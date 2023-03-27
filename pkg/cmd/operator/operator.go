@@ -247,19 +247,25 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 // findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists.
 func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, operatorNamespace string) error {
+	operatorID := defaults.OperatorID()
 	var platformName string
-	if defaults.OperatorID() != "" {
-		platformName = defaults.OperatorID()
+	if operatorID != "" {
+		platformName = operatorID
 	} else {
 		platformName = platform.DefaultPlatformName
 	}
 
 	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil || k8serrors.IsNotFound(err) {
 		defaultPlatform := v1.NewIntegrationPlatform(operatorNamespace, platformName)
+
 		if defaultPlatform.Labels == nil {
 			defaultPlatform.Labels = make(map[string]string)
 		}
 		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
+
+		if operatorID != "" {
+			defaultPlatform.SetOperatorID(operatorID)
+		}
 
 		if _, err := c.CamelV1().IntegrationPlatforms(operatorNamespace).Create(ctx, &defaultPlatform, metav1.CreateOptions{}); err != nil {
 			return err
