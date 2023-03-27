@@ -30,9 +30,9 @@ spec:
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 2.13.1
+      camel-quarkus.version: 2.13.2
       camel.version: 3.18.3
-      quarkus.version: 2.13.4.Final
+      quarkus.version: 2.13.5.Final
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime

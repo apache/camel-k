@@ -36,9 +36,9 @@ asciidoc:
     # from camel-k-runtime parent pom:
     camel-version: 3.18.3
     camel-docs-version: 3.18.x
-    camel-quarkus-version: 2.13.1
+    camel-quarkus-version: 2.13.2
     camel-quarkus-docs-version: 2.13.x
-    quarkus-version: 2.13.4.Final
+    quarkus-version: 2.13.5.Final
     graalvm-version: 22.1.0
     graalvm-docs-version: 22.1
     buildah-version: 1.23.3
