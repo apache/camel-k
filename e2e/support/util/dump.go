@@ -35,6 +35,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	routev1 "github.com/openshift/api/route/v1"
+	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
@@ -238,6 +239,22 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			}
 			t.Logf("---\n%s\n---\n", string(data))
 		}
+	}
+
+	// OLM CSV
+	csvs := olm.ClusterServiceVersionList{}
+	err = c.List(ctx, &csvs, ctrl.InNamespace(ns))
+	if err != nil {
+		return err
+	}
+	t.Logf("\nFound %d OLM CSVs:\n", len(csvs.Items))
+	for _, csv := range csvs.Items {
+		ref := csv
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
 	}
 
 	// Some log from running pods
