@@ -6,8 +6,11 @@
 
 **Closed issues:**
 
+- Kamelet development using Camel DSL instead of YAML DSL [\#4174](https://github.com/apache/camel-k/issues/4174)
+- Kamel cli reset/uninstall --all does not clean the camelcatalog [\#4160](https://github.com/apache/camel-k/issues/4160)
 - Unused parameter [\#4152](https://github.com/apache/camel-k/issues/4152)
 - + [\#4151](https://github.com/apache/camel-k/issues/4151)
+- Kamel run sample integration is failing to run [\#4150](https://github.com/apache/camel-k/issues/4150)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 
