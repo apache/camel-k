@@ -16,6 +16,8 @@ limitations under the License.
 */
 
 // Package v1alpha1 contains Camel unstable API Schema definitions
+// Package v1alpha1 is deprecated: use the v1 API instead
+// Deprecated
 // +kubebuilder:object:generate=true
 // +groupName=camel.apache.org
 package v1alpha1

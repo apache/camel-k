@@ -307,12 +307,12 @@ func areAllCrdInstalled(c client.Client) (bool, error) {
 	} else if !ok {
 		return false, nil
 	}
-	if ok, err := isCrdInstalled(c, "Kamelet", "v1alpha1"); err != nil {
+	if ok, err := isCrdInstalled(c, "Kamelet", "v1"); err != nil {
 		return ok, err
 	} else if !ok {
 		return false, nil
 	}
-	return isCrdInstalled(c, "Binding", "v1alpha1")
+	return isCrdInstalled(c, "Binding", "v1")
 }
 
 func isCrdInstalled(c client.Client, kind string, version string) (bool, error) {

@@ -17,6 +17,8 @@ limitations under the License.
 
 // NOTE: this file has been originally copied from https://github.com/kubernetes/apiextensions-apiserver/blob/33bb2d8b009bae408e40818a93877459efeb4cb1/pkg/apis/apiextensions/v1/types_jsonschema.go
 
+// Package v1alpha1 is deprecated: use the v1 API instead
+// Deprecated
 package v1alpha1
 
 import (
