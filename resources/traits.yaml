@@ -633,6 +633,31 @@ traits:
     type: int32
     description: Minimum consecutive failures for the readiness probe to be considered
       failed after having succeeded.
+  - name: startup-probe-enabled
+    type: bool
+    description: Configures the startup probe for the integration container (default
+      `true`).
+  - name: startup-scheme
+    type: string
+    description: Scheme to use when connecting to the startup probe (default `HTTP`).
+  - name: startup-initial-delay
+    type: int32
+    description: Number of seconds after the container has started before the startup
+      probe is initiated.
+  - name: startup-timeout
+    type: int32
+    description: Number of seconds after which the startup probe times out.
+  - name: startup-period
+    type: int32
+    description: How often to perform the startup probe.
+  - name: startup-success-threshold
+    type: int32
+    description: Minimum consecutive successes for the startup probe to be considered
+      successful after having failed.
+  - name: startup-failure-threshold
+    type: int32
+    description: Minimum consecutive failures for the startup probe to be considered
+      failed after having succeeded.
 - name: ingress
   platform: false
   profiles:
