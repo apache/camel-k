@@ -27,7 +27,6 @@ import (
 
 	kedav1alpha1 "github.com/apache/camel-k/v2/addons/keda/duck/v1alpha1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/metadata"
@@ -281,7 +280,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	}
 	if ctrlRef.Kind == camelv1.BindingKind {
 		scale.ObjectMeta.Name = ctrlRef.Name
-		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("bindings").GroupResource(), &scale, metav1.UpdateOptions{})
+		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("bindings").GroupResource(), &scale, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}
@@ -297,7 +296,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 
 func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectReference {
 	for _, o := range e.Integration.OwnerReferences {
-		if o.Kind == camelv1.BindingKind && strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
+		if o.Kind == camelv1.BindingKind && strings.HasPrefix(o.APIVersion, camelv1.SchemeGroupVersion.Group) {
 			return &v1.ObjectReference{
 				APIVersion: o.APIVersion,
 				Kind:       o.Kind,
@@ -320,7 +319,7 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 	kameletURIs := make(map[string][]string)
 	if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 		for _, kameletURI := range meta.FromURIs {
-			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelv1alpha1.ValidKameletName(kameletStr) {
+			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelv1.ValidKameletName(kameletStr) {
 				kamelet := kameletStr
 				if strings.Contains(kamelet, "/") {
 					kamelet = kamelet[0:strings.Index(kamelet, "/")]

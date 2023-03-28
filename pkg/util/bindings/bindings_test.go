@@ -25,7 +25,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
@@ -38,9 +37,9 @@ func TestBindings(t *testing.T) {
 	testcases := []struct {
 		endpointType v1.EndpointType
 		endpoint     v1.Endpoint
-		profile      camelv1.TraitProfile
+		profile      v1.TraitProfile
 		uri          string
-		traits       camelv1.Traits
+		traits       v1.Traits
 		props        map[string]string
 	}{
 		{
@@ -183,7 +182,7 @@ func TestBindings(t *testing.T) {
 				}),
 			},
 			uri: "knative:endpoint/sink?ce.override.ce-type=mytype",
-			traits: camelv1.Traits{
+			traits: v1.Traits{
 				Knative: &traitv1.KnativeTrait{
 					SinkBinding:   pointer.Bool(false),
 					Configuration: asKnativeConfig("https://myurl/hey"),
@@ -195,7 +194,7 @@ func TestBindings(t *testing.T) {
 			endpoint: v1.Endpoint{
 				URI: pointer.String("https://myurl/hey"),
 			},
-			profile: camelv1.TraitProfileKubernetes,
+			profile: v1.TraitProfileKubernetes,
 			uri:     "https://myurl/hey",
 		},
 		{
@@ -217,7 +216,7 @@ func TestBindings(t *testing.T) {
 
 			profile := tc.profile
 			if profile == "" {
-				profile = camelv1.TraitProfileKnative
+				profile = v1.TraitProfileKnative
 			}
 
 			bindingContext := BindingContext{
