@@ -24,7 +24,7 @@ import (
 
 	"github.com/apache/camel-k/v2/addons/keda/duck/v1alpha1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/controller/binding"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -117,7 +117,7 @@ func TestKameletAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
 	keda.Enabled = pointer.Bool(true)
 	env := createBasicTestEnvironment(
-		&camelv1alpha1.Kamelet{
+		&camelv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "my-kamelet",
@@ -125,7 +125,7 @@ func TestKameletAutoDetection(t *testing.T) {
 					"camel.apache.org/keda.type": "my-scaler",
 				},
 			},
-			Spec: camelv1alpha1.KameletSpec{
+			Spec: camelv1.KameletSpec{
 				Definition: &camelv1alpha1.JSONSchemaProps{
 					Properties: map[string]camelv1alpha1.JSONSchemaProp{
 						"a": {
@@ -207,12 +207,12 @@ func TestBindingAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
 	keda.Enabled = pointer.Bool(true)
 	logEndpoint := "log:info"
-	klb := camelv1alpha1.Binding{
+	klb := camelv1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "my-binding",
 		},
-		Spec: camelv1alpha1.BindingSpec{
+		Spec: camelv1.BindingSpec{
 			Source: camelv1alpha1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
@@ -232,7 +232,7 @@ func TestBindingAutoDetection(t *testing.T) {
 	}
 
 	env := createBasicTestEnvironment(
-		&camelv1alpha1.Kamelet{
+		&camelv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "my-kamelet",
@@ -240,7 +240,7 @@ func TestBindingAutoDetection(t *testing.T) {
 					"camel.apache.org/keda.type": "my-scaler",
 				},
 			},
-			Spec: camelv1alpha1.KameletSpec{
+			Spec: camelv1.KameletSpec{
 				Definition: &camelv1alpha1.JSONSchemaProps{
 					Properties: map[string]camelv1alpha1.JSONSchemaProp{
 						"a": {
@@ -362,7 +362,7 @@ func TestHackKLBReplicas(t *testing.T) {
 	})
 	keda.HackControllerReplicas = pointer.Bool(true)
 	env := createBasicTestEnvironment(
-		&camelv1alpha1.Binding{
+		&camelv1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "my-klb",

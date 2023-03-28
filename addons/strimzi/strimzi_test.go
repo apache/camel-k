@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset/fake"
 	"github.com/apache/camel-k/v2/addons/strimzi/duck/v1beta2"
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +47,7 @@ func TestStrimziDirect(t *testing.T) {
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
-	endpoint := v1alpha1.Endpoint{
+	endpoint := camelv1.Endpoint{
 		Ref: &v1.ObjectReference{
 			Kind:       "KafkaTopic",
 			Name:       "mytopic",
@@ -59,7 +59,7 @@ func TestStrimziDirect(t *testing.T) {
 	}
 
 	binding, err := BindingProvider{}.Translate(bindingContext, bindings.EndpointContext{
-		Type: v1alpha1.EndpointTypeSink,
+		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	assert.NoError(t, err)
 	assert.NotNil(t, binding)
@@ -110,7 +110,7 @@ func TestStrimziLookup(t *testing.T) {
 		Profile:   camelv1.TraitProfileKubernetes,
 	}
 
-	endpoint := v1alpha1.Endpoint{
+	endpoint := camelv1.Endpoint{
 		Ref: &v1.ObjectReference{
 			Kind:       "KafkaTopic",
 			Name:       "mytopicy",
@@ -119,7 +119,7 @@ func TestStrimziLookup(t *testing.T) {
 	}
 
 	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
-		Type: v1alpha1.EndpointTypeSink,
+		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	assert.NoError(t, err)
 	assert.NotNil(t, binding)
@@ -127,12 +127,12 @@ func TestStrimziLookup(t *testing.T) {
 	assert.Equal(t, camelv1.Traits{}, binding.Traits)
 }
 
-func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
+func asEndpointProperties(props map[string]string) *camelv1.EndpointProperties {
 	serialized, err := json.Marshal(props)
 	if err != nil {
 		panic(err)
 	}
-	return &v1alpha1.EndpointProperties{
+	return &camelv1.EndpointProperties{
 		RawMessage: serialized,
 	}
 }

@@ -38,6 +38,14 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.ArtifactApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BaseTask"):
 		return &camelv1.BaseTaskApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("Binding"):
+		return &camelv1.BindingApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("BindingCondition"):
+		return &camelv1.BindingConditionApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("BindingSpec"):
+		return &camelv1.BindingSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("BindingStatus"):
+		return &camelv1.BindingStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Build"):
 		return &camelv1.BuildApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuildahTask"):
@@ -76,12 +84,30 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.ConfigurationSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("DataSpec"):
 		return &camelv1.DataSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("DataTypeReference"):
+		return &camelv1.DataTypeReferenceApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("DataTypeSpec"):
+		return &camelv1.DataTypeSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("DataTypesSpec"):
+		return &camelv1.DataTypesSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("Endpoint"):
+		return &camelv1.EndpointApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("EndpointProperties"):
+		return &camelv1.EndpointPropertiesApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("ErrorHandlerSpec"):
+		return &camelv1.ErrorHandlerSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("EventTypeSpec"):
+		return &camelv1.EventTypeSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("ExternalDocumentation"):
+		return &camelv1.ExternalDocumentationApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Failure"):
 		return &camelv1.FailureApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("FailureRecovery"):
 		return &camelv1.FailureRecoveryApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Flow"):
 		return &camelv1.FlowApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("HeaderSpec"):
+		return &camelv1.HeaderSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("HealthCheckResponse"):
 		return &camelv1.HealthCheckResponseApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Integration"):
@@ -116,6 +142,22 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.IntegrationSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationStatus"):
 		return &camelv1.IntegrationStatusApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("JSON"):
+		return &camelv1.JSONApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("JSONSchemaProp"):
+		return &camelv1.JSONSchemaPropApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("JSONSchemaProps"):
+		return &camelv1.JSONSchemaPropsApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("Kamelet"):
+		return &camelv1.KameletApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("KameletCondition"):
+		return &camelv1.KameletConditionApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("KameletProperty"):
+		return &camelv1.KameletPropertyApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("KameletSpec"):
+		return &camelv1.KameletSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("KameletStatus"):
+		return &camelv1.KameletStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KanikoTask"):
 		return &camelv1.KanikoTaskApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KanikoTaskCache"):
@@ -152,6 +194,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.SpectrumTaskApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Task"):
 		return &camelv1.TaskApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("Template"):
+		return &camelv1.TemplateApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("TraitConfiguration"):
 		return &camelv1.TraitConfigurationApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Traits"):
@@ -162,14 +206,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.ValueSourceApplyConfiguration{}
 
 		// Group=camel.apache.org, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithKind("Binding"):
-		return &camelv1alpha1.BindingApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("BindingCondition"):
-		return &camelv1alpha1.BindingConditionApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("BindingSpec"):
-		return &camelv1alpha1.BindingSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("BindingStatus"):
-		return &camelv1alpha1.BindingStatusApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeReference"):
 		return &camelv1alpha1.DataTypeReferenceApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeSpec"):
@@ -196,6 +232,14 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1alpha1.JSONSchemaPropsApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("Kamelet"):
 		return &camelv1alpha1.KameletApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("KameletBinding"):
+		return &camelv1alpha1.KameletBindingApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingCondition"):
+		return &camelv1alpha1.KameletBindingConditionApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingSpec"):
+		return &camelv1alpha1.KameletBindingSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingStatus"):
+		return &camelv1alpha1.KameletBindingStatusApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("KameletCondition"):
 		return &camelv1alpha1.KameletConditionApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("KameletProperty"):

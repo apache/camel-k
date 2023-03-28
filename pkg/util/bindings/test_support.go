@@ -21,16 +21,16 @@ import (
 	"encoding/json"
 	"net/url"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 )
 
-func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
+func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
 	serialized, err := json.Marshal(props)
 	if err != nil {
 		panic(err)
 	}
-	return &v1alpha1.EndpointProperties{
+	return &v1.EndpointProperties{
 		RawMessage: serialized,
 	}
 }

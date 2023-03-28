@@ -52,20 +52,20 @@ func TestExpressions(t *testing.T) {
 			name: "source",
 			ref: corev1.ObjectReference{
 				Kind:       "Kamelet",
-				APIVersion: "camel.apache.org/v1alpha1",
+				APIVersion: "camel.apache.org/v1",
 				Name:       "source",
 			},
-			stringRef: "camel.apache.org/v1alpha1:Kamelet:source",
+			stringRef: "camel.apache.org/v1:Kamelet:source",
 		},
 		{
 			name: "ns1/source",
 			ref: corev1.ObjectReference{
 				Kind:       "Kamelet",
-				APIVersion: "camel.apache.org/v1alpha1",
+				APIVersion: "camel.apache.org/v1",
 				Namespace:  "ns1",
 				Name:       "source",
 			},
-			stringRef: "camel.apache.org/v1alpha1:Kamelet:ns1/source",
+			stringRef: "camel.apache.org/v1:Kamelet:ns1/source",
 		},
 		{
 			name: "v1:Secret:ns1/scr2",
@@ -145,10 +145,10 @@ func TestExpressions(t *testing.T) {
 			name: "source?a=b&b=c&d=e",
 			ref: corev1.ObjectReference{
 				Kind:       "Kamelet",
-				APIVersion: "camel.apache.org/v1alpha1",
+				APIVersion: "camel.apache.org/v1",
 				Name:       "source",
 			},
-			stringRef: "camel.apache.org/v1alpha1:Kamelet:source",
+			stringRef: "camel.apache.org/v1:Kamelet:source",
 			properties: map[string]string{
 				"a": "b",
 				"b": "c",

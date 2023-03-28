@@ -23,9 +23,9 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 )
 
-// BindingSpecApplyConfiguration represents an declarative configuration of the BindingSpec type for use
+// KameletBindingSpecApplyConfiguration represents an declarative configuration of the KameletBindingSpec type for use
 // with apply.
-type BindingSpecApplyConfiguration struct {
+type KameletBindingSpecApplyConfiguration struct {
 	Integration        *v1.IntegrationSpecApplyConfiguration `json:"integration,omitempty"`
 	Source             *EndpointApplyConfiguration           `json:"source,omitempty"`
 	Sink               *EndpointApplyConfiguration           `json:"sink,omitempty"`
@@ -35,16 +35,16 @@ type BindingSpecApplyConfiguration struct {
 	ServiceAccountName *string                               `json:"serviceAccountName,omitempty"`
 }
 
-// BindingSpecApplyConfiguration constructs an declarative configuration of the BindingSpec type for use with
+// KameletBindingSpecApplyConfiguration constructs an declarative configuration of the KameletBindingSpec type for use with
 // apply.
-func BindingSpec() *BindingSpecApplyConfiguration {
-	return &BindingSpecApplyConfiguration{}
+func KameletBindingSpec() *KameletBindingSpecApplyConfiguration {
+	return &KameletBindingSpecApplyConfiguration{}
 }
 
 // WithIntegration sets the Integration field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Integration field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithIntegration(value *v1.IntegrationSpecApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *KameletBindingSpecApplyConfiguration) WithIntegration(value *v1.IntegrationSpecApplyConfiguration) *KameletBindingSpecApplyConfiguration {
 	b.Integration = value
 	return b
 }
@@ -52,7 +52,7 @@ func (b *BindingSpecApplyConfiguration) WithIntegration(value *v1.IntegrationSpe
 // WithSource sets the Source field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Source field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithSource(value *EndpointApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *KameletBindingSpecApplyConfiguration) WithSource(value *EndpointApplyConfiguration) *KameletBindingSpecApplyConfiguration {
 	b.Source = value
 	return b
 }
@@ -60,7 +60,7 @@ func (b *BindingSpecApplyConfiguration) WithSource(value *EndpointApplyConfigura
 // WithSink sets the Sink field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Sink field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithSink(value *EndpointApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *KameletBindingSpecApplyConfiguration) WithSink(value *EndpointApplyConfiguration) *KameletBindingSpecApplyConfiguration {
 	b.Sink = value
 	return b
 }
@@ -68,7 +68,7 @@ func (b *BindingSpecApplyConfiguration) WithSink(value *EndpointApplyConfigurati
 // WithErrorHandler sets the ErrorHandler field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ErrorHandler field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithErrorHandler(value *ErrorHandlerSpecApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *KameletBindingSpecApplyConfiguration) WithErrorHandler(value *ErrorHandlerSpecApplyConfiguration) *KameletBindingSpecApplyConfiguration {
 	b.ErrorHandler = value
 	return b
 }
@@ -76,7 +76,7 @@ func (b *BindingSpecApplyConfiguration) WithErrorHandler(value *ErrorHandlerSpec
 // WithSteps adds the given value to the Steps field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Steps field.
-func (b *BindingSpecApplyConfiguration) WithSteps(values ...*EndpointApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *KameletBindingSpecApplyConfiguration) WithSteps(values ...*EndpointApplyConfiguration) *KameletBindingSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithSteps")
@@ -89,7 +89,7 @@ func (b *BindingSpecApplyConfiguration) WithSteps(values ...*EndpointApplyConfig
 // WithReplicas sets the Replicas field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Replicas field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithReplicas(value int32) *BindingSpecApplyConfiguration {
+func (b *KameletBindingSpecApplyConfiguration) WithReplicas(value int32) *KameletBindingSpecApplyConfiguration {
 	b.Replicas = &value
 	return b
 }
@@ -97,7 +97,7 @@ func (b *BindingSpecApplyConfiguration) WithReplicas(value int32) *BindingSpecAp
 // WithServiceAccountName sets the ServiceAccountName field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ServiceAccountName field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithServiceAccountName(value string) *BindingSpecApplyConfiguration {
+func (b *KameletBindingSpecApplyConfiguration) WithServiceAccountName(value string) *KameletBindingSpecApplyConfiguration {
 	b.ServiceAccountName = &value
 	return b
 }

@@ -34,7 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
 
@@ -58,9 +58,9 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			recorder: mgr.GetEventRecorderFor("camel-k-kamelet-binding-controller"),
 		},
 		schema.GroupVersionKind{
-			Group:   v1alpha1.SchemeGroupVersion.Group,
-			Version: v1alpha1.SchemeGroupVersion.Version,
-			Kind:    v1alpha1.BindingKind,
+			Group:   v1.SchemeGroupVersion.Group,
+			Version: v1.SchemeGroupVersion.Version,
+			Kind:    v1.BindingKind,
 		},
 	)
 }
@@ -72,15 +72,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Binding
-	err = c.Watch(&source.Kind{Type: &v1alpha1.Binding{}},
+	err = c.Watch(&source.Kind{Type: &v1.Binding{}},
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
-				oldBinding, ok := e.ObjectOld.(*v1alpha1.Binding)
+				oldBinding, ok := e.ObjectOld.(*v1.Binding)
 				if !ok {
 					return false
 				}
-				newBinding, ok := e.ObjectNew.(*v1alpha1.Binding)
+				newBinding, ok := e.ObjectNew.(*v1.Binding)
 				if !ok {
 					return false
 				}
@@ -115,7 +115,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch Integration to propagate changes downstream
 	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &v1alpha1.Binding{},
+		OwnerType:    &v1.Binding{},
 		IsController: false,
 	})
 	if err != nil {
@@ -154,7 +154,7 @@ func (r *ReconcileBinding) Reconcile(ctx context.Context, request reconcile.Requ
 	}
 
 	// Fetch the Binding instance
-	var instance v1alpha1.Binding
+	var instance v1.Binding
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
@@ -219,7 +219,7 @@ func (r *ReconcileBinding) Reconcile(ctx context.Context, request reconcile.Requ
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBinding) update(ctx context.Context, base *v1alpha1.Binding, target *v1alpha1.Binding, log *log.Logger) error {
+func (r *ReconcileBinding) update(ctx context.Context, base *v1.Binding, target *v1.Binding, log *log.Logger) error {
 	target.Status.ObservedGeneration = base.Generation
 
 	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {

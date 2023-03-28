@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -127,7 +126,7 @@ func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error)
 }
 
 func (o *resetCmdOptions) deleteAllBindings(c client.Client) (int, error) {
-	list := v1alpha1.NewBindingList()
+	list := v1.NewBindingList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieveBindings from namespace %s", o.Namespace))
 	}

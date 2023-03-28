@@ -29,7 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 const customLabel = "custom-label"
@@ -56,8 +56,8 @@ func createBundleKamelet(ns string, name string) func() error {
 	}
 
 	labels := map[string]string{
-		customLabel:                  "true",
-		v1alpha1.KameletBundledLabel: "true",
+		customLabel:            "true",
+		v1.KameletBundledLabel: "true",
 	}
 	return CreateKamelet(ns, name, flow, nil, labels)
 }

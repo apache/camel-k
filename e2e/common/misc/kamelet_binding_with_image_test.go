@@ -31,7 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestBindingWithImage(t *testing.T) {
@@ -40,13 +40,13 @@ func TestBindingWithImage(t *testing.T) {
 	from := corev1.ObjectReference{
 		Kind:       "Kamelet",
 		Name:       "my-own-timer-source",
-		APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		APIVersion: v1.SchemeGroupVersion.String(),
 	}
 
 	to := corev1.ObjectReference{
 		Kind:       "Kamelet",
 		Name:       "my-own-log-sink",
-		APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		APIVersion: v1.SchemeGroupVersion.String(),
 	}
 
 	emptyMap := map[string]string{}

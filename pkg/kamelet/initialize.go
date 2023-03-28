@@ -23,40 +23,41 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
-func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
+func Initialize(kamelet *v1.Kamelet) (*v1.Kamelet, error) {
 	target := kamelet.DeepCopy()
 
 	ok := true
-	if !v1alpha1.ValidKameletName(kamelet.Name) {
+	if !v1.ValidKameletName(kamelet.Name) {
 		ok = false
 		target.Status.SetCondition(
-			v1alpha1.KameletConditionReady,
+			v1.KameletConditionReady,
 			corev1.ConditionFalse,
-			v1alpha1.KameletConditionReasonInvalidName,
+			v1.KameletConditionReasonInvalidName,
 			fmt.Sprintf("Kamelet name %q is reserved", kamelet.Name),
 		)
 	}
-	if !v1alpha1.ValidKameletProperties(kamelet) {
+	if !v1.ValidKameletProperties(kamelet) {
 		ok = false
 		target.Status.SetCondition(
-			v1alpha1.KameletConditionReady,
+			v1.KameletConditionReady,
 			corev1.ConditionFalse,
-			v1alpha1.KameletConditionReasonInvalidProperty,
-			fmt.Sprintf("Kamelet property %q is reserved and cannot be part of the schema", v1alpha1.KameletIDProperty),
+			v1.KameletConditionReasonInvalidProperty,
+			fmt.Sprintf("Kamelet property %q is reserved and cannot be part of the schema", v1.KameletIDProperty),
 		)
 	}
 
 	if !ok {
-		target.Status.Phase = v1alpha1.KameletPhaseError
+		target.Status.Phase = v1.KameletPhaseError
 	} else {
-		target.Status.Phase = v1alpha1.KameletPhaseReady
+		target.Status.Phase = v1.KameletPhaseReady
 		target.Status.SetCondition(
-			v1alpha1.KameletConditionReady,
+			v1.KameletConditionReady,
 			corev1.ConditionTrue,
 			"",
 			"",
@@ -69,12 +70,12 @@ func Initialize(kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
 	return target, nil
 }
 
-func recomputeProperties(kamelet *v1alpha1.Kamelet) error {
+func recomputeProperties(kamelet *v1.Kamelet) error {
 	if kamelet.Spec.Definition == nil {
 		return nil
 	}
 
-	kamelet.Status.Properties = make([]v1alpha1.KameletProperty, 0, len(kamelet.Spec.Definition.Properties))
+	kamelet.Status.Properties = make([]v1.KameletProperty, 0, len(kamelet.Spec.Definition.Properties))
 	propSet := make(map[string]bool)
 	for k, v := range kamelet.Spec.Definition.Properties {
 		if propSet[k] {
@@ -91,7 +92,7 @@ func recomputeProperties(kamelet *v1alpha1.Kamelet) error {
 			}
 			defValue = fmt.Sprintf("%v", val)
 		}
-		kamelet.Status.Properties = append(kamelet.Status.Properties, v1alpha1.KameletProperty{
+		kamelet.Status.Properties = append(kamelet.Status.Properties, v1.KameletProperty{
 			Name:    k,
 			Default: defValue,
 		})

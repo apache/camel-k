@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -44,13 +44,13 @@ func TestBinding(t *testing.T) {
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-error-producer-source",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 
 		to := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-log-sink",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 
 		errorHandler := map[string]interface{}{
@@ -58,7 +58,7 @@ func TestBinding(t *testing.T) {
 				"endpoint": map[string]interface{}{
 					"ref": map[string]string{
 						"kind":       "Kamelet",
-						"apiVersion": v1alpha1.SchemeGroupVersion.String(),
+						"apiVersion": v1.SchemeGroupVersion.String(),
 						"name":       "my-own-log-sink",
 					},
 					"properties": map[string]string{
@@ -99,13 +99,13 @@ func TestBinding(t *testing.T) {
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-timer-source",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 
 		to := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-log-sink",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 
 		Expect(BindKameletTo(ns, "kb-with-traits",
@@ -122,13 +122,13 @@ func TestBinding(t *testing.T) {
 	// Binding with wrong spec
 	t.Run("test Binding with wrong spec", func(t *testing.T) {
 		name := "bad-klb"
-		kb := v1alpha1.NewBinding(ns, name)
-		kb.Spec = v1alpha1.BindingSpec{}
+		kb := v1.NewBinding(ns, name)
+		kb.Spec = v1.BindingSpec{}
 		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
 		Eventually(err).Should(BeNil())
-		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1alpha1.BindingPhaseError))
-		Eventually(BindingConditionStatus(ns, name, v1alpha1.BindingConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
-		Eventually(BindingCondition(ns, name, v1alpha1.BindingIntegrationConditionError), TestTimeoutShort).Should(
+		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.BindingPhaseError))
+		Eventually(BindingConditionStatus(ns, name, v1.BindingConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
+		Eventually(BindingCondition(ns, name, v1.BindingIntegrationConditionError), TestTimeoutShort).Should(
 			WithTransform(BindingConditionMessage, And(
 				ContainSubstring("could not determine source URI"),
 				ContainSubstring("no ref or URI specified in endpoint"),
@@ -139,7 +139,7 @@ func TestBinding(t *testing.T) {
 }
 
 func createErrorProducerKamelet(ns string, name string) func() error {
-	props := map[string]v1alpha1.JSONSchemaProp{
+	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
 		},

@@ -27,7 +27,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/google/go-github/v32/github"
 	"golang.org/x/oauth2"
 
@@ -79,7 +79,7 @@ func (c *githubKameletRepository) List(ctx context.Context) ([]string, error) {
 	return res, nil
 }
 
-func (c *githubKameletRepository) Get(ctx context.Context, name string) (*v1alpha1.Kamelet, error) {
+func (c *githubKameletRepository) Get(ctx context.Context, name string) (*v1.Kamelet, error) {
 	dir, err := c.listFiles(ctx)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (c *githubKameletRepository) listFiles(ctx context.Context) ([]*github.Repo
 	return dir, err
 }
 
-func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url string) (*v1alpha1.Kamelet, error) {
+func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url string) (*v1.Kamelet, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url strin
 		}
 	}
 
-	var kamelet v1alpha1.Kamelet
+	var kamelet v1.Kamelet
 	if err := json.Unmarshal(content, &kamelet); err != nil {
 		return nil, err
 	}

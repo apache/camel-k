@@ -29,12 +29,12 @@ type FakeCamelV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeCamelV1alpha1) Bindings(namespace string) v1alpha1.BindingInterface {
-	return &FakeBindings{c, namespace}
-}
-
 func (c *FakeCamelV1alpha1) Kamelets(namespace string) v1alpha1.KameletInterface {
 	return &FakeKamelets{c, namespace}
+}
+
+func (c *FakeCamelV1alpha1) KameletBindings(namespace string) v1alpha1.KameletBindingInterface {
+	return &FakeKameletBindings{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

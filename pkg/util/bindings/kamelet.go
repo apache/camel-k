@@ -21,7 +21,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -36,7 +37,7 @@ func (k BindingConverter) ID() string {
 	return "kamelet"
 }
 
-func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil
@@ -46,7 +47,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 		return nil, err
 	}
 	// it translates only Kamelet refs
-	if e.Ref.Kind == v1alpha1.KameletKind && gv.Group == v1alpha1.SchemeGroupVersion.Group {
+	if e.Ref.Kind == v1.KameletKind && gv.Group == v1.SchemeGroupVersion.Group {
 		kameletName := url.PathEscape(e.Ref.Name)
 
 		props, err := e.Properties.GetPropertyMap()
@@ -54,9 +55,9 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 			return nil, err
 		}
 
-		id, idPresent := props[v1alpha1.KameletIDProperty]
+		id, idPresent := props[v1.KameletIDProperty]
 		if idPresent {
-			delete(props, v1alpha1.KameletIDProperty)
+			delete(props, v1.KameletIDProperty)
 		} else {
 			id = endpointCtx.GenerateID()
 		}
@@ -69,10 +70,10 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 		}
 
 		switch endpointCtx.Type {
-		case v1alpha1.EndpointTypeAction:
+		case v1.EndpointTypeAction:
 			steps := make([]map[string]interface{}, 0)
 
-			if in, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotIn); in != nil {
+			if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn); in != nil {
 				steps = append(steps, in)
 				for k, v := range applicationProperties {
 					binding.ApplicationProperties[k] = v
@@ -85,7 +86,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 				},
 			})
 
-			if out, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotOut); out != nil {
+			if out, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotOut); out != nil {
 				steps = append(steps, out)
 				for k, v := range applicationProperties {
 					binding.ApplicationProperties[k] = v
@@ -102,8 +103,8 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 			} else {
 				binding.Step = steps[0]
 			}
-		case v1alpha1.EndpointTypeSource:
-			if out, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotOut); out != nil {
+		case v1.EndpointTypeSource:
+			if out, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotOut); out != nil {
 				binding.Step = out
 				for k, v := range applicationProperties {
 					binding.ApplicationProperties[k] = v
@@ -111,8 +112,8 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 			}
 
 			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
-		case v1alpha1.EndpointTypeSink:
-			if in, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotIn); in != nil {
+		case v1.EndpointTypeSink:
+			if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn); in != nil {
 				binding.Step = in
 				for k, v := range applicationProperties {
 					binding.ApplicationProperties[k] = v
@@ -129,7 +130,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 	return nil, nil
 }
 
-func (k BindingConverter) DataTypeStep(e v1alpha1.Endpoint, id string, typeSlot v1alpha1.TypeSlot) (map[string]interface{}, map[string]string) {
+func (k BindingConverter) DataTypeStep(e v1.Endpoint, id string, typeSlot v1.TypeSlot) (map[string]interface{}, map[string]string) {
 	if e.DataTypes == nil {
 		return nil, nil
 	}

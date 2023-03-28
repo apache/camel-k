@@ -24,8 +24,8 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1alpha1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	applyconfigurationcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -37,29 +37,29 @@ import (
 
 // FakeBindings implements BindingInterface
 type FakeBindings struct {
-	Fake *FakeCamelV1alpha1
+	Fake *FakeCamelV1
 	ns   string
 }
 
-var bindingsResource = schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1alpha1", Resource: "bindings"}
+var bindingsResource = schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1", Resource: "bindings"}
 
-var bindingsKind = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1alpha1", Kind: "Binding"}
+var bindingsKind = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "Binding"}
 
 // Get takes name of the binding, and returns the corresponding binding object, and an error if there is any.
-func (c *FakeBindings) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Binding, err error) {
+func (c *FakeBindings) Get(ctx context.Context, name string, options v1.GetOptions) (result *camelv1.Binding, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(bindingsResource, c.ns, name), &v1alpha1.Binding{})
+		Invokes(testing.NewGetAction(bindingsResource, c.ns, name), &camelv1.Binding{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.Binding), err
+	return obj.(*camelv1.Binding), err
 }
 
 // List takes label and field selectors, and returns the list of Bindings that match those selectors.
-func (c *FakeBindings) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.BindingList, err error) {
+func (c *FakeBindings) List(ctx context.Context, opts v1.ListOptions) (result *camelv1.BindingList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(bindingsResource, bindingsKind, c.ns, opts), &v1alpha1.BindingList{})
+		Invokes(testing.NewListAction(bindingsResource, bindingsKind, c.ns, opts), &camelv1.BindingList{})
 
 	if obj == nil {
 		return nil, err
@@ -69,8 +69,8 @@ func (c *FakeBindings) List(ctx context.Context, opts v1.ListOptions) (result *v
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.BindingList{ListMeta: obj.(*v1alpha1.BindingList).ListMeta}
-	for _, item := range obj.(*v1alpha1.BindingList).Items {
+	list := &camelv1.BindingList{ListMeta: obj.(*camelv1.BindingList).ListMeta}
+	for _, item := range obj.(*camelv1.BindingList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -86,43 +86,43 @@ func (c *FakeBindings) Watch(ctx context.Context, opts v1.ListOptions) (watch.In
 }
 
 // Create takes the representation of a binding and creates it.  Returns the server's representation of the binding, and an error, if there is any.
-func (c *FakeBindings) Create(ctx context.Context, binding *v1alpha1.Binding, opts v1.CreateOptions) (result *v1alpha1.Binding, err error) {
+func (c *FakeBindings) Create(ctx context.Context, binding *camelv1.Binding, opts v1.CreateOptions) (result *camelv1.Binding, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(bindingsResource, c.ns, binding), &v1alpha1.Binding{})
+		Invokes(testing.NewCreateAction(bindingsResource, c.ns, binding), &camelv1.Binding{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.Binding), err
+	return obj.(*camelv1.Binding), err
 }
 
 // Update takes the representation of a binding and updates it. Returns the server's representation of the binding, and an error, if there is any.
-func (c *FakeBindings) Update(ctx context.Context, binding *v1alpha1.Binding, opts v1.UpdateOptions) (result *v1alpha1.Binding, err error) {
+func (c *FakeBindings) Update(ctx context.Context, binding *camelv1.Binding, opts v1.UpdateOptions) (result *camelv1.Binding, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(bindingsResource, c.ns, binding), &v1alpha1.Binding{})
+		Invokes(testing.NewUpdateAction(bindingsResource, c.ns, binding), &camelv1.Binding{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.Binding), err
+	return obj.(*camelv1.Binding), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeBindings) UpdateStatus(ctx context.Context, binding *v1alpha1.Binding, opts v1.UpdateOptions) (*v1alpha1.Binding, error) {
+func (c *FakeBindings) UpdateStatus(ctx context.Context, binding *camelv1.Binding, opts v1.UpdateOptions) (*camelv1.Binding, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(bindingsResource, "status", c.ns, binding), &v1alpha1.Binding{})
+		Invokes(testing.NewUpdateSubresourceAction(bindingsResource, "status", c.ns, binding), &camelv1.Binding{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.Binding), err
+	return obj.(*camelv1.Binding), err
 }
 
 // Delete takes name of the binding and deletes it. Returns an error if one occurs.
 func (c *FakeBindings) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(bindingsResource, c.ns, name, opts), &v1alpha1.Binding{})
+		Invokes(testing.NewDeleteActionWithOptions(bindingsResource, c.ns, name, opts), &camelv1.Binding{})
 
 	return err
 }
@@ -131,23 +131,23 @@ func (c *FakeBindings) Delete(ctx context.Context, name string, opts v1.DeleteOp
 func (c *FakeBindings) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
 	action := testing.NewDeleteCollectionAction(bindingsResource, c.ns, listOpts)
 
-	_, err := c.Fake.Invokes(action, &v1alpha1.BindingList{})
+	_, err := c.Fake.Invokes(action, &camelv1.BindingList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched binding.
-func (c *FakeBindings) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Binding, err error) {
+func (c *FakeBindings) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.Binding, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(bindingsResource, c.ns, name, pt, data, subresources...), &v1alpha1.Binding{})
+		Invokes(testing.NewPatchSubresourceAction(bindingsResource, c.ns, name, pt, data, subresources...), &camelv1.Binding{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.Binding), err
+	return obj.(*camelv1.Binding), err
 }
 
 // Apply takes the given apply declarative configuration, applies it and returns the applied binding.
-func (c *FakeBindings) Apply(ctx context.Context, binding *camelv1alpha1.BindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.Binding, err error) {
+func (c *FakeBindings) Apply(ctx context.Context, binding *applyconfigurationcamelv1.BindingApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.Binding, err error) {
 	if binding == nil {
 		return nil, fmt.Errorf("binding provided to Apply must not be nil")
 	}
@@ -160,17 +160,17 @@ func (c *FakeBindings) Apply(ctx context.Context, binding *camelv1alpha1.Binding
 		return nil, fmt.Errorf("binding.Name must be provided to Apply")
 	}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(bindingsResource, c.ns, *name, types.ApplyPatchType, data), &v1alpha1.Binding{})
+		Invokes(testing.NewPatchSubresourceAction(bindingsResource, c.ns, *name, types.ApplyPatchType, data), &camelv1.Binding{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.Binding), err
+	return obj.(*camelv1.Binding), err
 }
 
 // ApplyStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *FakeBindings) ApplyStatus(ctx context.Context, binding *camelv1alpha1.BindingApplyConfiguration, opts v1.ApplyOptions) (result *v1alpha1.Binding, err error) {
+func (c *FakeBindings) ApplyStatus(ctx context.Context, binding *applyconfigurationcamelv1.BindingApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.Binding, err error) {
 	if binding == nil {
 		return nil, fmt.Errorf("binding provided to Apply must not be nil")
 	}
@@ -183,12 +183,12 @@ func (c *FakeBindings) ApplyStatus(ctx context.Context, binding *camelv1alpha1.B
 		return nil, fmt.Errorf("binding.Name must be provided to Apply")
 	}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(bindingsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1alpha1.Binding{})
+		Invokes(testing.NewPatchSubresourceAction(bindingsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &camelv1.Binding{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*v1alpha1.Binding), err
+	return obj.(*camelv1.Binding), err
 }
 
 // GetScale takes name of the binding, and returns the corresponding scale object, and an error if there is any.

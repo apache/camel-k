@@ -55,6 +55,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=camel.apache.org, Version=v1
+	case v1.SchemeGroupVersion.WithResource("bindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().Bindings().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("builds"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().Builds().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("camelcatalogs"):
@@ -65,12 +67,14 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().IntegrationKits().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("integrationplatforms"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().IntegrationPlatforms().Informer()}, nil
+	case v1.SchemeGroupVersion.WithResource("kamelets"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1().Kamelets().Informer()}, nil
 
 		// Group=camel.apache.org, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithResource("bindings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().Bindings().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("kamelets"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().Kamelets().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("kameletbindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Camel().V1alpha1().KameletBindings().Informer()}, nil
 
 	}
 

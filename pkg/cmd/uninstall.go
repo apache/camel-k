@@ -34,7 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/olm"
 )
@@ -503,14 +502,14 @@ func (o *uninstallCmdOptions) uninstallRegistrySecret(ctx context.Context, c cli
 }
 
 func (o *uninstallCmdOptions) uninstallKamelets(ctx context.Context, c client.Client) error {
-	kameletList := v1alpha1.NewKameletList()
+	kameletList := v1.NewKameletList()
 	if err := c.List(ctx, &kameletList, ctrl.InNamespace(o.Namespace)); err != nil {
 		return err
 	}
 
 	for i := range kameletList.Items {
 		// remove only platform Kamelets (user-defined Kamelets should be skipped)
-		if kameletList.Items[i].Labels[v1alpha1.KameletBundledLabel] == "true" {
+		if kameletList.Items[i].Labels[v1.KameletBundledLabel] == "true" {
 			err := c.Delete(ctx, &kameletList.Items[i])
 			if err != nil {
 				return err

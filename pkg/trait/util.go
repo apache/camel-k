@@ -34,7 +34,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -375,7 +374,7 @@ func IntegrationKitsHaveSameTraits(i1 *v1.IntegrationKit, i2 *v1.IntegrationKit)
 }
 
 // BindingsHaveSameTraits return if traits are the same.
-func BindingsHaveSameTraits(i1 *v1alpha1.Binding, i2 *v1alpha1.Binding) (bool, error) {
+func BindingsHaveSameTraits(i1 *v1.Binding, i2 *v1.Binding) (bool, error) {
 	c1, err := NewTraitsOptionsForBinding(i1)
 	if err != nil {
 		return false, err
@@ -391,7 +390,7 @@ func BindingsHaveSameTraits(i1 *v1alpha1.Binding, i2 *v1alpha1.Binding) (bool, e
 // IntegrationAndBindingSameTraits return if traits are the same.
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
-func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.Binding) (bool, error) {
+func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1.Binding) (bool, error) {
 	itOpts, err := NewTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
@@ -479,7 +478,7 @@ func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options,
 	return m1, nil
 }
 
-func NewTraitsOptionsForBinding(i *v1alpha1.Binding) (Options, error) {
+func NewTraitsOptionsForBinding(i *v1.Binding) (Options, error) {
 	if i.Spec.Integration != nil {
 		m1, err := ToTraitMap(i.Spec.Integration.Traits)
 		if err != nil {

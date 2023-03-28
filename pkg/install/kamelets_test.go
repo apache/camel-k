@@ -20,7 +20,7 @@ package install
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,8 +32,8 @@ func TestLoadKamelet(t *testing.T) {
 	assert.Equal(t, "timer-source", kamelet.GetName())
 	assert.Equal(t, "some-namespace", kamelet.GetNamespace())
 	assert.Equal(t, 3, len(kamelet.GetLabels()))
-	assert.Equal(t, "true", kamelet.GetLabels()[v1alpha1.KameletBundledLabel])
-	assert.Equal(t, "true", kamelet.GetLabels()[v1alpha1.KameletReadOnlyLabel])
+	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletBundledLabel])
+	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletReadOnlyLabel])
 	assert.Equal(t, 2, len(kamelet.GetAnnotations()))
 	assert.NotNil(t, kamelet.GetAnnotations()[kamelVersionAnnotation])
 }

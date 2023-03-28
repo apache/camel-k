@@ -25,7 +25,7 @@ package traits
 import (
 	"encoding/json"
 	"fmt"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"testing"
 	"time"
 
@@ -146,7 +146,7 @@ func TestHealthTrait(t *testing.T) {
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-timer-source",
-			APIVersion: camelv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: camelv1.SchemeGroupVersion.String(),
 		}
 
 		fromParams := map[string]string{
@@ -156,7 +156,7 @@ func TestHealthTrait(t *testing.T) {
 		to := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-log-sink",
-			APIVersion: camelv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: camelv1.SchemeGroupVersion.String(),
 		}
 
 		toParams := map[string]string{
@@ -239,8 +239,8 @@ func TestHealthTrait(t *testing.T) {
 				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
 			}))
 
-		Eventually(BindingCondition(ns, name, camelv1alpha1.BindingConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *camelv1alpha1.BindingCondition) bool {
+		Eventually(BindingCondition(ns, name, camelv1.BindingConditionReady), TestTimeoutLong).Should(
+			Satisfy(func(c *camelv1.BindingCondition) bool {
 				if c.Status != corev1.ConditionFalse {
 					return false
 				}

@@ -73,7 +73,6 @@ import (
 	"github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/install"
@@ -1068,9 +1067,9 @@ func ScaleIntegration(ns string, name string, replicas int32) error {
 	})
 }
 
-func Binding(ns string, name string) func() *v1alpha1.Binding {
-	return func() *v1alpha1.Binding {
-		klb := v1alpha1.NewBinding(ns, name)
+func Binding(ns string, name string) func() *v1.Binding {
+	return func() *v1.Binding {
+		klb := v1.NewBinding(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
@@ -1084,8 +1083,8 @@ func Binding(ns string, name string) func() *v1alpha1.Binding {
 	}
 }
 
-func BindingPhase(ns string, name string) func() v1alpha1.BindingPhase {
-	return func() v1alpha1.BindingPhase {
+func BindingPhase(ns string, name string) func() v1.BindingPhase {
+	return func() v1.BindingPhase {
 		klb := Binding(ns, name)()
 		if klb == nil {
 			return ""
@@ -1114,8 +1113,8 @@ func BindingStatusReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func BindingCondition(ns string, name string, conditionType v1alpha1.BindingConditionType) func() *v1alpha1.BindingCondition {
-	return func() *v1alpha1.BindingCondition {
+func BindingCondition(ns string, name string, conditionType v1.BindingConditionType) func() *v1.BindingCondition {
+	return func() *v1.BindingCondition {
 		kb := Binding(ns, name)()
 		if kb == nil {
 			return nil
@@ -1128,28 +1127,28 @@ func BindingCondition(ns string, name string, conditionType v1alpha1.BindingCond
 	}
 }
 
-func BindingConditionStatusExtract(c *v1alpha1.BindingCondition) corev1.ConditionStatus {
+func BindingConditionStatusExtract(c *v1.BindingCondition) corev1.ConditionStatus {
 	if c == nil {
 		return ""
 	}
 	return c.Status
 }
 
-func BindingConditionReason(c *v1alpha1.BindingCondition) string {
+func BindingConditionReason(c *v1.BindingCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Reason
 }
 
-func BindingConditionMessage(c *v1alpha1.BindingCondition) string {
+func BindingConditionMessage(c *v1.BindingCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Message
 }
 
-func BindingConditionStatus(ns string, name string, conditionType v1alpha1.BindingConditionType) func() corev1.ConditionStatus {
+func BindingConditionStatus(ns string, name string, conditionType v1.BindingConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
 		klb := Binding(ns, name)()
 		if klb == nil {
@@ -1163,7 +1162,7 @@ func BindingConditionStatus(ns string, name string, conditionType v1alpha1.Bindi
 	}
 }
 
-func UpdateBinding(ns string, name string, upd func(it *v1alpha1.Binding)) error {
+func UpdateBinding(ns string, name string, upd func(it *v1.Binding)) error {
 	klb := Binding(ns, name)()
 	if klb == nil {
 		return fmt.Errorf("noBinding named %s found", name)
@@ -1181,7 +1180,7 @@ func UpdateBinding(ns string, name string, upd func(it *v1alpha1.Binding)) error
 }
 
 func ScaleBinding(ns string, name string, replicas int32) error {
-	return UpdateBinding(ns, name, func(klb *v1alpha1.Binding) {
+	return UpdateBinding(ns, name, func(klb *v1.Binding) {
 		klb.Spec.Replicas = &replicas
 	})
 }
@@ -1862,11 +1861,11 @@ func CRDs() func() []metav1.APIResource {
 			reflect.TypeOf(v1.Integration{}).Name(),
 			reflect.TypeOf(v1.IntegrationKit{}).Name(),
 			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
-			reflect.TypeOf(v1alpha1.Kamelet{}).Name(),
-			reflect.TypeOf(v1alpha1.Binding{}).Name(),
+			reflect.TypeOf(v1.Kamelet{}).Name(),
+			reflect.TypeOf(v1.Binding{}).Name(),
 		}
 
-		versions := []string{"v1", "v1alpha1"}
+		versions := []string{"v1", "v1"}
 		present := []metav1.APIResource{}
 
 		for _, version := range versions {
@@ -2093,9 +2092,9 @@ func ServiceAccount(ns, name string) func() *corev1.ServiceAccount {
 	}
 }
 
-func KameletList(ns string) func() []v1alpha1.Kamelet {
-	return func() []v1alpha1.Kamelet {
-		lst := v1alpha1.NewKameletList()
+func KameletList(ns string) func() []v1.Kamelet {
+	return func() []v1.Kamelet {
+		lst := v1.NewKameletList()
 		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(err)
 		}
@@ -2103,9 +2102,9 @@ func KameletList(ns string) func() []v1alpha1.Kamelet {
 	}
 }
 
-func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
-	return func() *v1alpha1.Kamelet {
-		it := v1alpha1.NewKamelet(ns, name)
+func Kamelet(name string, ns string) func() *v1.Kamelet {
+	return func() *v1.Kamelet {
+		it := v1.NewKamelet(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
@@ -2119,7 +2118,7 @@ func Kamelet(name string, ns string) func() *v1alpha1.Kamelet {
 	}
 }
 
-func KameletLabels(kamelet *v1alpha1.Kamelet) map[string]string {
+func KameletLabels(kamelet *v1.Kamelet) map[string]string {
 	if kamelet == nil {
 		return map[string]string{}
 	}
@@ -2251,16 +2250,16 @@ func CreateKnativeBroker(ns string, name string) func() error {
 	Kamelets
 */
 
-func CreateKamelet(ns string, name string, template map[string]interface{}, properties map[string]v1alpha1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
-		kamelet := v1alpha1.Kamelet{
+		kamelet := v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
 				Name:      name,
 				Labels:    labels,
 			},
-			Spec: v1alpha1.KameletSpec{
-				Definition: &v1alpha1.JSONSchemaProps{
+			Spec: v1.KameletSpec{
+				Definition: &v1.JSONSchemaProps{
 					Properties: properties,
 				},
 				Template: asTemplate(template),
@@ -2271,7 +2270,7 @@ func CreateKamelet(ns string, name string, template map[string]interface{}, prop
 }
 
 func CreateTimerKamelet(ns string, name string) func() error {
-	props := map[string]v1alpha1.JSONSchemaProp{
+	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
 		},
@@ -2308,14 +2307,14 @@ func BindKameletTo(ns, name string, annotations map[string]string, from, to core
 func BindKameletToWithErrorHandler(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
 	sourceProperties, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
 	return func() error {
-		kb := v1alpha1.NewBinding(ns, name)
+		kb := v1.NewBinding(ns, name)
 		kb.Annotations = annotations
-		kb.Spec = v1alpha1.BindingSpec{
-			Source: v1alpha1.Endpoint{
+		kb.Spec = v1.BindingSpec{
+			Source: v1.Endpoint{
 				Ref:        &from,
 				Properties: asEndpointProperties(sourceProperties),
 			},
-			Sink: v1alpha1.Endpoint{
+			Sink: v1.Endpoint{
 				Ref:        &to,
 				Properties: asEndpointProperties(sinkProperties),
 			},
@@ -2330,40 +2329,40 @@ func BindKameletToWithErrorHandler(ns, name string, annotations map[string]strin
 
 // Deprecated:
 // Use KamelBind func instead
-func asTemplate(source map[string]interface{}) *v1alpha1.Template {
+func asTemplate(source map[string]interface{}) *v1.Template {
 	bytes, err := json.Marshal(source)
 	if err != nil {
 		failTest(err)
 	}
-	return &v1alpha1.Template{
+	return &v1.Template{
 		RawMessage: bytes,
 	}
 }
 
 // Deprecated:
 // Use KamelBind func instead
-func asErrorHandlerSpec(source map[string]interface{}) *v1alpha1.ErrorHandlerSpec {
+func asErrorHandlerSpec(source map[string]interface{}) *v1.ErrorHandlerSpec {
 	bytes, err := json.Marshal(source)
 	if err != nil {
 		failTest(err)
 	}
-	return &v1alpha1.ErrorHandlerSpec{
+	return &v1.ErrorHandlerSpec{
 		RawMessage: bytes,
 	}
 }
 
 // Deprecated:
 // Use KamelBind func instead
-func asEndpointProperties(props map[string]string) *v1alpha1.EndpointProperties {
+func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
 	if props == nil {
-		return &v1alpha1.EndpointProperties{}
+		return &v1.EndpointProperties{}
 	}
 
 	bytes, err := json.Marshal(props)
 	if err != nil {
 		failTest(err)
 	}
-	return &v1alpha1.EndpointProperties{
+	return &v1.EndpointProperties{
 		RawMessage: bytes,
 	}
 }
@@ -2704,7 +2703,7 @@ func CreateLogKamelet(ns string, name string) func() error {
 		},
 	}
 
-	props := map[string]v1alpha1.JSONSchemaProp{
+	props := map[string]v1.JSONSchemaProp{
 		"loggerName": {
 			Type: "string",
 		},

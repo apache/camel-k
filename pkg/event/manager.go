@@ -28,7 +28,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -169,7 +168,7 @@ func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, record
 }
 
 // NotifyKameletUpdated automatically generates events when a Kamelet changes.
-func NotifyKameletUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.Kamelet) {
+func NotifyKameletUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Kamelet) {
 	if newResource == nil {
 		return
 	}
@@ -179,14 +178,14 @@ func NotifyKameletUpdated(ctx context.Context, c client.Client, recorder record.
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	if newResource.Status.Phase != v1alpha1.KameletPhaseNone {
+	if newResource.Status.Phase != v1.KameletPhaseNone {
 		notifyIfConditionUpdated(recorder, newResource, oldConditions, newResource.Status.GetConditions(), "Kamelet", newResource.Name, ReasonKameletConditionChanged)
 	}
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Kamelet", newResource.Name, ReasonKameletPhaseUpdated, "")
 }
 
 // NotifyKameletError automatically generates error events when the kamelet reconcile cycle phase has an error.
-func NotifyKameletError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.Kamelet, err error) {
+func NotifyKameletError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Kamelet, err error) {
 	k := old
 	if newResource != nil {
 		k = newResource
@@ -227,7 +226,7 @@ func NotifyCamelCatalogError(ctx context.Context, c client.Client, recorder reco
 }
 
 // NotifyBindingUpdated automatically generates events when a Binding changes.
-func NotifyBindingUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.Binding) {
+func NotifyBindingUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Binding) {
 	if newResource == nil {
 		return
 	}
@@ -237,14 +236,14 @@ func NotifyBindingUpdated(ctx context.Context, c client.Client, recorder record.
 		oldPhase = string(old.Status.Phase)
 		oldConditions = old.Status.GetConditions()
 	}
-	if newResource.Status.Phase != v1alpha1.BindingPhaseNone {
+	if newResource.Status.Phase != v1.BindingPhaseNone {
 		notifyIfConditionUpdated(recorder, newResource, oldConditions, newResource.Status.GetConditions(), "Binding", newResource.Name, ReasonBindingConditionChanged)
 	}
 	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Binding", newResource.Name, ReasonBindingPhaseUpdated, "")
 }
 
 // NotifyBindingError automatically generates error events when the binding reconcile cycle phase has an error.
-func NotifyBindingError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.Binding, err error) {
+func NotifyBindingError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Binding, err error) {
 	k := old
 	if newResource != nil {
 		k = newResource

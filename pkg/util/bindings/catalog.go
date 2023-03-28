@@ -21,7 +21,7 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 var bindingProviders []BindingProvider
@@ -37,7 +37,7 @@ func RegisterBindingProvider(bp BindingProvider) {
 }
 
 // Translate execute all chained binding providers, returning the first success or the first error.
-func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1alpha1.Endpoint) (*Binding, error) {
+func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1.Endpoint) (*Binding, error) {
 	if err := validateEndpoint(ctx, endpoint); err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1alpha
 	return nil, nil
 }
 
-func validateEndpoint(ctx BindingContext, e v1alpha1.Endpoint) error {
+func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 	if e.Ref == nil && e.URI == nil {
 		return errors.New("no ref or URI specified in endpoint")
 	} else if e.Ref != nil && e.URI != nil {

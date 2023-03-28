@@ -34,7 +34,6 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 )
 
 // Test that a Binding can be changed and the changes are propagated to the Integration
@@ -49,7 +48,7 @@ func TestKameletChange(t *testing.T) {
 
 	from := corev1.ObjectReference{
 		Kind:       "Kamelet",
-		APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		APIVersion: v1.SchemeGroupVersion.String(),
 		Name:       timerSource,
 	}
 
@@ -72,7 +71,7 @@ func TestKameletChange(t *testing.T) {
 	Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hello"))
 
-	Eventually(BindingCondition(ns, timerBinding, v1alpha1.BindingConditionReady), TestTimeoutMedium).Should(And(
+	Eventually(BindingCondition(ns, timerBinding, v1.BindingConditionReady), TestTimeoutMedium).Should(And(
 		WithTransform(BindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
 		WithTransform(BindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
 		WithTransform(BindingConditionMessage, Equal(fmt.Sprintf("1/1 ready replicas"))),
@@ -85,7 +84,7 @@ func TestKameletChange(t *testing.T) {
 	Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
 
-	Eventually(BindingCondition(ns, timerBinding, v1alpha1.BindingConditionReady), TestTimeoutMedium).
+	Eventually(BindingCondition(ns, timerBinding, v1.BindingConditionReady), TestTimeoutMedium).
 		Should(And(
 			WithTransform(BindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
 			WithTransform(BindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),

@@ -34,7 +34,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
 	"github.com/apache/camel-k/v2/pkg/client"
 	camelevent "github.com/apache/camel-k/v2/pkg/event"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -55,9 +56,9 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 			recorder: mgr.GetEventRecorderFor("camel-k-kamelet-controller"),
 		},
 		schema.GroupVersionKind{
-			Group:   v1alpha1.SchemeGroupVersion.Group,
-			Version: v1alpha1.SchemeGroupVersion.Version,
-			Kind:    v1alpha1.KameletKind,
+			Group:   v1.SchemeGroupVersion.Group,
+			Version: v1.SchemeGroupVersion.Version,
+			Kind:    v1.KameletKind,
 		},
 	)
 }
@@ -66,14 +67,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return builder.ControllerManagedBy(mgr).
 		Named("kamelet-controller").
 		// Watch for changes to primary resource Kamelet
-		For(&v1alpha1.Kamelet{}, builder.WithPredicates(
+		For(&v1.Kamelet{}, builder.WithPredicates(
 			platform.FilteringFuncs{
 				UpdateFunc: func(e event.UpdateEvent) bool {
-					oldKamelet, ok := e.ObjectOld.(*v1alpha1.Kamelet)
+					oldKamelet, ok := e.ObjectOld.(*v1.Kamelet)
 					if !ok {
 						return false
 					}
-					newKamelet, ok := e.ObjectNew.(*v1alpha1.Kamelet)
+					newKamelet, ok := e.ObjectNew.(*v1.Kamelet)
 					if !ok {
 						return false
 					}
@@ -123,7 +124,7 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 	}
 
 	// Fetch the Kamelet instance
-	var instance v1alpha1.Kamelet
+	var instance v1.Kamelet
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
 		if errors.IsNotFound(err) {
@@ -149,7 +150,7 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 		NewMonitorAction(),
 	}
 
-	var targetPhase v1alpha1.KameletPhase
+	var targetPhase v1.KameletPhase
 	var err error
 
 	target := instance.DeepCopy()
@@ -198,7 +199,7 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 		break
 	}
 
-	if targetPhase == v1alpha1.KameletPhaseReady {
+	if targetPhase == v1.KameletPhaseReady {
 		return reconcile.Result{}, nil
 	}
 

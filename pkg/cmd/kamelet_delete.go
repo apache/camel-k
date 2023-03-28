@@ -21,12 +21,12 @@ import (
 	"errors"
 	"fmt"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
 	"github.com/spf13/cobra"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 )
 
 func newKameletDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kameletDeleteCommandOptions) {
@@ -76,14 +76,14 @@ func (command *kameletDeleteCommandOptions) run(cmd *cobra.Command, args []strin
 	}
 
 	if command.All {
-		klList := v1alpha1.NewKameletList()
+		klList := v1.NewKameletList()
 		if err := c.List(command.Context, &klList, k8sclient.InNamespace(command.Namespace)); err != nil {
 			return err
 		}
 		names = make([]string, 0, len(klList.Items))
 		for _, kl := range klList.Items {
 			// only include non-bundled, non-readonly kamelets
-			if kl.Labels[v1alpha1.KameletBundledLabel] != "true" && kl.Labels[v1alpha1.KameletReadOnlyLabel] != "true" {
+			if kl.Labels[v1.KameletBundledLabel] != "true" && kl.Labels[v1.KameletReadOnlyLabel] != "true" {
 				names = append(names, kl.Name)
 			}
 		}
@@ -104,7 +104,7 @@ func (command *kameletDeleteCommandOptions) delete(cmd *cobra.Command, name stri
 		return err
 	}
 
-	kl := v1alpha1.NewKamelet(command.Namespace, name)
+	kl := v1.NewKamelet(command.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      name,
@@ -119,7 +119,7 @@ func (command *kameletDeleteCommandOptions) delete(cmd *cobra.Command, name stri
 
 	// check that it is not a bundled nor read-only one which is supposed to belong to platform
 	// thus not managed by the end user
-	if kl.Labels[v1alpha1.KameletBundledLabel] == "true" || kl.Labels[v1alpha1.KameletReadOnlyLabel] == "true" {
+	if kl.Labels[v1.KameletBundledLabel] == "true" || kl.Labels[v1.KameletReadOnlyLabel] == "true" {
 		// skip platform Kamelets while deleting all Kamelets
 		if command.All {
 			return nil

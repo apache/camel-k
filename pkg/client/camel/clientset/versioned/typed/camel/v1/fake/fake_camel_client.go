@@ -29,6 +29,10 @@ type FakeCamelV1 struct {
 	*testing.Fake
 }
 
+func (c *FakeCamelV1) Bindings(namespace string) v1.BindingInterface {
+	return &FakeBindings{c, namespace}
+}
+
 func (c *FakeCamelV1) Builds(namespace string) v1.BuildInterface {
 	return &FakeBuilds{c, namespace}
 }
@@ -47,6 +51,10 @@ func (c *FakeCamelV1) IntegrationKits(namespace string) v1.IntegrationKitInterfa
 
 func (c *FakeCamelV1) IntegrationPlatforms(namespace string) v1.IntegrationPlatformInterface {
 	return &FakeIntegrationPlatforms{c, namespace}
+}
+
+func (c *FakeCamelV1) Kamelets(namespace string) v1.KameletInterface {
+	return &FakeKamelets{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

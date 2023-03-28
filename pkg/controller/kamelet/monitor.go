@@ -20,7 +20,7 @@ package kamelet
 import (
 	"context"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	kameletutils "github.com/apache/camel-k/v2/pkg/kamelet"
 )
 
@@ -37,10 +37,10 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(kamelet *v1alpha1.Kamelet) bool {
-	return kamelet.Status.Phase == v1alpha1.KameletPhaseReady || kamelet.Status.Phase == v1alpha1.KameletPhaseError
+func (action *monitorAction) CanHandle(kamelet *v1.Kamelet) bool {
+	return kamelet.Status.Phase == v1.KameletPhaseReady || kamelet.Status.Phase == v1.KameletPhaseError
 }
 
-func (action *monitorAction) Handle(ctx context.Context, kamelet *v1alpha1.Kamelet) (*v1alpha1.Kamelet, error) {
+func (action *monitorAction) Handle(ctx context.Context, kamelet *v1.Kamelet) (*v1.Kamelet, error) {
 	return kameletutils.Initialize(kamelet)
 }
