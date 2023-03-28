@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
 - Kamelet development using Camel DSL instead of YAML DSL [\#4174](https://github.com/apache/camel-k/issues/4174)
+- Default integrationPlatform created at operator startup dose not honor OPERATOR\_ID config [\#4167](https://github.com/apache/camel-k/issues/4167)
 - Kamel cli reset/uninstall --all does not clean the camelcatalog [\#4160](https://github.com/apache/camel-k/issues/4160)
 - Unused parameter [\#4152](https://github.com/apache/camel-k/issues/4152)
 - + [\#4151](https://github.com/apache/camel-k/issues/4151)
