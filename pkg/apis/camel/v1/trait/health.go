@@ -54,4 +54,19 @@ type HealthTrait struct {
 	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
 	// Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
 	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
+
+	// Configures the startup probe for the integration container (default `true`).
+	StartupProbeEnabled *bool `property:"startup-probe-enabled" json:"startupProbeEnabled,omitempty"`
+	// Scheme to use when connecting to the startup probe (default `HTTP`).
+	StartupScheme string `property:"startup-scheme" json:"startupScheme,omitempty"`
+	// Number of seconds after the container has started before the startup probe is initiated.
+	StartupInitialDelay int32 `property:"startup-initial-delay" json:"startupInitialDelay,omitempty"`
+	// Number of seconds after which the startup probe times out.
+	StartupTimeout int32 `property:"startup-timeout" json:"startupTimeout,omitempty"`
+	// How often to perform the startup probe.
+	StartupPeriod int32 `property:"startup-period" json:"startupPeriod,omitempty"`
+	// Minimum consecutive successes for the startup probe to be considered successful after having failed.
+	StartupSuccessThreshold int32 `property:"startup-success-threshold" json:"startupSuccessThreshold,omitempty"`
+	// Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
+	StartupFailureThreshold int32 `property:"startup-failure-threshold" json:"startupFailureThreshold,omitempty"`
 }
