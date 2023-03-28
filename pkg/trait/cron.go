@@ -33,7 +33,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/label"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -260,7 +259,9 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 					BackoffLimit:          &backoffLimit,
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels:      label.AddLabels(e.Integration.Name),
+							Labels: map[string]string{
+								v1.IntegrationLabel: e.Integration.Name,
+							},
 							Annotations: annotations,
 						},
 						Spec: corev1.PodSpec{
