@@ -55,7 +55,7 @@ type HealthTrait struct {
 	// Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
 	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
 
-	// Configures the startup probe for the integration container (default `true`).
+	// Configures the startup probe for the integration container (default `false`).
 	StartupProbeEnabled *bool `property:"startup-probe-enabled" json:"startupProbeEnabled,omitempty"`
 	// Scheme to use when connecting to the startup probe (default `HTTP`).
 	StartupScheme string `property:"startup-scheme" json:"startupScheme,omitempty"`
