@@ -15,6 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1alpha1 is deprecated: use the v1 API instead
+// Deprecated
 package v1alpha1
 
 const (
