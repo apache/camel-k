@@ -29,11 +29,8 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/onsi/gomega"
-
 	corev1 "k8s.io/api/core/v1"
 
-	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
@@ -325,6 +322,58 @@ func TestHealthTrait(t *testing.T) {
 				}
 
 				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "never-ready"
+			}))
+	})
+
+	t.Run("Startup condition with never properly started route", func(t *testing.T) {
+		name := "startup-never-ready"
+
+		Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
+			"-t", "health.enabled=true",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+		Consistently(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), 1*time.Minute).
+			Should(Equal(corev1.ConditionFalse))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+
+		// Check that the error message is propagated from health checks even if deployment never becomes ready
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+			WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
+
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+			Satisfy(func(c *v1.IntegrationCondition) bool {
+				if c.Status != corev1.ConditionFalse {
+					return false
+				}
+				if len(c.Pods) != 1 {
+					return false
+				}
+
+				var r *v1.HealthCheckResponse
+
+				for h := range c.Pods[0].Health {
+					if c.Pods[0].Health[h].Name == "camel-routes" {
+						r = &c.Pods[0].Health[h]
+					}
+				}
+
+				if r == nil {
+					return false
+				}
+
+				if r.Data == nil {
+					return false
+				}
+
+				var data map[string]interface{}
+				if err := json.Unmarshal(r.Data, &data); err != nil {
+					return false
+				}
+
+				return data["check.kind"].(string) == "STARTUP" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "startup-never-ready"
 			}))
 	})
 
