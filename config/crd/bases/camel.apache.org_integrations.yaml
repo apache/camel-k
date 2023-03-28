@@ -6593,7 +6593,7 @@ spec:
                         type: integer
                       startupProbeEnabled:
                         description: Configures the startup probe for the integration
-                          container (default `true`).
+                          container (default `false`).
                         type: boolean
                       startupScheme:
                         description: Scheme to use when connecting to the startup

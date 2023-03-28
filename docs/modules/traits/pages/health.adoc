@@ -85,7 +85,7 @@ The following configuration options are available:
 
 | health.startup-probe-enabled
 | bool
-| Configures the startup probe for the integration container (default `true`).
+| Configures the startup probe for the integration container (default `false`).
 
 | health.startup-scheme
 | string

@@ -636,7 +636,7 @@ traits:
   - name: startup-probe-enabled
     type: bool
     description: Configures the startup probe for the integration container (default
-      `true`).
+      `false`).
   - name: startup-scheme
     type: string
     description: Scheme to use when connecting to the startup probe (default `HTTP`).

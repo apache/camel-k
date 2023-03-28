@@ -4616,7 +4616,7 @@ bool
 |
 
 
-Configures the startup probe for the integration container (default `true`).
+Configures the startup probe for the integration container (default `false`).
 
 |`startupScheme` +
 string
