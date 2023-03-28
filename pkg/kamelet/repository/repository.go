@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -42,7 +41,7 @@ type KameletRepository interface {
 	List(ctx context.Context) ([]string, error)
 
 	// Get the Kamelet corresponding to the given name, or nil if not found
-	Get(ctx context.Context, name string) (*v1alpha1.Kamelet, error)
+	Get(ctx context.Context, name string) (*v1.Kamelet, error)
 
 	// String information about the repository
 	String() string

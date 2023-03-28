@@ -21,7 +21,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,13 +39,13 @@ func TestKubernetesEmptyRepository(t *testing.T) {
 func TestKubernetesRepository(t *testing.T) {
 	ctx := context.Background()
 	fakeClient := fake.NewSimpleClientset(
-		&v1alpha1.Kamelet{
+		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "kamelet1",
 			},
 		},
-		&v1alpha1.Kamelet{
+		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "kamelet2",

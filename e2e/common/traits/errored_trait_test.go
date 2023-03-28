@@ -30,8 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestErroredTrait(t *testing.T) {
@@ -58,9 +57,9 @@ func TestErroredTrait(t *testing.T) {
 			"-t", "kamelets.list=missing",
 		).Execute()).To(Succeed())
 		// Binding
-		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1alpha1.BindingPhaseError))
-		Eventually(BindingConditionStatus(ns, name, v1alpha1.BindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		Eventually(BindingCondition(ns, name, v1alpha1.BindingConditionReady), TestTimeoutShort).Should(
+		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.BindingPhaseError))
+		Eventually(BindingConditionStatus(ns, name, v1.BindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+		Eventually(BindingCondition(ns, name, v1.BindingConditionReady), TestTimeoutShort).Should(
 			WithTransform(BindingConditionMessage, And(
 				ContainSubstring("error during trait customization"),
 				ContainSubstring("[missing] not found"),

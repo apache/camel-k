@@ -23,7 +23,8 @@ import (
 
 	"github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset"
 	"github.com/apache/camel-k/v2/addons/strimzi/duck/v1beta2"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +40,7 @@ func (s BindingProvider) ID() string {
 	return "strimzi"
 }
 
-func (s BindingProvider) Translate(ctx bindings.BindingContext, _ bindings.EndpointContext, endpoint v1alpha1.Endpoint) (*bindings.Binding, error) {
+func (s BindingProvider) Translate(ctx bindings.BindingContext, _ bindings.EndpointContext, endpoint camelv1.Endpoint) (*bindings.Binding, error) {
 	if endpoint.Ref == nil {
 		// React only on refs
 		return nil, nil

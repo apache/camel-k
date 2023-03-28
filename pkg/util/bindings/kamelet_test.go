@@ -24,8 +24,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,7 +33,7 @@ import (
 func TestBindingConverter(t *testing.T) {
 	testcases := []struct {
 		name                  string
-		endpointType          v1alpha1.EndpointType
+		endpointType          v1.EndpointType
 		uri                   string
 		step                  map[string]interface{}
 		endpointProperties    map[string]string
@@ -41,13 +41,13 @@ func TestBindingConverter(t *testing.T) {
 	}{
 		{
 			name:         "source",
-			endpointType: v1alpha1.EndpointTypeSource,
+			endpointType: v1.EndpointTypeSource,
 			uri:          "kamelet:mykamelet/source-0",
 			step:         nil,
 		},
 		{
 			name:         "source-properties",
-			endpointType: v1alpha1.EndpointTypeSource,
+			endpointType: v1.EndpointTypeSource,
 			uri:          "kamelet:mykamelet/source-1",
 			step:         nil,
 			endpointProperties: map[string]string{
@@ -59,7 +59,7 @@ func TestBindingConverter(t *testing.T) {
 		},
 		{
 			name:         "action",
-			endpointType: v1alpha1.EndpointTypeAction,
+			endpointType: v1.EndpointTypeAction,
 			uri:          "",
 			step: map[string]interface{}{
 				"kamelet": map[string]interface{}{
@@ -69,7 +69,7 @@ func TestBindingConverter(t *testing.T) {
 		},
 		{
 			name:         "sink",
-			endpointType: v1alpha1.EndpointTypeSink,
+			endpointType: v1.EndpointTypeSink,
 			uri:          "kamelet:mykamelet/sink-3",
 			step:         nil,
 		},
@@ -83,7 +83,7 @@ func TestBindingConverter(t *testing.T) {
 			client, err := test.NewFakeClient()
 			assert.NoError(t, err)
 
-			endpoint := v1alpha1.Endpoint{
+			endpoint := v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
 					APIVersion: "camel.apache.org/v1any1",
@@ -100,7 +100,7 @@ func TestBindingConverter(t *testing.T) {
 					Ctx:       ctx,
 					Client:    client,
 					Namespace: "test",
-					Profile:   camelv1.TraitProfileKubernetes,
+					Profile:   v1.TraitProfileKubernetes,
 				},
 				EndpointContext{
 					Type:     tc.endpointType,
@@ -125,7 +125,7 @@ func TestBindingConverter(t *testing.T) {
 func TestBindingConverterWithDataTypes(t *testing.T) {
 	testcases := []struct {
 		name                  string
-		endpointType          v1alpha1.EndpointType
+		endpointType          v1.EndpointType
 		uri                   string
 		step                  map[string]interface{}
 		endpointProperties    map[string]string
@@ -137,7 +137,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 	}{
 		{
 			name:         "action-input",
-			endpointType: v1alpha1.EndpointTypeAction,
+			endpointType: v1.EndpointTypeAction,
 			uri:          "",
 			step: map[string]interface{}{
 				"pipeline": map[string]interface{}{
@@ -168,7 +168,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 		},
 		{
 			name:         "action-output",
-			endpointType: v1alpha1.EndpointTypeAction,
+			endpointType: v1.EndpointTypeAction,
 			uri:          "",
 			step: map[string]interface{}{
 				"pipeline": map[string]interface{}{
@@ -199,7 +199,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 		},
 		{
 			name:         "action-input-output",
-			endpointType: v1alpha1.EndpointTypeAction,
+			endpointType: v1.EndpointTypeAction,
 			uri:          "",
 			step: map[string]interface{}{
 				"pipeline": map[string]interface{}{
@@ -248,7 +248,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			client, err := test.NewFakeClient()
 			assert.NoError(t, err)
 
-			endpoint := v1alpha1.Endpoint{
+			endpoint := v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
 					APIVersion: "camel.apache.org/v1any1",
@@ -260,16 +260,16 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 				endpoint.Properties = asEndpointProperties(tc.endpointProperties)
 			}
 
-			endpoint.DataTypes = make(map[v1alpha1.TypeSlot]v1alpha1.DataTypeReference)
+			endpoint.DataTypes = make(map[v1.TypeSlot]v1.DataTypeReference)
 			if tc.inputFormat != "" {
-				endpoint.DataTypes[v1alpha1.TypeSlotIn] = v1alpha1.DataTypeReference{
+				endpoint.DataTypes[v1.TypeSlotIn] = v1.DataTypeReference{
 					Scheme: tc.inputScheme,
 					Format: tc.inputFormat,
 				}
 			}
 
 			if tc.outputFormat != "" {
-				endpoint.DataTypes[v1alpha1.TypeSlotOut] = v1alpha1.DataTypeReference{
+				endpoint.DataTypes[v1.TypeSlotOut] = v1.DataTypeReference{
 					Scheme: tc.outputScheme,
 					Format: tc.outputFormat,
 				}
@@ -280,7 +280,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 					Ctx:       ctx,
 					Client:    client,
 					Namespace: "test",
-					Profile:   camelv1.TraitProfileKubernetes,
+					Profile:   v1.TraitProfileKubernetes,
 				},
 				EndpointContext{
 					Type:     tc.endpointType,

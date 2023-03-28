@@ -25,7 +25,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -206,15 +205,15 @@ func TestToTrait(t *testing.T) {
 
 func TestSameTraits(t *testing.T) {
 	t.Run("empty traits", func(t *testing.T) {
-		oldKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		oldKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{},
 				},
 			},
 		}
-		newKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		newKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{},
 				},
@@ -227,8 +226,8 @@ func TestSameTraits(t *testing.T) {
 	})
 
 	t.Run("same traits", func(t *testing.T) {
-		oldKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		oldKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -238,8 +237,8 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		newKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -256,8 +255,8 @@ func TestSameTraits(t *testing.T) {
 	})
 
 	t.Run("not same traits", func(t *testing.T) {
-		oldKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		oldKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -267,8 +266,8 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		newKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Owner: &traitv1.OwnerTrait{
@@ -285,8 +284,8 @@ func TestSameTraits(t *testing.T) {
 	})
 
 	t.Run("same traits with annotations", func(t *testing.T) {
-		oldKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		oldKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -296,7 +295,7 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1alpha1.Binding{
+		newKlb := &v1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
@@ -310,14 +309,14 @@ func TestSameTraits(t *testing.T) {
 	})
 
 	t.Run("same traits with annotations only", func(t *testing.T) {
-		oldKlb := &v1alpha1.Binding{
+		oldKlb := &v1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
 				},
 			},
 		}
-		newKlb := &v1alpha1.Binding{
+		newKlb := &v1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
@@ -331,8 +330,8 @@ func TestSameTraits(t *testing.T) {
 	})
 
 	t.Run("not same traits with annotations", func(t *testing.T) {
-		oldKlb := &v1alpha1.Binding{
-			Spec: v1alpha1.BindingSpec{
+		oldKlb := &v1.Binding{
+			Spec: v1.BindingSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -342,7 +341,7 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1alpha1.Binding{
+		newKlb := &v1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:2",
@@ -356,14 +355,14 @@ func TestSameTraits(t *testing.T) {
 	})
 
 	t.Run("not same traits with annotations only", func(t *testing.T) {
-		oldKlb := &v1alpha1.Binding{
+		oldKlb := &v1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
 				},
 			},
 		}
-		newKlb := &v1alpha1.Binding{
+		newKlb := &v1.Binding{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:2",

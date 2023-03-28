@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,7 +44,7 @@ func newKubernetesKameletRepository(client versioned.Interface, namespace string
 var _ KameletRepository = &kubernetesKameletRepository{}
 
 func (c *kubernetesKameletRepository) List(ctx context.Context) ([]string, error) {
-	list, err := c.client.CamelV1alpha1().Kamelets(c.namespace).List(ctx, v1.ListOptions{})
+	list, err := c.client.CamelV1().Kamelets(c.namespace).List(ctx, v1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func (c *kubernetesKameletRepository) List(ctx context.Context) ([]string, error
 	return res, nil
 }
 
-func (c *kubernetesKameletRepository) Get(ctx context.Context, name string) (*v1alpha1.Kamelet, error) {
-	kamelet, err := c.client.CamelV1alpha1().Kamelets(c.namespace).Get(ctx, name, v1.GetOptions{})
+func (c *kubernetesKameletRepository) Get(ctx context.Context, name string) (*camelv1.Kamelet, error) {
+	kamelet, err := c.client.CamelV1().Kamelets(c.namespace).Get(ctx, name, v1.GetOptions{})
 	if err != nil && k8serrors.IsNotFound(err) {
 		// return nil if not found, so other repositories can try to find it
 		return nil, nil

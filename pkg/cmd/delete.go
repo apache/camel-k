@@ -24,7 +24,7 @@ import (
 	"strconv"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/spf13/cobra"
@@ -150,14 +150,14 @@ func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 func deleteBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
 	kind, name := findCreator(integration)
-	if kind != v1alpha1.BindingKind || name == "" {
+	if kind != v1.BindingKind || name == "" {
 		return false, "", nil
 	}
 
-	binding := v1alpha1.Binding{
+	binding := v1.Binding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       kind,
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: integration.Namespace,
@@ -178,7 +178,7 @@ func findCreator(integration *v1.Integration) (string, string) {
 	if kind == "" && name == "" {
 		// Look up in OwnerReferences in case creator labels are absent
 		for _, owner := range integration.GetOwnerReferences() {
-			if owner.Kind == v1alpha1.BindingKind {
+			if owner.Kind == v1.BindingKind {
 				return owner.Kind, owner.Name
 			}
 		}

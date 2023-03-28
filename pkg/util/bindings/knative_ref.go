@@ -22,8 +22,9 @@ import (
 	"fmt"
 	"net/url"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
@@ -36,7 +37,7 @@ func (k KnativeRefBindingProvider) ID() string {
 	return "knative-ref"
 }
 
-func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil
@@ -76,7 +77,7 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 			delete(props, "type")
 			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, eventType)
 		} else {
-			if endpointCtx.Type == v1alpha1.EndpointTypeSink || endpointCtx.Type == v1alpha1.EndpointTypeAction {
+			if endpointCtx.Type == v1.EndpointTypeSink || endpointCtx.Type == v1.EndpointTypeAction {
 				// Allowing no event type, but it can fail. See https://github.com/apache/camel-k/v2-runtime/issues/536
 				serviceURI = fmt.Sprintf("knative:%s", *serviceType)
 			} else {

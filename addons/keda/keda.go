@@ -27,8 +27,8 @@ import (
 
 	kedav1alpha1 "github.com/apache/camel-k/v2/addons/keda/duck/v1alpha1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -279,7 +279,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	if err != nil {
 		return err
 	}
-	if ctrlRef.Kind == camelv1alpha1.BindingKind {
+	if ctrlRef.Kind == camelv1.BindingKind {
 		scale.ObjectMeta.Name = ctrlRef.Name
 		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1alpha1.SchemeGroupVersion.WithResource("bindings").GroupResource(), &scale, metav1.UpdateOptions{})
 		if err != nil {
@@ -297,7 +297,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 
 func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectReference {
 	for _, o := range e.Integration.OwnerReferences {
-		if o.Kind == camelv1alpha1.BindingKind && strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
+		if o.Kind == camelv1.BindingKind && strings.HasPrefix(o.APIVersion, camelv1alpha1.SchemeGroupVersion.Group) {
 			return &v1.ObjectReference{
 				APIVersion: o.APIVersion,
 				Kind:       o.Kind,
@@ -401,7 +401,7 @@ func (t *kedaTrait) populateTriggersFromKamelet(e *trait.Environment, repo repos
 	return nil
 }
 
-func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet *camelv1alpha1.Kamelet, triggerType string, kedaParamToProperty map[string]string, requiredKEDAParam map[string]bool, authenticationParams map[string]bool, kameletURI string) error {
+func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet *camelv1.Kamelet, triggerType string, kedaParamToProperty map[string]string, requiredKEDAParam map[string]bool, authenticationParams map[string]bool, kameletURI string) error {
 	metaValues := make(map[string]string, len(kedaParamToProperty))
 	for metaParam, prop := range kedaParamToProperty {
 		v, err := t.getKameletPropertyValue(e, kamelet, kameletURI, prop)
@@ -450,7 +450,7 @@ func (t *kedaTrait) populateTriggersFromKameletURI(e *trait.Environment, kamelet
 	return nil
 }
 
-func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *camelv1alpha1.Kamelet, kameletURI string) (map[string]string, map[string]bool, error) {
+func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *camelv1.Kamelet, kameletURI string) (map[string]string, map[string]bool, error) {
 	paramTemplates := make(map[string]string)
 	authenticationParam := make(map[string]bool)
 	for annotation, expr := range kamelet.Annotations {
@@ -492,7 +492,7 @@ func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *ca
 	return paramValues, authenticationParam, nil
 }
 
-func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camelv1alpha1.Kamelet, kameletURI, prop string) (string, error) {
+func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camelv1.Kamelet, kameletURI, prop string) (string, error) {
 	// From top priority to lowest
 	if v := uri.GetQueryParameter(kameletURI, prop); v != "" {
 		return v, nil

@@ -26,8 +26,9 @@ import (
 	"k8s.io/utils/pointer"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
@@ -35,16 +36,16 @@ import (
 
 func TestBindings(t *testing.T) {
 	testcases := []struct {
-		endpointType v1alpha1.EndpointType
-		endpoint     v1alpha1.Endpoint
+		endpointType v1.EndpointType
+		endpoint     v1.Endpoint
 		profile      camelv1.TraitProfile
 		uri          string
 		traits       camelv1.Traits
 		props        map[string]string
 	}{
 		{
-			endpointType: v1alpha1.EndpointTypeSink,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Service",
 					APIVersion: "serving.knative.dev/v1",
@@ -54,8 +55,8 @@ func TestBindings(t *testing.T) {
 			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&kind=Service",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeAction,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeAction,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Service",
 					APIVersion: "serving.knative.dev/v1",
@@ -65,8 +66,8 @@ func TestBindings(t *testing.T) {
 			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&kind=Service",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSink,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Service",
 					APIVersion: "serving.knative.dev/v1",
@@ -79,8 +80,8 @@ func TestBindings(t *testing.T) {
 			uri: "knative:endpoint/myservice?apiVersion=serving.knative.dev%2Fv1&ce.override.ce-type=mytype&kind=Service",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSink,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Channel",
 					APIVersion: "messaging.knative.dev/v1",
@@ -90,8 +91,8 @@ func TestBindings(t *testing.T) {
 			uri: "knative:channel/mychannel?apiVersion=messaging.knative.dev%2Fv1&kind=Channel",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSource,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSource,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Channel",
 					APIVersion: "messaging.knative.dev/v1",
@@ -101,8 +102,8 @@ func TestBindings(t *testing.T) {
 			uri: "knative:channel/mychannel?apiVersion=messaging.knative.dev%2Fv1&kind=Channel",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSource,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSource,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "KafkaChannel",
 					APIVersion: "messaging.knative.dev/v1beta1",
@@ -112,8 +113,8 @@ func TestBindings(t *testing.T) {
 			uri: "knative:channel/mychannel?apiVersion=messaging.knative.dev%2Fv1beta1&kind=KafkaChannel",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSource,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSource,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Broker",
 					APIVersion: "eventing.knative.dev/v1",
@@ -126,8 +127,8 @@ func TestBindings(t *testing.T) {
 			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSource,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSource,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
 					APIVersion: "camel.apache.org/v1any1",
@@ -138,8 +139,8 @@ func TestBindings(t *testing.T) {
 			props: map[string]string{},
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSink,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
 					APIVersion: "camel.apache.org/v1any1",
@@ -157,7 +158,7 @@ func TestBindings(t *testing.T) {
 			},
 		},
 		{
-			endpoint: v1alpha1.Endpoint{
+			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
 					APIVersion: "camel.apache.org/v1any1",
@@ -174,8 +175,8 @@ func TestBindings(t *testing.T) {
 			},
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSink,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
 				URI: pointer.String("https://myurl/hey"),
 				Properties: asEndpointProperties(map[string]string{
 					"ce.override.ce-type": "mytype",
@@ -190,16 +191,16 @@ func TestBindings(t *testing.T) {
 			},
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSink,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
 				URI: pointer.String("https://myurl/hey"),
 			},
 			profile: camelv1.TraitProfileKubernetes,
 			uri:     "https://myurl/hey",
 		},
 		{
-			endpointType: v1alpha1.EndpointTypeSink,
-			endpoint: v1alpha1.Endpoint{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
 				URI: pointer.String("docker://xxx"),
 			},
 			uri: "docker://xxx",

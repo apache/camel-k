@@ -18,7 +18,7 @@ limitations under the License.
 package bindings
 
 import (
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -30,7 +30,7 @@ func (k CamelURIBindingProvider) ID() string {
 	return "camel-uri"
 }
 
-func (k CamelURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+func (k CamelURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris
 		return nil, nil

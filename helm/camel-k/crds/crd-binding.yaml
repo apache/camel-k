@@ -47,7 +47,7 @@ spec:
       jsonPath: .status.replicas
       name: Replicas
       type: integer
-    name: v1alpha1
+    name: v1
     schema:
       openAPIV3Schema:
         description: Binding is the Schema for the kamelets binding API
@@ -7777,6 +7777,7 @@ spec:
                               description: 'JSON represents any valid JSON value.
                                 These types are supported: bool, int64, float64, string,
                                 []interface{}, map[string]interface{} and nil.'
+                              type: object
                               x-kubernetes-preserve-unknown-fields: true
                             externalDocs:
                               description: ExternalDocumentation allows referencing
@@ -7795,6 +7796,7 @@ spec:
                                   default:
                                     description: default is a default value for undefined
                                       object fields.
+                                    type: object
                                     x-kubernetes-preserve-unknown-fields: true
                                   deprecated:
                                     type: boolean
@@ -7806,6 +7808,7 @@ spec:
                                         value. These types are supported: bool, int64,
                                         float64, string, []interface{}, map[string]interface{}
                                         and nil.'
+                                      type: object
                                       x-kubernetes-preserve-unknown-fields: true
                                     type: array
                                   example:
@@ -7813,6 +7816,7 @@ spec:
                                       These types are supported: bool, int64, float64,
                                       string, []interface{}, map[string]interface{}
                                       and nil.'
+                                    type: object
                                     x-kubernetes-preserve-unknown-fields: true
                                   exclusiveMaximum:
                                     type: boolean
@@ -8012,6 +8016,7 @@ spec:
                               description: 'JSON represents any valid JSON value.
                                 These types are supported: bool, int64, float64, string,
                                 []interface{}, map[string]interface{} and nil.'
+                              type: object
                               x-kubernetes-preserve-unknown-fields: true
                             externalDocs:
                               description: ExternalDocumentation allows referencing
@@ -8030,6 +8035,7 @@ spec:
                                   default:
                                     description: default is a default value for undefined
                                       object fields.
+                                    type: object
                                     x-kubernetes-preserve-unknown-fields: true
                                   deprecated:
                                     type: boolean
@@ -8041,6 +8047,7 @@ spec:
                                         value. These types are supported: bool, int64,
                                         float64, string, []interface{}, map[string]interface{}
                                         and nil.'
+                                      type: object
                                       x-kubernetes-preserve-unknown-fields: true
                                     type: array
                                   example:
@@ -8048,6 +8055,7 @@ spec:
                                       These types are supported: bool, int64, float64,
                                       string, []interface{}, map[string]interface{}
                                       and nil.'
+                                    type: object
                                     x-kubernetes-preserve-unknown-fields: true
                                   exclusiveMaximum:
                                     type: boolean
@@ -8252,6 +8260,7 @@ spec:
                                   These types are supported: bool, int64, float64,
                                   string, []interface{}, map[string]interface{} and
                                   nil.'
+                                type: object
                                 x-kubernetes-preserve-unknown-fields: true
                               externalDocs:
                                 description: ExternalDocumentation allows referencing
@@ -8270,6 +8279,7 @@ spec:
                                     default:
                                       description: default is a default value for
                                         undefined object fields.
+                                      type: object
                                       x-kubernetes-preserve-unknown-fields: true
                                     deprecated:
                                       type: boolean
@@ -8281,6 +8291,7 @@ spec:
                                           value. These types are supported: bool,
                                           int64, float64, string, []interface{}, map[string]interface{}
                                           and nil.'
+                                        type: object
                                         x-kubernetes-preserve-unknown-fields: true
                                       type: array
                                     example:
@@ -8288,6 +8299,7 @@ spec:
                                         value. These types are supported: bool, int64,
                                         float64, string, []interface{}, map[string]interface{}
                                         and nil.'
+                                      type: object
                                       x-kubernetes-preserve-unknown-fields: true
                                     exclusiveMaximum:
                                       type: boolean

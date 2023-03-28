@@ -15,13 +15,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1
 
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // +genclient
@@ -48,7 +46,7 @@ type Binding struct {
 // BindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
 type BindingSpec struct {
 	// Integration is an optional integration used to specify custom parameters
-	Integration *v1.IntegrationSpec `json:"integration,omitempty"`
+	Integration *IntegrationSpec `json:"integration,omitempty"`
 	// Source is the starting point of the integration defined by this binding
 	Source Endpoint `json:"source,omitempty"`
 	// Sink is the destination of the integration defined by this binding
@@ -126,7 +124,7 @@ type BindingCondition struct {
 	// A human readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
 	// Pods collect health and conditions information from the owned PODs
-	Pods []v1.PodCondition `json:"pods,omitempty"`
+	Pods []PodCondition `json:"pods,omitempty"`
 }
 
 // BindingConditionType --

@@ -19,6 +19,8 @@ limitations under the License.
 
 package v1
 
+type BindingExpansion interface{}
+
 type BuildExpansion interface{}
 
 type CamelCatalogExpansion interface{}
@@ -28,3 +30,5 @@ type IntegrationExpansion interface{}
 type IntegrationKitExpansion interface{}
 
 type IntegrationPlatformExpansion interface{}
+
+type KameletExpansion interface{}

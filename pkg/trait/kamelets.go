@@ -30,7 +30,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	kameletutils "github.com/apache/camel-k/v2/pkg/kamelet"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -114,13 +114,13 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1alpha1.Kamelet, error) {
+func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet, error) {
 	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
 		return nil, err
 	}
 
-	kamelets := make(map[string]*v1alpha1.Kamelet)
+	kamelets := make(map[string]*v1.Kamelet)
 	missingKamelets := make([]string, 0)
 	availableKamelets := make([]string, 0)
 
@@ -182,8 +182,8 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		for _, key := range t.getKameletKeys() {
 			kamelet := kamelets[key]
 
-			if kamelet.Status.Phase != v1alpha1.KameletPhaseReady {
-				return fmt.Errorf("kamelet %q is not %s: %s", key, v1alpha1.KameletPhaseReady, kamelet.Status.Phase)
+			if kamelet.Status.Phase != v1.KameletPhaseReady {
+				return fmt.Errorf("kamelet %q is not %s: %s", key, v1.KameletPhaseReady, kamelet.Status.Phase)
 			}
 
 			if err := t.addKameletAsSource(e, kamelet); err != nil {
@@ -231,7 +231,7 @@ func (t *kameletsTrait) configureApplicationProperties(e *Environment) error {
 	return nil
 }
 
-func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1alpha1.Kamelet) error {
+func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
 	if kamelet.Spec.Template != nil {
@@ -313,7 +313,7 @@ func (t *kameletsTrait) getKameletKeys() []string {
 		if strings.Contains(i, "/") {
 			i = strings.SplitN(i, "/", 2)[0]
 		}
-		if i != "" && v1alpha1.ValidKameletName(i) {
+		if i != "" && v1.ValidKameletName(i) {
 			util.StringSliceUniqueAdd(&answer, i)
 		}
 	}
@@ -351,7 +351,7 @@ func (t *kameletsTrait) getConfigurationKeys() []configurationKey {
 	return answer
 }
 
-func integrationSourceFromKameletSource(e *Environment, kamelet *v1alpha1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
+func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
 	if source.Type == v1.SourceTypeTemplate {
 		// Kamelets must be named "<kamelet-name>.extension"
 		language := source.InferLanguage()

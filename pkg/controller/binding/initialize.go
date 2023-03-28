@@ -21,7 +21,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -45,15 +46,15 @@ func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *initializeAction) CanHandle(binding *v1alpha1.Binding) bool {
-	return binding.Status.Phase == v1alpha1.BindingPhaseNone
+func (action *initializeAction) CanHandle(binding *v1.Binding) bool {
+	return binding.Status.Phase == v1.BindingPhaseNone
 }
 
-func (action *initializeAction) Handle(ctx context.Context, binding *v1alpha1.Binding) (*v1alpha1.Binding, error) {
+func (action *initializeAction) Handle(ctx context.Context, binding *v1.Binding) (*v1.Binding, error) {
 	it, err := CreateIntegrationFor(ctx, action.client, binding)
 	if err != nil {
-		binding.Status.Phase = v1alpha1.BindingPhaseError
-		binding.Status.SetErrorCondition(v1alpha1.BindingIntegrationConditionError,
+		binding.Status.Phase = v1.BindingPhaseError
+		binding.Status.SetErrorCondition(v1.BindingIntegrationConditionError,
 			"Couldn't create an Integration custom resource", err)
 		return binding, err
 	}
@@ -66,11 +67,11 @@ func (action *initializeAction) Handle(ctx context.Context, binding *v1alpha1.Bi
 	action.propagateIcon(ctx, binding)
 
 	target := binding.DeepCopy()
-	target.Status.Phase = v1alpha1.BindingPhaseCreating
+	target.Status.Phase = v1.BindingPhaseCreating
 	return target, nil
 }
 
-func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1alpha1.Binding) {
+func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1.Binding) {
 	icon, err := action.findIcon(ctx, binding)
 	if err != nil {
 		action.L.Errorf(err, "cannot find icon forBinding %q", binding.Name)
@@ -85,8 +86,8 @@ func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1al
 	for k, v := range binding.Annotations {
 		clone.Annotations[k] = v
 	}
-	if _, ok := clone.Annotations[v1alpha1.AnnotationIcon]; !ok {
-		clone.Annotations[v1alpha1.AnnotationIcon] = icon
+	if _, ok := clone.Annotations[v1.AnnotationIcon]; !ok {
+		clone.Annotations[v1.AnnotationIcon] = icon
 	}
 	p, err := patch.MergePatch(binding, clone)
 	if err != nil {
@@ -101,7 +102,7 @@ func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1al
 	}
 }
 
-func (action *initializeAction) findIcon(ctx context.Context, binding *v1alpha1.Binding) (string, error) {
+func (action *initializeAction) findIcon(ctx context.Context, binding *v1.Binding) (string, error) {
 	var kameletRef *corev1.ObjectReference
 	if binding.Spec.Source.Ref != nil && binding.Spec.Source.Ref.Kind == "Kamelet" && strings.HasPrefix(binding.Spec.Source.Ref.APIVersion, "camel.apache.org/") {
 		kameletRef = binding.Spec.Source.Ref
@@ -126,5 +127,5 @@ func (action *initializeAction) findIcon(ctx context.Context, binding *v1alpha1.
 		return "", nil
 	}
 
-	return kamelet.Annotations[v1alpha1.AnnotationIcon], nil
+	return kamelet.Annotations[v1.AnnotationIcon], nil
 }

@@ -27,7 +27,8 @@ import (
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
 	"github.com/apache/camel-k/v2/pkg/util/indentedwriter"
 )
 
@@ -74,7 +75,7 @@ func (command *describeKameletCommandOptions) run(cmd *cobra.Command, args []str
 		return err
 	}
 
-	kamelet := v1alpha1.NewKamelet(command.Namespace, args[0])
+	kamelet := v1.NewKamelet(command.Namespace, args[0])
 	kameletKey := k8sclient.ObjectKey{
 		Namespace: command.Namespace,
 		Name:      args[0],
@@ -93,7 +94,7 @@ func (command *describeKameletCommandOptions) run(cmd *cobra.Command, args []str
 	return nil
 }
 
-func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command, kamelet v1alpha1.Kamelet) (string, error) {
+func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command, kamelet v1.Kamelet) (string, error) {
 	return indentedwriter.IndentedString(func(out io.Writer) error {
 		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 

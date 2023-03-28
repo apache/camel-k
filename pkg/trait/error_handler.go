@@ -27,7 +27,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
@@ -58,7 +58,7 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if t.ErrorHandlerRef == "" {
-		t.ErrorHandlerRef = e.Integration.Spec.GetConfigurationProperty(v1alpha1.ErrorHandlerRefName)
+		t.ErrorHandlerRef = e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName)
 	}
 
 	return t.ErrorHandlerRef != "", nil
@@ -69,7 +69,7 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 		// If the user configure directly the URI, we need to auto-discover the underlying component
 		// and add the related dependency
 		defaultErrorHandlerURI := e.Integration.Spec.GetConfigurationProperty(
-			fmt.Sprintf("%s.deadLetterUri", v1alpha1.ErrorHandlerAppPropertiesPrefix))
+			fmt.Sprintf("%s.deadLetterUri", v1.ErrorHandlerAppPropertiesPrefix))
 		if defaultErrorHandlerURI != "" && !strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
 			t.addErrorHandlerDependencies(e, defaultErrorHandlerURI)
 		}

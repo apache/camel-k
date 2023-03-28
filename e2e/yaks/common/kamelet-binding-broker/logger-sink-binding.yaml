@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Binding
 metadata:
   name: logger-sink-binding
@@ -30,5 +30,5 @@ spec:
   sink:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: logger-sink

@@ -22,7 +22,7 @@ import (
 	"context"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/client"
 )
 
@@ -49,7 +49,7 @@ type BindingProvider interface {
 	// ID returns the name of the binding provider
 	ID() string
 	// Translate does the actual mapping
-	Translate(ctx BindingContext, endpointContext EndpointContext, endpoint v1alpha1.Endpoint) (*Binding, error)
+	Translate(ctx BindingContext, endpointContext EndpointContext, endpoint v1.Endpoint) (*Binding, error)
 	// Order returns the relative order of execution of the binding provider
 	Order() int
 }
@@ -63,6 +63,6 @@ type BindingContext struct {
 }
 
 type EndpointContext struct {
-	Type     v1alpha1.EndpointType
+	Type     v1.EndpointType
 	Position *int
 }

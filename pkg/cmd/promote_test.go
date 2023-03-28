@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -132,7 +131,7 @@ func TestBindingDryRun(t *testing.T) {
 	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	assert.Nil(t, err)
-	assert.Equal(t, `apiVersion: camel.apache.org/v1alpha1
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Binding
 metadata:
   creationTimestamp: null
@@ -150,9 +149,9 @@ status: {}
 `, output)
 }
 
-func nominalBinding(name string) v1alpha1.Binding {
-	kb := v1alpha1.NewBinding("default", name)
-	kb.Status.Phase = v1alpha1.BindingPhaseReady
+func nominalBinding(name string) v1.Binding {
+	kb := v1.NewBinding("default", name)
+	kb.Status.Phase = v1.BindingPhaseReady
 	return kb
 }
 

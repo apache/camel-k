@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/reference"
@@ -190,12 +190,12 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	name := o.nameFor(source, sink)
 
-	binding := v1alpha1.Binding{
+	binding := v1.Binding{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: o.Namespace,
 			Name:      name,
 		},
-		Spec: v1alpha1.BindingSpec{
+		Spec: v1.BindingSpec{
 			Source: source,
 			Sink:   sink,
 		},
@@ -210,7 +210,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(o.Steps) > 0 {
-		binding.Spec.Steps = make([]v1alpha1.Endpoint, 0)
+		binding.Spec.Steps = make([]v1.Endpoint, 0)
 		for idx, stepDesc := range o.Steps {
 			stepIndex := idx + 1
 			stepKey := fmt.Sprintf("%s%d", stepKeyPrefix, stepIndex)
@@ -280,7 +280,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func showBindingOutput(cmd *cobra.Command, binding *v1alpha1.Binding, outputFormat string, scheme runtime.ObjectTyper) error {
+func showBindingOutput(cmd *cobra.Command, binding *v1.Binding, outputFormat string, scheme runtime.ObjectTyper) error {
 	printer := printers.NewTypeSetter(scheme)
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,
@@ -288,7 +288,7 @@ func showBindingOutput(cmd *cobra.Command, binding *v1alpha1.Binding, outputForm
 	return printer.PrintObj(binding, cmd.OutOrStdout())
 }
 
-func (o *bindCmdOptions) parseErrorHandler() (*v1alpha1.ErrorHandlerSpec, error) {
+func (o *bindCmdOptions) parseErrorHandler() (*v1.ErrorHandlerSpec, error) {
 	errHandlMap := make(map[string]interface{})
 	errHandlType, errHandlValue, err := parseErrorHandlerByType(o.ErrorHandler)
 	if err != nil {
@@ -314,7 +314,7 @@ func (o *bindCmdOptions) parseErrorHandler() (*v1alpha1.ErrorHandlerSpec, error)
 	if err != nil {
 		return nil, err
 	}
-	return &v1alpha1.ErrorHandlerSpec{RawMessage: errHandlMarshalled}, nil
+	return &v1.ErrorHandlerSpec{RawMessage: errHandlMarshalled}, nil
 }
 
 func parseErrorHandlerByType(value string) (string, string, error) {
@@ -329,9 +329,9 @@ func parseErrorHandlerByType(value string) (string, string, error) {
 	return errHandlSplit[0], "", nil
 }
 
-func (o *bindCmdOptions) decode(res string, key string) (v1alpha1.Endpoint, error) {
+func (o *bindCmdOptions) decode(res string, key string) (v1.Endpoint, error) {
 	refConverter := reference.NewConverter(reference.KameletPrefix)
-	endpoint := v1alpha1.Endpoint{}
+	endpoint := v1.Endpoint{}
 	explicitProps := o.getProperties(key)
 	props, err := o.asEndpointProperties(explicitProps)
 	if err != nil {
@@ -374,7 +374,7 @@ func (o *bindCmdOptions) decode(res string, key string) (v1alpha1.Endpoint, erro
 	return endpoint, nil
 }
 
-func (o *bindCmdOptions) nameFor(source, sink v1alpha1.Endpoint) string {
+func (o *bindCmdOptions) nameFor(source, sink v1.Endpoint) string {
 	if o.Name != "" {
 		return o.Name
 	}
@@ -384,7 +384,7 @@ func (o *bindCmdOptions) nameFor(source, sink v1alpha1.Endpoint) string {
 	return kubernetes.SanitizeName(name)
 }
 
-func (o *bindCmdOptions) nameForEndpoint(endpoint v1alpha1.Endpoint) string {
+func (o *bindCmdOptions) nameForEndpoint(endpoint v1.Endpoint) string {
 	if endpoint.URI != nil {
 		return uri.GetComponent(*endpoint.URI)
 	}
@@ -394,7 +394,7 @@ func (o *bindCmdOptions) nameForEndpoint(endpoint v1alpha1.Endpoint) string {
 	return ""
 }
 
-func (o *bindCmdOptions) asEndpointProperties(props map[string]string) (*v1alpha1.EndpointProperties, error) {
+func (o *bindCmdOptions) asEndpointProperties(props map[string]string) (*v1.EndpointProperties, error) {
 	if len(props) == 0 {
 		return nil, nil
 	}
@@ -402,8 +402,8 @@ func (o *bindCmdOptions) asEndpointProperties(props map[string]string) (*v1alpha
 	if err != nil {
 		return nil, err
 	}
-	return &v1alpha1.EndpointProperties{
-		RawMessage: v1alpha1.RawMessage(data),
+	return &v1.EndpointProperties{
+		RawMessage: v1.RawMessage(data),
 	}, nil
 }
 
@@ -440,7 +440,7 @@ func (o *bindCmdOptions) parseProperty(prop string) (string, string, string, err
 	return keyParts[0], keyParts[1], parts[1], nil
 }
 
-func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1alpha1.Endpoint) error {
+func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1.Endpoint) error {
 	if endpoint.Ref != nil && endpoint.Ref.Kind == "Kamelet" {
 		c, err := o.GetCmdClient()
 		if err != nil {
@@ -450,7 +450,7 @@ func (o *bindCmdOptions) checkCompliance(cmd *cobra.Command, endpoint v1alpha1.E
 			Namespace: endpoint.Ref.Namespace,
 			Name:      endpoint.Ref.Name,
 		}
-		kamelet := v1alpha1.Kamelet{}
+		kamelet := v1.Kamelet{}
 		if err := c.Get(o.Context, key, &kamelet); err != nil {
 			if k8serrors.IsNotFound(err) {
 				// Kamelet may be in the operator namespace, but we currently don't have a way to determine it: we just warn

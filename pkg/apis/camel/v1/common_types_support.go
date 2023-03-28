@@ -116,6 +116,21 @@ func (m *RawMessage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// String returns a string representation of RawMessage
+func (m *RawMessage) String() string {
+	if m == nil {
+		return ""
+	}
+	b, err := m.MarshalJSON()
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
+
+var _ json.Marshaler = (*RawMessage)(nil)
+var _ json.Unmarshaler = (*RawMessage)(nil)
+
 // GetOperatorIDAnnotation to safely get the operator id annotation value.
 func GetOperatorIDAnnotation(obj metav1.Object) string {
 	if obj == nil || obj.GetAnnotations() == nil {

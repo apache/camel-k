@@ -23,7 +23,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 type compositeKameletRepository struct {
@@ -57,7 +57,7 @@ func (c compositeKameletRepository) List(ctx context.Context) ([]string, error) 
 	return res, nil
 }
 
-func (c compositeKameletRepository) Get(ctx context.Context, name string) (*v1alpha1.Kamelet, error) {
+func (c compositeKameletRepository) Get(ctx context.Context, name string) (*v1.Kamelet, error) {
 	for _, repo := range c.repositories {
 		kam, err := repo.Get(ctx, name)
 		if kam != nil || err != nil {

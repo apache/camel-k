@@ -25,14 +25,10 @@ package native
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
-
-	. "github.com/onsi/gomega"
-
-	corev1 "k8s.io/api/core/v1"
-
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestNativeBinding(t *testing.T) {
@@ -48,12 +44,12 @@ func TestNativeBinding(t *testing.T) {
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "timer-source",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 		to := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "log-sink",
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 		message := "Magicstring!"
 

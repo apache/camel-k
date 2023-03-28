@@ -20,7 +20,7 @@ package binding
 import (
 	"context"
 
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
@@ -34,10 +34,10 @@ type Action interface {
 	Name() string
 
 	// returns true if the action can handle the binding
-	CanHandle(kamelet *v1alpha1.Binding) bool
+	CanHandle(kamelet *v1.Binding) bool
 
 	// executes the handling function
-	Handle(ctx context.Context, kamelet *v1alpha1.Binding) (*v1alpha1.Binding, error)
+	Handle(ctx context.Context, kamelet *v1.Binding) (*v1.Binding, error)
 }
 
 type baseAction struct {

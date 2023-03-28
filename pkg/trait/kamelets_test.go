@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -82,12 +82,12 @@ func TestKameletLookup(t *testing.T) {
     uri: kamelet:timer
     steps:
     - to: log:info
-`, &v1alpha1.Kamelet{
+`, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "timer",
 		},
-		Spec: v1alpha1.KameletSpec{
+		Spec: v1.KameletSpec{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
@@ -98,7 +98,7 @@ func TestKameletLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
-		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -126,12 +126,12 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
     uri: kamelet:timer
     steps:
     - to: log:info
-`, &v1alpha1.Kamelet{
+`, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "timer",
 		},
-		Spec: v1alpha1.KameletSpec{
+		Spec: v1.KameletSpec{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
@@ -147,7 +147,7 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 				},
 			},
 		},
-		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -182,12 +182,12 @@ func TestNonYAMLKameletLookup(t *testing.T) {
     uri: kamelet:timer
     steps:
     - to: log:info
-`, &v1alpha1.Kamelet{
+`, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "timer",
 		},
-		Spec: v1alpha1.KameletSpec{
+		Spec: v1.KameletSpec{
 			Sources: []v1.SourceSpec{
 				{
 					DataSpec: v1.DataSpec{
@@ -198,7 +198,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 				},
 			},
 		},
-		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -225,12 +225,12 @@ func TestMultipleKamelets(t *testing.T) {
     steps:
     - to: kamelet:logger
     - to: kamelet:logger
-`, &v1alpha1.Kamelet{
+`, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "timer",
 		},
-		Spec: v1alpha1.KameletSpec{
+		Spec: v1.KameletSpec{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
@@ -250,13 +250,13 @@ func TestMultipleKamelets(t *testing.T) {
 				"camel:xxx",
 			},
 		},
-		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
-	}, &v1alpha1.Kamelet{
+		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
+	}, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "logger",
 		},
-		Spec: v1alpha1.KameletSpec{
+		Spec: v1.KameletSpec{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "tbd:endpoint",
@@ -274,7 +274,7 @@ func TestMultipleKamelets(t *testing.T) {
 				"camel:tbd",
 			},
 		},
-		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -320,12 +320,12 @@ func TestKameletConfigLookup(t *testing.T) {
     uri: kamelet:timer
     steps:
     - to: log:info
-`, &v1alpha1.Kamelet{
+`, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "timer",
 		},
-		Spec: v1alpha1.KameletSpec{
+		Spec: v1.KameletSpec{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
@@ -336,7 +336,7 @@ func TestKameletConfigLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
-		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	}, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -383,12 +383,12 @@ func TestKameletNamedConfigLookup(t *testing.T) {
     uri: kamelet:timer/id2
     steps:
     - to: log:info
-`, &v1alpha1.Kamelet{
+`, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "timer",
 		},
-		Spec: v1alpha1.KameletSpec{
+		Spec: v1.KameletSpec{
 			Template: templateOrFail(map[string]interface{}{
 				"from": map[string]interface{}{
 					"uri": "timer:tick",
@@ -399,7 +399,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
-		Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	}, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -453,19 +453,19 @@ func TestKameletConditionFalse(t *testing.T) {
 `
 	trait, environment := createKameletsTestEnvironment(
 		flow,
-		&v1alpha1.Kamelet{
+		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "timer",
 			},
-			Spec: v1alpha1.KameletSpec{
+			Spec: v1.KameletSpec{
 				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
 				}),
 			},
-			Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+			Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 		})
 
 	enabled, err := trait.Configure(environment)
@@ -492,33 +492,33 @@ func TestKameletConditionTrue(t *testing.T) {
 `
 	trait, environment := createKameletsTestEnvironment(
 		flow,
-		&v1alpha1.Kamelet{
+		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "timer",
 			},
-			Spec: v1alpha1.KameletSpec{
+			Spec: v1.KameletSpec{
 				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
 				}),
 			},
-			Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+			Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 		},
-		&v1alpha1.Kamelet{
+		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "none",
 			},
-			Spec: v1alpha1.KameletSpec{
+			Spec: v1.KameletSpec{
 				Template: templateOrFail(map[string]interface{}{
 					"from": map[string]interface{}{
 						"uri": "timer:tick",
 					},
 				}),
 			},
-			Status: v1alpha1.KameletStatus{Phase: v1alpha1.KameletPhaseReady},
+			Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 		})
 
 	enabled, err := trait.Configure(environment)
@@ -572,11 +572,11 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 	return trait, environment
 }
 
-func templateOrFail(template map[string]interface{}) *v1alpha1.Template {
+func templateOrFail(template map[string]interface{}) *v1.Template {
 	data, err := json.Marshal(template)
 	if err != nil {
 		panic(err)
 	}
-	t := v1alpha1.Template{RawMessage: data}
+	t := v1.Template{RawMessage: data}
 	return &t
 }

@@ -28,7 +28,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -178,8 +177,8 @@ func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) e
 	return nil
 }
 
-func (o *promoteCmdOptions) getBinding(c client.Client, name string) (*v1alpha1.Binding, error) {
-	it := v1alpha1.NewBinding(o.Namespace, name)
+func (o *promoteCmdOptions) getBinding(c client.Client, name string) (*v1.Binding, error) {
+	it := v1.NewBinding(o.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: o.Namespace,
@@ -423,7 +422,7 @@ func existsPv(ctx context.Context, c client.Client, name string, namespace strin
 }
 
 func existsKamelet(ctx context.Context, c client.Client, name string, namespace string) bool {
-	var obj v1alpha1.Kamelet
+	var obj v1.Kamelet
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: namespace,
@@ -446,8 +445,8 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	return &dst
 }
 
-func (o *promoteCmdOptions) editBinding(kb *v1alpha1.Binding, it *v1.Integration) *v1alpha1.Binding {
-	dst := v1alpha1.NewBinding(o.To, kb.Name)
+func (o *promoteCmdOptions) editBinding(kb *v1.Binding, it *v1.Integration) *v1.Binding {
+	dst := v1.NewBinding(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {

@@ -28,7 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -39,16 +39,16 @@ import (
 )
 
 var (
-	endpointTypeSourceContext = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSource}
-	endpointTypeSinkContext   = bindings.EndpointContext{Type: v1alpha1.EndpointTypeSink}
+	endpointTypeSourceContext = bindings.EndpointContext{Type: v1.EndpointTypeSource}
+	endpointTypeSinkContext   = bindings.EndpointContext{Type: v1.EndpointTypeSink}
 )
 
-func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1alpha1.Binding) (*v1.Integration, error) {
+func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Binding) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true
 	annotations := util.CopyMap(binding.Annotations)
 	// avoid propagating the icon to the integration as it's heavyweight and not needed
-	delete(annotations, v1alpha1.AnnotationIcon)
+	delete(annotations, v1.AnnotationIcon)
 
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
@@ -122,7 +122,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1alpha
 	for idx, step := range binding.Spec.Steps {
 		position := idx
 		stepBinding, err := bindings.Translate(bindingContext, bindings.EndpointContext{
-			Type:     v1alpha1.EndpointTypeAction,
+			Type:     v1.EndpointTypeAction,
 			Position: &position,
 		}, step)
 		if err != nil {
@@ -233,7 +233,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 	return nil
 }
 
-func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.Binding) (v1.TraitProfile, error) {
+func determineProfile(ctx context.Context, c client.Client, binding *v1.Binding) (v1.TraitProfile, error) {
 	if binding.Spec.Integration != nil && binding.Spec.Integration.Profile != "" {
 		return binding.Spec.Integration.Profile, nil
 	}

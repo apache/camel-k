@@ -29,16 +29,22 @@ import (
 
 type CamelV1Interface interface {
 	RESTClient() rest.Interface
+	BindingsGetter
 	BuildsGetter
 	CamelCatalogsGetter
 	IntegrationsGetter
 	IntegrationKitsGetter
 	IntegrationPlatformsGetter
+	KameletsGetter
 }
 
 // CamelV1Client is used to interact with features provided by the camel.apache.org group.
 type CamelV1Client struct {
 	restClient rest.Interface
+}
+
+func (c *CamelV1Client) Bindings(namespace string) BindingInterface {
+	return newBindings(c, namespace)
 }
 
 func (c *CamelV1Client) Builds(namespace string) BuildInterface {
@@ -59,6 +65,10 @@ func (c *CamelV1Client) IntegrationKits(namespace string) IntegrationKitInterfac
 
 func (c *CamelV1Client) IntegrationPlatforms(namespace string) IntegrationPlatformInterface {
 	return newIntegrationPlatforms(c, namespace)
+}
+
+func (c *CamelV1Client) Kamelets(namespace string) KameletInterface {
+	return newKamelets(c, namespace)
 }
 
 // NewForConfig creates a new CamelV1Client for the given config.

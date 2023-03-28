@@ -30,7 +30,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/trait"
 )
 
@@ -47,14 +46,14 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(binding *v1alpha1.Binding) bool {
-	return binding.Status.Phase == v1alpha1.BindingPhaseCreating ||
-		(binding.Status.Phase == v1alpha1.BindingPhaseError &&
-			binding.Status.GetCondition(v1alpha1.BindingIntegrationConditionError) == nil) ||
-		binding.Status.Phase == v1alpha1.BindingPhaseReady
+func (action *monitorAction) CanHandle(binding *v1.Binding) bool {
+	return binding.Status.Phase == v1.BindingPhaseCreating ||
+		(binding.Status.Phase == v1.BindingPhaseError &&
+			binding.Status.GetCondition(v1.BindingIntegrationConditionError) == nil) ||
+		binding.Status.Phase == v1.BindingPhaseReady
 }
 
-func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Binding) (*v1alpha1.Binding, error) {
+func (action *monitorAction) Handle(ctx context.Context, binding *v1.Binding) (*v1.Binding, error) {
 	key := client.ObjectKey{
 		Namespace: binding.Namespace,
 		Name:      binding.Name,
@@ -63,9 +62,9 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Bindi
 	if err := action.client.Get(ctx, key, &it); err != nil && k8serrors.IsNotFound(err) {
 		target := binding.DeepCopy()
 		// Rebuild the integration
-		target.Status.Phase = v1alpha1.BindingPhaseNone
+		target.Status.Phase = v1.BindingPhaseNone
 		target.Status.SetCondition(
-			v1alpha1.BindingConditionReady,
+			v1.BindingConditionReady,
 			corev1.ConditionFalse,
 			"",
 			"",
@@ -86,8 +85,8 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Bindi
 	// Check if the integration needs to be changed
 	expected, err := CreateIntegrationFor(ctx, action.client, binding)
 	if err != nil {
-		binding.Status.Phase = v1alpha1.BindingPhaseError
-		binding.Status.SetErrorCondition(v1alpha1.BindingIntegrationConditionError,
+		binding.Status.Phase = v1.BindingPhaseError
+		binding.Status.SetErrorCondition(v1.BindingIntegrationConditionError,
 			"Couldn't create an Integration custom resource", err)
 		return binding, err
 	}
@@ -104,9 +103,9 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Bindi
 		// Binding has changed and needs rebuild
 		target := binding.DeepCopy()
 		// Rebuild the integration
-		target.Status.Phase = v1alpha1.BindingPhaseNone
+		target.Status.Phase = v1.BindingPhaseNone
 		target.Status.SetCondition(
-			v1alpha1.BindingConditionReady,
+			v1.BindingConditionReady,
 			corev1.ConditionFalse,
 			"",
 			"",
@@ -120,18 +119,18 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Bindi
 	switch it.Status.Phase {
 
 	case v1.IntegrationPhaseRunning:
-		target.Status.Phase = v1alpha1.BindingPhaseReady
+		target.Status.Phase = v1.BindingPhaseReady
 		setBindingReadyCondition(target, &it)
 
 	case v1.IntegrationPhaseError:
-		target.Status.Phase = v1alpha1.BindingPhaseError
+		target.Status.Phase = v1.BindingPhaseError
 		setBindingReadyCondition(target, &it)
 
 	default:
-		target.Status.Phase = v1alpha1.BindingPhaseCreating
+		target.Status.Phase = v1.BindingPhaseCreating
 
-		c := v1alpha1.BindingCondition{
-			Type:    v1alpha1.BindingConditionReady,
+		c := v1.BindingCondition{
+			Type:    v1.BindingConditionReady,
 			Status:  corev1.ConditionFalse,
 			Reason:  string(target.Status.Phase),
 			Message: fmt.Sprintf("Integration %q is in %q phase", it.GetName(), target.Status.Phase),
@@ -154,15 +153,15 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Bindi
 	return target, nil
 }
 
-func setBindingReadyCondition(kb *v1alpha1.Binding, it *v1.Integration) {
+func setBindingReadyCondition(kb *v1.Binding, it *v1.Integration) {
 	if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
 		message := condition.Message
 		if message == "" {
 			message = fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status)
 		}
 
-		c := v1alpha1.BindingCondition{
-			Type:    v1alpha1.BindingConditionReady,
+		c := v1.BindingCondition{
+			Type:    v1.BindingConditionReady,
 			Status:  condition.Status,
 			Reason:  condition.Reason,
 			Message: message,
@@ -177,7 +176,7 @@ func setBindingReadyCondition(kb *v1alpha1.Binding, it *v1.Integration) {
 
 	} else {
 		kb.Status.SetCondition(
-			v1alpha1.BindingConditionReady,
+			v1.BindingConditionReady,
 			corev1.ConditionUnknown,
 			"",
 			fmt.Sprintf("Integration %q does not have a readiness condition", it.GetName()),
