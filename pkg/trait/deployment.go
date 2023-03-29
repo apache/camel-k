@@ -159,7 +159,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						v1.IntegrationLabel: e.Integration.Name,
-				},
+					},
 					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
