@@ -1700,6 +1700,16 @@ func CamelCatalogImage(ns, name string) func() string {
 	}
 }
 
+func CamelCatalogList(ns string) func() []v1.CamelCatalog {
+	return func() []v1.CamelCatalog {
+		lst := v1.NewCamelCatalogList()
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(err)
+		}
+		return lst.Items
+	}
+}
+
 func DeletePlatform(ns string) func() bool {
 	return func() bool {
 		pl := Platform(ns)()

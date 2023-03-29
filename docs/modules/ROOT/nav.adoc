@@ -1,6 +1,7 @@
 * xref:installation/installation.adoc[Installation]
 ** Kubernetes Platform
 *** xref:installation/platform/minikube.adoc[Minikube]
+*** xref:installation/platform/docker-desktop.adoc[Docker Desktop]
 *** xref:installation/platform/crc.adoc[CRC]
 *** xref:installation/platform/digitalocean.adoc[DigitalOcean]
 *** xref:installation/platform/gke.adoc[GKE]

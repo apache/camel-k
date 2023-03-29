@@ -62,6 +62,7 @@ func TestBasicUninstall(t *testing.T) {
 		Eventually(Configmap(ns, "camel-k-maven-settings")).Should(BeNil())
 		Eventually(OperatorPod(ns), TestTimeoutMedium).Should(BeNil())
 		Eventually(KameletList(ns), TestTimeoutMedium).Should(BeEmpty())
+		Eventually(CamelCatalogList(ns), TestTimeoutMedium).Should(BeEmpty())
 	})
 }
 
@@ -136,5 +137,19 @@ func TestUninstallSkipKamelets(t *testing.T) {
 		// on uninstall it should remove everything except kamelets
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-kamelets").Execute()).To(Succeed())
 		Eventually(KameletList(ns)).ShouldNot(BeEmpty())
+	})
+}
+
+func TestUninstallSkipCamelCatalogs(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		// a successful new installation
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(CamelCatalogList(ns)).ShouldNot(BeEmpty())
+		// on uninstall it should remove everything except camel catalogs
+		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles", "--skip-camel-catalogs").Execute()).To(Succeed())
+		Eventually(CamelCatalogList(ns)).ShouldNot(BeEmpty())
+
 	})
 }
