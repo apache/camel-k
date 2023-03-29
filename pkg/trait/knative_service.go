@@ -31,7 +31,6 @@ import (
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/label"
 )
 
 const (
@@ -256,7 +255,9 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: serving.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels:      label.AddLabels(e.Integration.Name),
+						Labels: map[string]string{
+							v1.IntegrationLabel: e.Integration.Name,
+						},
 						Annotations: revisionAnnotations,
 					},
 					Spec: serving.RevisionSpec{
