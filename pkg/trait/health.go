@@ -76,7 +76,7 @@ func (t *healthTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	if !pointer.BoolDeref(t.LivenessProbeEnabled, false) && !pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
+	if !pointer.BoolDeref(t.LivenessProbeEnabled, false) && !pointer.BoolDeref(t.ReadinessProbeEnabled, true) && !pointer.BoolDeref(t.StartupProbeEnabled, false) {
 		return nil
 	}
 
