@@ -54,6 +54,7 @@ var (
 )
 
 // +genclient
+// +kubebuilder:deprecatedversion:warning="v1apha1 is deprecated, please, use v1 instead"
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
 // +kubebuilder:subresource:status

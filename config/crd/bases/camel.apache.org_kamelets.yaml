@@ -750,6 +750,8 @@ spec:
       jsonPath: .status.phase
       name: Phase
       type: string
+    deprecated: true
+    deprecationWarning: v1apha1 is deprecated, please, use v1 instead
     name: v1alpha1
     schema:
       openAPIV3Schema:
