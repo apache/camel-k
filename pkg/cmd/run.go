@@ -699,11 +699,11 @@ func (o *runCmdOptions) convertOptionsToTraits(cmd *cobra.Command, c client.Clie
 		return err
 	}
 
-	if err := o.applyProperties(c); err != nil {
+	if err := o.applyProperties(c, o.Properties, "camel.properties"); err != nil {
 		return err
 	}
 
-	if err := o.applyBuildProperties(c); err != nil {
+	if err := o.applyProperties(c, o.BuildProperties, "builder.properties"); err != nil {
 		return err
 	}
 
@@ -743,36 +743,22 @@ func convertToTrait(value, traitParameter string) string {
 	return fmt.Sprintf("%s=%s", traitParameter, value)
 }
 
-func (o *runCmdOptions) applyProperties(c client.Client) error {
-	props, err := o.mergePropertiesWithPrecedence(c, o.Properties)
+func (o *runCmdOptions) applyProperties(c client.Client, items []string, traitName string) error {
+	if items == nil || len(items) == 0 {
+		return nil
+	}
+	props, err := o.mergePropertiesWithPrecedence(c, items)
 	if err != nil {
 		return err
 	}
 	for _, key := range props.Keys() {
-		kv := fmt.Sprintf("%s=%s", key, props.GetString(key, ""))
-		propsTraits, err := o.convertToTraitParameter(c, kv, "camel.properties")
+		val, _ := props.Get(key)
+		kv := fmt.Sprintf("%s=%s", key, val)
+		propsTraits, err := o.convertToTraitParameter(c, kv, traitName)
 		if err != nil {
 			return err
 		}
 		o.Traits = append(o.Traits, propsTraits...)
-	}
-
-	return nil
-}
-
-func (o *runCmdOptions) applyBuildProperties(c client.Client) error {
-	// convert each build configuration to a builder trait property
-	buildProps, err := o.mergePropertiesWithPrecedence(c, o.BuildProperties)
-	if err != nil {
-		return err
-	}
-	for _, key := range buildProps.Keys() {
-		kv := fmt.Sprintf("%s=%s", key, buildProps.GetString(key, ""))
-		buildPropsTraits, err := o.convertToTraitParameter(c, kv, "builder.properties")
-		if err != nil {
-			return err
-		}
-		o.Traits = append(o.Traits, buildPropsTraits...)
 	}
 
 	return nil
@@ -784,6 +770,7 @@ func (o *runCmdOptions) convertToTraitParameter(c client.Client, value, traitPar
 	if err != nil {
 		return nil, err
 	}
+	props.DisableExpansion = true
 	for _, k := range props.Keys() {
 		v, ok := props.Get(k)
 		if ok {
@@ -871,12 +858,15 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 
 func (o *runCmdOptions) mergePropertiesWithPrecedence(c client.Client, items []string) (*properties.Properties, error) {
 	loPrecedenceProps := properties.NewProperties()
+	loPrecedenceProps.DisableExpansion = true
 	hiPrecedenceProps := properties.NewProperties()
+	hiPrecedenceProps.DisableExpansion = true
 	for _, item := range items {
 		prop, err := o.extractProperties(c, item)
 		if err != nil {
 			return nil, err
 		}
+		prop.DisableExpansion = true
 		// We consider file, secret and config map props to have a lower priority versus single properties
 		if strings.HasPrefix(item, "file:") || strings.HasPrefix(item, "secret:") || strings.HasPrefix(item, "configmap:") {
 			loPrecedenceProps.Merge(prop)
