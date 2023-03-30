@@ -27,7 +27,7 @@ import (
 )
 
 // +genclient
-// +kubebuilder:deprecatedversion:warning="v1apha1 is deprecated, please, use v1 instead"
+// +kubebuilder:deprecatedversion:warning="v1apha1.KameletBinding is deprecated, please, use v1.Binding instead"
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=kameletbindings,scope=Namespaced,shortName=klb,categories=kamel;camel
 // +kubebuilder:subresource:status

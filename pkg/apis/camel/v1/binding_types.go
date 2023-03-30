@@ -24,7 +24,7 @@ import (
 
 // +genclient
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=bindings,scope=Namespaced,shortName=klb,categories=kamel;camel
+// +kubebuilder:resource:path=bindings,scope=Namespaced,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
 // +genclient:method=UpdateScale,verb=update,subresource=scale,input=k8s.io/api/autoscaling/v1.Scale,result=k8s.io/api/autoscaling/v1.Scale
