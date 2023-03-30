@@ -745,7 +745,7 @@ func convertToTrait(value, traitParameter string) string {
 }
 
 func (o *runCmdOptions) applyProperties(c client.Client, items []string, traitName string) error {
-	if items == nil || len(items) == 0 {
+	if len(items) == 0 {
 		return nil
 	}
 	props, err := o.mergePropertiesWithPrecedence(c, items)
