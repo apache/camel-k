@@ -29,7 +29,6 @@ import (
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/label"
 )
 
 type deploymentTrait struct {
@@ -158,7 +157,9 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels:      label.AddLabels(e.Integration.Name),
+					Labels: map[string]string{
+						v1.IntegrationLabel: e.Integration.Name,
+					},
 					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
