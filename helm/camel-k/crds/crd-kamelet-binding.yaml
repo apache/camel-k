@@ -48,7 +48,8 @@ spec:
       name: Replicas
       type: integer
     deprecated: true
-    deprecationWarning: v1apha1 is deprecated, please, use v1 instead
+    deprecationWarning: v1apha1.KameletBinding is deprecated, please, use v1.Binding
+      instead
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -8479,7 +8480,6 @@ spec:
                                     It implements Marshaler and Unmarshaler and can
                                     be used to delay JSON decoding or precompute a
                                     JSON encoding.
-                                  type: object
                                   x-kubernetes-preserve-unknown-fields: true
                                 name:
                                   type: string

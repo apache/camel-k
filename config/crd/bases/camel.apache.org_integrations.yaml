@@ -7465,7 +7465,6 @@ spec:
                                     It implements Marshaler and Unmarshaler and can
                                     be used to delay JSON decoding or precompute a
                                     JSON encoding.
-                                  type: object
                                   x-kubernetes-preserve-unknown-fields: true
                                 name:
                                   type: string
