@@ -12,7 +12,7 @@ require (
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structs v1.1.0
 	github.com/gertd/go-pluralize v0.2.1
-	github.com/go-logr/logr v1.2.3
+	github.com/go-logr/logr v1.2.4
 	github.com/google/go-containerregistry v0.13.0
 	github.com/google/go-github/v32 v32.1.0
 	github.com/google/uuid v1.3.0
