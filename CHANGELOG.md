@@ -11,11 +11,13 @@
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
 - Kamelet development using Camel DSL instead of YAML DSL [\#4174](https://github.com/apache/camel-k/issues/4174)
 - Default integrationPlatform created at operator startup dose not honor OPERATOR\_ID config [\#4167](https://github.com/apache/camel-k/issues/4167)
+- property with dollar sign and brackets replaced with emtpy value [\#4163](https://github.com/apache/camel-k/issues/4163)
 - Kamel cli reset/uninstall --all does not clean the camelcatalog [\#4160](https://github.com/apache/camel-k/issues/4160)
 - Unused parameter [\#4152](https://github.com/apache/camel-k/issues/4152)
 - + [\#4151](https://github.com/apache/camel-k/issues/4151)
 - Kamel run sample integration is failing to run [\#4150](https://github.com/apache/camel-k/issues/4150)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
+- How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 
 ## [2.0.0-nightly](https://github.com/apache/camel-k/tree/2.0.0-nightly) (2023-03-22)
