@@ -710,3 +710,67 @@ func TestIntegrationServiceAccountName(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Contains(t, output, "serviceAccountName: my-service-account")
 }
+
+func TestFileProperties(t *testing.T) {
+	var tmpFile1 *os.File
+	var err error
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile1.Close())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	key=${value}
+	#key2=value2
+	my.key=value
+	`), 0o400))
+
+	var tmpFile *os.File
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile.Close())
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
+		"-p", "file:"+tmpFile1.Name(),
+		"-o", "yaml",
+	)
+	assert.Nil(t, err)
+	assert.NotContains(t, output, "#key2")
+	assert.Contains(t, output, "my.key = value")
+	assert.Contains(t, output, "key = ${value}")
+}
+
+func TestPropertyShouldNotExpand(t *testing.T) {
+	var tmpFile1 *os.File
+	var err error
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile1.Close())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	key=${value}
+	`), 0o400))
+
+	var tmpFile *os.File
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile.Close())
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
+		"-o", "yaml",
+		"-p", "runtimeProp=${value}",
+		"--build-property", "buildProp=${value}",
+		"-p", "file:"+tmpFile1.Name(),
+	)
+	assert.Nil(t, err)
+	assert.Contains(t, output, "runtimeProp = ${value}")
+	assert.Contains(t, output, "buildProp = ${value}")
+	assert.Contains(t, output, "key = ${value}")
+}
