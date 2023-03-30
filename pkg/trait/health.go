@@ -99,7 +99,7 @@ func (t *healthTrait) Apply(e *Environment) error {
 	if pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
 		container.ReadinessProbe = t.newReadinessProbe(port, defaultReadinessProbePath)
 	}
-	if pointer.BoolDeref(t.StartupProbeEnabled, true) {
+	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
 		container.StartupProbe = t.newStartupProbe(port, defaultStartupProbePath)
 	}
 
