@@ -20,18 +20,22 @@ package cmd
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const cmdRebuild = "rebuild"
 
 // nolint: unparam
-func initializeRebuildCmdOptions(t *testing.T) (*rebuildCmdOptions, *cobra.Command, RootCmdOptions) {
+func initializeRebuildOptions(t *testing.T, initObjs ...runtime.Object) (*rebuildCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
-
-	options, rootCmd := kamelTestPreAddCommandInit()
+	fakeClient, err := test.NewFakeClient(initObjs...)
+	assert.Nil(t, err)
+	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
+	options.Namespace = "default"
 	rebuildCmdOptions := addTestRebuildCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
 
@@ -39,28 +43,82 @@ func initializeRebuildCmdOptions(t *testing.T) (*rebuildCmdOptions, *cobra.Comma
 }
 
 func addTestRebuildCmd(options RootCmdOptions, rootCmd *cobra.Command) *rebuildCmdOptions {
-	// add a testing version of rebuild Command
 	rebuildCmd, rebuildOptions := newCmdRebuild(&options)
-	rebuildCmd.RunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
-	rebuildCmd.PostRunE = func(c *cobra.Command, args []string) error {
-		return nil
-	}
 	rebuildCmd.Args = test.ArbitraryArgs
 	rootCmd.AddCommand(rebuildCmd)
 	return rebuildOptions
 }
 
 func TestRebuildNonExistingFlag(t *testing.T) {
-	_, rootCmd, _ := initializeRebuildCmdOptions(t)
+	_, rootCmd, _ := initializeRebuildOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRebuild, "--nonExistingFlag")
 	assert.NotNil(t, err)
 }
 
 func TestRebuildAllFlag(t *testing.T) {
-	rebuildCmdOptions, rootCmd, _ := initializeRebuildCmdOptions(t)
+	rebuildCmdOptions, rootCmd, _ := initializeRebuildOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRebuild, "--all")
 	assert.Nil(t, err)
 	assert.Equal(t, true, rebuildCmdOptions.RebuildAll)
+}
+
+func TestRebuildAllKameletBindingsAndIntegrations(t *testing.T) {
+	defaultIntegration := nominalIntegration("my-it-test")
+	defaultKB := nominalKameletBinding("my-kb-test")
+	itGeneratedByKlb := nominalIntegration("my-kb-test")
+	itGeneratedByKlb.Labels = map[string]string{
+		kubernetes.CamelCreatorLabelKind: "KameletBinding",
+	}
+
+	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
+	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "--all")
+	assert.Nil(t, err)
+	assert.Contains(t, output, "1 kamelet bindings have been rebuilt")
+	assert.Contains(t, output, "1 integrations have been rebuilt")
+}
+
+func TestRebuildNone(t *testing.T) {
+	defaultIntegration := nominalIntegration("my-it-test")
+	defaultKB := nominalKameletBinding("my-kb-test")
+	itGeneratedByKlb := nominalIntegration("my-kb-test")
+	itGeneratedByKlb.Labels = map[string]string{
+		kubernetes.CamelCreatorLabelKind: "KameletBinding",
+	}
+
+	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
+	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "my-missing")
+	assert.NotNil(t, err)
+	assert.NotContains(t, output, "have been rebuilt")
+	assert.Contains(t, output, "could not find kamelet binding my-missing in namespace default")
+	assert.Contains(t, output, "could not find integration my-missing in namespace default")
+}
+
+func TestRebuildKameletBindingOnly(t *testing.T) {
+	defaultIntegration := nominalIntegration("my-it-test")
+	defaultKB := nominalKameletBinding("my-kb-test")
+	itGeneratedByKlb := nominalIntegration("my-kb-test")
+	itGeneratedByKlb.Labels = map[string]string{
+		kubernetes.CamelCreatorLabelKind: "KameletBinding",
+	}
+
+	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
+	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "my-kb-test")
+	assert.Nil(t, err)
+	assert.Contains(t, output, "1 kamelet bindings have been rebuilt")
+	assert.NotContains(t, output, "1 integrations have been rebuilt")
+}
+
+func TestRebuildIntegrationOnly(t *testing.T) {
+	defaultIntegration := nominalIntegration("my-it-test")
+	defaultKB := nominalKameletBinding("my-kb-test")
+	itGeneratedByKlb := nominalIntegration("my-kb-test")
+	itGeneratedByKlb.Labels = map[string]string{
+		kubernetes.CamelCreatorLabelKind: "KameletBinding",
+	}
+
+	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
+	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "my-it-test")
+	assert.Nil(t, err)
+	assert.NotContains(t, output, "1 kamelet bindings have been rebuilt")
+	assert.Contains(t, output, "1 integrations have been rebuilt")
 }
