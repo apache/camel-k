@@ -20,7 +20,7 @@
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.microprofile.metrics.MicroProfileMetricsConstants;
+import org.apache.camel.component.micrometer.MicrometerConstants;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -51,27 +51,27 @@ public class Metrics extends RouteBuilder {
             .logStackTrace(false)
             .logExhausted(false)
             .log(LoggingLevel.ERROR, "Failed processing ${body}")
-            .to("microprofile-metrics:meter:camel-k-example-metrics-redelivery?mark=2")
+            .to("micrometer:counter:camel-k-example-metrics-redelivery?increment=2")
             // The 'error' meter
-            .to("microprofile-metrics:meter:camel-k-example-metrics-error");
+            .to("micrometer:counter:camel-k-example-metrics-error");
 
         from("timer:stream?period=1000")
             .routeId("unreliable-service")
             .setBody(header(Exchange.TIMER_COUNTER).prepend("event #"))
             .log("Processing ${body}...")
             // The 'generated' meter
-            .to("microprofile-metrics:meter:camel-k-example-metrics-generated")
+            .to("micrometer:counter:camel-k-example-metrics-generated")
             // TODO: replace with lookup by type as soon as CAMEL-15217 gets fixed
-            // The 'attempt' meter via @Metered interceptor
+            // The 'attempt' meter via @Counted interceptor
             .bean("service")
             .filter(header(Exchange.REDELIVERED))
                 .log(LoggingLevel.WARN, "Processed ${body} after ${header.CamelRedeliveryCounter} retries")
-                .setHeader(MicroProfileMetricsConstants.HEADER_METER_MARK, header(Exchange.REDELIVERY_COUNTER))
+                .setHeader(MicrometerConstants.HEADER_COUNTER_INCREMENT, header(Exchange.REDELIVERY_COUNTER))
                 // The 'redelivery' meter
-                .to("microprofile-metrics:meter:camel-k-example-metrics-redelivery")
+                .to("micrometer:counter:camel-k-example-metrics-redelivery")
             .end()
             .log("Successfully processed ${body}")
             // The 'success' meter
-            .to("microprofile-metrics:meter:camel-k-example-metrics-success");
+            .to("micrometer:counter:camel-k-example-metrics-success");
     }
 }

@@ -62,7 +62,7 @@ func TestPrometheusTrait(t *testing.T) {
 		if err != nil {
 			assert.Fail(t, err.Error())
 		}
-		assert.Contains(t, string(response), "camel.route.exchanges.total")
+		assert.Contains(t, string(response), "CamelExchangesTotal_total")
 	})
 
 	if ocp && createPodMonitor {
