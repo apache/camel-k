@@ -24,6 +24,9 @@ resources:
 - group: camel
   kind: Kamelet
   version: v1
+- group: camel
+  kind: KameletBinding
+  version: v1alpha1
 version: "3"
 plugins:
   go.sdk.operatorframework.io/v2-alpha: {}
