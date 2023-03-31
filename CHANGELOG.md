@@ -18,6 +18,7 @@
 - Kamel run sample integration is failing to run [\#4150](https://github.com/apache/camel-k/issues/4150)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
+- Private Registry With TLS  Can Not Work [\#3672](https://github.com/apache/camel-k/issues/3672)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 
 ## [2.0.0-nightly](https://github.com/apache/camel-k/tree/2.0.0-nightly) (2023-03-22)
