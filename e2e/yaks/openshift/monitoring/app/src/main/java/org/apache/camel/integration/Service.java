@@ -19,14 +19,10 @@ package org.apache.camel.integration;
 
 import java.util.Random;
 
+import io.micrometer.core.annotation.Counted;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.RuntimeExchangeException;
-
-import org.eclipse.microprofile.metrics.Gauge;
-import org.eclipse.microprofile.metrics.Meter;
-
-import org.eclipse.microprofile.metrics.annotation.Metered;
-import org.eclipse.microprofile.metrics.annotation.Metric;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -39,7 +35,7 @@ import javax.inject.Named;
 @io.quarkus.arc.Unremovable
 public class Service {
 
-	@Metered(name = "camel-k-example-metrics-attempt", absolute = true)
+	@Counted(value = "camel-k-example-metrics-attempt")
 	public void attempt(Exchange exchange) {
 		Random rand = new Random();
 		if (rand.nextDouble() < 0.5) {
