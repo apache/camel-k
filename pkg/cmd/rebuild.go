@@ -22,15 +22,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
 )
 
 func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdOptions) {
@@ -72,80 +68,11 @@ func (o *rebuildCmdOptions) validate(args []string) error {
 }
 
 func (o *rebuildCmdOptions) run(cmd *cobra.Command, args []string) error {
-	errKlbs := o.rebuildKameletBindingType(cmd, args)
-	errIts := o.rebuildIntegrationType(cmd, args)
-
-	if errIts != nil && errKlbs != nil {
-		return errors.Wrap(errIts, errKlbs.Error())
-	}
-
-	return nil
-}
-
-func (o *rebuildCmdOptions) rebuildKameletBindingType(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
 	}
-	var kameletBindings []v1alpha1.KameletBinding
-	if o.RebuildAll {
-		if kameletBindings, err = o.listAllKameletBindings(c); err != nil {
-			return err
-		}
-	} else if len(args) > 0 {
-		if kameletBindings, err = o.getKameletBindings(c, args); err != nil {
-			return err
-		}
-	}
 
-	if err = o.rebuildKameletBindings(c, kameletBindings); err != nil {
-		return err
-	}
-
-	fmt.Fprintln(cmd.OutOrStdout(), len(kameletBindings), "kamelet bindings have been rebuilt")
-	return nil
-}
-
-func (o *rebuildCmdOptions) listAllKameletBindings(c client.Client) ([]v1alpha1.KameletBinding, error) {
-	list := v1alpha1.NewKameletBindingList()
-	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve kamelet bindings from namespace %s", o.Namespace))
-	}
-	return list.Items, nil
-}
-
-func (o *rebuildCmdOptions) getKameletBindings(c client.Client, names []string) ([]v1alpha1.KameletBinding, error) {
-	klbs := make([]v1alpha1.KameletBinding, 0, len(names))
-	for _, n := range names {
-		klb := v1alpha1.NewKameletBinding(o.Namespace, n)
-		key := k8sclient.ObjectKey{
-			Name:      n,
-			Namespace: o.Namespace,
-		}
-		if err := c.Get(o.Context, key, &klb); err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("could not find kamelet binding %s in namespace %s", klb.Name, o.Namespace))
-		}
-		klbs = append(klbs, klb)
-	}
-	return klbs, nil
-}
-
-func (o *rebuildCmdOptions) rebuildKameletBindings(c k8sclient.StatusClient, kameletbindings []v1alpha1.KameletBinding) error {
-	for _, i := range kameletbindings {
-		klb := i
-		klb.Status = v1alpha1.KameletBindingStatus{}
-		if err := c.Status().Update(o.Context, &klb); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("could not rebuild kamelet binding %s in namespace %s", klb.Name, o.Namespace))
-		}
-	}
-	return nil
-}
-
-func (o *rebuildCmdOptions) rebuildIntegrationType(cmd *cobra.Command, args []string) error {
-	c, err := o.GetCmdClient()
-	if err != nil {
-		return err
-	}
 	var integrations []v1.Integration
 	if o.RebuildAll {
 		if integrations, err = o.listAllIntegrations(c); err != nil {
@@ -167,19 +94,7 @@ func (o *rebuildCmdOptions) rebuildIntegrationType(cmd *cobra.Command, args []st
 
 func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1.Integration, error) {
 	list := v1.NewIntegrationList()
-	// Integrations controlled by KameletBindings are not included
-	excludeItsFromKlbs, err := labels.NewRequirement(kubernetes.CamelCreatorLabelKind, selection.NotEquals, []string{
-		"KameletBinding",
-	})
-	if err != nil {
-		return list.Items, err
-	}
-	if err := c.List(o.Context, &list,
-		k8sclient.InNamespace(o.Namespace),
-		k8sclient.MatchingLabelsSelector{
-			Selector: labels.NewSelector().Add(*excludeItsFromKlbs),
-		},
-	); err != nil {
+	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
 	}
 	return list.Items, nil
@@ -196,10 +111,7 @@ func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]
 		if err := c.Get(o.Context, key, &it); err != nil {
 			return nil, errors.Wrap(err, fmt.Sprintf("could not find integration %s in namespace %s", it.Name, o.Namespace))
 		}
-		// Integrations controlled by KameletBindings are not included
-		if it.Labels[kubernetes.CamelCreatorLabelKind] != "KameletBinding" {
-			ints = append(ints, it)
-		}
+		ints = append(ints, it)
 	}
 	return ints, nil
 }
