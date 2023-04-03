@@ -20,11 +20,13 @@ package trait
 // The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
 // so that the endpoint can be scraped automatically, when using the Prometheus operator.
 //
-// The metrics are exposed using MicroProfile Metrics.
+// The metrics are exposed using Micrometer Metrics.
 //
 // WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
 // custom resource definition to be installed.
 // You can set `pod-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator.
+//
+// WARNING: By default the metrics API is not available in JSON
 //
 // The Prometheus trait is disabled by default.
 //
