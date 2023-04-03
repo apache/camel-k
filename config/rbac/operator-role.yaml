@@ -31,6 +31,8 @@ rules:
   - integrationplatforms
   - integrations
   - bindings
+  # Deprecated: kameletbindings CR
+  - kameletbindings
   - kamelets
   verbs:
   - create
@@ -56,6 +58,9 @@ rules:
   - integrations/status
   - bindings/status
   - bindings/scale
+  # Deprecated: kameletbindings CR
+  - kameletbindings/status
+  - kameletbindings/scale
   - kamelets/status
   verbs:
   - get

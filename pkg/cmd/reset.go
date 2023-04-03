@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -67,6 +68,12 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 			return
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), n, "bindings deleted from namespace", o.Namespace)
+
+		if n, err = o.deleteAllKameletBindings(c); err != nil {
+			fmt.Fprint(cmd.ErrOrStderr(), err)
+			return
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), n, "kameletbindings deleted from namespace", o.Namespace)
 	}
 
 	if !o.SkipIntegrations {
@@ -128,12 +135,26 @@ func (o *resetCmdOptions) deleteAllIntegrationKits(c client.Client) (int, error)
 func (o *resetCmdOptions) deleteAllBindings(c client.Client) (int, error) {
 	list := v1.NewBindingList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieveBindings from namespace %s", o.Namespace))
+		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve Bindings from namespace %s", o.Namespace))
 	}
 	for _, i := range list.Items {
 		klb := i
 		if err := c.Delete(o.Context, &klb); err != nil {
-			return 0, errors.Wrap(err, fmt.Sprintf("could not deleteBinding %s from namespace %s", klb.Name, klb.Namespace))
+			return 0, errors.Wrap(err, fmt.Sprintf("could not delete Binding %s from namespace %s", klb.Name, klb.Namespace))
+		}
+	}
+	return len(list.Items), nil
+}
+
+func (o *resetCmdOptions) deleteAllKameletBindings(c client.Client) (int, error) {
+	list := v1alpha1.NewKameletBindingList()
+	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
+		return 0, errors.Wrap(err, fmt.Sprintf("could not retrieve KameletBindings from namespace %s", o.Namespace))
+	}
+	for _, i := range list.Items {
+		klb := i
+		if err := c.Delete(o.Context, &klb); err != nil {
+			return 0, errors.Wrap(err, fmt.Sprintf("could not delete KameletBinding %s from namespace %s", klb.Name, klb.Namespace))
 		}
 	}
 	return len(list.Items), nil

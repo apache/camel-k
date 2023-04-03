@@ -34,6 +34,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -387,6 +388,21 @@ func BindingsHaveSameTraits(i1 *v1.Binding, i2 *v1.Binding) (bool, error) {
 	return Equals(c1, c2), nil
 }
 
+// KameletBindingsHaveSameTraits return if traits are the same.
+// Deprecated
+func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.KameletBinding) (bool, error) {
+	c1, err := NewTraitsOptionsForKameletBinding(i1)
+	if err != nil {
+		return false, err
+	}
+	c2, err := NewTraitsOptionsForKameletBinding(i2)
+	if err != nil {
+		return false, err
+	}
+
+	return Equals(c1, c2), nil
+}
+
 // IntegrationAndBindingSameTraits return if traits are the same.
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
@@ -396,6 +412,30 @@ func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1.Binding) (bool, 
 		return false, err
 	}
 	klbOpts, err := NewTraitsOptionsForBinding(i2)
+	if err != nil {
+		return false, err
+	}
+
+	toCompare := make(Options)
+	for k := range klbOpts {
+		if v, ok := itOpts[k]; ok {
+			toCompare[k] = v
+		}
+	}
+
+	return Equals(klbOpts, toCompare), nil
+}
+
+// IntegrationAndBindingSameTraits return if traits are the same.
+// The comparison is done for the subset of traits defines on the binding as during the trait processing,
+// some traits may be added to the Integration i.e. knative configuration in case of sink binding.
+// Deprecated
+func IntegrationAndKameletBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.KameletBinding) (bool, error) {
+	itOpts, err := NewTraitsOptionsForIntegration(i1)
+	if err != nil {
+		return false, err
+	}
+	klbOpts, err := NewTraitsOptionsForKameletBinding(i2)
 	if err != nil {
 		return false, err
 	}
@@ -479,6 +519,34 @@ func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options,
 }
 
 func NewTraitsOptionsForBinding(i *v1.Binding) (Options, error) {
+	if i.Spec.Integration != nil {
+		m1, err := ToTraitMap(i.Spec.Integration.Traits)
+		if err != nil {
+			return nil, err
+		}
+
+		m2, err := FromAnnotations(&i.ObjectMeta)
+		if err != nil {
+			return nil, err
+		}
+
+		for k, v := range m2 {
+			m1[k] = v
+		}
+
+		return m1, nil
+	}
+
+	m1, err := FromAnnotations(&i.ObjectMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	return m1, nil
+}
+
+// Deprecated
+func NewTraitsOptionsForKameletBinding(i *v1alpha1.KameletBinding) (Options, error) {
 	if i.Spec.Integration != nil {
 		m1, err := ToTraitMap(i.Spec.Integration.Traits)
 		if err != nil {

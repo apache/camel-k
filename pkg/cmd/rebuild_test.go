@@ -20,7 +20,6 @@ package cmd
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -64,65 +63,4 @@ func TestRebuildAllFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdRebuild, "--all")
 	assert.Nil(t, err)
 	assert.Equal(t, true, rebuildCmdOptions.RebuildAll)
-}
-
-func TestRebuildAllBindingsAndIntegrations(t *testing.T) {
-	defaultIntegration := nominalIntegration("my-it-test")
-	defaultKB := nominalBinding("my-kb-test-rebuild")
-	itGeneratedByKlb := nominalIntegration("my-kb-test-rebuild")
-	itGeneratedByKlb.Labels = map[string]string{
-		kubernetes.CamelCreatorLabelKind: "Binding",
-	}
-
-	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
-	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "--all")
-	assert.Nil(t, err)
-	assert.Contains(t, output, "1 bindings have been rebuilt")
-	assert.Contains(t, output, "1 integrations have been rebuilt")
-}
-
-func TestRebuildNone(t *testing.T) {
-	defaultIntegration := nominalIntegration("my-it-test")
-	defaultKB := nominalBinding("my-kb-test-rebuild")
-	itGeneratedByKlb := nominalIntegration("my-kb-test-rebuild")
-	itGeneratedByKlb.Labels = map[string]string{
-		kubernetes.CamelCreatorLabelKind: "Binding",
-	}
-
-	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
-	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "my-missing")
-	assert.NotNil(t, err)
-	assert.NotContains(t, output, "have been rebuilt")
-	assert.Contains(t, output, "could not find binding my-missing in namespace default")
-	assert.Contains(t, output, "could not find integration my-missing in namespace default")
-}
-
-func TestRebuildBindingOnly(t *testing.T) {
-	defaultIntegration := nominalIntegration("my-it-test")
-	defaultKB := nominalBinding("my-kb-test-rebuild")
-	itGeneratedByKlb := nominalIntegration("my-kb-test-rebuild")
-	itGeneratedByKlb.Labels = map[string]string{
-		kubernetes.CamelCreatorLabelKind: "Binding",
-	}
-
-	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
-	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "my-kb-test-rebuild")
-	assert.Nil(t, err)
-	assert.Contains(t, output, "1 bindings have been rebuilt")
-	assert.NotContains(t, output, "1 integrations have been rebuilt")
-}
-
-func TestRebuildIntegrationOnly(t *testing.T) {
-	defaultIntegration := nominalIntegration("my-it-test")
-	defaultKB := nominalBinding("my-kb-test-rebuild")
-	itGeneratedByKlb := nominalIntegration("my-kb-test-rebuild")
-	itGeneratedByKlb.Labels = map[string]string{
-		kubernetes.CamelCreatorLabelKind: "Binding",
-	}
-
-	_, rebuildCmd, _ := initializeRebuildOptions(t, &defaultIntegration, &defaultKB, &itGeneratedByKlb)
-	output, err := test.ExecuteCommand(rebuildCmd, cmdRebuild, "my-it-test")
-	assert.Nil(t, err)
-	assert.NotContains(t, output, "1 bindings have been rebuilt")
-	assert.Contains(t, output, "1 integrations have been rebuilt")
 }
