@@ -6,6 +6,10 @@
 
 **Closed issues:**
 
+- `KameletBinding` should own the related `Integration` [\#4219](https://github.com/apache/camel-k/issues/4219)
+- `kamel rebuild` does not rebuild integrations correctly [\#4218](https://github.com/apache/camel-k/issues/4218)
+- Validate error [\#4214](https://github.com/apache/camel-k/issues/4214)
+- `kamel rebuild` does not rebuild KameletBindings [\#4208](https://github.com/apache/camel-k/issues/4208)
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
 - Remove additional custom labels utility [\#4183](https://github.com/apache/camel-k/issues/4183)
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
