@@ -64,8 +64,8 @@ func TestRebuildAllFlag(t *testing.T) {
 
 func TestRebuildAllKameletBindingsAndIntegrations(t *testing.T) {
 	defaultIntegration := nominalIntegration("my-it-test")
-	defaultKB := nominalKameletBinding("my-kb-test-rebuild")
-	itGeneratedByKlb := nominalIntegration("my-kb-test-rebuild")
+	defaultKB := nominalKameletBinding("my-kb-test")
+	itGeneratedByKlb := nominalIntegration("my-kb-test")
 	itGeneratedByKlb.Labels = map[string]string{
 		kubernetes.CamelCreatorLabelKind: "KameletBinding",
 	}
