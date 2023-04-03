@@ -28,7 +28,7 @@ BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.25.6
-OPERATOR_SDK_VERSION := v1.26.1
+OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
 BASE_IMAGE := docker.io/eclipse-temurin:11
@@ -542,25 +542,15 @@ KUSTOMIZE=$(shell command -v kustomize 2> /dev/null)
 endif
 
 operator-sdk: detect-os
-ifeq (, $(shell command -v operator-sdk 2> /dev/null))
-	@{ \
+	@echo "####### Installing operator-sdk version $(OPERATOR_SDK_VERSION)..."
 	set -e ;\
 	curl \
-		-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
+		-s -L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
 		-o operator-sdk ; \
 	chmod +x operator-sdk ;\
 	mkdir -p $(GOBIN) ;\
-	mv operator-sdk $(GOBIN)/ ;\
-	}
+	mv operator-sdk $(GOBIN)/ ;
 OPERATOR_SDK=$(GOBIN)/operator-sdk
-else
-	@{ \
-	echo -n "operator-sdk already installed: "; \
-  operator-sdk version | sed -n 's/.*"v\([^"]*\)".*/\1/p'; \
-	echo " If this is less than $(OPERATOR_SDK_VERSION) then please consider moving it aside and allowing the approved version to be downloaded."; \
-	}
-OPERATOR_SDK=$(shell command -v operator-sdk 2> /dev/null)
-endif
 
 opm: detect-os
 ifeq (, $(shell command -v opm 2> /dev/null))
