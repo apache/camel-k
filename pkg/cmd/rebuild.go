@@ -22,14 +22,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 func newCmdRebuild(rootCmdOptions *RootCmdOptions) (*cobra.Command, *rebuildCmdOptions) {
@@ -71,76 +68,6 @@ func (o *rebuildCmdOptions) validate(args []string) error {
 }
 
 func (o *rebuildCmdOptions) run(cmd *cobra.Command, args []string) error {
-	errKlbs := o.rebuildBindingType(cmd, args)
-	errIts := o.rebuildIntegrationType(cmd, args)
-
-	if errIts != nil && errKlbs != nil {
-		return errors.Wrap(errIts, errKlbs.Error())
-	}
-
-	return nil
-}
-
-func (o *rebuildCmdOptions) rebuildBindingType(cmd *cobra.Command, args []string) error {
-	c, err := o.GetCmdClient()
-	if err != nil {
-		return err
-	}
-	var bindings []v1.Binding
-	if o.RebuildAll {
-		if bindings, err = o.listAllBindings(c); err != nil {
-			return err
-		}
-	} else if len(args) > 0 {
-		if bindings, err = o.getBindings(c, args); err != nil {
-			return err
-		}
-	}
-
-	if err = o.rebuildBindings(c, bindings); err != nil {
-		return err
-	}
-
-	fmt.Fprintln(cmd.OutOrStdout(), len(bindings), "bindings have been rebuilt")
-	return nil
-}
-
-func (o *rebuildCmdOptions) listAllBindings(c client.Client) ([]v1.Binding, error) {
-	list := v1.NewBindingList()
-	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve bindings from namespace %s", o.Namespace))
-	}
-	return list.Items, nil
-}
-
-func (o *rebuildCmdOptions) getBindings(c client.Client, names []string) ([]v1.Binding, error) {
-	klbs := make([]v1.Binding, 0, len(names))
-	for _, n := range names {
-		klb := v1.NewBinding(o.Namespace, n)
-		key := k8sclient.ObjectKey{
-			Name:      n,
-			Namespace: o.Namespace,
-		}
-		if err := c.Get(o.Context, key, &klb); err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("could not find binding %s in namespace %s", klb.Name, o.Namespace))
-		}
-		klbs = append(klbs, klb)
-	}
-	return klbs, nil
-}
-
-func (o *rebuildCmdOptions) rebuildBindings(c k8sclient.StatusClient, bindings []v1.Binding) error {
-	for _, i := range bindings {
-		klb := i
-		klb.Status = v1.BindingStatus{}
-		if err := c.Status().Update(o.Context, &klb); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("could not rebuild binding %s in namespace %s", klb.Name, o.Namespace))
-		}
-	}
-	return nil
-}
-
-func (o *rebuildCmdOptions) rebuildIntegrationType(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
@@ -166,19 +93,7 @@ func (o *rebuildCmdOptions) rebuildIntegrationType(cmd *cobra.Command, args []st
 
 func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1.Integration, error) {
 	list := v1.NewIntegrationList()
-	// Integrations controlled by Bindings are not included
-	excludeItsFromKlbs, err := labels.NewRequirement(kubernetes.CamelCreatorLabelKind, selection.NotEquals, []string{
-		"Binding",
-	})
-	if err != nil {
-		return list.Items, err
-	}
-	if err := c.List(o.Context, &list,
-		k8sclient.InNamespace(o.Namespace),
-		k8sclient.MatchingLabelsSelector{
-			Selector: labels.NewSelector().Add(*excludeItsFromKlbs),
-		},
-	); err != nil {
+	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
 	}
 	return list.Items, nil
@@ -195,10 +110,7 @@ func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]
 		if err := c.Get(o.Context, key, &it); err != nil {
 			return nil, errors.Wrap(err, fmt.Sprintf("could not find integration %s in namespace %s", it.Name, o.Namespace))
 		}
-		// Integrations controlled by Bindings are not included
-		if it.Labels[kubernetes.CamelCreatorLabelKind] != "Binding" {
-			ints = append(ints, it)
-		}
+		ints = append(ints, it)
 	}
 	return ints, nil
 }

@@ -15,12 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package kameletbinding
 
-import (
-	"github.com/apache/camel-k/v2/pkg/controller/kameletbinding"
-)
+import "github.com/apache/camel-k/v2/pkg/util/log"
 
-func init() {
-	addToManager = append(addToManager, kameletbinding.Add)
-}
+// Log --.
+var Log = log.Log.WithName("controller").WithName("kameletbinding")

@@ -28,6 +28,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -252,6 +253,37 @@ func NotifyBindingError(ctx context.Context, c client.Client, recorder record.Ev
 		return
 	}
 	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile Binding %s: %v", k.Name, err)
+}
+
+// NotifyKameletBindingUpdated automatically generates events when a KameletBinding changes.
+// Deprecated
+func NotifyKameletBindingUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.KameletBinding) {
+	if newResource == nil {
+		return
+	}
+	oldPhase := ""
+	var oldConditions []v1.ResourceCondition
+	if old != nil {
+		oldPhase = string(old.Status.Phase)
+		oldConditions = old.Status.GetConditions()
+	}
+	if newResource.Status.Phase != v1alpha1.KameletBindingPhaseNone {
+		notifyIfConditionUpdated(recorder, newResource, oldConditions, newResource.Status.GetConditions(), "KameletBinding", newResource.Name, ReasonBindingConditionChanged)
+	}
+	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "KameletBinding", newResource.Name, ReasonBindingPhaseUpdated, "")
+}
+
+// NotifyKameletBindingError automatically generates error events when the binding reconcile cycle phase has an error.
+// Deprecated
+func NotifyKameletBindingError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.KameletBinding, err error) {
+	k := old
+	if newResource != nil {
+		k = newResource
+	}
+	if k == nil {
+		return
+	}
+	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile KameletBinding %s: %v", k.Name, err)
 }
 
 // NotifyBuildUpdated automatically generates events when a build changes.
