@@ -25,6 +25,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -33,6 +34,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/remotecommand"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -58,6 +61,38 @@ func TestBasicInstallation(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+			// Check if file exists in operator pod
+			Expect(OperatorPod(ns)().Name).NotTo(Equal(""))
+			Expect(OperatorPod(ns)().Spec.Containers[0].Name).NotTo(Equal(""))
+
+			req := TestClient().CoreV1().RESTClient().Post().
+				Resource("pods").
+				Name(OperatorPod(ns)().Name).
+				Namespace(ns).
+				SubResource("exec").
+				Param("container", OperatorPod(ns)().Spec.Containers[0].Name)
+
+			req.VersionedParams(&corev1.PodExecOptions{
+				Container: OperatorPod(ns)().Spec.Containers[0].Name,
+				Command:   []string{"test", "-e", defaults.LocalRepository + "/org/apache/camel/k"},
+				Stdin:     false,
+				Stdout:    true,
+				Stderr:    true,
+				TTY:       false,
+			}, scheme.ParameterCodec)
+
+			exec, err := remotecommand.NewSPDYExecutor(TestClient().GetConfig(), "POST", req.URL())
+			Expect(err).To(BeNil())
+
+			// returns an error if file does not exists
+			execErr := exec.Stream(remotecommand.StreamOptions{
+				Stdout: os.Stdout,
+				Stderr: os.Stderr,
+				Tty:    false,
+			})
+			Expect(execErr).To(BeNil())
+
 		})
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
