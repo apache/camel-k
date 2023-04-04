@@ -150,7 +150,7 @@ func (l Logger) ForBinding(target *v1.Binding) Logger {
 }
 
 // ForKameletBinding --.
-// Deprecated: use ForBinding instead
+// Deprecated: use ForBinding instead.
 func (l Logger) ForKameletBinding(target *v1alpha1.KameletBinding) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,

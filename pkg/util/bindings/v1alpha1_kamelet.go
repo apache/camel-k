@@ -28,7 +28,7 @@ import (
 )
 
 // V1alpha1BindingConverter converts a reference to a Kamelet into a Camel URI.
-// Deprecated
+// Deprecated.
 type V1alpha1BindingConverter struct{}
 
 func (k V1alpha1BindingConverter) ID() string {

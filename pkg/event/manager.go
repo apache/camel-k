@@ -256,7 +256,7 @@ func NotifyBindingError(ctx context.Context, c client.Client, recorder record.Ev
 }
 
 // NotifyKameletBindingUpdated automatically generates events when a KameletBinding changes.
-// Deprecated
+// Deprecated.
 func NotifyKameletBindingUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.KameletBinding) {
 	if newResource == nil {
 		return
@@ -274,7 +274,7 @@ func NotifyKameletBindingUpdated(ctx context.Context, c client.Client, recorder 
 }
 
 // NotifyKameletBindingError automatically generates error events when the binding reconcile cycle phase has an error.
-// Deprecated
+// Deprecated.
 func NotifyKameletBindingError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1alpha1.KameletBinding, err error) {
 	k := old
 	if newResource != nil {

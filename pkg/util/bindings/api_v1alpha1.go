@@ -27,7 +27,7 @@ import (
 )
 
 // V1alpha1BindingProvider maps a Binding endpoint into Camel K resources.
-// Deprecated
+// Deprecated.
 type V1alpha1BindingProvider interface {
 	// ID returns the name of the binding provider
 	ID() string
@@ -39,7 +39,7 @@ type V1alpha1BindingProvider interface {
 
 // V1alpha1BindingContext --
 // nolint: containedctx
-// Deprecated
+// Deprecated.
 type V1alpha1BindingContext struct {
 	Ctx       context.Context
 	Client    client.Client
@@ -48,7 +48,7 @@ type V1alpha1BindingContext struct {
 }
 
 // V1alpha1EndpointContext --
-// Deprecated
+// Deprecated.
 type V1alpha1EndpointContext struct {
 	Type     v1alpha1.EndpointType
 	Position *int

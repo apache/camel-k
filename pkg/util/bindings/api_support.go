@@ -42,7 +42,7 @@ func (c EndpointContext) GenerateID() string {
 }
 
 // GenerateID generates an identifier based on the context type and its optional position.
-// Deprecated
+// Deprecated.
 func (c V1alpha1EndpointContext) GenerateID() string {
 	id := string(c.Type)
 	if c.Position != nil {
