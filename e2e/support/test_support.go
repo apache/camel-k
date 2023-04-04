@@ -73,6 +73,7 @@ import (
 	"github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/install"
@@ -1863,9 +1864,10 @@ func CRDs() func() []metav1.APIResource {
 			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
 			reflect.TypeOf(v1.Kamelet{}).Name(),
 			reflect.TypeOf(v1.Binding{}).Name(),
+			reflect.TypeOf(v1alpha1.KameletBinding{}).Name(),
 		}
 
-		versions := []string{"v1", "v1"}
+		versions := []string{"v1", "v1alpha1"}
 		present := []metav1.APIResource{}
 
 		for _, version := range versions {
