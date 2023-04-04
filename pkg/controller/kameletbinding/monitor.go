@@ -154,38 +154,6 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Kamel
 	return target, nil
 }
 
-func setBindingReadyCondition(kb *v1.Binding, it *v1.Integration) {
-	if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
-		message := condition.Message
-		if message == "" {
-			message = fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status)
-		}
-
-		c := v1.BindingCondition{
-			Type:    v1.BindingConditionReady,
-			Status:  condition.Status,
-			Reason:  condition.Reason,
-			Message: message,
-		}
-
-		if condition.Pods != nil {
-			c.Pods = make([]v1.PodCondition, 0, len(condition.Pods))
-			c.Pods = append(c.Pods, condition.Pods...)
-		}
-
-		kb.Status.SetConditions(c)
-
-	} else {
-		kb.Status.SetCondition(
-			v1.BindingConditionReady,
-			corev1.ConditionUnknown,
-			"",
-			fmt.Sprintf("Integration %q does not have a readiness condition", it.GetName()),
-		)
-	}
-}
-
-// Deprecated
 func setKameletBindingReadyCondition(kb *v1alpha1.KameletBinding, it *v1.Integration) {
 	if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
 		message := condition.Message

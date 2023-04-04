@@ -389,7 +389,7 @@ func BindingsHaveSameTraits(i1 *v1.Binding, i2 *v1.Binding) (bool, error) {
 }
 
 // KameletBindingsHaveSameTraits return if traits are the same.
-// Deprecated
+// Deprecated.
 func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.KameletBinding) (bool, error) {
 	c1, err := NewTraitsOptionsForKameletBinding(i1)
 	if err != nil {
@@ -429,7 +429,7 @@ func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1.Binding) (bool, 
 // IntegrationAndBindingSameTraits return if traits are the same.
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
-// Deprecated
+// Deprecated.
 func IntegrationAndKameletBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.KameletBinding) (bool, error) {
 	itOpts, err := NewTraitsOptionsForIntegration(i1)
 	if err != nil {
@@ -545,7 +545,7 @@ func NewTraitsOptionsForBinding(i *v1.Binding) (Options, error) {
 	return m1, nil
 }
 
-// Deprecated
+// Deprecated.
 func NewTraitsOptionsForKameletBinding(i *v1alpha1.KameletBinding) (Options, error) {
 	if i.Spec.Integration != nil {
 		m1, err := ToTraitMap(i.Spec.Integration.Traits)

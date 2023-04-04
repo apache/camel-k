@@ -27,7 +27,7 @@ import (
 
 var bindingProviders []BindingProvider
 
-// RegisterBindingProvider --
+// RegisterBindingProvider --.
 func RegisterBindingProvider(bp BindingProvider) {
 	bindingProviders = append(bindingProviders, bp)
 	sort.Slice(bindingProviders, func(i, j int) bool {
@@ -38,11 +38,11 @@ func RegisterBindingProvider(bp BindingProvider) {
 	})
 }
 
-// Deprecated
+// Deprecated.
 var v1alpha1BindingProviders []V1alpha1BindingProvider
 
 // V1alpha1RegisterBindingProvider --
-// Deprecated
+// Deprecated.
 func V1alpha1RegisterBindingProvider(bp V1alpha1BindingProvider) {
 	v1alpha1BindingProviders = append(v1alpha1BindingProviders, bp)
 	sort.Slice(v1alpha1BindingProviders, func(i, j int) bool {
@@ -81,7 +81,7 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 }
 
 // TranslateV1alpha1 execute all chained binding providers, returning the first success or the first error.
-// Deprecated
+// Deprecated.
 func TranslateV1alpha1(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, endpoint v1alpha1.Endpoint) (*Binding, error) {
 	if err := validateEndpointV1alpha1(ctx, endpoint); err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func TranslateV1alpha1(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointC
 	return nil, nil
 }
 
-// Deprecated
+// Deprecated.
 func validateEndpointV1alpha1(ctx V1alpha1BindingContext, e v1alpha1.Endpoint) error {
 	if e.Ref == nil && e.URI == nil {
 		return errors.New("no ref or URI specified in endpoint")
