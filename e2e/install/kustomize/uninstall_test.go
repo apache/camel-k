@@ -35,11 +35,13 @@ import (
 )
 
 func TestKustomizeUninstallBasic(t *testing.T) {
+	RegisterTestingT(t)
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
+	Eventually(CRDs()).Should(HaveLen(0))
 
 	// Return the cluster to previous state
 	defer Cleanup()
@@ -77,11 +79,13 @@ func TestKustomizeUninstallBasic(t *testing.T) {
 }
 
 func TestUninstallGlobal(t *testing.T) {
+	RegisterTestingT(t)
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
 	UninstallAll()
+	Eventually(CRDs()).Should(HaveLen(0))
 
 	// Return the cluster to previous state
 	defer Cleanup()

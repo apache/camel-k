@@ -36,8 +36,9 @@ import (
 const (
 	// v1.Build,          v1.Integration
 	// v1.IntegrationKit, v1.IntegrationPlatform
-	// v1.Kamelet,  v1.Binding
-	ExpectedCRDs = 6
+	// v1.Kamelet,  v1.Binding,
+	// v1alpha1.Kamelet, v1alpha1.KameletBinding
+	ExpectedCRDs = 8
 
 	// camel-k-operator,             camel-k-operator-events,
 	// camel-k-operator-knative,     camel-k-operator-leases,
