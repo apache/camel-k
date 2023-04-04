@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- duplicate routeId issue [\#4225](https://github.com/apache/camel-k/issues/4225)
 - `KameletBinding` should own the related `Integration` [\#4219](https://github.com/apache/camel-k/issues/4219)
 - `kamel rebuild` does not rebuild integrations correctly [\#4218](https://github.com/apache/camel-k/issues/4218)
+- Local file in unit test leftover [\#4217](https://github.com/apache/camel-k/issues/4217)
 - Validate error [\#4214](https://github.com/apache/camel-k/issues/4214)
 - `kamel rebuild` does not rebuild KameletBindings [\#4208](https://github.com/apache/camel-k/issues/4208)
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
@@ -24,6 +26,7 @@
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
 - Private Registry With TLS  Can Not Work [\#3672](https://github.com/apache/camel-k/issues/3672)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
+- Default to using Micrometer for integration monitoring [\#1773](https://github.com/apache/camel-k/issues/1773)
 
 ## [2.0.0-nightly](https://github.com/apache/camel-k/tree/2.0.0-nightly) (2023-03-22)
 
