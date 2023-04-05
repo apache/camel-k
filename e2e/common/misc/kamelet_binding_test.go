@@ -122,13 +122,13 @@ func TestBinding(t *testing.T) {
 	// Binding with wrong spec
 	t.Run("test Binding with wrong spec", func(t *testing.T) {
 		name := "bad-klb"
-		kb := v1.NewBinding(ns, name)
-		kb.Spec = v1.BindingSpec{}
+		kb := v1.NewPipe(ns, name)
+		kb.Spec = v1.PipeSpec{}
 		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
 		Eventually(err).Should(BeNil())
-		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.BindingPhaseError))
-		Eventually(BindingConditionStatus(ns, name, v1.BindingConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
-		Eventually(BindingCondition(ns, name, v1.BindingIntegrationConditionError), TestTimeoutShort).Should(
+		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
+		Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
+		Eventually(BindingCondition(ns, name, v1.PipeIntegrationConditionError), TestTimeoutShort).Should(
 			WithTransform(BindingConditionMessage, And(
 				ContainSubstring("could not determine source URI"),
 				ContainSubstring("no ref or URI specified in endpoint"),

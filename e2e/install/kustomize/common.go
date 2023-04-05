@@ -36,7 +36,7 @@ import (
 const (
 	// v1.Build,          v1.Integration
 	// v1.IntegrationKit, v1.IntegrationPlatform
-	// v1.Kamelet,  v1.Binding,
+	// v1.Kamelet,  v1.Pipe,
 	// v1alpha1.Kamelet, v1alpha1.KameletBinding
 	ExpectedCRDs = 8
 

@@ -53,7 +53,7 @@ func TestBindingScale(t *testing.T) {
 	Expect(KamelBindWithID(operatorID, ns, "timer-source?message=HelloBinding", "log-sink", "--name", name).Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(BindingConditionStatus(ns, name, v1.BindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("HelloBinding"))
 
 	t.Run("Update binding scale spec", func(t *testing.T) {
@@ -69,7 +69,7 @@ func TestBindingScale(t *testing.T) {
 		// Check the readiness condition becomes truthy back
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 		// Finally check the readiness condition becomes truthy back onBinding
-		Eventually(BindingConditionStatus(ns, name, v1.BindingConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 	})
 
 	t.Run("ScaleBinding with polymorphic client", func(t *testing.T) {
@@ -82,7 +82,7 @@ func TestBindingScale(t *testing.T) {
 		Expect(err).To(BeNil())
 
 		// Check the readiness condition is still truthy as down-scaling
-		Expect(BindingConditionStatus(ns, name, v1.BindingConditionReady)()).To(Equal(corev1.ConditionTrue))
+		Expect(BindingConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
 		// Check the Integration scale subresource Spec field
 		Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 2)))
@@ -101,18 +101,18 @@ func TestBindingScale(t *testing.T) {
 		Expect(err).To(BeNil())
 
 		// Getter
-		bindingScale, err := camel.CamelV1().Bindings(ns).GetScale(TestContext, name, metav1.GetOptions{})
+		bindingScale, err := camel.CamelV1().Pipes(ns).GetScale(TestContext, name, metav1.GetOptions{})
 		Expect(err).To(BeNil())
 		Expect(bindingScale.Spec.Replicas).To(BeNumerically("==", 2))
 		Expect(bindingScale.Status.Replicas).To(BeNumerically("==", 2))
 
 		// Setter
 		bindingScale.Spec.Replicas = 1
-		_, err = camel.CamelV1().Bindings(ns).UpdateScale(TestContext, name, bindingScale, metav1.UpdateOptions{})
+		_, err = camel.CamelV1().Pipes(ns).UpdateScale(TestContext, name, bindingScale, metav1.UpdateOptions{})
 		Expect(err).To(BeNil())
 
 		// Check the readiness condition is still truthy as down-scaling inBinding
-		Expect(BindingConditionStatus(ns, name, v1.BindingConditionReady)()).To(Equal(corev1.ConditionTrue))
+		Expect(BindingConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
 		// Check the Binding scale subresource Spec field
 		Eventually(BindingSpecReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 1)))

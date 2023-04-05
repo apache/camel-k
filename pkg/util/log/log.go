@@ -139,8 +139,8 @@ func (l Logger) ForKamelet(target *v1.Kamelet) Logger {
 	)
 }
 
-// ForBinding --.
-func (l Logger) ForBinding(target *v1.Binding) Logger {
+// ForPipe --.
+func (l Logger) ForPipe(target *v1.Pipe) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,

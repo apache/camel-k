@@ -33,59 +33,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// BindingInformer provides access to a shared informer and lister for
-// Bindings.
-type BindingInformer interface {
+// PipeInformer provides access to a shared informer and lister for
+// Pipes.
+type PipeInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1.BindingLister
+	Lister() v1.PipeLister
 }
 
-type bindingInformer struct {
+type pipeInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewBindingInformer constructs a new informer for Binding type.
+// NewPipeInformer constructs a new informer for Pipe type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredBindingInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewPipeInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredPipeInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredBindingInformer constructs a new informer for Binding type.
+// NewFilteredPipeInformer constructs a new informer for Pipe type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredPipeInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().Bindings(namespace).List(context.TODO(), options)
+				return client.CamelV1().Pipes(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CamelV1().Bindings(namespace).Watch(context.TODO(), options)
+				return client.CamelV1().Pipes(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&camelv1.Binding{},
+		&camelv1.Pipe{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *bindingInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *pipeInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredPipeInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *bindingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&camelv1.Binding{}, f.defaultInformer)
+func (f *pipeInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&camelv1.Pipe{}, f.defaultInformer)
 }
 
-func (f *bindingInformer) Lister() v1.BindingLister {
-	return v1.NewBindingLister(f.Informer().GetIndexer())
+func (f *pipeInformer) Lister() v1.PipeLister {
+	return v1.NewPipeLister(f.Informer().GetIndexer())
 }

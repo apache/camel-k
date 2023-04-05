@@ -71,7 +71,7 @@ func TestKameletChange(t *testing.T) {
 	Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hello"))
 
-	Eventually(BindingCondition(ns, timerBinding, v1.BindingConditionReady), TestTimeoutMedium).Should(And(
+	Eventually(BindingCondition(ns, timerBinding, v1.PipeConditionReady), TestTimeoutMedium).Should(And(
 		WithTransform(BindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
 		WithTransform(BindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
 		WithTransform(BindingConditionMessage, Equal(fmt.Sprintf("1/1 ready replicas"))),
@@ -84,7 +84,7 @@ func TestKameletChange(t *testing.T) {
 	Eventually(IntegrationConditionStatus(ns, "timer-binding", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
 
-	Eventually(BindingCondition(ns, timerBinding, v1.BindingConditionReady), TestTimeoutMedium).
+	Eventually(BindingCondition(ns, timerBinding, v1.PipeConditionReady), TestTimeoutMedium).
 		Should(And(
 			WithTransform(BindingConditionStatusExtract, Equal(corev1.ConditionTrue)),
 			WithTransform(BindingConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),

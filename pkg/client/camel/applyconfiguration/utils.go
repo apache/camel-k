@@ -38,14 +38,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.ArtifactApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BaseTask"):
 		return &camelv1.BaseTaskApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("Binding"):
-		return &camelv1.BindingApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("BindingCondition"):
-		return &camelv1.BindingConditionApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("BindingSpec"):
-		return &camelv1.BindingSpecApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("BindingStatus"):
-		return &camelv1.BindingStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Build"):
 		return &camelv1.BuildApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuildahTask"):
@@ -168,6 +160,14 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.MavenBuildSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("MavenSpec"):
 		return &camelv1.MavenSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("Pipe"):
+		return &camelv1.PipeApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("PipeCondition"):
+		return &camelv1.PipeConditionApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("PipeSpec"):
+		return &camelv1.PipeSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("PipeStatus"):
+		return &camelv1.PipeStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("PodCondition"):
 		return &camelv1.PodConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("PodSpec"):

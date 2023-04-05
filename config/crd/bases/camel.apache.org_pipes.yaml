@@ -1,45 +1,28 @@
-# ---------------------------------------------------------------------------
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ---------------------------------------------------------------------------
 
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.1
   creationTimestamp: null
-  labels:
-    app: camel-k
-  name: kameletbindings.camel.apache.org
+  name: pipes.camel.apache.org
 spec:
   group: camel.apache.org
   names:
     categories:
     - kamel
     - camel
-    kind: KameletBinding
-    listKind: KameletBindingList
-    plural: kameletbindings
+    kind: Pipe
+    listKind: PipeList
+    plural: pipes
     shortNames:
-    - klb
-    singular: kameletbinding
+    - pp
+    singular: pipe
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The Kamelet Binding phase
+    - description: The Pipe phase
       jsonPath: .status.phase
       name: Phase
       type: string
@@ -47,13 +30,10 @@ spec:
       jsonPath: .status.replicas
       name: Replicas
       type: integer
-    deprecated: true
-    deprecationWarning: v1apha1.KameletBinding is deprecated, please, use v1.Pipe
-      instead
-    name: v1alpha1
+    name: v1
     schema:
       openAPIV3Schema:
-        description: KameletBinding is the Schema for the kamelets binding API
+        description: Pipe is the Schema for the Pipe API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -68,7 +48,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: the specification of a KameletBinding
+            description: the specification of a Pipe
             properties:
               errorHandler:
                 description: ErrorHandler is an optional handler called upon an error
@@ -7692,15 +7672,15 @@ spec:
                     type: object
                 type: object
               replicas:
-                description: Replicas is the number of desired replicas for the binding
+                description: Replicas is the number of desired replicas for the Pipe
                 format: int32
                 type: integer
               serviceAccountName:
-                description: Custom SA to use for the binding
+                description: Custom SA to use for the Pipe
                 type: string
               sink:
                 description: Sink is the destination of the integration defined by
-                  this binding
+                  this Pipe
                 properties:
                   dataTypes:
                     additionalProperties:
@@ -7935,7 +7915,7 @@ spec:
                 type: object
               source:
                 description: Source is the starting point of the integration defined
-                  by this binding
+                  by this Pipe
                 properties:
                   dataTypes:
                     additionalProperties:
@@ -8413,13 +8393,13 @@ spec:
                 type: array
             type: object
           status:
-            description: the status of a KameletBinding
+            description: the status of a Pipe
             properties:
               conditions:
                 description: Conditions --
                 items:
-                  description: KameletBindingCondition describes the state of a resource
-                    at a certain point.
+                  description: PipeCondition describes the state of a resource at
+                    a certain point.
                   properties:
                     lastTransitionTime:
                       description: Last time the condition transitioned from one status
@@ -8500,7 +8480,7 @@ spec:
                       description: Status of the condition, one of True, False, Unknown.
                       type: string
                     type:
-                      description: Type of kameletBinding condition.
+                      description: Type of pipe condition.
                       type: string
                   required:
                   - status
@@ -8509,18 +8489,18 @@ spec:
                 type: array
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
-                  for this KameletBinding.
+                  for this Pipe.
                 format: int64
                 type: integer
               phase:
                 description: Phase --
                 type: string
               replicas:
-                description: Replicas is the number of actual replicas of the binding
+                description: Replicas is the number of actual replicas of the pipe
                 format: int32
                 type: integer
               selector:
-                description: Selector allows to identify pods belonging to the binding
+                description: Selector allows to identify pods belonging to the pipe
                 type: string
             type: object
         type: object
@@ -8532,3 +8512,9 @@ spec:
         specReplicasPath: .spec.replicas
         statusReplicasPath: .status.replicas
       status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

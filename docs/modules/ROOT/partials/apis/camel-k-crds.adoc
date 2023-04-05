@@ -5,48 +5,6 @@ Package v1 contains API Schema definitions for the camel v1 API group
 
 ==  Resource Types
 
-[#_camel_apache_org_v1_Binding]
-=== Binding
-
-Binding is the Schema for the kamelets binding API
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`apiVersion` +
-string
-|`camel.apache.org/v1`
-
-|`kind` +
-string
-|`Binding`
-|`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
-|
-
-
-
-
-Refer to the Kubernetes API documentation for the fields of the `metadata` field.
-|`spec` +
-*xref:#_camel_apache_org_v1_BindingSpec[BindingSpec]*
-|
-
-
-the specification of a Binding
-
-|`status` +
-*xref:#_camel_apache_org_v1_BindingStatus[BindingStatus]*
-|
-
-
-the status of a Binding
-
-
-|===
-
 [#_camel_apache_org_v1_Build]
 === Build
 
@@ -305,6 +263,48 @@ the actual status of the resource
 
 |===
 
+[#_camel_apache_org_v1_Pipe]
+=== Pipe
+
+Pipe is the Schema for the Pipe API
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`Pipe`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_PipeSpec[PipeSpec]*
+|
+
+
+the specification of a Pipe
+
+|`status` +
+*xref:#_camel_apache_org_v1_PipeStatus[PipeStatus]*
+|
+
+
+the status of a Pipe
+
+
+|===
+
 == Internal Types
 
 [#_camel_apache_org_v1_AddonTrait]
@@ -422,210 +422,6 @@ BeanProperties represent an unstructured object properties to be set on a bean
 
 
 
-
-
-|===
-
-[#_camel_apache_org_v1_BindingCondition]
-=== BindingCondition
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_BindingStatus, BindingStatus>>
-
-BindingCondition describes the state of a resource at a certain point.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`type` +
-*xref:#_camel_apache_org_v1_BindingConditionType[BindingConditionType]*
-|
-
-
-Type of binding condition.
-
-|`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
-|
-
-
-Status of the condition, one of True, False, Unknown.
-
-|`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-The last time this condition was updated.
-
-|`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
-|
-
-
-Last time the condition transitioned from one status to another.
-
-|`reason` +
-string
-|
-
-
-The reason for the condition's last transition.
-
-|`message` +
-string
-|
-
-
-A human readable message indicating details about the transition.
-
-|`pods` +
-*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
-|
-
-
-Pods collect health and conditions information from the owned PODs
-
-
-|===
-
-[#_camel_apache_org_v1_BindingConditionType]
-=== BindingConditionType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_BindingCondition, BindingCondition>>
-
-BindingConditionType --
-
-
-[#_camel_apache_org_v1_BindingPhase]
-=== BindingPhase(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_BindingStatus, BindingStatus>>
-
-BindingPhase --
-
-
-[#_camel_apache_org_v1_BindingSpec]
-=== BindingSpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_Binding, Binding>>
-
-BindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`integration` +
-*xref:#_camel_apache_org_v1_IntegrationSpec[IntegrationSpec]*
-|
-
-
-Integration is an optional integration used to specify custom parameters
-
-|`source` +
-*xref:#_camel_apache_org_v1_Endpoint[Endpoint]*
-|
-
-
-Source is the starting point of the integration defined by this binding
-
-|`sink` +
-*xref:#_camel_apache_org_v1_Endpoint[Endpoint]*
-|
-
-
-Sink is the destination of the integration defined by this binding
-
-|`errorHandler` +
-*xref:#_camel_apache_org_v1_ErrorHandlerSpec[ErrorHandlerSpec]*
-|
-
-
-ErrorHandler is an optional handler called upon an error occuring in the integration
-
-|`steps` +
-*xref:#_camel_apache_org_v1_Endpoint[[\]Endpoint]*
-|
-
-
-Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
-
-|`replicas` +
-int32
-|
-
-
-Replicas is the number of desired replicas for the binding
-
-|`serviceAccountName` +
-string
-|
-
-
-Custom SA to use for the binding
-
-
-|===
-
-[#_camel_apache_org_v1_BindingStatus]
-=== BindingStatus
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_Binding, Binding>>
-
-BindingStatus specify the status of a binding
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`observedGeneration` +
-int64
-|
-
-
-ObservedGeneration is the most recent generation observed for this Binding.
-
-|`phase` +
-*xref:#_camel_apache_org_v1_BindingPhase[BindingPhase]*
-|
-
-
-Phase --
-
-|`conditions` +
-*xref:#_camel_apache_org_v1_BindingCondition[[\]BindingCondition]*
-|
-
-
-Conditions --
-
-|`replicas` +
-int32
-|
-
-
-Replicas is the number of actual replicas of the binding
-
-|`selector` +
-string
-|
-
-
-Selector allows to identify pods belonging to the binding
 
 
 |===
@@ -1687,8 +1483,8 @@ one to many header specifications
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_BindingSpec, BindingSpec>>
 * <<#_camel_apache_org_v1_ErrorHandlerSink, ErrorHandlerSink>>
+* <<#_camel_apache_org_v1_PipeSpec, PipeSpec>>
 
 Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI)
 
@@ -1876,7 +1672,7 @@ ErrorHandlerSink represents a sink error handler type which behave like a dead l
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_BindingSpec, BindingSpec>>
+* <<#_camel_apache_org_v1_PipeSpec, PipeSpec>>
 
 ErrorHandlerSpec represents an unstructured object for an error handler
 
@@ -2969,7 +2765,7 @@ generic information related to the build of Camel K operator software
 *Appears on:*
 
 * <<#_camel_apache_org_v1_Integration, Integration>>
-* <<#_camel_apache_org_v1_BindingSpec, BindingSpec>>
+* <<#_camel_apache_org_v1_PipeSpec, PipeSpec>>
 
 IntegrationSpec specifies the configuration of an Integration.
 The Integration will be watched by the operator which will be in charge to run the related application, according to the configuration specified.
@@ -4000,6 +3796,210 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 
 |===
 
+[#_camel_apache_org_v1_PipeCondition]
+=== PipeCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PipeStatus, PipeStatus>>
+
+PipeCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_PipeConditionType[PipeConditionType]*
+|
+
+
+Type of pipe condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human readable message indicating details about the transition.
+
+|`pods` +
+*xref:#_camel_apache_org_v1_PodCondition[[\]PodCondition]*
+|
+
+
+Pods collect health and conditions information from the owned PODs
+
+
+|===
+
+[#_camel_apache_org_v1_PipeConditionType]
+=== PipeConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PipeCondition, PipeCondition>>
+
+PipeConditionType --
+
+
+[#_camel_apache_org_v1_PipePhase]
+=== PipePhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PipeStatus, PipeStatus>>
+
+PipePhase --
+
+
+[#_camel_apache_org_v1_PipeSpec]
+=== PipeSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Pipe, Pipe>>
+
+PipeSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`integration` +
+*xref:#_camel_apache_org_v1_IntegrationSpec[IntegrationSpec]*
+|
+
+
+Integration is an optional integration used to specify custom parameters
+
+|`source` +
+*xref:#_camel_apache_org_v1_Endpoint[Endpoint]*
+|
+
+
+Source is the starting point of the integration defined by this Pipe
+
+|`sink` +
+*xref:#_camel_apache_org_v1_Endpoint[Endpoint]*
+|
+
+
+Sink is the destination of the integration defined by this Pipe
+
+|`errorHandler` +
+*xref:#_camel_apache_org_v1_ErrorHandlerSpec[ErrorHandlerSpec]*
+|
+
+
+ErrorHandler is an optional handler called upon an error occuring in the integration
+
+|`steps` +
+*xref:#_camel_apache_org_v1_Endpoint[[\]Endpoint]*
+|
+
+
+Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
+
+|`replicas` +
+int32
+|
+
+
+Replicas is the number of desired replicas for the Pipe
+
+|`serviceAccountName` +
+string
+|
+
+
+Custom SA to use for the Pipe
+
+
+|===
+
+[#_camel_apache_org_v1_PipeStatus]
+=== PipeStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Pipe, Pipe>>
+
+PipeStatus specify the status of a Pipe
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Pipe.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_PipePhase[PipePhase]*
+|
+
+
+Phase --
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_PipeCondition[[\]PipeCondition]*
+|
+
+
+Conditions --
+
+|`replicas` +
+int32
+|
+
+
+Replicas is the number of actual replicas of the pipe
+
+|`selector` +
+string
+|
+
+
+Selector allows to identify pods belonging to the pipe
+
+
+|===
+
 [#_camel_apache_org_v1_PluginProperties]
 === PluginProperties(`map[string]github.com/apache/camel-k/v2/pkg/apis/camel/v1.StringOrProperties` alias)
 
@@ -4011,8 +4011,8 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_BindingCondition, BindingCondition>>
 * <<#_camel_apache_org_v1_IntegrationCondition, IntegrationCondition>>
+* <<#_camel_apache_org_v1_PipeCondition, PipeCondition>>
 
 
 

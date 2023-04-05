@@ -15,9 +15,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package binding
+package pipe
 
-import "github.com/apache/camel-k/v2/pkg/util/log"
+import (
+	"context"
 
-// Log --.
-var Log = log.Log.WithName("controller").WithName("binding")
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/log"
+)
+
+// Action --.
+type Action interface {
+	client.Injectable
+	log.Injectable
+
+	// a user friendly name for the action
+	Name() string
+
+	// returns true if the action can handle the Pipe
+	CanHandle(kamelet *v1.Pipe) bool
+
+	// executes the handling function
+	Handle(ctx context.Context, kamelet *v1.Pipe) (*v1.Pipe, error)
+}
+
+type baseAction struct {
+	client client.Client
+	L      log.Logger
+}
+
+func (action *baseAction) InjectClient(client client.Client) {
+	action.client = client
+}
+
+func (action *baseAction) InjectLogger(log log.Logger) {
+	action.L = log
+}

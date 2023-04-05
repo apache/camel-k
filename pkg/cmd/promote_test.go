@@ -113,7 +113,7 @@ func nominalIntegration(name string) v1.Integration {
 	return it
 }
 
-func TestBindingDryRun(t *testing.T) {
+func TestPipeDryRun(t *testing.T) {
 	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	srcPlatform.Status.Version = defaults.Version
 	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
@@ -122,7 +122,7 @@ func TestBindingDryRun(t *testing.T) {
 	dstPlatform.Status.Version = defaults.Version
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
-	defaultKB := nominalBinding("my-kb-test")
+	defaultKB := nominalPipe("my-kb-test")
 	defaultIntegration := nominalIntegration("my-kb-test")
 	srcCatalog := createCamelCatalog(srcPlatform)
 	dstCatalog := createCamelCatalog(dstPlatform)
@@ -132,7 +132,7 @@ func TestBindingDryRun(t *testing.T) {
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Binding
+kind: Pipe
 metadata:
   creationTimestamp: null
   name: my-kb-test
@@ -149,9 +149,9 @@ status: {}
 `, output)
 }
 
-func nominalBinding(name string) v1.Binding {
-	kb := v1.NewBinding("default", name)
-	kb.Status.Phase = v1.BindingPhaseReady
+func nominalPipe(name string) v1.Pipe {
+	kb := v1.NewPipe("default", name)
+	kb.Status.Phase = v1.PipePhaseReady
 	return kb
 }
 

@@ -278,7 +278,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	if err != nil {
 		return err
 	}
-	if ctrlRef.Kind == camelv1.BindingKind {
+	if ctrlRef.Kind == camelv1.PipeKind {
 		scale.ObjectMeta.Name = ctrlRef.Name
 		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("bindings").GroupResource(), &scale, metav1.UpdateOptions{})
 		if err != nil {
@@ -296,7 +296,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 
 func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectReference {
 	for _, o := range e.Integration.OwnerReferences {
-		if o.Kind == camelv1.BindingKind && strings.HasPrefix(o.APIVersion, camelv1.SchemeGroupVersion.Group) {
+		if o.Kind == camelv1.PipeKind && strings.HasPrefix(o.APIVersion, camelv1.SchemeGroupVersion.Group) {
 			return &v1.ObjectReference{
 				APIVersion: o.APIVersion,
 				Kind:       o.Kind,

@@ -205,29 +205,29 @@ func TestToTrait(t *testing.T) {
 
 func TestSameTraits(t *testing.T) {
 	t.Run("empty traits", func(t *testing.T) {
-		oldKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		oldKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{},
 				},
 			},
 		}
-		newKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		newKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{},
 				},
 			},
 		}
 
-		ok, err := BindingsHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
 		assert.NoError(t, err)
 		assert.True(t, ok)
 	})
 
 	t.Run("same traits", func(t *testing.T) {
-		oldKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		oldKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -237,8 +237,8 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		newKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -249,14 +249,14 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := BindingsHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
 		assert.NoError(t, err)
 		assert.True(t, ok)
 	})
 
 	t.Run("not same traits", func(t *testing.T) {
-		oldKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		oldKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -266,8 +266,8 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		newKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Owner: &traitv1.OwnerTrait{
@@ -278,14 +278,14 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := BindingsHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
 		assert.NoError(t, err)
 		assert.False(t, ok)
 	})
 
 	t.Run("same traits with annotations", func(t *testing.T) {
-		oldKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		oldKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -295,7 +295,7 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1.Binding{
+		newKlb := &v1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
@@ -303,20 +303,20 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := BindingsHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
 		assert.NoError(t, err)
 		assert.True(t, ok)
 	})
 
 	t.Run("same traits with annotations only", func(t *testing.T) {
-		oldKlb := &v1.Binding{
+		oldKlb := &v1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
 				},
 			},
 		}
-		newKlb := &v1.Binding{
+		newKlb := &v1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
@@ -324,14 +324,14 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := BindingsHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
 		assert.NoError(t, err)
 		assert.True(t, ok)
 	})
 
 	t.Run("not same traits with annotations", func(t *testing.T) {
-		oldKlb := &v1.Binding{
-			Spec: v1.BindingSpec{
+		oldKlb := &v1.Pipe{
+			Spec: v1.PipeSpec{
 				Integration: &v1.IntegrationSpec{
 					Traits: v1.Traits{
 						Container: &traitv1.ContainerTrait{
@@ -341,7 +341,7 @@ func TestSameTraits(t *testing.T) {
 				},
 			},
 		}
-		newKlb := &v1.Binding{
+		newKlb := &v1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:2",
@@ -349,20 +349,20 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := BindingsHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
 		assert.NoError(t, err)
 		assert.False(t, ok)
 	})
 
 	t.Run("not same traits with annotations only", func(t *testing.T) {
-		oldKlb := &v1.Binding{
+		oldKlb := &v1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:1",
 				},
 			},
 		}
-		newKlb := &v1.Binding{
+		newKlb := &v1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					v1.TraitAnnotationPrefix + "container.image": "foo/bar:2",
@@ -370,7 +370,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := BindingsHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
 		assert.NoError(t, err)
 		assert.False(t, ok)
 	})

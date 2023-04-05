@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package binding
+package pipe
 
 import (
 	"context"
@@ -33,7 +33,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 )
 
-// NewMonitorAction returns an action that monitors the Binding after it's fully initialized.
+// NewMonitorAction returns an action that monitors the Pipe after it's fully initialized.
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }
@@ -46,14 +46,14 @@ func (action *monitorAction) Name() string {
 	return "monitor"
 }
 
-func (action *monitorAction) CanHandle(binding *v1.Binding) bool {
-	return binding.Status.Phase == v1.BindingPhaseCreating ||
-		(binding.Status.Phase == v1.BindingPhaseError &&
-			binding.Status.GetCondition(v1.BindingIntegrationConditionError) == nil) ||
-		binding.Status.Phase == v1.BindingPhaseReady
+func (action *monitorAction) CanHandle(binding *v1.Pipe) bool {
+	return binding.Status.Phase == v1.PipePhaseCreating ||
+		(binding.Status.Phase == v1.PipePhaseError &&
+			binding.Status.GetCondition(v1.PipeIntegrationConditionError) == nil) ||
+		binding.Status.Phase == v1.PipePhaseReady
 }
 
-func (action *monitorAction) Handle(ctx context.Context, binding *v1.Binding) (*v1.Binding, error) {
+func (action *monitorAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.Pipe, error) {
 	key := client.ObjectKey{
 		Namespace: binding.Namespace,
 		Name:      binding.Name,
@@ -62,22 +62,22 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Binding) (*
 	if err := action.client.Get(ctx, key, &it); err != nil && k8serrors.IsNotFound(err) {
 		target := binding.DeepCopy()
 		// Rebuild the integration
-		target.Status.Phase = v1.BindingPhaseNone
+		target.Status.Phase = v1.PipePhaseNone
 		target.Status.SetCondition(
-			v1.BindingConditionReady,
+			v1.PipeConditionReady,
 			corev1.ConditionFalse,
 			"",
 			"",
 		)
 		return target, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, "could not load integration for Binding %q", binding.Name)
+		return nil, errors.Wrapf(err, "could not load integration for Pipe %q", binding.Name)
 	}
 
 	operatorIDChanged := v1.GetOperatorIDAnnotation(binding) != "" &&
 		(v1.GetOperatorIDAnnotation(binding) != v1.GetOperatorIDAnnotation(&it))
 
-	sameTraits, err := trait.IntegrationAndBindingSameTraits(&it, binding)
+	sameTraits, err := trait.IntegrationAndPipeSameTraits(&it, binding)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +85,8 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Binding) (*
 	// Check if the integration needs to be changed
 	expected, err := CreateIntegrationFor(ctx, action.client, binding)
 	if err != nil {
-		binding.Status.Phase = v1.BindingPhaseError
-		binding.Status.SetErrorCondition(v1.BindingIntegrationConditionError,
+		binding.Status.Phase = v1.PipePhaseError
+		binding.Status.SetErrorCondition(v1.PipeIntegrationConditionError,
 			"Couldn't create an Integration custom resource", err)
 		return binding, err
 	}
@@ -95,17 +95,17 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Binding) (*
 
 	if !semanticEquality || operatorIDChanged || !sameTraits {
 		action.L.Info(
-			"Binding needs a rebuild",
+			"Pipe needs a rebuild",
 			"semantic-equality", !semanticEquality,
 			"operatorid-changed", operatorIDChanged,
 			"traits-changed", !sameTraits)
 
-		// Binding has changed and needs rebuild
+		// Pipe has changed and needs rebuild
 		target := binding.DeepCopy()
 		// Rebuild the integration
-		target.Status.Phase = v1.BindingPhaseNone
+		target.Status.Phase = v1.PipePhaseNone
 		target.Status.SetCondition(
-			v1.BindingConditionReady,
+			v1.PipeConditionReady,
 			corev1.ConditionFalse,
 			"",
 			"",
@@ -113,24 +113,24 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Binding) (*
 		return target, nil
 	}
 
-	// Map integration phase and conditions to Binding
+	// Map integration phase and conditions to Pipe
 	target := binding.DeepCopy()
 
 	switch it.Status.Phase {
 
 	case v1.IntegrationPhaseRunning:
-		target.Status.Phase = v1.BindingPhaseReady
-		setBindingReadyCondition(target, &it)
+		target.Status.Phase = v1.PipePhaseReady
+		setPipeReadyCondition(target, &it)
 
 	case v1.IntegrationPhaseError:
-		target.Status.Phase = v1.BindingPhaseError
-		setBindingReadyCondition(target, &it)
+		target.Status.Phase = v1.PipePhaseError
+		setPipeReadyCondition(target, &it)
 
 	default:
-		target.Status.Phase = v1.BindingPhaseCreating
+		target.Status.Phase = v1.PipePhaseCreating
 
-		c := v1.BindingCondition{
-			Type:    v1.BindingConditionReady,
+		c := v1.PipeCondition{
+			Type:    v1.PipeConditionReady,
 			Status:  corev1.ConditionFalse,
 			Reason:  string(target.Status.Phase),
 			Message: fmt.Sprintf("Integration %q is in %q phase", it.GetName(), target.Status.Phase),
@@ -153,15 +153,15 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Binding) (*
 	return target, nil
 }
 
-func setBindingReadyCondition(kb *v1.Binding, it *v1.Integration) {
+func setPipeReadyCondition(kb *v1.Pipe, it *v1.Integration) {
 	if condition := it.Status.GetCondition(v1.IntegrationConditionReady); condition != nil {
 		message := condition.Message
 		if message == "" {
 			message = fmt.Sprintf("Integration %q readiness condition is %q", it.GetName(), condition.Status)
 		}
 
-		c := v1.BindingCondition{
-			Type:    v1.BindingConditionReady,
+		c := v1.PipeCondition{
+			Type:    v1.PipeConditionReady,
 			Status:  condition.Status,
 			Reason:  condition.Reason,
 			Message: message,
@@ -176,7 +176,7 @@ func setBindingReadyCondition(kb *v1.Binding, it *v1.Integration) {
 
 	} else {
 		kb.Status.SetCondition(
-			v1.BindingConditionReady,
+			v1.PipeConditionReady,
 			corev1.ConditionUnknown,
 			"",
 			fmt.Sprintf("Integration %q does not have a readiness condition", it.GetName()),

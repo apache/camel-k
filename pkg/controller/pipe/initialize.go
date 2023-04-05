@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package binding
+package pipe
 
 import (
 	"context"
@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// NewInitializeAction returns a action that initializes theBinding configuration when not provided by the user.
+// NewInitializeAction returns a action that initializes the Pipe configuration when not provided by the user.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -46,35 +46,35 @@ func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *initializeAction) CanHandle(binding *v1.Binding) bool {
-	return binding.Status.Phase == v1.BindingPhaseNone
+func (action *initializeAction) CanHandle(binding *v1.Pipe) bool {
+	return binding.Status.Phase == v1.PipePhaseNone
 }
 
-func (action *initializeAction) Handle(ctx context.Context, binding *v1.Binding) (*v1.Binding, error) {
+func (action *initializeAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.Pipe, error) {
 	it, err := CreateIntegrationFor(ctx, action.client, binding)
 	if err != nil {
-		binding.Status.Phase = v1.BindingPhaseError
-		binding.Status.SetErrorCondition(v1.BindingIntegrationConditionError,
+		binding.Status.Phase = v1.PipePhaseError
+		binding.Status.SetErrorCondition(v1.PipeIntegrationConditionError,
 			"Couldn't create an Integration custom resource", err)
 		return binding, err
 	}
 
 	if _, err := kubernetes.ReplaceResource(ctx, action.client, it); err != nil {
-		return nil, errors.Wrap(err, "could not create integration forBinding")
+		return nil, errors.Wrap(err, "could not create integration forPipe")
 	}
 
 	// propagate Kamelet icon (best effort)
 	action.propagateIcon(ctx, binding)
 
 	target := binding.DeepCopy()
-	target.Status.Phase = v1.BindingPhaseCreating
+	target.Status.Phase = v1.PipePhaseCreating
 	return target, nil
 }
 
-func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1.Binding) {
+func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1.Pipe) {
 	icon, err := action.findIcon(ctx, binding)
 	if err != nil {
-		action.L.Errorf(err, "cannot find icon forBinding %q", binding.Name)
+		action.L.Errorf(err, "cannot find icon for Pipe %q", binding.Name)
 		return
 	}
 	if icon == "" {
@@ -91,18 +91,18 @@ func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1.B
 	}
 	p, err := patch.MergePatch(binding, clone)
 	if err != nil {
-		action.L.Errorf(err, "cannot compute patch to update icon forBinding %q", binding.Name)
+		action.L.Errorf(err, "cannot compute patch to update icon for Binding %q", binding.Name)
 		return
 	}
 	if len(p) > 0 {
 		if err := action.client.Patch(ctx, clone, client.RawPatch(types.MergePatchType, p)); err != nil {
-			action.L.Errorf(err, "cannot apply merge patch to update icon forBinding %q", binding.Name)
+			action.L.Errorf(err, "cannot apply merge patch to update icon for Pipe %q", binding.Name)
 			return
 		}
 	}
 }
 
-func (action *initializeAction) findIcon(ctx context.Context, binding *v1.Binding) (string, error) {
+func (action *initializeAction) findIcon(ctx context.Context, binding *v1.Pipe) (string, error) {
 	var kameletRef *corev1.ObjectReference
 	if binding.Spec.Source.Ref != nil && binding.Spec.Source.Ref.Kind == "Kamelet" && strings.HasPrefix(binding.Spec.Source.Ref.APIVersion, "camel.apache.org/") {
 		kameletRef = binding.Spec.Source.Ref

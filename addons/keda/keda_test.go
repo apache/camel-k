@@ -24,7 +24,7 @@ import (
 
 	"github.com/apache/camel-k/v2/addons/keda/duck/v1alpha1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/controller/binding"
+	"github.com/apache/camel-k/v2/pkg/controller/pipe"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -202,16 +202,16 @@ func TestKameletAutoDetection(t *testing.T) {
 	assert.Contains(t, secret.StringData, "cc")
 }
 
-func TestBindingAutoDetection(t *testing.T) {
+func TestPipeAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
 	keda.Enabled = pointer.Bool(true)
 	logEndpoint := "log:info"
-	klb := camelv1.Binding{
+	klb := camelv1.Pipe{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "my-binding",
 		},
-		Spec: camelv1.BindingSpec{
+		Spec: camelv1.PipeSpec{
 			Source: camelv1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
@@ -276,7 +276,7 @@ func TestBindingAutoDetection(t *testing.T) {
 			},
 		})
 
-	it, err := binding.CreateIntegrationFor(env.Ctx, env.Client, &klb)
+	it, err := pipe.CreateIntegrationFor(env.Ctx, env.Client, &klb)
 	assert.NoError(t, err)
 	assert.NotNil(t, it)
 	env.Integration = it
@@ -361,7 +361,7 @@ func TestHackKLBReplicas(t *testing.T) {
 	})
 	keda.HackControllerReplicas = pointer.Bool(true)
 	env := createBasicTestEnvironment(
-		&camelv1.Binding{
+		&camelv1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "test",
 				Name:      "my-klb",
@@ -374,7 +374,7 @@ func TestHackKLBReplicas(t *testing.T) {
 				OwnerReferences: []metav1.OwnerReference{
 					{
 						APIVersion: camelv1.SchemeGroupVersion.String(),
-						Kind:       "Binding",
+						Kind:       "Pipe",
 						Name:       "my-klb",
 					},
 				},

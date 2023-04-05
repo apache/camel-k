@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package binding
+package pipe
 
 import (
 	"context"
@@ -43,7 +43,7 @@ var (
 	endpointTypeSinkContext   = bindings.EndpointContext{Type: v1.EndpointTypeSink}
 )
 
-func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Binding) (*v1.Integration, error) {
+func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true
 	annotations := util.CopyMap(binding.Annotations)
@@ -233,7 +233,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 	return nil
 }
 
-func determineProfile(ctx context.Context, c client.Client, binding *v1.Binding) (v1.TraitProfile, error) {
+func determineProfile(ctx context.Context, c client.Client, binding *v1.Pipe) (v1.TraitProfile, error) {
 	if binding.Spec.Integration != nil && binding.Spec.Integration.Profile != "" {
 		return binding.Spec.Integration.Profile, nil
 	}

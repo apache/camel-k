@@ -57,9 +57,9 @@ func TestErroredTrait(t *testing.T) {
 			"-t", "kamelets.list=missing",
 		).Execute()).To(Succeed())
 		// Binding
-		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.BindingPhaseError))
-		Eventually(BindingConditionStatus(ns, name, v1.BindingConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		Eventually(BindingCondition(ns, name, v1.BindingConditionReady), TestTimeoutShort).Should(
+		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
+		Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+		Eventually(BindingCondition(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
 			WithTransform(BindingConditionMessage, And(
 				ContainSubstring("error during trait customization"),
 				ContainSubstring("[missing] not found"),

@@ -57,7 +57,7 @@ func TestBindOutputJSON(t *testing.T) {
 	assert.Equal(t, "json", buildCmdOptions.OutputFormat)
 
 	assert.Nil(t, err)
-	assert.Equal(t, `{"kind":"Binding","apiVersion":"camel.apache.org/v1","metadata":{"name":"my-to-my","creationTimestamp":null,"annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
+	assert.Equal(t, `{"kind":"Pipe","apiVersion":"camel.apache.org/v1","metadata":{"name":"my-to-my","creationTimestamp":null,"annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
 }
 
 func TestBindOutputYAML(t *testing.T) {
@@ -67,7 +67,7 @@ func TestBindOutputYAML(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Binding
+kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
@@ -98,7 +98,7 @@ func TestBindErrorHandlerDLCKamelet(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Binding
+kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
@@ -130,7 +130,7 @@ func TestBindErrorHandlerNone(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Binding
+kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
@@ -155,7 +155,7 @@ func TestBindErrorHandlerLog(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Binding
+kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
@@ -179,7 +179,7 @@ func TestBindTraits(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Binding
+kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
@@ -212,7 +212,7 @@ func TestBindSteps(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
-kind: Binding
+kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
