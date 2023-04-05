@@ -439,6 +439,13 @@ The Build deadline is set to the Build start time plus the Timeout duration.
 If the Build deadline is exceeded, the Build context is canceled,
 and its phase set to BuildPhaseFailed.
 
+|`maxRunningBuilds` +
+int32
+|
+
+
+the maximum amount of parallel running builds started by this operator instance
+
 
 |===
 
@@ -1769,6 +1776,13 @@ map[string]string
 
 
 Generic options that can used by each publish strategy
+
+|`maxRunningBuilds` +
+int32
+|
+
+
+the maximum amount of parallel running builds started by this operator instance
 
 
 |===

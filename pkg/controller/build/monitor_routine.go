@@ -68,6 +68,7 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 			routines.Delete(build.Name)
 			build.Status.Phase = v1.BuildPhaseFailed
 			build.Status.Error = "Build routine exists"
+			monitorFinishedBuild(build)
 			return build, nil
 		}
 		status := v1.BuildStatus{Phase: v1.BuildPhaseRunning}
@@ -85,10 +86,14 @@ func (action *monitorRoutineAction) Handle(ctx context.Context, build *v1.Build)
 			// stops abruptly and restarts or the build status update fails.
 			build.Status.Phase = v1.BuildPhaseFailed
 			build.Status.Error = "Build routine not running"
+			monitorFinishedBuild(build)
 			return build, nil
 		}
 	}
 
+	// Monitor running state of the build - this may have been done already by the schedule action but the monitor action is idempotent
+	// We do this here to recover the running build state in the monitor in case of an operator restart
+	monitorRunningBuild(build)
 	return nil, nil
 }
 
@@ -173,6 +178,8 @@ tasks:
 
 	duration := metav1.Now().Sub(build.Status.StartedAt.Time)
 	status.Duration = duration.String()
+
+	monitorFinishedBuild(build)
 
 	buildCreator := kubernetes.GetCamelCreator(build)
 	// Account for the Build metrics

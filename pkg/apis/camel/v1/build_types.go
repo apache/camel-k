@@ -37,6 +37,8 @@ type BuildSpec struct {
 	// and its phase set to BuildPhaseFailed.
 	// +kubebuilder:validation:Format=duration
 	Timeout metav1.Duration `json:"timeout,omitempty"`
+	// the maximum amount of parallel running builds started by this operator instance
+	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.
