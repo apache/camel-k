@@ -41,7 +41,7 @@ cp ./manifests/camel.apache.org_integrationplatforms.yaml k8s-operatorhub/$1/man
 cp ./manifests/camel.apache.org_integrations.yaml k8s-operatorhub/$1/manifests/integrations.camel.apache.org.crd.yaml
 cp ./manifests/camel.apache.org_kamelets.yaml k8s-operatorhub/$1/manifests/kamelets.camel.apache.org.crd.yaml
 cp ./manifests/camel.apache.org_kameletbindings.yaml k8s-operatorhub/$1/manifests/kameletbindings.camel.apache.org.crd.yaml
-cp ./manifests/camel.apache.org_bindings.yaml k8s-operatorhub/$1/manifests/bindings.camel.apache.org.crd.yaml
+cp ./manifests/camel.apache.org_pipes.yaml k8s-operatorhub/$1/manifests/pipes.camel.apache.org.crd.yaml
 cp ./manifests/camel-k.clusterserviceversion.yaml k8s-operatorhub/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
 cp ./metadata/annotations.yaml k8s-operatorhub/$1/metadata/annotations.yaml
 cp ./tests/scorecard/config.yaml k8s-operatorhub/$1/tests/scorecard/config.yaml
@@ -53,7 +53,7 @@ cp ./manifests/camel.apache.org_integrationplatforms.yaml openshift-ecosystem/$1
 cp ./manifests/camel.apache.org_integrations.yaml openshift-ecosystem/$1/manifests/integrations.camel.apache.org.crd.yaml
 cp ./manifests/camel.apache.org_kamelets.yaml openshift-ecosystem/$1/manifests/kamelets.camel.apache.org.crd.yaml
 cp ./manifests/camel.apache.org_kameletbindings.yaml openshift-ecosystem/$1/manifests/kameletbindings.camel.apache.org.crd.yaml
-cp ./manifests/camel.apache.org_bindings.yaml openshift-ecosystem/$1/manifests/bindings.camel.apache.org.crd.yaml
+cp ./manifests/camel.apache.org_pipes.yaml openshift-ecosystem/$1/manifests/pipes.camel.apache.org.crd.yaml
 cp ./manifests/camel-k.clusterserviceversion.yaml openshift-ecosystem/$1/manifests/camel-k.v$1.clusterserviceversion.yaml
 cp ./metadata/annotations.yaml openshift-ecosystem/$1/metadata/annotations.yaml
 cp ./tests/scorecard/config.yaml openshift-ecosystem/$1/tests/scorecard/config.yaml

@@ -34,7 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestBindingWithImage(t *testing.T) {
+func TestPipeWithImage(t *testing.T) {
 	RegisterTestingT(t)
 
 	from := corev1.ObjectReference{

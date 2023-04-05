@@ -15,8 +15,8 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+apiVersion: camel.apache.org/v1
+kind: Pipe
 metadata:
   name: example
 spec:

@@ -50,17 +50,17 @@ func TestErroredTrait(t *testing.T) {
 		))
 	})
 
-	t.Run("Binding trait should fail", func(t *testing.T) {
+	t.Run("Pipe trait should fail", func(t *testing.T) {
 		name := "kb-errored"
 		Expect(KamelBindWithID(operatorID, ns, "timer:foo", "log:bar",
 			"--name", name,
 			"-t", "kamelets.list=missing",
 		).Execute()).To(Succeed())
-		// Binding
-		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
-		Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		Eventually(BindingCondition(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
-			WithTransform(BindingConditionMessage, And(
+		// Pipe
+		Eventually(PipePhase(ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
+		Eventually(PipeConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+		Eventually(PipeCondition(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
+			WithTransform(PipeConditionMessage, And(
 				ContainSubstring("error during trait customization"),
 				ContainSubstring("[missing] not found"),
 			)))

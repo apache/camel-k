@@ -120,12 +120,12 @@ func TestOperatorIDFiltering(t *testing.T) {
 					Expect(Kamel("delete", "pre-built", "-n", ns).Execute()).To(Succeed())
 				})
 
-				t.Run("Operators can run scopedBindings", func(t *testing.T) {
+				t.Run("Operators can run scoped Pipes", func(t *testing.T) {
 					Expect(KamelBind(ns, "timer-source?message=Hello", "log-sink",
 						"--name", "klb", "--force").Execute()).To(Succeed())
 					Consistently(Integration(ns, "klb"), 10*time.Second).Should(BeNil())
 
-					Expect(AssignBindingToOperator(ns, "klb", operator1)).To(Succeed())
+					Expect(AssignPipeToOperator(ns, "klb", operator1)).To(Succeed())
 					Eventually(Integration(ns, "klb"), TestTimeoutShort).ShouldNot(BeNil())
 					Eventually(IntegrationPhase(ns, "klb"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					Eventually(IntegrationPodPhase(ns, "klb"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

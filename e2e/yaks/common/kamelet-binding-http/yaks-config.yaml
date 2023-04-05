@@ -25,7 +25,7 @@ pre:
 
     kamel run display.groovy -w -n $YAKS_NAMESPACE
     cat timer-source-binding-display.yaml | sed  's/{namespace}/'"${YAKS_NAMESPACE}"'/' | kubectl apply -n $YAKS_NAMESPACE -f -
-    kubectl wait binding timer-source-binding-display --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
+    kubectl wait kameletbinding timer-source-binding-display --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

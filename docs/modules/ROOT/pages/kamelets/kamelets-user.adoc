@@ -278,11 +278,11 @@ In some contexts (for example **"serverless"**) users often want to leverage the
 doing additional processing (such as tranformations or other enterprise integration patterns).
 
 A common use case is that of **Knative Sources**, for which the Apache Camel developers maintain the https://knative.dev/docs/eventing/samples/apache-camel-source/[Knative CamelSources].
-Kamelets represent an **evolution** of the model proposed in CamelSources, but they allow using the same declarative style of binding, via a resource named **Binding**.
+Kamelets represent an **evolution** of the model proposed in CamelSources, but they allow using the same declarative style of binding, via a resource named **Pipe**.
 
 === Binding to a Knative Destination
 
-A Binding allows to declaratively move data from a system described by a Kamelet towards a Knative destination (or other kind of destinations, in the future), or from
+A Pipe allows to declaratively move data from a system described by a Kamelet towards a Knative destination (or other kind of destinations, in the future), or from
 a Knative channel/broker to another external system described by a Kamelet.
 
 For example, here's an example of binding:
@@ -290,7 +290,7 @@ For example, here's an example of binding:
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: telegram-text-source-to-channel
 spec:
@@ -315,11 +315,11 @@ makes sure that messages produced by the Kamelet are forwarded to the Knative **
 
 Note that source and sink are specified declaratively as standard **Kubernetes object references**.
 
-The example shows how we can reference the "telegram-text-source" resource in a Binding. It's contained in the `source` section
+The example shows how we can reference the "telegram-text-source" resource in a Pipe. It's contained in the `source` section
 because it's a Kamelet of type "source".
-A Kamelet of type "sink", by contrast, can only be used in the `sink` section of a `Binding`.
+A Kamelet of type "sink", by contrast, can only be used in the `sink` section of a `Pipe`.
 
-**Under the covers, a Binding creates an Integration** resource that implements the binding, but this is transparent to the end user.
+**Under the covers, a Pipe creates an Integration** resource that implements the binding, but this is transparent to the end user.
 
 === Binding to a Kafka Topic
 
@@ -338,7 +338,7 @@ The following binding can be created to push data into the `my-topic` topic:
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: telegram-text-source-to-kafka
 spec:
@@ -361,13 +361,13 @@ After creating it, messages will flow from Telegram to Kafka.
 
 === Binding to an explicit URI
 
-An alternative way to use a Binding is to configure the source/sink to be an explicit Camel URI.
+An alternative way to use a Pipe is to configure the source/sink to be an explicit Camel URI.
 For example, the following binding is allowed:
 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: telegram-text-source-to-channel
 spec:
@@ -381,25 +381,25 @@ spec:
   sink:
     uri: https://mycompany.com/the-service # <1>
 ----
-<1> Binding with explicitly URI
+<1> Pipe with explicitly URI
 
-This Binding explicitly defines an URI where data is going to be pushed.
+This Pipe explicitly defines an URI where data is going to be pushed.
 
 NOTE: the `uri` option is also conventionally used in Knative to specify a non-kubernetes destination.
 To comply with the Knative specifications, in case an "http" or "https" URI is used, Camel will send https://cloudevents.io/[CloudEvents] to the destination.
 
 === Error Handling
 
-You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/bindings-error-handler.adoc[Bindings Error Handler User Guide] for more detail.
+You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/bindings-error-handler.adoc[Pipes Error Handler User Guide] for more detail.
 
 === Trait via annotations
 
-You can easily tune your `Binding` with xref:traits:traits.adoc[traits] configuration adding `.metadata.annotations`. Let's have a look at the following example:
+You can easily tune your `Pipe` with xref:traits:traits.adoc[traits] configuration adding `.metadata.annotations`. Let's have a look at the following example:
 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: timer-2-log-annotation
   annotations: # <1>
@@ -578,7 +578,7 @@ Data shapes contain the following information:
 |E.g. `aws2-s3`
 
 |`format`
-|The data shape name used to identify and reference the data type in a Binding when choosing from multiple data type options.
+|The data shape name used to identify and reference the data type in a Pipe when choosing from multiple data type options.
 |`string`
 |E.g. `json`
 
@@ -653,13 +653,13 @@ which is set to the name of a specific KEDA autoscaler.
 A KEDA enabled Kamelet can be used in the same way as any other Kamelet, in a binding or in an integration.
 KEDA autoscalers are not enabled by default: they need to be manually enabled by the user via the `keda` trait.
 
-In a Binding, the KEDA trait can be enabled using annotations:
+In a Pipe, the KEDA trait can be enabled using annotations:
 
 .my-keda-binding.yaml
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: my-keda-binding
   annotations:

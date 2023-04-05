@@ -30,7 +30,7 @@ rules:
   - integrationkits
   - integrationplatforms
   - integrations
-  - bindings
+  - pipes
   # Deprecated: kameletbindings CR
   - kameletbindings
   - kamelets
@@ -56,8 +56,8 @@ rules:
   - integrationplatforms/status
   - integrations/scale
   - integrations/status
-  - bindings/status
-  - bindings/scale
+  - pipes/status
+  - pipes/scale
   # Deprecated: kameletbindings CR
   - kameletbindings/status
   - kameletbindings/scale
