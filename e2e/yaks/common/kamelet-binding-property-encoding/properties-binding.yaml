@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: Binding
+kind: KameletBinding
 apiVersion: camel.apache.org/v1
 metadata:
   name: properties-binding

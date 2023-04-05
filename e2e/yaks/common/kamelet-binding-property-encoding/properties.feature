@@ -23,4 +23,4 @@ Feature: Ensure that Kamelets support multiline configuration
     """
     And expect HTTP request header: Content-Type="application/json;charset=UTF-8"
     And receive POST /events
-    And delete Binding properties-binding
+    And delete KameletBinding properties-binding
