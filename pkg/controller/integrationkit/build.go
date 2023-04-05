@@ -115,9 +115,10 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Strategy: env.Platform.Status.Build.BuildStrategy,
-				Tasks:    env.BuildTasks,
-				Timeout:  timeout,
+				Strategy:         env.Platform.Status.Build.BuildStrategy,
+				Tasks:            env.BuildTasks,
+				Timeout:          timeout,
+				MaxRunningBuilds: env.Platform.Status.Build.MaxRunningBuilds,
 			},
 		}
 
