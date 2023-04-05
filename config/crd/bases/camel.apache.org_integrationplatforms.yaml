@@ -238,6 +238,11 @@ spec:
                             type: object
                         type: object
                     type: object
+                  maxRunningBuilds:
+                    description: the maximum amount of parallel running builds started
+                      by this operator instance
+                    format: int32
+                    type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image
@@ -1753,6 +1758,11 @@ spec:
                             type: object
                         type: object
                     type: object
+                  maxRunningBuilds:
+                    description: the maximum amount of parallel running builds started
+                      by this operator instance
+                    format: int32
+                    type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image

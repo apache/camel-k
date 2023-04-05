@@ -233,6 +233,15 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			Duration: 5 * time.Minute,
 		}
 	}
+
+	if p.Status.Build.MaxRunningBuilds <= 0 {
+		if p.Status.Build.BuildStrategy == v1.BuildStrategyRoutine {
+			p.Status.Build.MaxRunningBuilds = 3
+		} else if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
+			p.Status.Build.MaxRunningBuilds = 10
+		}
+	}
+
 	_, cacheEnabled := p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
 	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
 		// Default to disabling Kaniko cache warmer

@@ -142,11 +142,15 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 	var actions []Action
 
+	buildMonitor := Monitor{
+		maxRunningBuilds: instance.Spec.MaxRunningBuilds,
+	}
+
 	switch instance.Spec.Strategy {
 	case v1.BuildStrategyPod:
 		actions = []Action{
 			newInitializePodAction(r.reader),
-			newScheduleAction(r.reader),
+			newScheduleAction(r.reader, buildMonitor),
 			newMonitorPodAction(r.reader),
 			newErrorRecoveryAction(),
 			newErrorAction(),
@@ -154,7 +158,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	case v1.BuildStrategyRoutine:
 		actions = []Action{
 			newInitializeRoutineAction(),
-			newScheduleAction(r.reader),
+			newScheduleAction(r.reader, buildMonitor),
 			newMonitorRoutineAction(),
 			newErrorRecoveryAction(),
 			newErrorAction(),

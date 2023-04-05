@@ -79,6 +79,11 @@ spec:
           spec:
             description: BuildSpec defines the Build operation to be executed
             properties:
+              maxRunningBuilds:
+                description: the maximum amount of parallel running builds started
+                  by this operator instance
+                format: int32
+                type: integer
               strategy:
                 description: The strategy that should be used to perform the Build.
                 enum:
