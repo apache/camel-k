@@ -32,6 +32,7 @@ type BuildSpecApplyConfiguration struct {
 	ToolImage           *string                  `json:"toolImage,omitempty"`
 	BuilderPodNamespace *string                  `json:"operatorNamespace,omitempty"`
 	Timeout             *metav1.Duration         `json:"timeout,omitempty"`
+	MaxRunningBuilds    *int32                   `json:"maxRunningBuilds,omitempty"`
 }
 
 // BuildSpecApplyConfiguration constructs an declarative configuration of the BuildSpec type for use with
@@ -82,5 +83,13 @@ func (b *BuildSpecApplyConfiguration) WithBuilderPodNamespace(value string) *Bui
 // If called multiple times, the Timeout field is set to the value of the last call.
 func (b *BuildSpecApplyConfiguration) WithTimeout(value metav1.Duration) *BuildSpecApplyConfiguration {
 	b.Timeout = &value
+	return b
+}
+
+// WithMaxRunningBuilds sets the MaxRunningBuilds field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the MaxRunningBuilds field is set to the value of the last call.
+func (b *BuildSpecApplyConfiguration) WithMaxRunningBuilds(value int32) *BuildSpecApplyConfiguration {
+	b.MaxRunningBuilds = &value
 	return b
 }
