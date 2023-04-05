@@ -34,7 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
-func TestBinding(t *testing.T) {
+func TestPipe(t *testing.T) {
 	RegisterTestingT(t)
 
 	// Error Handler testing
@@ -91,8 +91,8 @@ func TestBinding(t *testing.T) {
 		})
 	})
 
-	//Binding with traits testing
-	t.Run("testBinding with trait", func(t *testing.T) {
+	//Pipe with traits testing
+	t.Run("test Pipe with trait", func(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
 		// Log sink kamelet exists from previous test
 
@@ -119,17 +119,17 @@ func TestBinding(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
 	})
 
-	// Binding with wrong spec
-	t.Run("test Binding with wrong spec", func(t *testing.T) {
+	// Pipe with wrong spec
+	t.Run("test Pipe with wrong spec", func(t *testing.T) {
 		name := "bad-klb"
 		kb := v1.NewPipe(ns, name)
 		kb.Spec = v1.PipeSpec{}
 		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
 		Eventually(err).Should(BeNil())
-		Eventually(BindingPhase(ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
-		Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
-		Eventually(BindingCondition(ns, name, v1.PipeIntegrationConditionError), TestTimeoutShort).Should(
-			WithTransform(BindingConditionMessage, And(
+		Eventually(PipePhase(ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
+		Eventually(PipeConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
+		Eventually(PipeCondition(ns, name, v1.PipeIntegrationConditionError), TestTimeoutShort).Should(
+			WithTransform(PipeConditionMessage, And(
 				ContainSubstring("could not determine source URI"),
 				ContainSubstring("no ref or URI specified in endpoint"),
 			)))

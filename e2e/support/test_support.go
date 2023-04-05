@@ -1068,7 +1068,7 @@ func ScaleIntegration(ns string, name string, replicas int32) error {
 	})
 }
 
-func Binding(ns string, name string) func() *v1.Pipe {
+func Pipe(ns string, name string) func() *v1.Pipe {
 	return func() *v1.Pipe {
 		klb := v1.NewPipe(ns, name)
 		key := ctrl.ObjectKey{
@@ -1084,9 +1084,9 @@ func Binding(ns string, name string) func() *v1.Pipe {
 	}
 }
 
-func BindingPhase(ns string, name string) func() v1.PipePhase {
+func PipePhase(ns string, name string) func() v1.PipePhase {
 	return func() v1.PipePhase {
-		klb := Binding(ns, name)()
+		klb := Pipe(ns, name)()
 		if klb == nil {
 			return ""
 		}
@@ -1094,9 +1094,9 @@ func BindingPhase(ns string, name string) func() v1.PipePhase {
 	}
 }
 
-func BindingSpecReplicas(ns string, name string) func() *int32 {
+func PipeSpecReplicas(ns string, name string) func() *int32 {
 	return func() *int32 {
-		klb := Binding(ns, name)()
+		klb := Pipe(ns, name)()
 		if klb == nil {
 			return nil
 		}
@@ -1104,9 +1104,9 @@ func BindingSpecReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func BindingStatusReplicas(ns string, name string) func() *int32 {
+func PipeStatusReplicas(ns string, name string) func() *int32 {
 	return func() *int32 {
-		klb := Binding(ns, name)()
+		klb := Pipe(ns, name)()
 		if klb == nil {
 			return nil
 		}
@@ -1114,9 +1114,9 @@ func BindingStatusReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func BindingCondition(ns string, name string, conditionType v1.PipeConditionType) func() *v1.PipeCondition {
+func PipeCondition(ns string, name string, conditionType v1.PipeConditionType) func() *v1.PipeCondition {
 	return func() *v1.PipeCondition {
-		kb := Binding(ns, name)()
+		kb := Pipe(ns, name)()
 		if kb == nil {
 			return nil
 		}
@@ -1128,32 +1128,32 @@ func BindingCondition(ns string, name string, conditionType v1.PipeConditionType
 	}
 }
 
-func BindingConditionStatusExtract(c *v1.PipeCondition) corev1.ConditionStatus {
+func PipeConditionStatusExtract(c *v1.PipeCondition) corev1.ConditionStatus {
 	if c == nil {
 		return ""
 	}
 	return c.Status
 }
 
-func BindingConditionReason(c *v1.PipeCondition) string {
+func PipeConditionReason(c *v1.PipeCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Reason
 }
 
-func BindingConditionMessage(c *v1.PipeCondition) string {
+func PipeConditionMessage(c *v1.PipeCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Message
 }
 
-func BindingConditionStatus(ns string, name string, conditionType v1.PipeConditionType) func() corev1.ConditionStatus {
+func PipeConditionStatus(ns string, name string, conditionType v1.PipeConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
-		klb := Binding(ns, name)()
+		klb := Pipe(ns, name)()
 		if klb == nil {
-			return "BindingMissing"
+			return "PipeMissing"
 		}
 		c := klb.Status.GetCondition(conditionType)
 		if c == nil {
@@ -1163,10 +1163,10 @@ func BindingConditionStatus(ns string, name string, conditionType v1.PipeConditi
 	}
 }
 
-func UpdateBinding(ns string, name string, upd func(it *v1.Pipe)) error {
-	klb := Binding(ns, name)()
+func UpdatePipe(ns string, name string, upd func(it *v1.Pipe)) error {
+	klb := Pipe(ns, name)()
 	if klb == nil {
-		return fmt.Errorf("noBinding named %s found", name)
+		return fmt.Errorf("no Pipe named %s found", name)
 	}
 	target := klb.DeepCopy()
 	upd(target)
@@ -1180,16 +1180,16 @@ func UpdateBinding(ns string, name string, upd func(it *v1.Pipe)) error {
 	return TestClient().Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
-func ScaleBinding(ns string, name string, replicas int32) error {
-	return UpdateBinding(ns, name, func(klb *v1.Pipe) {
+func ScalePipe(ns string, name string, replicas int32) error {
+	return UpdatePipe(ns, name, func(klb *v1.Pipe) {
 		klb.Spec.Replicas = &replicas
 	})
 }
 
-func AssignBindingToOperator(ns, name, operator string) error {
-	klb := Binding(ns, name)()
+func AssignPipeToOperator(ns, name, operator string) error {
+	klb := Pipe(ns, name)()
 	if klb == nil {
-		return fmt.Errorf("cannot assignBinding %q to operator:Binding not found", name)
+		return fmt.Errorf("cannot assign Pipe %q to operator:Pipe not found", name)
 	}
 
 	klb.SetOperatorID(operator)

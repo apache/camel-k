@@ -1,12 +1,12 @@
 [[bindings-error-handler]]
-=Bindings Error Handler
+=Pipes Error Handler
 
-Bindings offer a mechanism to specify an error policy to adopt in case an event produced by a `source` or consumed by a `sink`. Through the definition of an `errorHandler` you will be able to apply certain logic to the failing event, such as simply logging, ignoring the event or posting the event to a `Sink`.
+Pipes offer a mechanism to specify an error policy to adopt in case an event produced by a `source` or consumed by a `sink`. Through the definition of an `errorHandler` you will be able to apply certain logic to the failing event, such as simply logging, ignoring the event or posting the event to a `Sink`.
 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: my-kamelet-binding
 spec:
@@ -33,7 +33,7 @@ There may be certain cases where you want to just ignore any failure happening o
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: my-kamelet-binding
 spec:
@@ -54,7 +54,7 @@ Apache Camel offers a default behavior for handling any failure: log to standard
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: my-kamelet-binding
 spec:
@@ -78,7 +78,7 @@ The `Sink` is probably the most interesting error handler type as it allows you 
 [source,yaml]
 ----
 apiVersion: camel.apache.org/v1alpha1
-kind: Binding
+kind: Pipe
 metadata:
   name: my-kamelet-binding
 spec:

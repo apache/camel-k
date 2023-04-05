@@ -280,7 +280,7 @@ func (t *kedaTrait) hackControllerReplicas(e *trait.Environment) error {
 	}
 	if ctrlRef.Kind == camelv1.PipeKind {
 		scale.ObjectMeta.Name = ctrlRef.Name
-		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("bindings").GroupResource(), &scale, metav1.UpdateOptions{})
+		_, err = scalesClient.Scales(e.Integration.Namespace).Update(e.Ctx, camelv1.SchemeGroupVersion.WithResource("pipes").GroupResource(), &scale, metav1.UpdateOptions{})
 		if err != nil {
 			return err
 		}

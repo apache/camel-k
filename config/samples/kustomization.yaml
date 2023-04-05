@@ -27,7 +27,8 @@ resources:
 - bases/camel_v1_camelcatalog.yaml
 - bases/camel_v1_build.yaml
 - bases/camel_v1_kamelet.yaml
-- bases/camel_v1_binding.yaml
+- bases/camel_v1_pipe.yaml
+- bases/camel_v1alpha1_kameletbinding.yaml
 
 patchesStrategicMerge:
 - patch-integration-platform.yaml

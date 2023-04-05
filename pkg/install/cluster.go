@@ -206,8 +206,8 @@ func installCRDs(ctx context.Context, c client.Client, collection *kubernetes.Co
 		return err
 	}
 
-	// Install CRD for Binding (if needed)
-	if err := installCRD(ctx, c, "Binding", "v1", "camel.apache.org_bindings.yaml",
+	// Install CRD for Pipe (if needed)
+	if err := installCRD(ctx, c, "Pipe", "v1", "camel.apache.org_pipes.yaml",
 		v1beta1Customizer, collection, force); err != nil {
 		return err
 	}
@@ -217,7 +217,7 @@ func installCRDs(ctx context.Context, c client.Client, collection *kubernetes.Co
 
 func downgradeToCRDv1beta1(isAPIExtensionsV1 bool) ResourceCustomizer {
 	return func(object ctrl.Object) ctrl.Object {
-		// Remove default values in v1beta1 Integration and Binding CRDs,
+		// Remove default values in v1beta1 Integration and Pipe CRDs,
 		removeDefaultFromCrd := func(crd *apiextensionsv1beta1.CustomResourceDefinition, property string) {
 			defaultValue := apiextensionsv1beta1.JSONSchemaProps{
 				Default: nil,
@@ -227,7 +227,7 @@ func downgradeToCRDv1beta1(isAPIExtensionsV1 bool) ResourceCustomizer {
 					Properties["spec"].Properties["template"].Properties["spec"].Properties[property].Items.Schema.
 					Properties["ports"].Items.Schema.Properties["protocol"] = defaultValue
 			}
-			if crd.Name == "bindings.camel.apache.org" {
+			if crd.Name == "pipes.camel.apache.org" {
 				crd.Spec.Validation.OpenAPIV3Schema.Properties["spec"].Properties["integration"].Properties["template"].
 					Properties["spec"].Properties[property].Items.Schema.Properties["ports"].Items.Schema.
 					Properties["protocol"] = defaultValue
@@ -325,8 +325,8 @@ func areAllCrdInstalled(c client.Client) (int, error) {
 	} else if !ok {
 		return 7, nil
 	}
-	if ok, err := isCrdInstalled(c, "Binding", "v1"); err != nil {
-		return 8, pkgerr.Wrap(err, "Error installing Binding CRDs")
+	if ok, err := isCrdInstalled(c, "Pipe", "v1"); err != nil {
+		return 8, pkgerr.Wrap(err, "Error installing Pipe CRDs")
 	} else if !ok {
 		return 8, nil
 	}

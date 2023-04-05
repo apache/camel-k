@@ -29,8 +29,8 @@ pre:
     kubectl apply -f timer-source-binding.yaml -n $YAKS_NAMESPACE
     kubectl apply -f logger-sink-binding.yaml -n $YAKS_NAMESPACE
 
-    kubectl wait binding timer-source-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
-    kubectl wait binding logger-sink-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+    kubectl wait kameletbinding timer-source-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+    kubectl wait kameletbinding logger-sink-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

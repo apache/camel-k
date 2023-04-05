@@ -391,7 +391,7 @@ func TestHackKLBReplicas(t *testing.T) {
 	assert.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
 	assert.NoError(t, err)
-	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1.SchemeGroupVersion.WithResource("bindings").GroupResource(), "my-klb", metav1.GetOptions{})
+	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1.SchemeGroupVersion.WithResource("pipes").GroupResource(), "my-klb", metav1.GetOptions{})
 	assert.NoError(t, err)
 	assert.Equal(t, int32(1), sc.Spec.Replicas)
 }

@@ -39,7 +39,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
-func TestBindingScale(t *testing.T) {
+func TestPipeScale(t *testing.T) {
 	RegisterTestingT(t)
 
 	ocp, err := openshift.IsOpenShift(TestClient())
@@ -50,39 +50,39 @@ func TestBindingScale(t *testing.T) {
 	}
 
 	name := "timer2log"
-	Expect(KamelBindWithID(operatorID, ns, "timer-source?message=HelloBinding", "log-sink", "--name", name).Execute()).To(Succeed())
+	Expect(KamelBindWithID(operatorID, ns, "timer-source?message=HelloPipe", "log-sink", "--name", name).Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("HelloBinding"))
+	Eventually(PipeConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("HelloPipe"))
 
-	t.Run("Update binding scale spec", func(t *testing.T) {
-		Expect(ScaleBinding(ns, name, 3)).To(Succeed())
+	t.Run("Update Pipe scale spec", func(t *testing.T) {
+		Expect(ScalePipe(ns, name, 3)).To(Succeed())
 		// Check the scale cascades into the Deployment scale
 		Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(3))
 		// Check it also cascades into the Integration scale subresource Status field
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 3)))
-		// Check it also cascades into the Binding scale subresource Status field
-		Eventually(BindingStatusReplicas(ns, name), TestTimeoutShort).
+		// Check it also cascades into the Pipe scale subresource Status field
+		Eventually(PipeStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 3)))
 		// Check the readiness condition becomes truthy back
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		// Finally check the readiness condition becomes truthy back onBinding
-		Eventually(BindingConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		// Finally check the readiness condition becomes truthy back onPipe
+		Eventually(PipeConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 	})
 
-	t.Run("ScaleBinding with polymorphic client", func(t *testing.T) {
+	t.Run("ScalePipe with polymorphic client", func(t *testing.T) {
 		scaleClient, err := TestClient().ScalesClient()
 		Expect(err).To(BeNil())
 
 		// Patch the integration scale subresource
 		patch := "{\"spec\":{\"replicas\":2}}"
-		_, err = scaleClient.Scales(ns).Patch(TestContext, v1.SchemeGroupVersion.WithResource("bindings"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
+		_, err = scaleClient.Scales(ns).Patch(TestContext, v1.SchemeGroupVersion.WithResource("Pipes"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
 		Expect(err).To(BeNil())
 
 		// Check the readiness condition is still truthy as down-scaling
-		Expect(BindingConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+		Expect(PipeConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
 		// Check the Integration scale subresource Spec field
 		Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 2)))
@@ -91,30 +91,30 @@ func TestBindingScale(t *testing.T) {
 		// Check it cascades into the Integration scale subresource Status field
 		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 2)))
-		// Finally check it cascades into the Binding scale subresource Status field
-		Eventually(BindingStatusReplicas(ns, name), TestTimeoutShort).
+		// Finally check it cascades into the Pipe scale subresource Status field
+		Eventually(PipeStatusReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 2)))
 	})
 
-	t.Run("ScaleBinding with Camel K client", func(t *testing.T) {
+	t.Run("ScalePipe with Camel K client", func(t *testing.T) {
 		camel, err := versioned.NewForConfig(TestClient().GetConfig())
 		Expect(err).To(BeNil())
 
 		// Getter
-		bindingScale, err := camel.CamelV1().Pipes(ns).GetScale(TestContext, name, metav1.GetOptions{})
+		PipeScale, err := camel.CamelV1().Pipes(ns).GetScale(TestContext, name, metav1.GetOptions{})
 		Expect(err).To(BeNil())
-		Expect(bindingScale.Spec.Replicas).To(BeNumerically("==", 2))
-		Expect(bindingScale.Status.Replicas).To(BeNumerically("==", 2))
+		Expect(PipeScale.Spec.Replicas).To(BeNumerically("==", 2))
+		Expect(PipeScale.Status.Replicas).To(BeNumerically("==", 2))
 
 		// Setter
-		bindingScale.Spec.Replicas = 1
-		_, err = camel.CamelV1().Pipes(ns).UpdateScale(TestContext, name, bindingScale, metav1.UpdateOptions{})
+		PipeScale.Spec.Replicas = 1
+		_, err = camel.CamelV1().Pipes(ns).UpdateScale(TestContext, name, PipeScale, metav1.UpdateOptions{})
 		Expect(err).To(BeNil())
 
-		// Check the readiness condition is still truthy as down-scaling inBinding
-		Expect(BindingConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
-		// Check the Binding scale subresource Spec field
-		Eventually(BindingSpecReplicas(ns, name), TestTimeoutShort).
+		// Check the readiness condition is still truthy as down-scaling inPipe
+		Expect(PipeConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+		// Check the Pipe scale subresource Spec field
+		Eventually(PipeSpecReplicas(ns, name), TestTimeoutShort).
 			Should(gstruct.PointTo(BeNumerically("==", 1)))
 		// Check the readiness condition is still truthy as down-scaling
 		Expect(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))

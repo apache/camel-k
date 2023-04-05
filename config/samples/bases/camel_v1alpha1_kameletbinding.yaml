@@ -15,3 +15,20 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+apiVersion: camel.apache.org/v1alpha1
+kind: KameletBinding
+metadata:
+  name: example
+spec:
+  source:
+    ref:
+      apiVersion: camel.apache.org/v1alpha1
+      kind: Kamelet
+      name: example
+    properties:
+      message: Hello world
+  sink:
+    ref:
+      apiVersion: messaging.knative.dev/v1
+      kind: InMemoryChannel
+      name: example
