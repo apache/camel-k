@@ -271,6 +271,11 @@ spec:
                       Persistent Volume Claim used by Kaniko publish strategy, if
                       cache is enabled'
                     type: string
+                  maxRunningBuilds:
+                    description: the maximum amount of parallel running builds started
+                      by this operator instance
+                    format: int32
+                    type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image
@@ -1864,6 +1869,11 @@ spec:
                       Persistent Volume Claim used by Kaniko publish strategy, if
                       cache is enabled'
                     type: string
+                  maxRunningBuilds:
+                    description: the maximum amount of parallel running builds started
+                      by this operator instance
+                    format: int32
+                    type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image

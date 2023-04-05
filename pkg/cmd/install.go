@@ -196,6 +196,7 @@ type installCmdOptions struct {
 	HealthPort               int32    `mapstructure:"health-port"`
 	Monitoring               bool     `mapstructure:"monitoring"`
 	MonitoringPort           int32    `mapstructure:"monitoring-port"`
+	MaxRunningBuilds         int32    `mapstructure:"max-running-builds"`
 	TraitProfile             string   `mapstructure:"trait-profile"`
 	Tolerations              []string `mapstructure:"tolerations"`
 	NodeSelectors            []string `mapstructure:"node-selectors"`
@@ -435,6 +436,10 @@ func (o *installCmdOptions) install(cobraCmd *cobra.Command, _ []string) error {
 				Duration: d,
 			}
 		}
+		if o.MaxRunningBuilds > 0 {
+			platform.Spec.Build.MaxRunningBuilds = o.MaxRunningBuilds
+		}
+
 		if o.TraitProfile != "" {
 			platform.Spec.Profile = v1.TraitProfileByName(o.TraitProfile)
 		}

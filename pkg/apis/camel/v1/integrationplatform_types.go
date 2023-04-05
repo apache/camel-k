@@ -134,6 +134,8 @@ type IntegrationPlatformBuildSpec struct {
 	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
 	//
 	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
+	// the maximum amount of parallel running builds started by this operator instance
+	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform
