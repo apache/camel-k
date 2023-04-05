@@ -3,6 +3,8 @@
 
 A *Build* resource, describes the process of assembling a container image that copes with the requirement of an xref:architecture/cr/integration.adoc[Integration] or xref:architecture/cr/integration-kit.adoc[IntegrationKit].
 
+The result of a build is an xref:architecture/cr/integration-kit.adoc[IntegrationKit] that can and should be reused for multiple xref:architecture/cr/integration.adoc[Integrations].
+
 [source,go]
 ----
 type Build struct {
@@ -25,3 +27,32 @@ the full go definition can be found https://github.com/apache/camel-k/blob/main/
 
 image::architecture/camel-k-state-machine-build.png[life cycle]
 
+[[build-strategy]]
+= Build strategy
+
+You can choose from different build strategies. The build strategy defines how a build should be executed.
+At the moment the available strategies are:
+
+- buildStrategy: pod (each build is run in a separate pod, the operator monitors the pod state)
+- buildStrategy: routine (each build is run as a go routine inside the operator pod)
+
+[[build-queue]]
+= Build queues
+
+IntegrationKits and its base images should be reused for multiple Integrations in order to
+accomplish an efficient resource management and to optimize build and startup times for Camel K Integrations.
+
+In order to reuse images the operator is going to queue builds in sequential order.
+This way the operator is able to use efficient image layering for Integrations.
+
+By default, builds are queued sequentially based on their layout (e.g. native, fast-jar) and the build namespace.
+
+To avoid having many builds running in parallel the operator uses a maximum number of running builds setting that limits the
+amount of builds running.
+
+You can set this limit in the xref:architecture/cr/integration-platform.adoc[IntegrationPlatform] settings.
+
+The default values for this limitation is based on the build strategy.
+
+- buildStrategy: pod (MaxRunningBuilds=10)
+- buildStrategy: routine (MaxRunningBuilds=3)
