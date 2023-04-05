@@ -239,8 +239,8 @@ func TestHealthTrait(t *testing.T) {
 				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
 			}))
 
-		Eventually(BindingCondition(ns, name, camelv1.BindingConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *camelv1.BindingCondition) bool {
+		Eventually(BindingCondition(ns, name, camelv1.PipeConditionReady), TestTimeoutLong).Should(
+			Satisfy(func(c *camelv1.PipeCondition) bool {
 				if c.Status != corev1.ConditionFalse {
 					return false
 				}

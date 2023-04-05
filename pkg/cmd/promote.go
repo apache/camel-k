@@ -51,8 +51,8 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 	}
 	cmd := cobra.Command{
 		Use:     "promote my-it --to [namespace]",
-		Short:   "Promote an Integration/Binding from an environment to another",
-		Long:    "Promote an Integration/Binding from an environment to another, for example from a Development environment to a Production environment",
+		Short:   "Promote an Integration/Pipe from an environment to another",
+		Long:    "Promote an Integration/Pipe from an environment to another, for example from a Development environment to a Production environment",
 		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
@@ -71,7 +71,7 @@ type promoteCmdOptions struct {
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("promote expects an Integration/Binding name argument")
+		return errors.New("promote expects an Integration/Pipe name argument")
 	}
 	if o.To == "" {
 		return errors.New("promote expects a destination namespace as --to argument")
@@ -102,15 +102,15 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return errors.Wrap(err, "could not verify operators compatibility")
 	}
-	promoteBinding := false
+	promotePipe := false
 	var sourceIntegration *v1.Integration
-	// We first look if a Binding with the name exists
-	sourceBinding, err := o.getBinding(c, name)
+	// We first look if a Pipe with the name exists
+	sourcePipe, err := o.getPipe(c, name)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return errors.Wrap(err, "problems looking for Binding "+name)
+		return errors.Wrap(err, "problems looking for Pipe "+name)
 	}
-	if sourceBinding != nil {
-		promoteBinding = true
+	if sourcePipe != nil {
+		promotePipe = true
 	}
 	sourceIntegration, err = o.getIntegration(c, name)
 	if err != nil {
@@ -124,17 +124,17 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, "could not validate destination resources")
 	}
 
-	// Binding promotion
-	if promoteBinding {
-		destBinding := o.editBinding(sourceBinding, sourceIntegration)
+	// Pipe promotion
+	if promotePipe {
+		destPipe := o.editPipe(sourcePipe, sourceIntegration)
 		// Ensure the destination namespace has access to the source namespace images
-		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destBinding.Namespace)
+		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destPipe.Namespace)
 		if err != nil {
 			return err
 		}
-		replaced, err := o.replaceResource(destBinding)
+		replaced, err := o.replaceResource(destPipe)
 		if o.OutputFormat != "" {
-			return showBindingOutput(cmd, destBinding, o.OutputFormat, c.GetScheme())
+			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
 		}
 		if !replaced {
 			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
@@ -177,8 +177,8 @@ func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) e
 	return nil
 }
 
-func (o *promoteCmdOptions) getBinding(c client.Client, name string) (*v1.Binding, error) {
-	it := v1.NewBinding(o.Namespace, name)
+func (o *promoteCmdOptions) getPipe(c client.Client, name string) (*v1.Pipe, error) {
+	it := v1.NewPipe(o.Namespace, name)
 	key := k8sclient.ObjectKey{
 		Name:      name,
 		Namespace: o.Namespace,
@@ -445,8 +445,8 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	return &dst
 }
 
-func (o *promoteCmdOptions) editBinding(kb *v1.Binding, it *v1.Integration) *v1.Binding {
-	dst := v1.NewBinding(o.To, kb.Name)
+func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration) *v1.Pipe {
+	dst := v1.NewPipe(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {

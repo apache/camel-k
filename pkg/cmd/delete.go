@@ -136,25 +136,25 @@ func getIntegration(ctx context.Context, c client.Client, name string, namespace
 }
 
 func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client, integration *v1.Integration) error {
-	deleted, binding, err := deleteBindingIfExists(ctx, c, integration)
+	deleted, binding, err := deletePipeIfExists(ctx, c, integration)
 	if err != nil {
 		return err
 	}
 	if deleted {
-		// Deleting Binding will automatically clean up the integration
-		fmt.Fprintln(cmd.OutOrStdout(), "Binding "+binding+" deleted")
+		// Deleting Pipe will automatically clean up the integration
+		fmt.Fprintln(cmd.OutOrStdout(), "Pipe "+binding+" deleted")
 		return nil
 	}
 	return c.Delete(ctx, integration)
 }
 
-func deleteBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
+func deletePipeIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
 	kind, name := findCreator(integration)
-	if kind != v1.BindingKind || name == "" {
+	if kind != v1.PipeKind || name == "" {
 		return false, "", nil
 	}
 
-	binding := v1.Binding{
+	binding := v1.Pipe{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       kind,
 			APIVersion: v1.SchemeGroupVersion.String(),
@@ -178,7 +178,7 @@ func findCreator(integration *v1.Integration) (string, string) {
 	if kind == "" && name == "" {
 		// Look up in OwnerReferences in case creator labels are absent
 		for _, owner := range integration.GetOwnerReferences() {
-			if owner.Kind == v1.BindingKind {
+			if owner.Kind == v1.PipeKind {
 				return owner.Kind, owner.Name
 			}
 		}

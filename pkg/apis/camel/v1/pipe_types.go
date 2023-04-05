@@ -24,40 +24,40 @@ import (
 
 // +genclient
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=bindings,scope=Namespaced,shortName=bd,categories=kamel;camel
+// +kubebuilder:resource:path=pipes,scope=Namespaced,shortName=pp,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
 // +genclient:method=UpdateScale,verb=update,subresource=scale,input=k8s.io/api/autoscaling/v1.Scale,result=k8s.io/api/autoscaling/v1.Scale
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
-// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="TheBinding phase"
+// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Pipe phase"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
 
-// Binding is the Schema for the kamelets binding API
-type Binding struct {
+// Pipe is the Schema for the Pipe API
+type Pipe struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	// the specification of a Binding
-	Spec BindingSpec `json:"spec,omitempty"`
-	// the status of a Binding
-	Status BindingStatus `json:"status,omitempty"`
+	// the specification of a Pipe
+	Spec PipeSpec `json:"spec,omitempty"`
+	// the status of a Pipe
+	Status PipeStatus `json:"status,omitempty"`
 }
 
-// BindingSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
-type BindingSpec struct {
+// PipeSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
+type PipeSpec struct {
 	// Integration is an optional integration used to specify custom parameters
 	Integration *IntegrationSpec `json:"integration,omitempty"`
-	// Source is the starting point of the integration defined by this binding
+	// Source is the starting point of the integration defined by this Pipe
 	Source Endpoint `json:"source,omitempty"`
-	// Sink is the destination of the integration defined by this binding
+	// Sink is the destination of the integration defined by this Pipe
 	Sink Endpoint `json:"sink,omitempty"`
 	// ErrorHandler is an optional handler called upon an error occuring in the integration
 	ErrorHandler *ErrorHandlerSpec `json:"errorHandler,omitempty"`
 	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
 	Steps []Endpoint `json:"steps,omitempty"`
-	// Replicas is the number of desired replicas for the binding
+	// Replicas is the number of desired replicas for the Pipe
 	Replicas *int32 `json:"replicas,omitempty"`
-	// Custom SA to use for the binding
+	// Custom SA to use for the Pipe
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
@@ -95,24 +95,24 @@ type EndpointProperties struct {
 	RawMessage `json:",inline"`
 }
 
-// BindingStatus specify the status of a binding
-type BindingStatus struct {
-	// ObservedGeneration is the most recent generation observed for this Binding.
+// PipeStatus specify the status of a Pipe
+type PipeStatus struct {
+	// ObservedGeneration is the most recent generation observed for this Pipe.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// Phase --
-	Phase BindingPhase `json:"phase,omitempty"`
+	Phase PipePhase `json:"phase,omitempty"`
 	// Conditions --
-	Conditions []BindingCondition `json:"conditions,omitempty"`
-	// Replicas is the number of actual replicas of the binding
+	Conditions []PipeCondition `json:"conditions,omitempty"`
+	// Replicas is the number of actual replicas of the pipe
 	Replicas *int32 `json:"replicas,omitempty"`
-	// Selector allows to identify pods belonging to the binding
+	// Selector allows to identify pods belonging to the pipe
 	Selector string `json:"selector,omitempty"`
 }
 
-// BindingCondition describes the state of a resource at a certain point.
-type BindingCondition struct {
-	// Type of binding condition.
-	Type BindingConditionType `json:"type"`
+// PipeCondition describes the state of a resource at a certain point.
+type PipeCondition struct {
+	// Type of pipe condition.
+	Type PipeConditionType `json:"type"`
 	// Status of the condition, one of True, False, Unknown.
 	Status corev1.ConditionStatus `json:"status"`
 	// The last time this condition was updated.
@@ -127,38 +127,38 @@ type BindingCondition struct {
 	Pods []PodCondition `json:"pods,omitempty"`
 }
 
-// BindingConditionType --
-type BindingConditionType string
+// PipeConditionType --
+type PipeConditionType string
 
 const (
-	// BindingConditionReady --
-	BindingConditionReady BindingConditionType = "Ready"
-	// BindingIntegrationConditionError is used to report the error on the generated Integration
-	BindingIntegrationConditionError BindingConditionType = "IntegrationError"
+	// PipeConditionReady --
+	PipeConditionReady PipeConditionType = "Ready"
+	// PipeIntegrationConditionError is used to report the error on the generated Integration
+	PipeIntegrationConditionError PipeConditionType = "IntegrationError"
 )
 
-// BindingPhase --
-type BindingPhase string
+// PipePhase --
+type PipePhase string
 
 const (
-	// BindingKind --
-	BindingKind string = "Binding"
+	// PipeKind --
+	PipeKind string = "Pipe"
 
-	// BindingPhaseNone --
-	BindingPhaseNone BindingPhase = ""
-	// BindingPhaseCreating --
-	BindingPhaseCreating BindingPhase = "Creating"
-	// BindingPhaseError --
-	BindingPhaseError BindingPhase = "Error"
-	// BindingPhaseReady --
-	BindingPhaseReady BindingPhase = "Ready"
+	// PipePhaseNone --
+	PipePhaseNone PipePhase = ""
+	// PipePhaseCreating --
+	PipePhaseCreating PipePhase = "Creating"
+	// PipePhaseError --
+	PipePhaseError PipePhase = "Error"
+	// PipePhaseReady --
+	PipePhaseReady PipePhase = "Ready"
 )
 
 // +kubebuilder:object:root=true
 
-// BindingList contains a list of Binding
-type BindingList struct {
+// PipeList contains a list of Pipe
+type PipeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Binding `json:"items"`
+	Items           []Pipe `json:"items"`
 }

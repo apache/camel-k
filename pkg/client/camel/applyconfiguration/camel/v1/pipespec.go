@@ -19,9 +19,9 @@ limitations under the License.
 
 package v1
 
-// BindingSpecApplyConfiguration represents an declarative configuration of the BindingSpec type for use
+// PipeSpecApplyConfiguration represents an declarative configuration of the PipeSpec type for use
 // with apply.
-type BindingSpecApplyConfiguration struct {
+type PipeSpecApplyConfiguration struct {
 	Integration        *IntegrationSpecApplyConfiguration  `json:"integration,omitempty"`
 	Source             *EndpointApplyConfiguration         `json:"source,omitempty"`
 	Sink               *EndpointApplyConfiguration         `json:"sink,omitempty"`
@@ -31,16 +31,16 @@ type BindingSpecApplyConfiguration struct {
 	ServiceAccountName *string                             `json:"serviceAccountName,omitempty"`
 }
 
-// BindingSpecApplyConfiguration constructs an declarative configuration of the BindingSpec type for use with
+// PipeSpecApplyConfiguration constructs an declarative configuration of the PipeSpec type for use with
 // apply.
-func BindingSpec() *BindingSpecApplyConfiguration {
-	return &BindingSpecApplyConfiguration{}
+func PipeSpec() *PipeSpecApplyConfiguration {
+	return &PipeSpecApplyConfiguration{}
 }
 
 // WithIntegration sets the Integration field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Integration field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithIntegration(value *IntegrationSpecApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *PipeSpecApplyConfiguration) WithIntegration(value *IntegrationSpecApplyConfiguration) *PipeSpecApplyConfiguration {
 	b.Integration = value
 	return b
 }
@@ -48,7 +48,7 @@ func (b *BindingSpecApplyConfiguration) WithIntegration(value *IntegrationSpecAp
 // WithSource sets the Source field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Source field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithSource(value *EndpointApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *PipeSpecApplyConfiguration) WithSource(value *EndpointApplyConfiguration) *PipeSpecApplyConfiguration {
 	b.Source = value
 	return b
 }
@@ -56,7 +56,7 @@ func (b *BindingSpecApplyConfiguration) WithSource(value *EndpointApplyConfigura
 // WithSink sets the Sink field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Sink field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithSink(value *EndpointApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *PipeSpecApplyConfiguration) WithSink(value *EndpointApplyConfiguration) *PipeSpecApplyConfiguration {
 	b.Sink = value
 	return b
 }
@@ -64,7 +64,7 @@ func (b *BindingSpecApplyConfiguration) WithSink(value *EndpointApplyConfigurati
 // WithErrorHandler sets the ErrorHandler field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ErrorHandler field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithErrorHandler(value *ErrorHandlerSpecApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *PipeSpecApplyConfiguration) WithErrorHandler(value *ErrorHandlerSpecApplyConfiguration) *PipeSpecApplyConfiguration {
 	b.ErrorHandler = value
 	return b
 }
@@ -72,7 +72,7 @@ func (b *BindingSpecApplyConfiguration) WithErrorHandler(value *ErrorHandlerSpec
 // WithSteps adds the given value to the Steps field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Steps field.
-func (b *BindingSpecApplyConfiguration) WithSteps(values ...*EndpointApplyConfiguration) *BindingSpecApplyConfiguration {
+func (b *PipeSpecApplyConfiguration) WithSteps(values ...*EndpointApplyConfiguration) *PipeSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithSteps")
@@ -85,7 +85,7 @@ func (b *BindingSpecApplyConfiguration) WithSteps(values ...*EndpointApplyConfig
 // WithReplicas sets the Replicas field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Replicas field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithReplicas(value int32) *BindingSpecApplyConfiguration {
+func (b *PipeSpecApplyConfiguration) WithReplicas(value int32) *PipeSpecApplyConfiguration {
 	b.Replicas = &value
 	return b
 }
@@ -93,7 +93,7 @@ func (b *BindingSpecApplyConfiguration) WithReplicas(value int32) *BindingSpecAp
 // WithServiceAccountName sets the ServiceAccountName field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ServiceAccountName field is set to the value of the last call.
-func (b *BindingSpecApplyConfiguration) WithServiceAccountName(value string) *BindingSpecApplyConfiguration {
+func (b *PipeSpecApplyConfiguration) WithServiceAccountName(value string) *PipeSpecApplyConfiguration {
 	b.ServiceAccountName = &value
 	return b
 }

@@ -3083,7 +3083,7 @@ map[string]string
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.Integration">Integration</a>,
-<a href="#camel.apache.org/v1.BindingSpec">BindingSpec</a>)
+<a href="#camel.apache.org/v1.PipeSpec">BindingSpec</a>)
 </p>
 <div>
 <p>IntegrationSpec defines the desired state of Integration</p>
@@ -4968,7 +4968,7 @@ Resource Types:
 <ul><li>
 <a href="#camel.apache.org/v1.Kamelet">Kamelet</a>
 </li><li>
-<a href="#camel.apache.org/v1.Binding">Binding</a>
+<a href="#camel.apache.org/v1.Pipe">Binding</a>
 </li></ul>
 <h3 id="camel.apache.org/v1.Kamelet">Kamelet
 </h3>
@@ -5114,7 +5114,7 @@ KameletStatus
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1.Binding">Binding
+<h3 id="camel.apache.org/v1.Pipe">Binding
 </h3>
 <div>
 <p>Binding is the Schema for the kamelets binding API</p>
@@ -5162,7 +5162,7 @@ Refer to the Kubernetes API documentation for the fields of the
 <td>
 <code>spec</code><br/>
 <em>
-<a href="#camel.apache.org/v1.BindingSpec">
+<a href="#camel.apache.org/v1.PipeSpec">
 BindingSpec
 </a>
 </em>
@@ -5254,7 +5254,7 @@ int32
 <td>
 <code>status</code><br/>
 <em>
-<a href="#camel.apache.org/v1.BindingStatus">
+<a href="#camel.apache.org/v1.PipeStatus">
 BindingStatus
 </a>
 </em>
@@ -5305,7 +5305,7 @@ RawMessage
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1alpha1.ErrorHandlerSink">ErrorHandlerSink</a>,
-<a href="#camel.apache.org/v1.BindingSpec">BindingSpec</a>)
+<a href="#camel.apache.org/v1.PipeSpec">BindingSpec</a>)
 </p>
 <div>
 <p>Endpoint represents a source/sink external entity</p>
@@ -5549,7 +5549,7 @@ Endpoint
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BindingSpec">BindingSpec</a>)
+<a href="#camel.apache.org/v1.PipeSpec">BindingSpec</a>)
 </p>
 <div>
 <p>ErrorHandlerSpec represents an unstructured object for an error handler</p>
@@ -6111,11 +6111,11 @@ string
 <div>
 <p>JSONSchemaURL represents a schema url.</p>
 </div>
-<h3 id="camel.apache.org/v1.BindingCondition">BindingCondition
+<h3 id="camel.apache.org/v1.PipeCondition">BindingCondition
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BindingStatus">BindingStatus</a>)
+<a href="#camel.apache.org/v1.PipeStatus">BindingStatus</a>)
 </p>
 <div>
 <p>BindingCondition describes the state of a resource at a certain point.</p>
@@ -6132,7 +6132,7 @@ string
 <td>
 <code>type</code><br/>
 <em>
-<a href="#camel.apache.org/v1.BindingConditionType">
+<a href="#camel.apache.org/v1.PipeConditionType">
 BindingConditionType
 </a>
 </em>
@@ -6204,27 +6204,27 @@ string
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1.BindingConditionType">BindingConditionType
+<h3 id="camel.apache.org/v1.PipeConditionType">BindingConditionType
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BindingCondition">BindingCondition</a>)
+<a href="#camel.apache.org/v1.PipeCondition">BindingCondition</a>)
 </p>
 <div>
 </div>
-<h3 id="camel.apache.org/v1.BindingPhase">BindingPhase
+<h3 id="camel.apache.org/v1.PipePhase">BindingPhase
 (<code>string</code> alias)</h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.BindingStatus">BindingStatus</a>)
+<a href="#camel.apache.org/v1.PipeStatus">BindingStatus</a>)
 </p>
 <div>
 </div>
-<h3 id="camel.apache.org/v1.BindingSpec">BindingSpec
+<h3 id="camel.apache.org/v1.PipeSpec">BindingSpec
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Binding">Binding</a>)
+<a href="#camel.apache.org/v1.Pipe">Binding</a>)
 </p>
 <div>
 <p>BindingSpec &ndash;</p>
@@ -6315,11 +6315,11 @@ int32
 </tr>
 </tbody>
 </table>
-<h3 id="camel.apache.org/v1.BindingStatus">BindingStatus
+<h3 id="camel.apache.org/v1.PipeStatus">BindingStatus
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#camel.apache.org/v1.Binding">Binding</a>)
+<a href="#camel.apache.org/v1.Pipe">Binding</a>)
 </p>
 <div>
 <p>BindingStatus &ndash;</p>
@@ -6336,7 +6336,7 @@ int32
 <td>
 <code>phase</code><br/>
 <em>
-<a href="#camel.apache.org/v1.BindingPhase">
+<a href="#camel.apache.org/v1.PipePhase">
 BindingPhase
 </a>
 </em>
@@ -6349,7 +6349,7 @@ BindingPhase
 <td>
 <code>conditions</code><br/>
 <em>
-<a href="#camel.apache.org/v1.BindingCondition">
+<a href="#camel.apache.org/v1.PipeCondition">
 []BindingCondition
 </a>
 </em>

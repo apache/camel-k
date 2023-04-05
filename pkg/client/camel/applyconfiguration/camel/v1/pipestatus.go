@@ -23,26 +23,26 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// BindingStatusApplyConfiguration represents an declarative configuration of the BindingStatus type for use
+// PipeStatusApplyConfiguration represents an declarative configuration of the PipeStatus type for use
 // with apply.
-type BindingStatusApplyConfiguration struct {
-	ObservedGeneration *int64                               `json:"observedGeneration,omitempty"`
-	Phase              *v1.BindingPhase                     `json:"phase,omitempty"`
-	Conditions         []BindingConditionApplyConfiguration `json:"conditions,omitempty"`
-	Replicas           *int32                               `json:"replicas,omitempty"`
-	Selector           *string                              `json:"selector,omitempty"`
+type PipeStatusApplyConfiguration struct {
+	ObservedGeneration *int64                            `json:"observedGeneration,omitempty"`
+	Phase              *v1.PipePhase                     `json:"phase,omitempty"`
+	Conditions         []PipeConditionApplyConfiguration `json:"conditions,omitempty"`
+	Replicas           *int32                            `json:"replicas,omitempty"`
+	Selector           *string                           `json:"selector,omitempty"`
 }
 
-// BindingStatusApplyConfiguration constructs an declarative configuration of the BindingStatus type for use with
+// PipeStatusApplyConfiguration constructs an declarative configuration of the PipeStatus type for use with
 // apply.
-func BindingStatus() *BindingStatusApplyConfiguration {
-	return &BindingStatusApplyConfiguration{}
+func PipeStatus() *PipeStatusApplyConfiguration {
+	return &PipeStatusApplyConfiguration{}
 }
 
 // WithObservedGeneration sets the ObservedGeneration field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ObservedGeneration field is set to the value of the last call.
-func (b *BindingStatusApplyConfiguration) WithObservedGeneration(value int64) *BindingStatusApplyConfiguration {
+func (b *PipeStatusApplyConfiguration) WithObservedGeneration(value int64) *PipeStatusApplyConfiguration {
 	b.ObservedGeneration = &value
 	return b
 }
@@ -50,7 +50,7 @@ func (b *BindingStatusApplyConfiguration) WithObservedGeneration(value int64) *B
 // WithPhase sets the Phase field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Phase field is set to the value of the last call.
-func (b *BindingStatusApplyConfiguration) WithPhase(value v1.BindingPhase) *BindingStatusApplyConfiguration {
+func (b *PipeStatusApplyConfiguration) WithPhase(value v1.PipePhase) *PipeStatusApplyConfiguration {
 	b.Phase = &value
 	return b
 }
@@ -58,7 +58,7 @@ func (b *BindingStatusApplyConfiguration) WithPhase(value v1.BindingPhase) *Bind
 // WithConditions adds the given value to the Conditions field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Conditions field.
-func (b *BindingStatusApplyConfiguration) WithConditions(values ...*BindingConditionApplyConfiguration) *BindingStatusApplyConfiguration {
+func (b *PipeStatusApplyConfiguration) WithConditions(values ...*PipeConditionApplyConfiguration) *PipeStatusApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithConditions")
@@ -71,7 +71,7 @@ func (b *BindingStatusApplyConfiguration) WithConditions(values ...*BindingCondi
 // WithReplicas sets the Replicas field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Replicas field is set to the value of the last call.
-func (b *BindingStatusApplyConfiguration) WithReplicas(value int32) *BindingStatusApplyConfiguration {
+func (b *PipeStatusApplyConfiguration) WithReplicas(value int32) *PipeStatusApplyConfiguration {
 	b.Replicas = &value
 	return b
 }
@@ -79,7 +79,7 @@ func (b *BindingStatusApplyConfiguration) WithReplicas(value int32) *BindingStat
 // WithSelector sets the Selector field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Selector field is set to the value of the last call.
-func (b *BindingStatusApplyConfiguration) WithSelector(value string) *BindingStatusApplyConfiguration {
+func (b *PipeStatusApplyConfiguration) WithSelector(value string) *PipeStatusApplyConfiguration {
 	b.Selector = &value
 	return b
 }

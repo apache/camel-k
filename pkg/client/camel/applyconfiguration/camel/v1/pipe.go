@@ -25,22 +25,22 @@ import (
 	v1 "k8s.io/client-go/applyconfigurations/meta/v1"
 )
 
-// BindingApplyConfiguration represents an declarative configuration of the Binding type for use
+// PipeApplyConfiguration represents an declarative configuration of the Pipe type for use
 // with apply.
-type BindingApplyConfiguration struct {
+type PipeApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
 	*v1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                             *BindingSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                           *BindingStatusApplyConfiguration `json:"status,omitempty"`
+	Spec                             *PipeSpecApplyConfiguration   `json:"spec,omitempty"`
+	Status                           *PipeStatusApplyConfiguration `json:"status,omitempty"`
 }
 
-// Binding constructs an declarative configuration of the Binding type for use with
+// Pipe constructs an declarative configuration of the Pipe type for use with
 // apply.
-func Binding(name, namespace string) *BindingApplyConfiguration {
-	b := &BindingApplyConfiguration{}
+func Pipe(name, namespace string) *PipeApplyConfiguration {
+	b := &PipeApplyConfiguration{}
 	b.WithName(name)
 	b.WithNamespace(namespace)
-	b.WithKind("Binding")
+	b.WithKind("Pipe")
 	b.WithAPIVersion("camel.apache.org/v1")
 	return b
 }
@@ -48,7 +48,7 @@ func Binding(name, namespace string) *BindingApplyConfiguration {
 // WithKind sets the Kind field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kind field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithKind(value string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithKind(value string) *PipeApplyConfiguration {
 	b.Kind = &value
 	return b
 }
@@ -56,7 +56,7 @@ func (b *BindingApplyConfiguration) WithKind(value string) *BindingApplyConfigur
 // WithAPIVersion sets the APIVersion field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the APIVersion field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithAPIVersion(value string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithAPIVersion(value string) *PipeApplyConfiguration {
 	b.APIVersion = &value
 	return b
 }
@@ -64,7 +64,7 @@ func (b *BindingApplyConfiguration) WithAPIVersion(value string) *BindingApplyCo
 // WithName sets the Name field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Name field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithName(value string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithName(value string) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.Name = &value
 	return b
@@ -73,7 +73,7 @@ func (b *BindingApplyConfiguration) WithName(value string) *BindingApplyConfigur
 // WithGenerateName sets the GenerateName field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the GenerateName field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithGenerateName(value string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithGenerateName(value string) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.GenerateName = &value
 	return b
@@ -82,7 +82,7 @@ func (b *BindingApplyConfiguration) WithGenerateName(value string) *BindingApply
 // WithNamespace sets the Namespace field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Namespace field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithNamespace(value string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithNamespace(value string) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.Namespace = &value
 	return b
@@ -91,7 +91,7 @@ func (b *BindingApplyConfiguration) WithNamespace(value string) *BindingApplyCon
 // WithUID sets the UID field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the UID field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithUID(value types.UID) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithUID(value types.UID) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.UID = &value
 	return b
@@ -100,7 +100,7 @@ func (b *BindingApplyConfiguration) WithUID(value types.UID) *BindingApplyConfig
 // WithResourceVersion sets the ResourceVersion field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ResourceVersion field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithResourceVersion(value string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithResourceVersion(value string) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.ResourceVersion = &value
 	return b
@@ -109,7 +109,7 @@ func (b *BindingApplyConfiguration) WithResourceVersion(value string) *BindingAp
 // WithGeneration sets the Generation field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Generation field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithGeneration(value int64) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithGeneration(value int64) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.Generation = &value
 	return b
@@ -118,7 +118,7 @@ func (b *BindingApplyConfiguration) WithGeneration(value int64) *BindingApplyCon
 // WithCreationTimestamp sets the CreationTimestamp field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the CreationTimestamp field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithCreationTimestamp(value metav1.Time) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithCreationTimestamp(value metav1.Time) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.CreationTimestamp = &value
 	return b
@@ -127,7 +127,7 @@ func (b *BindingApplyConfiguration) WithCreationTimestamp(value metav1.Time) *Bi
 // WithDeletionTimestamp sets the DeletionTimestamp field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the DeletionTimestamp field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.DeletionTimestamp = &value
 	return b
@@ -136,7 +136,7 @@ func (b *BindingApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *Bi
 // WithDeletionGracePeriodSeconds sets the DeletionGracePeriodSeconds field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the DeletionGracePeriodSeconds field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	b.DeletionGracePeriodSeconds = &value
 	return b
@@ -146,7 +146,7 @@ func (b *BindingApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) 
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, the entries provided by each call will be put on the Labels field,
 // overwriting an existing map entries in Labels field with the same key.
-func (b *BindingApplyConfiguration) WithLabels(entries map[string]string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithLabels(entries map[string]string) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	if b.Labels == nil && len(entries) > 0 {
 		b.Labels = make(map[string]string, len(entries))
@@ -161,7 +161,7 @@ func (b *BindingApplyConfiguration) WithLabels(entries map[string]string) *Bindi
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, the entries provided by each call will be put on the Annotations field,
 // overwriting an existing map entries in Annotations field with the same key.
-func (b *BindingApplyConfiguration) WithAnnotations(entries map[string]string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithAnnotations(entries map[string]string) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	if b.Annotations == nil && len(entries) > 0 {
 		b.Annotations = make(map[string]string, len(entries))
@@ -175,7 +175,7 @@ func (b *BindingApplyConfiguration) WithAnnotations(entries map[string]string) *
 // WithOwnerReferences adds the given value to the OwnerReferences field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the OwnerReferences field.
-func (b *BindingApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerReferenceApplyConfiguration) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerReferenceApplyConfiguration) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	for i := range values {
 		if values[i] == nil {
@@ -189,7 +189,7 @@ func (b *BindingApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerRefer
 // WithFinalizers adds the given value to the Finalizers field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Finalizers field.
-func (b *BindingApplyConfiguration) WithFinalizers(values ...string) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithFinalizers(values ...string) *PipeApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	for i := range values {
 		b.Finalizers = append(b.Finalizers, values[i])
@@ -197,7 +197,7 @@ func (b *BindingApplyConfiguration) WithFinalizers(values ...string) *BindingApp
 	return b
 }
 
-func (b *BindingApplyConfiguration) ensureObjectMetaApplyConfigurationExists() {
+func (b *PipeApplyConfiguration) ensureObjectMetaApplyConfigurationExists() {
 	if b.ObjectMetaApplyConfiguration == nil {
 		b.ObjectMetaApplyConfiguration = &v1.ObjectMetaApplyConfiguration{}
 	}
@@ -206,7 +206,7 @@ func (b *BindingApplyConfiguration) ensureObjectMetaApplyConfigurationExists() {
 // WithSpec sets the Spec field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Spec field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithSpec(value *BindingSpecApplyConfiguration) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithSpec(value *PipeSpecApplyConfiguration) *PipeApplyConfiguration {
 	b.Spec = value
 	return b
 }
@@ -214,7 +214,7 @@ func (b *BindingApplyConfiguration) WithSpec(value *BindingSpecApplyConfiguratio
 // WithStatus sets the Status field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Status field is set to the value of the last call.
-func (b *BindingApplyConfiguration) WithStatus(value *BindingStatusApplyConfiguration) *BindingApplyConfiguration {
+func (b *PipeApplyConfiguration) WithStatus(value *PipeStatusApplyConfiguration) *PipeApplyConfiguration {
 	b.Status = value
 	return b
 }

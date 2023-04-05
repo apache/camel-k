@@ -25,8 +25,6 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// Bindings returns a BindingInformer.
-	Bindings() BindingInformer
 	// Builds returns a BuildInformer.
 	Builds() BuildInformer
 	// CamelCatalogs returns a CamelCatalogInformer.
@@ -39,6 +37,8 @@ type Interface interface {
 	IntegrationPlatforms() IntegrationPlatformInformer
 	// Kamelets returns a KameletInformer.
 	Kamelets() KameletInformer
+	// Pipes returns a PipeInformer.
+	Pipes() PipeInformer
 }
 
 type version struct {
@@ -50,11 +50,6 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
-}
-
-// Bindings returns a BindingInformer.
-func (v *version) Bindings() BindingInformer {
-	return &bindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // Builds returns a BuildInformer.
@@ -85,4 +80,9 @@ func (v *version) IntegrationPlatforms() IntegrationPlatformInformer {
 // Kamelets returns a KameletInformer.
 func (v *version) Kamelets() KameletInformer {
 	return &kameletInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Pipes returns a PipeInformer.
+func (v *version) Pipes() PipeInformer {
+	return &pipeInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

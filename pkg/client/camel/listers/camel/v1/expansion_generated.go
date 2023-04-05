@@ -19,14 +19,6 @@ limitations under the License.
 
 package v1
 
-// BindingListerExpansion allows custom methods to be added to
-// BindingLister.
-type BindingListerExpansion interface{}
-
-// BindingNamespaceListerExpansion allows custom methods to be added to
-// BindingNamespaceLister.
-type BindingNamespaceListerExpansion interface{}
-
 // BuildListerExpansion allows custom methods to be added to
 // BuildLister.
 type BuildListerExpansion interface{}
@@ -74,3 +66,11 @@ type KameletListerExpansion interface{}
 // KameletNamespaceListerExpansion allows custom methods to be added to
 // KameletNamespaceLister.
 type KameletNamespaceListerExpansion interface{}
+
+// PipeListerExpansion allows custom methods to be added to
+// PipeLister.
+type PipeListerExpansion interface{}
+
+// PipeNamespaceListerExpansion allows custom methods to be added to
+// PipeNamespaceLister.
+type PipeNamespaceListerExpansion interface{}

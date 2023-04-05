@@ -25,10 +25,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// BindingConditionApplyConfiguration represents an declarative configuration of the BindingCondition type for use
+// PipeConditionApplyConfiguration represents an declarative configuration of the PipeCondition type for use
 // with apply.
-type BindingConditionApplyConfiguration struct {
-	Type               *v1.BindingConditionType         `json:"type,omitempty"`
+type PipeConditionApplyConfiguration struct {
+	Type               *v1.PipeConditionType            `json:"type,omitempty"`
 	Status             *corev1.ConditionStatus          `json:"status,omitempty"`
 	LastUpdateTime     *metav1.Time                     `json:"lastUpdateTime,omitempty"`
 	LastTransitionTime *metav1.Time                     `json:"lastTransitionTime,omitempty"`
@@ -37,16 +37,16 @@ type BindingConditionApplyConfiguration struct {
 	Pods               []PodConditionApplyConfiguration `json:"pods,omitempty"`
 }
 
-// BindingConditionApplyConfiguration constructs an declarative configuration of the BindingCondition type for use with
+// PipeConditionApplyConfiguration constructs an declarative configuration of the PipeCondition type for use with
 // apply.
-func BindingCondition() *BindingConditionApplyConfiguration {
-	return &BindingConditionApplyConfiguration{}
+func PipeCondition() *PipeConditionApplyConfiguration {
+	return &PipeConditionApplyConfiguration{}
 }
 
 // WithType sets the Type field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Type field is set to the value of the last call.
-func (b *BindingConditionApplyConfiguration) WithType(value v1.BindingConditionType) *BindingConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithType(value v1.PipeConditionType) *PipeConditionApplyConfiguration {
 	b.Type = &value
 	return b
 }
@@ -54,7 +54,7 @@ func (b *BindingConditionApplyConfiguration) WithType(value v1.BindingConditionT
 // WithStatus sets the Status field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Status field is set to the value of the last call.
-func (b *BindingConditionApplyConfiguration) WithStatus(value corev1.ConditionStatus) *BindingConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithStatus(value corev1.ConditionStatus) *PipeConditionApplyConfiguration {
 	b.Status = &value
 	return b
 }
@@ -62,7 +62,7 @@ func (b *BindingConditionApplyConfiguration) WithStatus(value corev1.ConditionSt
 // WithLastUpdateTime sets the LastUpdateTime field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the LastUpdateTime field is set to the value of the last call.
-func (b *BindingConditionApplyConfiguration) WithLastUpdateTime(value metav1.Time) *BindingConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithLastUpdateTime(value metav1.Time) *PipeConditionApplyConfiguration {
 	b.LastUpdateTime = &value
 	return b
 }
@@ -70,7 +70,7 @@ func (b *BindingConditionApplyConfiguration) WithLastUpdateTime(value metav1.Tim
 // WithLastTransitionTime sets the LastTransitionTime field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the LastTransitionTime field is set to the value of the last call.
-func (b *BindingConditionApplyConfiguration) WithLastTransitionTime(value metav1.Time) *BindingConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithLastTransitionTime(value metav1.Time) *PipeConditionApplyConfiguration {
 	b.LastTransitionTime = &value
 	return b
 }
@@ -78,7 +78,7 @@ func (b *BindingConditionApplyConfiguration) WithLastTransitionTime(value metav1
 // WithReason sets the Reason field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Reason field is set to the value of the last call.
-func (b *BindingConditionApplyConfiguration) WithReason(value string) *BindingConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithReason(value string) *PipeConditionApplyConfiguration {
 	b.Reason = &value
 	return b
 }
@@ -86,7 +86,7 @@ func (b *BindingConditionApplyConfiguration) WithReason(value string) *BindingCo
 // WithMessage sets the Message field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Message field is set to the value of the last call.
-func (b *BindingConditionApplyConfiguration) WithMessage(value string) *BindingConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithMessage(value string) *PipeConditionApplyConfiguration {
 	b.Message = &value
 	return b
 }
@@ -94,7 +94,7 @@ func (b *BindingConditionApplyConfiguration) WithMessage(value string) *BindingC
 // WithPods adds the given value to the Pods field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Pods field.
-func (b *BindingConditionApplyConfiguration) WithPods(values ...*PodConditionApplyConfiguration) *BindingConditionApplyConfiguration {
+func (b *PipeConditionApplyConfiguration) WithPods(values ...*PodConditionApplyConfiguration) *PipeConditionApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithPods")

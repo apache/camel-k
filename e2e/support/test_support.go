@@ -1068,9 +1068,9 @@ func ScaleIntegration(ns string, name string, replicas int32) error {
 	})
 }
 
-func Binding(ns string, name string) func() *v1.Binding {
-	return func() *v1.Binding {
-		klb := v1.NewBinding(ns, name)
+func Binding(ns string, name string) func() *v1.Pipe {
+	return func() *v1.Pipe {
+		klb := v1.NewPipe(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
@@ -1084,8 +1084,8 @@ func Binding(ns string, name string) func() *v1.Binding {
 	}
 }
 
-func BindingPhase(ns string, name string) func() v1.BindingPhase {
-	return func() v1.BindingPhase {
+func BindingPhase(ns string, name string) func() v1.PipePhase {
+	return func() v1.PipePhase {
 		klb := Binding(ns, name)()
 		if klb == nil {
 			return ""
@@ -1114,8 +1114,8 @@ func BindingStatusReplicas(ns string, name string) func() *int32 {
 	}
 }
 
-func BindingCondition(ns string, name string, conditionType v1.BindingConditionType) func() *v1.BindingCondition {
-	return func() *v1.BindingCondition {
+func BindingCondition(ns string, name string, conditionType v1.PipeConditionType) func() *v1.PipeCondition {
+	return func() *v1.PipeCondition {
 		kb := Binding(ns, name)()
 		if kb == nil {
 			return nil
@@ -1128,28 +1128,28 @@ func BindingCondition(ns string, name string, conditionType v1.BindingConditionT
 	}
 }
 
-func BindingConditionStatusExtract(c *v1.BindingCondition) corev1.ConditionStatus {
+func BindingConditionStatusExtract(c *v1.PipeCondition) corev1.ConditionStatus {
 	if c == nil {
 		return ""
 	}
 	return c.Status
 }
 
-func BindingConditionReason(c *v1.BindingCondition) string {
+func BindingConditionReason(c *v1.PipeCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Reason
 }
 
-func BindingConditionMessage(c *v1.BindingCondition) string {
+func BindingConditionMessage(c *v1.PipeCondition) string {
 	if c == nil {
 		return ""
 	}
 	return c.Message
 }
 
-func BindingConditionStatus(ns string, name string, conditionType v1.BindingConditionType) func() corev1.ConditionStatus {
+func BindingConditionStatus(ns string, name string, conditionType v1.PipeConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
 		klb := Binding(ns, name)()
 		if klb == nil {
@@ -1163,7 +1163,7 @@ func BindingConditionStatus(ns string, name string, conditionType v1.BindingCond
 	}
 }
 
-func UpdateBinding(ns string, name string, upd func(it *v1.Binding)) error {
+func UpdateBinding(ns string, name string, upd func(it *v1.Pipe)) error {
 	klb := Binding(ns, name)()
 	if klb == nil {
 		return fmt.Errorf("noBinding named %s found", name)
@@ -1181,7 +1181,7 @@ func UpdateBinding(ns string, name string, upd func(it *v1.Binding)) error {
 }
 
 func ScaleBinding(ns string, name string, replicas int32) error {
-	return UpdateBinding(ns, name, func(klb *v1.Binding) {
+	return UpdateBinding(ns, name, func(klb *v1.Pipe) {
 		klb.Spec.Replicas = &replicas
 	})
 }
@@ -1863,7 +1863,7 @@ func CRDs() func() []metav1.APIResource {
 			reflect.TypeOf(v1.IntegrationKit{}).Name(),
 			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
 			reflect.TypeOf(v1.Kamelet{}).Name(),
-			reflect.TypeOf(v1.Binding{}).Name(),
+			reflect.TypeOf(v1.Pipe{}).Name(),
 			reflect.TypeOf(v1alpha1.KameletBinding{}).Name(),
 		}
 
@@ -2309,9 +2309,9 @@ func BindKameletTo(ns, name string, annotations map[string]string, from, to core
 func BindKameletToWithErrorHandler(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
 	sourceProperties, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
 	return func() error {
-		kb := v1.NewBinding(ns, name)
+		kb := v1.NewPipe(ns, name)
 		kb.Annotations = annotations
-		kb.Spec = v1.BindingSpec{
+		kb.Spec = v1.PipeSpec{
 			Source: v1.Endpoint{
 				Ref:        &from,
 				Properties: asEndpointProperties(sourceProperties),

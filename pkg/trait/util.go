@@ -374,13 +374,13 @@ func IntegrationKitsHaveSameTraits(i1 *v1.IntegrationKit, i2 *v1.IntegrationKit)
 	return Equals(c1, c2), nil
 }
 
-// BindingsHaveSameTraits return if traits are the same.
-func BindingsHaveSameTraits(i1 *v1.Binding, i2 *v1.Binding) (bool, error) {
-	c1, err := NewTraitsOptionsForBinding(i1)
+// PipesHaveSameTraits return if traits are the same.
+func PipesHaveSameTraits(i1 *v1.Pipe, i2 *v1.Pipe) (bool, error) {
+	c1, err := NewTraitsOptionsForPipe(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewTraitsOptionsForBinding(i2)
+	c2, err := NewTraitsOptionsForPipe(i2)
 	if err != nil {
 		return false, err
 	}
@@ -403,15 +403,15 @@ func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.Kam
 	return Equals(c1, c2), nil
 }
 
-// IntegrationAndBindingSameTraits return if traits are the same.
+// IntegrationAndPipeSameTraits return if traits are the same.
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
-func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1.Binding) (bool, error) {
+func IntegrationAndPipeSameTraits(i1 *v1.Integration, i2 *v1.Pipe) (bool, error) {
 	itOpts, err := NewTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	klbOpts, err := NewTraitsOptionsForBinding(i2)
+	klbOpts, err := NewTraitsOptionsForPipe(i2)
 	if err != nil {
 		return false, err
 	}
@@ -426,7 +426,7 @@ func IntegrationAndBindingSameTraits(i1 *v1.Integration, i2 *v1.Binding) (bool, 
 	return Equals(klbOpts, toCompare), nil
 }
 
-// IntegrationAndBindingSameTraits return if traits are the same.
+// IntegrationAndKameletBindingSameTraits return if traits are the same.
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
 // Deprecated.
@@ -518,7 +518,7 @@ func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options,
 	return m1, nil
 }
 
-func NewTraitsOptionsForBinding(i *v1.Binding) (Options, error) {
+func NewTraitsOptionsForPipe(i *v1.Pipe) (Options, error) {
 	if i.Spec.Integration != nil {
 		m1, err := ToTraitMap(i.Spec.Integration.Traits)
 		if err != nil {

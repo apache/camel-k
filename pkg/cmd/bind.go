@@ -60,9 +60,9 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().Bool("skip-checks", false, "Do not verify the binding for compliance with Kamelets and other Kubernetes resources")
 	cmd.Flags().StringArray("step", nil, `Add binding steps as Kubernetes resources. Endpoints are expected in the format "[[apigroup/]version:]kind:[namespace/]name", plain Camel URIs or Kamelet name.`)
 	cmd.Flags().StringArrayP("trait", "t", nil, `Add a trait to the corresponding Integration.`)
-	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage thisBinding.")
-	cmd.Flags().StringArray("annotation", nil, "Add an annotation to theBinding. E.g. \"--annotation my.company=hello\"")
-	cmd.Flags().Bool("force", false, "Force creation ofBinding regardless of potential misconfiguration.")
+	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this Pipe.")
+	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Pipe. E.g. \"--annotation my.company=hello\"")
+	cmd.Flags().Bool("force", false, "Force creation of Pipe regardless of potential misconfiguration.")
 	cmd.Flags().String("service-account", "", "The SA to use to run this binding")
 
 	return &cmd, &options
@@ -190,12 +190,12 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	name := o.nameFor(source, sink)
 
-	binding := v1.Binding{
+	binding := v1.Pipe{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: o.Namespace,
 			Name:      name,
 		},
-		Spec: v1.BindingSpec{
+		Spec: v1.PipeSpec{
 			Source: source,
 			Sink:   sink,
 		},
@@ -264,7 +264,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if o.OutputFormat != "" {
-		return showBindingOutput(cmd, &binding, o.OutputFormat, client.GetScheme())
+		return showPipeOutput(cmd, &binding, o.OutputFormat, client.GetScheme())
 	}
 
 	replaced, err := kubernetes.ReplaceResource(o.Context, client, &binding)
@@ -280,7 +280,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func showBindingOutput(cmd *cobra.Command, binding *v1.Binding, outputFormat string, scheme runtime.ObjectTyper) error {
+func showPipeOutput(cmd *cobra.Command, binding *v1.Pipe, outputFormat string, scheme runtime.ObjectTyper) error {
 	printer := printers.NewTypeSetter(scheme)
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,

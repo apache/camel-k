@@ -15,12 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package pipe
 
-import (
-	"github.com/apache/camel-k/v2/pkg/controller/binding"
-)
+import "github.com/apache/camel-k/v2/pkg/util/log"
 
-func init() {
-	addToManager = append(addToManager, binding.Add)
-}
+// Log --.
+var Log = log.Log.WithName("controller").WithName("pipe")

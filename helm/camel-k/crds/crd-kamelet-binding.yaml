@@ -48,7 +48,7 @@ spec:
       name: Replicas
       type: integer
     deprecated: true
-    deprecationWarning: v1apha1.KameletBinding is deprecated, please, use v1.Binding
+    deprecationWarning: v1apha1.KameletBinding is deprecated, please, use v1.Pipe
       instead
     name: v1alpha1
     schema:
