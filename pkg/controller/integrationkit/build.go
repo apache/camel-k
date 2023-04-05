@@ -146,6 +146,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				BuilderPodNamespace: builderPodNamespace,
 				Tasks:               env.BuildTasks,
 				Timeout:             timeout,
+				MaxRunningBuilds:    env.Platform.Status.Build.MaxRunningBuilds,
 			},
 		}
 

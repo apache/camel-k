@@ -197,6 +197,7 @@ type installCmdOptions struct {
 	MavenCASecret               string   `mapstructure:"maven-ca-secret"`
 	MavenCLIOptions             []string `mapstructure:"maven-cli-options"`
 	HealthPort                  int32    `mapstructure:"health-port"`
+	MaxRunningBuilds            int32    `mapstructure:"max-running-builds"`
 	Monitoring                  bool     `mapstructure:"monitoring"`
 	MonitoringPort              int32    `mapstructure:"monitoring-port"`
 	TraitProfile                string   `mapstructure:"trait-profile"`
@@ -539,6 +540,10 @@ func (o *installCmdOptions) setupIntegrationPlatform(
 			Duration: d,
 		}
 	}
+	if o.MaxRunningBuilds > 0 {
+		platform.Spec.Build.MaxRunningBuilds = o.MaxRunningBuilds
+	}
+
 	if o.TraitProfile != "" {
 		platform.Spec.Profile = v1.TraitProfileByName(o.TraitProfile)
 	}

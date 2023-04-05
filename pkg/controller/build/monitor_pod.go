@@ -99,6 +99,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			// Emulate context cancellation
 			build.Status.Phase = v1.BuildPhaseInterrupted
 			build.Status.Error = "Pod deleted"
+			monitorFinishedBuild(build)
 			return build, nil
 		}
 	}
@@ -121,6 +122,12 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 				// Requeue
 				return nil, err
 			}
+
+			monitorFinishedBuild(build)
+		} else {
+			// Monitor running state of the build - this may have been done already by the schedule action but the build monitor is idempotent
+			// We do this here to potentially restore the running build state in the monitor in case of an operator restart
+			monitorRunningBuild(build)
 		}
 
 	case corev1.PodSucceeded:
@@ -133,6 +140,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		finishedAt := action.getTerminatedTime(pod)
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
+
+		monitorFinishedBuild(build)
 
 		buildCreator := kubernetes.GetCamelCreator(build)
 		// Account for the Build metrics
@@ -179,6 +188,8 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		finishedAt := action.getTerminatedTime(pod)
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
+
+		monitorFinishedBuild(build)
 
 		buildCreator := kubernetes.GetCamelCreator(build)
 		// Account for the Build metrics

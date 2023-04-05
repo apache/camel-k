@@ -37,6 +37,7 @@ type IntegrationPlatformBuildSpecApplyConfiguration struct {
 	Timeout                 *metav1.Duration                            `json:"timeout,omitempty"`
 	Maven                   *MavenSpecApplyConfiguration                `json:"maven,omitempty"`
 	PublishStrategyOptions  map[string]string                           `json:"PublishStrategyOptions,omitempty"`
+	MaxRunningBuilds        *int32                                      `json:"maxRunningBuilds,omitempty"`
 }
 
 // IntegrationPlatformBuildSpecApplyConfiguration constructs an declarative configuration of the IntegrationPlatformBuildSpec type for use with
@@ -128,5 +129,13 @@ func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithPublishStrategyOpti
 	for k, v := range entries {
 		b.PublishStrategyOptions[k] = v
 	}
+	return b
+}
+
+// WithMaxRunningBuilds sets the MaxRunningBuilds field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the MaxRunningBuilds field is set to the value of the last call.
+func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithMaxRunningBuilds(value int32) *IntegrationPlatformBuildSpecApplyConfiguration {
+	b.MaxRunningBuilds = &value
 	return b
 }

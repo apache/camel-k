@@ -79,6 +79,11 @@ spec:
           spec:
             description: BuildSpec defines the Build operation to be executed
             properties:
+              maxRunningBuilds:
+                description: the maximum amount of parallel running builds started
+                  by this operator instance
+                format: int32
+                type: integer
               operatorNamespace:
                 description: The namespace where to run the builder Pod (must be the
                   same of the operator in charge of this Build reconciliation).
