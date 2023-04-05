@@ -26,6 +26,7 @@
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
 - Private Registry With TLS  Can Not Work [\#3672](https://github.com/apache/camel-k/issues/3672)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
+- OLM basic installation integration test [\#3180](https://github.com/apache/camel-k/issues/3180)
 - Default to using Micrometer for integration monitoring [\#1773](https://github.com/apache/camel-k/issues/1773)
 
 ## [2.0.0-nightly](https://github.com/apache/camel-k/tree/2.0.0-nightly) (2023-03-22)
