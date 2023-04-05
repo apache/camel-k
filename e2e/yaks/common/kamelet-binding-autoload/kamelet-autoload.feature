@@ -7,15 +7,15 @@ Feature: Camel K can load default secrets for Kamelets
       | maxAttempts          | 40   |
       | delayBetweenAttempts | 3000 |
 
-  Scenario: Binding can load default settings for Kamelet
+  Scenario: KameletBinding can load default settings for Kamelet
     Given create Kubernetes service stub-service with target port 8080
     And bind Kamelet timer-source to uri http://stub-service.${YAKS_NAMESPACE}.svc.cluster.local/default
-    When create Binding binding
-    Then Binding binding should be available
+    When create KameletBinding binding
+    Then KameletBinding binding should be available
 
  Scenario: Verify default binding
     Given HTTP server "stub-service"
     And HTTP server timeout is 600000 ms
     Then expect HTTP request body: default
     And receive POST /default
-    And delete Binding binding
+    And delete KameletBinding binding

@@ -7,17 +7,17 @@ Feature: Camel K can load specific secrets for Kamelets
       | maxAttempts          | 40   |
       | delayBetweenAttempts | 3000 |
 
-  Scenario: Binding can load specific settings for Kamelet
+  Scenario: KameletBinding can load specific settings for Kamelet
     Given create Kubernetes service stub-service-2 with target port 8080
     And bind Kamelet timer-source to uri http://stub-service-2.${YAKS_NAMESPACE}.svc.cluster.local/specific
-    And Binding source properties
+    And KameletBinding source properties
       | id  | specific |
-    When create Binding binding-specific
-    Then Binding binding-specific should be available
+    When create KameletBinding binding-specific
+    Then KameletBinding binding-specific should be available
 
  Scenario: Verify specific binding
     Given HTTP server "stub-service-2"
     And HTTP server timeout is 600000 ms
     Then expect HTTP request body: specific
     And receive POST /specific
-    And delete Binding binding-specific
+    And delete KameletBinding binding-specific

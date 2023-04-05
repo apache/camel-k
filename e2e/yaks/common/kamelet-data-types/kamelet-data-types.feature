@@ -6,13 +6,13 @@ Feature: Kamelets with data types
       | delayBetweenAttempts | 4000 |
 
   Scenario: Kamelet event data type conversion
-    Given load Binding event-binding.yaml
+    Given load KameletBinding event-binding.yaml
     Given Camel K integration event-binding is running
     Then Camel K integration event-binding should print BodyType: byte[], Body: Hello from Camel K!
     Then Camel K integration event-binding should print BodyType: String, Body: Hello from Camel K!
 
   Scenario: Kamelet timer-to-log conversion
-    Given load Binding timer-to-log.yaml
+    Given load KameletBinding timer-to-log.yaml
     Given Camel K integration timer-to-log is running
     Then Camel K integration timer-to-log should print BodyType: byte[], Body: Hello from Camel K!
     Then Camel K integration timer-to-log should print BodyType: String, Body: Hello from Camel K!

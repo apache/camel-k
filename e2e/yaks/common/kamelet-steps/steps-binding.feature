@@ -1,4 +1,4 @@
-Feature: Bindings can have multiple processing steps
+Feature: KameletBindings can have multiple processing steps
 
   Background:
     Given Camel K resource polling configuration
