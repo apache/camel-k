@@ -39,7 +39,9 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
+	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
 func ptrFrom[T any](value T) *T {
@@ -540,4 +542,29 @@ func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {
 	}
 
 	return options, nil
+}
+
+// verify if the integration in the Environment contains an endpoint.
+func containsEndpoint(name string, e *Environment, c client.Client) (bool, error) {
+	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, c, e.Integration, e.Resources)
+	if err != nil {
+		return false, err
+	}
+
+	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	if err != nil {
+		return false, err
+	}
+
+	hasKnativeEndpoint := false
+	endpoints := make([]string, 0)
+	endpoints = append(endpoints, meta.FromURIs...)
+	endpoints = append(endpoints, meta.ToURIs...)
+	for _, endpoint := range endpoints {
+		if uri.GetComponent(endpoint) == name {
+			hasKnativeEndpoint = true
+			break
+		}
+	}
+	return hasKnativeEndpoint, nil
 }

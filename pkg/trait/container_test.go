@@ -27,6 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -41,11 +42,13 @@ func TestContainerWithDefaults(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -100,11 +103,13 @@ func TestContainerWithCustomName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -338,4 +343,97 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 	container := environment.GetIntegrationContainer()
 
 	assert.Equal(t, corev1.PullAlways, container.ImagePullPolicy)
+}
+
+func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
+
+	environment := createEnvironment()
+
+	trait, _ := newContainerTrait().(*containerTrait)
+	trait.Enabled = pointer.Bool(true)
+
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name: "test.java",
+				Content: `
+				from("knative:channel/test").to("log:${body};
+			`,
+			},
+			Language: v1.LanguageJavaSource,
+		},
+	}
+	configured, err := trait.Configure(environment)
+	assert.NotNil(t, err)
+	assert.False(t, configured)
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, v1.IntegrationConditionKnativeNotInstalledReason, conditions[0].Reason)
+}
+
+func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
+
+	environment := createEnvironment()
+	trait, _ := newContainerTrait().(*containerTrait)
+	trait.Enabled = pointer.Bool(true)
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name: "test.java",
+				Content: `
+				from("platform-http://my-site").to("log:${body}");
+			`,
+			},
+			Language: v1.LanguageJavaSource,
+		},
+	}
+
+	configured, err := trait.Configure(environment)
+	assert.Nil(t, err)
+	assert.True(t, configured)
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 0)
+}
+
+func createEnvironment() *Environment {
+
+	client, _ := test.NewFakeClient()
+	// disable the knative service api
+	fakeClient := client.(*test.FakeClient) //nolint
+	fakeClient.DisableAPIGroupDiscovery("serving.knative.dev/v1")
+
+	replicas := int32(3)
+	catalog, _ := camel.QuarkusCatalog()
+
+	environment := &Environment{
+		CamelCatalog: catalog,
+		Catalog:      NewCatalog(nil),
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "integration-name",
+			},
+			Spec: v1.IntegrationSpec{
+				Replicas: &replicas,
+				Traits:   v1.Traits{},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "namespace",
+			},
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterKubernetes,
+				Profile: v1.TraitProfileKubernetes,
+			},
+		},
+		Resources:             kubernetes.NewCollection(),
+		ApplicationProperties: make(map[string]string),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	return environment
 }

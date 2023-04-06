@@ -34,6 +34,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const (
@@ -492,12 +493,14 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script string) *Environment {
 	t.Helper()
 
+	client, _ := test.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(nil),
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeploymentName,

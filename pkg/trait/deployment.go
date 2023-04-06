@@ -45,6 +45,7 @@ func newDeploymentTrait() Trait {
 }
 
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
+
 	if !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
