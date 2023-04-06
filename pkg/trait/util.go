@@ -38,7 +38,9 @@ import (
 	"github.com/apache/camel-k/pkg/metadata"
 	"github.com/apache/camel-k/pkg/util"
 	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/pkg/util/kubernetes"
 	"github.com/apache/camel-k/pkg/util/property"
+	"github.com/apache/camel-k/pkg/util/uri"
 )
 
 type Options map[string]map[string]interface{}
@@ -541,4 +543,26 @@ func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {
 	}
 
 	return options, nil
+}
+
+// verify if the integration in the Environment contains an endpoint.
+func containsEndpoint(name string, e *Environment, c client.Client) (bool, error) {
+	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, c, e.Integration, e.Resources)
+	if err != nil {
+		return false, err
+	}
+
+	meta := metadata.ExtractAll(e.CamelCatalog, sources)
+
+	hasKnativeEndpoint := false
+	endpoints := make([]string, 0)
+	endpoints = append(endpoints, meta.FromURIs...)
+	endpoints = append(endpoints, meta.ToURIs...)
+	for _, endpoint := range endpoints {
+		if uri.GetComponent(endpoint) == name {
+			hasKnativeEndpoint = true
+			break
+		}
+	}
+	return hasKnativeEndpoint, nil
 }

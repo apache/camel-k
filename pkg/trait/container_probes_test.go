@@ -29,6 +29,7 @@ import (
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
@@ -38,11 +39,13 @@ func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
 	assert.Nil(t, err)
 	assert.NotNil(t, catalog)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	return Environment{
 		Catalog:               traitCatalog,
 		CamelCatalog:          catalog,
+		Client:                client,
 		Platform:              &v1.IntegrationPlatform{},
 		Integration:           integration,
 		Resources:             kubernetes.NewCollection(),

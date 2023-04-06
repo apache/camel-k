@@ -32,6 +32,7 @@ import (
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/gzip"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 const (
@@ -43,6 +44,7 @@ func TestServiceWithDefaults(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
@@ -51,6 +53,7 @@ func TestServiceWithDefaults(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -136,6 +139,7 @@ func TestService(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
@@ -144,6 +148,7 @@ func TestService(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -237,11 +242,13 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -310,6 +317,7 @@ func TestServiceWithNodePort(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
@@ -318,6 +326,7 @@ func TestServiceWithNodePort(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -399,6 +408,7 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
@@ -407,6 +417,7 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -473,6 +484,7 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
@@ -481,6 +493,7 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -535,6 +548,7 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
@@ -543,6 +557,7 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,

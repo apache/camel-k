@@ -357,6 +357,7 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	t.Helper()
 
+	client, _ := NewFakeClient("ns")
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
@@ -365,6 +366,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
