@@ -63,8 +63,10 @@ func TestIntegrationNotCompatible(t *testing.T) {
 	dstPlatform.Status.Build.RuntimeVersion = "0.0.1"
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration := nominalIntegration("my-it-test")
+	srcCatalog := createCamelCatalog(srcPlatform)
+	dstCatalog := createCamelCatalog(dstPlatform)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
 	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	assert.NotNil(t, err)
@@ -84,8 +86,10 @@ func TestIntegrationDryRun(t *testing.T) {
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration := nominalIntegration("my-it-test")
+	srcCatalog := createCamelCatalog(srcPlatform)
+	dstCatalog := createCamelCatalog(dstPlatform)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
 	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	assert.Nil(t, err)
@@ -121,8 +125,10 @@ func TestKameletBindingDryRun(t *testing.T) {
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultKB := nominalKameletBinding("my-kb-test")
 	defaultIntegration := nominalIntegration("my-kb-test")
+	srcCatalog := createCamelCatalog(srcPlatform)
+	dstCatalog := createCamelCatalog(dstPlatform)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration)
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &srcCatalog, &dstCatalog)
 	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
 	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
 	assert.Nil(t, err)
@@ -148,4 +154,10 @@ func nominalKameletBinding(name string) v1alpha1.KameletBinding {
 	kb := v1alpha1.NewKameletBinding("default", name)
 	kb.Status.Phase = v1alpha1.KameletBindingPhaseReady
 	return kb
+}
+
+func createCamelCatalog(platform v1.IntegrationPlatform) v1.CamelCatalog {
+	c := v1.NewCamelCatalog(platform.Namespace, defaults.DefaultRuntimeVersion)
+	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Build.RuntimeProvider, Version: platform.Status.Build.RuntimeVersion}}
+	return c
 }

@@ -20,7 +20,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
+
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -43,6 +47,8 @@ var VersionVariant = ""
 const (
 	infoVersion = "Version"
 )
+
+var replaceRegexp = regexp.MustCompile(`(\s+\.\s*)|(\s+-\s*)`)
 
 func newCmdVersion(rootCmdOptions *RootCmdOptions) (*cobra.Command, *versionCmdOptions) {
 	options := versionCmdOptions{
@@ -119,7 +125,6 @@ func (o *versionCmdOptions) displayOperatorVersion(cmd *cobra.Command, c client.
 			fmt.Fprintf(cmd.OutOrStdout(), "Unable to retrieve operator version: The IntegrationPlatform resource hasn't been reconciled yet!")
 		} else {
 			fmt.Fprintf(cmd.OutOrStdout(), "Camel K Operator %s\n", operatorInfo[infoVersion])
-
 			if o.Verbose {
 				for k, v := range operatorInfo {
 					if k != infoVersion {
@@ -133,7 +138,6 @@ func (o *versionCmdOptions) displayOperatorVersion(cmd *cobra.Command, c client.
 
 func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[string]string, error) {
 	infos := make(map[string]string)
-
 	platform, err := platformutil.GetOrFindLocal(ctx, c, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
 		// find default operator platform in any namespace
@@ -159,6 +163,17 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 		}
 	}
 
+	catalog, err := camel.LoadCatalog(ctx, c, namespace, v1.RuntimeSpec{Version: platform.Status.Build.RuntimeVersion, Provider: platform.Status.Build.RuntimeProvider})
+	if err != nil {
+		return nil, err
+	}
+	if catalog == nil {
+		return nil, fmt.Errorf("CamelCatalog can't be found in %s namespace", platform.Namespace)
+	}
+	for k, v := range catalog.CamelCatalogSpec.Runtime.Metadata {
+		infos[k] = v
+	}
+
 	ccInfo := fromCamelCase(infos)
 	log.Debugf("Operator Info for namespace %s: %v", namespace, ccInfo)
 	return ccInfo, nil
@@ -166,8 +181,10 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 
 func fromCamelCase(infos map[string]string) map[string]string {
 	textKeys := make(map[string]string)
+
 	for k, v := range infos {
 		key := cases.Title(language.English).String(strings.Join(camelcase.Split(k), " "))
+		key = replaceRegexp.ReplaceAllString(key, " ")
 		textKeys[key] = v
 	}
 
