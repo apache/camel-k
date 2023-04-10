@@ -12,6 +12,7 @@
 - Local file in unit test leftover [\#4217](https://github.com/apache/camel-k/issues/4217)
 - Validate error [\#4214](https://github.com/apache/camel-k/issues/4214)
 - `kamel rebuild` does not rebuild KameletBindings [\#4208](https://github.com/apache/camel-k/issues/4208)
+- Cannot copy local runtime dependencies [\#4198](https://github.com/apache/camel-k/issues/4198)
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
 - Remove additional custom labels utility [\#4183](https://github.com/apache/camel-k/issues/4183)
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
