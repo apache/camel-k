@@ -1779,6 +1779,16 @@ func PlatformProfile(ns string) func() v1.TraitProfile {
 	}
 }
 
+func PlatformBuildCatalogToolTimeout(ns string) func() int {
+	return func() int {
+		p := Platform(ns)()
+		if p == nil {
+			return 0
+		}
+		return p.Status.Build.BuildCatalogToolTimeout
+	}
+}
+
 func AssignPlatformToOperator(ns, operator string) error {
 	pl := Platform(ns)()
 	if pl == nil {
