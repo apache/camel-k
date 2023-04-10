@@ -226,6 +226,10 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			Duration: 5 * time.Minute,
 		}
 	}
+	if p.Status.Build.BuildCatalogToolTimeout == 0 {
+		log.Debugf("Integration Platform [%s]: setting build camel catalog tool timeout", p.Namespace)
+		p.Status.Build.BuildCatalogToolTimeout = 60
+	}
 	_, cacheEnabled := p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
 	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
 		// Default to disabling Kaniko cache warmer

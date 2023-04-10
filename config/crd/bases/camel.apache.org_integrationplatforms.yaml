@@ -80,6 +80,10 @@ spec:
                       images. It can be useful if you want to provide some custom
                       base image with further utility softwares
                     type: string
+                  buildCatalogToolTimeout:
+                    description: the timeout (in seconds) to use when creating the
+                      build tools container image
+                    type: integer
                   buildStrategy:
                     description: the strategy to adopt for building an Integration
                       base image
@@ -1626,6 +1630,10 @@ spec:
                       images. It can be useful if you want to provide some custom
                       base image with further utility softwares
                     type: string
+                  buildCatalogToolTimeout:
+                    description: the timeout (in seconds) to use when creating the
+                      build tools container image
+                    type: integer
                   buildStrategy:
                     description: the strategy to adopt for building an Integration
                       base image

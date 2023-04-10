@@ -25,6 +25,7 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/builder"
@@ -71,10 +72,10 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 		return catalog, err
 	}
 
-	return initialize(options, platform.Spec.Build.Registry.Address, catalog)
+	return initialize(options, platform.Status.Build.Registry.Address, platform.Status.Build.BuildCatalogToolTimeout, catalog)
 }
 
-func initialize(options spectrum.Options, registryAddress string, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+func initialize(options spectrum.Options, registryAddress string, buildCatalogTimeout int, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
 	imageName := fmt.Sprintf(
 		"%s/camel-k-runtime-%s-builder:%s",
@@ -115,7 +116,7 @@ func initialize(options spectrum.Options, registryAddress string, catalog *v1.Ca
 	options.Base = catalog.Spec.GetQuarkusToolingImage()
 	options.Target = imageName
 
-	err := buildRuntimeBuilderImage(options)
+	err := buildRuntimeBuilderWithTimeout(options, time.Duration(buildCatalogTimeout)*time.Second)
 
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
@@ -157,6 +158,19 @@ func imageExists(options spectrum.Options) bool {
 
 func imageSnapshot(options spectrum.Options) bool {
 	return strings.HasSuffix(options.Base, "snapshot")
+}
+
+func buildRuntimeBuilderWithTimeout(options spectrum.Options, timeout time.Duration) error {
+	result := make(chan error, 1)
+	go func() {
+		result <- buildRuntimeBuilderImage(options)
+	}()
+	select {
+	case <-time.After(timeout):
+		return fmt.Errorf("build timeout: %s", timeout.String())
+	case result := <-result:
+		return result
+	}
 }
 
 // This func will take care to dynamically build an image that will contain the tools required

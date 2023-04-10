@@ -36,6 +36,7 @@ import (
 )
 
 func TestCamelCatalogBuilder(t *testing.T) {
+
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
@@ -143,5 +144,27 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		})
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+
+	WithNewTestNamespace(t, func(ns string) {
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+
+		pl := Platform(ns)()
+		// set a very short timeout to simulate it
+		pl.Spec.Build.BuildCatalogToolTimeout = 1
+		TestClient().Update(TestContext, pl)
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(PlatformBuildCatalogToolTimeout(ns)).Should(Equal(1))
+
+		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+			Should(Equal(corev1.ConditionTrue))
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+
+		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
+		Eventually(CamelCatalogPhase(ns, catalogName)).Should(Equal(v1.CamelCatalogPhaseError))
+		Eventually(CamelCatalogCondition(ns, catalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("build timeout"))
 	})
 }
