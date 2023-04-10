@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 
 kind: KameletBinding
-apiVersion: camel.apache.org/v1
+apiVersion: camel.apache.org/v1alpha1
 metadata:
   name: properties-binding
 spec:

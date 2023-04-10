@@ -68,7 +68,7 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 			fmt.Fprint(cmd.ErrOrStderr(), err)
 			return
 		}
-		fmt.Fprintln(cmd.OutOrStdout(), n, "bindings deleted from namespace", o.Namespace)
+		fmt.Fprintln(cmd.OutOrStdout(), n, "pipes deleted from namespace", o.Namespace)
 
 		if n, err = o.deleteAllKameletBindings(c); err != nil {
 			fmt.Fprint(cmd.ErrOrStderr(), err)
