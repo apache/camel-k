@@ -24,4 +24,5 @@ import (
 
 func init() {
 	bindings.RegisterBindingProvider(strimzi.BindingProvider{})
+	bindings.V1alpha1RegisterBindingProvider(strimzi.V1alpha1BindingProvider{})
 }

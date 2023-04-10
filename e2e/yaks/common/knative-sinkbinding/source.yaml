@@ -21,7 +21,7 @@
       period: "1000"
     steps:
       - set-body:
-          constant: "Hello SinkKameletBinding !!!"
+          constant: "Hello SinkBinding !!!"
       - transform:
           simple: "${body.toUpperCase()}"
       - to: "log:info"

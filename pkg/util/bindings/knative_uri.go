@@ -26,6 +26,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
@@ -33,10 +34,12 @@ import (
 // KnativeURIBindingProvider converts a HTTP/HTTPS URI into a Camel Knative endpoint (to call it via CloudEvents).
 type KnativeURIBindingProvider struct{}
 
+// ID --.
 func (k KnativeURIBindingProvider) ID() string {
 	return "knative-uri"
 }
 
+// Translate --.
 func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris
@@ -92,10 +95,84 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	}, nil
 }
 
+// Order --.
 func (k KnativeURIBindingProvider) Order() int {
+	return OrderStandard
+}
+
+// V1alpha1KnativeURIBindingProvider converts a HTTP/HTTPS URI into a Camel Knative endpoint (to call it via CloudEvents).
+type V1alpha1KnativeURIBindingProvider struct{}
+
+// ID --.
+// Deprecated.
+func (k V1alpha1KnativeURIBindingProvider) ID() string {
+	return "knative-uri"
+}
+
+// Translate --.
+// Deprecated.
+func (k V1alpha1KnativeURIBindingProvider) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
+	if e.URI == nil {
+		// works only on uris
+		return nil, nil
+	}
+	if ctx.Profile != v1.TraitProfileKnative {
+		// use cloudevent binding only in Knative trait profile
+		return nil, nil
+	}
+	if !strings.HasPrefix(*e.URI, "http:") && !strings.HasPrefix(*e.URI, "https:") {
+		// only translates http/https uri to Knative calls
+		return nil, nil
+	}
+	if endpointCtx.Type == v1alpha1.EndpointTypeSource {
+		// HTTP/HTTPS uri are translated to Knative endpoints only when used as sinks
+		return nil, nil
+	}
+
+	originalURI, err := url.Parse(*e.URI)
+	if err != nil {
+		return nil, err
+	}
+	env := knativeapis.NewCamelEnvironment()
+	svc, err := knativeapis.BuildCamelServiceDefinition("sink",
+		knativeapis.CamelEndpointKindSink,
+		knativeapis.CamelServiceTypeEndpoint,
+		*originalURI, "", "")
+	if err != nil {
+		return nil, err
+	}
+	env.Services = append(env.Services, svc)
+	config, err := env.Serialize()
+	if err != nil {
+		return nil, err
+	}
+
+	// Rewrite URI to match the service definition
+	serviceURI := "knative:endpoint/sink"
+	props, err := e.Properties.GetPropertyMap()
+	if err != nil {
+		return nil, err
+	}
+	serviceURI = uri.AppendParameters(serviceURI, props)
+
+	return &Binding{
+		URI: serviceURI,
+		Traits: v1.Traits{
+			Knative: &traitv1.KnativeTrait{
+				Configuration: config,
+				SinkBinding:   pointer.Bool(false),
+			},
+		},
+	}, nil
+}
+
+// Order --.
+// Deprecated.
+func (k V1alpha1KnativeURIBindingProvider) Order() int {
 	return OrderStandard
 }
 
 func init() {
 	RegisterBindingProvider(KnativeURIBindingProvider{})
+	V1alpha1RegisterBindingProvider(V1alpha1KnativeURIBindingProvider{})
 }
