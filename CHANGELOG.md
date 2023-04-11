@@ -6,12 +6,14 @@
 
 **Closed issues:**
 
+- CamelCatalog reconciliation fail [\#4226](https://github.com/apache/camel-k/issues/4226)
 - duplicate routeId issue [\#4225](https://github.com/apache/camel-k/issues/4225)
 - `KameletBinding` should own the related `Integration` [\#4219](https://github.com/apache/camel-k/issues/4219)
 - `kamel rebuild` does not rebuild integrations correctly [\#4218](https://github.com/apache/camel-k/issues/4218)
 - Local file in unit test leftover [\#4217](https://github.com/apache/camel-k/issues/4217)
 - Validate error [\#4214](https://github.com/apache/camel-k/issues/4214)
 - `kamel rebuild` does not rebuild KameletBindings [\#4208](https://github.com/apache/camel-k/issues/4208)
+- Cannot copy local runtime dependencies [\#4198](https://github.com/apache/camel-k/issues/4198)
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
 - Remove additional custom labels utility [\#4183](https://github.com/apache/camel-k/issues/4183)
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
@@ -24,6 +26,7 @@
 - Kamel run sample integration is failing to run [\#4150](https://github.com/apache/camel-k/issues/4150)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
+- Improve error reporting in case of knative is required but not installed [\#3803](https://github.com/apache/camel-k/issues/3803)
 - Private Registry With TLS  Can Not Work [\#3672](https://github.com/apache/camel-k/issues/3672)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 - OLM basic installation integration test [\#3180](https://github.com/apache/camel-k/issues/3180)
