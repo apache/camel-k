@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- CamelCatalog reconciliation fail [\#4226](https://github.com/apache/camel-k/issues/4226)
 - duplicate routeId issue [\#4225](https://github.com/apache/camel-k/issues/4225)
 - `KameletBinding` should own the related `Integration` [\#4219](https://github.com/apache/camel-k/issues/4219)
 - `kamel rebuild` does not rebuild integrations correctly [\#4218](https://github.com/apache/camel-k/issues/4218)
@@ -25,6 +26,7 @@
 - Kamel run sample integration is failing to run [\#4150](https://github.com/apache/camel-k/issues/4150)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
+- Improve error reporting in case of knative is required but not installed [\#3803](https://github.com/apache/camel-k/issues/3803)
 - Private Registry With TLS  Can Not Work [\#3672](https://github.com/apache/camel-k/issues/3672)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 - OLM basic installation integration test [\#3180](https://github.com/apache/camel-k/issues/3180)
