@@ -186,7 +186,7 @@ func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
 	return false
 }
 
-// Add a publish strategy option
+// AddOption add a publish strategy option
 func (b *IntegrationPlatformBuildSpec) AddOption(option string, value string) {
 	options := b.PublishStrategyOptions
 	if options == nil {
@@ -202,6 +202,14 @@ func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 		return metav1.Duration{}
 	}
 	return *b.Timeout
+}
+
+// GetBuildCatalogToolTimeout returns the specified duration or a default one
+func (b IntegrationPlatformBuildSpec) GetBuildCatalogToolTimeout() metav1.Duration {
+	if b.BuildCatalogToolTimeout == nil {
+		return metav1.Duration{}
+	}
+	return *b.BuildCatalogToolTimeout
 }
 
 var _ ResourceCondition = IntegrationPlatformCondition{}

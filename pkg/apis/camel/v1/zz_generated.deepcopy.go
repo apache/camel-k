@@ -991,6 +991,11 @@ func (in *IntegrationPlatform) DeepCopyObject() runtime.Object {
 func (in *IntegrationPlatformBuildSpec) DeepCopyInto(out *IntegrationPlatformBuildSpec) {
 	*out = *in
 	out.Registry = in.Registry
+	if in.BuildCatalogToolTimeout != nil {
+		in, out := &in.BuildCatalogToolTimeout, &out.BuildCatalogToolTimeout
+		*out = new(metav1.Duration)
+		**out = **in
+	}
 	if in.Timeout != nil {
 		in, out := &in.Timeout, &out.Timeout
 		*out = new(metav1.Duration)

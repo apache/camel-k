@@ -121,7 +121,7 @@ type IntegrationPlatformBuildSpec struct {
 	// the image registry used to push/pull Integration images
 	Registry RegistrySpec `json:"registry,omitempty"`
 	// the timeout (in seconds) to use when creating the build tools container image
-	BuildCatalogToolTimeout int `json:"buildCatalogToolTimeout,omitempty"`
+	BuildCatalogToolTimeout *metav1.Duration `json:"buildCatalogToolTimeout,omitempty"`
 	// how much time to wait before time out the build process
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 	// Maven configuration used to build the Camel/Camel-Quarkus applications
