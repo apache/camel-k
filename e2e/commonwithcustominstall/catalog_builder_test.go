@@ -26,9 +26,11 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -153,11 +155,17 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 
 		pl := Platform(ns)()
-		// set a very short timeout to simulate it
-		pl.Spec.Build.BuildCatalogToolTimeout = 1
+		// set a very short timeout to simulate the timeout
+		pl.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
+			Duration: 1 * time.Second,
+		}
 		TestClient().Update(TestContext, pl)
 		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformBuildCatalogToolTimeout(ns)).Should(Equal(1))
+		Eventually(PlatformBuildCatalogToolTimeout(ns)).Should(Equal(
+			&metav1.Duration{
+				Duration: 1 * time.Second,
+			},
+		))
 
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))

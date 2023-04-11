@@ -1878,7 +1878,7 @@ It can be useful if you want to provide some custom base image with further util
 the image registry used to push/pull Integration images
 
 |`buildCatalogToolTimeout` +
-int
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
 
 

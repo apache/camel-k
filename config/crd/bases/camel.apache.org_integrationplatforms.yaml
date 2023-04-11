@@ -83,7 +83,7 @@ spec:
                   buildCatalogToolTimeout:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
-                    type: integer
+                    type: string
                   buildStrategy:
                     description: the strategy to adopt for building an Integration
                       base image
@@ -1633,7 +1633,7 @@ spec:
                   buildCatalogToolTimeout:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
-                    type: integer
+                    type: string
                   buildStrategy:
                     description: the strategy to adopt for building an Integration
                       base image

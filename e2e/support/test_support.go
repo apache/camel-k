@@ -1779,11 +1779,11 @@ func PlatformProfile(ns string) func() v1.TraitProfile {
 	}
 }
 
-func PlatformBuildCatalogToolTimeout(ns string) func() int {
-	return func() int {
+func PlatformBuildCatalogToolTimeout(ns string) func() *metav1.Duration {
+	return func() *metav1.Duration {
 		p := Platform(ns)()
 		if p == nil {
-			return 0
+			return &metav1.Duration{}
 		}
 		return p.Status.Build.BuildCatalogToolTimeout
 	}

@@ -33,7 +33,7 @@ type IntegrationPlatformBuildSpecApplyConfiguration struct {
 	RuntimeProvider         *v1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
 	BaseImage               *string                                     `json:"baseImage,omitempty"`
 	Registry                *RegistrySpecApplyConfiguration             `json:"registry,omitempty"`
-	BuildCatalogToolTimeout *int                                        `json:"buildCatalogToolTimeout,omitempty"`
+	BuildCatalogToolTimeout *metav1.Duration                            `json:"buildCatalogToolTimeout,omitempty"`
 	Timeout                 *metav1.Duration                            `json:"timeout,omitempty"`
 	Maven                   *MavenSpecApplyConfiguration                `json:"maven,omitempty"`
 	PublishStrategyOptions  map[string]string                           `json:"PublishStrategyOptions,omitempty"`
@@ -96,7 +96,7 @@ func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithRegistry(value *Reg
 // WithBuildCatalogToolTimeout sets the BuildCatalogToolTimeout field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the BuildCatalogToolTimeout field is set to the value of the last call.
-func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithBuildCatalogToolTimeout(value int) *IntegrationPlatformBuildSpecApplyConfiguration {
+func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithBuildCatalogToolTimeout(value metav1.Duration) *IntegrationPlatformBuildSpecApplyConfiguration {
 	b.BuildCatalogToolTimeout = &value
 	return b
 }

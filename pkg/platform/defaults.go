@@ -209,7 +209,12 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 		p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName] = p.Name
 	}
 
-	if p.Status.Build.GetTimeout().Duration != 0 {
+	// Build timeout
+	if p.Status.Build.GetTimeout().Duration == 0 {
+		p.Status.Build.Timeout = &metav1.Duration{
+			Duration: 5 * time.Minute,
+		}
+	} else {
 		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)
 
 		if verbose && p.Status.Build.GetTimeout().Duration != d {
@@ -221,15 +226,26 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			Duration: d,
 		}
 	}
-	if p.Status.Build.GetTimeout().Duration == 0 {
-		p.Status.Build.Timeout = &metav1.Duration{
-			Duration: 5 * time.Minute,
+
+	// Catalog tools build timeout
+	if p.Status.Build.GetBuildCatalogToolTimeout().Duration == 0 {
+		log.Debugf("Integration Platform [%s]: setting default build camel catalog tool timeout (1 minute)", p.Namespace)
+		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
+			Duration: 1 * time.Minute,
+		}
+	} else {
+		d := p.Status.Build.GetBuildCatalogToolTimeout().Duration.Truncate(time.Second)
+
+		if verbose && p.Status.Build.GetBuildCatalogToolTimeout().Duration != d {
+			log.Log.Infof("Build catalog tools timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetBuildCatalogToolTimeout().Duration, d)
+		}
+
+		log.Debugf("Integration Platform [%s]: setting build catalog tools timeout", p.Namespace)
+		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
+			Duration: d,
 		}
 	}
-	if p.Status.Build.BuildCatalogToolTimeout == 0 {
-		log.Debugf("Integration Platform [%s]: setting build camel catalog tool timeout", p.Namespace)
-		p.Status.Build.BuildCatalogToolTimeout = 60
-	}
+
 	_, cacheEnabled := p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
 	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
 		// Default to disabling Kaniko cache warmer

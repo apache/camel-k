@@ -72,14 +72,14 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 		return catalog, err
 	}
 
-	return initialize(options, platform.Status.Build.Registry.Address, platform.Status.Build.BuildCatalogToolTimeout, catalog)
+	return initialize(options, platform, catalog)
 }
 
-func initialize(options spectrum.Options, registryAddress string, buildCatalogTimeout int, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+func initialize(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
 	imageName := fmt.Sprintf(
 		"%s/camel-k-runtime-%s-builder:%s",
-		registryAddress,
+		ip.Status.Build.Registry.Address,
 		catalog.Spec.Runtime.Provider,
 		strings.ToLower(catalog.Spec.Runtime.Version),
 	)
@@ -116,7 +116,7 @@ func initialize(options spectrum.Options, registryAddress string, buildCatalogTi
 	options.Base = catalog.Spec.GetQuarkusToolingImage()
 	options.Target = imageName
 
-	err := buildRuntimeBuilderWithTimeout(options, time.Duration(buildCatalogTimeout)*time.Second)
+	err := buildRuntimeBuilderWithTimeout(options, ip.Status.Build.GetBuildCatalogToolTimeout().Duration)
 
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
@@ -161,6 +161,10 @@ func imageSnapshot(options spectrum.Options) bool {
 }
 
 func buildRuntimeBuilderWithTimeout(options spectrum.Options, timeout time.Duration) error {
+	// Backward compatibility with IP which had not a timeout field
+	if timeout == 0 {
+		return buildRuntimeBuilderImage(options)
+	}
 	result := make(chan error, 1)
 	go func() {
 		result <- buildRuntimeBuilderImage(options)
