@@ -31,11 +31,15 @@ spec:
         description: The prefix to prepend to the logged message
         type: string
         default: "message: "
-  types:
+  dataTypes:
     in:
-      mediaType: text/plain
+      types:
+        text:
+          mediaType: text/plain
     out:
-      mediaType: text/plain
+      types:
+        text:
+          mediaType: text/plain
   template:
     from:
       uri: "kamelet:source"

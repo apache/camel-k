@@ -20,6 +20,7 @@ package integrationkit
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,19 +36,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	camelevent "github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/apache/camel-k/pkg/util/monitoring"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	camelevent "github.com/apache/camel-k/v2/pkg/event"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/digest"
+	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
 // Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
-func Add(mgr manager.Manager, c client.Client) error {
-	return add(mgr, newReconciler(mgr, c))
+func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
+	return add(ctx, mgr, newReconciler(mgr, c))
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -65,7 +66,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
+func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 	c, err := controller.New("integrationkit-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
@@ -259,6 +260,8 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		NewErrorAction(),
 	}
 
+	targetPhase := instance.Status.Phase
+
 	for _, a := range actions {
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
@@ -267,6 +270,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 			targetLog.Infof("Invoking action %s", a.Name())
 
 			newTarget, err := a.Handle(ctx, target)
+
 			if err != nil {
 				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
@@ -278,11 +282,13 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 					return res, err
 				}
 
-				if newTarget.Status.Phase != instance.Status.Phase {
+				targetPhase = newTarget.Status.Phase
+
+				if targetPhase != instance.Status.Phase {
 					targetLog.Info(
 						"state transition",
 						"phase-from", instance.Status.Phase,
-						"phase-to", newTarget.Status.Phase,
+						"phase-to", targetPhase,
 					)
 				}
 			}
@@ -292,6 +298,13 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 			camelevent.NotifyIntegrationKitUpdated(ctx, r.client, r.recorder, &instance, newTarget)
 			break
 		}
+	}
+
+	if targetPhase == v1.IntegrationKitPhaseWaitingForCatalog {
+		// Requeue
+		return reconcile.Result{
+			RequeueAfter: 2 * time.Second,
+		}, nil
 	}
 
 	return reconcile.Result{}, nil

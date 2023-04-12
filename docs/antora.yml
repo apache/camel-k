@@ -30,9 +30,9 @@ asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
-    camel-kamelets-version: '0.10.0'
-    camel-kamelets-docs-version: 0.10.x
-    camel-k-runtime-version: 1.17.0-SNAPSHOT
+    camel-kamelets-version: '3.20.1.1'
+    camel-kamelets-docs-version: 3.20.x
+    camel-k-runtime-version: 3.20.1-SNAPSHOT
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
     camel-version: 3.20.1
     camel-docs-version: 3.20.x
@@ -40,10 +40,10 @@ asciidoc:
     camel-quarkus-docs-version: 2.16.x
     quarkus-version: 2.16.0.Final
     buildah-version: 1.23.3
-    kaniko-version: 0.17.1
+    kaniko-version: 1.9.1
     kustomize-version: 4.5.4
-    kubernetes-api-version: 0.25.2
+    kubernetes-api-version: 0.25.6
     operator-fwk-api-version: 0.13.0
     knative-api-version: 0.35.3
-    service-binding-op-version: 1.3.3
+    service-binding-op-version: 1.3.4
     prometheus-op-version: 0.60.0

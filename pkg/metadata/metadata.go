@@ -20,9 +20,9 @@ package metadata
 import (
 	"github.com/scylladb/go-set/strset"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/camel"
-	src "github.com/apache/camel-k/pkg/util/source"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	src "github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 // ExtractAll returns metadata information from all listed source codes.

@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -84,8 +84,8 @@ func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
 			"sink": {
 				"endpoint": {
 					"uri": "someUri"
-					}, 
-				"parameters": 
+					},
+				"parameters":
 					{"param1": "value1", "param2": "value2"}
 			}
 		}`),

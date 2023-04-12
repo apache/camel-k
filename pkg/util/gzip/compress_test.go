@@ -18,12 +18,24 @@ limitations under the License.
 package gzip
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCompression(t *testing.T) {
+	source := "this is a script"
+	var compressed bytes.Buffer
+	err := Compress(&compressed, []byte(source))
+	assert.Nil(t, err)
+	var uncompressed bytes.Buffer
+	err = Uncompress(&uncompressed, compressed.Bytes())
+	assert.Nil(t, err)
+	assert.Equal(t, source, uncompressed.String())
+}
+
+func TestCompression64(t *testing.T) {
 	source := "this is a script"
 	compressed, err := CompressBase64([]byte(source))
 	assert.Nil(t, err)

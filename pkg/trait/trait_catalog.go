@@ -25,9 +25,9 @@ import (
 	"github.com/fatih/structs"
 	"github.com/pkg/errors"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/log"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 // Catalog collects all information about traits in one place.
@@ -182,7 +182,11 @@ func (c *Catalog) processFields(fields []*structs.Field, processor func(string))
 
 		if property != "" {
 			items := strings.Split(property, ",")
-			processor(items[0])
+			if f.Kind() == reflect.Map {
+				processor(items[0] + ".*")
+			} else {
+				processor(items[0])
+			}
 		}
 	}
 }

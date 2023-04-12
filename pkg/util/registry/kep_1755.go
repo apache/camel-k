@@ -20,7 +20,7 @@ package registry
 import (
 	"context"
 
-	"github.com/apache/camel-k/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/client"
 	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"

@@ -25,37 +25,20 @@ spec:
   definition:
     title: "Event Sink"
     description: "Handles incoming event with data type auto conversion"
-    required:
-      - inputFormat
-    properties:
-      inputFormat:
-        title: Input Format
-        description: The data type to convert incoming events to
-        type: string
+  dataTypes:
+    in:
+      default: string
+      types:
+        string:
+          mediaType: plain/text
+        binary:
+          mediaType: application/octet-stream
   dependencies:
-    - github:apache.camel-kamelets:camel-kamelets-utils:3.x-SNAPSHOT
     - "camel:core"
     - "camel:kamelet"
   template:
-    beans:
-      - name: dataTypeRegistry
-        type: "#class:org.apache.camel.kamelets.utils.format.DefaultDataTypeRegistry"
-        property:
-          - key: classpathScan
-            value: false
-      - name: inputTypeProcessor
-        type: "#class:org.apache.camel.kamelets.utils.format.DataTypeProcessor"
-        property:
-          - key: scheme
-            value: 'camel'
-          - key: format
-            value: '{{inputFormat}}'
-          - key: registry
-            value: '#bean:{{dataTypeRegistry}}'
     from:
       uri: "kamelet:source"
       steps:
-        - process:
-            ref: "{{inputTypeProcessor}}"
         - to:
             uri: "log:info"

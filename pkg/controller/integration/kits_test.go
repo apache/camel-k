@@ -24,12 +24,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -337,4 +337,101 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 	ok, err := trait.IntegrationAndKitHaveSameTraits(integration, kit)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+}
+
+func TestHasMatchingSources(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hms := hasMatchingSources(integration, kit)
+	assert.True(t, hms)
+
+	kit2 := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hms2 := hasMatchingSources(integration, kit2)
+	assert.False(t, hms2)
+}
+
+func TestHasMatchingMultipleSources(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hms := hasMatchingSources(integration, kit)
+	assert.True(t, hms)
+
+	integration2 := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hms2 := hasMatchingSources(integration2, kit)
+	assert.False(t, hms2)
+}
+
+func TestHasNotMatchingSources(t *testing.T) {
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	kit := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{
+				v1.NewSourceSpec("test", "some content 2", v1.LanguageJavaShell),
+			},
+		},
+	}
+
+	hsm := hasMatchingSources(integration, kit)
+	assert.False(t, hsm)
+
+	kit2 := &v1.IntegrationKit{
+		Spec: v1.IntegrationKitSpec{
+			Sources: []v1.SourceSpec{},
+		},
+	}
+
+	hsm2 := hasMatchingSources(integration, kit2)
+	assert.False(t, hsm2)
 }

@@ -26,8 +26,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/gzip"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/gzip"
 )
 
 const (

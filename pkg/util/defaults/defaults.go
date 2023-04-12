@@ -23,22 +23,25 @@ package defaults
 
 const (
 	// Version --
-	Version = "1.12.0-SNAPSHOT"
+	Version = "2.0.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "1.17.0-SNAPSHOT"
+	DefaultRuntimeVersion = "3.20.1-SNAPSHOT"
 
 	// BuildahVersion --
 	BuildahVersion = "1.23.3"
 
 	// KanikoVersion --
-	KanikoVersion = "0.17.1"
+	KanikoVersion = "1.9.1"
 
 	// baseImage --
 	baseImage = "docker.io/eclipse-temurin:11"
 
 	// LocalRepository --
-	LocalRepository = "/tmp/artifacts/m2"
+	LocalRepository = "/etc/maven/m2"
+
+	// DefaultPVC --
+	DefaultPVC = "camel-k-pvc"
 
 	// ImageName --
 	ImageName = "docker.io/apache/camel-k"

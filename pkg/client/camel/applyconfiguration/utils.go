@@ -20,10 +20,10 @@ limitations under the License.
 package applyconfiguration
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	v1alpha1 "github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1alpha1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -58,8 +58,12 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.CamelArtifactExclusionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelCatalog"):
 		return &camelv1.CamelCatalogApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("CamelCatalogCondition"):
+		return &camelv1.CamelCatalogConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelCatalogSpec"):
 		return &camelv1.CamelCatalogSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("CamelCatalogStatus"):
+		return &camelv1.CamelCatalogStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelLoader"):
 		return &camelv1.CamelLoaderApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelScheme"):
@@ -158,6 +162,12 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.ValueSourceApplyConfiguration{}
 
 		// Group=camel.apache.org, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeReference"):
+		return &camelv1alpha1.DataTypeReferenceApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeSpec"):
+		return &camelv1alpha1.DataTypeSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("DataTypesSpec"):
+		return &camelv1alpha1.DataTypesSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("Endpoint"):
 		return &camelv1alpha1.EndpointApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("EndpointProperties"):
@@ -168,6 +178,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1alpha1.EventTypeSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("ExternalDocumentation"):
 		return &camelv1alpha1.ExternalDocumentationApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("HeaderSpec"):
+		return &camelv1alpha1.HeaderSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("JSON"):
 		return &camelv1alpha1.JSONApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("JSONSchemaProp"):

@@ -21,7 +21,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -69,6 +69,8 @@ type IntegrationKitSpec struct {
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
 	// Maven repositories that can be used by the kit
 	Repositories []string `json:"repositories,omitempty"`
+	// the sources to add at build time
+	Sources []SourceSpec `json:"sources,omitempty"`
 }
 
 // IntegrationKitTraits defines traits assigned to an `IntegrationKit`
@@ -165,6 +167,8 @@ const (
 	IntegrationKitPhaseBuildSubmitted IntegrationKitPhase = "Build Submitted"
 	// IntegrationKitPhaseBuildRunning --
 	IntegrationKitPhaseBuildRunning IntegrationKitPhase = "Build Running"
+	// IntegrationKitPhaseWaitingForCatalog --
+	IntegrationKitPhaseWaitingForCatalog IntegrationKitPhase = "Waiting For Catalog"
 	// IntegrationKitPhaseReady --
 	IntegrationKitPhaseReady IntegrationKitPhase = "Ready"
 	// IntegrationKitPhaseError --
@@ -172,6 +176,8 @@ const (
 
 	// IntegrationKitConditionPlatformAvailable --
 	IntegrationKitConditionPlatformAvailable IntegrationKitConditionType = "IntegrationPlatformAvailable"
+	// IntegrationKitConditionCatalogAvailable --
+	IntegrationKitConditionCatalogAvailable IntegrationKitConditionType = "CamelCatalogAvailable"
 	// IntegrationKitConditionPlatformAvailableReason --
 	IntegrationKitConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
 )

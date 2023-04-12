@@ -21,7 +21,7 @@ import (
 	"encoding/xml"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // XMLInspector --.

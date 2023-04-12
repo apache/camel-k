@@ -27,11 +27,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 const (
@@ -46,6 +47,47 @@ var kitPriority = map[traitv1.QuarkusPackageType]string{
 type quarkusTrait struct {
 	BaseTrait
 	traitv1.QuarkusTrait `property:",squash"`
+}
+type languageSettings struct {
+	// indicates whether the native mode is supported
+	native bool
+	// indicates whether the sources are required at build time for native compilation
+	sourcesRequiredAtBuildTime bool
+}
+
+var (
+	// settings for an unknown language.
+	defaultSettings = languageSettings{false, false}
+	// settings for languages supporting native mode for old catalogs.
+	nativeSupportSettings = languageSettings{true, false}
+)
+
+// Retrieves the settings of the given language from the Camel catalog.
+func getLanguageSettings(e *Environment, language v1.Language) languageSettings {
+	if loader, ok := e.CamelCatalog.Loaders[string(language)]; ok {
+		native, nExists := loader.Metadata["native"]
+		if !nExists {
+			log.Debug("The metadata 'native' is absent from the Camel catalog, the legacy language settings are applied")
+			return getLegacyLanguageSettings(language)
+		}
+		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
+		return languageSettings{
+			native:                     native == "true",
+			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == "true",
+		}
+	}
+	log.Debugf("No loader could be found for the language %q, the legacy language settings are applied", string(language))
+	return getLegacyLanguageSettings(language)
+}
+
+// Provides the legacy settings of a given language.
+func getLegacyLanguageSettings(language v1.Language) languageSettings {
+	switch language {
+	case v1.LanguageXML, v1.LanguageYaml, v1.LanguageKamelet:
+		return nativeSupportSettings
+	default:
+		return defaultSettings
+	}
 }
 
 func newQuarkusTrait() Trait {
@@ -105,6 +147,13 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
+	if t.hasKitNativeType() {
+		// Force the build to run in a separate Pod
+		t.L.Info("Quarkus Native requires a build pod strategy")
+		e.BuildStrategy = v1.BuildStrategyPod
+		// TODO we may provide a set of sensible resource default values for the Pod spun off
+	}
+
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		t.applyWhileBuildingKit(e)
 
@@ -161,9 +210,7 @@ func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
 
 func (t *quarkusTrait) validateNativeSupport(e *Environment) bool {
 	for _, source := range e.Integration.Sources() {
-		if language := source.InferLanguage(); language != v1.LanguageKamelet &&
-			language != v1.LanguageYaml &&
-			language != v1.LanguageXML {
+		if language := source.InferLanguage(); !getLanguageSettings(e, language).native {
 			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace, e.Integration.Name, language)
 			e.Integration.Status.Phase = v1.IntegrationPhaseError
 			e.Integration.Status.SetCondition(
@@ -216,6 +263,9 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.Qua
 		Traits:       propagateKitTraits(e),
 	}
 
+	if packageType == traitv1.NativePackageType {
+		kit.Spec.Sources = propagateSourcesRequiredAtBuildTime(e)
+	}
 	return kit
 }
 
@@ -265,6 +315,10 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 
 	if native {
 		build.Maven.Properties["quarkus.package.type"] = string(traitv1.NativePackageType)
+		if len(e.IntegrationKit.Spec.Sources) > 0 {
+			build.Sources = e.IntegrationKit.Spec.Sources
+			steps = append(steps, builder.Quarkus.PrepareProjectWithSources)
+		}
 		steps = append(steps, builder.Image.NativeImageContext)
 		// Spectrum does not rely on Dockerfile to assemble the image
 		if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
@@ -300,6 +354,15 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	}
 }
 
+func (t *quarkusTrait) hasKitNativeType() bool {
+	for _, v := range t.PackageTypes {
+		if v == traitv1.NativePackageType {
+			return true
+		}
+	}
+	return false
+}
+
 func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
 	if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
 		container := e.GetIntegrationContainer()
@@ -319,6 +382,17 @@ func (t *quarkusTrait) isNativeIntegration(e *Environment) bool {
 	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNative
 }
 
+// Indicates whether the given source code is embedded into the final binary.
+func (t *quarkusTrait) isEmbedded(e *Environment, source v1.SourceSpec) bool {
+	if e.IntegrationInRunningPhases() {
+		return e.IntegrationKit != nil && t.isNativeIntegration(e) && sourcesRequiredAtBuildTime(e, source)
+	} else if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
+		native, _ := t.isNativeKit(e)
+		return native && sourcesRequiredAtBuildTime(e, source)
+	}
+	return false
+}
+
 func containsPackageType(types []traitv1.QuarkusPackageType, t traitv1.QuarkusPackageType) bool {
 	for _, ti := range types {
 		if t == ti {
@@ -326,4 +400,21 @@ func containsPackageType(types []traitv1.QuarkusPackageType, t traitv1.QuarkusPa
 		}
 	}
 	return false
+}
+
+// Indicates whether the given source file is required at build time for native compilation.
+func sourcesRequiredAtBuildTime(e *Environment, source v1.SourceSpec) bool {
+	settings := getLanguageSettings(e, source.InferLanguage())
+	return settings.native && settings.sourcesRequiredAtBuildTime
+}
+
+// Propagates the sources that are required at build time for native compilation.
+func propagateSourcesRequiredAtBuildTime(e *Environment) []v1.SourceSpec {
+	array := make([]v1.SourceSpec, 0)
+	for _, source := range e.Integration.Sources() {
+		if sourcesRequiredAtBuildTime(e, source) {
+			array = append(array, source)
+		}
+	}
+	return array
 }

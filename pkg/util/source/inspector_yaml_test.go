@@ -25,8 +25,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/camel"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
 
 func newTestYAMLInspector(t *testing.T) YAMLInspector {
@@ -427,7 +427,7 @@ const yamlKameletEipMap = `
 - from:
     uri: timer:tick
     steps:
-    - kamelet: 
+    - kamelet:
         name: "foo/bar?baz=test"
 `
 
@@ -436,7 +436,7 @@ const yamlKameletEipMapWithParams = `
 - from:
     uri: timer:tick
     steps:
-    - kamelet: 
+    - kamelet:
         name: "foo/bar"
         parameters:
           baz:test

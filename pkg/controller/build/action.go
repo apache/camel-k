@@ -22,10 +22,10 @@ import (
 
 	"k8s.io/client-go/tools/record"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/util/log"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/event"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 // Action --.

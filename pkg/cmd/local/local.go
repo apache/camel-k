@@ -21,7 +21,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -31,14 +30,14 @@ import (
 	"github.com/scylladb/go-set/strset"
 	"github.com/spf13/cobra"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/cmd/source"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/maven"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/cmd/source"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
 var acceptedDependencyTypes = []string{
@@ -165,7 +164,7 @@ func getTransitiveDependencies(ctx context.Context, catalog *camel.RuntimeCatalo
 
 func getRegularFilesInDir(directory string, dirnameInPath bool) ([]string, error) {
 	var dirFiles []string
-	files, err := ioutil.ReadDir(directory)
+	files, err := os.ReadDir(directory)
 	if err != nil {
 		return nil, err
 	}
@@ -384,7 +383,7 @@ func UpdateIntegrationProperties(properties []string, propertyFiles []string, ha
 		// Output list of properties to property file if any CLI properties were given.
 		if len(properties) > 0 {
 			propertyFilePath := filepath.Join(dir, "CLI.properties")
-			if err := ioutil.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o600); err != nil {
+			if err := os.WriteFile(propertyFilePath, []byte(strings.Join(properties, "\n")), 0o600); err != nil {
 				return nil, err
 			}
 			relocatedPropertyFiles = append(relocatedPropertyFiles, propertyFilePath)

@@ -31,8 +31,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.camel.quarkus</groupId>
-			<artifactId>camel-quarkus-microprofile-metrics</artifactId>
+			<artifactId>camel-quarkus-micrometer</artifactId>
 			<version>${version.camel.quarkus}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 	</dependencies>
 

@@ -5,11 +5,9 @@ The Quarkus trait configures the Quarkus runtime.
 
 It's enabled by default.
 
-NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported
-for kamelets, as well as YAML and XML integrations.
-It also requires at least 4GiB of memory, so the Pod running the native build, that is either
-the operator Pod, or the build Pod (depending on the build strategy configured for the platform),
-must have enough memory available.
+NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least
+4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build
+Pod (depending on the build strategy configured for the platform), must have enough memory available.
 
 
 This trait is available in the following profiles: **Kubernetes, Knative, OpenShift**.
@@ -36,7 +34,7 @@ The following configuration options are available:
 | Can be used to enable or disable a trait. All traits share this common property.
 
 | quarkus.package-type
-| []github.com/apache/camel-k/pkg/apis/camel/v1/trait.QuarkusPackageType
+| []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusPackageType
 | The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
 In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
 with the `native` kit having precedence over the `fast-jar` one once ready.

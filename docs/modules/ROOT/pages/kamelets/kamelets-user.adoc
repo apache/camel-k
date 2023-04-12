@@ -69,10 +69,13 @@ spec:
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
 
-  types: # <5>
+  dataTypes: # <5>
     out:
-      mediaType: text/plain
-      # schema:
+      default: text
+      types:
+        text:
+          mediaType: text/plain
+          # schema:
   template: # <6>
     from:
       uri: telegram:bots
@@ -92,7 +95,7 @@ spec:
 <2> Annotations such as icon provide additional display features to the Kamelet
 <3> Labels allow users to query Kamelets e.g. by kind ("source" vs. "sink")
 <4> Description of the Kamelets and parameters in JSON-schema specification format
-<5> The media type of the output (can include a schema)
+<5> The data type that the Kamelet produces. Data type specifications contain the media type of the output and also may include a schema.
 <6> The route template defining the behavior of the Kamelet
 
 At a high level (more details are provided later), a Kamelet resource describes:
@@ -543,15 +546,19 @@ specification of a Kamelet includes also information about type of data that it 
 # ...
 spec:
   # ...
-  types:
+  dataTypes:
     out: # <1>
-      mediaType: application/json
-      schema: # <2>
-        properties:
-          # ...
+      default: json
+      types:
+        json: # <2>
+          mediaType: application/json
+          schema: # <3>
+            properties:
+              # ...
 ----
 <1> Defines the type of the `output`
-<2> JSON-schema definition of the output
+<2> Name of the data type
+<3> Optional JSON-schema definition of the output
 
 Data shape can be indicated for the following channels:
 
@@ -565,10 +572,30 @@ Data shapes contain the following information:
 |===
 |name |Description |Type |Example
 
+|`scheme`
+|A specific component scheme that is used to identify the data shape
+|`string`
+|E.g. `aws2-s3`
+
+|`format`
+|The data shape name used to identify and reference the data type in a KameletBinding when choosing from multiple data type options.
+|`string`
+|E.g. `json`
+
 |`mediaType`
 |The media type of the data
 |`string`
 |E.g. `application/json`
+
+|`headers`
+|Optional map of message headers that get set with the data shape where the map keys represent the header name and the value defines the header type information.
+|`map`
+|
+
+|`dependencies`
+|Optional list of additional dependencies that are required for this data type (e.g. Json marshal/unmarshal libraries)
+|`list`
+|E.g. `mvn:org.jackson:jackson-databind`
 
 |`schema`
 |An optional JSON-schema definition for the data

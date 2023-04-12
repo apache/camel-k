@@ -20,17 +20,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
 
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 func main() {
@@ -99,7 +98,7 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(destination, result, 0o600)
+	return os.WriteFile(destination, result, 0o600)
 }
 
 func remapRef(ref string) string {

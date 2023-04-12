@@ -8,6 +8,16 @@ Releases of the Camel K CLI are available on:
 - Github Releases: https://github.com/apache/camel-k/releases
 - Homebrew (Mac and Linux): https://formulae.brew.sh/formula/kamel
 
+== Running on macOS
+
+Before running the CLI on macOS, it may be necessary to give adequate permissions for it to run.
+
+It can either be done on the "Privacy & Security" panel in the System Settings or via command-line:
+
+```
+xattr -d com.apple.quarantine /path/to/kamel
+```
+
 == Available Commands
 
 Some of the most used commands are:

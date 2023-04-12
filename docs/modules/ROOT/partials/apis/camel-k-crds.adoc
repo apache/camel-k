@@ -429,6 +429,20 @@ The sequence of Build tasks to be performed as part of the Build execution.
 
 The strategy that should be used to perform the Build.
 
+|`toolImage` +
+string
+|
+
+
+The container image to be used to run the build.
+
+|`operatorNamespace` +
+string
+|
+
+
+The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
@@ -665,6 +679,13 @@ string
 
 workspace directory to use
 
+|`sources` +
+*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
+|
+
+
+the sources to add at build time
+
 
 |===
 
@@ -790,6 +811,85 @@ Maven Artifact
 
 |===
 
+[#_camel_apache_org_v1_CamelCatalogCondition]
+=== CamelCatalogCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogStatus, CamelCatalogStatus>>
+
+CamelCatalogCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_CamelCatalogConditionType[CamelCatalogConditionType]*
+|
+
+
+Type of CamelCatalog condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_CamelCatalogConditionType]
+=== CamelCatalogConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogCondition, CamelCatalogCondition>>
+
+CamelCatalogConditionType --
+
+
+[#_camel_apache_org_v1_CamelCatalogPhase]
+=== CamelCatalogPhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_CamelCatalogStatus, CamelCatalogStatus>>
+
+CamelCatalogPhase --
+
+
 [#_camel_apache_org_v1_CamelCatalogSpec]
 === CamelCatalogSpec
 
@@ -812,14 +912,14 @@ CamelCatalogSpec specify what features a Camel runtime provides
 the runtime targeted for the catalog
 
 |`artifacts` +
-*xref:#_camel_apache_org_v1_CamelArtifact[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelArtifact]*
+*xref:#_camel_apache_org_v1_CamelArtifact[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.CamelArtifact]*
 |
 
 
 artifacts required by this catalog
 
 |`loaders` +
-*xref:#_camel_apache_org_v1_CamelLoader[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.CamelLoader]*
+*xref:#_camel_apache_org_v1_CamelLoader[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.CamelLoader]*
 |
 
 
@@ -837,6 +937,41 @@ loaders required by this catalog
 
 CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
 
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this Catalog.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_CamelCatalogPhase[CamelCatalogPhase]*
+|
+
+
+the actual phase
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_CamelCatalogCondition[[\]CamelCatalogCondition]*
+|
+
+
+a list of events happened for the CamelCatalog
+
+|`image` +
+string
+|
+
+
+the container image available for building an application with this catalog
+
+
+|===
 
 [#_camel_apache_org_v1_CamelLoader]
 === CamelLoader
@@ -872,6 +1007,13 @@ a list of DSLs supported
 
 
 a list of additional dependencies required beside the base one
+
+|`metadata` +
+map[string]string
+|
+
+
+the metadata of the loader
 
 
 |===
@@ -1491,6 +1633,13 @@ configuration used by the kit
 
 Maven repositories that can be used by the kit
 
+|`sources` +
+*xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
+|
+
+
+the sources to add at build time
+
 
 |===
 
@@ -1640,7 +1789,7 @@ NOTE: Compiling to a native executable, i.e. when using `package-type=native`, i
 The Registry trait sets up Maven to use the Image registry as a Maven repository.
 
 |`addons` +
-*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.AddonTrait]*
+*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.AddonTrait]*
 |
 
 
@@ -1727,6 +1876,13 @@ It can be useful if you want to provide some custom base image with further util
 
 
 the image registry used to push/pull Integration images
+
+|`buildCatalogToolTimeout` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+|
+
+
+the timeout (in seconds) to use when creating the build tools container image
 
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#duration-v1-meta[Kubernetes meta/v1.Duration]*
@@ -2508,7 +2664,7 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 |===
 
 [#_camel_apache_org_v1_PluginProperties]
-=== PluginProperties(`map[string]github.com/apache/camel-k/pkg/apis/camel/v1.StringOrProperties` alias)
+=== PluginProperties(`map[string]github.com/apache/camel-k/v2/pkg/apis/camel/v1.StringOrProperties` alias)
 
 
 
@@ -3003,7 +3159,7 @@ map[string]string
 set of metadata
 
 |`capabilities` +
-*xref:#_camel_apache_org_v1_Capability[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.Capability]*
+*xref:#_camel_apache_org_v1_Capability[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.Capability]*
 |
 
 
@@ -3107,6 +3263,8 @@ string
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
@@ -3601,7 +3759,7 @@ The configuration of Service Binding trait
 The configuration of Toleration trait
 
 |`addons` +
-*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1.AddonTrait]*
+*xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.AddonTrait]*
 |
 
 
@@ -3749,7 +3907,7 @@ integration pod(s) should not be co-located with.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The builder trait is internally used to determine the best strategy to
+BuilderTrait is internally used to determine the best strategy to
 build and configure IntegrationKits.
 
 
@@ -3778,6 +3936,13 @@ Enable verbose logging on build components that support it (e.g. Kaniko build po
 
 
 A list of properties to be provided to the build task
+
+|`strategy` +
+string
+|
+
+
+The strategy to use, either `pod` or `routine` (default routine)
 
 
 |===
@@ -4481,12 +4646,36 @@ It's enabled by default whenever a Service is added to the integration (through 
 
 
 
+|`annotations` +
+map[string]string
+|
+
+
+The annotations added to the ingress.
+This can be used to set controller specific annotations, e.g., when using the NGINX Ingress controller:
+See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md
+
 |`host` +
 string
 |
 
 
 To configure the host exposed by the ingress.
+
+|`path` +
+string
+|
+
+
+To configure the path exposed by the ingress (default `/`).
+
+|`pathType` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#pathtype-v1-networking[Kubernetes networking/v1.PathType]*
+|
+
+
+To configure the path type exposed by the ingress.
+One of `Exact`, `Prefix`, `ImplementationSpecific` (default to `Prefix`).
 
 |`auto` +
 bool
@@ -4969,6 +5158,15 @@ bool
 
 Enable automatic discovery of all trait properties.
 
+|`namespaceLabel` +
+bool
+|
+
+
+Enables the camel-k-operator to set the "bindings.knative.dev/include=true" label to the namespace
+As Knative requires this label to perform injection of K_SINK URL into the service.
+If this is false, the integration pod may start and fail, read the SinkBinding Knative documentation. (default: true)
+
 
 |===
 
@@ -5291,11 +5489,13 @@ by using the `integration` container name.
 The Prometheus trait configures a Prometheus-compatible endpoint. It also creates a `PodMonitor` resource,
 so that the endpoint can be scraped automatically, when using the Prometheus operator.
 
-The metrics are exposed using MicroProfile Metrics.
+The metrics are exposed using Micrometer Metrics.
 
 WARNING: The creation of the `PodMonitor` resource requires the https://github.com/coreos/prometheus-operator[Prometheus Operator]
 custom resource definition to be installed.
 You can set `pod-monitor` to `false` for the Prometheus trait to work without the Prometheus Operator.
+
+WARNING: By default the metrics API is not available in JSON
 
 The Prometheus trait is disabled by default.
 
@@ -5406,11 +5606,9 @@ The Quarkus trait configures the Quarkus runtime.
 
 It's enabled by default.
 
-NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported
-for kamelets, as well as YAML and XML integrations.
-It also requires at least 4GiB of memory, so the Pod running the native build, that is either
-the operator Pod, or the build Pod (depending on the build strategy configured for the platform),
-must have enough memory available.
+NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least
+4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build
+Pod (depending on the build strategy configured for the platform), must have enough memory available.
 
 
 [cols="2,2a",options="header"]

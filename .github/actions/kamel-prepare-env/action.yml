@@ -24,7 +24,7 @@ runs:
     - name: Set Env Vars
       shell: bash
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
+        if [ "$RUNNER_OS" == "Linux" ] || [ "$RUNNER_OS" == "macOS" ]; then
           SUDO=sudo
         fi
 
@@ -54,10 +54,11 @@ runs:
           ${{ env.SUDO }} rm -rf "/usr/local/share/boost"
           ${{ env.SUDO }} rm -rf "$AGENT_TOOLSDIRECTORY"
         fi
-
-        df -kh
-        docker rmi $(docker image ls -aq) || true # Don't fail if image is not present
-        df -kh
+        if [ -x "$(command -v docker)" ]; then
+          df -kh
+          docker rmi $(docker image ls -aq) || true # Don't fail if image is not present
+          df -kh
+        fi
 
         echo "Final status:"
         df -h
@@ -100,6 +101,15 @@ runs:
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
         version: 'latest'
+
+    - id: install-realpath
+      shell: bash
+      if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+      run : |
+        if [ "$RUNNER_OS" == "macOS" ] && ! [ -x "$(command -v realpath)" ]; then
+          echo 'Installing realpath...'
+          brew install coreutils
+        fi
 
     - id: complete-action
       name: Environment Prepared

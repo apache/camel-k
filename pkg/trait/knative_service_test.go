@@ -30,13 +30,13 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/envvar"
-	"github.com/apache/camel-k/pkg/util/gzip"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
+	"github.com/apache/camel-k/v2/pkg/util/gzip"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const (
@@ -48,6 +48,7 @@ func TestKnativeService(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
@@ -56,6 +57,7 @@ func TestKnativeService(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,
@@ -184,11 +186,13 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,
@@ -265,11 +269,13 @@ func TestKnativeServiceWithResr(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,
@@ -367,11 +373,13 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	environment := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      KnativeServiceTestName,

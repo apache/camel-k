@@ -22,12 +22,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis"
-	"github.com/apache/camel-k/pkg/client"
-	camel "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
-	fakecamelclientset "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/fake"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis"
+	"github.com/apache/camel-k/v2/pkg/client"
+	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/util"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -121,8 +122,9 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
-	camel  camel.Interface
-	scales *fakescale.FakeScaleClient
+	camel          camel.Interface
+	scales         *fakescale.FakeScaleClient
+	disabledGroups []string
 }
 
 func (c *FakeClient) CamelV1() camelv1.CamelV1Interface {
@@ -151,9 +153,14 @@ func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch con
 	return c.Create(ctx, obj)
 }
 
+func (c *FakeClient) DisableAPIGroupDiscovery(group string) {
+	c.disabledGroups = append(c.disabledGroups, group)
+}
+
 func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
 	return &FakeDiscovery{
 		DiscoveryInterface: c.Interface.Discovery(),
+		disabledGroups:     c.disabledGroups,
 	}
 }
 
@@ -169,6 +176,7 @@ func (c *FakeClient) ScalesClient() (scale.ScalesGetter, error) {
 
 type FakeDiscovery struct {
 	discovery.DiscoveryInterface
+	disabledGroups []string
 }
 
 func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
@@ -177,6 +185,13 @@ func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*me
 		return nil, k8serrors.NewNotFound(schema.GroupResource{
 			Group: "image.openshift.io",
 		}, "")
+	}
+
+	// used in util/knative/enabled.go to verify if knative is installed
+	if groupVersion == "serving.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+		return &metav1.APIResourceList{
+			GroupVersion: "serving.knative.dev/v1",
+		}, nil
 	}
 	return f.DiscoveryInterface.ServerResourcesForGroupVersion(groupVersion)
 }

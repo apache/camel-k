@@ -20,7 +20,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -29,10 +28,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
-	"github.com/apache/camel-k/cmd/util/vfs-gen/multifs"
-	"github.com/apache/camel-k/pkg/base"
+	"github.com/apache/camel-k/v2/cmd/util/vfs-gen/multifs"
+	"github.com/apache/camel-k/v2/pkg/base"
 	"github.com/shurcooL/httpfs/filter"
 	"github.com/shurcooL/vfsgen"
 )
@@ -144,7 +143,7 @@ limitations under the License.
 	var finalContent []byte
 	finalContent = append(finalContent, []byte(header)...)
 	finalContent = append(finalContent, content...)
-	if err := ioutil.WriteFile(resourceFile, finalContent, 0o600); err != nil {
+	if err := os.WriteFile(resourceFile, finalContent, 0o600); err != nil {
 		log.Fatalln(err)
 	}
 }

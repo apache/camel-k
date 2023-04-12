@@ -20,6 +20,7 @@ package v1
 import (
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -62,6 +63,120 @@ func NewCamelCatalogList() CamelCatalogList {
 	}
 }
 
+// GetType --
+func (c CamelCatalogCondition) GetType() string {
+	return string(c.Type)
+}
+
+// GetStatus --
+func (c CamelCatalogCondition) GetStatus() corev1.ConditionStatus {
+	return c.Status
+}
+
+// GetLastUpdateTime --
+func (c CamelCatalogCondition) GetLastUpdateTime() metav1.Time {
+	return c.LastUpdateTime
+}
+
+// GetLastTransitionTime --
+func (c CamelCatalogCondition) GetLastTransitionTime() metav1.Time {
+	return c.LastTransitionTime
+}
+
+// GetReason --
+func (c CamelCatalogCondition) GetReason() string {
+	return c.Reason
+}
+
+// GetMessage --
+func (c CamelCatalogCondition) GetMessage() string {
+	return c.Message
+}
+
+// GetConditions --
+func (in *CamelCatalogStatus) GetConditions() []ResourceCondition {
+	res := make([]ResourceCondition, 0, len(in.Conditions))
+	for _, c := range in.Conditions {
+		res = append(res, c)
+	}
+	return res
+}
+
+// GetCondition returns the condition with the provided type.
+func (in *CamelCatalogStatus) GetCondition(condType CamelCatalogConditionType) *CamelCatalogCondition {
+	for i := range in.Conditions {
+		c := in.Conditions[i]
+		if c.Type == condType {
+			return &c
+		}
+	}
+	return nil
+}
+
+// SetCondition --
+func (in *CamelCatalogStatus) SetCondition(condType CamelCatalogConditionType, status corev1.ConditionStatus, reason string, message string) {
+	in.SetConditions(CamelCatalogCondition{
+		Type:               condType,
+		Status:             status,
+		LastUpdateTime:     metav1.Now(),
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Message:            message,
+	})
+}
+
+// SetErrorCondition --
+func (in *CamelCatalogStatus) SetErrorCondition(condType CamelCatalogConditionType, reason string, err error) {
+	in.SetConditions(CamelCatalogCondition{
+		Type:               condType,
+		Status:             corev1.ConditionFalse,
+		LastUpdateTime:     metav1.Now(),
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Message:            err.Error(),
+	})
+}
+
+// SetConditions updates the resource to include the provided conditions.
+//
+// If a condition that we are about to add already exists and has the same status and
+// reason then we are not going to update.
+func (in *CamelCatalogStatus) SetConditions(conditions ...CamelCatalogCondition) {
+	for _, condition := range conditions {
+		if condition.LastUpdateTime.IsZero() {
+			condition.LastUpdateTime = metav1.Now()
+		}
+		if condition.LastTransitionTime.IsZero() {
+			condition.LastTransitionTime = metav1.Now()
+		}
+
+		currentCond := in.GetCondition(condition.Type)
+
+		if currentCond != nil && currentCond.Status == condition.Status && currentCond.Reason == condition.Reason {
+			return
+		}
+		// Do not update lastTransitionTime if the status of the condition doesn't change.
+		if currentCond != nil && currentCond.Status == condition.Status {
+			condition.LastTransitionTime = currentCond.LastTransitionTime
+		}
+
+		in.RemoveCondition(condition.Type)
+		in.Conditions = append(in.Conditions, condition)
+	}
+}
+
+// RemoveCondition removes the resource condition with the provided type.
+func (in *CamelCatalogStatus) RemoveCondition(condType CamelCatalogConditionType) {
+	newConditions := in.Conditions[:0]
+	for _, c := range in.Conditions {
+		if c.Type != condType {
+			newConditions = append(newConditions, c)
+		}
+	}
+
+	in.Conditions = newConditions
+}
+
 // GetRuntimeVersion returns the Camel K runtime version of the catalog.
 func (c *CamelCatalogSpec) GetRuntimeVersion() string {
 	return c.Runtime.Version
@@ -80,6 +195,11 @@ func (c *CamelCatalogSpec) GetCamelQuarkusVersion() string {
 // GetQuarkusVersion returns the Quarkus version the runtime is based on.
 func (c *CamelCatalogSpec) GetQuarkusVersion() string {
 	return c.Runtime.Metadata["quarkus.version"]
+}
+
+// GetQuarkusToolingImage returns the Quarkus tooling image required to build an application based on this catalog.
+func (c *CamelCatalogSpec) GetQuarkusToolingImage() string {
+	return c.Runtime.Metadata["quarkus.native-builder-image"]
 }
 
 // HasCapability checks if the given capability is present in the catalog.

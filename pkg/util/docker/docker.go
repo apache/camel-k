@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/pkg/errors"
 )
 
@@ -94,7 +94,6 @@ func CreateIntegrationImageDockerFile(integrationRunCmd *exec.Cmd, startsFromLoc
 // BuildBaseImageArgs constructs the docker command:
 //
 // docker build -f <BaseWorkingDirectory>/Dockerfile -t <dockerRegistry>/<BaseImageName> <BaseWorkingDirectory>.
-//
 func BuildBaseImageArgs() []string {
 	return BuildImageArgs(BaseWorkingDirectory, GetBaseImagePath(), BaseWorkingDirectory)
 }
@@ -102,7 +101,6 @@ func BuildBaseImageArgs() []string {
 // BuildIntegrationImageArgs constructs the docker command:
 //
 // docker build -f <BaseWorkingDirectory>/Dockerfile -t <imagePath> <mavenWorkingDirectory>.
-//
 func BuildIntegrationImageArgs(imagePath string, mavenWorkingDirectory string) []string {
 	return BuildImageArgs(IntegrationWorkingDirectory, imagePath, mavenWorkingDirectory)
 }
@@ -110,9 +108,8 @@ func BuildIntegrationImageArgs(imagePath string, mavenWorkingDirectory string) [
 // RunIntegrationImageArgs constructs the docker command:
 //
 // docker run --network=<network-name> --env LAZY_ENV_VAR=value <dockerRegistry>/<ImageName>.
-//
 func RunIntegrationImageArgs(imagePath string) ([]string, error) {
-	return RunImageArgs(imagePath, latestTag)
+	return RunImageArgs(imagePath)
 }
 
 // GetContainerWorkspaceDir -- directory inside the container where all the integration files are copied.

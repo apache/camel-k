@@ -31,6 +31,10 @@ type BuildSpec struct {
 	Tasks []Task `json:"tasks,omitempty"`
 	// The strategy that should be used to perform the Build.
 	Strategy BuildStrategy `json:"strategy,omitempty"`
+	// The container image to be used to run the build.
+	ToolImage string `json:"toolImage,omitempty"`
+	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+	BuilderPodNamespace string `json:"operatorNamespace,omitempty"`
 	// Timeout defines the Build maximum execution duration.
 	// The Build deadline is set to the Build start time plus the Timeout duration.
 	// If the Build deadline is exceeded, the Build context is canceled,
@@ -74,6 +78,8 @@ type BuilderTask struct {
 	Maven MavenBuildSpec `json:"maven,omitempty"`
 	// workspace directory to use
 	BuildDir string `json:"buildDir,omitempty"`
+	// the sources to add at build time
+	Sources []SourceSpec `json:"sources,omitempty"`
 }
 
 // MavenBuildSpec defines the Maven configuration plus additional repositories to use

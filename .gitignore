@@ -47,6 +47,10 @@ build/maven
 build/m2
 /api_*
 
+# YAKS test output
+.yaks-jbang/
+_output/
+
 # envrc
 .envrc
 
@@ -168,3 +172,6 @@ config/**/*.gen.yaml
 config/**/*.gen.json
 
 *-installer*
+
+# Fabric8 CRDs
+java/target

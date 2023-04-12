@@ -20,8 +20,8 @@ package trait
 import (
 	"k8s.io/utils/pointer"
 
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/envvar"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
 )
 
 const (

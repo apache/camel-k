@@ -20,7 +20,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/spf13/cobra"
 )
 

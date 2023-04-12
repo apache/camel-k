@@ -18,10 +18,10 @@ limitations under the License.
 package hashicorp
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"k8s.io/utils/pointer"
 )
 
@@ -41,15 +41,15 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The Host to use
-	Host string `property:"host,omitempty"`
+	Host string `property:"host" json:"host,omitempty"`
 	// The Port to use
-	Port string `property:"port,omitempty"`
+	Port string `property:"port" json:"port,omitempty"`
 	// The Hashicorp engine to use
-	Engine string `property:"engine,omitempty"`
+	Engine string `property:"engine" json:"engine,omitempty"`
 	// The token to access Hashicorp Vault
-	Token string `property:"token,omitempty"`
+	Token string `property:"token" json:"token,omitempty"`
 	// The scheme to access Hashicorp Vault
-	Scheme string `property:"scheme,omitempty"`
+	Scheme string `property:"scheme" json:"scheme,omitempty"`
 }
 
 type hashicorpVaultTrait struct {

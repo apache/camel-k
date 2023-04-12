@@ -18,7 +18,7 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/apache/camel-k/pkg/controller/kameletbinding"
+	"github.com/apache/camel-k/v2/pkg/controller/kameletbinding"
 )
 
 func init() {

@@ -132,4 +132,4 @@ if [ -n "${GLOBAL_OPERATOR_NAMESPACE}" ]; then
 fi
 
 # Then run integration tests
-DO_TEST_PREBUILD=false make test-builder
+DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-builder

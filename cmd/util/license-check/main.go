@@ -22,7 +22,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
 func main() {

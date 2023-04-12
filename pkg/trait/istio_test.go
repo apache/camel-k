@@ -29,21 +29,23 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, enabled bool) Environment {
 	t.Helper()
-
+	client, _ := test.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	env := Environment{
 		Catalog:      NewEnvironmentTestCatalog(),
 		CamelCatalog: catalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,

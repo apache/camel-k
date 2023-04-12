@@ -25,10 +25,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
@@ -38,11 +39,13 @@ func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
 	assert.Nil(t, err)
 	assert.NotNil(t, catalog)
 
+	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	return Environment{
 		Catalog:      traitCatalog,
 		CamelCatalog: catalog,
+		Client:       client,
 		Platform: &v1.IntegrationPlatform{
 			Status: v1.IntegrationPlatformStatus{
 				Phase: v1.IntegrationPlatformPhaseReady,

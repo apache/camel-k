@@ -37,23 +37,23 @@ The following configuration options are available:
 | bool
 | Enables automatic configuration of the trait.
 
-| hashicorp-vault.host,omitempty
+| hashicorp-vault.host
 | string
 | The Host to use
 
-| hashicorp-vault.port,omitempty
+| hashicorp-vault.port
 | string
 | The Port to use
 
-| hashicorp-vault.engine,omitempty
+| hashicorp-vault.engine
 | string
 | The Hashicorp engine to use
 
-| hashicorp-vault.token,omitempty
+| hashicorp-vault.token
 | string
 | The token to access Hashicorp Vault
 
-| hashicorp-vault.scheme,omitempty
+| hashicorp-vault.scheme
 | string
 | The scheme to access Hashicorp Vault
 

@@ -20,16 +20,15 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util/test"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -288,12 +287,12 @@ func TestExtractProperties_SingleKeyValue(t *testing.T) {
 func TestExtractProperties_FromFile(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = ioutil.TempFile("", "camel-k-*.properties"); err != nil {
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte(`
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
 	key=value
 	#key2=value2
 	my.key=value
@@ -312,12 +311,12 @@ func TestExtractProperties_FromFile(t *testing.T) {
 func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
 	var tmpFile1 *os.File
 	var err error
-	if tmpFile1, err = ioutil.TempFile("", "camel-k-*.properties"); err != nil {
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile1.Name(), []byte(`
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
 	key=value
 	#key2=value2
 	my.key=value
@@ -339,12 +338,12 @@ func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
 func TestAddPropertyFile(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
 
 	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
 	properties, err := runCmdOptions.convertToTraitParameter(nil, "file:"+tmpFile.Name(), "trait.properties")
@@ -573,12 +572,12 @@ public class Sample extends RouteBuilder {
 func TestOutputYaml(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	fileName := filepath.Base(tmpFile.Name())
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
@@ -607,12 +606,12 @@ status: {}
 func TestTrait(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	fileName := filepath.Base(tmpFile.Name())
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
@@ -647,12 +646,12 @@ status: {}
 func TestMissingTrait(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "bogus.fail=i-must-fail")
@@ -697,16 +696,80 @@ func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
 func TestIntegrationServiceAccountName(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "--service-account", "my-service-account")
 
 	assert.Nil(t, err)
 	assert.Contains(t, output, "serviceAccountName: my-service-account")
+}
+
+func TestFileProperties(t *testing.T) {
+	var tmpFile1 *os.File
+	var err error
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile1.Close())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	key=${value}
+	#key2=value2
+	my.key=value
+	`), 0o400))
+
+	var tmpFile *os.File
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile.Close())
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
+		"-p", "file:"+tmpFile1.Name(),
+		"-o", "yaml",
+	)
+	assert.Nil(t, err)
+	assert.NotContains(t, output, "#key2")
+	assert.Contains(t, output, "my.key = value")
+	assert.Contains(t, output, "key = ${value}")
+}
+
+func TestPropertyShouldNotExpand(t *testing.T) {
+	var tmpFile1 *os.File
+	var err error
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.properties"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile1.Close())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	key=${value}
+	`), 0o400))
+
+	var tmpFile *os.File
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, tmpFile.Close())
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
+		"-o", "yaml",
+		"-p", "runtimeProp=${value}",
+		"--build-property", "buildProp=${value}",
+		"-p", "file:"+tmpFile1.Name(),
+	)
+	assert.Nil(t, err)
+	assert.Contains(t, output, "runtimeProp = ${value}")
+	assert.Contains(t, output, "buildProp = ${value}")
+	assert.Contains(t, output, "key = ${value}")
 }

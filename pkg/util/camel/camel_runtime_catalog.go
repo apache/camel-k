@@ -20,13 +20,14 @@ package camel
 import (
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// NewRuntimeCatalog creates a runtime catalog with the given catalog spec.
-func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
+// NewRuntimeCatalog creates a runtime catalog with the given catalog.
+func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 	catalog := RuntimeCatalog{}
-	catalog.CamelCatalogSpec = spec
+	catalog.CamelCatalogSpec = cat.Spec
+	catalog.CamelCatalogStatus = cat.Status
 	catalog.artifactByScheme = make(map[string]string)
 	catalog.artifactByDataFormat = make(map[string]string)
 	catalog.schemesByID = make(map[string]v1.CamelScheme)
@@ -39,7 +40,7 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 			scheme := scheme
 
 			// In case of duplicate only, choose the "org.apache.camel.quarkus" artifact (if present).
-			// Workaround for https://github.com/apache/camel-k-runtime/issues/592
+			// Workaround for https://github.com/apache/camel-k/v2-runtime/issues/592
 			if _, duplicate := catalog.artifactByScheme[scheme.ID]; duplicate {
 				if artifact.GroupID != "org.apache.camel.quarkus" {
 					continue
@@ -77,6 +78,7 @@ func NewRuntimeCatalog(spec v1.CamelCatalogSpec) *RuntimeCatalog {
 // RuntimeCatalog represents the data structure for a runtime catalog.
 type RuntimeCatalog struct {
 	v1.CamelCatalogSpec
+	v1.CamelCatalogStatus
 
 	artifactByScheme     map[string]string
 	artifactByDataFormat map[string]string

@@ -19,7 +19,7 @@ package resources
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -27,7 +27,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
 	"github.com/pkg/errors"
 )
@@ -54,7 +54,7 @@ func Resource(name string) ([]byte, error) {
 		return nil, errors.Wrapf(err, "cannot access resource file %s", name)
 	}
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		_ = file.Close()
 		return nil, errors.Wrapf(err, "cannot access resource file %s", name)

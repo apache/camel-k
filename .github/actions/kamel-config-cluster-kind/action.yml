@@ -23,11 +23,12 @@ runs:
   steps:
     - id: install-cluster
       name: Install Cluster
-      uses: container-tools/kind-action@v1
+      uses: container-tools/kind-action@61f1afd4807b0dac84f3232ec99e45c63701d220
       if: ${{ env.CLUSTER_KIND_CONFIGURED != 'true' }}
       with:
         version: v0.14.0
         node_image: kindest/node:v1.23.6@sha256:b1fa224cc6c7ff32455e0b1fd9cbfd3d3bc87ecaa8fcb06961ed1afb3db0f9ae
+        cpu: 3
 
     - id: info
       name: Info

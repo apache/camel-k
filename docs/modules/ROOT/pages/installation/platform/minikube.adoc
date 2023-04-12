@@ -21,4 +21,4 @@ Alternatively, you can also start an instance with the `registry` addon in one c
 minikube start --addons registry
 ```
 
-You can now proceed with the xref:installation/installation.adoc#procedure[standard Camel K installation procedure].
+You can now proceed with the xref:installation/installation.adoc[standard Camel K installation procedure].

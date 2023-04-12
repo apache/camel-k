@@ -36,10 +36,10 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 // Dump prints all information about the given namespace to debug errors
@@ -50,6 +50,8 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	if err != nil {
 		return err
 	}
+
+	// IntegrationPlatforms
 	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -64,20 +66,36 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
-	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
+	// CamelCatalogs
+	cats, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d integrations:\n", len(its.Items))
-	for _, integration := range its.Items {
-		ref := integration
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+	t.Logf("Found %d catalogs:\n", len(cats.Items))
+	for _, c := range cats.Items {
+		ref := c
+		cdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
-		t.Logf("---\n%s\n---\n", string(pdata))
+		t.Logf("---\n%s\n---\n", string(cdata))
 	}
 
+	// Builds
+	builds, err := camelClient.CamelV1().Builds(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d builds:\n", len(builds.Items))
+	for _, build := range builds.Items {
+		data, err := kubernetes.ToYAMLNoManagedFields(&build)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
+	}
+
+	// IntegrationKits
 	iks, err := camelClient.CamelV1().IntegrationKits(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -92,19 +110,22 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
-	builds, err := camelClient.CamelV1().Builds(ns).List(ctx, metav1.ListOptions{})
+	// Integrations
+	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d builds:\n", len(builds.Items))
-	for _, build := range builds.Items {
-		data, err := kubernetes.ToYAMLNoManagedFields(&build)
+	t.Logf("Found %d integrations:\n", len(its.Items))
+	for _, integration := range its.Items {
+		ref := integration
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
-		t.Logf("---\n%s\n---\n", string(data))
+		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
+	// Configmaps
 	cms, err := c.CoreV1().ConfigMaps(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -119,11 +140,12 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
+	// Deployments
 	deployments, err := c.AppsV1().Deployments(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d deployments:\n", len(iks.Items))
+	t.Logf("Found %d deployments:\n", len(deployments.Items))
 	for _, deployment := range deployments.Items {
 		ref := deployment
 		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
@@ -133,6 +155,22 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(data))
 	}
 
+	// PVCs
+	pvcs, err := c.CoreV1().PersistentVolumeClaims(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d persistent volume claims:\n", len(pvcs.Items))
+	for _, pvc := range pvcs.Items {
+		ref := pvc
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	// Pods
 	lst, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -164,6 +202,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		}
 	}
 
+	// Services
 	svcs, err := c.CoreV1().Services(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -178,6 +217,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(data))
 	}
 
+	// Routes
 	if ocp, err := openshift.IsOpenShift(c); err == nil && ocp {
 		routes := routev1.RouteList{
 			TypeMeta: metav1.TypeMeta{
@@ -199,6 +239,8 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			t.Logf("---\n%s\n---\n", string(data))
 		}
 	}
+
+	// Some log from running pods
 
 	//
 	// Get logs for global operator if it is being used

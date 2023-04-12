@@ -22,9 +22,9 @@ import (
 	"regexp"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
 
 type catalog2deps func(*camel.RuntimeCatalog) []string
@@ -203,6 +203,12 @@ func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) I
 		}
 	case v1.LanguageYaml:
 		return &YAMLInspector{
+			baseInspector: baseInspector{
+				catalog: catalog,
+			},
+		}
+	case v1.LanguageJavaShell:
+		return &JavaSourceInspector{
 			baseInspector: baseInspector{
 				catalog: catalog,
 			},

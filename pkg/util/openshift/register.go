@@ -30,7 +30,7 @@ import (
 	route "github.com/openshift/api/route/v1"
 	template "github.com/openshift/api/template/v1"
 
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 type registerFunction func(*runtime.Scheme) error

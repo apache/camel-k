@@ -25,13 +25,13 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/resources"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/jvm"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/maven"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/resources"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/jvm"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
 func DefaultCatalog() (*RuntimeCatalog, error) {
@@ -156,7 +156,7 @@ func GenerateCatalogCommon(
 		return yaml2.Unmarshal(content, &catalog)
 	})
 
-	return NewRuntimeCatalog(catalog.Spec), err
+	return NewRuntimeCatalog(catalog), err
 }
 
 func generateMavenProject(runtimeVersion string, providerDependencies []maven.Dependency) maven.Project {

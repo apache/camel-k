@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -30,14 +31,15 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/envvar"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/digest"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -72,6 +74,27 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil
+	}
+
+	knativeInstalled, _ := knative.IsInstalled(e.Client)
+	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !knativeInstalled {
+		hasKnativeEndpoint, err := containsEndpoint("knative", e, t.Client)
+		if err != nil {
+			return false, err
+		}
+
+		if hasKnativeEndpoint {
+			// fail fast the integration as there is no knative installed in the cluster
+			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains knative endpoint that cannot run, as knative is not installed in the cluster.", e.Integration.Namespace, e.Integration.Name)
+			err := errors.New("integration cannot run, as knative is not installed in the cluster")
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionKnativeAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionKnativeNotInstalledReason,
+				err.Error())
+			e.Integration.Status.Phase = v1.IntegrationPhaseError
+			return false, err
+		}
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {

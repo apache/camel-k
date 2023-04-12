@@ -18,11 +18,10 @@ limitations under the License.
 package digest
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,12 +49,12 @@ func TestDigestUsesAnnotations(t *testing.T) {
 func TestDigestSHA1FromTempFile(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-"); err != nil {
 		t.Error(err)
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
 
 	sha1, err := ComputeSHA1(tmpFile.Name())
 	assert.NoError(t, err)

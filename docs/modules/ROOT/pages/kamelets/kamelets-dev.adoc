@@ -72,9 +72,12 @@ spec:
         title: Message
         description: The message to generate
         type: string
-  types:
+  dataTypes:
     out:
-      mediaType: text/plain
+      default: text
+      types:
+        text:
+          mediaType: text/plain
   template:
     from:
       uri: timer:tick
@@ -250,9 +253,12 @@ spec:
         format: password
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:password
-  types: # <2>
+  dataTypes: # <2>
     out:
-      mediaType: application/json
+      default: json
+      types:
+        json:
+          mediaType: application/json
   template: # <3>
     from:
       uri: "twitter-search:{{keywords}}"
@@ -267,7 +273,7 @@ spec:
       - to: "kamelet:sink"
 ----
 <1> An icon with an appropriate license, better using svg+base64 URL encoding. You can encode icons using services like https://dopiaza.org/tools/datauri/index.php[this one]
-<2> The types section indicates that the Kamelet is going to produce JSON data. This part of the Kamelet spec is likely to change in the future but is not fundamental for the Kamelet mechanics to work
+<2> The dataTypes section indicates that the Kamelet is going to produce JSON data as a default. The Kamelet is able to define multiple data types for in/out/error. The user will then be able to choose on of the data types in a KameletBinding when referencing the Kamelet.
 <3> The previous YAML flow
 
 The Kamelet can be shared on the Catalog and or created on a Kubernetes cluster to let users use it.
@@ -799,9 +805,12 @@ spec:
         description: The amount of minutes to look ahead when starting the integration afresh
         type: integer
         default: 120
-  types: # <3>
+  dataTypes: # <3>
     out:
-      mediaType: application/json
+      default: json
+      types:
+        json:
+          mediaType: application/json
   dependencies: # <4>
     - camel-quarkus:caffeine
     - camel-quarkus:http
@@ -858,7 +867,7 @@ spec:
 ----
 <1> Add an icon with an appropriate license, better using svg+base64 URL encoding. You can encode icons using services like https://dopiaza.org/tools/datauri/index.php[this one]
 <2> This marks the Kamelet as dependant on Quarkus since we're specifying explicit dependencies on Quarkus artifacts in the `spec` -> `dependencies` section
-<3> The types section indicates that the Kamelet is going to produce JSON data. This part of the Kamelet spec will be subject of revision but is not fundamental for the Kamelet mechanics to work
+<3> The types section indicates that the Kamelet is going to produce JSON data by default. The Kamelet is able to define multiple data types for in/out/error. The user will then be able to choose on of the data types in a KameletBinding when referencing the Kamelet.
 <4> Dependencies that we previously specified in the modeline options should be expressed now in the Kamelet spec
 
 The Kamelet is now ready to be used!
@@ -1131,9 +1140,12 @@ spec:
         title: Chat ID
         description: The Chat ID where messages should be sent by default
         type: string
-  types: # <2>
+  dataTypes: # <2>
     out:
-      mediaType: application/json
+      default: json
+      types:
+        json:
+          mediaType: application/json
   template: # <3>
     from:
       uri: "kamelet:source"

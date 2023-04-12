@@ -33,10 +33,10 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/resources"
-	"github.com/apache/camel-k/pkg/util/knative"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/resources"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 func SetupClusterWideResourcesOrCollect(

@@ -20,9 +20,9 @@ package integrationplatform
 import (
 	"context"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	platformutil "github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 // NewMonitorAction returns an action that monitors the integration platform after it's fully initialized.

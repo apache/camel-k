@@ -1,0 +1,94 @@
+--- # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+name: Nightly release
+
+env:
+  TEST_CLUSTER: kind
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NEXUS_DEPLOY_USERNAME: ${{ secrets.NEXUS_USER }}
+  NEXUS_DEPLOY_PASSWORD: ${{ secrets.NEXUS_PW }}
+
+on:
+  schedule:
+    - cron: "15 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  main:
+    if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: main
+        persist-credentials: false
+        submodules: recursive
+    - name: Release main nightly
+      uses: ./.github/actions/release-nightly
+      with:
+        goVersion: "1.18.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  v1_12_x:
+    if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.12.x
+        persist-credentials: false
+        submodules: recursive
+    - name: release-1.12.x nightly
+      uses: ./.github/actions/release-nightly
+      with:
+        goVersion: "1.18.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  v1_10_x:
+    if: github.repository == 'apache/camel-k'
+    runs-on: ubuntu-20.04
+    steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v2
+      with:
+        ref: release-1.10.x
+        persist-credentials: false
+        submodules: recursive
+    - name: release-1.10.x nightly
+      uses: ./.github/actions/release-nightly
+      with:
+        goVersion: "1.17.x"
+        javaVersion: "11"
+        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
+        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
+

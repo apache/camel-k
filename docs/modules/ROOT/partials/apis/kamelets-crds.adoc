@@ -111,6 +111,141 @@ BeanProperties represent an unstructured object properties to be set on a bean
 
 |===
 
+[#_camel_apache_org_v1alpha1_DataTypeReference]
+=== DataTypeReference
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_Endpoint, Endpoint>>
+
+DataTypeReference references to the specification of a data type by its scheme and format name
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`scheme` +
+string
+|
+
+
+the data type component scheme
+
+|`format` +
+string
+|
+
+
+the data type format name
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_DataTypeSpec]
+=== DataTypeSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_DataTypesSpec, DataTypesSpec>>
+
+DataTypeSpec represents the specification for a data type
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`scheme` +
+string
+|
+
+
+the data type component scheme
+
+|`format` +
+string
+|
+
+
+the data type format name
+
+|`description` +
+string
+|
+
+
+optional description
+
+|`mediaType` +
+string
+|
+
+
+media type as expected for HTTP media types (ie, application/json)
+
+|`dependencies` +
+[]string
+|
+
+
+the list of Camel or Maven dependencies required by the data type
+
+|`headers` +
+*xref:#_camel_apache_org_v1alpha1_HeaderSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.HeaderSpec]*
+|
+
+
+one to many header specifications
+
+|`schema` +
+*xref:#_camel_apache_org_v1alpha1_JSONSchemaProps[JSONSchemaProps]*
+|
+
+
+the expected schema for the data type
+
+
+|===
+
+[#_camel_apache_org_v1alpha1_DataTypesSpec]
+=== DataTypesSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
+
+DataTypesSpec represents the specification for a set of data types
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`default` +
+string
+|
+
+
+the default data type for this Kamelet
+
+|`types` +
+*xref:#_camel_apache_org_v1alpha1_DataTypeSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.DataTypeSpec]*
+|
+
+
+one to many data type specifications
+
+|`headers` +
+*xref:#_camel_apache_org_v1alpha1_HeaderSpec[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.HeaderSpec]*
+|
+
+
+one to many header specifications
+
+
+|===
+
 [#_camel_apache_org_v1alpha1_Endpoint]
 === Endpoint
 
@@ -148,11 +283,19 @@ URI can be used to specify the (Camel) endpoint explicitly
 Properties are a key value representation of endpoint properties
 
 |`types` +
-*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*
+*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.EventTypeSpec]*
 |
 
 
-Types defines the schema of the data produced/consumed by the endpoint
+Types defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
+Deprecated: In favor of using DataTypes
+
+|`dataTypes` +
+*xref:#_camel_apache_org_v1alpha1_DataTypeReference[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.DataTypeReference]*
+|
+
+
+DataTypes defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
 
 
 |===
@@ -322,12 +465,6 @@ ErrorHandlerSpec represents an unstructured object for an error handler
 ErrorHandlerType a type of error handler (ie, sink)
 
 
-[#_camel_apache_org_v1alpha1_EventSlot]
-=== EventSlot(`string` alias)
-
-EventSlot represent a kind of data (ie, input, output, ...)
-
-
 [#_camel_apache_org_v1alpha1_EventTypeSpec]
 === EventTypeSpec
 
@@ -337,6 +474,7 @@ EventSlot represent a kind of data (ie, input, output, ...)
 * <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
 
 EventTypeSpec represents a specification for an event type
+Deprecated: In favor of using DataTypeSpec
 
 [cols="2,2a",options="header"]
 |===
@@ -391,6 +529,59 @@ string
 
 |===
 
+[#_camel_apache_org_v1alpha1_HeaderSpec]
+=== HeaderSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1alpha1_DataTypeSpec, DataTypeSpec>>
+* <<#_camel_apache_org_v1alpha1_DataTypesSpec, DataTypesSpec>>
+
+HeaderSpec represents the specification for a header used in the Kamelet
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+string
+|
+
+
+
+
+|`title` +
+string
+|
+
+
+
+
+|`description` +
+string
+|
+
+
+
+
+|`required` +
+bool
+|
+
+
+
+
+|`default` +
+string
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1alpha1_JSON]
 === JSON
 
@@ -433,6 +624,13 @@ These types are supported: bool, int64, float64, string, []interface{}, map[stri
 
 |`id` +
 string
+|
+
+
+
+
+|`deprecated` +
+bool
 |
 
 
@@ -625,6 +823,7 @@ XDescriptors is a list of extended properties that trigger a custom behavior in 
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1alpha1_DataTypeSpec, DataTypeSpec>>
 * <<#_camel_apache_org_v1alpha1_EventTypeSpec, EventTypeSpec>>
 * <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
 
@@ -657,7 +856,7 @@ string
 
 
 |`properties` +
-*xref:#_camel_apache_org_v1alpha1_JSONSchemaProp[map[string\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.JSONSchemaProp]*
+*xref:#_camel_apache_org_v1alpha1_JSONSchemaProp[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.JSONSchemaProp]*
 |
 
 
@@ -768,7 +967,7 @@ string
 A human readable message indicating details about the transition.
 
 |`pods` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_PodCondition[[\]github.com/apache/camel-k/pkg/apis/camel/v1.PodCondition]*
+[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.PodCondition
 |
 
 
@@ -812,7 +1011,7 @@ KameletBindingSpec defines the binding between a source and a sink. It can inclu
 |Description
 
 |`integration` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_IntegrationSpec[github.com/apache/camel-k/pkg/apis/camel/v1.IntegrationSpec]*
+github.com/apache/camel-k/v2/pkg/apis/camel/v1.IntegrationSpec
 |
 
 
@@ -1047,7 +1246,7 @@ KameletSpec specifies the configuration required to execute a Kamelet
 defines the formal configuration of the Kamelet
 
 |`sources` +
-*xref:apis/camel-k.adoc#_camel_apache_org_v1_SourceSpec[[\]github.com/apache/camel-k/pkg/apis/camel/v1.SourceSpec]*
+[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.SourceSpec
 |
 
 
@@ -1061,7 +1260,15 @@ sources in any Camel DSL supported
 the main source in YAML DSL
 
 |`types` +
-*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventSlot\]github.com/apache/camel-k/pkg/apis/camel/v1alpha1.EventTypeSpec]*
+*xref:#_camel_apache_org_v1alpha1_EventTypeSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.EventTypeSpec]*
+|
+
+
+data specification types for the events consumed/produced by the Kamelet
+Deprecated: In favor of using DataTypes
+
+|`dataTypes` +
+*xref:#_camel_apache_org_v1alpha1_DataTypesSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1.DataTypesSpec]*
 |
 
 
@@ -1162,3 +1369,8 @@ an unstructured raw message
 
 
 |===
+
+[#_camel_apache_org_v1alpha1_TypeSlot]
+=== TypeSlot(`string` alias)
+
+TypeSlot represent a kind of data (ie, input, output, ...)

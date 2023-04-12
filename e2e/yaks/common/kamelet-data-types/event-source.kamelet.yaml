@@ -25,38 +25,21 @@ spec:
   definition:
     title: "Event Source"
     description: "Produces events in given data type"
-    required:
-      - outputFormat
-    properties:
-      outputFormat:
-        title: Output Format
-        description: The data type of produced events
-        type: string
+  dataTypes:
+    out:
+      default: string
+      types:
+        string:
+          mediaType: plain/text
+        binary:
+          mediaType: application/octet-stream
   dependencies:
-    - github:apache.camel-kamelets:camel-kamelets-utils:3.x-SNAPSHOT
     - "camel:core"
     - "camel:kamelet"
   template:
-    beans:
-      - name: dataTypeRegistry
-        type: "#class:org.apache.camel.kamelets.utils.format.DefaultDataTypeRegistry"
-        property:
-          - key: classpathScan
-            value: false
-      - name: outputTypeProcessor
-        type: "#class:org.apache.camel.kamelets.utils.format.DataTypeProcessor"
-        property:
-          - key: scheme
-            value: 'camel'
-          - key: format
-            value: '{{outputFormat}}'
-          - key: registry
-            value: '#bean:{{dataTypeRegistry}}'
     from:
       uri: timer:tick
       steps:
         - set-body:
             constant: "Hello from Camel K!"
-        - process:
-            ref: "{{outputTypeProcessor}}"
         - to: "kamelet:sink"

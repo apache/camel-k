@@ -1,0 +1,31 @@
+[[installation-on-docker-desktop]]
+= Installing Camel K on Docker Desktop
+
+You can run Camel K integrations on plain Kubernetes using Docker Desktop, for that an external registry is needed and Kubernetes must be enabled.
+
+First, enable Kubernetes by following the instructions in the https://docs.docker.com/desktop/kubernetes/#enable-kubernetes[official documentation page].
+
+Once Kubernetes is up and running, a registry can be started locally using the command:
+```
+docker run -d -p 5000:5000 --restart=always --name registry registry:2
+```
+
+As it is meant for development purpose only, the registry has not been configured to be secured. To allow Kubernetes to pull images from
+our unsecured registry, the address `host.docker.internal:5000` (corresponding to the address of the registry from a container
+https://docs.docker.com/desktop/networking/#i-want-to-connect-from-a-container-to-a-service-on-the-host[see for more details]) needs to be
+added to the `insecure-registries` by following the instructions in the https://docs.docker.com/registry/insecure/#deploy-a-plain-http-registry[official documentation page].
+
+
+An example of `daemon.json` with the expected configuration:
+```
+{
+    "insecure-registries": ["host.docker.internal:5000"]
+}
+```
+
+Once the configuration changed, the Docker daemon must be restarted to take the modification into account.
+
+Finally, you can install the Camel-K operator with the insecure registry properly configured thanks to the next command:
+```
+kamel install --registry host.docker.internal:5000 --registry-insecure true
+```

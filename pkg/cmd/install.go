@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	platformutil "github.com/apache/camel-k/pkg/platform"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -42,17 +42,17 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/pkg/util/olm"
-	"github.com/apache/camel-k/pkg/util/patch"
-	"github.com/apache/camel-k/pkg/util/registry"
-	"github.com/apache/camel-k/pkg/util/watch"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/install"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/olm"
+	"github.com/apache/camel-k/v2/pkg/util/patch"
+	"github.com/apache/camel-k/v2/pkg/util/registry"
+	"github.com/apache/camel-k/v2/pkg/util/watch"
 )
 
 const installCommand = "install"
@@ -153,6 +153,12 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
 
+	// Storage settings
+	cmd.Flags().Bool("storage", true, "If false, it won't use a persistent storage (recommended for development purpose only)")
+	cmd.Flags().String("storage-class-name", "", "Use a storage class name to create a dynamic volume (if empty will look up for cluster default)")
+	cmd.Flags().String("storage-capacity", "20Gi", "How much capacity to use")
+	cmd.Flags().String("storage-access-mode", "ReadWriteOnce", "Persistent Volume Access Mode (any of ReadWriteOnce, ReadOnlyMany, ReadWriteMany or ReadWriteOncePod)")
+
 	return &cmd, &options
 }
 
@@ -167,10 +173,11 @@ type installCmdOptions struct {
 	ExampleSetup             bool `mapstructure:"example"`
 	Global                   bool `mapstructure:"global"`
 	// Deprecated: use the BuildPublishStrategyOption "KanikoBuildCacheEnabled" instead
-	KanikoBuildCache            bool     `mapstructure:"kaniko-build-cache"`
-	Save                        bool     `mapstructure:"save" kamel:"omitsave"`
-	Force                       bool     `mapstructure:"force"`
-	Olm                         bool     `mapstructure:"olm"`
+	KanikoBuildCache            bool `mapstructure:"kaniko-build-cache"`
+	Save                        bool `mapstructure:"save" kamel:"omitsave"`
+	Force                       bool `mapstructure:"force"`
+	Olm                         bool `mapstructure:"olm"`
+	olmOptions                  olm.Options
 	ClusterType                 string   `mapstructure:"cluster-type"`
 	OutputFormat                string   `mapstructure:"output"`
 	RuntimeVersion              string   `mapstructure:"runtime-version"`
@@ -198,12 +205,11 @@ type installCmdOptions struct {
 	ResourcesRequirements       []string `mapstructure:"operator-resources"`
 	LogLevel                    string   `mapstructure:"log-level"`
 	EnvVars                     []string `mapstructure:"operator-env-vars"`
-
-	registry         v1.RegistrySpec
-	registryAuth     registry.Auth
-	RegistryAuthFile string `mapstructure:"registry-auth-file"`
-
-	olmOptions olm.Options
+	registry                    v1.RegistrySpec
+	registryAuth                registry.Auth
+	RegistryAuthFile            string `mapstructure:"registry-auth-file"`
+	Storage                     bool   `mapstructure:"storage"`
+	storageOptions              install.OperatorStorageConfiguration
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, _ []string) error {
@@ -428,6 +434,9 @@ func (o *installCmdOptions) setupOperator(
 		NodeSelectors:         o.NodeSelectors,
 		ResourcesRequirements: o.ResourcesRequirements,
 		EnvVars:               o.EnvVars,
+	}
+	if o.Storage {
+		cfg.Storage = o.storageOptions
 	}
 
 	return install.OperatorOrCollect(o.Context, cmd, c, cfg, output, o.Force)
@@ -682,6 +691,13 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	o.olmOptions.SourceNamespace = viper.GetString(path + ".olm-source-namespace")
 	o.olmOptions.StartingCSV = viper.GetString(path + ".olm-starting-csv")
 	o.olmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
+
+	if o.Storage {
+		o.storageOptions.Enabled = true
+		o.storageOptions.ClassName = viper.GetString(path + ".storage-class-name")
+		o.storageOptions.AccessMode = viper.GetString(path + ".storage-access-mode")
+		o.storageOptions.Capacity = viper.GetString(path + ".storage-capacity")
+	}
 
 	return nil
 }

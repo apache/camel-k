@@ -17,7 +17,7 @@ limitations under the License.
 
 package trait
 
-// The builder trait is internally used to determine the best strategy to
+// BuilderTrait is internally used to determine the best strategy to
 // build and configure IntegrationKits.
 //
 // +camel-k:trait=builder.
@@ -27,4 +27,6 @@ type BuilderTrait struct {
 	Verbose *bool `property:"verbose" json:"verbose,omitempty"`
 	// A list of properties to be provided to the build task
 	Properties []string `property:"properties" json:"properties,omitempty"`
+	// The strategy to use, either `pod` or `routine` (default routine)
+	Strategy string `property:"strategy" json:"strategy,omitempty"`
 }

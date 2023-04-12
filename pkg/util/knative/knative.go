@@ -19,6 +19,7 @@ package knative
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -27,6 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"knative.dev/pkg/apis"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,8 +41,8 @@ import (
 	"knative.dev/pkg/tracker"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/client"
-	util "github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/client"
+	util "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 func CreateSubscription(channelReference corev1.ObjectReference, serviceName string, path string) *messaging.Subscription {
@@ -205,4 +207,36 @@ func getSinkURI(ctx context.Context, c client.Client, sink *corev1.ObjectReferen
 		return "", fmt.Errorf("sink %s contains an empty hostname", objIdentifier)
 	}
 	return addressURL.String(), nil
+}
+
+// EnableKnativeBindInNamespace sets the "bindings.knative.dev/include=true" label to the namespace, only
+// if there aren't any of these labels bindings.knative.dev/include bindings.knative.dev/exclude in the namespace
+// Returns true if the label was set in the namespace
+// https://knative.dev/docs/eventing/custom-event-source/sinkbinding/create-a-sinkbinding
+func EnableKnativeBindInNamespace(ctx context.Context, client client.Client, namespace string) (bool, error) {
+	ns, err := client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
+	if err != nil {
+		return false, err
+	}
+
+	// if there are sinkbinding labels in the namespace, camel-k-operator respects it and doesn't proceed
+	sinkbindingLabelsExists := ns.Labels["bindings.knative.dev/include"] != "" || ns.Labels["bindings.knative.dev/exclude"] != ""
+	if sinkbindingLabelsExists {
+		return false, nil
+	}
+
+	var jsonLabelPatch = map[string]interface{}{
+		"metadata": map[string]interface{}{
+			"labels": map[string]string{"bindings.knative.dev/include": "true"},
+		},
+	}
+	patch, err := json.Marshal(jsonLabelPatch)
+	if err != nil {
+		return false, err
+	}
+	_, err = client.CoreV1().Namespaces().Patch(ctx, namespace, types.MergePatchType, patch, metav1.PatchOptions{})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

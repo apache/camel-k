@@ -23,16 +23,15 @@ import (
 
 	networking "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	k8s "k8s.io/client-go/kubernetes"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/resources"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/openshift"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/resources"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const serviceAccountName = "camel-k-operator"
@@ -105,12 +104,6 @@ func ObjectOrCollect(ctx context.Context, c client.Client, namespace string, col
 	}
 
 	obj.SetNamespace(namespace)
-
-	if obj.GetObjectKind().GroupVersionKind().Kind == "PersistentVolumeClaim" {
-		if err := c.Create(ctx, obj); err != nil && !errors.IsAlreadyExists(err) {
-			return err
-		}
-	}
 
 	if force {
 		if _, err := kubernetes.ReplaceResource(ctx, c, obj); err != nil {

@@ -21,7 +21,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 const (
@@ -77,7 +77,10 @@ type KameletSpec struct {
 	// the main source in YAML DSL
 	Template *Template `json:"template,omitempty"`
 	// data specification types for the events consumed/produced by the Kamelet
-	Types map[EventSlot]EventTypeSpec `json:"types,omitempty"`
+	// Deprecated: In favor of using DataTypes
+	Types map[TypeSlot]EventTypeSpec `json:"types,omitempty"`
+	// data specification types for the events consumed/produced by the Kamelet
+	DataTypes map[TypeSlot]DataTypesSpec `json:"dataTypes,omitempty"`
 	// Camel dependencies needed by the Kamelet
 	Dependencies []string `json:"dependencies,omitempty"`
 }
@@ -88,24 +91,70 @@ type Template struct {
 	RawMessage `json:",inline"`
 }
 
-// EventSlot represent a kind of data (ie, input, output, ...)
-type EventSlot string
+// TypeSlot represent a kind of data (ie, input, output, ...)
+type TypeSlot string
 
 const (
-	// EventSlotIn is used for the input events
-	EventSlotIn EventSlot = "in"
-	// EventSlotOut is used for the output events
-	EventSlotOut EventSlot = "out"
-	// EventSlotError is used for the error events
-	EventSlotError EventSlot = "error"
+	// TypeSlotIn is used for the input events
+	TypeSlotIn TypeSlot = "in"
+	// TypeSlotOut is used for the output events
+	TypeSlotOut TypeSlot = "out"
+	// TypeSlotError is used for the error events
+	TypeSlotError TypeSlot = "error"
 )
 
 // EventTypeSpec represents a specification for an event type
+// Deprecated: In favor of using DataTypeSpec
 type EventTypeSpec struct {
 	// media type as expected for HTTP media types (ie, application/json)
 	MediaType string `json:"mediaType,omitempty"`
 	// the expected schema for the event
 	Schema *JSONSchemaProps `json:"schema,omitempty"`
+}
+
+// DataTypesSpec represents the specification for a set of data types
+type DataTypesSpec struct {
+	// the default data type for this Kamelet
+	Default string `json:"default,omitempty"`
+	// one to many data type specifications
+	Types map[string]DataTypeSpec `json:"types,omitempty"`
+	// one to many header specifications
+	Headers map[string]HeaderSpec `json:"headers,omitempty"`
+}
+
+// DataTypeSpec represents the specification for a data type
+type DataTypeSpec struct {
+	// the data type component scheme
+	Scheme string `json:"scheme,omitempty"`
+	// the data type format name
+	Format string `json:"format,omitempty"`
+	// optional description
+	Description string `json:"description,omitempty"`
+	// media type as expected for HTTP media types (ie, application/json)
+	MediaType string `json:"mediaType,omitempty"`
+	// the list of Camel or Maven dependencies required by the data type
+	Dependencies []string `json:"dependencies,omitempty"`
+	// one to many header specifications
+	Headers map[string]HeaderSpec `json:"headers,omitempty"`
+	// the expected schema for the data type
+	Schema *JSONSchemaProps `json:"schema,omitempty"`
+}
+
+// DataTypeReference references to the specification of a data type by its scheme and format name
+type DataTypeReference struct {
+	// the data type component scheme
+	Scheme string `json:"scheme,omitempty"`
+	// the data type format name
+	Format string `json:"format,omitempty"`
+}
+
+// HeaderSpec represents the specification for a header used in the Kamelet
+type HeaderSpec struct {
+	Type        string `json:"type,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Required    bool   `json:"required,omitempty"`
+	Default     string `json:"default,omitempty"`
 }
 
 // KameletStatus defines the observed state of Kamelet

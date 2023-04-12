@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"k8s.io/klog/v2"
 
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
@@ -46,8 +47,6 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/klog/v2"
-
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -59,16 +58,16 @@ import (
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
-	"github.com/apache/camel-k/pkg/apis"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/controller"
-	"github.com/apache/camel-k/pkg/event"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	logutil "github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/apis"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/controller"
+	"github.com/apache/camel-k/v2/pkg/event"
+	"github.com/apache/camel-k/v2/pkg/install"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	logutil "github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 var log = logutil.Log.WithName("cmd")
@@ -224,21 +223,12 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	})
 	exitOnError(err, "")
 
-	exitOnError(
-		mgr.GetFieldIndexer().IndexField(ctx, &corev1.Pod{}, "status.phase",
-			func(obj ctrl.Object) []string {
-				pod, _ := obj.(*corev1.Pod)
-				return []string{string(pod.Status.Phase)}
-			}),
-		"unable to set up field indexer for status.phase: %v",
-	)
-
 	log.Info("Configuring manager")
 	exitOnError(mgr.AddHealthzCheck("health-probe", healthz.Ping), "Unable add liveness check")
 	exitOnError(apis.AddToScheme(mgr.GetScheme()), "")
 	ctrlClient, err := client.FromManager(mgr)
 	exitOnError(err, "")
-	exitOnError(controller.AddToManager(mgr, ctrlClient), "")
+	exitOnError(controller.AddToManager(ctx, mgr, ctrlClient), "")
 
 	log.Info("Installing operator resources")
 	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
@@ -252,19 +242,25 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 // findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists.
 func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, operatorNamespace string) error {
+	operatorID := defaults.OperatorID()
 	var platformName string
-	if defaults.OperatorID() != "" {
-		platformName = defaults.OperatorID()
+	if operatorID != "" {
+		platformName = operatorID
 	} else {
 		platformName = platform.DefaultPlatformName
 	}
 
 	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil || k8serrors.IsNotFound(err) {
 		defaultPlatform := v1.NewIntegrationPlatform(operatorNamespace, platformName)
+
 		if defaultPlatform.Labels == nil {
 			defaultPlatform.Labels = make(map[string]string)
 		}
 		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
+
+		if operatorID != "" {
+			defaultPlatform.SetOperatorID(operatorID)
+		}
 
 		if _, err := c.CamelV1().IntegrationPlatforms(operatorNamespace).Create(ctx, &defaultPlatform, metav1.CreateOptions{}); err != nil {
 			return err

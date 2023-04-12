@@ -6464,6 +6464,10 @@ spec:
                             items:
                               type: string
                             type: array
+                          strategy:
+                            description: The strategy to use, either `pod` or `routine`
+                              (default routine)
+                            type: string
                           verbose:
                             description: Enable verbose logging on build components
                               that support it (e.g. Kaniko build pod).
@@ -6859,6 +6863,13 @@ spec:
                       ingress:
                         description: The configuration of Ingress trait
                         properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            description: 'The annotations added to the ingress. This
+                              can be used to set controller specific annotations,
+                              e.g., when using the NGINX Ingress controller: See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md'
+                            type: object
                           auto:
                             description: To automatically add an ingress whenever
                               the integration uses an HTTP endpoint consumer.
@@ -6874,6 +6885,19 @@ spec:
                             type: boolean
                           host:
                             description: To configure the host exposed by the ingress.
+                            type: string
+                          path:
+                            description: To configure the path exposed by the ingress
+                              (default `/`).
+                            type: string
+                          pathType:
+                            description: To configure the path type exposed by the
+                              ingress. One of `Exact`, `Prefix`, `ImplementationSpecific`
+                              (default to `Prefix`).
+                            enum:
+                            - Exact
+                            - Prefix
+                            - ImplementationSpecific
                             type: string
                         type: object
                       istio:
@@ -7104,6 +7128,14 @@ spec:
                               header "ce-knativehistory". Since this header has been
                               removed in newer versions of Knative, filtering is disabled
                               by default.
+                            type: boolean
+                          namespaceLabel:
+                            description: 'Enables the camel-k-operator to set the
+                              "bindings.knative.dev/include=true" label to the namespace
+                              As Knative requires this label to perform injection
+                              of K_SINK URL into the service. If this is false, the
+                              integration pod may start and fail, read the SinkBinding
+                              Knative documentation. (default: true)'
                             type: boolean
                           sinkBinding:
                             description: Allows binding the integration to a sink
@@ -7667,6 +7699,21 @@ spec:
                 description: Sink is the destination of the integration defined by
                   this binding
                 properties:
+                  dataTypes:
+                    additionalProperties:
+                      description: DataTypeReference references to the specification
+                        of a data type by its scheme and format name
+                      properties:
+                        format:
+                          description: the data type format name
+                          type: string
+                        scheme:
+                          description: the data type component scheme
+                          type: string
+                      type: object
+                    description: DataTypes defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                    type: object
                   properties:
                     description: Properties are a key value representation of endpoint
                       properties
@@ -7711,8 +7758,8 @@ spec:
                     type: object
                   types:
                     additionalProperties:
-                      description: EventTypeSpec represents a specification for an
-                        event type
+                      description: 'EventTypeSpec represents a specification for an
+                        event type Deprecated: In favor of using DataTypeSpec'
                       properties:
                         mediaType:
                           description: media type as expected for HTTP media types
@@ -7749,6 +7796,8 @@ spec:
                                     description: default is a default value for undefined
                                       object fields.
                                     x-kubernetes-preserve-unknown-fields: true
+                                  deprecated:
+                                    type: boolean
                                   description:
                                     type: string
                                   enum:
@@ -7873,8 +7922,9 @@ spec:
                               type: string
                           type: object
                       type: object
-                    description: Types defines the schema of the data produced/consumed
-                      by the endpoint
+                    description: 'Types defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                      Deprecated: In favor of using DataTypes'
                     type: object
                   uri:
                     description: URI can be used to specify the (Camel) endpoint explicitly
@@ -7884,6 +7934,21 @@ spec:
                 description: Source is the starting point of the integration defined
                   by this binding
                 properties:
+                  dataTypes:
+                    additionalProperties:
+                      description: DataTypeReference references to the specification
+                        of a data type by its scheme and format name
+                      properties:
+                        format:
+                          description: the data type format name
+                          type: string
+                        scheme:
+                          description: the data type component scheme
+                          type: string
+                      type: object
+                    description: DataTypes defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                    type: object
                   properties:
                     description: Properties are a key value representation of endpoint
                       properties
@@ -7928,8 +7993,8 @@ spec:
                     type: object
                   types:
                     additionalProperties:
-                      description: EventTypeSpec represents a specification for an
-                        event type
+                      description: 'EventTypeSpec represents a specification for an
+                        event type Deprecated: In favor of using DataTypeSpec'
                       properties:
                         mediaType:
                           description: media type as expected for HTTP media types
@@ -7966,6 +8031,8 @@ spec:
                                     description: default is a default value for undefined
                                       object fields.
                                     x-kubernetes-preserve-unknown-fields: true
+                                  deprecated:
+                                    type: boolean
                                   description:
                                     type: string
                                   enum:
@@ -8090,8 +8157,9 @@ spec:
                               type: string
                           type: object
                       type: object
-                    description: Types defines the schema of the data produced/consumed
-                      by the endpoint
+                    description: 'Types defines the data type of the data produced/consumed
+                      by the endpoint and references a given data type specification.
+                      Deprecated: In favor of using DataTypes'
                     type: object
                   uri:
                     description: URI can be used to specify the (Camel) endpoint explicitly
@@ -8104,6 +8172,21 @@ spec:
                   description: Endpoint represents a source/sink external entity (could
                     be any Kubernetes resource or Camel URI)
                   properties:
+                    dataTypes:
+                      additionalProperties:
+                        description: DataTypeReference references to the specification
+                          of a data type by its scheme and format name
+                        properties:
+                          format:
+                            description: the data type format name
+                            type: string
+                          scheme:
+                            description: the data type component scheme
+                            type: string
+                        type: object
+                      description: DataTypes defines the data type of the data produced/consumed
+                        by the endpoint and references a given data type specification.
+                      type: object
                     properties:
                       description: Properties are a key value representation of endpoint
                         properties
@@ -8149,8 +8232,8 @@ spec:
                       type: object
                     types:
                       additionalProperties:
-                        description: EventTypeSpec represents a specification for
-                          an event type
+                        description: 'EventTypeSpec represents a specification for
+                          an event type Deprecated: In favor of using DataTypeSpec'
                         properties:
                           mediaType:
                             description: media type as expected for HTTP media types
@@ -8188,6 +8271,8 @@ spec:
                                       description: default is a default value for
                                         undefined object fields.
                                       x-kubernetes-preserve-unknown-fields: true
+                                    deprecated:
+                                      type: boolean
                                     description:
                                       type: string
                                     enum:
@@ -8313,8 +8398,9 @@ spec:
                                 type: string
                             type: object
                         type: object
-                      description: Types defines the schema of the data produced/consumed
-                        by the endpoint
+                      description: 'Types defines the data type of the data produced/consumed
+                        by the endpoint and references a given data type specification.
+                        Deprecated: In favor of using DataTypes'
                       type: object
                     uri:
                       description: URI can be used to specify the (Camel) endpoint

@@ -18,8 +18,8 @@ limitations under the License.
 package addons
 
 import (
-	"github.com/apache/camel-k/addons/vault/hashicorp"
-	"github.com/apache/camel-k/pkg/trait"
+	"github.com/apache/camel-k/v2/addons/vault/hashicorp"
+	"github.com/apache/camel-k/v2/pkg/trait"
 )
 
 func init() {

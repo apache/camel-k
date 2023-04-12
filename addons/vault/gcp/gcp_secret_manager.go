@@ -20,10 +20,10 @@ package gcp
 import (
 	"strconv"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"k8s.io/utils/pointer"
 )
 
@@ -47,21 +47,21 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The Project Id from Google Cloud
-	ProjectID string `property:"project-id,omitempty"`
+	ProjectID string `property:"project-id" json:"projectId,omitempty"`
 	// The Path to a service account Key File to use secrets from Google Secret Manager
-	ServiceAccountKey string `property:"service-account-key,omitempty"`
+	ServiceAccountKey string `property:"service-account-key" json:"serviceAccountKey,omitempty"`
 	// Define if we want to use the Default Instance approach for accessing the Google Secret Manager service
-	UseDefaultInstance *bool `property:"use-default-instance,omitempty"`
+	UseDefaultInstance *bool `property:"use-default-instance" json:"useDefaultInstance,omitempty"`
 	// Define if we want to use the Camel Context Reload feature or not
-	ContextReloadEnabled *bool `property:"context-reload-enabled,omitempty"`
+	ContextReloadEnabled *bool `property:"context-reload-enabled" json:"contextReloadEnabled,omitempty"`
 	// Define if we want to use the Refresh Feature for secrets
-	RefreshEnabled *bool `property:"refresh-enabled,omitempty"`
+	RefreshEnabled *bool `property:"refresh-enabled" json:"refreshEnabled,omitempty"`
 	// If Refresh is enabled, this defines the interval to check the refresh event
-	RefreshPeriod string `property:"refresh-period,omitempty"`
+	RefreshPeriod string `property:"refresh-period" json:"refreshPeriod,omitempty"`
 	// If Refresh is enabled, the regular expression representing the secrets we want to track
-	Secrets string `property:"refresh-period,omitempty"`
+	Secrets string `property:"secrets" json:"secrets,omitempty"`
 	// If Refresh is enabled, this defines the subscription name to the Google PubSub topic used to keep track of updates
-	SubscriptionName string `property:"refresh-period,omitempty"`
+	SubscriptionName string `property:"subscription-name" json:"subscriptionName,omitempty"`
 }
 
 type gcpSecretManagerTrait struct {

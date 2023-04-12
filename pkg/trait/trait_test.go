@@ -30,10 +30,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 const (
@@ -283,6 +284,7 @@ func TestConfigureVolumesAndMountsSources(t *testing.T) {
 				},
 			},
 		},
+		Catalog: &Catalog{},
 	}
 
 	vols := make([]corev1.Volume, 0)
@@ -303,6 +305,109 @@ func TestConfigureVolumesAndMountsSources(t *testing.T) {
 	assert.NotNil(t, m)
 
 	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+}
+
+func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
+	traitList := make([]Trait, 0, len(FactoryList))
+	trait, ok := newQuarkusTrait().(*quarkusTrait)
+	assert.True(t, ok, "A Quarkus trait was expected")
+	trait.PackageTypes = []traitv1.QuarkusPackageType{traitv1.NativePackageType}
+	traitList = append(traitList, trait)
+	env := Environment{
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      TestDeploymentName,
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source1.xml",
+							ContentRef: "my-cm1",
+							ContentKey: "source1.xml",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source2.java",
+							ContentRef: "my-cm2",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source1.java",
+							ContentRef: "my-cm3",
+							ContentKey: "source1.java",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source2.xml",
+							ContentRef: "my-cm4",
+						},
+						Type: "data",
+					},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: map[string]string{
+					v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNative,
+				},
+				Namespace: "ns",
+			},
+		},
+		Catalog: &Catalog{
+			traits: traitList,
+		},
+		CamelCatalog: &camel.RuntimeCatalog{
+			CamelCatalogSpec: v1.CamelCatalogSpec{
+				Loaders: map[string]v1.CamelLoader{
+					"java": {
+						Metadata: map[string]string{
+							"native":                         "true",
+							"sources-required-at-build-time": "true",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	vols := make([]corev1.Volume, 0)
+	mnts := make([]corev1.VolumeMount, 0)
+
+	env.configureVolumesAndMounts(&vols, &mnts)
+
+	assert.Len(t, vols, 2)
+	assert.Len(t, mnts, 2)
+
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "source1.xml", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm4" })
 	assert.NotNil(t, v)
 	assert.NotNil(t, v.VolumeSource.ConfigMap)
 	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
@@ -388,12 +493,14 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script string) *Environment {
 	t.Helper()
 
+	client, _ := test.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
 	assert.Nil(t, err)
 
 	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(nil),
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      TestDeploymentName,

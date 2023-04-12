@@ -28,9 +28,9 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/log"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationPlatform, error) {
@@ -42,6 +42,17 @@ func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name st
 	}
 
 	return &platform, nil
+}
+
+func GetCamelCatalog(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.CamelCatalog, error) {
+	catalog := v1.NewCamelCatalog(namespace, name)
+	log.Debugf("Camel Catalog [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&catalog))
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(&catalog), &catalog); err != nil {
+		log.Debugf("Camel catalog Error: %v", err)
+		return nil, err
+	}
+
+	return &catalog, nil
 }
 
 func GetIntegrationKit(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationKit, error) {

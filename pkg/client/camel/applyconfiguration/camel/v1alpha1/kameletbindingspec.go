@@ -20,7 +20,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1 "github.com/apache/camel-k/pkg/client/camel/applyconfiguration/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
 )
 
 // KameletBindingSpecApplyConfiguration represents an declarative configuration of the KameletBindingSpec type for use

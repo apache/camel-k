@@ -21,13 +21,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/google/go-github/v32/github"
 	"golang.org/x/oauth2"
 
@@ -127,7 +127,7 @@ func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url strin
 		return nil, fmt.Errorf("cannot download file %s: %d %s", url, resp.StatusCode, resp.Status)
 	}
 
-	content, err := ioutil.ReadAll(resp.Body)
+	content, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

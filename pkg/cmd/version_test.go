@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -85,4 +85,10 @@ func TestCompatibleVersions(t *testing.T) {
 	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0", rootCmd))
 	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa", rootCmd))
 	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4", rootCmd))
+}
+
+func TestCompatibleVersionsNonSemver(t *testing.T) {
+	_, rootCmd, _ := initializeVersionCmdOptions(t)
+	assert.Equal(t, true, compatibleVersions("1.3.0.special-version", "1.3.0.special-version", rootCmd))
+	assert.Equal(t, false, compatibleVersions("1.3.1.special-version", "1.3.0.special-version", rootCmd))
 }

@@ -28,13 +28,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/metadata"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/label"
-	"github.com/apache/camel-k/pkg/util/uri"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/metadata"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
 type cronTrait struct {
@@ -260,7 +259,9 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 					BackoffLimit:          &backoffLimit,
 					Template: corev1.PodTemplateSpec{
 						ObjectMeta: metav1.ObjectMeta{
-							Labels:      label.AddLabels(e.Integration.Name),
+							Labels: map[string]string{
+								v1.IntegrationLabel: e.Integration.Name,
+							},
 							Annotations: annotations,
 						},
 						Spec: corev1.PodSpec{

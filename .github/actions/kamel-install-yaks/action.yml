@@ -21,7 +21,7 @@ description: 'Install YAKS artifacts'
 inputs:
   version:
     description: "The YAKS version"
-    default: 0.10.0
+    default: 0.14.3
     required: false
   image-name:
     description: "The YAKS operator image name"

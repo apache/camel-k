@@ -32,11 +32,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -114,13 +114,14 @@ var (
 )
 
 func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
+	var ugfid int64 = 1000
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
 			Kind:       "Pod",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.Namespace,
+			Namespace: build.BuilderPodNamespace(),
 			Name:      buildPodName(build),
 			Labels: map[string]string{
 				"camel.apache.org/build":     build.Name,
@@ -130,6 +131,11 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 		Spec: corev1.PodSpec{
 			ServiceAccountName: platform.BuilderServiceAccount,
 			RestartPolicy:      corev1.RestartPolicyNever,
+			SecurityContext: &corev1.PodSecurityContext{
+				RunAsUser:  &ugfid,
+				RunAsGroup: &ugfid,
+				FSGroup:    &ugfid,
+			},
 		},
 	}
 
@@ -170,7 +176,7 @@ func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error
 			Kind:       "Pod",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: build.Namespace,
+			Namespace: build.BuilderPodNamespace(),
 			Name:      buildPodName(build),
 		},
 	}
@@ -185,7 +191,7 @@ func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error
 
 func getBuilderPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
 	pod := corev1.Pod{}
-	err := c.Get(ctx, ctrl.ObjectKey{Namespace: build.Namespace, Name: buildPodName(build)}, &pod)
+	err := c.Get(ctx, ctrl.ObjectKey{Namespace: build.BuilderPodNamespace(), Name: buildPodName(build)}, &pod)
 	if err != nil && k8serrors.IsNotFound(err) {
 		return nil, nil
 	}
@@ -201,24 +207,34 @@ func buildPodName(build *v1.Build) string {
 }
 
 func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
-	if !hasBuilderVolume(pod) {
-		// Add the EmptyDir volume used to share the build state across tasks
-		pod.Spec.Volumes = append(pod.Spec.Volumes, corev1.Volume{
-			Name: builderVolume,
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
+	if !hasVolume(pod, builderVolume) {
+		pod.Spec.Volumes = append(pod.Spec.Volumes,
+			// EmptyDir volume used to share the build state across tasks
+			corev1.Volume{
+				Name: builderVolume,
+				VolumeSource: corev1.VolumeSource{
+					EmptyDir: &corev1.EmptyDirVolumeSource{},
+				},
 			},
-		})
+		)
 	}
-
-	operatorImage := platform.OperatorImage
-	if operatorImage == "" {
-		operatorImage = defaults.ImageName + ":" + defaults.Version
+	if !hasVolume(pod, defaults.DefaultPVC) {
+		pod.Spec.Volumes = append(pod.Spec.Volumes,
+			// Maven repo volume
+			corev1.Volume{
+				Name: defaults.DefaultPVC,
+				VolumeSource: corev1.VolumeSource{
+					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+						ClaimName: defaults.DefaultPVC,
+					},
+				},
+			},
+		)
 	}
 
 	container := corev1.Container{
 		Name:            taskName,
-		Image:           operatorImage,
+		Image:           build.Spec.ToolImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command: []string{
 			"kamel",
@@ -460,25 +476,41 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 	pod.Spec.Affinity = affinity
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 
+	// Warning: Kaniko requires root privileges to work correctly
+	// As we're planning to deprecate this building strategy we're fixing in the first
+	// releases of version 2
+	var ugfid int64 = 0
+	pod.Spec.SecurityContext = &corev1.PodSecurityContext{
+		RunAsUser:  &ugfid,
+		RunAsGroup: &ugfid,
+		FSGroup:    &ugfid,
+	}
+
 	addContainerToPod(build, container, pod)
 
 	return nil
 }
 
 func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.Pod) {
-	if hasBuilderVolume(pod) {
+	if hasVolume(pod, builderVolume) {
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
 			MountPath: filepath.Join(builderDir, build.Name),
+		})
+	}
+	if hasVolume(pod, defaults.DefaultPVC) {
+		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
+			Name:      defaults.DefaultPVC,
+			MountPath: defaults.LocalRepository,
 		})
 	}
 
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, container)
 }
 
-func hasBuilderVolume(pod *corev1.Pod) bool {
+func hasVolume(pod *corev1.Pod, name string) bool {
 	for _, volume := range pod.Spec.Volumes {
-		if volume.Name == builderVolume {
+		if volume.Name == name {
 			return true
 		}
 	}

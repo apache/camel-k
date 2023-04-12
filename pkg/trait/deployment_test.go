@@ -27,9 +27,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/test"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestConfigureDisabledDeploymentTraitDoesNotSucceed(t *testing.T) {
@@ -265,10 +266,17 @@ func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 		},
 	})
 
+	// disable the knative service api
+	fakeClient := trait.Client.(*test.FakeClient) //nolint
+	fakeClient.DisableAPIGroupDiscovery("serving.knative.dev/v1")
+
 	replicas := int32(3)
+	catalog, _ := camel.QuarkusCatalog()
 
 	environment := &Environment{
-		Catalog: NewCatalog(nil),
+		CamelCatalog: catalog,
+		Catalog:      NewCatalog(nil),
+		Client:       trait.Client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "integration-name",

@@ -26,14 +26,14 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v1.Integration, options ...ctrl.ListOption) ([]v1.IntegrationKit, error) {
@@ -129,6 +129,12 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	}
 	if !util.StringSliceContains(kit.Spec.Dependencies, integration.Status.Dependencies) {
 		ilog.Debug("Integration and integration-kit dependencies do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false, nil
+	}
+	// If IntegrationKit has any source, we must verify that it corresponds with the one in the Integration.
+	// This is important in case of Native builds as we need to rebuild when language requires a source during build.
+	if (kit.Spec.Sources != nil && len(kit.Spec.Sources) > 0) && !hasMatchingSources(integration, kit) {
+		ilog.Debug("Integration and integration-kit sources do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false, nil
 	}
 
@@ -249,4 +255,23 @@ func matchesComparableTrait(ct trait.ComparableTrait, it map[string]interface{},
 func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
 	// perform exact match on the two trait maps
 	return reflect.DeepEqual(it, kt)
+}
+
+func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
+	if len(it.Sources()) != len(kit.Spec.Sources) {
+		return false
+	}
+	for _, itSource := range it.Sources() {
+		found := false
+		for _, ikSource := range kit.Spec.Sources {
+			if itSource.Content == ikSource.Content {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }

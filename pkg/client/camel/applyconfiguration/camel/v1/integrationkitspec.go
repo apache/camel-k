@@ -20,7 +20,7 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // IntegrationKitSpecApplyConfiguration represents an declarative configuration of the IntegrationKitSpec type for use
@@ -32,6 +32,7 @@ type IntegrationKitSpecApplyConfiguration struct {
 	Traits        *IntegrationKitTraitsApplyConfiguration `json:"traits,omitempty"`
 	Configuration []ConfigurationSpecApplyConfiguration   `json:"configuration,omitempty"`
 	Repositories  []string                                `json:"repositories,omitempty"`
+	Sources       []SourceSpecApplyConfiguration          `json:"sources,omitempty"`
 }
 
 // IntegrationKitSpecApplyConfiguration constructs an declarative configuration of the IntegrationKitSpec type for use with
@@ -93,6 +94,19 @@ func (b *IntegrationKitSpecApplyConfiguration) WithConfiguration(values ...*Conf
 func (b *IntegrationKitSpecApplyConfiguration) WithRepositories(values ...string) *IntegrationKitSpecApplyConfiguration {
 	for i := range values {
 		b.Repositories = append(b.Repositories, values[i])
+	}
+	return b
+}
+
+// WithSources adds the given value to the Sources field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Sources field.
+func (b *IntegrationKitSpecApplyConfiguration) WithSources(values ...*SourceSpecApplyConfiguration) *IntegrationKitSpecApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithSources")
+		}
+		b.Sources = append(b.Sources, *values[i])
 	}
 	return b
 }

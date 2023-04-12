@@ -20,7 +20,6 @@ package source
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -38,11 +37,11 @@ func TestRawContentFileMissing(t *testing.T) {
 func TestRawBinaryContentType(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-*.json"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
 
 	data, contentType, err := LoadRawContent(context.Background(), tmpFile.Name())
 	assert.Nil(t, err)
@@ -53,11 +52,11 @@ func TestRawBinaryContentType(t *testing.T) {
 func TestRawApplicationContentType(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-*.json"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, err := LoadRawContent(context.Background(), tmpFile.Name())
 	assert.Nil(t, err)
@@ -68,11 +67,11 @@ func TestRawApplicationContentType(t *testing.T) {
 func TestTextContentType(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-*.json"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := LoadTextContent(context.Background(), tmpFile.Name(), false)
 	assert.Nil(t, err)
@@ -84,11 +83,11 @@ func TestTextContentType(t *testing.T) {
 func TestTextCompressed(t *testing.T) {
 	var tmpFile *os.File
 	var err error
-	if tmpFile, err = ioutil.TempFile("", "camel-k-*.json"); err != nil {
+	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, ioutil.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := LoadTextContent(context.Background(), tmpFile.Name(), true)
 	assert.Nil(t, err)

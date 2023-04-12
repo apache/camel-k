@@ -21,7 +21,6 @@ import (
 	"bufio"
 	"context"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -33,10 +32,10 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/log"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 type spectrumTask struct {
@@ -99,7 +98,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 
 	registryConfigDir := ""
 	if t.task.Registry.Secret != "" {
-		registryConfigDir, err = mountSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret)
+		registryConfigDir, err = MountSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret)
 		if err != nil {
 			return status.Failed(err)
 		}
@@ -158,8 +157,8 @@ func readSpectrumLogs(newStdOut io.Reader) {
 	}
 }
 
-func mountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
-	dir, err := ioutil.TempDir("", "spectrum-secret-")
+func MountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
+	dir, err := os.MkdirTemp("", "spectrum-secret-")
 	if err != nil {
 		return "", err
 	}
@@ -173,7 +172,7 @@ func mountSecret(ctx context.Context, c client.Client, namespace, name string) (
 	}
 
 	for file, content := range secret.Data {
-		if err := ioutil.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
 			if removeErr := os.RemoveAll(dir); removeErr != nil {
 				err = multierr.Append(err, removeErr)
 			}

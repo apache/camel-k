@@ -36,19 +36,17 @@ spec:
       configuration:
         enabled: true # <1>
 ----
-<1> Actives the Prometheus trait at the platform level
+<1> Activates the Prometheus trait at the platform level
 
-The xref:camel-quarkus::reference/extensions/microprofile-metrics.adoc[Camel Quarkus MicroProfile Metrics extension] is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
+The Camel Quarkus MicroProfile Metrics extension is responsible for collecting and exposing metrics in the https://github.com/OpenObservability/OpenMetrics[OpenMetrics] text format.
 
 The MicroProfile Metrics extension registers and exposes the following metrics out-of-the-box:
 
 * https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/required-metrics.adoc#required-metrics[JVM and operating system related metrics]
 
-* xref:camel-quarkus::reference/extensions/microprofile-metrics.adoc#extensions-microprofile-metrics-usage-camel-route-metrics[Camel specific metrics]
-
 It is possible to extend this set of metrics by using either, or both:
 
-* The xref:components::microprofile-metrics-component.adoc[MicroProfile Metrics component]
+* The MicroProfile Metrics component
 
 * The https://github.com/eclipse/microprofile-metrics/blob/master/spec/src/main/asciidoc/app-programming-model.adoc#annotations[MicroProfile Metrics annotations], in external dependencies
 
@@ -79,7 +77,7 @@ In case your integration metrics are not discovered, you may want to rely on htt
 
 == Alerting
 
-The Prometheus Operator declares the `AlertManager` resource that can be used to configure _Alertmanager_ instances, along with `Prometheus` instances.
+The Prometheus Operator declares the `AlertManager` resource that can be used to configure _AlertManager_ instances, along with `Prometheus` instances.
 
 Assuming an `AlertManager` resource already exists in your cluster, you can register a `PrometheusRule` resource that is used by Prometheus to trigger alerts, e.g.:
 

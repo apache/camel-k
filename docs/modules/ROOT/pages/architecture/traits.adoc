@@ -5,7 +5,7 @@ image::architecture/camel-k-traits.jpg[traits, width=1024]
 
 Traits are high level named features of Camel K that can be enabled/disabled or configured to customize the behavior of the final `Integration`. You can think a **trait** as a possible way to tune your `Integration` on the running platform. Through the configuration of a trait, you will be able to specify certain characteristics configuring low level details, if you need to.
 
-Advanced users will find very useful to configure certain facets of the deployments or to control how to manage the cluster resources. Most of the times you need to interact with the cluster, you will need to configure a trait that control such cluster behavior (think at the `Pod`, `Container`, `Service` traits which map to the `Kubernetes` resources of the same name).
+Advanced users will find it very useful to configure certain facets of the deployments or to control how to manage the cluster resources. Most of the time you need to interact with the cluster, you will need to configure a trait that control such cluster behavior (think at the `Pod`, `Container`, `Service` traits which map to the `Kubernetes` resources of the same name).
 
 This page is dedicated to developers/engineers willing to dive more in the low level details of Camel K development. You can find a complete list of available traits and how to configure them in the xref:traits:traits.adoc[trait section].
 
@@ -14,9 +14,9 @@ NOTE: This document reflects Camel K version 1.5. It may not reflect slight chan
 [[traits-life-cycle]]
 == Traits life cycle
 
-Traits are typically used to tune several aspects of an `Integration`. However, you will learn that we are using the same concept to influence the build of `IntegrationKits`. Therefore, we can distinguish between those traits that can be applied to either one or the other type. Another important thing to know is that the platform uses this mechanism to perform many common (hidden to the user) operations. We use to identify those trait as **platform traits**. Misusing a platform trait, may result in execution errors.
+Traits are typically used to tune several aspects of an `Integration`. However, you will learn that we are using the same concept to influence the build of `IntegrationKits`. Therefore, we can distinguish between those traits that can be applied to either one or the other type. Another important thing to know is that the platform uses this mechanism to perform many common (hidden to the user) operations. We use to identify those trait as **platform traits**. Misusing a platform trait may result in execution errors.
 
-Another important concept related to the trait lifecycle is the **trait profile**. At this time, Camel K is supporting the following profiles:
+Another important concept related to the trait lifecycle is the **trait profile**. At this time, Camel K supports the following profiles:
 
 * Kubernetes
 * OpenShift
@@ -32,7 +32,7 @@ A Camel K user will provide a trait configuration via CLI (`--trait` or `-t` fla
 [[traits-interface]]
 === Trait interface
 
-In order to understand better the logic behind the trait managment, let's have a look at the `https://github.com/apache/camel-k/blob/main/pkg/trait/trait_types.go#L70[Trait]` interface:
+In order to understand the logic behind the trait management better, let's have a look at the `https://github.com/apache/camel-k/blob/main/pkg/trait/trait_types.go#L70[Trait]` interface:
 
 [source,go]
 ----
@@ -50,7 +50,7 @@ type Trait interface {
 }
 ----
 
-Each trait will implement this interface. The most important methods that will be invoked by the xref:architecture/operator.adoc[Operator] are `Configure()` and `Apply()`. Basically, the `Configure()` method will set those inputs aforementioned (each trait has its own). The method is in charge to verify also the correctness of those expected parameters, where it makes sense (ie, a well expected `Kubernetes` resource name).
+Each trait will implement this interface. The most important methods that will be invoked by the xref:architecture/operator.adoc[Operator] are `Configure()` and `Apply()`. Basically, the `Configure()` method will set those inputs aforementioned (each trait has its own). The method is in charge to verify also the correctness of those expected parameters, where it makes sense (i.e., a well expected `Kubernetes` resource name).
 
 Once configured, the `Apply()` method will be called along the build or initialization phase in order to do the business logic expected for it. The `environment` variable will give you all the below resources you will need to perform your operation (ie, the `Integration` or any Kubernetes resource attached to it). You can have a deeper look at the `https://github.com/apache/camel-k/blob/main/pkg/trait/trait_types.go#L188[Environment]` struct.
 

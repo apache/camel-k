@@ -1,6 +1,7 @@
 * xref:installation/installation.adoc[Installation]
 ** Kubernetes Platform
 *** xref:installation/platform/minikube.adoc[Minikube]
+*** xref:installation/platform/docker-desktop.adoc[Docker Desktop]
 *** xref:installation/platform/crc.adoc[CRC]
 *** xref:installation/platform/digitalocean.adoc[DigitalOcean]
 *** xref:installation/platform/gke.adoc[GKE]
@@ -15,11 +16,13 @@
 *** xref:installation/registry/gcr.adoc[Gcr.io]
 *** xref:installation/registry/icr.adoc[IBM Container Registry]
 *** xref:installation/registry/k3s.adoc[K3s]
-** Advanced
-*** xref:installation/advanced/knative.adoc[Knative Sinks]
+** xref:installation/advanced/advanced.adoc[Advanced]
+*** xref:installation/advanced/kustomize.adoc[Install Using Kustomize]
 *** xref:installation/advanced/resources.adoc[Resource management]
 *** xref:installation/advanced/multi.adoc[Multiple Operators]
-*** xref:installation/advanced/kustomize.adoc[Install Using Kustomize]
+*** xref:installation/advanced/http-proxy.adoc[HTTP Proxy]
+*** xref:installation/advanced/maven.adoc[Maven]
+*** xref:installation/advanced/multi-architecture.adoc[Multi Architecture]
 * Command Line Interface
 ** xref:cli/cli.adoc[Kamel CLI]
 ** xref:cli/file-based-config.adoc[File-based Config]
@@ -29,6 +32,7 @@
 ** xref:running/run-from-github.adoc[Run from GitHub]
 ** xref:running/local.adoc[Run Locally]
 ** xref:running/promoting.adoc[Promote an Integration]
+** xref:running/knative-sink.adoc[Knative Sinks]
 ** xref:tutorials/tutorials.adoc[Examples]
 * xref:configuration/configuration.adoc[Configuration]
 ** xref:configuration/build-time-properties.adoc[Build time properties]
@@ -37,9 +41,6 @@
 ** xref:configuration/runtime-properties.adoc[Properties]
 ** xref:configuration/runtime-config.adoc[Runtime configuration]
 ** xref:configuration/runtime-resources.adoc[Runtime resources]
-** xref:configuration/http-proxy.adoc[HTTP Proxy]
-** xref:configuration/maven.adoc[Maven]
-** xref:configuration/multi-architecture.adoc[Multi Architecture]
 * Observability
 ** xref:observability/logging.adoc[Logging]
 *** xref:observability/logging/operator.adoc[Operator]

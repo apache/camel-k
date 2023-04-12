@@ -18,13 +18,12 @@ limitations under the License.
 package local
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
 // MavenWorkingDirectory is the directory used by Maven for an invocation of the kamel local command.
@@ -33,7 +32,7 @@ var MavenWorkingDirectory = ""
 
 // CreateMavenWorkingDirectory creates local Maven working directory.
 func CreateMavenWorkingDirectory() error {
-	temporaryDirectory, err := ioutil.TempDir(os.TempDir(), "maven-")
+	temporaryDirectory, err := os.MkdirTemp(os.TempDir(), "maven-")
 	if err != nil {
 		return err
 	}

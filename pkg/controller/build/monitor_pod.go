@@ -34,8 +34,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const timeoutAnnotation = "camel.apache.org/timeout"
@@ -75,10 +76,21 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			if pod, err = newBuildPod(ctx, action.reader, build); err != nil {
 				return nil, err
 			}
-			// Set the Build as the Pod owner and controller
-			if err = controllerutil.SetControllerReference(build, pod, action.client.GetScheme()); err != nil {
+
+			// If the Builder Pod is in the Build namespace, we can set the ownership to it. If not (global operator mode)
+			// we set the ownership to the Operator Pod instead
+			var owner metav1.Object
+			owner = build
+			if build.Namespace != pod.Namespace {
+				operatorPod := platform.GetOperatorPod(ctx, action.reader, pod.Namespace)
+				if operatorPod != nil {
+					owner = operatorPod
+				}
+			}
+			if err = controllerutil.SetControllerReference(owner, pod, action.client.GetScheme()); err != nil {
 				return nil, err
 			}
+
 			if err = action.client.Create(ctx, pod); err != nil {
 				return nil, errors.Wrap(err, "cannot create build pod")
 			}

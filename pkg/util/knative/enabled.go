@@ -22,7 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 
-	util "github.com/apache/camel-k/pkg/util/kubernetes"
+	util "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 // IsInstalled returns true if we are connected to a cluster with Knative installed.

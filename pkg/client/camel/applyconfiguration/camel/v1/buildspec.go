@@ -20,16 +20,18 @@ limitations under the License.
 package v1
 
 import (
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // BuildSpecApplyConfiguration represents an declarative configuration of the BuildSpec type for use
 // with apply.
 type BuildSpecApplyConfiguration struct {
-	Tasks    []TaskApplyConfiguration `json:"tasks,omitempty"`
-	Strategy *camelv1.BuildStrategy   `json:"strategy,omitempty"`
-	Timeout  *metav1.Duration         `json:"timeout,omitempty"`
+	Tasks               []TaskApplyConfiguration `json:"tasks,omitempty"`
+	Strategy            *camelv1.BuildStrategy   `json:"strategy,omitempty"`
+	ToolImage           *string                  `json:"toolImage,omitempty"`
+	BuilderPodNamespace *string                  `json:"operatorNamespace,omitempty"`
+	Timeout             *metav1.Duration         `json:"timeout,omitempty"`
 }
 
 // BuildSpecApplyConfiguration constructs an declarative configuration of the BuildSpec type for use with
@@ -56,6 +58,22 @@ func (b *BuildSpecApplyConfiguration) WithTasks(values ...*TaskApplyConfiguratio
 // If called multiple times, the Strategy field is set to the value of the last call.
 func (b *BuildSpecApplyConfiguration) WithStrategy(value camelv1.BuildStrategy) *BuildSpecApplyConfiguration {
 	b.Strategy = &value
+	return b
+}
+
+// WithToolImage sets the ToolImage field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ToolImage field is set to the value of the last call.
+func (b *BuildSpecApplyConfiguration) WithToolImage(value string) *BuildSpecApplyConfiguration {
+	b.ToolImage = &value
+	return b
+}
+
+// WithBuilderPodNamespace sets the BuilderPodNamespace field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the BuilderPodNamespace field is set to the value of the last call.
+func (b *BuildSpecApplyConfiguration) WithBuilderPodNamespace(value string) *BuildSpecApplyConfiguration {
+	b.BuilderPodNamespace = &value
 	return b
 }
 

@@ -24,10 +24,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 type ingressTrait struct {
@@ -39,7 +38,10 @@ func newIngressTrait() Trait {
 	return &ingressTrait{
 		BaseTrait: NewBaseTrait("ingress", 2400),
 		IngressTrait: traitv1.IngressTrait{
-			Host: "",
+			Annotations: map[string]string{},
+			Host:        "",
+			Path:        "/",
+			PathType:    ptrFrom(networkingv1.PathTypePrefix),
 		},
 	}
 }
@@ -54,7 +56,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptrDerefOr(t.Enabled, true) {
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
@@ -64,7 +66,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptrDerefOr(t.Auto, true) {
 		if e.Resources.GetUserServiceForIntegration(e.Integration) == nil {
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionExposureAvailable,
@@ -85,16 +87,15 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		return errors.New("cannot Apply ingress trait: no target service")
 	}
 
-	pathType := networkingv1.PathTypePrefix
-
 	ingress := networkingv1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
 			APIVersion: networkingv1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      service.Name,
-			Namespace: service.Namespace,
+			Name:        service.Name,
+			Namespace:   service.Namespace,
+			Annotations: t.Annotations,
 		},
 		Spec: networkingv1.IngressSpec{
 			Rules: []networkingv1.IngressRule{
@@ -104,8 +105,8 @@ func (t *ingressTrait) Apply(e *Environment) error {
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
 								{
-									Path:     "/",
-									PathType: &pathType,
+									Path:     t.Path,
+									PathType: t.PathType,
 									Backend: networkingv1.IngressBackend{
 										Service: &networkingv1.IngressServiceBackend{
 											Name: service.Name,

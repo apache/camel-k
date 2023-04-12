@@ -31,11 +31,11 @@ import (
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/pkg/util/property"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 )
 
 type camelTrait struct {
@@ -132,7 +132,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 			}
 
 			// sanitize catalog name
-			catalogName := "camel-catalog-" + strings.ToLower(runtimeVersion) + "-" + string(runtime.Provider)
+			catalogName := "camel-catalog-" + strings.ToLower(runtimeVersion)
 
 			cx := v1.NewCamelCatalogWithSpecs(ns, catalogName, catalog.CamelCatalogSpec)
 			cx.Labels = make(map[string]string)
@@ -217,7 +217,7 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 	}
 
 	for i, s := range sources {
-		if s.ContentRef != "" {
+		if s.ContentRef != "" || e.isEmbedded(s) {
 			continue
 		}
 

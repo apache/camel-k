@@ -33,14 +33,27 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/metadata"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/property"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/metadata"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/property"
+	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
+
+func ptrFrom[T any](value T) *T {
+	return &value
+}
+
+func ptrDerefOr[T any](value *T, def T) T {
+	if value != nil {
+		return *value
+	}
+	return def
+}
 
 type Options map[string]map[string]interface{}
 
@@ -60,7 +73,7 @@ func (u Options) Get(id string) (map[string]interface{}, bool) {
 	return nil, false
 }
 
-var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.([\w-.]+)$`)
+var exactVersionRegexp = regexp.MustCompile(`^(\d+)\.(\d+)\.(\d+)([\w-.]*)$`)
 
 // getIntegrationKit retrieves the kit set on the integration.
 func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Integration) (*v1.IntegrationKit, error) {
@@ -529,4 +542,29 @@ func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {
 	}
 
 	return options, nil
+}
+
+// verify if the integration in the Environment contains an endpoint.
+func containsEndpoint(name string, e *Environment, c client.Client) (bool, error) {
+	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, c, e.Integration, e.Resources)
+	if err != nil {
+		return false, err
+	}
+
+	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	if err != nil {
+		return false, err
+	}
+
+	hasKnativeEndpoint := false
+	endpoints := make([]string, 0)
+	endpoints = append(endpoints, meta.FromURIs...)
+	endpoints = append(endpoints, meta.ToURIs...)
+	for _, endpoint := range endpoints {
+		if uri.GetComponent(endpoint) == name {
+			hasKnativeEndpoint = true
+			break
+		}
+	}
+	return hasKnativeEndpoint, nil
 }

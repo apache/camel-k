@@ -33,15 +33,15 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/install"
-	"github.com/apache/camel-k/pkg/kamelet/repository"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/apache/camel-k/pkg/util/openshift"
-	image "github.com/apache/camel-k/pkg/util/registry"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/install"
+	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
+	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 // BuilderServiceAccount --.
@@ -69,24 +69,17 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.PublishStrategy == "" {
-		log.Debugf("Integration Platform [%s]: setting publishing strategy", p.Namespace)
 		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
 		}
+		log.Debugf("Integration Platform [%s]: setting publishing strategy %s", p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
 	if p.Status.Build.BuildStrategy == "" {
-		log.Debugf("Integration Platform [%s]: setting build strategy", p.Namespace)
-		// Use the fastest strategy that they support (routine when possible)
-		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I ||
-			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
-			p.Status.Build.BuildStrategy = v1.BuildStrategyRoutine
-		} else {
-			// The build output has to be shared via a volume
-			p.Status.Build.BuildStrategy = v1.BuildStrategyPod
-		}
+		p.Status.Build.BuildStrategy = v1.BuildStrategyPod
+		log.Debugf("Integration Platform [%s]: setting build strategy %s", p.Namespace, p.Status.Build.BuildStrategy)
 	}
 
 	err := setPlatformDefaults(p, verbose)
@@ -216,7 +209,12 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 		p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName] = p.Name
 	}
 
-	if p.Status.Build.GetTimeout().Duration != 0 {
+	// Build timeout
+	if p.Status.Build.GetTimeout().Duration == 0 {
+		p.Status.Build.Timeout = &metav1.Duration{
+			Duration: 5 * time.Minute,
+		}
+	} else {
 		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)
 
 		if verbose && p.Status.Build.GetTimeout().Duration != d {
@@ -228,11 +226,26 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			Duration: d,
 		}
 	}
-	if p.Status.Build.GetTimeout().Duration == 0 {
-		p.Status.Build.Timeout = &metav1.Duration{
-			Duration: 5 * time.Minute,
+
+	// Catalog tools build timeout
+	if p.Status.Build.GetBuildCatalogToolTimeout().Duration == 0 {
+		log.Debugf("Integration Platform [%s]: setting default build camel catalog tool timeout (1 minute)", p.Namespace)
+		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
+			Duration: 1 * time.Minute,
+		}
+	} else {
+		d := p.Status.Build.GetBuildCatalogToolTimeout().Duration.Truncate(time.Second)
+
+		if verbose && p.Status.Build.GetBuildCatalogToolTimeout().Duration != d {
+			log.Log.Infof("Build catalog tools timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetBuildCatalogToolTimeout().Duration, d)
+		}
+
+		log.Debugf("Integration Platform [%s]: setting build catalog tools timeout", p.Namespace)
+		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
+			Duration: d,
 		}
 	}
+
 	_, cacheEnabled := p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
 	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
 		// Default to disabling Kaniko cache warmer

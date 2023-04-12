@@ -22,9 +22,8 @@ import (
 	g "compress/gzip"
 	"encoding/base64"
 	"io"
-	"io/ioutil"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
 // Compress --.
@@ -63,7 +62,7 @@ func Uncompress(buffer io.Writer, data []byte) error {
 		return err
 	}
 
-	data, err = ioutil.ReadAll(gz)
+	data, err = io.ReadAll(gz)
 	if err != nil {
 		util.CloseQuietly(gz)
 		return err

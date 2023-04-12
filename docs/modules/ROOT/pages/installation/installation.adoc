@@ -1,64 +1,105 @@
 [[installation]]
 = Installation
 
-Camel K allows us to run integrations directly on a Kubernetes or OpenShift cluster.
-To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes.
+Camel K allows us to run Camel integrations directly on a Kubernetes or OpenShift cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes (ie, Minikube or Kind).
 
-[[requirements]]
-== Requirements
-
-Camel K installation is usually straightforward, but for certain cluster types you need to apply specific configuration settings
-before installing it. Customized instructions are needed for the following cluster types:
-
-- xref:installation/platform/minikube.adoc[Minikube]
-- xref:installation/platform/crc.adoc[Red Hat CodeReady Containers (CRC)]
-- xref:installation/platform/gke.adoc[Google Kubernetes Engine (GKE)]
-- xref:installation/platform/openshift.adoc[OpenShift]
-- xref:installation/platform/iks.adoc[IBM Kubernetes Services (IKS)]
-- xref:installation/platform/k3s.adoc[K3s]
-- xref:installation/platform/kind.adoc[Kind]
-
-Other cluster types (such as OpenShift clusters) should *not need* prior configuration.
-
-NOTE: Minishift is no longer supported since Camel K 1.5.0. You can use xref:installation/platform/crc.adoc[CRC] for a local OpenShift cluster.
-
-[[procedure]]
-== Procedure
+[[cli]]
+== Installation via Kamel CLI
 
 To start using Camel K you need the **"kamel"** CLI tool, that can be used to both configure the cluster and run integrations.
 Look into the https://github.com/apache/camel-k/releases[release page] for the latest version of the *camel-k-client* tool for your specific platform.
 
-Download and uncompress the archive. It contains a small binary file named `kamel` that you should put into your system path.
-For example, if you're using Linux, you can put `kamel` in `/usr/bin`.
+Download and uncompress the archive. It contains a small binary file named `kamel` that you should put into your system path. For example, if you're using Linux, you can put `kamel` in `/usr/bin`.
 
 Once you have put the `kamel` CLI in the path, log into your cluster using the standard `oc` (OpenShift) or `kubectl` (Kubernetes) client tool and execute the following command to install Camel K:
 
 [source]
 ----
-kamel install
+$ kamel install --olm=false
 ----
 
-This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace.
+This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace with the default settings.
 
 IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately, this
 operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
 For CRC, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for the first-time installation.
 
-You're now ready to xref:running/running.adoc[run some integrations].
-
-[[helm]]
-== Installation via Helm
-
-Camel K is also available in Helm Hub for installation.
-Follow the instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K] page for more information.
-
 [[kustomize]]
 == Installation via Kustomize
 
 Camel K can be installed using https://kustomize.io[Kustomize], providing an interface for configuring more advanced features.
-Please go to xref:installation/advanced/kustomize.adoc[this page] for more information.
 
-[[advanced]]
-== Advanced configuration
+```
+# Clone the project repository
+$ https://github.com/apache/camel-k.git
+$ cd camel-k
+# You can use any release branch or skip this step to use it the last code on `main`
+$ git checkout release-a.b.x
+$ cd install
+$ kubectl apply -k setup-cluster
+$ kubectl apply -k setup
+$ kubectl apply -k operator
+$ kubectl apply -k platform
+```
 
-Camel K installation can be configured with certain special settings available for experienced users. You can manage resources such as limiting memory and CPU, provide a policy for `Pod` scheduling and `Toleration`. You can also configure the application to run multiple operators on the same namespace. Have a look at the "advanced" section under the "installation" menu.
+NOTE: you probably want to edit the configuration. Please, do any change right after cloning the repository.
+
+More information on the xref:installation/advanced/kustomize.adoc[Kustomize Camel K installation procedure] page.
+
+[[olm]]
+== Installation via Operator Hub
+
+Camel K is also available in Operator Hub:
+
+```
+$ kubectl create -f https://operatorhub.io/install/camel-k.yaml
+```
+
+You will need to OLM framework to be properly installed in your cluster. More instructions on the https://operatorhub.io/operator/camel-k[Camel K Operator Hub] page.
+
+As an alternative, you can also use the `kamel` CLI to perform the same installation:
+
+```
+$ kamel install --olm=true
+```
+
+NOTE: Some Kubernetes clusters such as Openshift (or CRC) may let you to perform the same operation from a GUI as well. Refer to the cluster instruction to learn how to perform such action.
+
+
+[[helm]]
+== Installation via Helm Hub
+
+Camel K is also available in Helm Hub:
+
+```
+$ helm repo add camel-k https://apache.github.io/camel-k/charts/
+$ helm install my-camel-k camel-k/camel-k
+```
+
+More instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page.
+
+[[test]]
+== Test your installation
+
+Once you've completed any of the above installation procedure, you'll be ready to xref:running/running.adoc[run some integrations].
+
+[[special-requirements]]
+== Special clusters requirements
+
+Camel K installation is usually straightforward, but for certain cluster types you need to apply specific configuration settings before installing it. You need customized instructions for the following cluster types:
+
+- xref:installation/platform/openshift.adoc[OpenShift]
+- xref:installation/platform/minikube.adoc[Minikube]
+- xref:installation/platform/docker-desktop.adoc[Docker Desktop]
+- xref:installation/platform/kind.adoc[Kind]
+- xref:installation/platform/crc.adoc[Red Hat CodeReady Containers (CRC)]
+- xref:installation/platform/gke.adoc[Google Kubernetes Engine (GKE)]
+- xref:installation/platform/iks.adoc[IBM Kubernetes Services (IKS)]
+- xref:installation/platform/k3s.adoc[K3s]
+
+NOTE: Minishift is no longer supported since Camel K 1.5.0. You can use xref:installation/platform/crc.adoc[CRC] for a local OpenShift cluster.
+
+[[fine-tuning]]
+== Fine Tuning
+
+Camel K installation can be configured with certain special settings available for experienced users. You can manage resources such as limiting memory and CPU, provide a policy for `Pod` scheduling and `Toleration`. Please have a look at xref:installation/advanced/advanced.adoc[Camel K fine tuning] to learn more about advanced configuration.

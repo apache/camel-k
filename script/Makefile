@@ -20,19 +20,20 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 1.12.0-SNAPSHOT
+VERSION ?= 2.0.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 1.11.1
-RUNTIME_VERSION := 1.17.0-SNAPSHOT
+LAST_RELEASED_VERSION ?= 1.12.0
+RUNTIME_VERSION := 3.20.1-SNAPSHOT
 BUILDAH_VERSION := 1.23.3
-KANIKO_VERSION := 0.17.1
+KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
-CODEGEN_VERSION := v0.25.2
-OPERATOR_SDK_VERSION := v1.16.0
+CODEGEN_VERSION := v0.25.6
+OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
 BASE_IMAGE := docker.io/eclipse-temurin:11
-LOCAL_REPOSITORY := /tmp/artifacts/m2
+DEFAULT_PVC := camel-k-pvc
+LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 
 #
@@ -85,7 +86,7 @@ STAGING_RUNTIME_REPO :=
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v0.10.0
+KAMELET_CATALOG_REPO_TAG := v3.20.1.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
@@ -95,13 +96,13 @@ DO_TEST_PREBUILD ?= true
 TEST_PREBUILD = build
 
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultOperatorName=camel-k-operator
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultPackage=camel-k
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultChannel=alpha
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultSource=community-operators
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultSourceNamespace=openshift-marketplace
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultStartingCSV=
-#GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultOperatorName=camel-k-operator
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultPackage=camel-k
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultChannel=alpha
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultSource=community-operators
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultSourceNamespace=openshift-marketplace
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultStartingCSV=
+#GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultGlobalNamespace=openshift-operators
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -112,7 +113,7 @@ endif
 
 # Build
 ifdef GIT_COMMIT
-GOLDFLAGS += -X github.com/apache/camel-k/pkg/util/defaults.GitCommit=$(GIT_COMMIT)
+GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/defaults.GitCommit=$(GIT_COMMIT)
 else
 $(warning Could not retrieve a valid Git Commit)
 endif
@@ -141,6 +142,9 @@ default: build
 
 update-docs: build-resources
 	./script/update_docs.sh
+
+update-default-camel:
+	./script/update_default_camel.sh
 
 bump-replace:
 	@# Bump version and replace with the variables provided by the user
@@ -184,6 +188,9 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // LocalRepository -- " >> $(VERSIONFILE)
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // DefaultPVC -- " >> $(VERSIONFILE)
+	@echo "  DefaultPVC = \"$(DEFAULT_PVC)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)
@@ -250,80 +257,81 @@ test-fmt: do-build
 	cd pkg/kamelet/repository && go test -v ./... -json 2>&1 | gotestfmt
 
 #
-# Integration tests are located either as global or namespace
-# global:    tests can be executed using a pre-installed global operator
-#            with only the platform installed is a namespace
+# Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
+# the time to complete (they are used also as smoke test for nightly release)
 #
-# namespace: tests must be executed using a namespace installed operator
-#            usually due to the test requiring specific parameters on the
-#            operator configuration
-#
-
-
-###############################
-#
-# GLOBAL INSTALL TESTS
-#
-###############################
-
-#
-# Note
-# This should execute all tests and not exit if one of the suites fail
-#
-test-integration: do-build
+test-common: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/global/common -tags=integration $(TEST_INTEGRATION_COMMON_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/build -tags=integration $(TEST_INTEGRATION_COMMON_BUILD_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/config -tags=integration $(TEST_INTEGRATION_COMMON_CONFIG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/global/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_TRAITS_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/cli -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/misc -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
-test-knative: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 90m -v ./e2e/global/knative -tags=integration $(TEST_KNATIVE_RUN) -json 2>&1 | gotestfmt
-
-test-builder: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 90m -v ./e2e/global/builder -tags=integration $(TEST_BUILDER_RUN) -json 2>&1 | gotestfmt
-
-test-service-binding: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 90m -v ./e2e/global/service-binding -tags=integration $(TEST_SERVICE_RUN) -json 2>&1 | gotestfmt
-
-test-telemetry: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 90m -v ./e2e/global/telemetry -tags=integration $(TEST_TELEMETRY_RUN) -json 2>&1 | gotestfmt
-
-test-local: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	RUNTIME_VERSION="$(RUNTIME_VERSION)" \
-	go test -timeout 30m -v ./e2e/local -tags=integration $(TEST_LOCAL_RUN) -json 2>&1 | gotestfmt
-
-test-registry-maven-wagon: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 90m -v ./e2e/global/registry -tags=integration $(TEST_REGISTRY_MAVEN_WAGON_RUN) -json 2>&1 | gotestfmt
-
-###############################
 #
-# NAMESPACED INSTALL TESTS
+# Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
-###############################
+test-common-with-custom-install: do-build
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 60m -v ./e2e/commonwithcustominstall -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	exit $${FAILED}
 
+#
+# Installation procedure test using CLi and Kustomize methodologies
+#
 test-install: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/namespace/install/ -tags=integration $(TEST_INSTALL_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/namespace/install/cli -tags=integration $(TEST_INSTALL_CLI_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
-	go test -timeout 90m -v ./e2e/namespace/install/kustomize -tags=integration $(TEST_INSTALL_KUSTOMIZE_RUN) -json 2>&1 | gotestfmt || FAILED=1; \
+	go test -timeout 60m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
+#
+# Installation procedure test using OLM (requires cluster to be setup accordingly)
+#
+test-install-olm: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 60m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
+
+#
+# Knative tests that require the presence of KNative configuration
+#
+test-knative: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 30m -v ./e2e/knative/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/knative/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	exit $${FAILED}
+
+#
+# Builder tests that require a custom build strategy
+#
+test-builder: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 30m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN) $(GOTESTFMT)
+
+#
+# Telemetry tests that require the configuration of telemtry endpoints
+#
+test-telemetry: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
+	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(TEST_TELEMETRY_RUN) $(GOTESTFMT)
+
+#
+# Quarkus native test which require a lower memory resources
+#
 test-quarkus-native: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 180m -v ./e2e/namespace/native -tags=integration $(TEST_QUARKUS_RUN) -json 2>&1 | gotestfmt
+	go test -timeout 180m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
-test-upgrade: do-build
+#
+# Quarkus native test which require a higher memory resources
+#
+test-quarkus-native-high-memory: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 90m -v ./e2e/namespace/upgrade -tags=integration $(TEST_UPGRADE_RUN) -json 2>&1 | gotestfmt
+	go test -timeout 180m -v ./e2e/namespace/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
 	@echo "####### Building kamel CLI..."
@@ -353,9 +361,7 @@ build-submodules:
 	./script/build_submodules.sh
 
 build-compile-integration-tests:
-	go test -run nope -tags="integration" ./e2e/global/... > /dev/null
-	go test -run nope -tags="integration" ./e2e/local/... > /dev/null
-	go test -run nope -tags="integration" ./e2e/namespace/... > /dev/null
+	go test -run nope -tags="integration" ./e2e/...
 
 clean:
 	# disable gomodules when executing go clean:
@@ -485,6 +491,9 @@ set-module-version:
 git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
+fabric8-crds:
+	./java/mvnw -f java/pom.xml clean package
+
 cross-compile:
 	# we must wrap the goldflags parameters with quotes as they will need to
 	# be processed as a single argument by the cross compile script
@@ -492,7 +501,7 @@ cross-compile:
 
 release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile fabric8-crds git-tag
 
 release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile
 
@@ -507,7 +516,7 @@ release-kustomize:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check test-integration clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets
+.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary
@@ -533,25 +542,15 @@ KUSTOMIZE=$(shell command -v kustomize 2> /dev/null)
 endif
 
 operator-sdk: detect-os
-ifeq (, $(shell command -v operator-sdk 2> /dev/null))
-	@{ \
+	@echo "####### Installing operator-sdk version $(OPERATOR_SDK_VERSION)..."
 	set -e ;\
 	curl \
-		-L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
+		-s -L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
 		-o operator-sdk ; \
 	chmod +x operator-sdk ;\
 	mkdir -p $(GOBIN) ;\
-	mv operator-sdk $(GOBIN)/ ;\
-	}
+	mv operator-sdk $(GOBIN)/ ;
 OPERATOR_SDK=$(GOBIN)/operator-sdk
-else
-	@{ \
-	echo -n "operator-sdk already installed: "; \
-  operator-sdk version | sed -n 's/.*"v\([^"]*\)".*/\1/p'; \
-	echo " If this is less than $(OPERATOR_SDK_VERSION) then please consider moving it aside and allowing the approved version to be downloaded."; \
-	}
-OPERATOR_SDK=$(shell command -v operator-sdk 2> /dev/null)
-endif
 
 opm: detect-os
 ifeq (, $(shell command -v opm 2> /dev/null))
@@ -638,7 +637,7 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	@$(KUSTOMIZE) build config/manifests | \
+	@INSTALL_DEFAULT_PVC=false $(KUSTOMIZE) build config/manifests | \
 		$(OPERATOR_SDK) generate bundle \
 			-q --overwrite --version $(OPERATOR_VERSION) \
 			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)

@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -31,9 +31,10 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 // NewBuildAction creates a new build request handling action for the kit.
@@ -51,11 +52,13 @@ func (action *buildAction) Name() string {
 
 func (action *buildAction) CanHandle(kit *v1.IntegrationKit) bool {
 	return kit.Status.Phase == v1.IntegrationKitPhaseBuildSubmitted ||
-		kit.Status.Phase == v1.IntegrationKitPhaseBuildRunning
+		kit.Status.Phase == v1.IntegrationKitPhaseBuildRunning ||
+		kit.Status.Phase == v1.IntegrationKitPhaseWaitingForCatalog
 }
 
 func (action *buildAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
-	if kit.Status.Phase == v1.IntegrationKitPhaseBuildSubmitted {
+	if kit.Status.Phase == v1.IntegrationKitPhaseBuildSubmitted ||
+		kit.Status.Phase == v1.IntegrationKitPhaseWaitingForCatalog {
 		return action.handleBuildSubmitted(ctx, kit)
 	} else if kit.Status.Phase == v1.IntegrationKitPhaseBuildRunning {
 		return action.handleBuildRunning(ctx, kit)
@@ -103,6 +106,29 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Duration: 10 * time.Minute,
 			}
 		}
+
+		// It has to be the same namespace as the operator as they must share a PVC
+		builderPodNamespace := platform.GetOperatorNamespace()
+		buildStrategy := env.Platform.Status.Build.BuildStrategy
+		if env.BuildStrategy != "" {
+			buildStrategy = env.BuildStrategy
+		}
+
+		// nolint: contextcheck
+		if buildStrategy == v1.BuildStrategyPod {
+			// Pod strategy requires a PVC to exist. If it does not exist, we warn the user and fallback to Routine build strategy
+			if pvc, err := kubernetes.LookupPersistentVolumeClaim(env.Ctx, env.Client, builderPodNamespace, defaults.DefaultPVC); pvc != nil || err != nil {
+				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
+				if err != nil {
+					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")
+				}
+			} else {
+				// Fallback to Routine strategy
+				buildStrategy = v1.BuildStrategyRoutine
+				Log.Info(`Warning: the operator was installed with an ephemeral storage, builder "pod" strategy is not supported: using "routine" build strategy as a fallback. We recommend to configure a PersistentVolumeClaim in order to be able to use "pod" builder strategy. Please consider that certain features such as Quarkus native require a "pod" builder strategy (hence a PVC) to work properly.`)
+			}
+		}
+
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -115,9 +141,11 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Strategy: env.Platform.Status.Build.BuildStrategy,
-				Tasks:    env.BuildTasks,
-				Timeout:  timeout,
+				Strategy:            buildStrategy,
+				ToolImage:           env.CamelCatalog.Image,
+				BuilderPodNamespace: builderPodNamespace,
+				Tasks:               env.BuildTasks,
+				Timeout:             timeout,
 			},
 		}
 

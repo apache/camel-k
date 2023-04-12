@@ -34,14 +34,14 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/log"
-	"github.com/apache/camel-k/pkg/util/property"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 )
 
 const (
@@ -196,6 +196,8 @@ type Environment struct {
 	ApplicationProperties map[string]string
 	Interceptors          []string
 	ServiceBindingSecret  string
+	// The strategy to adopt when building a Kit
+	BuildStrategy v1.BuildStrategy
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.
@@ -405,32 +407,36 @@ func (e *Environment) addSourcesProperties() {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	for i, s := range e.Integration.Sources() {
+	idx := 0
+	for _, s := range e.Integration.Sources() {
+		if e.isEmbedded(s) {
+			continue
+		}
 		srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
 		src := "file:" + path.Join(filepath.ToSlash(camel.SourcesMountPath), srcName)
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", i)] = src
+		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", idx)] = src
 
 		simpleName := srcName
 		if strings.Contains(srcName, ".") {
 			simpleName = srcName[0:strings.Index(srcName, ".")]
 		}
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", i)] = simpleName
+		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", idx)] = simpleName
 
 		for pid, p := range s.PropertyNames {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", i, pid)] = p
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", idx, pid)] = p
 		}
 
 		if s.Type != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", i)] = string(s.Type)
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", idx)] = string(s.Type)
 		}
 		if s.InferLanguage() != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", i)] = string(s.InferLanguage())
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", idx)] = string(s.InferLanguage())
 		}
 		if s.Loader != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", i)] = s.Loader
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
 		}
 		if s.Compression {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", i)] = "true"
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = "true"
 		}
 
 		interceptors := make([]string, 0, len(s.Interceptors))
@@ -441,8 +447,9 @@ func (e *Environment) addSourcesProperties() {
 			interceptors = append(interceptors, e.Interceptors...)
 		}
 		for intID, interceptor := range interceptors {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].interceptors[%d]", i, intID)] = interceptor
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].interceptors[%d]", idx, intID)] = interceptor
 		}
+		idx++
 	}
 }
 
@@ -450,8 +457,12 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	//
 	// Volumes :: Sources
 	//
-	for i, s := range e.Integration.Sources() {
-		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, i)
+	idx := 0
+	for _, s := range e.Integration.Sources() {
+		if e.isEmbedded(s) {
+			continue
+		}
+		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, idx)
 		if s.ContentRef != "" {
 			cmName = s.ContentRef
 		}
@@ -460,13 +471,14 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			cmKey = s.ContentKey
 		}
 		resName := strings.TrimPrefix(s.Name, "/")
-		refName := fmt.Sprintf("i-source-%03d", i)
+		refName := fmt.Sprintf("i-source-%03d", idx)
 		resPath := filepath.Join(camel.SourcesMountPath, resName)
 		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
 		mnt := getMount(refName, resPath, resName, true)
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
+		idx++
 	}
 
 	if e.Resources != nil {
@@ -649,6 +661,16 @@ func (e *Environment) GetIntegrationContainerName() string {
 		}
 	}
 	return containerName
+}
+
+// Indicates whether the given source is embedded in the final binary.
+func (e *Environment) isEmbedded(source v1.SourceSpec) bool {
+	if dt := e.Catalog.GetTrait(quarkusTraitID); dt != nil {
+		if qt, ok := dt.(*quarkusTrait); ok {
+			return qt.isEmbedded(e, source)
+		}
+	}
+	return false
 }
 
 func (e *Environment) GetIntegrationContainer() *corev1.Container {

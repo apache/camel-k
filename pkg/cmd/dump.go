@@ -25,16 +25,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/tar"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/tar"
 )
 
 func newCmdDump(rootCmdOptions *RootCmdOptions) (*cobra.Command, *dumpCmdOptions) {
@@ -89,6 +89,21 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 	if err != nil {
 		return err
 	}
+
+	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "Found %d integrations:\n", len(its.Items))
+	for _, integration := range its.Items {
+		ref := integration
+		pdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
+	}
+
 	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -103,18 +118,18 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
 	}
 
-	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
+	cat, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(out, "Found %d integrations:\n", len(its.Items))
-	for _, integration := range its.Items {
-		ref := integration
-		pdata, err := kubernetes.ToYAML(&ref)
+	fmt.Fprintf(out, "Found %d catalogs:\n", len(pls.Items))
+	for _, c := range cat.Items {
+		ref := c
+		cdata, err := kubernetes.ToYAML(&ref)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
+		fmt.Fprintf(out, "---\n%s\n---\n", string(cdata))
 	}
 
 	iks, err := camelClient.CamelV1().IntegrationKits(ns).List(ctx, metav1.ListOptions{})

@@ -26,9 +26,9 @@ import (
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
 type prometheusTrait struct {
@@ -55,8 +55,9 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *prometheusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// Add the Camel Quarkus MP Metrics extension
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-metrics")
+		// Add the Camel Quarkus Micrometer extension and micrometer registry for prometheus
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-micrometer")
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.micrometer:micrometer-registry-prometheus")
 		return nil
 	}
 

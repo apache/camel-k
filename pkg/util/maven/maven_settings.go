@@ -20,7 +20,7 @@ package maven
 import (
 	"encoding/xml"
 
-	"github.com/apache/camel-k/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
 // DefaultMavenRepositories is a comma separated list of default maven repositories

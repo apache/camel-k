@@ -27,11 +27,10 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/metadata"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	"github.com/apache/camel-k/pkg/util/label"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/metadata"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -262,7 +261,9 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 			ConfigurationSpec: serving.ConfigurationSpec{
 				Template: serving.RevisionTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels:      label.AddLabels(e.Integration.Name),
+						Labels: map[string]string{
+							v1.IntegrationLabel: e.Integration.Name,
+						},
 						Annotations: revisionAnnotations,
 					},
 					Spec: serving.RevisionSpec{

@@ -41,7 +41,7 @@ under the License.
         <repository>
           <id>apache-staging</id>
           <name>Apache Staging Repository</name>
-          <url>https://repository.apache.org/content/repositories/orgapachecamel-1499</url>
+          <url>https://repository.apache.org/content/repositories/orgapachecamel-1528/</url>
           <releases>
             <enabled>true</enabled>
             <updatePolicy>never</updatePolicy>

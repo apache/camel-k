@@ -13,34 +13,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM quay.io/quarkus/ubi-quarkus-mandrel:22.2.0.0-Final-java11
+FROM eclipse-temurin:17-jdk
 
-ARG MAVEN_VERSION="3.8.6"
+ARG MAVEN_DEFAULT_VERSION="3.8.6"
 ARG MAVEN_HOME="/usr/share/maven"
-ARG SHA="f790857f3b1f90ae8d16281f902c689e4f136ebe584aba45e4b1fa66c80cba826d3e0e52fdd04ed44b4c66f6d3fe3584a057c26dfcac544a60b301e6d0f91c26"
-ARG BASE_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries"
+ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
+ARG MVNW_DIR="/usr/share/maven/mvnw/"
 
 USER 0
 
-RUN mkdir -p ${MAVEN_HOME} \
-    && curl -Lso /tmp/maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
-    && echo "${SHA} /tmp/maven.tar.gz" | sha512sum -c - \
-    && tar -xzC ${MAVEN_HOME} --strip-components=1 -f /tmp/maven.tar.gz \
-    && rm -v /tmp/maven.tar.gz \
-    && ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn \
-    && rm ${MAVEN_HOME}/lib/maven-slf4j-provider*
-
-ADD build/_maven_output /tmp/artifacts/m2
-ADD build/_kamelets /kamelets
+# Maven configuration
+RUN mkdir -p ${MAVEN_HOME}
 COPY build/_maven_overlay/ /usr/share/maven/lib/
 ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
-ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=/usr/share/maven/conf/logback.xml"
+# Prepare the maven wrapper required in the build Pod strategy
+COPY build/mvnw/mvnw.tar ${MVNW_DIR}
+RUN tar -xC ${MVNW_DIR} -f ${MVNW_DIR}mvnw.tar \
+    && rm -v ${MVNW_DIR}mvnw.tar \
+    && sed -i "s;distributionUrl=.*;distributionUrl=${MAVEN_DIST_URL};" ${MVNW_DIR}.mvn/wrapper/maven-wrapper.properties
+# Used by mvnw to download maven dist into it
+ENV MAVEN_USER_HOME="${MAVEN_HOME}"
+# Install a default mvnw distribution at build time and prepare the config for formatting log
+RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default \
+    && cp -r /usr/share/maven/lib/. $(cat ${MVNW_DIR}default)/lib \
+    && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider*
+ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
-RUN chgrp -R 0 /tmp/artifacts/m2 \
-    && chmod -R g=u /tmp/artifacts/m2 \
+ADD build/_maven_output /tmp/local/m2
+ADD build/_kamelets /kamelets
+
+RUN mkdir -p /etc/maven/m2 \
+    && chgrp -R 0 /etc/maven/m2 \
+    && chmod -R g=u /etc/maven/m2 \
     && chgrp -R 0 /kamelets \
-    && chmod -R g=u /kamelets
+    && chmod -R g=u /kamelets \
+    && chgrp -R 0 ${MAVEN_HOME} \
+    && chmod -R g=u ${MAVEN_HOME}
 
 USER 1000
 

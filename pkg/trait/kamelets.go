@@ -28,16 +28,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	kameletutils "github.com/apache/camel-k/pkg/kamelet"
-	"github.com/apache/camel-k/pkg/kamelet/repository"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/dsl"
-	"github.com/apache/camel-k/pkg/util/kamelets"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	kameletutils "github.com/apache/camel-k/v2/pkg/kamelet"
+	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/digest"
+	"github.com/apache/camel-k/v2/pkg/util/dsl"
+	"github.com/apache/camel-k/v2/pkg/util/kamelets"
 )
 
 type kameletsTrait struct {

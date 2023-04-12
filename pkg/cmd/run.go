@@ -33,7 +33,6 @@ import (
 	"hash"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"os/signal"
@@ -58,23 +57,23 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/cmd/local"
-	"github.com/apache/camel-k/pkg/cmd/source"
-	"github.com/apache/camel-k/pkg/platform"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/camel"
-	"github.com/apache/camel-k/pkg/util/defaults"
-	"github.com/apache/camel-k/pkg/util/dsl"
-	"github.com/apache/camel-k/pkg/util/kubernetes"
-	k8slog "github.com/apache/camel-k/pkg/util/kubernetes/log"
-	"github.com/apache/camel-k/pkg/util/maven"
-	"github.com/apache/camel-k/pkg/util/property"
-	"github.com/apache/camel-k/pkg/util/resource"
-	"github.com/apache/camel-k/pkg/util/sync"
-	"github.com/apache/camel-k/pkg/util/watch"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/cmd/local"
+	"github.com/apache/camel-k/v2/pkg/cmd/source"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/dsl"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	k8slog "github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/property"
+	"github.com/apache/camel-k/v2/pkg/util/resource"
+	"github.com/apache/camel-k/v2/pkg/util/sync"
+	"github.com/apache/camel-k/v2/pkg/util/watch"
 )
 
 const usageDependency = `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency, "-d http(s)://my-repo/my-dependency.jar|targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>&classpath=<true>" for custom dependencies located on an http server or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>&classpath=<true>]" for local files`
@@ -700,11 +699,11 @@ func (o *runCmdOptions) convertOptionsToTraits(cmd *cobra.Command, c client.Clie
 		return err
 	}
 
-	if err := o.applyProperties(c); err != nil {
+	if err := o.applyProperties(c, o.Properties, "camel.properties"); err != nil {
 		return err
 	}
 
-	if err := o.applyBuildProperties(c); err != nil {
+	if err := o.applyProperties(c, o.BuildProperties, "builder.properties"); err != nil {
 		return err
 	}
 
@@ -744,36 +743,22 @@ func convertToTrait(value, traitParameter string) string {
 	return fmt.Sprintf("%s=%s", traitParameter, value)
 }
 
-func (o *runCmdOptions) applyProperties(c client.Client) error {
-	props, err := o.mergePropertiesWithPrecedence(c, o.Properties)
+func (o *runCmdOptions) applyProperties(c client.Client, items []string, traitName string) error {
+	if len(items) == 0 {
+		return nil
+	}
+	props, err := o.mergePropertiesWithPrecedence(c, items)
 	if err != nil {
 		return err
 	}
 	for _, key := range props.Keys() {
-		kv := fmt.Sprintf("%s=%s", key, props.GetString(key, ""))
-		propsTraits, err := o.convertToTraitParameter(c, kv, "camel.properties")
+		val, _ := props.Get(key)
+		kv := fmt.Sprintf("%s=%s", key, val)
+		propsTraits, err := o.convertToTraitParameter(c, kv, traitName)
 		if err != nil {
 			return err
 		}
 		o.Traits = append(o.Traits, propsTraits...)
-	}
-
-	return nil
-}
-
-func (o *runCmdOptions) applyBuildProperties(c client.Client) error {
-	// convert each build configuration to a builder trait property
-	buildProps, err := o.mergePropertiesWithPrecedence(c, o.BuildProperties)
-	if err != nil {
-		return err
-	}
-	for _, key := range buildProps.Keys() {
-		kv := fmt.Sprintf("%s=%s", key, buildProps.GetString(key, ""))
-		buildPropsTraits, err := o.convertToTraitParameter(c, kv, "builder.properties")
-		if err != nil {
-			return err
-		}
-		o.Traits = append(o.Traits, buildPropsTraits...)
 	}
 
 	return nil
@@ -785,6 +770,7 @@ func (o *runCmdOptions) convertToTraitParameter(c client.Client, value, traitPar
 	if err != nil {
 		return nil, err
 	}
+	props.DisableExpansion = true
 	for _, k := range props.Keys() {
 		v, ok := props.Get(k)
 		if ok {
@@ -872,12 +858,15 @@ func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 
 func (o *runCmdOptions) mergePropertiesWithPrecedence(c client.Client, items []string) (*properties.Properties, error) {
 	loPrecedenceProps := properties.NewProperties()
+	loPrecedenceProps.DisableExpansion = true
 	hiPrecedenceProps := properties.NewProperties()
+	hiPrecedenceProps.DisableExpansion = true
 	for _, item := range items {
 		prop, err := o.extractProperties(c, item)
 		if err != nil {
 			return nil, err
 		}
+		prop.DisableExpansion = true
 		// We consider file, secret and config map props to have a lower priority versus single properties
 		if strings.HasPrefix(item, "file:") || strings.HasPrefix(item, "secret:") || strings.HasPrefix(item, "configmap:") {
 			loPrecedenceProps.Merge(prop)
@@ -1147,7 +1136,7 @@ func (o *runCmdOptions) extractGav(src *zip.File, localPath string, cmd *cobra.C
 		return maven.Dependency{}, false
 	}
 	defer rc.Close()
-	data, err := ioutil.ReadAll(rc)
+	data, err := io.ReadAll(rc)
 	if err != nil {
 		o.PrintfVerboseErrf(cmd, "Error while reading pom.properties from [%s], switching to default: \n %s err \n", localPath, err)
 		return maven.Dependency{}, false
@@ -1206,7 +1195,7 @@ func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 		return gav
 	}
 	defer file.Close()
-	content, err := ioutil.ReadAll(file)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		return gav
 	}

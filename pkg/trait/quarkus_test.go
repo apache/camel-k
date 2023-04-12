@@ -24,9 +24,9 @@ import (
 
 	"k8s.io/utils/pointer"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/builder"
-	"github.com/apache/camel-k/pkg/util/camel"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
 
 func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
@@ -114,4 +114,94 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	}
 
 	return trait, environment
+}
+
+func TestGetLanguageSettingsWithoutLoaders(t *testing.T) {
+	environment := &Environment{
+		CamelCatalog: &camel.RuntimeCatalog{
+			CamelCatalogSpec: v1.CamelCatalogSpec{
+				Loaders: map[string]v1.CamelLoader{},
+			},
+		},
+	}
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaSource))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKotlin))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKamelet))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageXML))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageYaml))
+}
+
+func TestGetLanguageSettingsWithoutMetadata(t *testing.T) {
+	environment := &Environment{
+		CamelCatalog: &camel.RuntimeCatalog{
+			CamelCatalogSpec: v1.CamelCatalogSpec{
+				Loaders: map[string]v1.CamelLoader{
+					"java":    {},
+					"groovy":  {},
+					"js":      {},
+					"kts":     {},
+					"jsh":     {},
+					"kamelet": {},
+					"xml":     {},
+					"yaml":    {},
+				},
+			},
+		},
+	}
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaSource))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKotlin))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKamelet))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageXML))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageYaml))
+}
+
+func TestGetLanguageSettingsWithLoaders(t *testing.T) {
+	environment := &Environment{
+		CamelCatalog: &camel.RuntimeCatalog{
+			CamelCatalogSpec: v1.CamelCatalogSpec{
+				Loaders: map[string]v1.CamelLoader{
+					"java": {
+						Metadata: map[string]string{
+							"native":                         "true",
+							"sources-required-at-build-time": "true",
+						},
+					},
+					"groovy": {
+						Metadata: map[string]string{
+							"native":                         "false",
+							"sources-required-at-build-time": "false",
+						},
+					},
+					"js": {
+						Metadata: map[string]string{
+							"native":                         "true",
+							"sources-required-at-build-time": "false",
+						},
+					},
+					"kts": {
+						Metadata: map[string]string{
+							"native":                         "false",
+							"sources-required-at-build-time": "true",
+						},
+					},
+					"jsh": {
+						Metadata: map[string]string{
+							"native": "true",
+						},
+					},
+				},
+			},
+		},
+	}
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageJavaSource))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
+	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageKotlin))
+	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 }

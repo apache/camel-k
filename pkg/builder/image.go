@@ -18,7 +18,6 @@ limitations under the License.
 package builder
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -28,9 +27,9 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 const (
@@ -88,7 +87,7 @@ func executableDockerfile(ctx *builderContext) error {
 		USER nonroot
 	`)
 
-	err := ioutil.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}
@@ -112,7 +111,7 @@ func jvmDockerfile(ctx *builderContext) error {
 		USER 1000
 	`)
 
-	err := ioutil.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
 	if err != nil {
 		return err
 	}

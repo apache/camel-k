@@ -25,9 +25,9 @@ import (
 	"regexp"
 	"strings"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -36,7 +36,7 @@ type optionMap map[string]map[string]interface{}
 // The list of known addons is used for handling backward compatibility.
 var knownAddons = []string{"keda", "master", "strimzi", "3scale", "tracing"}
 
-var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)(?:\[[0-9]+\]|\.[A-Za-z0-9-_]+)*)=(.*)$`)
+var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)(?:\[[0-9]+\]|\..+)*)=(.*)$`)
 
 func validateTraits(catalog *trait.Catalog, traits []string) error {
 	tp := catalog.ComputeTraitsProperties()
@@ -46,12 +46,30 @@ func validateTraits(catalog *trait.Catalog, traits []string) error {
 		if strings.Contains(prefix, "[") {
 			prefix = prefix[0:strings.Index(prefix, "[")]
 		}
-		if !util.StringSliceExists(tp, prefix) {
+		if valid, err := validateTrait(tp, prefix); err != nil {
+			return err
+		} else if !valid {
 			return fmt.Errorf("%s is not a valid trait property", t)
 		}
 	}
 
 	return nil
+}
+
+func validateTrait(properties []string, item string) (bool, error) {
+	for i := 0; i < len(properties); i++ {
+		if strings.HasSuffix(properties[i], ".*") {
+			if match, err := regexp.MatchString(properties[i], item); err != nil {
+				return false, err
+			} else if match {
+				return true, nil
+			}
+		} else if properties[i] == item {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func configureTraits(options []string, traits interface{}, catalog trait.Finder) error {
@@ -60,12 +78,10 @@ func configureTraits(options []string, traits interface{}, catalog trait.Finder)
 		return err
 	}
 
-	//
 	// Known addons need to be put aside here, as otherwise the deprecated addon fields on
 	// Traits might be accidentally populated. The deprecated addon fields are preserved
 	// for backward compatibility and should be populated only when the operator reads
 	// existing CRs from the API server.
-	//
 	addons := make(optionMap)
 	for _, id := range knownAddons {
 		if config[id] != nil {

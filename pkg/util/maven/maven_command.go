@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,8 +31,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/apache/camel-k/pkg/util"
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 var Log = log.WithName("maven")
@@ -48,7 +47,13 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	mvnCmd := "mvn"
+	// Prepare maven wrapper helps when running the builder as Pod as it makes
+	// the builder container, Maven agnostic
+	if err := c.prepareMavenWrapper(ctx); err != nil {
+		return err
+	}
+
+	mvnCmd := "./mvnw"
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
 	}
@@ -74,6 +79,13 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	} else if settingsExists {
 		args = append(args, "--settings", settingsPath)
+	}
+
+	settingsSecurityPath := filepath.Join(c.context.Path, "settings-security.xml")
+	if settingsSecurityExists, err := util.FileExists(settingsSecurityPath); err != nil {
+		return err
+	} else if settingsSecurityExists {
+		args = append(args, "-Dsettings.security="+settingsSecurityPath)
 	}
 
 	if !util.StringContainsPrefix(c.context.AdditionalArguments, "-Dmaven.artifact.threads") {
@@ -207,7 +219,7 @@ func generateProjectStructure(context Context, project Project) error {
 		if dc, ok := v.([]byte); ok {
 			bytes = dc
 		} else if dc, ok := v.(io.Reader); ok {
-			bytes, err = ioutil.ReadAll(dc)
+			bytes, err = io.ReadAll(dc)
 			if err != nil {
 				return err
 			}
@@ -226,6 +238,13 @@ func generateProjectStructure(context Context, project Project) error {
 	}
 
 	return nil
+}
+
+// We expect a maven wrapper under /usr/share/maven/mvnw.
+func (c *Command) prepareMavenWrapper(ctx context.Context) error {
+	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
+	cmd.Dir = c.context.Path
+	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
 }
 
 // ParseGAV decodes the provided Maven GAV into the corresponding Dependency.

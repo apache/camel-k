@@ -20,11 +20,11 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/apache/camel-k/pkg/client/camel/clientset/versioned"
-	camelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	fakecamelv1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1/fake"
-	camelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
-	fakecamelv1alpha1 "github.com/apache/camel-k/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1/fake"
+	clientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
+	fakecamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1/fake"
+	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
+	fakecamelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

@@ -20,10 +20,10 @@ package azure
 import (
 	"strconv"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/pkg/trait"
-	"github.com/apache/camel-k/pkg/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"k8s.io/utils/pointer"
 )
 
@@ -47,29 +47,29 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The Azure Tenant Id for accessing Key Vault
-	TenantID string `property:"tenant-id,omitempty"`
+	TenantID string `property:"tenant-id" json:"tenantId,omitempty"`
 	// The Azure Client Id for accessing Key Vault
-	ClientID string `property:"client-id,omitempty"`
+	ClientID string `property:"client-id" json:"clientId,omitempty"`
 	// The Azure Client Secret for accessing Key Vault
-	ClientSecret string `property:"client-secret,omitempty"`
+	ClientSecret string `property:"client-secret" json:"clientSecret,omitempty"`
 	// The Azure Vault Name for accessing Key Vault
-	VaultName string `property:"vault-name,omitempty"`
+	VaultName string `property:"vault-name" json:"vaultName,omitempty"`
 	// Define if we want to use the Camel Context Reload feature or not
-	ContextReloadEnabled *bool `property:"context-reload-enabled,omitempty"`
+	ContextReloadEnabled *bool `property:"context-reload-enabled" json:"contextReloadEnabled,omitempty"`
 	// Define if we want to use the Refresh Feature for secrets
-	RefreshEnabled *bool `property:"refresh-enabled,omitempty"`
+	RefreshEnabled *bool `property:"refresh-enabled" json:"refreshEnabled,omitempty"`
 	// If Refresh is enabled, this defines the interval to check the refresh event
-	RefreshPeriod string `property:"refresh-period,omitempty"`
+	RefreshPeriod string `property:"refresh-period" json:"refreshPeriod,omitempty"`
 	// If Refresh is enabled, the regular expression representing the secrets we want to track
-	Secrets string `property:"refresh-period,omitempty"`
+	Secrets string `property:"secrets" json:"secrets,omitempty"`
 	// If Refresh is enabled, the connection String to point to the Eventhub service used to track updates
-	EventhubConnectionString string `property:"refresh-period,omitempty"`
+	EventhubConnectionString string `property:"eventhub-connection-string" json:"eventhubConnectionString,omitempty"`
 	// If Refresh is enabled, the account name for Azure Storage Blob service used to save checkpoint while consuming from Eventhub
-	BlobAccountName string `property:"refresh-period,omitempty"`
+	BlobAccountName string `property:"blob-account-name" json:"blobAccountName,omitempty"`
 	// If Refresh is enabled, the access key for Azure Storage Blob service used to save checkpoint while consuming from Eventhub
-	BlobAccessKey string `property:"refresh-period,omitempty"`
+	BlobAccessKey string `property:"blob-access-key" json:"blobAccessKey,omitempty"`
 	// If Refresh is enabled, the container name for Azure Storage Blob service used to save checkpoint while consuming from Eventhub
-	BlobContainerName string `property:"refresh-period,omitempty"`
+	BlobContainerName string `property:"blob-container-name" json:"blobContainerName,omitempty"`
 }
 
 type azureKeyVaultTrait struct {

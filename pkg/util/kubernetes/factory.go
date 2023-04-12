@@ -153,3 +153,29 @@ func NewConfigMap(namespace, cmName, originalFilename string, generatedKey strin
 	}
 	return &cm
 }
+
+// NewPersistentVolumeClaim will create a NewPersistentVolumeClaim based on a StorageClass.
+func NewPersistentVolumeClaim(ns, name, storageClassName, capacityStorage string, accessMode corev1.PersistentVolumeAccessMode) *corev1.PersistentVolumeClaim {
+	pvc := corev1.PersistentVolumeClaim{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PersistentVolumeClaim",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			StorageClassName: &storageClassName,
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				accessMode,
+			},
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
+					"storage": resource.MustParse(capacityStorage),
+				},
+			},
+		},
+	}
+	return &pvc
+}

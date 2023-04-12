@@ -25,5 +25,5 @@ mvn clean install -f $APP_FOLDER -Dversion.camel.quarkus=${VERSION_CAMEL_QUARKUS
 LOCAL_MVN_HOME=$(mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout)
 
 OPERATOR_POD=$(oc -n ${YAKS_NAMESPACE} get pods -l name=camel-k-operator --no-headers -o custom-columns=NAME:.metadata.name)
-oc -n ${YAKS_NAMESPACE} exec $OPERATOR_POD -- mkdir -p /tmp/artifacts/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/
-oc -n ${YAKS_NAMESPACE} rsync $LOCAL_MVN_HOME/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ $OPERATOR_POD:/tmp/artifacts/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ --no-perms=true
+oc -n ${YAKS_NAMESPACE} exec $OPERATOR_POD -- mkdir -p /etc/maven/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/
+oc -n ${YAKS_NAMESPACE} rsync $LOCAL_MVN_HOME/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ $OPERATOR_POD:/etc/maven/m2/com/github/openshift-integration/camel-k-example-metrics/1.0.0-SNAPSHOT/ --no-perms=true

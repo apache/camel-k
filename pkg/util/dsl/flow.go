@@ -22,13 +22,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	yaml2 "gopkg.in/yaml.v2"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // FromYamlDSLString creates a slice of flows from a Camel YAML DSL string.
@@ -38,7 +37,7 @@ func FromYamlDSLString(flowsString string) ([]v1.Flow, error) {
 
 // FromYamlDSL creates a slice of flows from a Camel YAML DSL stream.
 func FromYamlDSL(reader io.Reader) ([]v1.Flow, error) {
-	buffered, err := ioutil.ReadAll(reader)
+	buffered, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

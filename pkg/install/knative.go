@@ -27,7 +27,7 @@ import (
 	rbacv1ac "k8s.io/client-go/applyconfigurations/rbac/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/apache/camel-k/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
 )
 
 const knativeAddressableResolverClusterRoleName = "addressable-resolver"

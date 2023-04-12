@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/apache/camel-k/pkg/util/test"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )

@@ -29,6 +29,7 @@ type BuilderTaskApplyConfiguration struct {
 	Steps                      []string                          `json:"steps,omitempty"`
 	Maven                      *MavenBuildSpecApplyConfiguration `json:"maven,omitempty"`
 	BuildDir                   *string                           `json:"buildDir,omitempty"`
+	Sources                    []SourceSpecApplyConfiguration    `json:"sources,omitempty"`
 }
 
 // BuilderTaskApplyConfiguration constructs an declarative configuration of the BuilderTask type for use with
@@ -94,5 +95,18 @@ func (b *BuilderTaskApplyConfiguration) WithMaven(value *MavenBuildSpecApplyConf
 // If called multiple times, the BuildDir field is set to the value of the last call.
 func (b *BuilderTaskApplyConfiguration) WithBuildDir(value string) *BuilderTaskApplyConfiguration {
 	b.BuildDir = &value
+	return b
+}
+
+// WithSources adds the given value to the Sources field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Sources field.
+func (b *BuilderTaskApplyConfiguration) WithSources(values ...*SourceSpecApplyConfiguration) *BuilderTaskApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithSources")
+		}
+		b.Sources = append(b.Sources, *values[i])
+	}
 	return b
 }

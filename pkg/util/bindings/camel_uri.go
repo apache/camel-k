@@ -18,8 +18,8 @@ limitations under the License.
 package bindings
 
 import (
-	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
-	"github.com/apache/camel-k/pkg/util/uri"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
 // CamelURIBindingProvider converts an explicit URI into a Camel endpoint.

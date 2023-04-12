@@ -31,14 +31,14 @@ echo "Generating CRD API documentation..."
 go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
     -config $location/gen-crd-api-config.json \
     -template-dir $location/template \
-    -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1" \
+    -api-dir "github.com/apache/camel-k/v2/pkg/apis/camel/v1" \
     -out-file $crd_file_camel
 
 #go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
 go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
     -config $location/gen-kamelets-crd-api-config.json \
     -template-dir $location/template \
-    -api-dir "github.com/apache/camel-k/pkg/apis/camel/v1alpha1" \
+    -api-dir "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1" \
     -out-file $crd_file_kamelets
 
 echo "Generating CRD API documentation... Done."

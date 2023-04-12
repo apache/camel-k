@@ -23,14 +23,16 @@ import (
 	"os"
 	"strings"
 
-	camelv1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/defaults"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	coordination "k8s.io/api/coordination/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
-	"github.com/apache/camel-k/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -53,6 +55,27 @@ func IsCurrentOperatorGlobal() bool {
 
 	log.Debug("Operator is local to namespace")
 	return false
+}
+
+// GetOperatorPod returns the Pod which is running the operator in a given namespace.
+func GetOperatorPod(ctx context.Context, c ctrl.Reader, ns string) *corev1.Pod {
+	lst := corev1.PodList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+	}
+	if err := c.List(ctx, &lst,
+		ctrl.InNamespace(ns),
+		ctrl.MatchingLabels{
+			"camel.apache.org/component": "operator",
+		}); err != nil {
+		return nil
+	}
+	if len(lst.Items) == 0 {
+		return nil
+	}
+	return &lst.Items[0]
 }
 
 // GetOperatorWatchNamespace returns the namespace the operator watches.
