@@ -24,6 +24,7 @@ package olm
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 	"os"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -135,6 +136,8 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
 			Should(Equal(corev1.ConditionTrue))
+		Eventually(KameletBindingConditionStatus(ns, kbindName, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).
+			Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationPodPhase(ns, kbindName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, kbindName, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 
@@ -199,13 +202,11 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Rebuild the Integration
 			Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
-			// Check the Integration runs correctly
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPodPhase(ns, kbindName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			// Check KameletBinding is rebuilt
+			Eventually(KameletBindingPhase(ns, kbindName), TestTimeoutLong).
+				Should(Equal(v1alpha1.KameletBindingPhaseCreating))
+			Eventually(KameletBindingConditionStatus(ns, kbindName, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationConditionStatus(ns, kbindName, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 
 			// Check the Integration version has been upgraded
 			Eventually(IntegrationVersion(ns, name)).Should(ContainSubstring(newIPVersionPrefix))
@@ -242,8 +243,5 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 		})
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		Expect(Kamel("uninstall", "-n", ns).Execute()).To(Succeed())
-		// Clean up cluster-wide resources that are not removed by OLM
-		Expect(Kamel("uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
 	})
 }
