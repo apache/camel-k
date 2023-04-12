@@ -18,7 +18,6 @@ limitations under the License.
 package kameletbinding
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
@@ -64,7 +63,6 @@ func TestParseErrorHandlerLogWithParametersDoesSucceed(t *testing.T) {
 }
 
 func TestParseErrorHandlerSinkDoesSucceed(t *testing.T) {
-	fmt.Println("Test")
 	sinkErrorHandler, err := parseErrorHandler(
 		[]byte(`{"sink": {"endpoint": {"uri": "someUri"}}}`),
 	)
@@ -100,4 +98,12 @@ func TestParseErrorHandlerSinkWithParametersDoesSucceed(t *testing.T) {
 	assert.Equal(t, v1alpha1.ErrorHandlerRefDefaultName, parameters[v1alpha1.ErrorHandlerRefName])
 	assert.Equal(t, "value1", parameters["camel.beans.defaultErrorHandler.param1"])
 	assert.Equal(t, "value2", parameters["camel.beans.defaultErrorHandler.param2"])
+}
+
+func TestParseErrorHandlerSinkFail(t *testing.T) {
+	_, err := parseErrorHandler(
+		[]byte(`{"sink": {"ref": {"uri": "someUri"}}}`),
+	)
+	assert.NotNil(t, err)
+	assert.Equal(t, "Missing endpoint in Error Handler Sink", err.Error())
 }
