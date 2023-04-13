@@ -69,6 +69,24 @@ You can also execute the following script, if by any chance you have some change
 make images [CAMEL_K_RUNTIME_DIR=/path/to/camel-k-runtime-project]
 ----
 
+[[using-remote-cluster]]
+== Using remote cluster
+
+If you don't have enough machine resources to run the test locally (a local Kubernetes cluster may require up to 32 GB of memory and several CPUs), then, you can push your operator image to some remote registry that is also reachable from your Kubernetes cluster.
+
+----
+make images CUSTOM_IMAGE=docker.io/my-org/my-ck-operator-test
+----
+
+Then, you need to use a couple of environment variables in order to let the test know the container image to use.
+
+----
+export CAMEL_K_TEST_OPERATOR_IMAGE=docker.io/my-org/my-ck-operator-test:2.0.0-SNAPSHOT
+export CAMEL_K_TEST_OPERATOR_IMAGE_PULL_POLICY=Always // this may not be required, use only if you want to change the policy
+----
+
+Make sure your local Kubernetes config settings is pointing to the right cluster (ie, `kubectl config current-context`) and run the suite of test you want to run (ie, `make test-common`).
+
 [[using-nexus]]
 == Using Nexus repository mirror with E2E testing
 
