@@ -34,7 +34,7 @@ func TestGenerateKeystore(t *testing.T) {
 	err := GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
 	assert.Nil(t, err)
 
-	// Non-nil data
+	// Non-Nil Data
 	data = [][]byte{{0}, {1}}
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
 	assert.NotNil(t, err)
