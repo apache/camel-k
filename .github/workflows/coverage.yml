@@ -21,6 +21,9 @@ on:
   schedule:
     - cron:  '45 3 * * *'
   workflow_dispatch: 
+  push:
+    branches:
+      - "feat/coverage_badge"
 
 jobs:
   test:
