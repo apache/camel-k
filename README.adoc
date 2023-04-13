@@ -1,5 +1,4 @@
 :toc: macro
-![Coverage](https://img.shields.io/badge/Coverage-39.6%25-yellow)
 :toclevels: 3
 
 = :camel: + :cloud: = Apache Camel K
@@ -11,6 +10,7 @@ image:https://github.com/apache/camel-k/workflows/build/badge.svg["Build", link=
 image:https://github.com/apache/camel-k/workflows/kubernetes/badge.svg["Kubernetes", link="https://github.com/apache/camel-k/actions/workflows/common.yml"]
 image:https://github.com/apache/camel-k/workflows/knative/badge.svg["Knative", link="https://github.com/apache/camel-k/actions/workflows/knative.yml"]
 image:https://github.com/apache/camel-k/actions/workflows/nightly-release.yml/badge.svg["Nightly releases", link="https://github.com/apache/camel-k/actions/workflows/nightly-release.yml"]
+![Coverage](https://img.shields.io/badge/Coverage-39.6%25-yellow)
 image:https://github.com/apache/camel-k/actions/workflows/nightly-native-test.yml/badge.svg["Quarkus native", link="https://github.com/apache/camel-k/actions/workflows/nightly-native-test.yml"]
 image:https://img.shields.io/badge/zulip-join_chat-brightgreen.svg["Chat on Zulip", link="https://camel.zulipchat.com"]
 
