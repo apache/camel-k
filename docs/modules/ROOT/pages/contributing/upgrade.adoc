@@ -1,0 +1,33 @@
+[[upgrade]]
+= Upgrading Camel K
+
+Camel K is delivering new features with each new release, so, you'll be probably running the upgrade process quite often. OLM installation method gives you the possibility to even perform this operation automatically, selecting the auto-upgrade feature when installing. Here we're providing the steps required for non-OLM installation procedure. This is working when using CLI but it can be adapted to any other installation methodology.
+
+When a new release is available, you need to perform a forcefully installation on top of the existing installation. This is required in order to upgrade the CRDs and any other configuration required by the new operator. You need to replace your `kamel` CLI binary with the new one released. Once you have replaced your `kamel` you can proceed with the installation:
+
+[source]
+----
+kamel install --force --olm=false
+----
+
+This operation will install all the required configuration for the new operator version, replacing the previous one. Mind that the `Integration` resources running won't be affected, so they will keep running with the default runtime details provided in the previous operator version.
+
+[[refresh-integrations]]
+== Refresh integrations
+
+Once the operator is up to date, you may want to refresh the `Integration` resources with the new default configuration provided by the upgraded operator (for instance, the default runtime). In such case you'll need to run a `kamel rebuild` operation for each integration you want to update, or `kamel rebuild --all` if you want to upgrade all the Integrations at once.
+
+NOTE: we suggest a controlled approach and rebuild one integration after another.
+
+[[maintain-runtime-integrations]]
+== Stick runtime version
+
+Since Camel K version 2, we're able to run any Camel K runtime version from the same operator. However, if you upgrade and you rebuild an Integration, this one will be rebuilt using the default runtime version of the new operator. In order to stick to a runtime fixed version you need to use the `Camel` trait and the `runtime-version` property, which pin the exact runtime version to use, regardless the default one used by the operator:
+
+----
+kamel run /tmp/Test.java -t camel.runtime-version=1.17.0
+kamel install --force //ie, version 2.0.0
+kamel rebuild test
+kamel logs test
+[1] 2023-04-13 13:38:43,648 INFO  [org.apa.cam.k.Runtime] (main) Apache Camel K Runtime 1.17.0
+----
