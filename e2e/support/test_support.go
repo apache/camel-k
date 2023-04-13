@@ -279,6 +279,17 @@ func kamelInstallWithContext(ctx context.Context, operatorID string, namespace s
 		}
 	}
 
+	opImage := os.Getenv("CAMEL_K_TEST_OPERATOR_IMAGE")
+	if opImage != "" {
+		fmt.Printf("Setting operator image to %s\n", opImage)
+		installArgs = append(installArgs, "--operator-image", opImage)
+	}
+	opImagePullPolicy := os.Getenv("CAMEL_K_TEST_OPERATOR_IMAGE_PULL_POLICY")
+	if opImagePullPolicy != "" {
+		fmt.Printf("Setting operator image pull policy to %s\n", opImagePullPolicy)
+		installArgs = append(installArgs, "--operator-image-pull-policy", opImagePullPolicy)
+	}
+
 	installArgs = append(installArgs, args...)
 	return KamelWithContext(ctx, installArgs...)
 }
