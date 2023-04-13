@@ -28,13 +28,13 @@ import (
 
 func TestGenerateKeystore(t *testing.T) {
 
-	// No Data
+	// Nil Data
 	var data [][]byte
 	ctx := context.Background()
 	err := GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
 	assert.Nil(t, err)
 
-	// Correct input
+	// Non-nil data
 	data = [][]byte{{0}, {1}}
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
 	assert.NotNil(t, err)
