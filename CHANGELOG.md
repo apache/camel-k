@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- unable to execute "kamel run" in secure mode [\#4249](https://github.com/apache/camel-k/issues/4249)
+- Builder pod that hit timeout is not terminated [\#4241](https://github.com/apache/camel-k/issues/4241)
 - CamelCatalog reconciliation fail [\#4226](https://github.com/apache/camel-k/issues/4226)
 - duplicate routeId issue [\#4225](https://github.com/apache/camel-k/issues/4225)
 - `KameletBinding` should own the related `Integration` [\#4219](https://github.com/apache/camel-k/issues/4219)
@@ -15,6 +17,7 @@
 - `kamel rebuild` does not rebuild KameletBindings [\#4208](https://github.com/apache/camel-k/issues/4208)
 - Cannot copy local runtime dependencies [\#4198](https://github.com/apache/camel-k/issues/4198)
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
+- Unable to produce and consume in camel-k to apache kafka, getting error like "Connection to node -1 \(localhost/127.0.0.1:9092\) could not be established. Broker may not be available." [\#4186](https://github.com/apache/camel-k/issues/4186)
 - Remove additional custom labels utility [\#4183](https://github.com/apache/camel-k/issues/4183)
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
 - Kamelet development using Camel DSL instead of YAML DSL [\#4174](https://github.com/apache/camel-k/issues/4174)
@@ -26,8 +29,10 @@
 - Kamel run sample integration is failing to run [\#4150](https://github.com/apache/camel-k/issues/4150)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
+- Remove KEP cryptic message when installing [\#3829](https://github.com/apache/camel-k/issues/3829)
 - Improve error reporting in case of knative is required but not installed [\#3803](https://github.com/apache/camel-k/issues/3803)
 - Private Registry With TLS  Can Not Work [\#3672](https://github.com/apache/camel-k/issues/3672)
+- Wrong KameletBinding definition leads to operator panic [\#3586](https://github.com/apache/camel-k/issues/3586)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 - OLM basic installation integration test [\#3180](https://github.com/apache/camel-k/issues/3180)
 - Default to using Micrometer for integration monitoring [\#1773](https://github.com/apache/camel-k/issues/1773)
