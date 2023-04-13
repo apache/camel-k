@@ -239,6 +239,12 @@ func (o *uninstallCmdOptions) uninstallNamespaceRoles(ctx context.Context, cmd *
 			return err
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Role Bindings removed from namespace", o.Namespace)
+
+		KEP1755Namespace := "kube-public"
+		if err := o.uninstallKEP_1755RoleBindings(ctx, c, KEP1755Namespace); err != nil {
+			return err
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), "Camel K Role Bindings removed from namespace", KEP1755Namespace)
 	}
 
 	if !o.SkipRoles {
@@ -339,6 +345,24 @@ func (o *uninstallCmdOptions) uninstallRoleBindings(ctx context.Context, c clien
 
 	for _, roleBinding := range roleBindings.Items {
 		err := api.RoleBindings(o.Namespace).Delete(ctx, roleBinding.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallKEP_1755RoleBindings(ctx context.Context, c client.Client, namespace string) error {
+	api := c.RbacV1()
+
+	roleBindings, err := api.RoleBindings(namespace).List(ctx, defaultListOptions)
+	if err != nil {
+		return err
+	}
+
+	for _, roleBinding := range roleBindings.Items {
+		err := api.RoleBindings(namespace).Delete(ctx, roleBinding.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
