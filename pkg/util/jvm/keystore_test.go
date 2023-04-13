@@ -39,7 +39,7 @@ func TestGenerateKeystore(t *testing.T) {
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
 	assert.NotNil(t, err)
 
-	// Incorrect input format
+	// Incorrect password format
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", "", data)
 	assert.NotNil(t, err)
 
