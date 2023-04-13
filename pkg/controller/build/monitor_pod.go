@@ -216,7 +216,7 @@ func (action *monitorPodAction) sigterm(pod *corev1.Pod) error {
 
 		r.VersionedParams(&corev1.PodExecOptions{
 			Container: container.Name,
-			Command:   []string{"kill", "-SIGTERM", "1"},
+			Command:   []string{"/bin/bash", "-c", "kill -SIGTERM 1"},
 			Stdout:    true,
 			Stderr:    true,
 			TTY:       false,

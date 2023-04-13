@@ -1374,6 +1374,16 @@ func BuilderPod(ns string, name string) func() *corev1.Pod {
 	}
 }
 
+func BuilderPodPhase(ns string, name string) func() corev1.PodPhase {
+	return func() corev1.PodPhase {
+		pod := BuilderPod(ns, name)()
+		if pod == nil {
+			return ""
+		}
+		return pod.Status.Phase
+	}
+}
+
 func BuilderPodsCount(ns string) func() int {
 	return func() int {
 		lst := corev1.PodList{
@@ -1590,6 +1600,16 @@ func BuildPhase(ns, name string) func() v1.BuildPhase {
 	}
 }
 
+func BuildFailureRecovery(ns, name string) func() int {
+	return func() int {
+		build := Build(ns, name)()
+		if build != nil {
+			return build.Status.Failure.Recovery.Attempt
+		}
+		return 0
+	}
+}
+
 func HasPlatform(ns string) func() bool {
 	return func() bool {
 		lst := v1.NewIntegrationPlatformList()
@@ -1786,6 +1806,16 @@ func PlatformBuildCatalogToolTimeout(ns string) func() *metav1.Duration {
 			return &metav1.Duration{}
 		}
 		return p.Status.Build.BuildCatalogToolTimeout
+	}
+}
+
+func PlatformTimeout(ns string) func() *metav1.Duration {
+	return func() *metav1.Duration {
+		p := Platform(ns)()
+		if p == nil {
+			return &metav1.Duration{}
+		}
+		return p.Status.Build.Timeout
 	}
 }
 
