@@ -1,7 +1,7 @@
 [[uninstalling]]
 = Uninstalling Camel K
 
-If you really need to, it is possible to completely uninstall Camel K from OpenShift or Kubernetes with the following command:
+We're sad to see you go, but If you really need to, it is possible to completely uninstall Camel K from OpenShift or Kubernetes with the following command:
 
 [source]
 ----
