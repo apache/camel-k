@@ -56,6 +56,7 @@ jobs:
           touch badge.out
 
       - name: Go Coverage Badge
+
         uses: tj-actions/coverage-badge-go@v2
         with:
           filename: coverage.out
@@ -63,7 +64,9 @@ jobs:
 
       - name: Convert Badge to adoc
         run: |
-          target=$(grep -o 'https://[^)]*' badge.out) && replacement="^(image:https://img.shields.io/badge/Coverage).*" && sed -i "s/replacement/test/g" README.adoc
+          replacement=$(grep -o 'https://[^)]*' badge.out)
+          target="(?:https:\/\/img\.shields\.io\/badge\/Coverage).*?(?=\.svg)"
+          sed -i "s|${target}|${replacement}|g" README.adoc
           
           
       - name: Verify Changed files
