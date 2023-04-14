@@ -90,4 +90,4 @@ jobs:
           CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
           CI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" 'main'
+          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" '${{ github.ref_name }}'
