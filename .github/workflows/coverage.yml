@@ -58,6 +58,8 @@ jobs:
         uses: tj-actions/coverage-badge-go@v2
         with:
           filename: coverage.out
+          text: "image:"
+          value: ".svg[\"Go coverage\", link=\"https://github.com/apache/camel-k/actions/workflows/coverage.yml\"]"
           target: README.adoc
 
       - name: Verify Changed files
