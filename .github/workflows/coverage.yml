@@ -58,8 +58,13 @@ jobs:
         uses: tj-actions/coverage-badge-go@v2
         with:
           filename: coverage.out
-          target: README.adoc
+          target: badge.out
 
+      - name: Convert Badge to adoc
+        run: |
+          target=$(grep -o 'https://[^)]*' badge.out) && replacement="^(image:https://img.shields.io/badge/Coverage).*" && sed -i "s/replacement/test/g" README.adoc
+          
+          
       - name: Verify Changed files
         uses: tj-actions/verify-changed-files@v12
         id: verify-changed-files
