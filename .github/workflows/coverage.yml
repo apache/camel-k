@@ -59,6 +59,7 @@ jobs:
         with:
           filename: coverage.out
           text: "image:"
+          value: "[\"Go coverage\", link=\"https://github.com/apache/camel-k/actions/workflows/coverage.yml\"]"
           target: README.adoc
 
       - name: Verify Changed files
