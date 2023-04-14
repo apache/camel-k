@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - unable to execute "kamel run" in secure mode [\#4249](https://github.com/apache/camel-k/issues/4249)
 - Builder pod that hit timeout is not terminated [\#4241](https://github.com/apache/camel-k/issues/4241)
 - CamelCatalog reconciliation fail [\#4226](https://github.com/apache/camel-k/issues/4226)
@@ -15,6 +16,7 @@
 - Local file in unit test leftover [\#4217](https://github.com/apache/camel-k/issues/4217)
 - Validate error [\#4214](https://github.com/apache/camel-k/issues/4214)
 - `kamel rebuild` does not rebuild KameletBindings [\#4208](https://github.com/apache/camel-k/issues/4208)
+- Allow E2E suite test to run against a remote cluster [\#4207](https://github.com/apache/camel-k/issues/4207)
 - Cannot copy local runtime dependencies [\#4198](https://github.com/apache/camel-k/issues/4198)
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
 - Unable to produce and consume in camel-k to apache kafka, getting error like "Connection to node -1 \(localhost/127.0.0.1:9092\) could not be established. Broker may not be available." [\#4186](https://github.com/apache/camel-k/issues/4186)
