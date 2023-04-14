@@ -53,6 +53,7 @@ jobs:
         run: |
           go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
+          touch badge.out
 
       - name: Go Coverage Badge
         uses: tj-actions/coverage-badge-go@v2
