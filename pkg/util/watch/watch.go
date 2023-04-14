@@ -23,6 +23,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/watch"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -208,6 +209,31 @@ func HandleIntegrationPlatformEvents(ctx context.Context, c client.Client, p *v1
 					}
 				}
 			}
+		}
+	}
+}
+
+// WaitPodToTerminate will wait for a given pod to teminate.
+func WaitPodToTerminate(ctx context.Context, c client.Client, pod *corev1.Pod) error {
+	opts := metav1.ListOptions{
+		TypeMeta:      metav1.TypeMeta{},
+		FieldSelector: fmt.Sprintf("metadata.name=%s", pod.Name),
+	}
+	watcher, err := c.CoreV1().Pods(pod.Namespace).Watch(ctx, opts)
+	if err != nil {
+		return err
+	}
+
+	defer watcher.Stop()
+
+	for {
+		select {
+		case event := <-watcher.ResultChan():
+			if event.Type == watch.Deleted {
+				return nil
+			}
+		case <-ctx.Done():
+			return nil
 		}
 	}
 }
