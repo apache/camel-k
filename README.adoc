@@ -1,4 +1,5 @@
 :toc: macro
+![Coverage](https://img.shields.io/badge/Coverage-39.6%25-yellow)
 :toclevels: 3
 
 = :camel: + :cloud: = Apache Camel K
