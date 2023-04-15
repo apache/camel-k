@@ -9,6 +9,7 @@
 - unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - unable to execute "kamel run" in secure mode [\#4249](https://github.com/apache/camel-k/issues/4249)
 - Builder pod that hit timeout is not terminated [\#4241](https://github.com/apache/camel-k/issues/4241)
+- Introduce Code Coverage badge [\#4227](https://github.com/apache/camel-k/issues/4227)
 - CamelCatalog reconciliation fail [\#4226](https://github.com/apache/camel-k/issues/4226)
 - duplicate routeId issue [\#4225](https://github.com/apache/camel-k/issues/4225)
 - `KameletBinding` should own the related `Integration` [\#4219](https://github.com/apache/camel-k/issues/4219)
