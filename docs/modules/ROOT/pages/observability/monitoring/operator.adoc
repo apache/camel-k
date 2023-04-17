@@ -95,9 +95,9 @@ spec:
 <1> The labels must match the `podMonitorSelector` field from the `Prometheus` resource
 <2> This label selector matches the Camel K operator Deployment labels
 
-The Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/getting-started.md#related-resources[getting started] guide documents the discovery mechanism, as well as the relationship between the operator resources.
+The Prometheus Operator https://prometheus-operator.dev/docs/user-guides/getting-started/[getting started] guide documents the discovery mechanism, as well as the relationship between the operator resources.
 
-In case your operator metrics are not discovered, you may want to rely on https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/troubleshooting.md#troubleshooting-servicemonitor-changes[Troubleshooting `ServiceMonitor` changes], which also applies to `PodMonitor` resources troubleshooting.
+In case your operator metrics are not discovered, you may want to rely on https://prometheus-operator.dev/docs/operator/troubleshooting/#troubleshooting-servicemonitor-changes[Troubleshooting `ServiceMonitor` changes], which also applies to `PodMonitor` resources troubleshooting.
 
 [[alerting]]
 == Alerting
@@ -172,5 +172,5 @@ spec:
               for {{ $labels.job }} have their first time to readiness above 1m.
 ----
 
-More information can be found in the Prometheus Operator https://github.com/coreos/prometheus-operator/blob/v0.38.0/Documentation/user-guides/alerting.md[Alerting] user guide.
-You can also find more details in https://docs.openshift.com/container-platform/4.4/monitoring/monitoring-your-own-services.html#creating-alerting-rules_monitoring-your-own-services[Creating alerting rules] from the OpenShift documentation.
+More information can be found in the Prometheus Operator https://prometheus-operator.dev/docs/user-guides/alerting/[Alerting] user guide.
+You can also find more details in https://docs.openshift.com/container-platform/4.12/monitoring/managing-alerts.html#creating-alerting-rules-for-user-defined-projects_managing-alerts[Creating alerting rules] from the OpenShift documentation.
