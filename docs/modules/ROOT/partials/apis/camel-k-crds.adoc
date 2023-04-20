@@ -3,6 +3,29 @@
 
 Package v1 contains API Schema definitions for the camel v1 API group
 
+There is a published https://github.com/fabric8io/kubernetes-client[kubernetes-client] typed API to access those resources from Java.
+
+Importing the dependency in Maven projects looks like:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.apache.camel.k</groupId>
+  <artifactId>camel-k-crds</artifactId>
+  <version>${version}</version>
+</dependency>
+----
+
+And using it:
+
+[source,java]
+----
+var client = new KubernetesClientBuilder().build();
+var camelCatalogClient = client.resources(CamelCatalog.class);
+
+camelCatalogClient.list() ...
+----
+
 ==  Resource Types
 
 [#_camel_apache_org_v1_Build]
