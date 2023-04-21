@@ -1953,7 +1953,7 @@ func NumPods(ns string) func() int {
 
 func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 	setTestLocus(t)
-	ns := newTestNamespace(false)
+	ns := NewTestNamespace(false)
 	defer deleteTestNamespace(t, ns)
 	defer userCleanup(t)
 
@@ -1975,7 +1975,7 @@ func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
 
 func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
 	setTestLocus(t)
-	ns := newTestNamespace(true)
+	ns := NewTestNamespace(true)
 	defer deleteTestNamespace(t, ns)
 	defer deleteKnativeBroker(ns)
 	defer userCleanup(t)
@@ -2003,11 +2003,7 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
 
 	defer func(isGlobal bool) {
-		if t.Failed() {
-			if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
-				t.Logf("Error while dumping namespace %s: %v\n", ns, err)
-			}
-		}
+		DumpNamespace(t, ns)
 
 		// Try to clean up namespace
 		if !isGlobal && HasPlatform(ns)() {
@@ -2100,7 +2096,26 @@ func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 	}
 }
 
-func newTestNamespace(injectKnativeBroker bool) ctrl.Object {
+func DumpNamespace(t *testing.T, ns string) {
+	if t.Failed() {
+		if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
+			t.Logf("Error while dumping namespace %s: %v\n", ns, err)
+		}
+	}
+}
+
+func DeleteNamespace(t *testing.T, ns string) error {
+	nsObj, err := TestClient().CoreV1().Namespaces().Get(TestContext, ns, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	deleteTestNamespace(t, nsObj)
+
+	return nil
+}
+
+func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	brokerLabel := "eventing.knative.dev/injection"
 	name := "test-" + uuid.New().String()
 	c := TestClient()

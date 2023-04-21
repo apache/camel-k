@@ -54,6 +54,7 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreate
 	cmd.Flags().StringArray("configmap", nil, "Add a ConfigMap")
 	cmd.Flags().StringArray("secret", nil, "Add a Secret")
 	cmd.Flags().StringArray("repository", nil, "Add a maven repository")
+	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this kit")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 
 	// completion support
@@ -71,6 +72,7 @@ type kitCreateCommandOptions struct {
 	Configmaps   []string `mapstructure:"configmaps"`
 	Secrets      []string `mapstructure:"secrets"`
 	Repositories []string `mapstructure:"repositories"`
+	OperatorID   string   `mapstructure:"operator-id"`
 	Traits       []string `mapstructure:"traits"`
 }
 
@@ -115,6 +117,12 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	}
 
 	kit = v1.NewIntegrationKit(command.Namespace, kubernetes.SanitizeName(args[0]))
+
+	if command.OperatorID != "" {
+		// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
+		kit.SetOperatorID(strings.TrimSpace(command.OperatorID))
+	}
+
 	kit.Labels = map[string]string{
 		v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeUser,
 	}
