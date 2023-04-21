@@ -2453,11 +2453,7 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
 
 	defer func(isGlobal bool) {
-		if t.Failed() {
-			if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
-				t.Logf("Error while dumping namespace %s: %v\n", ns, err)
-			}
-		}
+		DumpNamespace(t, ns)
 
 		// Try to clean up namespace
 		if !isGlobal && HasPlatform(ns)() {
@@ -2566,6 +2562,14 @@ func testNamespaceExists(ns string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func DumpNamespace(t *testing.T, ns string) {
+	if t.Failed() {
+		if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
+			t.Logf("Error while dumping namespace %s: %v\n", ns, err)
+		}
+	}
 }
 
 func DeleteNamespace(t *testing.T, ns string) error {
