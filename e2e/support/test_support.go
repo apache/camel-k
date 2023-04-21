@@ -107,11 +107,9 @@ func setTestLocus(t *testing.T) {
 	testLocus = t
 }
 
-//
 // Only panic the test if absolutely necessary and there is
 // no test locus. In most cases, the test should fail gracefully
 // using the test locus to error out and fail now.
-//
 func failTest(err error) {
 	if testLocus != nil {
 		testLocus.Error(err)
@@ -726,9 +724,7 @@ func ServiceType(ns string, name string) func() corev1.ServiceType {
 	}
 }
 
-//
 // Find the service in the given namespace with the given type
-//
 func ServicesByType(ns string, svcType corev1.ServiceType) func() []corev1.Service {
 	return func() []corev1.Service {
 		svcs := []corev1.Service{}
@@ -1949,7 +1945,7 @@ func NumPods(ns string) func() int {
 
 func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 	setTestLocus(t)
-	ns := newTestNamespace(false)
+	ns := NewTestNamespace(false)
 	defer deleteTestNamespace(t, ns)
 	defer userCleanup(t)
 
@@ -1971,7 +1967,7 @@ func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
 
 func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
 	setTestLocus(t)
-	ns := newTestNamespace(true)
+	ns := NewTestNamespace(true)
 	defer deleteTestNamespace(t, ns)
 	defer deleteKnativeBroker(ns)
 	defer userCleanup(t)
@@ -1999,11 +1995,7 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
 
 	defer func(isGlobal bool) {
-		if t.Failed() {
-			if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
-				t.Logf("Error while dumping namespace %s: %v\n", ns, err)
-			}
-		}
+		DumpNamespace(t, ns)
 
 		// Try to clean up namespace
 		if !isGlobal && HasPlatform(ns)() {
@@ -2096,7 +2088,26 @@ func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 	}
 }
 
-func newTestNamespace(injectKnativeBroker bool) ctrl.Object {
+func DumpNamespace(t *testing.T, ns string) {
+	if t.Failed() {
+		if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
+			t.Logf("Error while dumping namespace %s: %v\n", ns, err)
+		}
+	}
+}
+
+func DeleteNamespace(t *testing.T, ns string) error {
+	nsObj, err := TestClient().CoreV1().Namespaces().Get(TestContext, ns, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	deleteTestNamespace(t, nsObj)
+
+	return nil
+}
+
+func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	brokerLabel := "eventing.knative.dev/injection"
 	name := "test-" + uuid.New().String()
 	c := TestClient()
