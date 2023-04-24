@@ -562,14 +562,26 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	if existing == nil {
 		err = c.Create(o.Context, integration)
+		if err != nil {
+			return nil, err
+		}
 		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" created`)
 	} else {
-		err = c.Patch(o.Context, integration, ctrl.MergeFromWithOptions(existing, ctrl.MergeFromWithOptimisticLock{}))
-		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" updated`)
-	}
+		patch := ctrl.MergeFrom(existing)
+		d, err := patch.Data(integration)
+		if err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
+		if string(d) == "{}" {
+			fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" unchanged`)
+			return integration, nil
+		}
+		err = c.Patch(o.Context, integration, patch)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" updated`)
 	}
 
 	return integration, nil
