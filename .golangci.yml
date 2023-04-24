@@ -52,11 +52,15 @@ linters:
     - nlreturn
     - nosnakecase
     - paralleltest
+    - rowserrcheck
     - scopelint
+    - structcheck
+    - sqlclosecheck
     - tagliatelle
     - tenv
     - testpackage
     - varnamelen
+    - wastedassign
     - whitespace
     - wrapcheck
     - wsl
