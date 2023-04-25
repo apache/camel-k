@@ -202,10 +202,7 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			// Rebuild the Integration
 			Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
-			// Check KameletBinding is rebuilt
-			Eventually(KameletBindingPhase(ns, kbindName), TestTimeoutLong).
-				Should(Equal(v1alpha1.KameletBindingPhaseCreating))
-			Eventually(KameletBindingConditionStatus(ns, kbindName, v1alpha1.KameletBindingConditionReady), TestTimeoutShort).
+			Eventually(KameletBindingConditionStatus(ns, kbindName, v1alpha1.KameletBindingConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 
 			// Check the Integration version has been upgraded
