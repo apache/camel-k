@@ -141,6 +141,7 @@ func createTestRouteEnvironment(t *testing.T, name string) *Environment {
 	res := &Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(client),
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
