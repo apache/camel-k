@@ -64,7 +64,7 @@ func TestKitMainInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		Expect(Kamel("kit", "create", "timer", "-d", "camel:timer", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("kit", "create", "timer", "-d", "camel:timer", "-x", operatorID, "-n", ns).Execute()).To(Succeed())
 		Eventually(Build(ns, "timer"), TestTimeoutMedium).ShouldNot(BeNil())
 	})
 }
