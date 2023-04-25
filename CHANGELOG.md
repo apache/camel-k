@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Failed to fetch data from Mysql database using camel-k [\#4264](https://github.com/apache/camel-k/issues/4264)
 - unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - unable to execute "kamel run" in secure mode [\#4249](https://github.com/apache/camel-k/issues/4249)
 - Builder pod that hit timeout is not terminated [\#4241](https://github.com/apache/camel-k/issues/4241)
@@ -32,11 +33,13 @@
 - Kamel run sample integration is failing to run [\#4150](https://github.com/apache/camel-k/issues/4150)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
+- Remove deprecated linters [\#4061](https://github.com/apache/camel-k/issues/4061)
 - Expose runtime details in `kamel version -a -v` [\#3836](https://github.com/apache/camel-k/issues/3836)
 - Remove KEP cryptic message when installing [\#3829](https://github.com/apache/camel-k/issues/3829)
 - Improve error reporting in case of knative is required but not installed [\#3803](https://github.com/apache/camel-k/issues/3803)
 - Private Registry With TLS  Can Not Work [\#3672](https://github.com/apache/camel-k/issues/3672)
 - Wrong KameletBinding definition leads to operator panic [\#3586](https://github.com/apache/camel-k/issues/3586)
+- \[E2E\] Add tests for enabling traits at IntegrationPlatform [\#3476](https://github.com/apache/camel-k/issues/3476)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 - OLM basic installation integration test [\#3180](https://github.com/apache/camel-k/issues/3180)
 - Default to using Micrometer for integration monitoring [\#1773](https://github.com/apache/camel-k/issues/1773)
