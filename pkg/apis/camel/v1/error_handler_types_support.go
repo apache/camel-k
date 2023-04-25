@@ -19,6 +19,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 // +kubebuilder:object:generate=false
@@ -28,6 +29,7 @@ type ErrorHandler interface {
 	Type() ErrorHandlerType
 	Endpoint() *Endpoint
 	Configuration() (map[string]interface{}, error)
+	Validate() error
 }
 
 // baseErrorHandler is the base used for the Error Handler hierarchy
@@ -47,6 +49,11 @@ func (e baseErrorHandler) Endpoint() *Endpoint {
 // Configuration --
 func (e baseErrorHandler) Configuration() (map[string]interface{}, error) {
 	return nil, nil
+}
+
+// Validate --
+func (e baseErrorHandler) Validate() error {
+	return nil
 }
 
 // ErrorHandlerNone --
@@ -125,4 +132,12 @@ func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 	properties[ErrorHandlerAppPropertiesPrefix] = "#class:org.apache.camel.builder.DeadLetterChannelBuilder"
 
 	return properties, err
+}
+
+// Validate --
+func (e ErrorHandlerSink) Validate() error {
+	if e.DLCEndpoint == nil {
+		return fmt.Errorf("Missing endpoint in Error Handler Sink")
+	}
+	return nil
 }

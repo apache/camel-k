@@ -79,8 +79,10 @@ func parseErrorHandler(rawMessage v1alpha1.RawMessage) (v1alpha1.ErrorHandler, e
 			return nil, errors.Errorf("Unknown error handler type %s", errHandlType)
 		}
 
-		err := json.Unmarshal(errHandlValue, dst)
-		if err != nil {
+		if err = json.Unmarshal(errHandlValue, dst); err != nil {
+			return nil, err
+		}
+		if err = dst.Validate(); err != nil {
 			return nil, err
 		}
 
