@@ -31,6 +31,7 @@ import (
 	traitv1 "github.com/apache/camel-k/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/pkg/util/camel"
 	"github.com/apache/camel-k/pkg/util/kubernetes"
+	"github.com/apache/camel-k/pkg/util/test"
 )
 
 func TestDefaultEnvironment(t *testing.T) {
@@ -195,9 +196,11 @@ func NewEnvironmentTestCatalog() *Catalog {
 }
 
 func mockEnvironment(catalog *camel.RuntimeCatalog) Environment {
+	fakeClient, _ := test.NewFakeClient()
 	return Environment{
 		CamelCatalog: catalog,
 		Catalog:      NewCatalog(nil),
+		Client:       fakeClient,
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
