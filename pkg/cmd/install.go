@@ -149,6 +149,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)")
 	cmd.Flags().StringArray("operator-env-vars", nil, "Add an environment variable to set in the operator Pod(s), as <name=value>")
 	cmd.Flags().StringP("log-level", "z", "info", "The level of operator logging (default - info): info or 0, debug or 1")
+	cmd.Flags().Int("max-running-builds", 0, "Maximum number of parallel running builds")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
