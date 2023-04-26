@@ -148,6 +148,11 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 				}
 
 				for _, kit := range list.Items {
+					if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok && v != p.Name {
+						log.Infof("Integration kit %s is waiting for selected integration platform '%s' - skip it now", kit.Name, v)
+						continue
+					}
+
 					if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 						log.Infof("Platform %s ready, wake-up integration kit: %s", p.Name, kit.Name)
 						requests = append(requests, reconcile.Request{

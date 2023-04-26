@@ -38,16 +38,15 @@ func TestSecondaryPlatform(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-platform-secondary"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 		Expect(ConfigureSecondaryPlatformWith(ns, func(p *v1.IntegrationPlatform) {
 			p.Name = "secondary"
 			p.Spec.Traits.Container = &traitv1.ContainerTrait{
-				Trait: traitv1.Trait{
-					Configuration: AsTraitConfiguration(map[string]string{
-						"limitCPU": "0.1",
-					}),
-				},
+				LimitCPU: "0.1",
 			}
 		})).To(Succeed())
+		Eventually(SelectedPlatformPhase(ns, "secondary"), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		Expect(KamelRunWithID(operatorID, ns, "--name", "limited", "--annotation", "camel.apache.org/platform.id=secondary", "files/yaml.yaml").Execute()).To(Succeed())
 

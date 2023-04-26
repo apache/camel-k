@@ -1661,6 +1661,21 @@ func Platform(ns string) func() *v1.IntegrationPlatform {
 	}
 }
 
+func PlatformByName(ns string, name string) func() *v1.IntegrationPlatform {
+	return func() *v1.IntegrationPlatform {
+		lst := v1.NewIntegrationPlatformList()
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(err)
+		}
+		for _, p := range lst.Items {
+			if p.Name == name {
+				return &p
+			}
+		}
+		return nil
+	}
+}
+
 func CamelCatalog(ns, name string) func() *v1.CamelCatalog {
 	return func() *v1.CamelCatalog {
 		cat := v1.CamelCatalog{}
@@ -1767,6 +1782,16 @@ func PlatformVersion(ns string) func() string {
 func PlatformPhase(ns string) func() v1.IntegrationPlatformPhase {
 	return func() v1.IntegrationPlatformPhase {
 		p := Platform(ns)()
+		if p == nil {
+			return ""
+		}
+		return p.Status.Phase
+	}
+}
+
+func SelectedPlatformPhase(ns string, name string) func() v1.IntegrationPlatformPhase {
+	return func() v1.IntegrationPlatformPhase {
+		p := PlatformByName(ns, name)()
 		if p == nil {
 			return ""
 		}
