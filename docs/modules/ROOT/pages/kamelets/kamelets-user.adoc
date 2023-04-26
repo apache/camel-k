@@ -390,7 +390,7 @@ To comply with the Knative specifications, in case an "http" or "https" URI is u
 
 === Error Handling
 
-You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/bindings-error-handler.adoc[Pipes Error Handler User Guide] for more detail.
+You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/kameletbindings-error-handler.adoc[Pipes Error Handler User Guide] for more detail.
 
 === Trait via annotations
 
