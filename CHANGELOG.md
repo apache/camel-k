@@ -6,9 +6,14 @@
 
 **Closed issues:**
 
+- Maximum number of running builds \(0\) exceeded [\#4290](https://github.com/apache/camel-k/issues/4290)
+- Should uninstall --all remove PersistentVolumeClaim? [\#4285](https://github.com/apache/camel-k/issues/4285)
+- Camel-k install and uninstall on a fresh kind cluster in Linux [\#4277](https://github.com/apache/camel-k/issues/4277)
+- Kamelet redis-source not working [\#4276](https://github.com/apache/camel-k/issues/4276)
 - Failed to fetch data from Mysql database using camel-k [\#4264](https://github.com/apache/camel-k/issues/4264)
 - unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - unable to execute "kamel run" in secure mode [\#4249](https://github.com/apache/camel-k/issues/4249)
+- Acquiring lock at startup is taking long [\#4246](https://github.com/apache/camel-k/issues/4246)
 - Builder pod that hit timeout is not terminated [\#4241](https://github.com/apache/camel-k/issues/4241)
 - Introduce Code Coverage badge [\#4227](https://github.com/apache/camel-k/issues/4227)
 - CamelCatalog reconciliation fail [\#4226](https://github.com/apache/camel-k/issues/4226)
@@ -23,6 +28,7 @@
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
 - Unable to produce and consume in camel-k to apache kafka, getting error like "Connection to node -1 \(localhost/127.0.0.1:9092\) could not be established. Broker may not be available." [\#4186](https://github.com/apache/camel-k/issues/4186)
 - Remove additional custom labels utility [\#4183](https://github.com/apache/camel-k/issues/4183)
+- Camel K 2.x upgrade 1.x strategy [\#4179](https://github.com/apache/camel-k/issues/4179)
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
 - Kamelet development using Camel DSL instead of YAML DSL [\#4174](https://github.com/apache/camel-k/issues/4174)
 - Default integrationPlatform created at operator startup dose not honor OPERATOR\_ID config [\#4167](https://github.com/apache/camel-k/issues/4167)
@@ -42,6 +48,7 @@
 - \[E2E\] Add tests for enabling traits at IntegrationPlatform [\#3476](https://github.com/apache/camel-k/issues/3476)
 - Move from release nightly to Continuous Delivery [\#3260](https://github.com/apache/camel-k/issues/3260)
 - OLM basic installation integration test [\#3180](https://github.com/apache/camel-k/issues/3180)
+- A better name for KameletBinding [\#2625](https://github.com/apache/camel-k/issues/2625)
 - Default to using Micrometer for integration monitoring [\#1773](https://github.com/apache/camel-k/issues/1773)
 
 ## [2.0.0-nightly](https://github.com/apache/camel-k/tree/2.0.0-nightly) (2023-03-22)
