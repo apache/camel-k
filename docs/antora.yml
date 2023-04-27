@@ -34,11 +34,11 @@ asciidoc:
     camel-k-runtime-version: 1.15.3-SNAPSHOT # Makefile RUNTIME_VERSION
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # Makefile BUNDLE_CAMEL_APIS
     # from camel-k-runtime parent pom:
-    camel-version: 3.18.3
+    camel-version: 3.18.6
     camel-docs-version: 3.18.x
-    camel-quarkus-version: 2.13.2
+    camel-quarkus-version: 2.13.3
     camel-quarkus-docs-version: 2.13.x
-    quarkus-version: 2.13.5.Final
+    quarkus-version: 2.13.7.Final
     graalvm-version: 22.1.0
     graalvm-docs-version: 22.1
     buildah-version: 1.23.3
