@@ -22,5 +22,5 @@ package cli
 
 import "github.com/apache/camel-k/v2/e2e/support"
 
-var ns = support.GetEnvOrDefault("CAMEL_K_TEST_NAMESPACE", support.GetCIProcessID())
-var operatorID = support.GetEnvOrDefault("CAMEL_K_OPERATOR_ID",support.GetCIProcessID())
+var ns = support.GetCIProcessID()
+var operatorID = support.GetCIProcessID()
