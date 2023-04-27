@@ -23,7 +23,7 @@
 #
 ####
 
-set -e
+set -ex
 
 NAMESPACE="preflight"
 
