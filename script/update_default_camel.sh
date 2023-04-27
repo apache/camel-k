@@ -21,16 +21,18 @@ set -e
 
 location=$(dirname $0)
 
+rm -rf /tmp/camel-k-runtime
 git clone --depth 1 https://github.com/apache/camel-k-runtime.git /tmp/camel-k-runtime
 ck_runtime_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f /tmp/camel-k-runtime/pom.xml)
 echo "INFO: last Camel K runtime version set at $ck_runtime_version"
 sed -i "s/^RUNTIME_VERSION := .*$/RUNTIME_VERSION := $ck_runtime_version/" $location/Makefile
+camel_version=$(grep -oPm1 "(?<=<camel-version>)[^<]+" /tmp/camel-k-runtime/pom.xml)
 
+rm -rf /tmp/camel-kamelets
 git clone https://github.com/apache/camel-kamelets.git /tmp/camel-kamelets
 pushd /tmp/camel-kamelets
-ck_camel_base_version=$(echo "$ck_runtime_version" | sed -r 's/-SNAPSHOT//g')
-echo "INFO: Looking a suitable Kamelet tag for $ck_camel_base_version camel version"
-kamelets_tag=$(git tag | grep $ck_camel_base_version | sort -r | head -n 1)
+echo "INFO: Looking a suitable Kamelet tag for $camel_version camel version"
+kamelets_tag=$(git tag | grep $camel_version | sort -r | head -n 1)
 popd
 echo "INFO: Kamelets version set at $kamelets_tag"
 sed -i "s/^KAMELET_CATALOG_REPO_TAG := .*$/KAMELET_CATALOG_REPO_TAG := $kamelets_tag/" $location/Makefile
