@@ -20,7 +20,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -36,9 +35,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/olm"
-	"github.com/apache/camel-k/v2/pkg/util/watch"
 )
 
 func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstallCmdOptions) {
@@ -159,19 +156,6 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 				return err
 			}
 			fmt.Fprintf(cmd.OutOrStdout(), "Camel K Operator removed from namespace %s\n", o.Namespace)
-
-			// Let's wait the Pod has completed all the tasks before removing roles, as it may cause
-			// problems during the shutdown
-
-			pod := platform.GetOperatorPod(o.Context, c, o.Namespace)
-			if pod != nil {
-				tctx, cancel := context.WithTimeout(o.Context, 15*time.Second)
-				defer cancel()
-				err := watch.WaitPodToTerminate(tctx, c, pod)
-				if err != nil {
-					return errors.Wrap(err, "error while waiting the operator pod to terminate gracefully")
-				}
-			}
 		}
 
 		if err = o.uninstallNamespaceRoles(o.Context, cmd, c); err != nil {
