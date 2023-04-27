@@ -235,6 +235,10 @@ do
 done
 
 echo "Camel K operator ${camel_operator} up and running"
+
+# For troubleshooting purpose only!!
+kubectl logs ${camel_operator} -n ${NAMESPACE}
+
 camel_op_version=$(kubectl logs ${camel_operator} -n ${NAMESPACE} | sed -n 's/.*"Camel K Operator Version: \(.*\)"}/\1/p')
 camel_op_commit=$(kubectl logs ${camel_operator} -n ${NAMESPACE} | sed -n 's/.*"Camel K Git Commit: \(.*\)"}/\1/p')
 
