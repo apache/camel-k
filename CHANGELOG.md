@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Cannot set GOMAXPROCS [\#4299](https://github.com/apache/camel-k/issues/4299)
 - Maximum number of running builds \(0\) exceeded [\#4290](https://github.com/apache/camel-k/issues/4290)
 - Should uninstall --all remove PersistentVolumeClaim? [\#4285](https://github.com/apache/camel-k/issues/4285)
 - Camel-k install and uninstall on a fresh kind cluster in Linux [\#4277](https://github.com/apache/camel-k/issues/4277)
