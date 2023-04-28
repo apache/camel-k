@@ -36,6 +36,10 @@ pre:
     kubectl apply -f event-source.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f event-sink.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f log-action.kamelet.yaml -n $YAKS_NAMESPACE
+    
+    kubectl wait kamelet event-source --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+    kubectl wait kamelet event-sink --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+    kubectl wait kamelet log-action --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()
