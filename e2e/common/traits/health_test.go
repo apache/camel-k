@@ -328,5 +328,107 @@ func TestHealthTrait(t *testing.T) {
 			}))
 	})
 
+	t.Run("Startup condition with never ready route", func(t *testing.T) {
+		name := "startup-never-ready"
+
+		Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
+			"-t", "health.enabled=true",
+			"-t", "health.startup-probe-enabled=true",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+		Consistently(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), 1*time.Minute).
+			Should(Equal(corev1.ConditionFalse))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+
+		// Check that the error message is propagated from health checks even if deployment never becomes ready
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+			WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
+
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+			Satisfy(func(c *v1.IntegrationCondition) bool {
+				if c.Status != corev1.ConditionFalse {
+					return false
+				}
+				if len(c.Pods) != 1 {
+					return false
+				}
+
+				var r *v1.HealthCheckResponse
+
+				for h := range c.Pods[0].Health {
+					if c.Pods[0].Health[h].Name == "camel-routes" {
+						r = &c.Pods[0].Health[h]
+					}
+				}
+
+				if r == nil {
+					return false
+				}
+
+				if r.Data == nil {
+					return false
+				}
+
+				var data map[string]interface{}
+				if err := json.Unmarshal(r.Data, &data); err != nil {
+					return false
+				}
+
+				return data["check.kind"].(string) == "STARTUP" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "startup-never-ready"
+			}))
+	})
+
+	t.Run("Startup condition with ready route", func(t *testing.T) {
+		name := "startup-ready"
+
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"-t", "health.enabled=true",
+			"-t", "health.startup-probe-enabled=true",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+
+		// Check that the deployment is ready
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)))
+
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+			Satisfy(func(c *v1.IntegrationCondition) bool {
+				if c.Status != corev1.ConditionFalse {
+					return false
+				}
+				if len(c.Pods) != 1 {
+					return false
+				}
+
+				var r *v1.HealthCheckResponse
+
+				for h := range c.Pods[0].Health {
+					if c.Pods[0].Health[h].Name == "camel-routes" {
+						r = &c.Pods[0].Health[h]
+					}
+				}
+
+				if r == nil {
+					return false
+				}
+
+				if r.Data == nil {
+					return false
+				}
+
+				var data map[string]interface{}
+				if err := json.Unmarshal(r.Data, &data); err != nil {
+					return false
+				}
+
+				return data["check.kind"].(string) == "STARTUP" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "startup-ready"
+			}))
+	})
+
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

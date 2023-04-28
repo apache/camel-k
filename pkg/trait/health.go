@@ -32,6 +32,7 @@ import (
 const (
 	defaultLivenessProbePath  = "/q/health/live"
 	defaultReadinessProbePath = "/q/health/ready"
+	defaultStartupProbePath   = "/q/health/started"
 )
 
 type healthTrait struct {
@@ -45,6 +46,7 @@ func newHealthTrait() Trait {
 		HealthTrait: traitv1.HealthTrait{
 			LivenessScheme:  string(corev1.URISchemeHTTP),
 			ReadinessScheme: string(corev1.URISchemeHTTP),
+			StartupScheme:   string(corev1.URISchemeHTTP),
 		},
 	}
 }
@@ -74,7 +76,7 @@ func (t *healthTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	if !pointer.BoolDeref(t.LivenessProbeEnabled, false) && !pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
+	if !pointer.BoolDeref(t.LivenessProbeEnabled, false) && !pointer.BoolDeref(t.ReadinessProbeEnabled, true) && !pointer.BoolDeref(t.StartupProbeEnabled, false) {
 		return nil
 	}
 
@@ -96,6 +98,9 @@ func (t *healthTrait) Apply(e *Environment) error {
 	}
 	if pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
 		container.ReadinessProbe = t.newReadinessProbe(port, defaultReadinessProbePath)
+	}
+	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
+		container.StartupProbe = t.newStartupProbe(port, defaultStartupProbePath)
 	}
 
 	return nil
@@ -136,6 +141,28 @@ func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *
 		PeriodSeconds:       t.ReadinessPeriod,
 		SuccessThreshold:    t.ReadinessSuccessThreshold,
 		FailureThreshold:    t.ReadinessFailureThreshold,
+	}
+
+	if port != nil {
+		p.ProbeHandler.HTTPGet.Port = *port
+	}
+
+	return &p
+}
+
+func (t *healthTrait) newStartupProbe(port *intstr.IntOrString, path string) *corev1.Probe {
+	p := corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Path:   path,
+				Scheme: corev1.URIScheme(t.StartupScheme),
+			},
+		},
+		InitialDelaySeconds: t.StartupInitialDelay,
+		TimeoutSeconds:      t.StartupTimeout,
+		PeriodSeconds:       t.StartupPeriod,
+		SuccessThreshold:    t.StartupSuccessThreshold,
+		FailureThreshold:    t.StartupFailureThreshold,
 	}
 
 	if port != nil {
