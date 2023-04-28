@@ -126,7 +126,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	klog.SetLogger(log.AsLogger())
 
 	_, err := maxprocs.Set(maxprocs.Logger(func(f string, a ...interface{}) { log.Info(fmt.Sprintf(f, a)) }))
-	exitOnError(err, "failed to set GOMAXPROCS from cgroups")
+	if err != nil {
+		log.Error(err, "Some problem while trying to set GOMAXPROCS")
+	}
+	// exitOnError(err, "failed to set GOMAXPROCS from cgroups")
 
 	printVersion()
 
