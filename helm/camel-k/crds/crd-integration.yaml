@@ -6577,6 +6577,38 @@ spec:
                           times out.
                         format: int32
                         type: integer
+                      startupFailureThreshold:
+                        description: Minimum consecutive failures for the startup
+                          probe to be considered failed after having succeeded.
+                        format: int32
+                        type: integer
+                      startupInitialDelay:
+                        description: Number of seconds after the container has started
+                          before the startup probe is initiated.
+                        format: int32
+                        type: integer
+                      startupPeriod:
+                        description: How often to perform the startup probe.
+                        format: int32
+                        type: integer
+                      startupProbeEnabled:
+                        description: Configures the startup probe for the integration
+                          container (default `false`).
+                        type: boolean
+                      startupScheme:
+                        description: Scheme to use when connecting to the startup
+                          probe (default `HTTP`).
+                        type: string
+                      startupSuccessThreshold:
+                        description: Minimum consecutive successes for the startup
+                          probe to be considered successful after having failed.
+                        format: int32
+                        type: integer
+                      startupTimeout:
+                        description: Number of seconds after which the startup probe
+                          times out.
+                        format: int32
+                        type: integer
                     type: object
                   ingress:
                     description: The configuration of Ingress trait
