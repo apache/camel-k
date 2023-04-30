@@ -409,10 +409,7 @@ func TestHealthTrait(t *testing.T) {
 			WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
 
 		Satisfy(func(is *v1.IntegrationSpec) bool {
-
-			enabled := is.Traits.Health.Enabled
-
-			if *enabled {
+			if *is.Traits.Health.Enabled == true && *is.Traits.Health.StartupProbeEnabled == true && is.Traits.Health.StartupTimeout == 60 {
 				return true
 			}
 			return false
