@@ -59,6 +59,30 @@ Some of the most used commands are:
 |Delete integrations deployed on Kubernetes
 |kamel delete routes
 
+|bind
+|Bind Kubernetes resources, such as Kamelets, in an integration flow.
+|kamel bind timer-source -p "source.message=hello world" channel:mychannel
+
+|install
+|Install Camel K on a Kubernetes cluster
+|kamel install
+
+|rebuild
+|Clear the state of integrations to rebuild them.
+|kamel rebuild --all
+
+|reset
+|Reset the Camel K installation
+|kamel reset
+
+|uninstall
+|Uninstall Camel K from a Kubernetes cluster
+|kamel uninstall
+
+|version
+|Display client version
+|kamel version
+
 |===
 
 The list above is not the full list of available commands.
