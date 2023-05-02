@@ -103,7 +103,7 @@ runs:
     uses: ./.github/actions/kamel-install-otlp-collector
     with:
       otlp-collector-image-name: otel/opentelemetry-collector
-      otlp-collector-image-version: 0.68.0
+      otlp-collector-image-version: 0.75.0
 
   - id: report-problematic
     name: List Tests Marked As Problematic
