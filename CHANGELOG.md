@@ -9,6 +9,7 @@
 - Cannot set GOMAXPROCS [\#4299](https://github.com/apache/camel-k/issues/4299)
 - Maximum number of running builds \(0\) exceeded [\#4290](https://github.com/apache/camel-k/issues/4290)
 - Should uninstall --all remove PersistentVolumeClaim? [\#4285](https://github.com/apache/camel-k/issues/4285)
+- Add statical check if integration refers to components supported by Camel K [\#4283](https://github.com/apache/camel-k/issues/4283)
 - Camel-k install and uninstall on a fresh kind cluster in Linux [\#4277](https://github.com/apache/camel-k/issues/4277)
 - Kamelet redis-source not working [\#4276](https://github.com/apache/camel-k/issues/4276)
 - Failed to fetch data from Mysql database using camel-k [\#4264](https://github.com/apache/camel-k/issues/4264)
