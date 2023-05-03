@@ -49,29 +49,22 @@ func TestPipeWithImage(t *testing.T) {
 		APIVersion: v1.SchemeGroupVersion.String(),
 	}
 
-	emptyMap := map[string]string{}
-
-	annotations1 := map[string]string{
-		"trait.camel.apache.org/container.image":      "docker.io/jmalloc/echo-server:0.3.2",
-		"trait.camel.apache.org/jvm.enabled":          "false",
-		"trait.camel.apache.org/kamelets.enabled":     "false",
-		"trait.camel.apache.org/dependencies.enabled": "false",
-		"test": "1",
-	}
-	annotations2 := map[string]string{
-		"trait.camel.apache.org/container.image":      "docker.io/jmalloc/echo-server:0.3.3",
-		"trait.camel.apache.org/jvm.enabled":          "false",
-		"trait.camel.apache.org/kamelets.enabled":     "false",
-		"trait.camel.apache.org/dependencies.enabled": "false",
-		"test": "2",
-	}
 	bindingID := "with-image-binding"
 
 	t.Run("run with initial image", func(t *testing.T) {
-		expectedImage := annotations1["trait.camel.apache.org/container.image"]
+		expectedImage := "docker.io/jmalloc/echo-server:0.3.2"
 
-		Expect(BindKameletTo(ns, bindingID, annotations1, from, to, emptyMap, emptyMap)()).
-			To(Succeed())
+		Expect(KamelBind(ns,
+			from.Name,
+			to.Name,
+			"--annotation", "trait.camel.apache.org/container.image="+expectedImage,
+			"--annotation", "trait.camel.apache.org/jvm.enabled=false",
+			"--annotation", "trait.camel.apache.org/kamelets.enabled=false",
+			"--annotation", "trait.camel.apache.org/dependencies.enabled=false",
+			"--annotation", "test=1",
+			"--name", bindingID,
+		).Execute()).To(Succeed())
+
 		Eventually(IntegrationGeneration(ns, bindingID)).
 			Should(gstruct.PointTo(BeNumerically("==", 1)))
 		Eventually(Integration(ns, bindingID)).Should(WithTransform(Annotations, And(
@@ -87,10 +80,18 @@ func TestPipeWithImage(t *testing.T) {
 	})
 
 	t.Run("run with new image", func(t *testing.T) {
-		expectedImage := annotations2["trait.camel.apache.org/container.image"]
+		expectedImage := "docker.io/jmalloc/echo-server:0.3.3"
 
-		Expect(BindKameletTo(ns, bindingID, annotations2, from, to, emptyMap, emptyMap)()).
-			To(Succeed())
+		Expect(KamelBind(ns,
+			from.Name,
+			to.Name,
+			"--annotation", "trait.camel.apache.org/container.image="+expectedImage,
+			"--annotation", "trait.camel.apache.org/jvm.enabled=false",
+			"--annotation", "trait.camel.apache.org/kamelets.enabled=false",
+			"--annotation", "trait.camel.apache.org/dependencies.enabled=false",
+			"--annotation", "test=2",
+			"--name", bindingID,
+		).Execute()).To(Succeed())
 		Eventually(IntegrationGeneration(ns, bindingID)).
 			Should(gstruct.PointTo(BeNumerically("==", 1)))
 		Eventually(Integration(ns, bindingID)).Should(WithTransform(Annotations, And(

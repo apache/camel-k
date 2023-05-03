@@ -192,16 +192,6 @@ func NewSourceSpec(name string, content string, language Language) SourceSpec {
 	}
 }
 
-func NewResourceSpec(name string, content string, destination string, resourceType ResourceType) ResourceSpec {
-	return ResourceSpec{
-		DataSpec: DataSpec{
-			Name:    name,
-			Content: content,
-		},
-		Type: resourceType,
-	}
-}
-
 // InferLanguage returns the language of the source or discovers it from file extension if not set
 func (in *SourceSpec) InferLanguage() Language {
 	if in.Language != "" {

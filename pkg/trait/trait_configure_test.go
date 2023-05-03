@@ -45,8 +45,7 @@ func TestTraitConfiguration(t *testing.T) {
 						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
-						Auto:     pointer.Bool(true),
-						NodePort: pointer.Bool(false),
+						Auto: pointer.Bool(true),
 					},
 				},
 			},
@@ -63,7 +62,6 @@ func TestTraitConfiguration(t *testing.T) {
 	require.True(t, ok)
 	assert.True(t, *service.Enabled)
 	assert.True(t, *service.Auto)
-	assert.False(t, *service.NodePort)
 }
 
 func TestTraitConfigurationFromAnnotations(t *testing.T) {

@@ -335,29 +335,6 @@ const (
 	RuntimeProviderQuarkus RuntimeProvider = "quarkus"
 )
 
-// ResourceSpec represent an attached resource which will be materialized as a file on the running `Pod`
-// TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
-type ResourceSpec struct {
-	// the content of the resource
-	DataSpec `json:",inline"`
-	// the kind of data to expect
-	Type ResourceType `json:"type,omitempty"`
-	// the mount path on destination `Pod`
-	MountPath string `json:"mountPath,omitempty"`
-}
-
-// ResourceType defines a kind of resource
-type ResourceType string
-
-const (
-	// ResourceTypeData represents a generic data resource (text or binary)
-	ResourceTypeData ResourceType = "data"
-	// ResourceTypeConfig represents a configuration resource (text only)
-	ResourceTypeConfig ResourceType = "config"
-	// ResourceTypeOpenAPI represents an OpenAPI specification resource
-	ResourceTypeOpenAPI ResourceType = "openapi"
-)
-
 // SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language
 type SourceSpec struct {
 	// contains configuration related to the source code

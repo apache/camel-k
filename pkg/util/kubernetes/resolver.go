@@ -41,19 +41,6 @@ func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.Co
 	return elements, nil
 }
 
-// ResolveResource --.
-func ResolveResource(elements []v1.ResourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.ResourceSpec, error) {
-	for i := 0; i < len(elements); i++ {
-		r := &elements[i]
-
-		if err := Resolve(&r.DataSpec, mapLookup); err != nil {
-			return nil, err
-		}
-	}
-
-	return elements, nil
-}
-
 // Resolve --.
 func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error)) error {
 	// if it is a reference, get the content from the

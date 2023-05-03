@@ -303,7 +303,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 				"camel.apache.org/source.name":        resource.Name,
 				"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
 				"camel.apache.org/source.generated":   "true",
-				"camel.apache.org/source.type":        string(v1.ResourceTypeOpenAPI),
+				"camel.apache.org/source.type":        "openapi",
 				"camel.apache.org/source.digest":      hash,
 			},
 		},

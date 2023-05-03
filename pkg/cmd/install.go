@@ -24,7 +24,6 @@ import (
 	"io"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -113,9 +112,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
 	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
 
-	// Kaniko
-	cmd.Flags().Bool("kaniko-build-cache", false, "To enable or disable the Kaniko cache. Deprecated use --build-publish-strategy-option KanikoBuildCacheEnabled=true instead")
-
 	// OLM
 	cmd.Flags().Bool("olm", true, "Try to install everything via OLM (Operator Lifecycle Manager) if available")
 	cmd.Flags().String("olm-operator-name", "", "Name of the Camel K operator in the OLM source or marketplace")
@@ -166,16 +162,14 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	Wait                     bool `mapstructure:"wait"`
-	ClusterSetupOnly         bool `mapstructure:"cluster-setup"`
-	SkipOperatorSetup        bool `mapstructure:"skip-operator-setup"`
-	SkipClusterSetup         bool `mapstructure:"skip-cluster-setup"`
-	SkipRegistrySetup        bool `mapstructure:"skip-registry-setup"`
-	SkipDefaultKameletsSetup bool `mapstructure:"skip-default-kamelets-setup"`
-	ExampleSetup             bool `mapstructure:"example"`
-	Global                   bool `mapstructure:"global"`
-	// Deprecated: use the BuildPublishStrategyOption "KanikoBuildCacheEnabled" instead
-	KanikoBuildCache            bool `mapstructure:"kaniko-build-cache"`
+	Wait                        bool `mapstructure:"wait"`
+	ClusterSetupOnly            bool `mapstructure:"cluster-setup"`
+	SkipOperatorSetup           bool `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup            bool `mapstructure:"skip-cluster-setup"`
+	SkipRegistrySetup           bool `mapstructure:"skip-registry-setup"`
+	SkipDefaultKameletsSetup    bool `mapstructure:"skip-default-kamelets-setup"`
+	ExampleSetup                bool `mapstructure:"example"`
+	Global                      bool `mapstructure:"global"`
 	Save                        bool `mapstructure:"save" kamel:"omitsave"`
 	Force                       bool `mapstructure:"force"`
 	Olm                         bool `mapstructure:"olm"`
@@ -589,10 +583,6 @@ func (o *installCmdOptions) setupIntegrationPlatform(
 				platform.Spec.Cluster = c
 			}
 		}
-	}
-	if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && cmd.Flags().Lookup("kaniko-build-cache").Changed {
-		fmt.Fprintln(cmd.OutOrStdout(), "Warn: the flag --kaniko-build-cache is deprecated, use --build-publish-strategy-option KanikoBuildCacheEnabled=true instead")
-		platform.Spec.Build.AddOption(builder.KanikoBuildCacheEnabled, strconv.FormatBool(o.KanikoBuildCache))
 	}
 	if len(o.BuildPublishStrategyOptions) > 0 {
 		if err = o.addBuildPublishStrategyOptions(&platform.Spec.Build); err != nil {
