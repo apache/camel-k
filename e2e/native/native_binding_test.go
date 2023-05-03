@@ -69,10 +69,13 @@ func TestNativeBinding(t *testing.T) {
 
 		t.Run("binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
-			Expect(BindKameletTo(ns, bindingName,
-				map[string]string{"trait.camel.apache.org/quarkus.package-type": "native"},
-				from, to,
-				map[string]string{"message": message}, map[string]string{})()).To(Succeed())
+			Expect(KamelBind(ns,
+				from.Name,
+				to.Name,
+				"-p", "source.message=message",
+				"--annotation", "trait.camel.apache.org/quarkus.package-type=native",
+				"--name", bindingName,
+			).Execute()).To(Succeed())
 
 			// ====================================
 			// !!! THE MOST TIME-CONSUMING PART !!!

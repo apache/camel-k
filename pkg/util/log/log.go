@@ -150,7 +150,7 @@ func (l Logger) ForPipe(target *v1.Pipe) Logger {
 }
 
 // ForKameletBinding --.
-// Deprecated: use ForBinding instead.
+// Deprecated: use ForPipe instead.
 func (l Logger) ForKameletBinding(target *v1alpha1.KameletBinding) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,

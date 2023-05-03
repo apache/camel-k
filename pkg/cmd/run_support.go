@@ -31,11 +31,13 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/cmd/source"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/resource"
 	"github.com/magiconair/properties"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -60,61 +62,12 @@ func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Clien
 		if secret == nil {
 			fmt.Fprintln(cmd.ErrOrStderr(), "Warn:", config.Name(), "Secret not found in", integration.Namespace, "namespace, make sure to provide it before the Integration can run")
 		}
-	case resource.StorageTypeFile:
-		// Don't allow a binary non compressed resource
-		rawData, contentType, err := source.LoadRawContent(ctx, config.Name())
-		if err != nil {
-			return nil, err
-		}
-		if config.ContentType() != resource.ContentTypeData && !enableCompression && source.IsBinary(contentType) {
-			return nil, fmt.Errorf("you cannot provide a binary config, use a text file or check --resource flag instead")
-		}
-		resourceType := v1.ResourceTypeData
-		if config.ContentType() == resource.ContentTypeText {
-			resourceType = v1.ResourceTypeConfig
-		}
-		resourceSpec, err := binaryOrTextResource(filepath.Base(config.Name()), rawData, contentType, enableCompression, resourceType, config.DestinationPath())
-		if err != nil {
-			return nil, err
-		}
-
-		return resource.ConvertFileToConfigmap(ctx, c, config, integration.Namespace, integration.Name, resourceSpec.Content, resourceSpec.RawContent)
 	default:
 		// Should never reach this
 		return nil, fmt.Errorf("invalid option type %s", config.StorageType())
 	}
 
 	return nil, nil
-}
-
-func binaryOrTextResource(fileName string, data []byte, contentType string, base64Compression bool, resourceType v1.ResourceType, destinationPath string) (v1.ResourceSpec, error) {
-	resourceSpec := v1.ResourceSpec{
-		DataSpec: v1.DataSpec{
-			Name:        fileName,
-			Path:        destinationPath,
-			ContentKey:  fileName,
-			ContentType: contentType,
-			Compression: false,
-		},
-		Type: resourceType,
-	}
-
-	if !base64Compression && source.IsBinary(contentType) {
-		resourceSpec.RawContent = data
-		return resourceSpec, nil
-	}
-	// either is a text resource or base64 compression is enabled
-	if base64Compression {
-		content, err := source.CompressToString(data)
-		if err != nil {
-			return resourceSpec, err
-		}
-		resourceSpec.Content = content
-		resourceSpec.Compression = true
-	} else {
-		resourceSpec.Content = string(data)
-	}
-	return resourceSpec, nil
 }
 
 func filterFileLocation(maybeFileLocations []string) []string {
@@ -205,4 +158,65 @@ func downloadDependency(ctx context.Context, url url.URL) (string, error) {
 		return "", err
 	}
 	return out.Name(), nil
+}
+
+func validatePropertyFiles(propertyFiles []string) error {
+	for _, fileName := range propertyFiles {
+		if err := validatePropertyFile(fileName); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func validatePropertyFile(fileName string) error {
+	if !strings.HasSuffix(fileName, ".properties") {
+		return fmt.Errorf("supported property files must have a .properties extension: %s", fileName)
+	}
+
+	if file, err := os.Stat(fileName); err != nil {
+		return errors.Wrapf(err, "unable to access property file %s", fileName)
+	} else if file.IsDir() {
+		return fmt.Errorf("property file %s is a directory", fileName)
+	}
+
+	return nil
+}
+
+func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
+	// Attempt to reuse existing Camel catalog if one is present
+	catalog, err := camel.DefaultCatalog()
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate catalog if one was not found
+	if catalog == nil {
+		catalog, err = generateCatalog(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return catalog, nil
+}
+
+func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
+	// A Camel catalog is required for this operation
+	mvn := v1.MavenSpec{
+		LocalRepository: "",
+	}
+	runtime := v1.RuntimeSpec{
+		Version:  defaults.DefaultRuntimeVersion,
+		Provider: v1.RuntimeProviderQuarkus,
+	}
+	var providerDependencies []maven.Dependency
+	var caCert [][]byte
+	catalog, err := camel.GenerateCatalogCommon(ctx, nil, nil, caCert, mvn, runtime, providerDependencies)
+	if err != nil {
+		return nil, err
+	}
+
+	return catalog, nil
 }

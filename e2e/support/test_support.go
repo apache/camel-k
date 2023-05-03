@@ -2345,74 +2345,12 @@ func CreateTimerKamelet(ns string, name string) func() error {
 	return CreateKamelet(ns, name, flow, props, nil)
 }
 
-// Deprecated:
-// Use KamelBind func instead
-func BindKameletTo(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
-	sourceProperties, sinkProperties map[string]string) func() error {
-	return BindKameletToWithErrorHandler(ns, name, annotations, from, to, sourceProperties, sinkProperties, nil)
-}
-
-// Deprecated:
-// Use KamelBind func instead
-func BindKameletToWithErrorHandler(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
-	sourceProperties, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
-	return func() error {
-		kb := v1.NewPipe(ns, name)
-		kb.Annotations = annotations
-		kb.Spec = v1.PipeSpec{
-			Source: v1.Endpoint{
-				Ref:        &from,
-				Properties: asEndpointProperties(sourceProperties),
-			},
-			Sink: v1.Endpoint{
-				Ref:        &to,
-				Properties: asEndpointProperties(sinkProperties),
-			},
-		}
-		if errorHandler != nil {
-			kb.Spec.ErrorHandler = asErrorHandlerSpec(errorHandler)
-		}
-		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
-		return err
-	}
-}
-
-// Deprecated:
-// Use KamelBind func instead
 func asTemplate(source map[string]interface{}) *v1.Template {
 	bytes, err := json.Marshal(source)
 	if err != nil {
 		failTest(err)
 	}
 	return &v1.Template{
-		RawMessage: bytes,
-	}
-}
-
-// Deprecated:
-// Use KamelBind func instead
-func asErrorHandlerSpec(source map[string]interface{}) *v1.ErrorHandlerSpec {
-	bytes, err := json.Marshal(source)
-	if err != nil {
-		failTest(err)
-	}
-	return &v1.ErrorHandlerSpec{
-		RawMessage: bytes,
-	}
-}
-
-// Deprecated:
-// Use KamelBind func instead
-func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
-	if props == nil {
-		return &v1.EndpointProperties{}
-	}
-
-	bytes, err := json.Marshal(props)
-	if err != nil {
-		failTest(err)
-	}
-	return &v1.EndpointProperties{
 		RawMessage: bytes,
 	}
 }

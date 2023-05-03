@@ -53,24 +53,16 @@ func TestPipe(t *testing.T) {
 			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 
-		errorHandler := map[string]interface{}{
-			"sink": map[string]interface{}{
-				"endpoint": map[string]interface{}{
-					"ref": map[string]string{
-						"kind":       "Kamelet",
-						"apiVersion": v1.SchemeGroupVersion.String(),
-						"name":       "my-own-log-sink",
-					},
-					"properties": map[string]string{
-						"loggerName": "kameletErrorHandler",
-					},
-				}}}
-
 		t.Run("throw error test", func(t *testing.T) {
-			Expect(BindKameletToWithErrorHandler(ns, "throw-error-binding", map[string]string{},
-				from, to,
-				map[string]string{"message": "throw Error"}, map[string]string{"loggerName": "integrationLogger"},
-				errorHandler)()).To(Succeed())
+			Expect(KamelBind(ns,
+				from.Name,
+				to.Name,
+				"--error-handler", "sink:"+to.Name,
+				"-p", "source.message=throw Error",
+				"-p", "sink.loggerName=integrationLogger",
+				"-p", "error-handler.loggerName=kameletErrorHandler",
+				"--name", "throw-error-binding",
+			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
@@ -79,10 +71,15 @@ func TestPipe(t *testing.T) {
 		})
 
 		t.Run("don't throw error test", func(t *testing.T) {
-			Expect(BindKameletToWithErrorHandler(ns, "no-error-binding", map[string]string{},
-				from, to,
-				map[string]string{"message": "true"}, map[string]string{"loggerName": "integrationLogger"},
-				errorHandler)()).To(Succeed())
+			Expect(KamelBind(ns,
+				from.Name,
+				to.Name,
+				"--error-handler", "sink:"+to.Name,
+				"-p", "source.message=true",
+				"-p", "sink.loggerName=integrationLogger",
+				"-p", "error-handler.loggerName=kameletErrorHandler",
+				"--name", "no-error-binding",
+			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("kameletErrorHandler"))
@@ -108,11 +105,14 @@ func TestPipe(t *testing.T) {
 			APIVersion: v1.SchemeGroupVersion.String(),
 		}
 
-		Expect(BindKameletTo(ns, "kb-with-traits",
-			map[string]string{"trait.camel.apache.org/camel.properties": "[\"camel.prop1=a\",\"camel.prop2=b\"]"},
-			from, to,
-			map[string]string{"message": "hello from test"}, map[string]string{"loggerName": "integrationLogger"})()).
-			To(Succeed())
+		Expect(KamelBind(ns,
+			from.Name,
+			to.Name,
+			"-p", "source.message=hello from test",
+			"-p", "sink.loggerName=integrationLogger",
+			"--annotation", "trait.camel.apache.org/camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",
+			"--name", "kb-with-traits",
+		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("hello from test"))

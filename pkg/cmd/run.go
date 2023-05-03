@@ -60,7 +60,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/cmd/local"
 	"github.com/apache/camel-k/v2/pkg/cmd/source"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -263,7 +262,7 @@ func (o *runCmdOptions) validate() error {
 
 	propertyFiles := filterBuildPropertyFiles(o.Properties)
 	propertyFiles = append(propertyFiles, filterBuildPropertyFiles(o.BuildProperties)...)
-	err := local.ValidatePropertyFiles(propertyFiles)
+	err := validatePropertyFiles(propertyFiles)
 	if err != nil {
 		return err
 	}
@@ -823,7 +822,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				// And the validation only warns potential misusages of Camel components at the CLI level,
 				// so strictness of catalog version is not necessary here.
 				var err error
-				catalog, err = local.CreateCamelCatalog(o.Context)
+				catalog, err = createCamelCatalog(o.Context)
 				if err != nil {
 					return err
 				}

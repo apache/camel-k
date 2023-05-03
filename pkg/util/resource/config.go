@@ -87,8 +87,6 @@ const (
 	StorageTypeConfigmap StorageType = "configmap"
 	// StorageTypeSecret --.
 	StorageTypeSecret StorageType = "secret"
-	// StorageTypeFile --.
-	StorageTypeFile StorageType = "file"
 	// StorageTypePVC --.
 	StorageTypePVC StorageType = "pvc"
 )
@@ -105,12 +103,11 @@ const (
 
 var (
 	validConfigSecretRegexp = regexp.MustCompile(`^(configmap|secret)\:([\w\.\-\_\:\/@]+)$`)
-	validFileRegexp         = regexp.MustCompile(`^file\:([\w\.\-\_\:\/@" ]+)$`)
 	validResourceRegexp     = regexp.MustCompile(`^([\w\.\-\_\:]+)(\/([\w\.\-\_\:]+))?(\@([\w\.\-\_\:\/]+))?$`)
 )
 
 func newConfig(storageType StorageType, contentType ContentType, value string) *Config {
-	rn, mk, mp := parseResourceValue(storageType, value)
+	rn, mk, mp := parseCMOrSecretValue(value)
 	return &Config{
 		storageType:     storageType,
 		contentType:     contentType,
@@ -118,15 +115,6 @@ func newConfig(storageType StorageType, contentType ContentType, value string) *
 		resourceKey:     mk,
 		destinationPath: mp,
 	}
-}
-
-func parseResourceValue(storageType StorageType, value string) (string, string, string) {
-	if storageType == StorageTypeFile {
-		resource, maybeDestinationPath := ParseFileValue(value)
-		return resource, "", maybeDestinationPath
-	}
-
-	return parseCMOrSecretValue(value)
 }
 
 // ParseFileValue will parse a file resource/config option to return the local path and the
@@ -189,13 +177,8 @@ func parse(item string, contentType ContentType) (*Config, error) {
 			cot = StorageTypeSecret
 		}
 		value = groups[2]
-	case validFileRegexp.MatchString(item):
-		// parse as file
-		groups := validFileRegexp.FindStringSubmatch(item)
-		cot = StorageTypeFile
-		value = groups[1]
 	default:
-		return nil, fmt.Errorf("could not match config, secret or file configuration as %s", item)
+		return nil, fmt.Errorf("could not match config or secret configuration as %s", item)
 	}
 
 	return newConfig(cot, contentType, value), nil

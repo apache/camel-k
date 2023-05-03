@@ -151,29 +151,23 @@ func TestHealthTrait(t *testing.T) {
 			APIVersion: camelv1.SchemeGroupVersion.String(),
 		}
 
-		fromParams := map[string]string{
-			"message": "Magicstring!",
-		}
-
 		to := corev1.ObjectReference{
 			Kind:       "Kamelet",
 			Name:       "my-own-log-sink",
 			APIVersion: camelv1.SchemeGroupVersion.String(),
 		}
 
-		toParams := map[string]string{
-			"loggerName": "binding",
-		}
-
-		annotations := map[string]string{
-			"trait.camel.apache.org/health.enabled":                        "true",
-			"trait.camel.apache.org/jolokia.enabled":                       "true",
-			"trait.camel.apache.org/jolokia.use-ssl-client-authentication": "false",
-			"trait.camel.apache.org/jolokia.protocol":                      "http",
-		}
-
-		Expect(BindKameletTo(ns, name, annotations, from, to, fromParams, toParams)()).
-			To(Succeed())
+		Expect(KamelBind(ns,
+			from.Name,
+			to.Name,
+			"-p", "source.message=Magicstring!",
+			"-p", "sink.loggerName=binding",
+			"--annotation", "trait.camel.apache.org/health.enabled=true",
+			"--annotation", "trait.camel.apache.org/jolokia.enabled=true",
+			"--annotation", "trait.camel.apache.org/jolokia.use-ssl-client-authentication=false",
+			"--annotation", "trait.camel.apache.org/jolokia.protocol=http",
+			"--name", name,
+		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))

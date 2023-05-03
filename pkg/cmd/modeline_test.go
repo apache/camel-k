@@ -464,49 +464,6 @@ func TestModelineRunResourceFile(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestModelineInspectSimple(t *testing.T) {
-	err := util.WithTempDir("camel-k-test-", func(dir string) error {
-
-		file := `
-		// camel-k: dependency=mvn:org.my:lib:1.0
-	`
-		fileName := filepath.Join(dir, "simple.groovy")
-		err := os.WriteFile(fileName, []byte(file), 0o400)
-		assert.NoError(t, err)
-
-		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "local", "inspect", fileName})
-		assert.NoError(t, err)
-		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"local", "inspect", fileName, "--dependency=mvn:org.my:lib:1.0"}, flags)
-
-		return nil
-	})
-
-	assert.NoError(t, err)
-}
-
-func TestModelineInspectMultipleDeps(t *testing.T) {
-	err := util.WithTempDir("camel-k-test-", func(dir string) error {
-
-		file := `
-		// camel-k: dependency=mvn:org.my:lib:1.0
-		// camel-k: dependency=camel-k:camel-dep
-	`
-		fileName := filepath.Join(dir, "simple.groovy")
-		err := os.WriteFile(fileName, []byte(file), 0o400)
-		assert.NoError(t, err)
-
-		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "local", "inspect", fileName})
-		assert.NoError(t, err)
-		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"local", "inspect", fileName, "--dependency=mvn:org.my:lib:1.0", "--dependency=camel-k:camel-dep"}, flags)
-
-		return nil
-	})
-
-	assert.NoError(t, err)
-}
-
 func TestModelineQuotedPodTemplate(t *testing.T) {
 	err := util.WithTempDir("camel-k-test-", func(dir string) error {
 

@@ -30,7 +30,6 @@ type EndpointApplyConfiguration struct {
 	Ref        *v1.ObjectReference                                          `json:"ref,omitempty"`
 	URI        *string                                                      `json:"uri,omitempty"`
 	Properties *EndpointPropertiesApplyConfiguration                        `json:"properties,omitempty"`
-	Types      map[apiscamelv1.TypeSlot]EventTypeSpecApplyConfiguration     `json:"types,omitempty"`
 	DataTypes  map[apiscamelv1.TypeSlot]DataTypeReferenceApplyConfiguration `json:"dataTypes,omitempty"`
 }
 
@@ -61,20 +60,6 @@ func (b *EndpointApplyConfiguration) WithURI(value string) *EndpointApplyConfigu
 // If called multiple times, the Properties field is set to the value of the last call.
 func (b *EndpointApplyConfiguration) WithProperties(value *EndpointPropertiesApplyConfiguration) *EndpointApplyConfiguration {
 	b.Properties = value
-	return b
-}
-
-// WithTypes puts the entries into the Types field in the declarative configuration
-// and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, the entries provided by each call will be put on the Types field,
-// overwriting an existing map entries in Types field with the same key.
-func (b *EndpointApplyConfiguration) WithTypes(entries map[apiscamelv1.TypeSlot]EventTypeSpecApplyConfiguration) *EndpointApplyConfiguration {
-	if b.Types == nil && len(entries) > 0 {
-		b.Types = make(map[apiscamelv1.TypeSlot]EventTypeSpecApplyConfiguration, len(entries))
-	}
-	for k, v := range entries {
-		b.Types[k] = v
-	}
 	return b
 }
 
