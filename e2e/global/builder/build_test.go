@@ -182,6 +182,7 @@ func createOperator(ns string, memoryLimit string, buildTimeout string, installA
 
 	operatorID := fmt.Sprintf("camel-k-%s", ns)
 	Expect(KamelInstallWithID(operatorID, ns, args...).Execute()).To(Succeed())
+	Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 }
 
 func doKitBuildInNamespace(name string, ns string, testTimeout time.Duration, options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
