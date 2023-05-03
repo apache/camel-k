@@ -53,9 +53,7 @@ runs:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
       run: |
-        make generate
-        make update-docs
-        make update-default-camel
+        make update-default-camel generate codegen update-docs
         git add -A && git commit -m 'chore: nightly resource refresh' && echo "refresh=1" >> $GITHUB_ENV || echo "No changes to make update-docs"
     - name: Push changes
       shell: bash
