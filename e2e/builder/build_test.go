@@ -57,16 +57,6 @@ func TestKitMaxBuildLimit(t *testing.T) {
 		buildB := "integration-b"
 		buildC := "integration-c"
 
-		doKitBuildInNamespace(buildA, ns, TestTimeoutShort, kitOptions{
-			operatorID: fmt.Sprintf("camel-k-%s", ns),
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=A",
-			},
-		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
-
 		ns1 := NewTestNamespace(false).GetName()
 		defer DumpNamespace(t, ns1)
 		defer DeleteNamespace(t, ns1)
@@ -80,15 +70,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 			t.FailNow()
 		}
 
-		doKitBuildInNamespace(buildB, ns1, TestTimeoutShort, kitOptions{
-			operatorID: fmt.Sprintf("camel-k-%s", ns),
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=B",
-			},
-		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+		Eventually(PlatformPhase(ns1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		ns2 := NewTestNamespace(false).GetName()
 		defer DumpNamespace(t, ns2)
@@ -102,6 +84,28 @@ func TestKitMaxBuildLimit(t *testing.T) {
 			t.Error(err)
 			t.FailNow()
 		}
+
+		Eventually(PlatformPhase(ns2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		doKitBuildInNamespace(buildA, ns, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:timer", "camel:log",
+			},
+			traits: []string{
+				"builder.properties=build-property=A",
+			},
+		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+
+		doKitBuildInNamespace(buildB, ns1, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:timer", "camel:log",
+			},
+			traits: []string{
+				"builder.properties=build-property=B",
+			},
+		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
 		doKitBuildInNamespace(buildC, ns2, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
