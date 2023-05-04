@@ -55,24 +55,14 @@ func TestNativeBinding(t *testing.T) {
 			},
 		))
 
-		from := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "timer-source",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		}
-		to := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "log-sink",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		}
 		message := "Magicstring!"
 
 		t.Run("binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
-			Expect(KamelBind(ns,
-				from.Name,
-				to.Name,
-				"-p", "source.message=message",
+			Expect(KamelBindWithID(operatorID, ns,
+				"timer-source",
+				"log-sink",
+				"-p", "source.message="+message,
 				"--annotation", "trait.camel.apache.org/quarkus.package-type=native",
 				"--name", bindingName,
 			).Execute()).To(Succeed())
