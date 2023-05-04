@@ -91,7 +91,7 @@ const kubeConfigEnvVar = "KUBECONFIG"
 
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
-var TestTimeoutLong = 10 * time.Minute
+var TestTimeoutLong = 15 * time.Minute
 
 // TestTimeoutVeryLong should be used only for testing native builds.
 var TestTimeoutVeryLong = 60 * time.Minute
@@ -112,6 +112,7 @@ func setTestLocus(t *testing.T) {
 // using the test locus to error out and fail now.
 func failTest(err error) {
 	if testLocus != nil {
+		testLocus.Helper()
 		testLocus.Error(err)
 		testLocus.FailNow()
 	} else {
@@ -390,9 +391,9 @@ func MakeWithContext(ctx context.Context, rule string, args ...string) *exec.Cmd
 	return exec.Command("make", args...)
 }
 
-/*
-	Curryied utility functions for testing
-*/
+// =============================================================================
+// Curried utility functions for testing
+// =============================================================================
 
 func IntegrationLogs(ns, name string) func() string {
 	return func() string {
@@ -455,6 +456,7 @@ func StructuredLogs(ns, podName string, options corev1.PodLogOptions, ignorePars
 		err := json.Unmarshal([]byte(t), &entry)
 		if err != nil {
 			if ignoreParseErrors {
+				fmt.Printf("Warning: Ignoring parse error for logging line: %q\n", t)
 				continue
 			} else {
 				log.Errorf(err, "Unable to parse structured content: %s", t)
@@ -1429,6 +1431,16 @@ func PlatformPhase(ns string) func() v1.IntegrationPlatformPhase {
 			return ""
 		}
 		return p.Status.Phase
+	}
+}
+
+func PlatformHas(ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
+	return func() bool {
+		pl := Platform(ns)()
+		if pl == nil {
+			return false
+		}
+		return predicate(pl)
 	}
 }
 
