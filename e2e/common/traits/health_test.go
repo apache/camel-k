@@ -138,22 +138,18 @@ func TestHealthTrait(t *testing.T) {
 	t.Run("Readiness condition with stopped binding", func(t *testing.T) {
 		name := "stopped-binding"
 
-		// Clean up any previous kamelet with same name
-		Expect(TestClient().Delete(TestContext, Kamelet("my-own-timer-source", ns)())).To(Succeed())
-		Expect(TestClient().Delete(TestContext, Kamelet("my-own-log-sink", ns)())).To(Succeed())
-
-		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
-		Expect(CreateLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
+		Expect(CreateTimerKamelet(ns, "my-own-timer-source")).To(Succeed())
+		Expect(CreateLogKamelet(ns, "my-own-log-sink")).To(Succeed())
 
 		from := corev1.ObjectReference{
 			Kind:       "Kamelet",
-			Name:       "my-own-timer-source",
+			Name:       "my-stopped-binding-timer-source",
 			APIVersion: camelv1.SchemeGroupVersion.String(),
 		}
 
 		to := corev1.ObjectReference{
 			Kind:       "Kamelet",
-			Name:       "my-own-log-sink",
+			Name:       "my-stopped-binding-log-sink",
 			APIVersion: camelv1.SchemeGroupVersion.String(),
 		}
 

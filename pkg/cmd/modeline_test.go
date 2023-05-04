@@ -354,37 +354,6 @@ func TestModelineRunConfigSecret(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestModelineRunConfigFile(t *testing.T) {
-	err := util.WithTempDir("camel-k-test-", func(dir string) error {
-		subDir := filepath.Join(dir, "sub")
-		err := os.Mkdir(subDir, 0o700)
-		assert.NoError(t, err)
-
-		file := `
-		// camel-k: config=file:application.properties
-	`
-		fileName := filepath.Join(subDir, "simple.groovy")
-		err = os.WriteFile(fileName, []byte(file), 0o400)
-		assert.NoError(t, err)
-
-		propFile := `
-		a=b
-	`
-		propFileName := filepath.Join(subDir, "application.properties")
-		err = os.WriteFile(propFileName, []byte(propFile), 0o400)
-		assert.NoError(t, err)
-
-		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
-		assert.NoError(t, err)
-		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", fileName, fmt.Sprintf("--config=file:%s", propFileName)}, flags)
-
-		return nil
-	})
-
-	assert.NoError(t, err)
-}
-
 func TestModelineRunResourceConfigmap(t *testing.T) {
 	err := util.WithTempDir("camel-k-test-", func(dir string) error {
 		subDir := filepath.Join(dir, "sub")
@@ -426,37 +395,6 @@ func TestModelineRunResourceSecret(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, cmd)
 		assert.Equal(t, []string{"run", fileName, "--resource=secret:my-secret"}, flags)
-
-		return nil
-	})
-
-	assert.NoError(t, err)
-}
-
-func TestModelineRunResourceFile(t *testing.T) {
-	err := util.WithTempDir("camel-k-test-", func(dir string) error {
-		subDir := filepath.Join(dir, "sub")
-		err := os.Mkdir(subDir, 0o700)
-		assert.NoError(t, err)
-
-		file := `
-		// camel-k: resource=file:application.properties
-	`
-		fileName := filepath.Join(subDir, "simple.groovy")
-		err = os.WriteFile(fileName, []byte(file), 0o400)
-		assert.NoError(t, err)
-
-		propFile := `
-		a=b
-	`
-		propFileName := filepath.Join(subDir, "application.properties")
-		err = os.WriteFile(propFileName, []byte(propFile), 0o400)
-		assert.NoError(t, err)
-
-		cmd, flags, err := NewKamelWithModelineCommand(context.TODO(), []string{"kamel", "run", fileName})
-		assert.NoError(t, err)
-		assert.NotNil(t, cmd)
-		assert.Equal(t, []string{"run", fileName, fmt.Sprintf("--resource=file:%s", propFileName)}, flags)
 
 		return nil
 	})

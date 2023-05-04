@@ -43,9 +43,5 @@ func TestRunSimpleXmlExamples(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "xml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 	})
 
-	t.Run("init run xml", func(t *testing.T) {
-		RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageXML)
-	})
-
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

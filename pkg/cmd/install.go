@@ -355,7 +355,7 @@ func (o *installCmdOptions) installOperator(cmd *cobra.Command, output *kubernet
 	}
 
 	// Set up IntegrationPlatform
-	platform, err := o.setupIntegrationPlatform(cmd, c, namespace, platformName, registrySecretName, output)
+	platform, err := o.setupIntegrationPlatform(c, namespace, platformName, registrySecretName, output)
 	if err != nil {
 		return err
 	}
@@ -464,8 +464,7 @@ func (o *installCmdOptions) setupRegistrySecret(c client.Client, namespace strin
 	return "", nil
 }
 
-func (o *installCmdOptions) setupIntegrationPlatform(
-	cmd *cobra.Command, c client.Client, namespace string, platformName string, registrySecretName string,
+func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace string, platformName string, registrySecretName string,
 	output *kubernetes.Collection,
 ) (*v1.IntegrationPlatform, error) {
 	platform, err := install.NewPlatform(o.Context, c, o.ClusterType, o.SkipRegistrySetup, o.registry, platformName)
