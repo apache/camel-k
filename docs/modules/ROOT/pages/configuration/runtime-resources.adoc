@@ -7,31 +7,6 @@ The *runtime resources* are expected to be any resource type (text or binary con
 
 NOTE: you'll find `--resource` is very similar to the `--config` run flag. The main difference is that a `resource` can have a binary content and it won't be parsed by the Camel Context.
 
-[[runtime-resource-file]]
-== Runtime file resource
-
-Most of the time you will deal with the need to provide your `Integration` with resource files you have stored in your local machine. In this case you can use the `--resource file:/path/to/file` flag that will copy that file under the _/etc/camel/resources/_ directory. You can look at the _resource destination path_ section at the bottom of this page to specify the destination file location.
-
-Let's see an example. We want to create an `Integration` unzipping and reading the content of a file we'll provide (ie, _resources-data.zip_):
-
-[source,groovy]
-.resource-file-binary-route.groovy
-----
-from('file:/etc/camel/resources/?fileName=resources-data.zip&noop=true&idempotent=false')
-    .unmarshal().zipFile()
-    .log('resource file unzipped content is: ${body}')
-----
-
-We have this file available locally, so we can use the `--resource` _file_ flag command to copy this file in the `Integration`:
-
-----
-kamel run --resource file:resources-data.zip resource-file-binary-route.groovy -d camel:zipfile
-----
-
-NOTE: when you're providing a resource file, we try to recognize if it's a binary file and process it accordingly creating a binary representation that will be decoded transparently in the `Integration`.
-
-You can provide more than one single `resource` at once by just adding the flag repeatedly (ie, `--resource file:file1.txt --resource file:file2.txt ...`).
-
 [[runtime-resource-configmap]]
 == Runtime configmap resource
 
@@ -109,7 +84,7 @@ from('file:/tmp/?fileName=input.txt&noop=true&idempotent=false')
 When running the `Integration`, you can specify where to mount the resource content (either a `File`, `Configmap` or `Secret`) with the _@path_ syntax:
 
 ----
-kamel run --resource file:resources-data.txt@/tmp/input.txt resource-file-location-route.groovy
+kamel run --resource configmap:my-cm@/tmp/input.txt resource-file-location-route.groovy
 ----
 
 You may check in the `Integration` `Pod` and verify that the file was mounted in the _tmp/input.txt_ destination.

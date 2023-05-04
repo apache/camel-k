@@ -7,34 +7,6 @@ The *runtime configuration* files are expected to be encoded in `UTF-8` as they 
 
 NOTE: the scope of `--config` global option had different meaning prior Camel K version 1.5. The old global `--config` has been replaced with `--kube-config` since Camel K version 1.5.
 
-[[runtime-config-file]]
-== Runtime file configuration
-
-The most classic way to provide a configuration is probably to have a file where you have certain text data stored. In this case you can use the `--config file:/path/to/file` flag that will copy that file and make it available at classpath level.
-
-[source,txt]
-.resources-data.txt
-----
-the file body
-----
-
-[source,groovy]
-.config-file-route.groovy
-----
-from('timer:config-file')
-    .setBody()
-        .simple("resource:classpath:resources-data.txt")
-    .log('resource file content is: ${body}')
-----
-
-We are referring to the file expected to be copied somewhere in the classpath, with the same name as the source file. In order to use it, we'll execute the following `--config` _file_ flag command:
-
-----
-kamel run --config file:resources-data.txt config-file-route.groovy
-----
-
-You can provide more than one single `config` at once by just adding the flag repeatedly (ie, `--config file:file1.txt ---config file:file2.txt ...`).
-
 [[runtime-config-configmap]]
 == Runtime configmap configuration
 
