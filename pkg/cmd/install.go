@@ -520,7 +520,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 		platform.Spec.Build.BaseImage = o.BaseImage
 	}
 	if o.BuildStrategy != "" {
-		platform.Spec.Build.BuildStrategy = v1.BuildStrategy(o.BuildStrategy)
+		platform.Spec.Build.BuildConfiguration.Strategy = v1.BuildStrategy(o.BuildStrategy)
 	}
 	if o.BuildPublishStrategy != "" {
 		platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)

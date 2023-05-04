@@ -194,8 +194,7 @@ type Environment struct {
 	ApplicationProperties map[string]string
 	Interceptors          []string
 	ServiceBindingSecret  string
-	// The strategy to adopt when building a Kit
-	BuildStrategy v1.BuildStrategy
+	BuildConfiguration    v1.BuildConfiguration
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.

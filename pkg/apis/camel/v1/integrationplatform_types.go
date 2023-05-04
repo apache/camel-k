@@ -111,9 +111,9 @@ var AllIntegrationPlatformClusters = []IntegrationPlatformCluster{IntegrationPla
 // This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
 // You can define the build strategy, the image registry to use and the Maven configuration to adopt.
 type IntegrationPlatformBuildSpec struct {
-	// the strategy to adopt for building an Integration base image
-	BuildStrategy BuildStrategy `json:"buildStrategy,omitempty"`
-	// the strategy to adopt for publishing an Integration base image
+	// the configuration required to build an Integration container image
+	BuildConfiguration BuildConfiguration `json:"buildconfiguration,omitempty"`
+	// the strategy to adopt for publishing an Integration container image
 	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	// the Camel K Runtime dependency version
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`

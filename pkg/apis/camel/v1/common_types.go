@@ -35,8 +35,23 @@ const (
 	PlatformSelectorAnnotation = "camel.apache.org/platform.id"
 )
 
+// BuildConfiguration represent the configuration required to build the runtime
+type BuildConfiguration struct {
+	// the strategy to adopt
+	Strategy BuildStrategy `json:"strategy"`
+	// The minimum amount of CPU required.
+	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
+	// The minimum amount of memory required.
+	RequestMemory string `property:"request-memory" json:"requestMemory,omitempty"`
+	// The maximum amount of CPU required.
+	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
+	// The maximum amount of memory required.
+	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
+}
+
 // BuildStrategy specifies how the Build should be executed.
-// It will trigger a Maven process that will take care of producing the expected Camel/Camel-Quarkus runtime.
+// It will trigger a Maven process (either as an Operator routine or Kubernetes Pod execution) that
+// will take care of producing the expected Camel/Camel-Quarkus runtime.
 // +kubebuilder:validation:Enum=routine;pod
 type BuildStrategy string
 
