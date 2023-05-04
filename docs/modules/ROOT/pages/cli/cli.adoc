@@ -31,10 +31,6 @@ Some of the most used commands are:
 |Obtain the full list of available commands
 |kamel help
 
-|init
-|Initialize empty Camel K files (besides Java you can also do this for other languages like Groovy, Kotlin, XML, YAML)
-|kamel init Routes.java
-
 |run
 |Run an integration on Kubernetes
 |kamel run Routes.java
