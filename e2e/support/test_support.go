@@ -107,11 +107,9 @@ func setTestLocus(t *testing.T) {
 	testLocus = t
 }
 
-//
 // Only panic the test if absolutely necessary and there is
 // no test locus. In most cases, the test should fail gracefully
 // using the test locus to error out and fail now.
-//
 func failTest(err error) {
 	if testLocus != nil {
 		testLocus.Error(err)
@@ -726,9 +724,7 @@ func ServiceType(ns string, name string) func() corev1.ServiceType {
 	}
 }
 
-//
 // Find the service in the given namespace with the given type
-//
 func ServicesByType(ns string, svcType corev1.ServiceType) func() []corev1.Service {
 	return func() []corev1.Service {
 		svcs := []corev1.Service{}
@@ -1054,6 +1050,14 @@ func KitWithVersion(version string) KitFilter {
 	return &kitFilter{
 		filter: func(kit *v1.IntegrationKit) bool {
 			return kit.Status.Version == version
+		},
+	}
+}
+
+func KitWithVersionPrefix(versionPrefix string) KitFilter {
+	return &kitFilter{
+		filter: func(kit *v1.IntegrationKit) bool {
+			return strings.HasPrefix(kit.Status.Version, versionPrefix)
 		},
 	}
 }
