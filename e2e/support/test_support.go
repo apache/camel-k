@@ -1799,6 +1799,16 @@ func SelectedPlatformPhase(ns string, name string) func() v1.IntegrationPlatform
 	}
 }
 
+func PlatformHas(ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
+	return func() bool {
+		pl := Platform(ns)()
+		if pl == nil {
+			return false
+		}
+		return predicate(pl)
+	}
+}
+
 func PlatformCondition(
 	ns string,
 	conditionType v1.IntegrationPlatformConditionType,
