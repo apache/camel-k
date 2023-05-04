@@ -36,7 +36,7 @@ func TestKameletClasspathLoading(t *testing.T) {
 
 	// Store a configmap on the cluster
 	var cmData = make(map[string]string)
-	cmData["my-kamelet"] = `
+	cmData["my-timer-source.kamelet.yaml"] = `
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -112,7 +112,7 @@ spec:
 	// Basic
 	t.Run("test basic case", func(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
-			"--resource", "configmap:my-kamelet-cm@/kamelets/my-timer-source.kamelet.yaml",
+			"--resource", "configmap:my-kamelet-cm@/kamelets",
 			"-p camel.component.kamelet.location=file:/kamelets",
 			"-d", "camel:yaml-dsl",
 			// kamelet dependencies

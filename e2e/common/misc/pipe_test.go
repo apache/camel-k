@@ -41,23 +41,12 @@ func TestPipe(t *testing.T) {
 	t.Run("test error handler", func(t *testing.T) {
 		Expect(createErrorProducerKamelet(ns, "my-own-error-producer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
-		from := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-error-producer-source",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		}
-
-		to := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-log-sink",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		}
 
 		t.Run("throw error test", func(t *testing.T) {
-			Expect(KamelBind(ns,
-				from.Name,
-				to.Name,
-				"--error-handler", "sink:"+to.Name,
+			Expect(KamelBindWithID(operatorID, ns,
+				"my-own-error-producer-source",
+				"my-own-log-sink",
+				"--error-handler", "sink:my-own-log-sink",
 				"-p", "source.message=throw Error",
 				"-p", "sink.loggerName=integrationLogger",
 				"-p", "error-handler.loggerName=kameletErrorHandler",
@@ -71,10 +60,10 @@ func TestPipe(t *testing.T) {
 		})
 
 		t.Run("don't throw error test", func(t *testing.T) {
-			Expect(KamelBind(ns,
-				from.Name,
-				to.Name,
-				"--error-handler", "sink:"+to.Name,
+			Expect(KamelBindWithID(operatorID, ns,
+				"my-own-error-producer-source",
+				"my-own-log-sink",
+				"--error-handler", "sink:my-own-log-sink",
 				"-p", "source.message=true",
 				"-p", "sink.loggerName=integrationLogger",
 				"-p", "error-handler.loggerName=kameletErrorHandler",
@@ -93,21 +82,9 @@ func TestPipe(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
 		// Log sink kamelet exists from previous test
 
-		from := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-timer-source",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		}
-
-		to := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-log-sink",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		}
-
-		Expect(KamelBind(ns,
-			from.Name,
-			to.Name,
+		Expect(KamelBindWithID(operatorID, ns,
+			"my-own-timer-source",
+			"my-own-log-sink",
 			"-p", "source.message=hello from test",
 			"-p", "sink.loggerName=integrationLogger",
 			"--annotation", "trait.camel.apache.org/camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",

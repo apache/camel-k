@@ -31,32 +31,19 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestPipeWithImage(t *testing.T) {
 	RegisterTestingT(t)
-
-	from := corev1.ObjectReference{
-		Kind:       "Kamelet",
-		Name:       "my-own-timer-source",
-		APIVersion: v1.SchemeGroupVersion.String(),
-	}
-
-	to := corev1.ObjectReference{
-		Kind:       "Kamelet",
-		Name:       "my-own-log-sink",
-		APIVersion: v1.SchemeGroupVersion.String(),
-	}
 
 	bindingID := "with-image-binding"
 
 	t.Run("run with initial image", func(t *testing.T) {
 		expectedImage := "docker.io/jmalloc/echo-server:0.3.2"
 
-		Expect(KamelBind(ns,
-			from.Name,
-			to.Name,
+		Expect(KamelBindWithID(operatorID, ns,
+			"my-own-timer-source",
+			"my-own-log-sink",
 			"--annotation", "trait.camel.apache.org/container.image="+expectedImage,
 			"--annotation", "trait.camel.apache.org/jvm.enabled=false",
 			"--annotation", "trait.camel.apache.org/kamelets.enabled=false",
@@ -82,9 +69,9 @@ func TestPipeWithImage(t *testing.T) {
 	t.Run("run with new image", func(t *testing.T) {
 		expectedImage := "docker.io/jmalloc/echo-server:0.3.3"
 
-		Expect(KamelBind(ns,
-			from.Name,
-			to.Name,
+		Expect(KamelBindWithID(operatorID, ns,
+			"my-own-timer-source",
+			"my-own-log-sink",
 			"--annotation", "trait.camel.apache.org/container.image="+expectedImage,
 			"--annotation", "trait.camel.apache.org/jvm.enabled=false",
 			"--annotation", "trait.camel.apache.org/kamelets.enabled=false",

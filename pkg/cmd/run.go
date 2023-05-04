@@ -742,8 +742,7 @@ func (o *runCmdOptions) parseAndConvertToTrait(cmd *cobra.Command,
 		if err != nil {
 			return err
 		}
-		// We try to autogenerate a configmap
-		if _, err := parseConfigAndGenCm(o.Context, cmd, c, config, integration); err != nil {
+		if err := parseConfig(o.Context, cmd, c, config, integration); err != nil {
 			return err
 		}
 		o.Traits = append(o.Traits, convertToTrait(convert(config), traitParam))

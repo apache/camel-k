@@ -138,24 +138,12 @@ func TestHealthTrait(t *testing.T) {
 	t.Run("Readiness condition with stopped binding", func(t *testing.T) {
 		name := "stopped-binding"
 
-		Expect(CreateTimerKamelet(ns, "my-own-timer-source")).To(Succeed())
-		Expect(CreateLogKamelet(ns, "my-own-log-sink")).To(Succeed())
+		Expect(CreateTimerKamelet(ns, "my-health-timer-source")()).To(Succeed())
+		Expect(CreateLogKamelet(ns, "my-health-log-sink")()).To(Succeed())
 
-		from := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-stopped-binding-timer-source",
-			APIVersion: camelv1.SchemeGroupVersion.String(),
-		}
-
-		to := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-stopped-binding-log-sink",
-			APIVersion: camelv1.SchemeGroupVersion.String(),
-		}
-
-		Expect(KamelBind(ns,
-			from.Name,
-			to.Name,
+		Expect(KamelBindWithID(operatorID, ns,
+			"my-health-timer-source",
+			"my-health-log-sink",
 			"-p", "source.message=Magicstring!",
 			"-p", "sink.loggerName=binding",
 			"--annotation", "trait.camel.apache.org/health.enabled=true",
