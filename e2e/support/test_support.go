@@ -2591,11 +2591,11 @@ func testNamespaceExists(ns string) (bool, error) {
 }
 
 func DumpNamespace(t *testing.T, ns string) {
-	if t.Failed() {
+
 		if err := util.Dump(TestContext, TestClient(), ns, t); err != nil {
 			t.Logf("Error while dumping namespace %s: %v\n", ns, err)
 		}
-	}
+
 }
 
 func DeleteNamespace(t *testing.T, ns string) error {

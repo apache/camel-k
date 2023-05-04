@@ -38,10 +38,16 @@ func TestKamelReset(t *testing.T) {
 
 		t.Run("Reset the whole platform", func(t *testing.T) {
 
+			DumpNamespace(t, ns)
 			name := "yaml1"
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			DumpNamespace(t, ns)
+
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+
+			DumpNamespace(t, ns)
 
 			Eventually(Kit(ns, IntegrationKit(ns, name)())).Should(Not(BeNil()))
 			Eventually(Integration(ns, name)).Should(Not(BeNil()))
