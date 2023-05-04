@@ -48,7 +48,7 @@ func addDependency(cmd *cobra.Command, it *v1.Integration, dependency string, ca
 	it.Spec.AddDependency(normalized)
 }
 
-func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Client, config *resource.Config, integration *v1.Integration, enableCompression bool) (*corev1.ConfigMap, error) {
+func parseConfigAndGenCm(ctx context.Context, cmd *cobra.Command, c client.Client, config *resource.Config, integration *v1.Integration) (*corev1.ConfigMap, error) {
 	switch config.StorageType() {
 	case resource.StorageTypeConfigmap:
 		cm := kubernetes.LookupConfigmap(ctx, c, integration.Namespace, config.Name())

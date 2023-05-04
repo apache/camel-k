@@ -43,9 +43,5 @@ func TestRunSimpleGroovyExamples(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 	})
 
-	t.Run("init run groovy", func(t *testing.T) {
-		RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageGroovy)
-	})
-
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

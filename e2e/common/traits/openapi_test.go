@@ -37,30 +37,6 @@ import (
 func TestOpenAPI(t *testing.T) {
 	RegisterTestingT(t)
 
-	Expect(KamelRunWithID(operatorID, ns,
-		"--name", "petstore",
-		"--open-api", "file:files/openapi/petstore-api.yaml",
-		"files/openapi/petstore.groovy",
-	).Execute()).To(Succeed())
-
-	Eventually(IntegrationPodPhase(ns, "petstore"), TestTimeoutLong).
-		Should(Equal(corev1.PodRunning))
-	Eventually(Deployment(ns, "petstore"), TestTimeoutLong).
-		Should(Not(BeNil()))
-
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-}
-
-func TestOpenAPIConfigmap(t *testing.T) {
-	RegisterTestingT(t)
-
 	openapiContent, err := ioutil.ReadFile("./files/openapi/petstore-api.yaml")
 	assert.Nil(t, err)
 	var cmDataProps = make(map[string]string)

@@ -102,8 +102,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name])")
 	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name]])")
-	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
-	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
+	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap or a Secret (syntax: [configmap|secret]:name[/key], where name represents the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
+	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap or a Secret (syntax: [configmap|secret]:name[/key][@path], where name represents the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
@@ -286,9 +286,9 @@ func (o *runCmdOptions) validate() error {
 	}
 
 	for _, openapi := range o.OpenAPIs {
-		// We support only local file and cluster configmaps
-		if !(strings.HasPrefix(openapi, "file:") || strings.HasPrefix(openapi, "configmap:")) {
-			return fmt.Errorf(`invalid openapi specification "%s". It supports only file or configmap`, openapi)
+		// We support only cluster configmaps
+		if !(strings.HasPrefix(openapi, "configmap:")) {
+			return fmt.Errorf(`invalid openapi specification "%s". It supports only configmaps`, openapi)
 		}
 	}
 
@@ -743,7 +743,7 @@ func (o *runCmdOptions) parseAndConvertToTrait(cmd *cobra.Command,
 			return err
 		}
 		// We try to autogenerate a configmap
-		if _, err := parseConfigAndGenCm(o.Context, cmd, c, config, integration, o.Compression); err != nil {
+		if _, err := parseConfigAndGenCm(o.Context, cmd, c, config, integration); err != nil {
 			return err
 		}
 		o.Traits = append(o.Traits, convertToTrait(convert(config), traitParam))
