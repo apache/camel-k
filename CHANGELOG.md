@@ -44,6 +44,8 @@
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
 - Remove deprecated linters [\#4061](https://github.com/apache/camel-k/issues/4061)
+- Remove github.com/fatih/structs dependency [\#4033](https://github.com/apache/camel-k/issues/4033)
+- Remove dependency no longer maintained [\#3935](https://github.com/apache/camel-k/issues/3935)
 - Expose runtime details in `kamel version -a -v` [\#3836](https://github.com/apache/camel-k/issues/3836)
 - Remove KEP cryptic message when installing [\#3829](https://github.com/apache/camel-k/issues/3829)
 - Improve error reporting in case of knative is required but not installed [\#3803](https://github.com/apache/camel-k/issues/3803)
