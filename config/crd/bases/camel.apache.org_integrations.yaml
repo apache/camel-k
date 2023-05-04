@@ -43,6 +43,14 @@ spec:
       jsonPath: .status.phase
       name: Phase
       type: string
+    - description: The runtime version
+      jsonPath: .status.runtimeProvider
+      name: Runtime Provider
+      type: string
+    - description: The runtime provider
+      jsonPath: .status.runtimeVersion
+      name: Runtime Version
+      type: string
     - description: The integration kit
       jsonPath: .status.integrationKit.name
       name: Kit

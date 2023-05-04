@@ -39,6 +39,10 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - description: The integration kit alias
+      jsonPath: .metadata.labels.camel\.apache\.org\/kit\.alias
+      name: Alias
+      type: string
     - description: The integration kit phase
       jsonPath: .status.phase
       name: Phase
@@ -46,6 +50,10 @@ spec:
     - description: The integration kit type
       jsonPath: .metadata.labels.camel\.apache\.org\/kit\.type
       name: Type
+      type: string
+    - description: The integration kit layout
+      jsonPath: .metadata.labels.camel\.apache\.org\/kit\.layout
+      name: Layout
       type: string
     - description: The integration kit image
       jsonPath: .status.image

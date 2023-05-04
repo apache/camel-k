@@ -43,6 +43,22 @@ spec:
       jsonPath: .status.phase
       name: Phase
       type: string
+    - description: The default build strategy
+      jsonPath: .status.build.buildStrategy
+      name: Build strategy
+      type: string
+    - description: The default publish strategy
+      jsonPath: .status.build.publishStrategy
+      name: Publish strategy
+      type: string
+    - description: The container registry address
+      jsonPath: .status.build.registry.address
+      name: Registry address
+      type: string
+    - description: The default runtime version
+      jsonPath: .status.build.runtimeVersion
+      name: Default runtime
+      type: string
     name: v1
     schema:
       openAPIV3Schema:
