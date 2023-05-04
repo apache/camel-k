@@ -100,13 +100,31 @@ spec:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
                     type: string
-                  buildStrategy:
-                    description: the strategy to adopt for building an Integration
-                      base image
-                    enum:
-                    - routine
-                    - pod
-                    type: string
+                  buildconfiguration:
+                    description: the configuration required to build an Integration
+                      container image
+                    properties:
+                      limitCPU:
+                        description: The maximum amount of CPU required.
+                        type: string
+                      limitMemory:
+                        description: The maximum amount of memory required.
+                        type: string
+                      requestCPU:
+                        description: The minimum amount of CPU required.
+                        type: string
+                      requestMemory:
+                        description: The minimum amount of memory required.
+                        type: string
+                      strategy:
+                        description: the strategy to adopt
+                        enum:
+                        - routine
+                        - pod
+                        type: string
+                    required:
+                    - strategy
+                    type: object
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
                       applications
@@ -265,7 +283,7 @@ spec:
                     type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
-                      base image
+                      container image
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration
@@ -1687,13 +1705,31 @@ spec:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
                     type: string
-                  buildStrategy:
-                    description: the strategy to adopt for building an Integration
-                      base image
-                    enum:
-                    - routine
-                    - pod
-                    type: string
+                  buildconfiguration:
+                    description: the configuration required to build an Integration
+                      container image
+                    properties:
+                      limitCPU:
+                        description: The maximum amount of CPU required.
+                        type: string
+                      limitMemory:
+                        description: The maximum amount of memory required.
+                        type: string
+                      requestCPU:
+                        description: The minimum amount of CPU required.
+                        type: string
+                      requestMemory:
+                        description: The minimum amount of memory required.
+                        type: string
+                      strategy:
+                        description: the strategy to adopt
+                        enum:
+                        - routine
+                        - pod
+                        type: string
+                    required:
+                    - strategy
+                    type: object
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
                       applications
@@ -1852,7 +1888,7 @@ spec:
                     type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
-                      base image
+                      container image
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration

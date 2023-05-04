@@ -109,9 +109,9 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		// It has to be the same namespace as the operator as they must share a PVC
 		builderPodNamespace := platform.GetOperatorNamespace()
-		buildStrategy := env.Platform.Status.Build.BuildStrategy
-		if env.BuildStrategy != "" {
-			buildStrategy = env.BuildStrategy
+		buildStrategy := env.Platform.Status.Build.BuildConfiguration.Strategy
+		if env.BuildConfiguration.Strategy != "" {
+			buildStrategy = env.BuildConfiguration.Strategy
 		}
 
 		// nolint: contextcheck

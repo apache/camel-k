@@ -81,9 +81,9 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
-	if p.Status.Build.BuildStrategy == "" {
-		p.Status.Build.BuildStrategy = v1.BuildStrategyPod
-		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildStrategy)
+	if p.Status.Build.BuildConfiguration.Strategy == "" {
+		p.Status.Build.BuildConfiguration.Strategy = v1.BuildStrategyPod
+		log.Debugf("Integration Platform [%s]: setting build strategy %s", p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
 	}
 
 	err := setPlatformDefaults(p, verbose)
@@ -91,7 +91,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
+	if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
 		if err := CreateBuilderServiceAccount(ctx, c, p); err != nil {
 			return fmt.Errorf("cannot ensure service account is present: %w", err)
 		}
@@ -222,8 +222,8 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", target.Name, target.Namespace)
 		target.Status.Build.PublishStrategyOptions = source.Status.Build.PublishStrategyOptions
 	}
-	if target.Status.Build.BuildStrategy == "" {
-		target.Status.Build.BuildStrategy = source.Status.Build.BuildStrategy
+	if target.Status.Build.BuildConfiguration.Strategy == "" {
+		target.Status.Build.BuildConfiguration.Strategy = source.Status.Build.BuildConfiguration.Strategy
 	}
 
 	if target.Status.Build.RuntimeVersion == "" {
@@ -369,9 +369,9 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 	if p.Status.Build.MaxRunningBuilds <= 0 {
 		log.Debugf("Integration Platform %s [%s]: setting max running builds", p.Name, p.Namespace)
-		if p.Status.Build.BuildStrategy == v1.BuildStrategyRoutine {
+		if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyRoutine {
 			p.Status.Build.MaxRunningBuilds = 3
-		} else if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
+		} else if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
 			p.Status.Build.MaxRunningBuilds = 10
 		}
 	}

@@ -495,6 +495,58 @@ A human-readable message indicating details about the transition.
 BuildConditionType --
 
 
+[#_camel_apache_org_v1_BuildConfiguration]
+=== BuildConfiguration
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+
+BuildConfiguration represent the configuration required to build the runtime
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`strategy` +
+*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+|
+
+
+the strategy to adopt
+
+|`requestCPU` +
+string
+|
+
+
+The minimum amount of CPU required.
+
+|`requestMemory` +
+string
+|
+
+
+The minimum amount of memory required.
+
+|`limitCPU` +
+string
+|
+
+
+The maximum amount of CPU required.
+
+|`limitMemory` +
+string
+|
+
+
+The maximum amount of memory required.
+
+
+|===
+
 [#_camel_apache_org_v1_BuildPhase]
 === BuildPhase(`string` alias)
 
@@ -668,11 +720,12 @@ https://github.com/OAI/OpenAPI-Specification/issues/845
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1_BuildConfiguration, BuildConfiguration>>
 * <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
-* <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
 
 BuildStrategy specifies how the Build should be executed.
-It will trigger a Maven process that will take care of producing the expected Camel/Camel-Quarkus runtime.
+It will trigger a Maven process (either as an Operator routine or Kubernetes Pod execution) that
+will take care of producing the expected Camel/Camel-Quarkus runtime.
 
 
 [#_camel_apache_org_v1_BuildahTask]
@@ -2406,19 +2459,19 @@ You can define the build strategy, the image registry to use and the Maven confi
 |Field
 |Description
 
-|`buildStrategy` +
-*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+|`buildconfiguration` +
+*xref:#_camel_apache_org_v1_BuildConfiguration[BuildConfiguration]*
 |
 
 
-the strategy to adopt for building an Integration base image
+the configuration required to build an Integration container image
 
 |`publishStrategy` +
 *xref:#_camel_apache_org_v1_IntegrationPlatformBuildPublishStrategy[IntegrationPlatformBuildPublishStrategy]*
 |
 
 
-the strategy to adopt for publishing an Integration base image
+the strategy to adopt for publishing an Integration container image
 
 |`runtimeVersion` +
 string

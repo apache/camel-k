@@ -150,7 +150,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 	if t.hasKitNativeType() {
 		// Force the build to run in a separate Pod
 		t.L.Info("Quarkus Native requires a build pod strategy")
-		e.BuildStrategy = v1.BuildStrategyPod
+		e.BuildConfiguration.Strategy = v1.BuildStrategyPod
 		// TODO we may provide a set of sensible resource default values for the Pod spun off
 	}
 

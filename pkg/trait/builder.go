@@ -153,9 +153,9 @@ func (t *builderTrait) Apply(e *Environment) error {
 		t.L.Infof("User defined build strategy %s", t.Strategy)
 		switch t.Strategy {
 		case string(v1.BuildStrategyPod):
-			e.BuildStrategy = v1.BuildStrategyPod
+			e.BuildConfiguration.Strategy = v1.BuildStrategyPod
 		case string(v1.BuildStrategyRoutine):
-			e.BuildStrategy = v1.BuildStrategyRoutine
+			e.BuildConfiguration.Strategy = v1.BuildStrategyRoutine
 		default:
 			return fmt.Errorf("must specify either pod or routine build strategy, unknown %s", t.Strategy)
 		}

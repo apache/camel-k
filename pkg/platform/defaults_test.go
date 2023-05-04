@@ -38,7 +38,9 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildStrategy: v1.BuildStrategyRoutine,
+				BuildConfiguration: v1.BuildConfiguration{
+					Strategy: v1.BuildStrategyRoutine,
+				},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"global_prop1": "global_value1",
@@ -79,7 +81,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformClusterOpenShift, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
-	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildStrategy)
+	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
 
 	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
 
@@ -106,7 +108,9 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildStrategy: v1.BuildStrategyRoutine,
+				BuildConfiguration: v1.BuildConfiguration{
+					Strategy: v1.BuildStrategyRoutine,
+				},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"global_prop1": "global_value1",
@@ -141,7 +145,9 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildStrategy:    v1.BuildStrategyPod,
+				BuildConfiguration: v1.BuildConfiguration{
+					Strategy: v1.BuildStrategyPod,
+				},
 				MaxRunningBuilds: 1,
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
@@ -166,7 +172,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)
-	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildStrategy)
+	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
 
 	assert.True(t, ip.Status.Build.MaxRunningBuilds == 1)
 
