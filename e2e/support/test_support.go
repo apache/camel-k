@@ -1535,6 +1535,18 @@ func BuildPhase(ns, name string) func() v1.BuildPhase {
 	}
 }
 
+func BuildsRunning(predicates ...func() v1.BuildPhase) func() int {
+	return func() int {
+		runningBuilds := 0
+		for _, predicate := range predicates {
+			if predicate() == v1.BuildPhaseRunning {
+				runningBuilds++
+			}
+		}
+		return runningBuilds
+	}
+}
+
 func HasPlatform(ns string) func() bool {
 	return func() bool {
 		lst := v1.NewIntegrationPlatformList()
