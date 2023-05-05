@@ -331,7 +331,7 @@ test-quarkus-native: do-build
 #
 test-quarkus-native-high-memory: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 180m -v ./e2e/namespace/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
+	go test -timeout 180m -v ./e2e/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
 	@echo "####### Building kamel CLI..."
