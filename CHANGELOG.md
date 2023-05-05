@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Native "higher memory" checks not running [\#4328](https://github.com/apache/camel-k/issues/4328)
 - Cannot set GOMAXPROCS [\#4299](https://github.com/apache/camel-k/issues/4299)
 - Maximum number of running builds \(0\) exceeded [\#4290](https://github.com/apache/camel-k/issues/4290)
 - Should uninstall --all remove PersistentVolumeClaim? [\#4285](https://github.com/apache/camel-k/issues/4285)
@@ -27,6 +28,7 @@
 - Validate error [\#4214](https://github.com/apache/camel-k/issues/4214)
 - `kamel rebuild` does not rebuild KameletBindings [\#4208](https://github.com/apache/camel-k/issues/4208)
 - Allow E2E suite test to run against a remote cluster [\#4207](https://github.com/apache/camel-k/issues/4207)
+- Bring in the option to have more verbose IntegrationKit names [\#4205](https://github.com/apache/camel-k/issues/4205)
 - Cannot copy local runtime dependencies [\#4198](https://github.com/apache/camel-k/issues/4198)
 - Creation of monitoring resources fail in a new GKE cluster [\#4191](https://github.com/apache/camel-k/issues/4191)
 - Unable to produce and consume in camel-k to apache kafka, getting error like "Connection to node -1 \(localhost/127.0.0.1:9092\) could not be established. Broker may not be available." [\#4186](https://github.com/apache/camel-k/issues/4186)
@@ -34,6 +36,7 @@
 - Camel K 2.x upgrade 1.x strategy [\#4179](https://github.com/apache/camel-k/issues/4179)
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
 - Kamelet development using Camel DSL instead of YAML DSL [\#4174](https://github.com/apache/camel-k/issues/4174)
+- Better naming of IntegrationKits to indicate whether the kit is native or non-native [\#4172](https://github.com/apache/camel-k/issues/4172)
 - Default integrationPlatform created at operator startup dose not honor OPERATOR\_ID config [\#4167](https://github.com/apache/camel-k/issues/4167)
 - property with dollar sign and brackets replaced with emtpy value [\#4163](https://github.com/apache/camel-k/issues/4163)
 - Kamel cli reset/uninstall --all does not clean the camelcatalog [\#4160](https://github.com/apache/camel-k/issues/4160)
