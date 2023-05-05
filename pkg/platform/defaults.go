@@ -19,11 +19,10 @@ package platform
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 	"strings"
 	"time"
-
-	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -94,7 +93,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 
 	if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
 		if err := CreateBuilderServiceAccount(ctx, c, p); err != nil {
-			return errors.Wrap(err, "cannot ensure service account is present")
+			return fmt.Errorf("cannot ensure service account is present: %w", err)
 		}
 	}
 

@@ -19,10 +19,10 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -137,7 +137,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	if o.OlmEnabled {
 		var err error
 		if uninstallViaOLM, err = olm.IsAPIAvailable(o.Context, c, o.Namespace); err != nil {
-			return errors.Wrap(err, "error while checking OLM availability. Run with '--olm=false' to skip this check")
+			return fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
 		}
 
 		if uninstallViaOLM {
@@ -169,7 +169,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 				defer cancel()
 				err := watch.WaitPodToTerminate(tctx, c, pod)
 				if err != nil {
-					return errors.Wrap(err, "error while waiting the operator pod to terminate gracefully")
+					return fmt.Errorf("error while waiting the operator pod to terminate gracefully: %w", err)
 				}
 			}
 		}

@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -38,7 +39,6 @@ import (
 
 	yaml2 "gopkg.in/yaml.v2"
 
-	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 )
 
@@ -490,7 +490,7 @@ func MapToYAML(src map[string]interface{}) ([]byte, error) {
 func WriteToFile(filePath string, fileContents string) error {
 	err := os.WriteFile(filePath, []byte(fileContents), 0o400)
 	if err != nil {
-		return errors.Errorf("error writing file: %v", filePath)
+		return fmt.Errorf("error writing file: %v", filePath)
 	}
 
 	return nil
@@ -499,11 +499,11 @@ func WriteToFile(filePath string, fileContents string) error {
 func GetEnvironmentVariable(variable string) (string, error) {
 	value, isPresent := os.LookupEnv(variable)
 	if !isPresent {
-		return "", errors.Errorf("environment variable %v does not exist", variable)
+		return "", fmt.Errorf("environment variable %v does not exist", variable)
 	}
 
 	if value == "" {
-		return "", errors.Errorf("environment variable %v is not set", variable)
+		return "", fmt.Errorf("environment variable %v is not set", variable)
 	}
 
 	return value, nil
@@ -615,18 +615,18 @@ func WriteFileWithContent(filePath string, content []byte) error {
 	// Create dir if not present
 	err := os.MkdirAll(fileDir, 0o700)
 	if err != nil {
-		return errors.Wrap(err, "could not create dir for file "+filePath)
+		return fmt.Errorf("could not create dir for file "+filePath+": %w", err)
 	}
 
 	// Create file
 	file, err := os.Create(filePath)
 	if err != nil {
-		return errors.Wrap(err, "could not create file "+filePath)
+		return fmt.Errorf("could not create file "+filePath+": %w", err)
 	}
 
 	_, err = file.Write(content)
 	if err != nil {
-		err = errors.Wrap(err, "could not write to file "+filePath)
+		err = fmt.Errorf("could not write to file "+filePath+": %w", err)
 	}
 
 	return Close(err, file)
@@ -713,7 +713,7 @@ func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error
 		}
 		pos, err := strconv.Atoi(nodes[0][1 : len(nodes[0])-1])
 		if err != nil {
-			return nil, errors.Wrapf(err, "value %q inside brackets is not numeric", nodes[0])
+			return nil, fmt.Errorf("value %q inside brackets is not numeric: %w", nodes[0], err)
 		}
 		var next interface{}
 		if len(*c) > pos && (*c)[pos] != nil {

@@ -19,6 +19,7 @@ package resources
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -28,14 +29,12 @@ import (
 	"text/template"
 
 	"github.com/apache/camel-k/v2/pkg/util"
-
-	"github.com/pkg/errors"
 )
 
 //
-//go:generate go run ../../cmd/util/vfs-gen resources config
-//
 // ResourceAsString returns the named resource content as string.
+//
+//go:generate go run ../../cmd/util/vfs-gen resources config
 func ResourceAsString(name string) (string, error) {
 	data, err := Resource(name)
 	return string(data), err
@@ -51,13 +50,13 @@ func Resource(name string) ([]byte, error) {
 
 	file, err := openAsset(name)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot access resource file %s", name)
+		return nil, fmt.Errorf("cannot access resource file %s: %w", name, err)
 	}
 
 	data, err := io.ReadAll(file)
 	if err != nil {
 		_ = file.Close()
-		return nil, errors.Wrapf(err, "cannot access resource file %s", name)
+		return nil, fmt.Errorf("cannot access resource file %s: %w", name, err)
 	}
 
 	return data, file.Close()
@@ -124,7 +123,7 @@ func Resources(dirName string) ([]string, error) {
 			return nil, nil
 		}
 
-		return nil, errors.Wrapf(err, "error while listing resource files %s", dirName)
+		return nil, fmt.Errorf("error while listing resource files %s: %w", dirName, err)
 	}
 
 	info, err := dir.Stat()
@@ -133,13 +132,13 @@ func Resources(dirName string) ([]string, error) {
 	}
 	if !info.IsDir() {
 		util.CloseQuietly(dir)
-		return nil, errors.Wrapf(err, "location %s is not a directory", dirName)
+		return nil, fmt.Errorf("location %s is not a directory: %w", dirName, err)
 	}
 
 	files, err := dir.Readdir(-1)
 	if err != nil {
 		util.CloseQuietly(dir)
-		return nil, errors.Wrapf(err, "error while listing files on directory %s", dirName)
+		return nil, fmt.Errorf("error while listing files on directory %s: %w", dirName, err)
 	}
 
 	var res []string

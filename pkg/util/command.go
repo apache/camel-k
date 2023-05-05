@@ -24,7 +24,6 @@ import (
 	"io"
 	"os/exec"
 
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -49,7 +48,7 @@ func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string) string, 
 		scanOutMsg = scan(stdOut, stdOutF)
 		scanErrMsg = scan(stdErr, stdErrF)
 
-		return errors.Wrapf(err, formatErr(scanOutMsg, scanErrMsg))
+		return fmt.Errorf(formatErr(scanOutMsg, scanErrMsg)+": %w", err)
 	}
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
@@ -61,10 +60,10 @@ func RunAndLog(ctx context.Context, cmd *exec.Cmd, stdOutF func(string) string, 
 		return nil
 	})
 	if err = g.Wait(); err != nil {
-		return errors.Wrapf(err, formatErr(scanOutMsg, scanErrMsg))
+		return fmt.Errorf(formatErr(scanOutMsg, scanErrMsg)+": %w", err)
 	}
 	if err = cmd.Wait(); err != nil {
-		return errors.Wrapf(err, formatErr(scanOutMsg, scanErrMsg))
+		return fmt.Errorf(formatErr(scanOutMsg, scanErrMsg)+": %w", err)
 	}
 
 	return nil

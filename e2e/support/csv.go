@@ -29,7 +29,7 @@ import (
 	"unsafe"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -97,7 +97,7 @@ func CatalogSource(ns, name string) func() *olm.CatalogSource {
 				Name:      name,
 			},
 		}
-		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(cs), cs); err != nil && errors.IsNotFound(err) {
+		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(cs), cs); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Errorf(err, "Error while retrieving CatalogSource %s", name)
@@ -119,7 +119,7 @@ func CatalogSourcePhase(ns, name string) func() string {
 func CatalogSourcePod(ns, csName string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		podList, err := TestClient().CoreV1().Pods(ns).List(TestContext, metav1.ListOptions{})
-		if err != nil && errors.IsNotFound(err) {
+		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			panic(err)

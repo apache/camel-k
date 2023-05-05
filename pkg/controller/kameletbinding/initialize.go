@@ -19,6 +19,7 @@ package kameletbinding
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
@@ -27,7 +28,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
-	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -60,7 +61,7 @@ func (action *initializeAction) Handle(ctx context.Context, binding *v1alpha1.Ka
 	}
 
 	if _, err := kubernetes.ReplaceResource(ctx, action.client, it); err != nil {
-		return nil, errors.Wrap(err, "could not create integration for KameletBinding")
+		return nil, fmt.Errorf("could not create integration for KameletBinding: %w", err)
 	}
 
 	// propagate Kamelet icon (best effort)

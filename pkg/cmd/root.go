@@ -19,11 +19,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/term"
@@ -180,14 +180,14 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 	if !isOfflineCommand(cmd) {
 		c, err := command.GetCmdClient()
 		if err != nil {
-			return errors.Wrap(err, "cannot get command client")
+			return fmt.Errorf("cannot get command client: %w", err)
 		}
 		if command.Namespace == "" {
 			current := viper.GetString("kamel.config.default-namespace")
 			if current == "" {
 				defaultNS, err := c.GetCurrentNamespace(command.KubeConfig)
 				if err != nil {
-					return errors.Wrap(err, "cannot get current namespace")
+					return fmt.Errorf("cannot get current namespace: %w", err)
 				}
 				current = defaultNS
 			}

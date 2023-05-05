@@ -19,8 +19,7 @@ package integration
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -69,15 +68,17 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
 			integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 		if err != nil {
-			return nil, errors.Wrapf(err, "unable to find integration kit %s/%s, %s",
-				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+			return nil, fmt.Errorf("unable to find integration kit %s/%s, %s: %w",
+				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err, err)
+
 		}
 
 		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
 			match, err := integrationMatches(integration, kit)
 			if err != nil {
-				return nil, errors.Wrapf(err, "unable to match any integration kit with integration %s/%s",
-					integration.Namespace, integration.Name)
+				return nil, fmt.Errorf("unable to match any integration kit with integration %s/%s: %w",
+					integration.Namespace, integration.Name, err)
+
 			} else if !match {
 				// We need to re-generate a kit, or search for a new one that
 				// matches the integration, so let's remove the association
@@ -113,8 +114,9 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	action.L.Debug("No kit specified in integration status so looking up", "integration", integration.Name, "namespace", integration.Namespace)
 	existingKits, err := lookupKitsForIntegration(ctx, action.client, integration)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to lookup kits for integration %s/%s",
-			integration.Namespace, integration.Name)
+		return nil, fmt.Errorf("failed to lookup kits for integration %s/%s: %w",
+			integration.Namespace, integration.Name, err)
+
 	}
 
 	action.L.Debug("Applying traits to integration",
@@ -122,8 +124,9 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		"namespace", integration.Namespace)
 	env, err := trait.Apply(ctx, action.client, integration, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to apply traits to integration %s/%s",
-			integration.Namespace, integration.Name)
+		return nil, fmt.Errorf("failed to apply traits to integration %s/%s: %w",
+			integration.Namespace, integration.Name, err)
+
 	}
 
 	action.L.Debug("Searching integration kits to assign to integration", "integration",
@@ -139,9 +142,9 @@ kits:
 			action.L.Debug("Comparing existing kit with environment", "env kit", kit.Name, "existing kit", k.Name)
 			match, err := kitMatches(&kit, k)
 			if err != nil {
-				return nil, errors.Wrapf(err,
-					"error occurred matches integration kits with environment for integration %s/%s",
-					integration.Namespace, integration.Name)
+				return nil, fmt.Errorf("error occurred matches integration kits with environment for integration %s/%s: %w",
+					integration.Namespace, integration.Name, err)
+
 			}
 			if match {
 				if integrationKit == nil ||
@@ -162,8 +165,9 @@ kits:
 			"namespace", integration.Namespace,
 			"integration kit", kit.Name)
 		if err := action.client.Create(ctx, &kit); err != nil {
-			return nil, errors.Wrapf(err, "failed to create new integration kit for integration %s/%s",
-				integration.Namespace, integration.Name)
+			return nil, fmt.Errorf("failed to create new integration kit for integration %s/%s: %w",
+				integration.Namespace, integration.Name, err)
+
 		}
 		if integrationKit == nil {
 			integrationKit = &kit

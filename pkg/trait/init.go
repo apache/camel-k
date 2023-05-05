@@ -18,9 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
 	"sort"
-
-	"github.com/pkg/errors"
 
 	"k8s.io/utils/pointer"
 

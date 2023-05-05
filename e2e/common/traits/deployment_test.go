@@ -23,8 +23,9 @@ limitations under the License.
 package traits
 
 import (
-	appsv1 "k8s.io/api/apps/v1"
 	"testing"
+
+	appsv1 "k8s.io/api/apps/v1"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"

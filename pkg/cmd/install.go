@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -28,7 +29,7 @@ import (
 	"time"
 
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -72,7 +73,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 			}
 			if err := options.install(cmd, args); err != nil {
 				if k8serrors.IsAlreadyExists(err) {
-					return errors.Wrap(err, "Camel K seems already installed (use the --force option to overwrite existing resources)")
+					return fmt.Errorf("camel K seems already installed (use the --force option to overwrite existing resources): %w", err)
 				}
 				return err
 			}
@@ -283,8 +284,8 @@ func (o *installCmdOptions) tryInstallViaOLM(
 		return false, err
 	}
 	if olmAvailable, err := olm.IsAPIAvailable(o.Context, olmClient, o.Namespace); err != nil {
-		return false, errors.Wrap(err,
-			"error while checking OLM availability. Run with '--olm=false' to skip this check")
+		return false, fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
+
 	} else if !olmAvailable {
 		fmt.Fprintln(cmd.OutOrStdout(), "OLM is not available in the cluster. Fallback to regular installation.")
 		return false, nil
@@ -292,13 +293,13 @@ func (o *installCmdOptions) tryInstallViaOLM(
 
 	if hasPermission, err := olm.HasPermissionToInstall(o.Context, olmClient,
 		o.Namespace, o.Global, o.olmOptions); err != nil {
-		return false, errors.Wrap(err,
-			"error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check")
+		return false, fmt.Errorf("error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check: %w", err)
+
 	} else if !hasPermission {
 		return false, errors.New(
 			"OLM is available but current user has not enough permissions to create the operator. " +
 				"You can either ask your administrator to provide permissions (preferred) " +
-				"or run the install command with the '--olm=false' flag.")
+				"or run the install command with the '--olm=false' flag")
 	}
 
 	// Install or collect via OLM
@@ -605,7 +606,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(
 	}
 
 	if err := install.IntegrationPlatformViewerRole(o.Context, c, namespace); err != nil && !k8serrors.IsAlreadyExists(err) {
-		return nil, errors.Wrap(err, "Error while installing global IntegrationPlatform viewer role")
+		return nil, fmt.Errorf("error while installing global IntegrationPlatform viewer role: %w", err)
 	}
 
 	if o.ExampleSetup {
@@ -743,7 +744,7 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		if err != nil {
 			result = multierr.Append(result, err)
 		} else if nfo.IsDir() {
-			result = multierr.Append(result, errors.Wrapf(err, "registry file cannot be a directory: %s", o.RegistryAuthFile))
+			result = multierr.Append(result, fmt.Errorf("registry file cannot be a directory: %s: %w", o.RegistryAuthFile, err))
 		}
 	}
 
@@ -902,7 +903,7 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 		} else if len(p) != 0 {
 			err = client.Patch(ctx, cm, ctrl.RawPatch(types.MergePatchType, p))
 			if err != nil {
-				return errors.Wrap(err, "error during patch resource")
+				return fmt.Errorf("error during patch resource: %w", err)
 			}
 		}
 	}

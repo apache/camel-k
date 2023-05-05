@@ -21,8 +21,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -110,12 +108,12 @@ func createKanikoCacheWarmerPod(ctx context.Context, client client.Client, platf
 
 	err := client.Delete(ctx, &pod)
 	if err != nil && !apierrors.IsNotFound(err) {
-		return errors.Wrap(err, "cannot delete Kaniko warmer pod")
+		return fmt.Errorf("cannot delete Kaniko warmer pod: %w", err)
 	}
 
 	err = client.Create(ctx, &pod)
 	if err != nil {
-		return errors.Wrap(err, "cannot create Kaniko warmer pod")
+		return fmt.Errorf("cannot create Kaniko warmer pod: %w", err)
 	}
 
 	return nil

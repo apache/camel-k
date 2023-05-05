@@ -20,6 +20,7 @@ package build
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"time"
 
@@ -31,8 +32,6 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -92,7 +91,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 			}
 
 			if err = action.client.Create(ctx, pod); err != nil {
-				return nil, errors.Wrap(err, "cannot create build pod")
+				return nil, fmt.Errorf("cannot create build pod: %w", err)
 			}
 
 		case v1.BuildPhaseRunning:

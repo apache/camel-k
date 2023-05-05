@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -28,7 +29,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

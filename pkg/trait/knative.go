@@ -24,8 +24,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -217,7 +215,7 @@ func (t *knativeTrait) Apply(e *Environment) error {
 
 		conf, err := env.Serialize()
 		if err != nil {
-			return errors.Wrap(err, "unable to fetch environment configuration")
+			return fmt.Errorf("unable to fetch environment configuration: %w", err)
 		}
 
 		envvar.SetVal(&e.EnvVars, "CAMEL_KNATIVE_CONFIGURATION", conf)
@@ -556,16 +554,16 @@ func (t *knativeTrait) withServiceDo(
 		} else {
 			actualRef, err = knativeutil.GetAddressableReference(e.Ctx, t.Client, possibleRefs, e.Integration.Namespace, ref.Name)
 			if err != nil && k8serrors.IsNotFound(err) {
-				return errors.Errorf("cannot find %s", serviceType.ResourceDescription(ref.Name))
+				return fmt.Errorf("cannot find %s", serviceType.ResourceDescription(ref.Name))
 			} else if err != nil {
-				return errors.Wrapf(err, "error looking up %s", serviceType.ResourceDescription(ref.Name))
+				return fmt.Errorf("error looking up %s: %w", serviceType.ResourceDescription(ref.Name), err)
 			}
 		}
 
 		urlProvider := func() (*url.URL, error) {
 			targetURL, err := knativeutil.GetSinkURL(e.Ctx, t.Client, actualRef, e.Integration.Namespace)
 			if err != nil {
-				return nil, errors.Wrapf(err, "cannot determine address of %s", serviceType.ResourceDescription(ref.Name))
+				return nil, fmt.Errorf("cannot determine address of %s: %w", serviceType.ResourceDescription(ref.Name), err)
 			}
 			t.L.Infof("Found URL for %s: %s", serviceType.ResourceDescription(ref.Name), targetURL.String())
 			return targetURL, nil
@@ -573,7 +571,7 @@ func (t *knativeTrait) withServiceDo(
 
 		err = gen(actualRef, serviceURI, urlProvider)
 		if err != nil {
-			return errors.Wrapf(err, "unexpected error while executing handler for %s", serviceType.ResourceDescription(ref.Name))
+			return fmt.Errorf("unexpected error while executing handler for %s: %w", serviceType.ResourceDescription(ref.Name), err)
 		}
 	}
 	return nil

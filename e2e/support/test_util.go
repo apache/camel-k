@@ -23,10 +23,11 @@ limitations under the License.
 package support
 
 import (
+	"os"
+
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/onsi/gomega/types"
-	"os"
 )
 
 func init() {

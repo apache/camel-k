@@ -35,7 +35,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	pkgerr "github.com/pkg/errors"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -291,42 +291,42 @@ func WaitForAllCrdInstallation(ctx context.Context, clientProvider client.Provid
 
 func areAllCrdInstalled(c client.Client) (int, error) {
 	if ok, err := isCrdInstalled(c, "IntegrationPlatform", "v1"); err != nil {
-		return 1, pkgerr.Wrap(err, "Error installing IntegrationPlatform CRDs")
+		return 1, fmt.Errorf("error installing IntegrationPlatform CRDs: %w", err)
 	} else if !ok {
 		return 1, nil
 	}
 	if ok, err := isCrdInstalled(c, "IntegrationKit", "v1"); err != nil {
-		return 2, pkgerr.Wrap(err, "Error installing IntegrationKit CRDs")
+		return 2, fmt.Errorf("error installing IntegrationKit CRDs: %w", err)
 	} else if !ok {
 		return 2, nil
 	}
 	if ok, err := isCrdInstalled(c, "Integration", "v1"); err != nil {
-		return 3, pkgerr.Wrap(err, "Error installing Integration CRDs")
+		return 3, fmt.Errorf("error installing Integration CRDs: %w", err)
 	} else if !ok {
 		return 3, nil
 	}
 	if ok, err := isCrdInstalled(c, "CamelCatalog", "v1"); err != nil {
-		return 4, pkgerr.Wrap(err, "Error installing CamelCatalog CRDs")
+		return 4, fmt.Errorf("error installing CamelCatalog CRDs: %w", err)
 	} else if !ok {
 		return 4, nil
 	}
 	if ok, err := isCrdInstalled(c, "Build", "v1"); err != nil {
-		return 5, pkgerr.Wrap(err, "Error installing Build CRDs")
+		return 5, fmt.Errorf("error installing Build CRDs: %w", err)
 	} else if !ok {
 		return 5, nil
 	}
 	if ok, err := isCrdInstalled(c, "Kamelet", "v1"); err != nil {
-		return 6, pkgerr.Wrap(err, "Error installing Kamelet CRDs")
+		return 6, fmt.Errorf("error installing Kamelet CRDs: %w", err)
 	} else if !ok {
 		return 6, nil
 	}
 	if ok, err := isCrdInstalled(c, "KameletBinding", "v1alpha1"); err != nil {
-		return 7, pkgerr.Wrap(err, "Error installing KameletBindings CRDs")
+		return 7, fmt.Errorf("error installing KameletBindings CRDs: %w", err)
 	} else if !ok {
 		return 7, nil
 	}
 	if ok, err := isCrdInstalled(c, "Pipe", "v1"); err != nil {
-		return 8, pkgerr.Wrap(err, "Error installing Pipe CRDs")
+		return 8, fmt.Errorf("error installing Pipe CRDs: %w", err)
 	} else if !ok {
 		return 8, nil
 	}

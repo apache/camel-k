@@ -23,9 +23,10 @@ limitations under the License.
 package knative
 
 import (
+	"testing"
+
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
-	"testing"
 )
 
 func TestOpenAPIService(t *testing.T) {

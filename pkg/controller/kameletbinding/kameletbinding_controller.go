@@ -20,7 +20,7 @@ package kameletbinding
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
@@ -157,7 +157,7 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 	var instance v1alpha1.KameletBinding
 
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup
 			// logic use finalizers.

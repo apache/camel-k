@@ -23,8 +23,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -52,7 +50,7 @@ func IsLocalAndFileExists(uri string) (bool, error) {
 		}
 
 		// If it is a different error (ie, permission denied) we should report it back
-		return false, errors.Wrap(err, fmt.Sprintf("file system error while looking for %s", uri))
+		return false, fmt.Errorf("file system error while looking for %s: %w", uri, err)
 	}
 
 	return !info.IsDir(), nil

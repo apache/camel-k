@@ -31,7 +31,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	policyv1 "k8s.io/api/policy/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
@@ -102,7 +102,7 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 			Name: pods[0].Name,
 		},
 	})
-	Expect(err).To(MatchError(&errors.StatusError{
+	Expect(err).To(MatchError(&k8serrors.StatusError{
 		ErrStatus: metav1.Status{
 			Status:  "Failure",
 			Message: "Cannot evict pod as it would violate the pod's disruption budget.",
@@ -152,7 +152,7 @@ func podDisruptionBudget(ns string, name string) func() *policyv1.PodDisruptionB
 			},
 		}
 		err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(&pdb), &pdb)
-		if err != nil && errors.IsNotFound(err) {
+		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			panic(err)

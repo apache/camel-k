@@ -20,9 +20,8 @@ package kameletbinding
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sort"
-
-	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,16 +105,16 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1alpha
 
 	from, err := bindings.TranslateV1alpha1(bindingContext, endpointTypeSourceContext, binding.Spec.Source)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not determine source URI")
+		return nil, fmt.Errorf("could not determine source URI: %w", err)
 	}
 	to, err := bindings.TranslateV1alpha1(bindingContext, endpointTypeSinkContext, binding.Spec.Sink)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not determine sink URI")
+		return nil, fmt.Errorf("could not determine sink URI: %w", err)
 	}
 	// error handler is optional
 	errorHandler, err := maybeErrorHandler(binding.Spec.ErrorHandler, bindingContext)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not determine error handler")
+		return nil, fmt.Errorf("could not determine error handler: %w", err)
 	}
 
 	steps := make([]*bindings.Binding, 0, len(binding.Spec.Steps))
@@ -126,20 +125,20 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1alpha
 			Position: &position,
 		}, step)
 		if err != nil {
-			return nil, errors.Wrapf(err, "could not determine URI for step %d", idx)
+			return nil, fmt.Errorf("could not determine URI for step %d: %w", idx, err)
 		}
 		steps = append(steps, stepKameletBinding)
 	}
 
 	if to.Step == nil && to.URI == "" {
-		return nil, errors.Errorf("illegal step definition for sink step: either Step or URI should be provided")
+		return nil, fmt.Errorf("illegal step definition for sink step: either Step or URI should be provided")
 	}
 	if from.URI == "" {
-		return nil, errors.Errorf("illegal step definition for source step: URI should be provided")
+		return nil, fmt.Errorf("illegal step definition for source step: URI should be provided")
 	}
 	for index, step := range steps {
 		if step.Step == nil && step.URI == "" {
-			return nil, errors.Errorf("illegal step definition for step %d: either Step or URI should be provided", index)
+			return nil, fmt.Errorf("illegal step definition for step %d: either Step or URI should be provided", index)
 		}
 	}
 
@@ -239,7 +238,7 @@ func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.Ka
 	}
 	pl, err := platform.GetForResource(ctx, c, binding)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return "", errors.Wrap(err, "error while retrieving the integration platform")
+		return "", fmt.Errorf("error while retrieving the integration platform: %w", err)
 	}
 	if pl != nil {
 		if pl.Status.Profile != "" {

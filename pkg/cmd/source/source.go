@@ -32,7 +32,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/google/go-github/v32/github"
-	"github.com/pkg/errors"
 )
 
 // Source represents the source file of an Integration.
@@ -202,9 +201,9 @@ func resolveGist(ctx context.Context, location string, compress bool, cmd *cobra
 // resolveLocal resolves a source from the local file system.
 func resolveLocal(location string, compress bool) (Source, error) {
 	if _, err := os.Stat(location); err != nil && os.IsNotExist(err) {
-		return Source{}, errors.Wrapf(err, "file %s does not exist", location)
+		return Source{}, fmt.Errorf("file %s does not exist: %w", location, err)
 	} else if err != nil {
-		return Source{}, errors.Wrapf(err, "error while accessing file %s", location)
+		return Source{}, fmt.Errorf("error while accessing file %s: %w", location, err)
 	}
 
 	answer, err := newSource(location, compress, func() ([]byte, error) {

@@ -25,7 +25,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -88,7 +87,7 @@ func recomputeProperties(kamelet *v1.Kamelet) error {
 			d := json.NewDecoder(bytes.NewReader(v.Default.RawMessage))
 			d.UseNumber()
 			if err := d.Decode(&val); err != nil {
-				return errors.Wrapf(err, "cannot decode default value for property %q", k)
+				return fmt.Errorf("cannot decode default value for property %q: %w", k, err)
 			}
 			defValue = fmt.Sprintf("%v", val)
 		}

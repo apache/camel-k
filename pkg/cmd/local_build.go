@@ -18,9 +18,9 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/apache/camel-k/v2/pkg/cmd/local"
