@@ -2459,7 +2459,7 @@ You can define the build strategy, the image registry to use and the Maven confi
 |Field
 |Description
 
-|`buildconfiguration` +
+|`buildConfiguration` +
 *xref:#_camel_apache_org_v1_BuildConfiguration[BuildConfiguration]*
 |
 
