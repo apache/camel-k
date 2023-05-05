@@ -22,3 +22,6 @@ metadata:
   labels:
     app: "camel-k"
 spec:
+  build:
+    buildConfiguration:
+      strategy: pod

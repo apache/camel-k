@@ -100,7 +100,7 @@ spec:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
                     type: string
-                  buildconfiguration:
+                  buildConfiguration:
                     description: the configuration required to build an Integration
                       container image
                     properties:
@@ -1705,7 +1705,7 @@ spec:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
                     type: string
-                  buildconfiguration:
+                  buildConfiguration:
                     description: the configuration required to build an Integration
                       container image
                     properties:

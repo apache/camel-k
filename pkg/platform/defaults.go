@@ -83,7 +83,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 
 	if p.Status.Build.BuildConfiguration.Strategy == "" {
 		p.Status.Build.BuildConfiguration.Strategy = v1.BuildStrategyPod
-		log.Debugf("Integration Platform [%s]: setting build strategy %s", p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
+		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
 	}
 
 	err := setPlatformDefaults(p, verbose)

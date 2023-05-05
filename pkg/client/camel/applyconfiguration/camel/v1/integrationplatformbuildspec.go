@@ -27,7 +27,7 @@ import (
 // IntegrationPlatformBuildSpecApplyConfiguration represents an declarative configuration of the IntegrationPlatformBuildSpec type for use
 // with apply.
 type IntegrationPlatformBuildSpecApplyConfiguration struct {
-	BuildConfiguration      *BuildConfigurationApplyConfiguration            `json:"buildconfiguration,omitempty"`
+	BuildConfiguration      *BuildConfigurationApplyConfiguration            `json:"buildConfiguration,omitempty"`
 	PublishStrategy         *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	RuntimeVersion          *string                                          `json:"runtimeVersion,omitempty"`
 	RuntimeProvider         *camelv1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
