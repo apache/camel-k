@@ -20,8 +20,6 @@ package trait
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -110,7 +108,7 @@ func (t *pullSecretTrait) delegateImagePuller(e *Environment) error {
 	// (different from the integration namespace when delegation is enabled).
 	rb := t.newImagePullerRoleBinding(e)
 	if _, err := kubernetes.ReplaceResource(e.Ctx, e.Client, rb); err != nil {
-		return errors.Wrap(err, "error during the creation of the system:image-puller delegating role binding")
+		return fmt.Errorf("error during the creation of the system:image-puller delegating role binding: %w", err)
 	}
 	return nil
 }

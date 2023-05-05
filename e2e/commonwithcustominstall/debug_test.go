@@ -25,12 +25,13 @@ package commonwithcustominstall
 import (
 	"context"
 	"fmt"
-	. "github.com/apache/camel-k/v2/e2e/support"
-	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 	"net"
 	"testing"
 	"time"
+
+	. "github.com/apache/camel-k/v2/e2e/support"
+	. "github.com/onsi/gomega"
+	v1 "k8s.io/api/core/v1"
 )
 
 func TestKamelCLIDebug(t *testing.T) {

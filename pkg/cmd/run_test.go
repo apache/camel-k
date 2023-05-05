@@ -524,7 +524,7 @@ func TestRunValidateArgs(t *testing.T) {
 	args = []string{"missing_file"}
 	err = runCmdOptions.validateArgs(rootCmd, args)
 	assert.NotNil(t, err)
-	assert.Equal(t, "One of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
+	assert.Equal(t, "one of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
 }
 
 func TestResolvePodTemplate(t *testing.T) {

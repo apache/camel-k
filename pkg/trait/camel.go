@@ -19,11 +19,10 @@ package trait
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -149,13 +148,14 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 					catalog, err = camel.LoadCatalog(e.Ctx, e.Client, ns, runtime)
 					if err != nil {
 						// unexpected error
-						return errors.Wrapf(err, "catalog %q already exists but unable to load", catalogName)
+						return fmt.Errorf("catalog %q already exists but unable to load: %w", catalogName, err)
 					}
 				} else {
-					return errors.Wrapf(err, "unable to create catalog runtime=%s, provider=%s, name=%s",
+					return fmt.Errorf("unable to create catalog runtime=%s, provider=%s, name=%s: %w",
 						runtime.Version,
 						runtime.Provider,
-						catalogName)
+						catalogName, err)
+
 				}
 			}
 		}

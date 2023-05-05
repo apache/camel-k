@@ -27,6 +27,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -44,7 +45,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -348,7 +349,7 @@ func verifyGlobalOperator() error {
 
 	oppod := OperatorPod(opns)()
 	if oppod == nil {
-		return fmt.Errorf("No operator pod detected in namespace %s. Operator install is a pre-requisite of the test", opns)
+		return fmt.Errorf("no operator pod detected in namespace %s. Operator install is a pre-requisite of the test", opns)
 	}
 
 	return nil

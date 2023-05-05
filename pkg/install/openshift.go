@@ -24,7 +24,7 @@ import (
 
 	"github.com/Masterminds/semver"
 
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -80,7 +80,7 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 	existing := &console.ConsoleCLIDownload{}
 	err = c.Get(ctx, types.NamespacedName{Name: KamelCLIDownloadName}, existing)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			existing = nil
 		} else {
 			return err
@@ -104,7 +104,7 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 			// Else delete the older version
 			err = c.Delete(ctx, existing)
 			if err != nil {
-				if errors.IsForbidden(err) {
+				if k8serrors.IsForbidden(err) {
 					// Let's just skip the ConsoleCLIDownload resource creation
 					return nil
 				}

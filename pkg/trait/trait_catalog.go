@@ -18,12 +18,13 @@ limitations under the License.
 package trait
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
 
 	"github.com/fatih/structs"
-	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -119,7 +120,7 @@ func (c *Catalog) apply(environment *Environment) error {
 			for _, processor := range environment.PostStepProcessors {
 				err := processor(environment)
 				if err != nil {
-					return errors.Wrap(err, "error executing post step action")
+					return fmt.Errorf("error executing post step action: %w", err)
 				}
 			}
 		}
@@ -138,7 +139,7 @@ func (c *Catalog) apply(environment *Environment) error {
 	for _, processor := range environment.PostProcessors {
 		err := processor(environment)
 		if err != nil {
-			return errors.Wrap(err, "error executing post processor")
+			return fmt.Errorf("error executing post processor: %w", err)
 		}
 	}
 

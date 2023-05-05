@@ -18,13 +18,13 @@ limitations under the License.
 package docker
 
 import (
+	"errors"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/pkg/errors"
 )
 
 // CreateBaseImageDockerFile --.

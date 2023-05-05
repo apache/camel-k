@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -25,7 +26,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/cmd/local"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -123,7 +124,7 @@ func (o *localRunCmdOptions) validate(args []string) error {
 		if ok, err := util.DirectoryExists(o.IntegrationDirectory); err != nil {
 			return err
 		} else if !ok {
-			return errors.Errorf("integration directory %q does not exist", o.IntegrationDirectory)
+			return fmt.Errorf("integration directory %q does not exist", o.IntegrationDirectory)
 		}
 	}
 

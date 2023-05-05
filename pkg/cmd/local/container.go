@@ -19,6 +19,7 @@ package local
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -29,7 +30,6 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/docker"
-	"github.com/pkg/errors"
 )
 
 // Local Docker file system management functions.
@@ -110,7 +110,7 @@ func buildBaseImage(ctx context.Context, stdout, stderr io.Writer) error {
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
-		return errors.Errorf("base image containerization did not run successfully: %v", err)
+		return fmt.Errorf("base image containerization did not run successfully: %w", err)
 	}
 
 	return nil
@@ -206,7 +206,7 @@ func buildIntegrationImage(ctx context.Context, image string, stdout, stderr io.
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
-		return errors.Errorf("integration image containerization did not run successfully: %v", err)
+		return fmt.Errorf("integration image containerization did not run successfully: %w", err)
 	}
 
 	return nil
@@ -239,7 +239,7 @@ func RunIntegrationImage(ctx context.Context, image string, stdout, stderr io.Wr
 
 	// Run the command.
 	if err := cmd.Run(); err != nil {
-		return errors.Errorf("integration image did not run successfully: %v", err)
+		return fmt.Errorf("integration image did not run successfully: %w", err)
 	}
 
 	return nil

@@ -25,10 +25,11 @@ package traits
 import (
 	"encoding/json"
 	"fmt"
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"strings"
 	"testing"
 	"time"
+
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	. "github.com/onsi/gomega"
 

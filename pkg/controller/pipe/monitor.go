@@ -21,8 +21,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -71,7 +69,7 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.
 		)
 		return target, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, "could not load integration for Pipe %q", binding.Name)
+		return nil, fmt.Errorf("could not load integration for Pipe %q: %w", binding.Name, err)
 	}
 
 	operatorIDChanged := v1.GetOperatorIDAnnotation(binding) != "" &&

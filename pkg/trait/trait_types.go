@@ -25,8 +25,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -377,7 +375,7 @@ func (e *Environment) computeApplicationProperties() (*corev1.ConfigMap, error) 
 	// application properties
 	applicationProperties, err := property.EncodePropertyFile(e.ApplicationProperties)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not compute application properties")
+		return nil, fmt.Errorf("could not compute application properties: %w", err)
 	}
 
 	if applicationProperties != "" {

@@ -20,6 +20,7 @@ package cmd
 import (
 	"archive/zip"
 	"context"
+	"errors"
 
 	// this is needed to generate an SHA1 sum for Jars
 	// #nosec G501
@@ -44,7 +45,7 @@ import (
 
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	"github.com/magiconair/properties"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -242,7 +243,7 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	}
 
 	if _, err := source.Resolve(context.Background(), args, false, cmd); err != nil {
-		return errors.Wrap(err, "One of the provided sources is not reachable")
+		return fmt.Errorf("one of the provided sources is not reachable: %w", err)
 	}
 
 	return nil
@@ -812,7 +813,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				}
 			}
 			if err := o.uploadDependency(platform, item, name, cmd, it); err != nil {
-				return errors.Wrap(err, fmt.Sprintf("Error trying to upload %s to the Image Registry.", item))
+				return fmt.Errorf("error trying to upload %s to the Image Registry.: %w", item, err)
 			}
 		} else {
 			if catalog == nil {
@@ -1001,7 +1002,7 @@ func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item 
 			query := item[idx+1:]
 			options, err := url.ParseQuery(query)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("invalid http dependency options %s", query))
+				return fmt.Errorf("invalid http dependency options %s: %w", query, err)
 			}
 			o.RegistryOptions = options
 			depURL = item[:idx]
@@ -1009,9 +1010,9 @@ func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item 
 
 		uri, err := url.Parse(depURL)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("invalid http dependency url %s", depURL))
+			return fmt.Errorf("invalid http dependency url %s: %w", depURL, err)
 		} else if localPath, err = downloadDependency(o.Context, *uri); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("could not download http dependency %s", depURL))
+			return fmt.Errorf("could not download http dependency %s: %w", depURL, err)
 		}
 		// Remove the temporary file
 		defer os.Remove(localPath)

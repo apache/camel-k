@@ -20,6 +20,7 @@ package keda
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -37,7 +38,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/source"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
-	"github.com/pkg/errors"
+
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -225,7 +226,7 @@ func (t *kedaTrait) addScalingResources(e *trait.Environment) error {
 				Name:      trigger.AuthenticationSecret,
 			}
 			if err := e.Client.Get(e.Ctx, key, &s); err != nil {
-				return errors.Wrapf(err, "could not load secret named %q in namespace %q", trigger.AuthenticationSecret, e.Integration.Namespace)
+				return fmt.Errorf("could not load secret named %q in namespace %q: %w", trigger.AuthenticationSecret, e.Integration.Namespace, err)
 			}
 			// Fill a TriggerAuthentication from the secret
 			triggerAuth := kedav1alpha1.TriggerAuthentication{
@@ -480,11 +481,11 @@ func (t *kedaTrait) evaluateTemplateParameters(e *trait.Environment, kamelet *ca
 	for param, expr := range paramTemplates {
 		tmpl, err := template.New(fmt.Sprintf("kamelet-param-%s", param)).Parse(expr)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "invalid template for KEDA parameter %q: %q", param, expr)
+			return nil, nil, fmt.Errorf("invalid template for KEDA parameter %q: %q: %w", param, expr, err)
 		}
 		var buf bytes.Buffer
 		if err := tmpl.Execute(&buf, kameletPropValues); err != nil {
-			return nil, nil, errors.Wrapf(err, "unable to process template for KEDA parameter %q: %q", param, expr)
+			return nil, nil, fmt.Errorf("unable to process template for KEDA parameter %q: %q: %w", param, expr, err)
 		}
 		paramValues[param] = buf.String()
 	}
@@ -502,7 +503,7 @@ func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camel
 			if c.Type == "property" && strings.HasPrefix(c.Value, kameletSpecificKey) {
 				v, err := property.DecodePropertyFileValue(c.Value, kameletSpecificKey)
 				if err != nil {
-					return "", errors.Wrapf(err, "could not decode property %q", kameletSpecificKey)
+					return "", fmt.Errorf("could not decode property %q: %w", kameletSpecificKey, err)
 				}
 				return v, nil
 			}
@@ -522,7 +523,7 @@ func (t *kedaTrait) getKameletPropertyValue(e *trait.Environment, kamelet *camel
 			d := json.NewDecoder(bytes.NewReader(schema.Default.RawMessage))
 			d.UseNumber()
 			if err := d.Decode(&val); err != nil {
-				return "", errors.Wrapf(err, "cannot decode default value for property %q", prop)
+				return "", fmt.Errorf("cannot decode default value for property %q: %w", prop, err)
 			}
 			v := fmt.Sprintf("%v", val)
 			return v, nil

@@ -74,4 +74,3 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 		})
 	})
 }
-

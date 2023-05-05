@@ -19,10 +19,10 @@ package property
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/magiconair/properties"
-	"github.com/pkg/errors"
 )
 
 // EncodePropertyFileEntry converts the given key/value pair into a .properties file entry.
@@ -48,7 +48,7 @@ func EncodePropertyFile(sourceProperties map[string]string) (string, error) {
 	buf := new(bytes.Buffer)
 	_, err := props.Write(buf, properties.UTF8)
 	if err != nil {
-		return "", errors.Wrapf(err, "could not compute application properties")
+		return "", fmt.Errorf("could not compute application properties: %w", err)
 	}
 	return buf.String(), nil
 }

@@ -20,13 +20,13 @@ package local
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 	"github.com/spf13/cobra"
 
@@ -52,7 +52,7 @@ func GetDependencies(ctx context.Context, cmd *cobra.Command, srcs, userDependen
 	// Fetch existing catalog or create new one if one does not already exist
 	catalog, err := CreateCamelCatalog(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create Camel catalog")
+		return nil, fmt.Errorf("failed to create Camel catalog: %w", err)
 	}
 
 	// Validate user-provided dependencies against Camel catalog
@@ -61,7 +61,7 @@ func GetDependencies(ctx context.Context, cmd *cobra.Command, srcs, userDependen
 	// Get top-level dependencies from sources
 	dependencies, err := getTopLevelDependencies(ctx, catalog, srcs)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to resolve dependencies from source")
+		return nil, fmt.Errorf("failed to resolve dependencies from source: %w", err)
 	}
 
 	// Add additional user-provided dependencies
@@ -77,7 +77,7 @@ func GetDependencies(ctx context.Context, cmd *cobra.Command, srcs, userDependen
 
 		dependencies, err = getTransitiveDependencies(ctx, catalog, dependencies, repositories)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to compute transitive dependencies")
+			return nil, fmt.Errorf("failed to compute transitive dependencies: %w", err)
 		}
 	}
 
@@ -278,7 +278,7 @@ func printDependencies(format string, dependencies []string, cmd *cobra.Command)
 		}
 		fmt.Fprint(cmd.OutOrStdout(), string(data))
 	default:
-		return errors.Errorf("unknown output format: %s", format)
+		return fmt.Errorf("unknown output format: %s", format)
 	}
 	return nil
 }
@@ -353,7 +353,7 @@ func validatePropertyFile(fileName string) error {
 	}
 
 	if file, err := os.Stat(fileName); err != nil {
-		return errors.Wrapf(err, "unable to access property file %s", fileName)
+		return fmt.Errorf("unable to access property file %s: %w", fileName, err)
 	} else if file.IsDir() {
 		return fmt.Errorf("property file %s is a directory", fileName)
 	}

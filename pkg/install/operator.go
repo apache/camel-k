@@ -19,10 +19,10 @@ package install
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -355,7 +355,8 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 			switch {
 			case k8serrors.IsForbidden(err):
 				fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the creation of monitoring resources is not allowed. Try installing as cluster-admin to allow the creation of monitoring resources.")
-			case meta.IsNoMatchError(errors.Cause(err)):
+				// TU to check ?
+			case meta.IsNoMatchError(errors.Unwrap(err)):
 				fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the creation of the monitoring resources failed: ", err)
 			default:
 				return err
@@ -415,7 +416,7 @@ func installNamespacedRoleBinding(ctx context.Context, c client.Client, collecti
 		return err
 	}
 	if yaml == "" {
-		return errors.Errorf("resource file %v not found", path)
+		return fmt.Errorf("resource file %v not found", path)
 	}
 	obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), yaml)
 	if err != nil {
@@ -466,7 +467,7 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 
 		existing = nil
 		if content == "" {
-			return errors.Errorf("resource file %v not found", path)
+			return fmt.Errorf("resource file %v not found", path)
 		}
 
 		obj, err := kubernetes.LoadResourceFromYaml(c.GetScheme(), content)

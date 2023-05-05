@@ -18,9 +18,9 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -94,7 +94,7 @@ func (o *rebuildCmdOptions) run(cmd *cobra.Command, args []string) error {
 func (o *rebuildCmdOptions) listAllIntegrations(c client.Client) ([]v1.Integration, error) {
 	list := v1.NewIntegrationList()
 	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve integrations from namespace %s", o.Namespace))
+		return nil, fmt.Errorf("could not retrieve integrations from namespace %s: %w", o.Namespace, err)
 	}
 	return list.Items, nil
 }
@@ -108,7 +108,7 @@ func (o *rebuildCmdOptions) getIntegrations(c client.Client, names []string) ([]
 			Namespace: o.Namespace,
 		}
 		if err := c.Get(o.Context, key, &it); err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("could not find integration %s in namespace %s", it.Name, o.Namespace))
+			return nil, fmt.Errorf("could not find integration %s in namespace %s: %w", it.Name, o.Namespace, err)
 		}
 		ints = append(ints, it)
 	}
@@ -120,7 +120,7 @@ func (o *rebuildCmdOptions) rebuildIntegrations(c k8sclient.StatusClient, integr
 		it := i
 		it.Status = v1.IntegrationStatus{}
 		if err := c.Status().Update(o.Context, &it); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("could not rebuild integration %s in namespace %s", it.Name, o.Namespace))
+			return fmt.Errorf("could not rebuild integration %s in namespace %s: %w", it.Name, o.Namespace, err)
 		}
 	}
 	return nil

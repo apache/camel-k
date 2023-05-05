@@ -20,6 +20,7 @@ package keda
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/apache/camel-k/v2/addons/keda/duck/v1alpha1"
@@ -29,7 +30,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
-	"github.com/pkg/errors"
+
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -438,7 +439,7 @@ func getSecret(e *trait.Environment) *corev1.Secret {
 func createBasicTestEnvironment(resources ...runtime.Object) *trait.Environment {
 	fakeClient, err := test.NewFakeClient(resources...)
 	if err != nil {
-		panic(errors.Wrap(err, "could not create fake client"))
+		panic(fmt.Errorf("could not create fake client: %w", err))
 	}
 
 	var it *camelv1.Integration

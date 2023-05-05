@@ -24,7 +24,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
 	infp "gopkg.in/inf.v0"
@@ -87,7 +86,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
 		k := v1.NewIntegrationKit(ns, name)
 		if err := t.Client.Get(e.Ctx, ctrl.ObjectKeyFromObject(k), k); err != nil {
-			return errors.Wrapf(err, "unable to find integration kit %s/%s, %s", ns, name, err)
+			return fmt.Errorf("unable to find integration kit %s/%s, %s: %w", ns, name, err, err)
 		}
 		kit = k
 	}
