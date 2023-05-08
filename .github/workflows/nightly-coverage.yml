@@ -24,6 +24,7 @@ on:
 
 jobs:
   test:
+    if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-20.04
     name: Update Coverage Badge
     steps:
