@@ -25,6 +25,8 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
@@ -44,6 +46,17 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	if e.Ref == nil {
 		// works only on refs
 		return nil, nil
+	}
+
+	if ok, err := isKnownKnativeResource(e.Ref); !ok {
+		// only operates on known Knative endpoint resources (e.g. channels, brokers)
+		return nil, err
+	}
+
+	if knativeInstalled, _ := knative.IsInstalled(ctx.Client); !knativeInstalled {
+		// works only when Knative is installed
+		return nil, fmt.Errorf("integration referencing Knative endpoint '%s' that cannot run, "+
+			"because Knative is not installed on the cluster", e.Ref.Name)
 	}
 
 	serviceType, err := knative.GetServiceType(*e.Ref)
@@ -95,6 +108,21 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	return &Binding{
 		URI: serviceURI,
 	}, nil
+}
+
+func isKnownKnativeResource(ref *corev1.ObjectReference) (bool, error) {
+	gv, err := schema.ParseGroupVersion(ref.APIVersion)
+	if err != nil {
+		return false, err
+	}
+
+	for _, endpoint := range knative.KnownEndpointKinds {
+		if endpoint.Group == gv.Group && endpoint.Kind == ref.Kind {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 // Order --.
