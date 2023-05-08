@@ -417,7 +417,7 @@ func (o *uninstallCmdOptions) uninstallServiceAccounts(ctx context.Context, c cl
 }
 
 func (o *uninstallCmdOptions) uninstallIntegrationPlatform(ctx context.Context, c client.Client) error {
-	integrationPlatforms, err := c.CamelV1().IntegrationPlatforms(o.Namespace).List(ctx, defaultListOptions)
+	integrationPlatforms, err := c.CamelV1().IntegrationPlatforms(o.Namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
