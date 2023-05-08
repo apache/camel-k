@@ -122,8 +122,6 @@ spec:
                         - routine
                         - pod
                         type: string
-                    required:
-                    - strategy
                     type: object
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
@@ -1727,8 +1725,6 @@ spec:
                         - routine
                         - pod
                         type: string
-                    required:
-                    - strategy
                     type: object
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
