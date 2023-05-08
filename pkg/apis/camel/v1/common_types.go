@@ -38,7 +38,7 @@ const (
 // BuildConfiguration represent the configuration required to build the runtime
 type BuildConfiguration struct {
 	// the strategy to adopt
-	Strategy BuildStrategy `json:"strategy"`
+	Strategy BuildStrategy `property:"strategy" json:"strategy,omitempty"`
 	// The minimum amount of CPU required.
 	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
 	// The minimum amount of memory required.
