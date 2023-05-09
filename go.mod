@@ -92,6 +92,7 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.12.0 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.14.1 // indirect
+	github.com/containers/image v3.0.2+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/cli v23.0.5+incompatible // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
@@ -133,7 +134,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/opencontainers/image-spec v1.0.3-0.20220114050600-8b9d41f48198 // indirect
+	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
 	github.com/opencontainers/runc v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -165,6 +166,7 @@ require (
 	k8s.io/component-base v0.25.6 // indirect
 	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
 	knative.dev/networking v0.0.0-20221012062251-58f3e6239b4f // indirect
+	oras.land/oras-go/v2 v2.0.0 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect

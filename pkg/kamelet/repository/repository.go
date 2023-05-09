@@ -174,6 +174,10 @@ func newFromURI(uri string) (KameletRepository, error) {
 			path = strings.Join(parts[2:], "/")
 		}
 		return newGithubKameletRepository(owner, repo, path, version), nil
+	} else if strings.HasPrefix(uri, "oci:") {
+		image := strings.TrimPrefix(uri, "oci:")
+
+		return newOCIKameletRepository(image), nil
 	}
 	return nil, fmt.Errorf("invalid uri: %s", uri)
 }
