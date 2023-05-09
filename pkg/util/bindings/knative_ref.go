@@ -150,6 +150,17 @@ func (k V1alpha1KnativeRefBindingProvider) Translate(ctx V1alpha1BindingContext,
 		return nil, nil
 	}
 
+	if ok, err := isKnownKnativeResource(e.Ref); !ok {
+		// only operates on known Knative endpoint resources (e.g. channels, brokers)
+		return nil, err
+	}
+
+	if knativeInstalled, _ := knative.IsInstalled(ctx.Client); !knativeInstalled {
+		// works only when Knative is installed
+		return nil, fmt.Errorf("integration referencing Knative endpoint '%s' that cannot run, "+
+			"because Knative is not installed on the cluster", e.Ref.Name)
+	}
+
 	serviceType, err := knative.GetServiceType(*e.Ref)
 	if err != nil {
 		return nil, err
