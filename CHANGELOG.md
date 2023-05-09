@@ -6,7 +6,10 @@
 
 **Closed issues:**
 
+- High memory Quarkus native check failing [\#4345](https://github.com/apache/camel-k/issues/4345)
+- Binding from a Strimzi CR is not properly decoded [\#4336](https://github.com/apache/camel-k/issues/4336)
 - Native "higher memory" checks not running [\#4328](https://github.com/apache/camel-k/issues/4328)
+- TestKamelReset test flakiness [\#4316](https://github.com/apache/camel-k/issues/4316)
 - Cannot set GOMAXPROCS [\#4299](https://github.com/apache/camel-k/issues/4299)
 - Maximum number of running builds \(0\) exceeded [\#4290](https://github.com/apache/camel-k/issues/4290)
 - Should uninstall --all remove PersistentVolumeClaim? [\#4285](https://github.com/apache/camel-k/issues/4285)
@@ -15,6 +18,7 @@
 - Camel-k install and uninstall on a fresh kind cluster in Linux [\#4277](https://github.com/apache/camel-k/issues/4277)
 - Kamelet redis-source not working [\#4276](https://github.com/apache/camel-k/issues/4276)
 - Failed to fetch data from Mysql database using camel-k [\#4264](https://github.com/apache/camel-k/issues/4264)
+- Mention the published "generated extension" for Java in the docs [\#4262](https://github.com/apache/camel-k/issues/4262)
 - unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - unable to execute "kamel run" in secure mode [\#4249](https://github.com/apache/camel-k/issues/4249)
 - Acquiring lock at startup is taking long [\#4246](https://github.com/apache/camel-k/issues/4246)
@@ -46,8 +50,10 @@
 - Bring in startup probes to the Health trait [\#4146](https://github.com/apache/camel-k/issues/4146)
 - Bring an option to force an image build to the kamel run command [\#4126](https://github.com/apache/camel-k/issues/4126)
 - How to use JVM classpaths in Native mode? [\#4124](https://github.com/apache/camel-k/issues/4124)
+- Secret managers parsing errors [\#4080](https://github.com/apache/camel-k/issues/4080)
 - Remove deprecated linters [\#4061](https://github.com/apache/camel-k/issues/4061)
 - Remove github.com/fatih/structs dependency [\#4033](https://github.com/apache/camel-k/issues/4033)
+- Bump Mandrel from 22.2.0 to 22.3.1 [\#4017](https://github.com/apache/camel-k/issues/4017)
 - Remove dependency no longer maintained [\#3935](https://github.com/apache/camel-k/issues/3935)
 - Expose runtime details in `kamel version -a -v` [\#3836](https://github.com/apache/camel-k/issues/3836)
 - Remove KEP cryptic message when installing [\#3829](https://github.com/apache/camel-k/issues/3829)
