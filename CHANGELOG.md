@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- High memory Quarkus native check failing [\#4345](https://github.com/apache/camel-k/issues/4345)
+- Binding from a Strimzi CR is not properly decoded [\#4336](https://github.com/apache/camel-k/issues/4336)
 - Native "higher memory" checks not running [\#4328](https://github.com/apache/camel-k/issues/4328)
 - TestKamelReset test flakiness [\#4316](https://github.com/apache/camel-k/issues/4316)
 - Cannot set GOMAXPROCS [\#4299](https://github.com/apache/camel-k/issues/4299)
