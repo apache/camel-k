@@ -266,16 +266,16 @@ spec:
                             type: object
                         type: object
                     type: object
-                  persistentVolumeClaim:
-                    description: 'Deprecated: Use PublishStrategyOptions instead the
-                      Persistent Volume Claim used by Kaniko publish strategy, if
-                      cache is enabled'
-                    type: string
                   maxRunningBuilds:
                     description: the maximum amount of parallel running builds started
                       by this operator instance
                     format: int32
                     type: integer
+                  persistentVolumeClaim:
+                    description: 'Deprecated: Use PublishStrategyOptions instead the
+                      Persistent Volume Claim used by Kaniko publish strategy, if
+                      cache is enabled'
+                    type: string
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image
@@ -1864,16 +1864,16 @@ spec:
                             type: object
                         type: object
                     type: object
-                  persistentVolumeClaim:
-                    description: 'Deprecated: Use PublishStrategyOptions instead the
-                      Persistent Volume Claim used by Kaniko publish strategy, if
-                      cache is enabled'
-                    type: string
                   maxRunningBuilds:
                     description: the maximum amount of parallel running builds started
                       by this operator instance
                     format: int32
                     type: integer
+                  persistentVolumeClaim:
+                    description: 'Deprecated: Use PublishStrategyOptions instead the
+                      Persistent Volume Claim used by Kaniko publish strategy, if
+                      cache is enabled'
+                    type: string
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
                       base image
