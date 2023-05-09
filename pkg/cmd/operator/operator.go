@@ -258,6 +258,7 @@ func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, opera
 		if defaultPlatform.Labels == nil {
 			defaultPlatform.Labels = make(map[string]string)
 		}
+		defaultPlatform.Labels["app"] = "camel-k"
 		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
 
 		if operatorID != "" {
