@@ -165,7 +165,45 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 	pod.Spec.Containers = pod.Spec.InitContainers[len(pod.Spec.InitContainers)-1 : len(pod.Spec.InitContainers)]
 	pod.Spec.InitContainers = pod.Spec.InitContainers[:len(pod.Spec.InitContainers)-1]
 
+	if err := configureResources(build.Spec.Configuration, &pod.Spec.Containers[0]); err != nil {
+		return pod, err
+	}
+
 	return pod, nil
+}
+
+func configureResources(conf v1.BuildConfiguration, container *corev1.Container) error {
+	requestsList := container.Resources.Requests
+	limitsList := container.Resources.Limits
+	var err error
+	if requestsList == nil {
+		requestsList = make(corev1.ResourceList)
+	}
+	if limitsList == nil {
+		limitsList = make(corev1.ResourceList)
+	}
+
+	requestsList, err = kubernetes.ConfigureResource(conf.RequestCPU, requestsList, corev1.ResourceCPU)
+	if err != nil {
+		return err
+	}
+	requestsList, err = kubernetes.ConfigureResource(conf.RequestMemory, requestsList, corev1.ResourceMemory)
+	if err != nil {
+		return err
+	}
+	limitsList, err = kubernetes.ConfigureResource(conf.LimitCPU, limitsList, corev1.ResourceCPU)
+	if err != nil {
+		return err
+	}
+	limitsList, err = kubernetes.ConfigureResource(conf.LimitMemory, limitsList, corev1.ResourceMemory)
+	if err != nil {
+		return err
+	}
+
+	container.Resources.Requests = requestsList
+	container.Resources.Limits = limitsList
+
+	return nil
 }
 
 func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error {

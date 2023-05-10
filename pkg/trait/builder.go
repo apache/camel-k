@@ -161,6 +161,19 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}
 	}
 
+	if t.RequestCPU != "" {
+		e.BuildConfiguration.RequestCPU = t.RequestCPU
+	}
+	if t.RequestMemory != "" {
+		e.BuildConfiguration.RequestMemory = t.RequestMemory
+	}
+	if t.LimitCPU != "" {
+		e.BuildConfiguration.LimitCPU = t.LimitCPU
+	}
+	if t.LimitMemory != "" {
+		e.BuildConfiguration.LimitMemory = t.LimitMemory
+	}
+
 	return nil
 }
 

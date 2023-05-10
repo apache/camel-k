@@ -203,12 +203,28 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      limitCPU:
+                        description: When using `pod` strategy, the maximum amount
+                          of CPU required by the pod builder.
+                        type: string
+                      limitMemory:
+                        description: When using `pod` strategy, the maximum amount
+                          of memory required by the pod builder.
+                        type: string
                       properties:
                         description: A list of properties to be provided to the build
                           task
                         items:
                           type: string
                         type: array
+                      requestCPU:
+                        description: When using `pod` strategy, the minimum amount
+                          of CPU required by the pod builder.
+                        type: string
+                      requestMemory:
+                        description: When using `pod` strategy, the minimum amount
+                          of memory required by the pod builder.
+                        type: string
                       strategy:
                         description: The strategy to use, either `pod` or `routine`
                           (default routine)
