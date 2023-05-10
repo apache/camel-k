@@ -109,7 +109,14 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		// It has to be the same namespace as the operator as they must share a PVC
 		builderPodNamespace := platform.GetOperatorNamespace()
-		buildConfig := env.Platform.Status.Build.BuildConfiguration
+		buildConfig := env.BuildConfiguration
+		if buildConfig.IsEmpty() {
+			// default to IntegrationPlatform configuration
+			buildConfig = env.Platform.Status.Build.BuildConfiguration
+		} else if buildConfig.Strategy == "" {
+			// we always need to define a strategy, so we default to platform if none
+			buildConfig.Strategy = env.Platform.Status.Build.BuildConfiguration.Strategy
+		}
 
 		// nolint: contextcheck
 		if buildConfig.Strategy == v1.BuildStrategyPod {
