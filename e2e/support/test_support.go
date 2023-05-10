@@ -1602,6 +1602,16 @@ func Build(ns, name string) func() *v1.Build {
 	}
 }
 
+func BuildConfig(ns, name string) func() v1.BuildConfiguration {
+	return func() v1.BuildConfiguration {
+		build := Build(ns, name)()
+		if build != nil {
+			return build.Spec.Configuration
+		}
+		return v1.BuildConfiguration{}
+	}
+}
+
 func BuildPhase(ns, name string) func() v1.BuildPhase {
 	return func() v1.BuildPhase {
 		build := Build(ns, name)()

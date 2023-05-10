@@ -165,14 +165,11 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 	pod.Spec.Containers = pod.Spec.InitContainers[len(pod.Spec.InitContainers)-1 : len(pod.Spec.InitContainers)]
 	pod.Spec.InitContainers = pod.Spec.InitContainers[:len(pod.Spec.InitContainers)-1]
 
-	if err := configureResources(build.Spec.Configuration, &pod.Spec.Containers[0]); err != nil {
-		return pod, err
-	}
-
 	return pod, nil
 }
 
-func configureResources(conf v1.BuildConfiguration, container *corev1.Container) error {
+func configureResources(build *v1.Build, container *corev1.Container) {
+	conf := build.Spec.Configuration
 	requestsList := container.Resources.Requests
 	limitsList := container.Resources.Limits
 	var err error
@@ -185,25 +182,27 @@ func configureResources(conf v1.BuildConfiguration, container *corev1.Container)
 
 	requestsList, err = kubernetes.ConfigureResource(conf.RequestCPU, requestsList, corev1.ResourceCPU)
 	if err != nil {
-		return err
+		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
+			Errorf(err, "Could not configure builder resource cpu, leaving default value")
 	}
 	requestsList, err = kubernetes.ConfigureResource(conf.RequestMemory, requestsList, corev1.ResourceMemory)
 	if err != nil {
-		return err
+		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
+			Errorf(err, "Could not configure builder resource memory, leaving default value")
 	}
 	limitsList, err = kubernetes.ConfigureResource(conf.LimitCPU, limitsList, corev1.ResourceCPU)
 	if err != nil {
-		return err
+		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
+			Errorf(err, "Could not configure builder limit cpu, leaving default value")
 	}
 	limitsList, err = kubernetes.ConfigureResource(conf.LimitMemory, limitsList, corev1.ResourceMemory)
 	if err != nil {
-		return err
+		Log.WithValues("request-namespace", build.Namespace, "request-name", build.Name).
+			Errorf(err, "Could not configure builder limit memory, leaving default value")
 	}
 
 	container.Resources.Requests = requestsList
 	container.Resources.Limits = limitsList
-
-	return nil
 }
 
 func deleteBuilderPod(ctx context.Context, c ctrl.Writer, build *v1.Build) error {
@@ -287,6 +286,7 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 		Env:        proxyFromEnvironment(),
 	}
 
+	configureResources(build, &container)
 	addContainerToPod(build, container, pod)
 }
 
