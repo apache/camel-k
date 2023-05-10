@@ -117,6 +117,7 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 			if defaultPlatform.Labels == nil {
 				defaultPlatform.Labels = make(map[string]string)
 			}
+			defaultPlatform.Labels["app"] = "camel-k"
 			defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
 			// Cascade the operator id in charge to reconcile the Integration
 			if v1.GetOperatorIDAnnotation(e.Integration) != "" {
