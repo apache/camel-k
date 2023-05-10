@@ -28,7 +28,7 @@ the full go definition can be found https://github.com/apache/camel-k/blob/main/
 image::architecture/camel-k-state-machine-build.png[life cycle]
 
 [[build-strategy]]
-= Build strategy
+== Build strategy
 
 You can choose from different build strategies. The build strategy defines how a build should be executed.
 At the moment the available strategies are:
@@ -37,7 +37,7 @@ At the moment the available strategies are:
 - buildStrategy: routine (each build is run as a go routine inside the operator pod)
 
 [[build-queue]]
-= Build queues
+== Build queues
 
 IntegrationKits and its base images should be reused for multiple Integrations in order to
 accomplish an efficient resource management and to optimize build and startup times for Camel K Integrations.
