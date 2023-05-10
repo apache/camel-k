@@ -88,7 +88,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 
 		if hasKnativeEndpoint {
 			// fail fast the integration as there is no knative installed in the cluster
-			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains knative endpoint that cannot run, as knative is not installed in the cluster.", e.Integration.Namespace, e.Integration.Name)
+			t.L.ForIntegration(e.Integration).Infof("Integration %s in namespace %s contains knative endpoint that cannot run, as knative is not installed in the cluster.", e.Integration.Name, e.Integration.Namespace)
 			err := errors.New("integration cannot run, as knative is not installed in the cluster")
 			e.Integration.Status.SetCondition(
 				v1.IntegrationConditionKnativeAvailable,
