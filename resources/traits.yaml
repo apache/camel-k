@@ -212,6 +212,22 @@ traits:
   - name: strategy
     type: string
     description: The strategy to use, either `pod` or `routine` (default routine)
+  - name: request-cpu
+    type: string
+    description: When using `pod` strategy, the minimum amount of CPU required by
+      the pod builder.
+  - name: request-memory
+    type: string
+    description: When using `pod` strategy, the minimum amount of memory required
+      by the pod builder.
+  - name: limit-cpu
+    type: string
+    description: When using `pod` strategy, the maximum amount of CPU required by
+      the pod builder.
+  - name: limit-memory
+    type: string
+    description: When using `pod` strategy, the maximum amount of memory required
+      by the pod builder.
 - name: camel
   platform: true
   profiles:

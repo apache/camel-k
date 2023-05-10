@@ -25,7 +25,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 
@@ -195,7 +194,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		e.Resources.Add(props)
 	}
 
-	t.configureResources(e, &container)
+	t.configureResources(&container)
 	if pointer.BoolDeref(t.Expose, false) {
 		t.configureService(e, &container)
 	}
@@ -303,50 +302,36 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 	service.Labels["camel.apache.org/service.type"] = v1.ServiceTypeUser
 }
 
-func (t *containerTrait) configureResources(_ *Environment, container *corev1.Container) {
-	// Requests
-	if container.Resources.Requests == nil {
-		container.Resources.Requests = make(corev1.ResourceList)
+func (t *containerTrait) configureResources(container *corev1.Container) {
+	requestsList := container.Resources.Requests
+	limitsList := container.Resources.Limits
+	var err error
+	if requestsList == nil {
+		requestsList = make(corev1.ResourceList)
+	}
+	if limitsList == nil {
+		limitsList = make(corev1.ResourceList)
 	}
 
-	if t.RequestCPU != "" {
-		v, err := resource.ParseQuantity(t.RequestCPU)
-		if err != nil {
-			t.L.Error(err, "unable to parse quantity", "request-cpu", t.RequestCPU)
-		} else {
-			container.Resources.Requests[corev1.ResourceCPU] = v
-		}
+	requestsList, err = kubernetes.ConfigureResource(t.RequestCPU, requestsList, corev1.ResourceCPU)
+	if err != nil {
+		t.L.Error(err, "unable to parse quantity", "request-cpu", t.RequestCPU)
 	}
-	if t.RequestMemory != "" {
-		v, err := resource.ParseQuantity(t.RequestMemory)
-		if err != nil {
-			t.L.Error(err, "unable to parse quantity", "request-memory", t.RequestMemory)
-		} else {
-			container.Resources.Requests[corev1.ResourceMemory] = v
-		}
+	requestsList, err = kubernetes.ConfigureResource(t.RequestMemory, requestsList, corev1.ResourceMemory)
+	if err != nil {
+		t.L.Error(err, "unable to parse quantity", "request-memory", t.RequestMemory)
 	}
-
-	// Limits
-	if container.Resources.Limits == nil {
-		container.Resources.Limits = make(corev1.ResourceList)
+	limitsList, err = kubernetes.ConfigureResource(t.LimitCPU, limitsList, corev1.ResourceCPU)
+	if err != nil {
+		t.L.Error(err, "unable to parse quantity", "limit-cpu", t.LimitCPU)
+	}
+	limitsList, err = kubernetes.ConfigureResource(t.LimitMemory, limitsList, corev1.ResourceMemory)
+	if err != nil {
+		t.L.Error(err, "unable to parse quantity", "limit-memory", t.LimitMemory)
 	}
 
-	if t.LimitCPU != "" {
-		v, err := resource.ParseQuantity(t.LimitCPU)
-		if err != nil {
-			t.L.Error(err, "unable to parse quantity", "limit-cpu", t.LimitCPU)
-		} else {
-			container.Resources.Limits[corev1.ResourceCPU] = v
-		}
-	}
-	if t.LimitMemory != "" {
-		v, err := resource.ParseQuantity(t.LimitMemory)
-		if err != nil {
-			t.L.Error(err, "unable to parse quantity", "limit-memory", t.LimitMemory)
-		} else {
-			container.Resources.Limits[corev1.ResourceMemory] = v
-		}
-	}
+	container.Resources.Requests = requestsList
+	container.Resources.Limits = limitsList
 }
 
 func (t *containerTrait) configureCapabilities(e *Environment) {

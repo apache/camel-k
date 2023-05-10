@@ -500,6 +500,7 @@ BuildConditionType --
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
 
 BuildConfiguration represent the configuration required to build the runtime
@@ -521,28 +522,28 @@ string
 |
 
 
-The minimum amount of CPU required.
+The minimum amount of CPU required. Only used for `pod` strategy
 
 |`requestMemory` +
 string
 |
 
 
-The minimum amount of memory required.
+The minimum amount of memory required. Only used for `pod` strategy
 
 |`limitCPU` +
 string
 |
 
 
-The maximum amount of CPU required.
+The maximum amount of CPU required. Only used for `pod` strategy
 
 |`limitMemory` +
 string
 |
 
 
-The maximum amount of memory required.
+The maximum amount of memory required. Only used for `pod` strategy
 
 
 |===
@@ -578,12 +579,12 @@ BuildSpec defines the Build operation to be executed
 
 The sequence of Build tasks to be performed as part of the Build execution.
 
-|`strategy` +
-*xref:#_camel_apache_org_v1_BuildStrategy[BuildStrategy]*
+|`configuration` +
+*xref:#_camel_apache_org_v1_BuildConfiguration[BuildConfiguration]*
 |
 
 
-The strategy that should be used to perform the Build.
+The configuration that should be used to perform the Build.
 
 |`toolImage` +
 string
@@ -721,7 +722,6 @@ https://github.com/OAI/OpenAPI-Specification/issues/845
 *Appears on:*
 
 * <<#_camel_apache_org_v1_BuildConfiguration, BuildConfiguration>>
-* <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
 
 BuildStrategy specifies how the Build should be executed.
 It will trigger a Maven process (either as an Operator routine or Kubernetes Pod execution) that
@@ -5316,6 +5316,34 @@ string
 
 
 The strategy to use, either `pod` or `routine` (default routine)
+
+|`requestCPU` +
+string
+|
+
+
+When using `pod` strategy, the minimum amount of CPU required by the pod builder.
+
+|`requestMemory` +
+string
+|
+
+
+When using `pod` strategy, the minimum amount of memory required by the pod builder.
+
+|`limitCPU` +
+string
+|
+
+
+When using `pod` strategy, the maximum amount of CPU required by the pod builder.
+
+|`limitMemory` +
+string
+|
+
+
+When using `pod` strategy, the maximum amount of memory required by the pod builder.
 
 
 |===

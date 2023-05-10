@@ -228,7 +228,9 @@ func newBuildWithLayoutInPhase(namespace string, name string, layout string, pha
 			},
 		},
 		Spec: v1.BuildSpec{
-			Strategy:            v1.BuildStrategyRoutine,
+			Configuration: v1.BuildConfiguration{
+				Strategy: v1.BuildStrategyRoutine,
+			},
 			ToolImage:           "camel:latest",
 			BuilderPodNamespace: "ns",
 			Tasks:               []v1.Task{},

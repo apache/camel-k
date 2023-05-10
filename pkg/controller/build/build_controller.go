@@ -146,7 +146,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		maxRunningBuilds: instance.Spec.MaxRunningBuilds,
 	}
 
-	switch instance.Spec.Strategy {
+	switch instance.Spec.Configuration.Strategy {
 	case v1.BuildStrategyPod:
 		actions = []Action{
 			newInitializePodAction(r.reader),
@@ -209,7 +209,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		return reconcile.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	if target.Spec.Strategy == v1.BuildStrategyPod &&
+	if target.Spec.Configuration.Strategy == v1.BuildStrategyPod &&
 		(target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
 		// Requeue running Build to poll Pod and signal timeout
 		return reconcile.Result{RequeueAfter: 1 * time.Second}, nil

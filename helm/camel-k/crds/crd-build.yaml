@@ -79,6 +79,33 @@ spec:
           spec:
             description: BuildSpec defines the Build operation to be executed
             properties:
+              configuration:
+                description: The configuration that should be used to perform the
+                  Build.
+                properties:
+                  limitCPU:
+                    description: The maximum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  limitMemory:
+                    description: The maximum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
+                  requestCPU:
+                    description: The minimum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  requestMemory:
+                    description: The minimum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
+                  strategy:
+                    description: the strategy to adopt
+                    enum:
+                    - routine
+                    - pod
+                    type: string
+                type: object
               maxRunningBuilds:
                 description: the maximum amount of parallel running builds started
                   by this operator instance
@@ -87,12 +114,6 @@ spec:
               operatorNamespace:
                 description: The namespace where to run the builder Pod (must be the
                   same of the operator in charge of this Build reconciliation).
-                type: string
-              strategy:
-                description: The strategy that should be used to perform the Build.
-                enum:
-                - routine
-                - pod
                 type: string
               tasks:
                 description: The sequence of Build tasks to be performed as part of

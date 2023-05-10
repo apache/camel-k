@@ -184,6 +184,7 @@ func (in *BuildSpec) DeepCopyInto(out *BuildSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	out.Configuration = in.Configuration
 	out.Timeout = in.Timeout
 }
 

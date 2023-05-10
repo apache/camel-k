@@ -29,8 +29,8 @@ import (
 type BuildSpec struct {
 	// The sequence of Build tasks to be performed as part of the Build execution.
 	Tasks []Task `json:"tasks,omitempty"`
-	// The strategy that should be used to perform the Build.
-	Strategy BuildStrategy `json:"strategy,omitempty"`
+	// The configuration that should be used to perform the Build.
+	Configuration BuildConfiguration `json:"configuration,omitempty"`
 	// The container image to be used to run the build.
 	ToolImage string `json:"toolImage,omitempty"`
 	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).

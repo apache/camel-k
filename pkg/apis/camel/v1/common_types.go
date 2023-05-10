@@ -39,13 +39,13 @@ const (
 type BuildConfiguration struct {
 	// the strategy to adopt
 	Strategy BuildStrategy `property:"strategy" json:"strategy,omitempty"`
-	// The minimum amount of CPU required.
+	// The minimum amount of CPU required. Only used for `pod` strategy
 	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
-	// The minimum amount of memory required.
+	// The minimum amount of memory required. Only used for `pod` strategy
 	RequestMemory string `property:"request-memory" json:"requestMemory,omitempty"`
-	// The maximum amount of CPU required.
+	// The maximum amount of CPU required. Only used for `pod` strategy
 	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
-	// The maximum amount of memory required.
+	// The maximum amount of memory required. Only used for `pod` strategy
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
 }
 
