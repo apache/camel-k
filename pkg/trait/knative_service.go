@@ -117,31 +117,6 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
-		// Check the right value for minScale, as not all services are allowed to scale down to 0
-		if t.MinScale == nil {
-			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
-			if err != nil {
-				e.Integration.Status.SetErrorCondition(
-					v1.IntegrationConditionKnativeServiceAvailable,
-					v1.IntegrationConditionKnativeServiceNotAvailableReason,
-					err,
-				)
-
-				return false, err
-			}
-
-			meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-			if err != nil {
-				return false, err
-			}
-			if !meta.ExposesHTTPServices || !meta.PassiveEndpoints {
-				single := 1
-				t.MinScale = &single
-			}
-		}
-	}
-
 	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
 		return condition != nil && condition.Status == corev1.ConditionTrue, nil
@@ -168,11 +143,8 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	knativeServiceStrategy := ControllerStrategyKnativeService
-	if t.Enabled != nil {
-		if *t.Enabled {
-			return &knativeServiceStrategy, nil
-		}
+	if !pointer.BoolDeref(t.Enabled, true) {
+		// explicitly disabled
 		return nil, nil
 	}
 
@@ -186,7 +158,8 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 	if err != nil {
 		return nil, err
 	}
-	if meta.ExposesHTTPServices {
+	if meta.ExposesHTTPServices || meta.PassiveEndpoints {
+		knativeServiceStrategy := ControllerStrategyKnativeService
 		return &knativeServiceStrategy, nil
 	}
 	return nil, nil
