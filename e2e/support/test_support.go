@@ -27,6 +27,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -44,7 +45,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/format"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -348,7 +349,7 @@ func verifyGlobalOperator() error {
 
 	oppod := OperatorPod(opns)()
 	if oppod == nil {
-		return fmt.Errorf("No operator pod detected in namespace %s. Operator install is a pre-requisite of the test", opns)
+		return fmt.Errorf("no operator pod detected in namespace %s. Operator install is a pre-requisite of the test", opns)
 	}
 
 	return nil
@@ -1621,6 +1622,18 @@ func BuildFailureRecovery(ns, name string) func() int {
 	}
 }
 
+func BuildsRunning(predicates ...func() v1.BuildPhase) func() int {
+	return func() int {
+		runningBuilds := 0
+		for _, predicate := range predicates {
+			if predicate() == v1.BuildPhaseRunning {
+				runningBuilds++
+			}
+		}
+		return runningBuilds
+	}
+}
+
 func HasPlatform(ns string) func() bool {
 	return func() bool {
 		lst := v1.NewIntegrationPlatformList()
@@ -1658,6 +1671,21 @@ func Platform(ns string) func() *v1.IntegrationPlatform {
 			return pl
 		}
 		return &lst.Items[0]
+	}
+}
+
+func PlatformByName(ns string, name string) func() *v1.IntegrationPlatform {
+	return func() *v1.IntegrationPlatform {
+		lst := v1.NewIntegrationPlatformList()
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(err)
+		}
+		for _, p := range lst.Items {
+			if p.Name == name {
+				return &p
+			}
+		}
+		return nil
 	}
 }
 
@@ -1771,6 +1799,26 @@ func PlatformPhase(ns string) func() v1.IntegrationPlatformPhase {
 			return ""
 		}
 		return p.Status.Phase
+	}
+}
+
+func SelectedPlatformPhase(ns string, name string) func() v1.IntegrationPlatformPhase {
+	return func() v1.IntegrationPlatformPhase {
+		p := PlatformByName(ns, name)()
+		if p == nil {
+			return ""
+		}
+		return p.Status.Phase
+	}
+}
+
+func PlatformHas(ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
+	return func() bool {
+		pl := Platform(ns)()
+		if pl == nil {
+			return false
+		}
+		return predicate(pl)
 	}
 }
 
@@ -2297,74 +2345,12 @@ func CreateTimerKamelet(ns string, name string) func() error {
 	return CreateKamelet(ns, name, flow, props, nil)
 }
 
-// Deprecated:
-// Use KamelBind func instead
-func BindKameletTo(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
-	sourceProperties, sinkProperties map[string]string) func() error {
-	return BindKameletToWithErrorHandler(ns, name, annotations, from, to, sourceProperties, sinkProperties, nil)
-}
-
-// Deprecated:
-// Use KamelBind func instead
-func BindKameletToWithErrorHandler(ns, name string, annotations map[string]string, from, to corev1.ObjectReference,
-	sourceProperties, sinkProperties map[string]string, errorHandler map[string]interface{}) func() error {
-	return func() error {
-		kb := v1.NewPipe(ns, name)
-		kb.Annotations = annotations
-		kb.Spec = v1.PipeSpec{
-			Source: v1.Endpoint{
-				Ref:        &from,
-				Properties: asEndpointProperties(sourceProperties),
-			},
-			Sink: v1.Endpoint{
-				Ref:        &to,
-				Properties: asEndpointProperties(sinkProperties),
-			},
-		}
-		if errorHandler != nil {
-			kb.Spec.ErrorHandler = asErrorHandlerSpec(errorHandler)
-		}
-		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)
-		return err
-	}
-}
-
-// Deprecated:
-// Use KamelBind func instead
 func asTemplate(source map[string]interface{}) *v1.Template {
 	bytes, err := json.Marshal(source)
 	if err != nil {
 		failTest(err)
 	}
 	return &v1.Template{
-		RawMessage: bytes,
-	}
-}
-
-// Deprecated:
-// Use KamelBind func instead
-func asErrorHandlerSpec(source map[string]interface{}) *v1.ErrorHandlerSpec {
-	bytes, err := json.Marshal(source)
-	if err != nil {
-		failTest(err)
-	}
-	return &v1.ErrorHandlerSpec{
-		RawMessage: bytes,
-	}
-}
-
-// Deprecated:
-// Use KamelBind func instead
-func asEndpointProperties(props map[string]string) *v1.EndpointProperties {
-	if props == nil {
-		return &v1.EndpointProperties{}
-	}
-
-	bytes, err := json.Marshal(props)
-	if err != nil {
-		failTest(err)
-	}
-	return &v1.EndpointProperties{
 		RawMessage: bytes,
 	}
 }

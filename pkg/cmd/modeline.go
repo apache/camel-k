@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -26,7 +27,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/cmd/source"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/modeline"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -129,7 +130,7 @@ func createKamelWithModelineCommand(ctx context.Context, args []string) (*cobra.
 
 	opts, err := extractModelineOptions(ctx, files, rootCmd)
 	if err != nil {
-		return rootCmd, nil, errors.Wrap(err, "cannot read sources")
+		return rootCmd, nil, fmt.Errorf("cannot read sources: %w", err)
 	}
 
 	// Extract list of property/trait names already specified by the user.
@@ -196,7 +197,7 @@ func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Co
 
 	resolvedSources, err := source.Resolve(ctx, sources, false, cmd)
 	if err != nil {
-		return opts, errors.Wrap(err, "failed to resolve sources")
+		return opts, fmt.Errorf("failed to resolve sources: %w", err)
 	}
 
 	for _, resolvedSource := range resolvedSources {
@@ -219,7 +220,7 @@ func extractModelineOptions(ctx context.Context, sources []string, cmd *cobra.Co
 func extractModelineOptionsFromSource(resolvedSource source.Source) ([]modeline.Option, error) {
 	ops, err := modeline.Parse(resolvedSource.Name, resolvedSource.Content)
 	if err != nil {
-		return ops, errors.Wrapf(err, "cannot process file %s", resolvedSource.Location)
+		return ops, fmt.Errorf("cannot process file %s: %w", resolvedSource.Location, err)
 	}
 	for i, o := range ops {
 		if disallowedOptions[o.Name] {

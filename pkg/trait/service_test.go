@@ -335,6 +335,7 @@ func TestServiceWithNodePort(t *testing.T) {
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
 	assert.NoError(t, err)
 
+	serviceType := traitv1.ServiceTypeNodePort
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
@@ -364,8 +365,8 @@ func TestServiceWithNodePort(t *testing.T) {
 						Trait: traitv1.Trait{
 							Enabled: pointer.Bool(true),
 						},
-						Auto:     pointer.Bool(false),
-						NodePort: pointer.Bool(true),
+						Auto: pointer.Bool(false),
+						Type: &serviceType,
 					},
 				},
 			},

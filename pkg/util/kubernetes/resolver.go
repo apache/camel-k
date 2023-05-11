@@ -23,26 +23,13 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/gzip"
-	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // ResolveSources --.
 func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.SourceSpec, error) {
-	for i := 0; i < len(elements); i++ {
-		r := &elements[i]
-
-		if err := Resolve(&r.DataSpec, mapLookup); err != nil {
-			return nil, err
-		}
-	}
-
-	return elements, nil
-}
-
-// ResolveResource --.
-func ResolveResource(elements []v1.ResourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.ResourceSpec, error) {
 	for i := 0; i < len(elements); i++ {
 		r := &elements[i]
 
@@ -85,7 +72,7 @@ func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error
 		var uncompressed []byte
 		var err error
 		if uncompressed, err = gzip.UncompressBase64(cnt); err != nil {
-			return errors.Wrap(err, "error while uncompressing data")
+			return fmt.Errorf("error while uncompressing data: %w", err)
 		}
 		data.Compression = false
 		data.Content = string(uncompressed)

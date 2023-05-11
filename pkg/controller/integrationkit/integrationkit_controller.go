@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -148,6 +148,11 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 				}
 
 				for _, kit := range list.Items {
+					if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok && v != p.Name {
+						log.Infof("Integration kit %s is waiting for selected integration platform '%s' - skip it now", kit.Name, v)
+						continue
+					}
+
 					if kit.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 						log.Infof("Platform %s ready, wake-up integration kit: %s", p.Name, kit.Name)
 						requests = append(requests, reconcile.Request{
@@ -203,7 +208,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 	// Fetch the IntegrationKit instance
 	if err := r.client.Get(ctx, request.NamespacedName, &instance); err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue

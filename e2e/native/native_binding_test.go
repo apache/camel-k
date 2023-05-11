@@ -23,12 +23,13 @@ limitations under the License.
 package native
 
 import (
-	"testing"
-
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
+	"time"
 )
 
 func TestNativeBinding(t *testing.T) {
@@ -41,24 +42,30 @@ func TestNativeBinding(t *testing.T) {
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		from := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "timer-source",
-			APIVersion: v1.SchemeGroupVersion.String(),
+		pl := Platform(ns)()
+		// set a longer timeout than default as for some reason the builder hit the timeout
+		pl.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
+			Duration: 5 * time.Minute,
 		}
-		to := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "log-sink",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		}
+		TestClient().Update(TestContext, pl)
+		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(PlatformBuildCatalogToolTimeout(ns)).Should(Equal(
+			&metav1.Duration{
+				Duration: 5 * time.Minute,
+			},
+		))
+
 		message := "Magicstring!"
 
 		t.Run("binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
-			Expect(BindKameletTo(ns, bindingName,
-				map[string]string{"trait.camel.apache.org/quarkus.package-type": "native"},
-				from, to,
-				map[string]string{"message": message}, map[string]string{})()).To(Succeed())
+			Expect(KamelBindWithID(operatorID, ns,
+				"timer-source",
+				"log-sink",
+				"-p", "source.message="+message,
+				"--annotation", "trait.camel.apache.org/quarkus.package-type=native",
+				"--name", bindingName,
+			).Execute()).To(Succeed())
 
 			// ====================================
 			// !!! THE MOST TIME-CONSUMING PART !!!

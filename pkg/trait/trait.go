@@ -19,8 +19,8 @@ package trait
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -46,7 +46,7 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 
 	environment, err := newEnvironment(ctx, c, integration, kit)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating trait environment")
+		return nil, fmt.Errorf("error creating trait environment: %w", err)
 	}
 
 	catalog := NewCatalog(c)
@@ -56,14 +56,14 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 
 	// invoke the trait framework to determine the needed resources
 	if err := catalog.apply(environment); err != nil {
-		return nil, errors.Wrap(err, "error during trait customization")
+		return nil, fmt.Errorf("error during trait customization: %w", err)
 	}
 
 	// execute post actions registered by traits
 	for _, postAction := range environment.PostActions {
 		err := postAction(environment)
 		if err != nil {
-			return nil, errors.Wrap(err, "error executing post actions")
+			return nil, fmt.Errorf("error executing post actions: %w", err)
 		}
 	}
 

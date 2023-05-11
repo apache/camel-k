@@ -29,7 +29,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"k8s.io/klog/v2"
 
 	"go.uber.org/automaxprocs/maxprocs"
@@ -258,6 +257,7 @@ func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, opera
 		if defaultPlatform.Labels == nil {
 			defaultPlatform.Labels = make(map[string]string)
 		}
+		defaultPlatform.Labels["app"] = "camel-k"
 		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
 
 		if operatorID != "" {
@@ -270,7 +270,7 @@ func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, opera
 
 		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
 		if err := install.IntegrationPlatformViewerRole(ctx, c, operatorNamespace); err != nil && !k8serrors.IsAlreadyExists(err) {
-			return errors.Wrap(err, "Error while installing global IntegrationPlatform viewer role")
+			return fmt.Errorf("error while installing global IntegrationPlatform viewer role: %w", err)
 		}
 	} else {
 		return err

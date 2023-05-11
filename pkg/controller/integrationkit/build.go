@@ -19,12 +19,12 @@ package integrationkit
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/pkg/errors"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -120,7 +120,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			if pvc, err := kubernetes.LookupPersistentVolumeClaim(env.Ctx, env.Client, builderPodNamespace, defaults.DefaultPVC); pvc != nil || err != nil {
 				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 				if err != nil {
-					return nil, errors.Wrap(err, "Error while creating Camel K Builder service account")
+					return nil, fmt.Errorf("error while creating Camel K Builder service account: %w", err)
 				}
 			} else {
 				// Fallback to Routine strategy
@@ -157,12 +157,12 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		err = action.client.Delete(ctx, build)
 		if err != nil && !k8serrors.IsNotFound(err) {
-			return nil, errors.Wrap(err, "cannot delete build")
+			return nil, fmt.Errorf("cannot delete build: %w", err)
 		}
 
 		err = action.client.Create(ctx, build)
 		if err != nil {
-			return nil, errors.Wrap(err, "cannot create build")
+			return nil, fmt.Errorf("cannot create build: %w", err)
 		}
 	}
 

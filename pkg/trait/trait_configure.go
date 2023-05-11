@@ -19,12 +19,12 @@ package trait
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -170,7 +170,7 @@ func configureTrait(id string, config map[string]interface{}, trait interface{})
 			if v, ok := data.(string); ok && strings.HasPrefix(v, "[") && strings.HasSuffix(v, "]") {
 				var value interface{}
 				if err := json.Unmarshal([]byte(v), &value); err != nil {
-					return nil, errors.Wrap(err, "could not decode JSON array for configuring trait property")
+					return nil, fmt.Errorf("could not decode JSON array for configuring trait property: %w", err)
 				}
 				return value, nil
 			}
@@ -189,7 +189,7 @@ func configureTrait(id string, config map[string]interface{}, trait interface{})
 		},
 	)
 	if err != nil {
-		return errors.Wrapf(err, "error while decoding trait configuration %q", id)
+		return fmt.Errorf("error while decoding trait configuration %q: %w", id, err)
 	}
 
 	return decoder.Decode(config)

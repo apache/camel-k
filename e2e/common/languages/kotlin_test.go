@@ -43,9 +43,5 @@ func TestRunSimpleKotlinExamples(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "kotlin"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 	})
 
-	t.Run("init run Kotlin", func(t *testing.T) {
-		RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageKotlin)
-	})
-
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

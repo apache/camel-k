@@ -24,8 +24,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -87,7 +85,7 @@ func prepareProjectWithSources(ctx *builderContext) error {
 	}
 	sourcesPath := filepath.Join(ctx.Path, "maven", "src", "main", "resources", "routes")
 	if err := os.MkdirAll(sourcesPath, os.ModePerm); err != nil {
-		return errors.Wrap(err, "failure while creating resource folder")
+		return fmt.Errorf("failure while creating resource folder: %w", err)
 	}
 
 	sourceList := ""
@@ -97,14 +95,14 @@ func prepareProjectWithSources(ctx *builderContext) error {
 		}
 		sourceList += "classpath:routes/" + source.Name
 		if err := os.WriteFile(filepath.Join(sourcesPath, source.Name), []byte(source.Content), os.ModePerm); err != nil {
-			return errors.Wrapf(err, "failure while writing %s", source.Name)
+			return fmt.Errorf("failure while writing %s: %w", source.Name, err)
 		}
 	}
 
 	if sourceList != "" {
 		routesIncludedPattern := "camel.main.routes-include-pattern = " + sourceList
 		if err := os.WriteFile(filepath.Join(filepath.Dir(sourcesPath), "application.properties"), []byte(routesIncludedPattern), os.ModePerm); err != nil {
-			return errors.Wrapf(err, "failure while writing the configuration application.properties")
+			return fmt.Errorf("failure while writing the configuration application.properties: %w", err)
 		}
 	}
 	return nil
@@ -239,7 +237,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project maven.Project) error {
 	resourcesPath := filepath.Join(mc.Path, "src", "main", "resources")
 	if err := os.MkdirAll(resourcesPath, os.ModePerm); err != nil {
-		return errors.Wrap(err, "failure while creating resource folder")
+		return fmt.Errorf("failure while creating resource folder: %w", err)
 	}
 
 	// Generate an empty application.properties so that there will be something in
@@ -248,14 +246,14 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 	// In the future there should be a way to provide build information from secrets,
 	// configmap, etc.
 	if _, err := os.OpenFile(filepath.Join(resourcesPath, "application.properties"), os.O_RDWR|os.O_CREATE, 0666); err != nil {
-		return errors.Wrap(err, "failure while creating application.properties")
+		return fmt.Errorf("failure while creating application.properties: %w", err)
 	}
 
 	mc.AddArgument("package")
 
 	// Run the Maven goal
 	if err := project.Command(mc).Do(ctx); err != nil {
-		return errors.Wrap(err, "failure while building project")
+		return fmt.Errorf("failure while building project: %w", err)
 	}
 
 	return nil

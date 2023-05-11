@@ -19,12 +19,12 @@ package trait
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
 
 	authorization "k8s.io/api/authorization/v1"
@@ -101,13 +101,13 @@ func (t *gcTrait) Apply(e *Environment) error {
 func (t *gcTrait) garbageCollectResources(e *Environment) error {
 	deletableGVKs, err := t.getDeletableTypes(e)
 	if err != nil {
-		return errors.Wrap(err, "cannot discover GVK types")
+		return fmt.Errorf("cannot discover GVK types: %w", err)
 	}
 
 	integration, _ := labels.NewRequirement(v1.IntegrationLabel, selection.Equals, []string{e.Integration.Name})
 	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
 	if err != nil {
-		return errors.Wrap(err, "cannot determine generation requirement")
+		return fmt.Errorf("cannot determine generation requirement: %w", err)
 	}
 	selector := labels.NewSelector().
 		Add(*integration).
@@ -130,7 +130,7 @@ func (t *gcTrait) deleteEachOf(ctx context.Context, deletableGVKs map[schema.Gro
 		}
 		if err := t.Client.List(ctx, &resources, options...); err != nil {
 			if !k8serrors.IsNotFound(err) {
-				return errors.Wrap(err, "cannot list child resources")
+				return fmt.Errorf("cannot list child resources: %w", err)
 			}
 			continue
 		}

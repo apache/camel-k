@@ -18,12 +18,13 @@ limitations under the License.
 package client
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	user "github.com/mitchellh/go-homedir"
-	"github.com/pkg/errors"
+
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/scale"
 

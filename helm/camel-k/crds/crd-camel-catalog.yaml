@@ -39,13 +39,17 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The Camel K Runtime version
+    - description: The Runtime provider
+      jsonPath: .spec.runtime.provider
+      name: Runtime Provider
+      type: string
+    - description: The Runtime version
       jsonPath: .spec.runtime.version
       name: Runtime Version
       type: string
-    - description: The Camel K Runtime provider
-      jsonPath: .spec.runtime.provider
-      name: Runtime Provider
+    - description: The Camel version
+      jsonPath: .spec.runtime.metadata.camel\.version
+      name: Runtime Camel Version
       type: string
     - description: The catalog phase
       jsonPath: .status.phase

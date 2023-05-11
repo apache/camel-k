@@ -22,12 +22,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/spf13/cobra"
@@ -38,6 +40,17 @@ import (
 const (
 	cmdRun            = "run"
 	integrationSource = "example.js"
+	yamlIntegration   = `# camel-k: language=yaml
+
+- from:
+    uri: "timer:yaml"
+    parameters:
+      period: "1000"
+    steps:
+      - setBody:
+          constant: "Hello Camel K from yaml"
+      - to: "log:info"
+`
 )
 
 // nolint: unparam
@@ -54,9 +67,10 @@ func initializeRunCmdOptions(t *testing.T) (*runCmdOptions, *cobra.Command, Root
 // nolint: unparam
 func initializeRunCmdOptionsWithOutput(t *testing.T) (*runCmdOptions, *cobra.Command, RootCmdOptions) {
 	t.Helper()
-
 	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
-	fakeClient, _ := test.NewFakeClient(&defaultIntegrationPlatform)
+	c := v1.NewCamelCatalog(defaultIntegrationPlatform.Namespace, defaults.DefaultRuntimeVersion)
+	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: defaultIntegrationPlatform.Status.Build.RuntimeProvider, Version: defaultIntegrationPlatform.Status.Build.RuntimeVersion}}
+	fakeClient, _ := test.NewFakeClient(&defaultIntegrationPlatform, &c)
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	runCmdOptions := addTestRunCmdWithOutput(*options, rootCmd)
@@ -215,13 +229,11 @@ func TestRunNameFlag(t *testing.T) {
 func TestRunOpenApiFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun,
-		"--open-api", "file:oapi1",
 		"--open-api", "configmap:oapi2",
 		integrationSource)
 	assert.Nil(t, err)
-	assert.Len(t, runCmdOptions.OpenAPIs, 2)
-	assert.Equal(t, "file:oapi1", runCmdOptions.OpenAPIs[0])
-	assert.Equal(t, "configmap:oapi2", runCmdOptions.OpenAPIs[1])
+	assert.Len(t, runCmdOptions.OpenAPIs, 1)
+	assert.Equal(t, "configmap:oapi2", runCmdOptions.OpenAPIs[0])
 }
 
 func TestRunOpenApiInvalidFlag(t *testing.T) {
@@ -510,7 +522,7 @@ func TestRunValidateArgs(t *testing.T) {
 	args = []string{"missing_file"}
 	err = runCmdOptions.validateArgs(rootCmd, args)
 	assert.NotNil(t, err)
-	assert.Equal(t, "One of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
+	assert.Equal(t, "one of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
 }
 
 func TestResolvePodTemplate(t *testing.T) {
@@ -772,4 +784,34 @@ func TestPropertyShouldNotExpand(t *testing.T) {
 	assert.Contains(t, output, "runtimeProp = ${value}")
 	assert.Contains(t, output, "buildProp = ${value}")
 	assert.Contains(t, output, "key = ${value}")
+}
+
+func TestRunOutput(t *testing.T) {
+	var tmpFile1 *os.File
+	var err error
+	if tmpFile1, err = os.CreateTemp("", "camel-k-*.yaml"); err != nil {
+		t.Error(err)
+	}
+	defer tmpFile1.Close()
+
+	assert.Nil(t, tmpFile1.Sync())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+
+	_, rootCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
+	_, fileName := filepath.Split(tmpFile1.Name())
+	integrationName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
+
+	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" unchanged\n", integrationName), output)
+
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(strings.Replace(yamlIntegration, "Hello", "Hi", 1)), 0o400))
+	assert.Nil(t, tmpFile1.Sync())
+	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
+
 }

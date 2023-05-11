@@ -26,7 +26,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // NewInitializeAction creates a new initialization handling action for the kit.
@@ -65,7 +65,7 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 		)
 
 		if err != nil {
-			if errors.IsNotFound(err) {
+			if k8serrors.IsNotFound(err) {
 				// If the catalog is not available, likely it was required to be created
 				// by Integration trait, so we'll need to wait for it the be available
 				kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog

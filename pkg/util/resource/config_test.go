@@ -26,9 +26,7 @@ import (
 func TestParseConfigOption(t *testing.T) {
 	validConfigMap := "configmap:my-config_map"
 	validSecret := "secret:my-secret"
-	validFile := "file:/tmp/my-file.txt"
 	notValid := "someprotocol:wrong"
-	validLocation := "file:my-file.txt@/tmp/another-name.xml"
 
 	configmap, err := ParseConfig(validConfigMap)
 	assert.Nil(t, err)
@@ -38,17 +36,8 @@ func TestParseConfigOption(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, StorageTypeSecret, secret.storageType)
 	assert.Equal(t, "my-secret", secret.Name())
-	file, err := ParseConfig(validFile)
-	assert.Nil(t, err)
-	assert.Equal(t, StorageTypeFile, file.storageType)
-	assert.Equal(t, "/tmp/my-file.txt", file.Name())
 	_, err = ParseConfig(notValid)
 	assert.NotNil(t, err)
-	location, err := ParseConfig(validLocation)
-	assert.Nil(t, err)
-	assert.Equal(t, StorageTypeFile, location.storageType)
-	assert.Equal(t, "my-file.txt", location.Name())
-	assert.Equal(t, "/tmp/another-name.xml", location.DestinationPath())
 }
 
 func TestParseConfigOptionAllParams(t *testing.T) {
@@ -60,9 +49,6 @@ func TestParseConfigOptionAllParams(t *testing.T) {
 	sec2 := "secret:sec/key"
 	sec3 := "secret:sec@/tmp/sec"
 	sec4 := "secret:sec"
-	file1 := "file:/path/to/my-file.txt@/tmp/file.txt"
-	file2 := "file:/path/to/my-file.txt"
-	file3 := "file:/path to/my-file.txt"
 
 	parsedCm1, err := ParseConfig(cm1)
 	assert.Nil(t, err)
@@ -119,25 +105,4 @@ func TestParseConfigOptionAllParams(t *testing.T) {
 	assert.Equal(t, "sec", parsedSec4.Name())
 	assert.Equal(t, "", parsedSec4.Key())
 	assert.Equal(t, "", parsedSec4.DestinationPath())
-
-	parsedFile1, err := ParseConfig(file1)
-	assert.Nil(t, err)
-	assert.Equal(t, StorageTypeFile, parsedFile1.StorageType())
-	assert.Equal(t, "/path/to/my-file.txt", parsedFile1.Name())
-	assert.Equal(t, "", parsedFile1.Key())
-	assert.Equal(t, "/tmp/file.txt", parsedFile1.DestinationPath())
-
-	parsedFile2, err := ParseConfig(file2)
-	assert.Nil(t, err)
-	assert.Equal(t, StorageTypeFile, parsedFile2.StorageType())
-	assert.Equal(t, "/path/to/my-file.txt", parsedFile2.Name())
-	assert.Equal(t, "", parsedFile2.Key())
-	assert.Equal(t, "", parsedFile2.DestinationPath())
-
-	parsedFile3, err := ParseConfig(file3)
-	assert.Nil(t, err)
-	assert.Equal(t, StorageTypeFile, parsedFile3.StorageType())
-	assert.Equal(t, "/path to/my-file.txt", parsedFile3.Name())
-	assert.Equal(t, "", parsedFile3.Key())
-	assert.Equal(t, "", parsedFile3.DestinationPath())
 }

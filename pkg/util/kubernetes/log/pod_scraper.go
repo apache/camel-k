@@ -20,13 +20,14 @@ package log
 import (
 	"bufio"
 	"context"
+	"errors"
 	"io"
 	"time"
 
 	"go.uber.org/multierr"
 
 	klog "github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/pkg/errors"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

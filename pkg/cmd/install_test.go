@@ -66,7 +66,6 @@ func TestInstallNoFlag(t *testing.T) {
 	assert.Equal(t, false, installCmdOptions.SkipDefaultKameletsSetup)
 	assert.Equal(t, false, installCmdOptions.ExampleSetup)
 	assert.Equal(t, false, installCmdOptions.Global)
-	assert.Equal(t, false, installCmdOptions.KanikoBuildCache)
 	assert.Equal(t, false, installCmdOptions.Save)
 	assert.Equal(t, false, installCmdOptions.Force)
 	assert.Equal(t, true, installCmdOptions.Olm)
@@ -155,13 +154,6 @@ func TestInstallHealthFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--health-port", "7777")
 	assert.Nil(t, err)
 	assert.Equal(t, int32(7777), installCmdOptions.HealthPort)
-}
-
-func TestInstallKanikoBuildCacheFlag(t *testing.T) {
-	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--kaniko-build-cache")
-	assert.Nil(t, err)
-	assert.Equal(t, true, installCmdOptions.KanikoBuildCache)
 }
 
 func TestInstallBuildPublishStrategyOptions(t *testing.T) {

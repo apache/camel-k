@@ -62,8 +62,8 @@ func TestIntegrationNotCompatible(t *testing.T) {
 	dstPlatform.Status.Build.RuntimeVersion = "0.0.1"
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration := nominalIntegration("my-it-test")
-	srcCatalog := createCamelCatalog(srcPlatform)
-	dstCatalog := createCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
 	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
@@ -85,8 +85,8 @@ func TestIntegrationDryRun(t *testing.T) {
 	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration := nominalIntegration("my-it-test")
-	srcCatalog := createCamelCatalog(srcPlatform)
-	dstCatalog := createCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
 	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
@@ -124,8 +124,8 @@ func TestPipeDryRun(t *testing.T) {
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultKB := nominalPipe("my-kb-test")
 	defaultIntegration := nominalIntegration("my-kb-test")
-	srcCatalog := createCamelCatalog(srcPlatform)
-	dstCatalog := createCamelCatalog(dstPlatform)
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
 
 	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &srcCatalog, &dstCatalog)
 	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
@@ -155,7 +155,7 @@ func nominalPipe(name string) v1.Pipe {
 	return kb
 }
 
-func createCamelCatalog(platform v1.IntegrationPlatform) v1.CamelCatalog {
+func createTestCamelCatalog(platform v1.IntegrationPlatform) v1.CamelCatalog {
 	c := v1.NewCamelCatalog(platform.Namespace, defaults.DefaultRuntimeVersion)
 	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Build.RuntimeProvider, Version: platform.Status.Build.RuntimeVersion}}
 	return c

@@ -150,7 +150,11 @@ func (c *FakeClient) GetCurrentNamespace(kubeConfig string) (string, error) {
 
 // Patch mimicks patch for server-side apply and simply creates the obj.
 func (c *FakeClient) Patch(ctx context.Context, obj controller.Object, patch controller.Patch, opts ...controller.PatchOption) error {
-	return c.Create(ctx, obj)
+	if err := c.Create(ctx, obj); err != nil {
+		// Create fails if object already exists. Try to update it.
+		return c.Update(ctx, obj)
+	}
+	return nil
 }
 
 func (c *FakeClient) DisableAPIGroupDiscovery(group string) {

@@ -19,6 +19,7 @@ package maven
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -28,8 +29,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/log"

@@ -32,8 +32,10 @@ import (
 // +kubebuilder:resource:path=integrationkits,scope=Namespaced,shortName=ik,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
+// +kubebuilder:printcolumn:name="Alias",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.alias`,description="The integration kit alias"
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration kit phase"
 // +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.type`,description="The integration kit type"
+// +kubebuilder:printcolumn:name="Layout",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.layout`,description="The integration kit layout"
 // +kubebuilder:printcolumn:name="Image",type=string,JSONPath=`.status.image`,description="The integration kit image"
 
 // IntegrationKit defines a container image and additional configuration needed to run an `Integration`.

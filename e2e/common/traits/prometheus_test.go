@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -83,7 +83,7 @@ func podMonitor(ns string, name string) func() *monitoringv1.PodMonitor {
 			Name:      name,
 		}
 		err := TestClient().Get(TestContext, key, &pm)
-		if err != nil && errors.IsNotFound(err) {
+		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			panic(err)

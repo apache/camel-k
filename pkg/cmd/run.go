@@ -20,6 +20,7 @@ package cmd
 import (
 	"archive/zip"
 	"context"
+	"errors"
 
 	// this is needed to generate an SHA1 sum for Jars
 	// #nosec G501
@@ -44,7 +45,7 @@ import (
 
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	"github.com/magiconair/properties"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -59,7 +60,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/cmd/local"
 	"github.com/apache/camel-k/v2/pkg/cmd/source"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -102,8 +102,8 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name])")
 	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name]])")
-	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key], where name represents the local file path or the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
-	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap, a Secret or a file (syntax: [configmap|secret|file]:name[/key][@path], where name represents the local file path or the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
+	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap or a Secret (syntax: [configmap|secret]:name[/key], where name represents the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
+	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap or a Secret (syntax: [configmap|secret]:name[/key][@path], where name represents the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
@@ -242,7 +242,7 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	}
 
 	if _, err := source.Resolve(context.Background(), args, false, cmd); err != nil {
-		return errors.Wrap(err, "One of the provided sources is not reachable")
+		return fmt.Errorf("one of the provided sources is not reachable: %w", err)
 	}
 
 	return nil
@@ -262,7 +262,7 @@ func (o *runCmdOptions) validate() error {
 
 	propertyFiles := filterBuildPropertyFiles(o.Properties)
 	propertyFiles = append(propertyFiles, filterBuildPropertyFiles(o.BuildProperties)...)
-	err := local.ValidatePropertyFiles(propertyFiles)
+	err := validatePropertyFiles(propertyFiles)
 	if err != nil {
 		return err
 	}
@@ -286,9 +286,9 @@ func (o *runCmdOptions) validate() error {
 	}
 
 	for _, openapi := range o.OpenAPIs {
-		// We support only local file and cluster configmaps
-		if !(strings.HasPrefix(openapi, "file:") || strings.HasPrefix(openapi, "configmap:")) {
-			return fmt.Errorf(`invalid openapi specification "%s". It supports only file or configmap`, openapi)
+		// We support only cluster configmaps
+		if !(strings.HasPrefix(openapi, "configmap:")) {
+			return fmt.Errorf(`invalid openapi specification "%s". It supports only configmaps`, openapi)
 		}
 	}
 
@@ -562,14 +562,26 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	if existing == nil {
 		err = c.Create(o.Context, integration)
+		if err != nil {
+			return nil, err
+		}
 		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" created`)
 	} else {
-		err = c.Patch(o.Context, integration, ctrl.MergeFromWithOptions(existing, ctrl.MergeFromWithOptimisticLock{}))
-		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" updated`)
-	}
+		patch := ctrl.MergeFrom(existing)
+		d, err := patch.Data(integration)
+		if err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
+		if string(d) == "{}" {
+			fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" unchanged`)
+			return integration, nil
+		}
+		err = c.Patch(o.Context, integration, patch)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), `Integration "`+name+`" updated`)
 	}
 
 	return integration, nil
@@ -730,8 +742,7 @@ func (o *runCmdOptions) parseAndConvertToTrait(cmd *cobra.Command,
 		if err != nil {
 			return err
 		}
-		// We try to autogenerate a configmap
-		if _, err := parseConfigAndGenCm(o.Context, cmd, c, config, integration, o.Compression); err != nil {
+		if err := parseConfig(o.Context, cmd, c, config, integration); err != nil {
 			return err
 		}
 		o.Traits = append(o.Traits, convertToTrait(convert(config), traitParam))
@@ -800,7 +811,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				}
 			}
 			if err := o.uploadDependency(platform, item, name, cmd, it); err != nil {
-				return errors.Wrap(err, fmt.Sprintf("Error trying to upload %s to the Image Registry.", item))
+				return fmt.Errorf("error trying to upload %s to the Image Registry.: %w", item, err)
 			}
 		} else {
 			if catalog == nil {
@@ -810,7 +821,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				// And the validation only warns potential misusages of Camel components at the CLI level,
 				// so strictness of catalog version is not necessary here.
 				var err error
-				catalog, err = local.CreateCamelCatalog(o.Context)
+				catalog, err = createCamelCatalog(o.Context)
 				if err != nil {
 					return err
 				}
@@ -989,7 +1000,7 @@ func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item 
 			query := item[idx+1:]
 			options, err := url.ParseQuery(query)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("invalid http dependency options %s", query))
+				return fmt.Errorf("invalid http dependency options %s: %w", query, err)
 			}
 			o.RegistryOptions = options
 			depURL = item[:idx]
@@ -997,9 +1008,9 @@ func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item 
 
 		uri, err := url.Parse(depURL)
 		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("invalid http dependency url %s", depURL))
+			return fmt.Errorf("invalid http dependency url %s: %w", depURL, err)
 		} else if localPath, err = downloadDependency(o.Context, *uri); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("could not download http dependency %s", depURL))
+			return fmt.Errorf("could not download http dependency %s: %w", depURL, err)
 		}
 		// Remove the temporary file
 		defer os.Remove(localPath)

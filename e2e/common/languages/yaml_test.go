@@ -43,9 +43,5 @@ func TestRunSimpleYamlExamples(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 	})
 
-	t.Run("init run yaml", func(t *testing.T) {
-		RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageYaml)
-	})
-
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

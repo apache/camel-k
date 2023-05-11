@@ -23,6 +23,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -40,8 +41,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
-	"github.com/pkg/errors"
 
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
@@ -93,7 +92,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 
 	err := t.c.Delete(ctx, bc)
 	if err != nil && !apierrors.IsNotFound(err) {
-		return status.Failed(errors.Wrap(err, "cannot delete build config"))
+		return status.Failed(fmt.Errorf("cannot delete build config: %w", err))
 	}
 
 	// Set the build controller as owner reference
@@ -104,12 +103,12 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	if err := ctrlutil.SetOwnerReference(owner, bc, t.c.GetScheme()); err != nil {
-		return status.Failed(errors.Wrapf(err, "cannot set owner reference on BuildConfig: %s", bc.Name))
+		return status.Failed(fmt.Errorf("cannot set owner reference on BuildConfig: %s: %w", bc.Name, err))
 	}
 
 	err = t.c.Create(ctx, bc)
 	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot create build config"))
+		return status.Failed(fmt.Errorf("cannot create build config: %w", err))
 	}
 
 	is := &imagev1.ImageStream{
@@ -131,16 +130,16 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 
 	err = t.c.Delete(ctx, is)
 	if err != nil && !apierrors.IsNotFound(err) {
-		return status.Failed(errors.Wrap(err, "cannot delete image stream"))
+		return status.Failed(fmt.Errorf("cannot delete image stream: %w", err))
 	}
 
 	if err := ctrlutil.SetOwnerReference(owner, is, t.c.GetScheme()); err != nil {
-		return status.Failed(errors.Wrapf(err, "cannot set owner reference on ImageStream: %s", is.Name))
+		return status.Failed(fmt.Errorf("cannot set owner reference on ImageStream: %s: %w", is.Name, err))
 	}
 
 	err = t.c.Create(ctx, is)
 	if err != nil {
-		return status.Failed(errors.Wrap(err, "cannot create image stream"))
+		return status.Failed(fmt.Errorf("cannot create image stream: %w", err))
 	}
 
 	err = util.WithTempDir(t.build.Name+"-s2i-", func(tmpDir string) error {
@@ -161,12 +160,12 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 
 		archiveFile, err := os.Create(archive)
 		if err != nil {
-			return errors.Wrap(err, "cannot create tar archive")
+			return fmt.Errorf("cannot create tar archive: %w", err)
 		}
 
 		err = tarDir(contextDir, archiveFile)
 		if err != nil {
-			return errors.Wrap(err, "cannot tar context directory")
+			return fmt.Errorf("cannot tar context directory: %w", err)
 		}
 
 		f, err := util.Open(archive)
@@ -190,18 +189,18 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 			Do(ctx)
 
 		if r.Error() != nil {
-			return errors.Wrap(r.Error(), "cannot instantiate binary")
+			return fmt.Errorf("cannot instantiate binary: %w", r.Error())
 		}
 
 		data, err := r.Raw()
 		if err != nil {
-			return errors.Wrap(err, "no raw data retrieved")
+			return fmt.Errorf("no raw data retrieved: %w", err)
 		}
 
 		s2iBuild := buildv1.Build{}
 		err = json.Unmarshal(data, &s2iBuild)
 		if err != nil {
-			return errors.Wrap(err, "cannot unmarshal instantiated binary response")
+			return fmt.Errorf("cannot unmarshal instantiated binary response: %w", err)
 		}
 
 		err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)

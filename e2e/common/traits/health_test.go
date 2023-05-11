@@ -25,9 +25,11 @@ package traits
 import (
 	"encoding/json"
 	"fmt"
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"strings"
 	"testing"
 	"time"
+
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -136,42 +138,20 @@ func TestHealthTrait(t *testing.T) {
 	t.Run("Readiness condition with stopped binding", func(t *testing.T) {
 		name := "stopped-binding"
 
-		// Clean up any previous kamelet with same name
-		Expect(TestClient().Delete(TestContext, Kamelet("my-own-timer-source", ns)())).To(Succeed())
-		Expect(TestClient().Delete(TestContext, Kamelet("my-own-log-sink", ns)())).To(Succeed())
+		Expect(CreateTimerKamelet(ns, "my-health-timer-source")()).To(Succeed())
+		Expect(CreateLogKamelet(ns, "my-health-log-sink")()).To(Succeed())
 
-		Expect(CreateTimerKamelet(ns, "my-own-timer-source")()).To(Succeed())
-		Expect(CreateLogKamelet(ns, "my-own-log-sink")()).To(Succeed())
-
-		from := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-timer-source",
-			APIVersion: camelv1.SchemeGroupVersion.String(),
-		}
-
-		fromParams := map[string]string{
-			"message": "Magicstring!",
-		}
-
-		to := corev1.ObjectReference{
-			Kind:       "Kamelet",
-			Name:       "my-own-log-sink",
-			APIVersion: camelv1.SchemeGroupVersion.String(),
-		}
-
-		toParams := map[string]string{
-			"loggerName": "binding",
-		}
-
-		annotations := map[string]string{
-			"trait.camel.apache.org/health.enabled":                        "true",
-			"trait.camel.apache.org/jolokia.enabled":                       "true",
-			"trait.camel.apache.org/jolokia.use-ssl-client-authentication": "false",
-			"trait.camel.apache.org/jolokia.protocol":                      "http",
-		}
-
-		Expect(BindKameletTo(ns, name, annotations, from, to, fromParams, toParams)()).
-			To(Succeed())
+		Expect(KamelBindWithID(operatorID, ns,
+			"my-health-timer-source",
+			"my-health-log-sink",
+			"-p", "source.message=Magicstring!",
+			"-p", "sink.loggerName=binding",
+			"--annotation", "trait.camel.apache.org/health.enabled=true",
+			"--annotation", "trait.camel.apache.org/jolokia.enabled=true",
+			"--annotation", "trait.camel.apache.org/jolokia.use-ssl-client-authentication=false",
+			"--annotation", "trait.camel.apache.org/jolokia.protocol=http",
+			"--name", name,
+		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
@@ -326,6 +306,94 @@ func TestHealthTrait(t *testing.T) {
 
 				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "never-ready"
 			}))
+	})
+
+	t.Run("Startup condition with never ready route", func(t *testing.T) {
+		name := "startup-probe-never-ready-route"
+
+		Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
+			"--name", name,
+			"-t", "health.enabled=true",
+			"-t", "health.startup-probe-enabled=true",
+			"-t", "health.startup-timeout=60",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+		Consistently(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), 1*time.Minute).Should(Equal(corev1.ConditionFalse))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+			WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
+
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+			Satisfy(func(c *v1.IntegrationCondition) bool {
+				if c.Status != corev1.ConditionFalse {
+					return false
+				}
+				if len(c.Pods) != 1 {
+					return false
+				}
+
+				var r *v1.HealthCheckResponse
+
+				for h := range c.Pods[0].Health {
+					if c.Pods[0].Health[h].Name == "camel-routes" && c.Pods[0].Health[h].Status == "DOWN" {
+						r = &c.Pods[0].Health[h]
+					}
+				}
+
+				if r == nil {
+					return false
+				}
+
+				if r.Data == nil {
+					return false
+				}
+
+				var data map[string]interface{}
+				if err := json.Unmarshal(r.Data, &data); err != nil {
+					return false
+				}
+
+				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "never-ready"
+			}))
+
+		Satisfy(func(events *corev1.EventList) bool {
+			for e := range events.Items {
+				if events.Items[e].Type == "Warning" && events.Items[e].Reason == "Unhealthy" && strings.Contains(events.Items[e].Message, "Startup probe failed") {
+					return true
+				}
+			}
+			return false
+		})
+	})
+
+	t.Run("Startup condition with ready route", func(t *testing.T) {
+		name := "startup-probe-ready-route"
+
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+			"-t", "health.enabled=true",
+			"-t", "health.startup-probe-enabled=true",
+			"-t", "health.startup-timeout=60",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(And(
+			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
+			WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
+
+		Satisfy(func(is *v1.IntegrationSpec) bool {
+			if *is.Traits.Health.Enabled == true && *is.Traits.Health.StartupProbeEnabled == true && is.Traits.Health.StartupTimeout == 60 {
+				return true
+			}
+			return false
+		})
+
 	})
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

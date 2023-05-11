@@ -19,13 +19,12 @@ package trait
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -132,7 +131,7 @@ func (t *openAPITrait) generateFromDataSpecs(e *Environment, tmpDir string, spec
 		generatedSourceName := strings.TrimSuffix(resource.Name, filepath.Ext(resource.Name)) + ".xml"
 		// Generate configmap or reuse existing one
 		if err := t.generateOpenAPIConfigMap(e, resource, tmpDir, generatedContentName); err != nil {
-			return nil, errors.Wrapf(err, "cannot generate configmap for openapi resource %s", resource.Name)
+			return nil, fmt.Errorf("cannot generate configmap for openapi resource %s: %w", resource.Name, err)
 		}
 		if e.Integration.Status.GeneratedSources != nil {
 			// Filter out the previously generated source
@@ -304,7 +303,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 				"camel.apache.org/source.name":        resource.Name,
 				"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
 				"camel.apache.org/source.generated":   "true",
-				"camel.apache.org/source.type":        string(v1.ResourceTypeOpenAPI),
+				"camel.apache.org/source.type":        "openapi",
 				"camel.apache.org/source.digest":      hash,
 			},
 		},

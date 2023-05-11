@@ -20,13 +20,13 @@ package trait
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
 	"sort"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/scylladb/go-set/strset"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -312,7 +312,7 @@ func MigrateLegacyConfiguration(trait map[string]interface{}) error {
 		}
 		delete(trait, "configuration")
 	} else {
-		return errors.Errorf(`unexpected type for "configuration" field: %v`, reflect.TypeOf(trait["configuration"]))
+		return fmt.Errorf(`unexpected type for "configuration" field: %v`, reflect.TypeOf(trait["configuration"]))
 	}
 
 	return nil

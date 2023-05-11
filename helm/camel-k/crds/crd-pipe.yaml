@@ -6859,6 +6859,38 @@ spec:
                               probe times out.
                             format: int32
                             type: integer
+                          startupFailureThreshold:
+                            description: Minimum consecutive failures for the startup
+                              probe to be considered failed after having succeeded.
+                            format: int32
+                            type: integer
+                          startupInitialDelay:
+                            description: Number of seconds after the container has
+                              started before the startup probe is initiated.
+                            format: int32
+                            type: integer
+                          startupPeriod:
+                            description: How often to perform the startup probe.
+                            format: int32
+                            type: integer
+                          startupProbeEnabled:
+                            description: Configures the startup probe for the integration
+                              container (default `false`).
+                            type: boolean
+                          startupScheme:
+                            description: Scheme to use when connecting to the startup
+                              probe (default `HTTP`).
+                            type: string
+                          startupSuccessThreshold:
+                            description: Minimum consecutive successes for the startup
+                              probe to be considered successful after having failed.
+                            format: int32
+                            type: integer
+                          startupTimeout:
+                            description: Number of seconds after which the startup
+                              probe times out.
+                            format: int32
+                            type: integer
                         type: object
                       ingress:
                         description: The configuration of Ingress trait
@@ -7756,176 +7788,6 @@ spec:
                         description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
                         type: string
                     type: object
-                  types:
-                    additionalProperties:
-                      description: 'EventTypeSpec represents a specification for an
-                        event type Deprecated: In favor of using DataTypeSpec'
-                      properties:
-                        mediaType:
-                          description: media type as expected for HTTP media types
-                            (ie, application/json)
-                          type: string
-                        schema:
-                          description: the expected schema for the event
-                          properties:
-                            $schema:
-                              description: JSONSchemaURL represents a schema url.
-                              type: string
-                            description:
-                              type: string
-                            example:
-                              description: 'JSON represents any valid JSON value.
-                                These types are supported: bool, int64, float64, string,
-                                []interface{}, map[string]interface{} and nil.'
-                              x-kubernetes-preserve-unknown-fields: true
-                            externalDocs:
-                              description: ExternalDocumentation allows referencing
-                                an external resource for extended documentation.
-                              properties:
-                                description:
-                                  type: string
-                                url:
-                                  type: string
-                              type: object
-                            id:
-                              type: string
-                            properties:
-                              additionalProperties:
-                                properties:
-                                  default:
-                                    description: default is a default value for undefined
-                                      object fields.
-                                    x-kubernetes-preserve-unknown-fields: true
-                                  deprecated:
-                                    type: boolean
-                                  description:
-                                    type: string
-                                  enum:
-                                    items:
-                                      description: 'JSON represents any valid JSON
-                                        value. These types are supported: bool, int64,
-                                        float64, string, []interface{}, map[string]interface{}
-                                        and nil.'
-                                      x-kubernetes-preserve-unknown-fields: true
-                                    type: array
-                                  example:
-                                    description: 'JSON represents any valid JSON value.
-                                      These types are supported: bool, int64, float64,
-                                      string, []interface{}, map[string]interface{}
-                                      and nil.'
-                                    x-kubernetes-preserve-unknown-fields: true
-                                  exclusiveMaximum:
-                                    type: boolean
-                                  exclusiveMinimum:
-                                    type: boolean
-                                  format:
-                                    description: "format is an OpenAPI v3 format string.
-                                      Unknown formats are ignored. The following formats
-                                      are validated: \n - bsonobjectid: a bson object
-                                      ID, i.e. a 24 characters hex string - uri: an
-                                      URI as parsed by Golang net/url.ParseRequestURI
-                                      - email: an email address as parsed by Golang
-                                      net/mail.ParseAddress - hostname: a valid representation
-                                      for an Internet host name, as defined by RFC
-                                      1034, section 3.1 [RFC1034]. - ipv4: an IPv4
-                                      IP as parsed by Golang net.ParseIP - ipv6: an
-                                      IPv6 IP as parsed by Golang net.ParseIP - cidr:
-                                      a CIDR as parsed by Golang net.ParseCIDR - mac:
-                                      a MAC address as parsed by Golang net.ParseMAC
-                                      - uuid: an UUID that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                      - uuid3: an UUID3 that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                      - uuid4: an UUID4 that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                      - uuid5: an UUID5 that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                      - isbn: an ISBN10 or ISBN13 number string like
-                                      \"0321751043\" or \"978-0321751041\" - isbn10:
-                                      an ISBN10 number string like \"0321751043\"
-                                      - isbn13: an ISBN13 number string like \"978-0321751041\"
-                                      - creditcard: a credit card number defined by
-                                      the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
-                                      with any non digit characters mixed in - ssn:
-                                      a U.S. social security number following the
-                                      regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ -
-                                      hexcolor: an hexadecimal color code like \"#FFFFFF\"
-                                      following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                      - rgbcolor: an RGB color code like rgb like
-                                      \"rgb(255,255,255)\" - byte: base64 encoded
-                                      binary data - password: any kind of string -
-                                      date: a date string like \"2006-01-02\" as defined
-                                      by full-date in RFC3339 - duration: a duration
-                                      string like \"22 ns\" as parsed by Golang time.ParseDuration
-                                      or compatible with Scala duration format - datetime:
-                                      a date time string like \"2014-12-15T19:30:20.000Z\"
-                                      as defined by date-time in RFC3339."
-                                    type: string
-                                  id:
-                                    type: string
-                                  maxItems:
-                                    format: int64
-                                    type: integer
-                                  maxLength:
-                                    format: int64
-                                    type: integer
-                                  maxProperties:
-                                    format: int64
-                                    type: integer
-                                  maximum:
-                                    description: A Number represents a JSON number
-                                      literal.
-                                    type: string
-                                  minItems:
-                                    format: int64
-                                    type: integer
-                                  minLength:
-                                    format: int64
-                                    type: integer
-                                  minProperties:
-                                    format: int64
-                                    type: integer
-                                  minimum:
-                                    description: A Number represents a JSON number
-                                      literal.
-                                    type: string
-                                  multipleOf:
-                                    description: A Number represents a JSON number
-                                      literal.
-                                    type: string
-                                  nullable:
-                                    type: boolean
-                                  pattern:
-                                    type: string
-                                  title:
-                                    type: string
-                                  type:
-                                    type: string
-                                  uniqueItems:
-                                    type: boolean
-                                  x-descriptors:
-                                    description: XDescriptors is a list of extended
-                                      properties that trigger a custom behavior in
-                                      external systems
-                                    items:
-                                      type: string
-                                    type: array
-                                type: object
-                              type: object
-                            required:
-                              items:
-                                type: string
-                              type: array
-                            title:
-                              type: string
-                            type:
-                              type: string
-                          type: object
-                      type: object
-                    description: 'Types defines the data type of the data produced/consumed
-                      by the endpoint and references a given data type specification.
-                      Deprecated: In favor of using DataTypes'
-                    type: object
                   uri:
                     description: URI can be used to specify the (Camel) endpoint explicitly
                     type: string
@@ -7990,176 +7852,6 @@ spec:
                       uid:
                         description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
                         type: string
-                    type: object
-                  types:
-                    additionalProperties:
-                      description: 'EventTypeSpec represents a specification for an
-                        event type Deprecated: In favor of using DataTypeSpec'
-                      properties:
-                        mediaType:
-                          description: media type as expected for HTTP media types
-                            (ie, application/json)
-                          type: string
-                        schema:
-                          description: the expected schema for the event
-                          properties:
-                            $schema:
-                              description: JSONSchemaURL represents a schema url.
-                              type: string
-                            description:
-                              type: string
-                            example:
-                              description: 'JSON represents any valid JSON value.
-                                These types are supported: bool, int64, float64, string,
-                                []interface{}, map[string]interface{} and nil.'
-                              x-kubernetes-preserve-unknown-fields: true
-                            externalDocs:
-                              description: ExternalDocumentation allows referencing
-                                an external resource for extended documentation.
-                              properties:
-                                description:
-                                  type: string
-                                url:
-                                  type: string
-                              type: object
-                            id:
-                              type: string
-                            properties:
-                              additionalProperties:
-                                properties:
-                                  default:
-                                    description: default is a default value for undefined
-                                      object fields.
-                                    x-kubernetes-preserve-unknown-fields: true
-                                  deprecated:
-                                    type: boolean
-                                  description:
-                                    type: string
-                                  enum:
-                                    items:
-                                      description: 'JSON represents any valid JSON
-                                        value. These types are supported: bool, int64,
-                                        float64, string, []interface{}, map[string]interface{}
-                                        and nil.'
-                                      x-kubernetes-preserve-unknown-fields: true
-                                    type: array
-                                  example:
-                                    description: 'JSON represents any valid JSON value.
-                                      These types are supported: bool, int64, float64,
-                                      string, []interface{}, map[string]interface{}
-                                      and nil.'
-                                    x-kubernetes-preserve-unknown-fields: true
-                                  exclusiveMaximum:
-                                    type: boolean
-                                  exclusiveMinimum:
-                                    type: boolean
-                                  format:
-                                    description: "format is an OpenAPI v3 format string.
-                                      Unknown formats are ignored. The following formats
-                                      are validated: \n - bsonobjectid: a bson object
-                                      ID, i.e. a 24 characters hex string - uri: an
-                                      URI as parsed by Golang net/url.ParseRequestURI
-                                      - email: an email address as parsed by Golang
-                                      net/mail.ParseAddress - hostname: a valid representation
-                                      for an Internet host name, as defined by RFC
-                                      1034, section 3.1 [RFC1034]. - ipv4: an IPv4
-                                      IP as parsed by Golang net.ParseIP - ipv6: an
-                                      IPv6 IP as parsed by Golang net.ParseIP - cidr:
-                                      a CIDR as parsed by Golang net.ParseCIDR - mac:
-                                      a MAC address as parsed by Golang net.ParseMAC
-                                      - uuid: an UUID that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                      - uuid3: an UUID3 that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                      - uuid4: an UUID4 that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                      - uuid5: an UUID5 that allows uppercase defined
-                                      by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                      - isbn: an ISBN10 or ISBN13 number string like
-                                      \"0321751043\" or \"978-0321751041\" - isbn10:
-                                      an ISBN10 number string like \"0321751043\"
-                                      - isbn13: an ISBN13 number string like \"978-0321751041\"
-                                      - creditcard: a credit card number defined by
-                                      the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
-                                      with any non digit characters mixed in - ssn:
-                                      a U.S. social security number following the
-                                      regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ -
-                                      hexcolor: an hexadecimal color code like \"#FFFFFF\"
-                                      following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                      - rgbcolor: an RGB color code like rgb like
-                                      \"rgb(255,255,255)\" - byte: base64 encoded
-                                      binary data - password: any kind of string -
-                                      date: a date string like \"2006-01-02\" as defined
-                                      by full-date in RFC3339 - duration: a duration
-                                      string like \"22 ns\" as parsed by Golang time.ParseDuration
-                                      or compatible with Scala duration format - datetime:
-                                      a date time string like \"2014-12-15T19:30:20.000Z\"
-                                      as defined by date-time in RFC3339."
-                                    type: string
-                                  id:
-                                    type: string
-                                  maxItems:
-                                    format: int64
-                                    type: integer
-                                  maxLength:
-                                    format: int64
-                                    type: integer
-                                  maxProperties:
-                                    format: int64
-                                    type: integer
-                                  maximum:
-                                    description: A Number represents a JSON number
-                                      literal.
-                                    type: string
-                                  minItems:
-                                    format: int64
-                                    type: integer
-                                  minLength:
-                                    format: int64
-                                    type: integer
-                                  minProperties:
-                                    format: int64
-                                    type: integer
-                                  minimum:
-                                    description: A Number represents a JSON number
-                                      literal.
-                                    type: string
-                                  multipleOf:
-                                    description: A Number represents a JSON number
-                                      literal.
-                                    type: string
-                                  nullable:
-                                    type: boolean
-                                  pattern:
-                                    type: string
-                                  title:
-                                    type: string
-                                  type:
-                                    type: string
-                                  uniqueItems:
-                                    type: boolean
-                                  x-descriptors:
-                                    description: XDescriptors is a list of extended
-                                      properties that trigger a custom behavior in
-                                      external systems
-                                    items:
-                                      type: string
-                                    type: array
-                                type: object
-                              type: object
-                            required:
-                              items:
-                                type: string
-                              type: array
-                            title:
-                              type: string
-                            type:
-                              type: string
-                          type: object
-                      type: object
-                    description: 'Types defines the data type of the data produced/consumed
-                      by the endpoint and references a given data type specification.
-                      Deprecated: In favor of using DataTypes'
                     type: object
                   uri:
                     description: URI can be used to specify the (Camel) endpoint explicitly
@@ -8229,178 +7921,6 @@ spec:
                         uid:
                           description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
                           type: string
-                      type: object
-                    types:
-                      additionalProperties:
-                        description: 'EventTypeSpec represents a specification for
-                          an event type Deprecated: In favor of using DataTypeSpec'
-                        properties:
-                          mediaType:
-                            description: media type as expected for HTTP media types
-                              (ie, application/json)
-                            type: string
-                          schema:
-                            description: the expected schema for the event
-                            properties:
-                              $schema:
-                                description: JSONSchemaURL represents a schema url.
-                                type: string
-                              description:
-                                type: string
-                              example:
-                                description: 'JSON represents any valid JSON value.
-                                  These types are supported: bool, int64, float64,
-                                  string, []interface{}, map[string]interface{} and
-                                  nil.'
-                                x-kubernetes-preserve-unknown-fields: true
-                              externalDocs:
-                                description: ExternalDocumentation allows referencing
-                                  an external resource for extended documentation.
-                                properties:
-                                  description:
-                                    type: string
-                                  url:
-                                    type: string
-                                type: object
-                              id:
-                                type: string
-                              properties:
-                                additionalProperties:
-                                  properties:
-                                    default:
-                                      description: default is a default value for
-                                        undefined object fields.
-                                      x-kubernetes-preserve-unknown-fields: true
-                                    deprecated:
-                                      type: boolean
-                                    description:
-                                      type: string
-                                    enum:
-                                      items:
-                                        description: 'JSON represents any valid JSON
-                                          value. These types are supported: bool,
-                                          int64, float64, string, []interface{}, map[string]interface{}
-                                          and nil.'
-                                        x-kubernetes-preserve-unknown-fields: true
-                                      type: array
-                                    example:
-                                      description: 'JSON represents any valid JSON
-                                        value. These types are supported: bool, int64,
-                                        float64, string, []interface{}, map[string]interface{}
-                                        and nil.'
-                                      x-kubernetes-preserve-unknown-fields: true
-                                    exclusiveMaximum:
-                                      type: boolean
-                                    exclusiveMinimum:
-                                      type: boolean
-                                    format:
-                                      description: "format is an OpenAPI v3 format
-                                        string. Unknown formats are ignored. The following
-                                        formats are validated: \n - bsonobjectid:
-                                        a bson object ID, i.e. a 24 characters hex
-                                        string - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                        - email: an email address as parsed by Golang
-                                        net/mail.ParseAddress - hostname: a valid
-                                        representation for an Internet host name,
-                                        as defined by RFC 1034, section 3.1 [RFC1034].
-                                        - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
-                                        - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
-                                        - cidr: a CIDR as parsed by Golang net.ParseCIDR
-                                        - mac: a MAC address as parsed by Golang net.ParseMAC
-                                        - uuid: an UUID that allows uppercase defined
-                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid3: an UUID3 that allows uppercase defined
-                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid4: an UUID4 that allows uppercase defined
-                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - uuid5: an UUID5 that allows uppercase defined
-                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - isbn: an ISBN10 or ISBN13 number string
-                                        like \"0321751043\" or \"978-0321751041\"
-                                        - isbn10: an ISBN10 number string like \"0321751043\"
-                                        - isbn13: an ISBN13 number string like \"978-0321751041\"
-                                        - creditcard: a credit card number defined
-                                        by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
-                                        with any non digit characters mixed in - ssn:
-                                        a U.S. social security number following the
-                                        regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$
-                                        - hexcolor: an hexadecimal color code like
-                                        \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                        - rgbcolor: an RGB color code like rgb like
-                                        \"rgb(255,255,255)\" - byte: base64 encoded
-                                        binary data - password: any kind of string
-                                        - date: a date string like \"2006-01-02\"
-                                        as defined by full-date in RFC3339 - duration:
-                                        a duration string like \"22 ns\" as parsed
-                                        by Golang time.ParseDuration or compatible
-                                        with Scala duration format - datetime: a date
-                                        time string like \"2014-12-15T19:30:20.000Z\"
-                                        as defined by date-time in RFC3339."
-                                      type: string
-                                    id:
-                                      type: string
-                                    maxItems:
-                                      format: int64
-                                      type: integer
-                                    maxLength:
-                                      format: int64
-                                      type: integer
-                                    maxProperties:
-                                      format: int64
-                                      type: integer
-                                    maximum:
-                                      description: A Number represents a JSON number
-                                        literal.
-                                      type: string
-                                    minItems:
-                                      format: int64
-                                      type: integer
-                                    minLength:
-                                      format: int64
-                                      type: integer
-                                    minProperties:
-                                      format: int64
-                                      type: integer
-                                    minimum:
-                                      description: A Number represents a JSON number
-                                        literal.
-                                      type: string
-                                    multipleOf:
-                                      description: A Number represents a JSON number
-                                        literal.
-                                      type: string
-                                    nullable:
-                                      type: boolean
-                                    pattern:
-                                      type: string
-                                    title:
-                                      type: string
-                                    type:
-                                      type: string
-                                    uniqueItems:
-                                      type: boolean
-                                    x-descriptors:
-                                      description: XDescriptors is a list of extended
-                                        properties that trigger a custom behavior
-                                        in external systems
-                                      items:
-                                        type: string
-                                      type: array
-                                  type: object
-                                type: object
-                              required:
-                                items:
-                                  type: string
-                                type: array
-                              title:
-                                type: string
-                              type:
-                                type: string
-                            type: object
-                        type: object
-                      description: 'Types defines the data type of the data produced/consumed
-                        by the endpoint and references a given data type specification.
-                        Deprecated: In favor of using DataTypes'
                       type: object
                     uri:
                       description: URI can be used to specify the (Camel) endpoint

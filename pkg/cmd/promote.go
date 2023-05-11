@@ -19,12 +19,11 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -87,41 +86,41 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	name := args[0]
 	c, err := o.GetCmdClient()
 	if err != nil {
-		return errors.Wrap(err, "could not retrieve cluster client")
+		return fmt.Errorf("could not retrieve cluster client: %w", err)
 	}
 	opSource, err := operatorInfo(o.Context, c, o.Namespace)
 	if err != nil {
-		return errors.Wrap(err, "could not retrieve info for Camel K operator source")
+		return fmt.Errorf("could not retrieve info for Camel K operator source: %w", err)
 	}
 	opDest, err := operatorInfo(o.Context, c, o.To)
 	if err != nil {
-		return errors.Wrap(err, "could not retrieve info for Camel K operator destination")
+		return fmt.Errorf("could not retrieve info for Camel K operator destination: %w", err)
 	}
 
 	err = checkOpsCompatibility(cmd, opSource, opDest)
 	if err != nil {
-		return errors.Wrap(err, "could not verify operators compatibility")
+		return fmt.Errorf("could not verify operators compatibility: %w", err)
 	}
 	promotePipe := false
 	var sourceIntegration *v1.Integration
 	// We first look if a Pipe with the name exists
 	sourcePipe, err := o.getPipe(c, name)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return errors.Wrap(err, "problems looking for Pipe "+name)
+		return fmt.Errorf("problems looking for Pipe "+name+": %w", err)
 	}
 	if sourcePipe != nil {
 		promotePipe = true
 	}
 	sourceIntegration, err = o.getIntegration(c, name)
 	if err != nil {
-		return errors.Wrap(err, "could not get Integration "+name)
+		return fmt.Errorf("could not get Integration "+name+": %w", err)
 	}
 	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning {
 		return fmt.Errorf("could not promote an Integration in %s status", sourceIntegration.Status.Phase)
 	}
 	err = o.validateDestResources(c, sourceIntegration)
 	if err != nil {
-		return errors.Wrap(err, "could not validate destination resources")
+		return fmt.Errorf("could not validate destination resources: %w", err)
 	}
 
 	// Pipe promotion

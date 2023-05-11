@@ -43,9 +43,5 @@ func TestRunSimpleJavaScriptExamples(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 	})
 
-	t.Run("init run JavaScript", func(t *testing.T) {
-		RunInitGeneratedExample(t, operatorID, ns, camelv1.LanguageJavaScript)
-	})
-
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

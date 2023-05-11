@@ -19,16 +19,16 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/pkg/errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -72,7 +72,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 			}
 			if err := options.install(cmd, args); err != nil {
 				if k8serrors.IsAlreadyExists(err) {
-					return errors.Wrap(err, "Camel K seems already installed (use the --force option to overwrite existing resources)")
+					return fmt.Errorf("camel K seems already installed (use the --force option to overwrite existing resources): %w", err)
 				}
 				return err
 			}
@@ -112,9 +112,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
 	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
 
-	// Kaniko
-	cmd.Flags().Bool("kaniko-build-cache", false, "To enable or disable the Kaniko cache. Deprecated use --build-publish-strategy-option KanikoBuildCacheEnabled=true instead")
-
 	// OLM
 	cmd.Flags().Bool("olm", true, "Try to install everything via OLM (Operator Lifecycle Manager) if available")
 	cmd.Flags().String("olm-operator-name", "", "Name of the Camel K operator in the OLM source or marketplace")
@@ -149,6 +146,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)")
 	cmd.Flags().StringArray("operator-env-vars", nil, "Add an environment variable to set in the operator Pod(s), as <name=value>")
 	cmd.Flags().StringP("log-level", "z", "info", "The level of operator logging (default - info): info or 0, debug or 1")
+	cmd.Flags().Int("max-running-builds", 0, "Maximum number of parallel running builds")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -164,16 +162,14 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	Wait                     bool `mapstructure:"wait"`
-	ClusterSetupOnly         bool `mapstructure:"cluster-setup"`
-	SkipOperatorSetup        bool `mapstructure:"skip-operator-setup"`
-	SkipClusterSetup         bool `mapstructure:"skip-cluster-setup"`
-	SkipRegistrySetup        bool `mapstructure:"skip-registry-setup"`
-	SkipDefaultKameletsSetup bool `mapstructure:"skip-default-kamelets-setup"`
-	ExampleSetup             bool `mapstructure:"example"`
-	Global                   bool `mapstructure:"global"`
-	// Deprecated: use the BuildPublishStrategyOption "KanikoBuildCacheEnabled" instead
-	KanikoBuildCache            bool `mapstructure:"kaniko-build-cache"`
+	Wait                        bool `mapstructure:"wait"`
+	ClusterSetupOnly            bool `mapstructure:"cluster-setup"`
+	SkipOperatorSetup           bool `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup            bool `mapstructure:"skip-cluster-setup"`
+	SkipRegistrySetup           bool `mapstructure:"skip-registry-setup"`
+	SkipDefaultKameletsSetup    bool `mapstructure:"skip-default-kamelets-setup"`
+	ExampleSetup                bool `mapstructure:"example"`
+	Global                      bool `mapstructure:"global"`
 	Save                        bool `mapstructure:"save" kamel:"omitsave"`
 	Force                       bool `mapstructure:"force"`
 	Olm                         bool `mapstructure:"olm"`
@@ -282,8 +278,8 @@ func (o *installCmdOptions) tryInstallViaOLM(
 		return false, err
 	}
 	if olmAvailable, err := olm.IsAPIAvailable(o.Context, olmClient, o.Namespace); err != nil {
-		return false, errors.Wrap(err,
-			"error while checking OLM availability. Run with '--olm=false' to skip this check")
+		return false, fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
+
 	} else if !olmAvailable {
 		fmt.Fprintln(cmd.OutOrStdout(), "OLM is not available in the cluster. Fallback to regular installation.")
 		return false, nil
@@ -291,13 +287,13 @@ func (o *installCmdOptions) tryInstallViaOLM(
 
 	if hasPermission, err := olm.HasPermissionToInstall(o.Context, olmClient,
 		o.Namespace, o.Global, o.olmOptions); err != nil {
-		return false, errors.Wrap(err,
-			"error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check")
+		return false, fmt.Errorf("error while checking permissions to install operator via OLM. Run with '--olm=false' to skip this check: %w", err)
+
 	} else if !hasPermission {
 		return false, errors.New(
 			"OLM is available but current user has not enough permissions to create the operator. " +
 				"You can either ask your administrator to provide permissions (preferred) " +
-				"or run the install command with the '--olm=false' flag.")
+				"or run the install command with the '--olm=false' flag")
 	}
 
 	// Install or collect via OLM
@@ -359,7 +355,7 @@ func (o *installCmdOptions) installOperator(cmd *cobra.Command, output *kubernet
 	}
 
 	// Set up IntegrationPlatform
-	platform, err := o.setupIntegrationPlatform(cmd, c, namespace, platformName, registrySecretName, output)
+	platform, err := o.setupIntegrationPlatform(c, namespace, platformName, registrySecretName, output)
 	if err != nil {
 		return err
 	}
@@ -468,8 +464,7 @@ func (o *installCmdOptions) setupRegistrySecret(c client.Client, namespace strin
 	return "", nil
 }
 
-func (o *installCmdOptions) setupIntegrationPlatform(
-	cmd *cobra.Command, c client.Client, namespace string, platformName string, registrySecretName string,
+func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace string, platformName string, registrySecretName string,
 	output *kubernetes.Collection,
 ) (*v1.IntegrationPlatform, error) {
 	platform, err := install.NewPlatform(o.Context, c, o.ClusterType, o.SkipRegistrySetup, o.registry, platformName)
@@ -588,10 +583,6 @@ func (o *installCmdOptions) setupIntegrationPlatform(
 			}
 		}
 	}
-	if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && cmd.Flags().Lookup("kaniko-build-cache").Changed {
-		fmt.Fprintln(cmd.OutOrStdout(), "Warn: the flag --kaniko-build-cache is deprecated, use --build-publish-strategy-option KanikoBuildCacheEnabled=true instead")
-		platform.Spec.Build.AddOption(builder.KanikoBuildCacheEnabled, strconv.FormatBool(o.KanikoBuildCache))
-	}
 	if len(o.BuildPublishStrategyOptions) > 0 {
 		if err = o.addBuildPublishStrategyOptions(&platform.Spec.Build); err != nil {
 			return nil, err
@@ -604,7 +595,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(
 	}
 
 	if err := install.IntegrationPlatformViewerRole(o.Context, c, namespace); err != nil && !k8serrors.IsAlreadyExists(err) {
-		return nil, errors.Wrap(err, "Error while installing global IntegrationPlatform viewer role")
+		return nil, fmt.Errorf("error while installing global IntegrationPlatform viewer role: %w", err)
 	}
 
 	if o.ExampleSetup {
@@ -742,7 +733,7 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		if err != nil {
 			result = multierr.Append(result, err)
 		} else if nfo.IsDir() {
-			result = multierr.Append(result, errors.Wrapf(err, "registry file cannot be a directory: %s", o.RegistryAuthFile))
+			result = multierr.Append(result, fmt.Errorf("registry file cannot be a directory: %s: %w", o.RegistryAuthFile, err))
 		}
 	}
 
@@ -901,7 +892,7 @@ func createDefaultMavenSettingsConfigMap(ctx context.Context, client client.Clie
 		} else if len(p) != 0 {
 			err = client.Patch(ctx, cm, ctrl.RawPatch(types.MergePatchType, p))
 			if err != nil {
-				return errors.Wrap(err, "error during patch resource")
+				return fmt.Errorf("error during patch resource: %w", err)
 			}
 		}
 	}

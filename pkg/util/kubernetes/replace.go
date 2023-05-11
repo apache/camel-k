@@ -21,8 +21,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -58,7 +56,7 @@ func ReplaceResource(ctx context.Context, c client.Client, res ctrl.Object) (boo
 		err = c.Update(ctx, res)
 	}
 	if err != nil {
-		return replaced, errors.Wrap(err, "could not create or replace "+findResourceDetails(res))
+		return replaced, fmt.Errorf("could not create or replace "+findResourceDetails(res)+": %w", err)
 	}
 	return replaced, nil
 }

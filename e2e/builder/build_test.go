@@ -23,6 +23,7 @@ limitations under the License.
 package builder
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -57,72 +58,86 @@ func TestKitMaxBuildLimit(t *testing.T) {
 		buildB := "integration-b"
 		buildC := "integration-c"
 
-		doKitBuildInNamespace(buildA, ns, TestTimeoutShort, kitOptions{
-			operatorID: fmt.Sprintf("camel-k-%s", ns),
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=A",
-			},
-		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+		WithNewTestNamespace(t, func(ns1 string) {
+			WithNewTestNamespace(t, func(ns2 string) {
+				pl1 := v1.NewIntegrationPlatform(ns1, fmt.Sprintf("camel-k-%s", ns))
+				pl.Spec.DeepCopyInto(&pl1.Spec)
+				pl1.Spec.Build.Maven.Settings = v1.ValueSource{}
+				pl1.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
+				if err := TestClient().Create(TestContext, &pl1); err != nil {
+					t.Error(err)
+					t.FailNow()
+				}
 
-		ns1 := NewTestNamespace(false).GetName()
-		defer DumpNamespace(t, ns1)
-		defer DeleteNamespace(t, ns1)
+				Eventually(PlatformPhase(ns1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		pl1 := v1.NewIntegrationPlatform(ns1, fmt.Sprintf("camel-k-%s", ns))
-		pl.Spec.DeepCopyInto(&pl1.Spec)
-		pl1.Spec.Build.Maven.Settings = v1.ValueSource{}
-		pl1.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
-		if err := TestClient().Create(TestContext, &pl1); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+				pl2 := v1.NewIntegrationPlatform(ns2, fmt.Sprintf("camel-k-%s", ns))
+				pl.Spec.DeepCopyInto(&pl2.Spec)
+				pl2.Spec.Build.Maven.Settings = v1.ValueSource{}
+				pl2.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
+				if err := TestClient().Create(TestContext, &pl2); err != nil {
+					t.Error(err)
+					t.FailNow()
+				}
 
-		doKitBuildInNamespace(buildB, ns1, TestTimeoutShort, kitOptions{
-			operatorID: fmt.Sprintf("camel-k-%s", ns),
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=B",
-			},
-		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+				Eventually(PlatformPhase(ns2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		ns2 := NewTestNamespace(false).GetName()
-		defer DumpNamespace(t, ns2)
-		defer DeleteNamespace(t, ns2)
+				doKitBuildInNamespace(buildA, ns, TestTimeoutShort, kitOptions{
+					operatorID: fmt.Sprintf("camel-k-%s", ns),
+					dependencies: []string{
+						"camel:timer", "camel:log",
+					},
+					traits: []string{
+						"builder.properties=build-property=A",
+					},
+				}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-		pl2 := v1.NewIntegrationPlatform(ns2, fmt.Sprintf("camel-k-%s", ns))
-		pl.Spec.DeepCopyInto(&pl2.Spec)
-		pl2.Spec.Build.Maven.Settings = v1.ValueSource{}
-		pl2.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
-		if err := TestClient().Create(TestContext, &pl2); err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+				doKitBuildInNamespace(buildB, ns1, TestTimeoutShort, kitOptions{
+					operatorID: fmt.Sprintf("camel-k-%s", ns),
+					dependencies: []string{
+						"camel:timer", "camel:log",
+					},
+					traits: []string{
+						"builder.properties=build-property=B",
+					},
+				}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-		doKitBuildInNamespace(buildC, ns2, TestTimeoutShort, kitOptions{
-			operatorID: fmt.Sprintf("camel-k-%s", ns),
-			dependencies: []string{
-				"camel:timer", "camel:log",
-			},
-			traits: []string{
-				"builder.properties=build-property=C",
-			},
-		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
+				doKitBuildInNamespace(buildC, ns2, TestTimeoutShort, kitOptions{
+					operatorID: fmt.Sprintf("camel-k-%s", ns),
+					dependencies: []string{
+						"camel:timer", "camel:log",
+					},
+					traits: []string{
+						"builder.properties=build-property=C",
+					},
+				}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
 
-		// verify that buildC is allowed to build as soon as buildA has finished
-		Eventually(BuildPhase(ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(BuildPhase(ns2, buildC), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
-		Eventually(KitPhase(ns2, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseBuildRunning))
+				var notExceedsMaxBuildLimit = func(runningBuilds int) bool {
+					return runningBuilds <= 2
+				}
 
-		// verify that all builds are successful
-		Eventually(BuildPhase(ns1, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(ns1, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-		Eventually(BuildPhase(ns2, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(ns2, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+				limit := 0
+				for limit < 5 && BuildPhase(ns, buildA)() == v1.BuildPhaseRunning {
+					// verify that number of running builds does not exceed max build limit
+					Consistently(BuildsRunning(BuildPhase(ns, buildA), BuildPhase(ns1, buildB), BuildPhase(ns2, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
+					limit++
+				}
+
+				// make sure we have verified max build limit at least once
+				if limit == 0 {
+					t.Error(errors.New(fmt.Sprintf("Unexpected build phase '%s' for %s - not able to verify max builds limit", BuildPhase(ns, buildA)(), buildA)))
+					t.FailNow()
+				}
+
+				// verify that all builds are successful
+				Eventually(BuildPhase(ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+				Eventually(KitPhase(ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+				Eventually(BuildPhase(ns1, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+				Eventually(KitPhase(ns1, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+				Eventually(BuildPhase(ns2, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+				Eventually(KitPhase(ns2, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+			})
+		})
 	})
 }
 
@@ -178,6 +193,7 @@ func createOperator(ns string, memoryLimit string, buildTimeout string, installA
 
 	operatorID := fmt.Sprintf("camel-k-%s", ns)
 	Expect(KamelInstallWithID(operatorID, ns, args...).Execute()).To(Succeed())
+	Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 }
 
 func doKitBuildInNamespace(name string, ns string, testTimeout time.Duration, options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {

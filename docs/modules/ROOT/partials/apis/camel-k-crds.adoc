@@ -1274,7 +1274,6 @@ the value to assign to the configuration (syntax may vary depending on the `Type
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
 * <<#_camel_apache_org_v1_SourceSpec, SourceSpec>>
 
 DataSpec represents the way the source is materialized in the running `Pod`
@@ -1514,14 +1513,6 @@ URI can be used to specify the (Camel) endpoint explicitly
 
 Properties are a key value representation of endpoint properties
 
-|`types` +
-*xref:#_camel_apache_org_v1_EventTypeSpec[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.EventTypeSpec]*
-|
-
-
-Types defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
-Deprecated: In favor of using DataTypes
-
 |`dataTypes` +
 *xref:#_camel_apache_org_v1_DataTypeReference[map[github.com/apache/camel-k/v2/pkg/apis/camel/v1.TypeSlot\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.DataTypeReference]*
 |
@@ -1702,7 +1693,6 @@ ErrorHandlerType a type of error handler (ie, sink)
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_Endpoint, Endpoint>>
 * <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
 
 EventTypeSpec represents a specification for an event type
@@ -4394,51 +4384,6 @@ Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksum
 ResourceCondition is a common type for all conditions
 
 
-[#_camel_apache_org_v1_ResourceSpec]
-=== ResourceSpec
-
-ResourceSpec represent an attached resource which will be materialized as a file on the running `Pod`
-TODO: we should deprecate in future releases in favour of mount, openapi or camel traits
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`DataSpec` +
-*xref:#_camel_apache_org_v1_DataSpec[DataSpec]*
-|(Members of `DataSpec` are embedded into this type.)
-
-
-the content of the resource
-
-|`type` +
-*xref:#_camel_apache_org_v1_ResourceType[ResourceType]*
-|
-
-
-the kind of data to expect
-
-|`mountPath` +
-string
-|
-
-
-the mount path on destination `Pod`
-
-
-|===
-
-[#_camel_apache_org_v1_ResourceType]
-=== ResourceType(`string` alias)
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_ResourceSpec, ResourceSpec>>
-
-ResourceType defines a kind of resource
-
-
 [#_camel_apache_org_v1_RuntimeProvider]
 === RuntimeProvider(`string` alias)
 
@@ -5522,9 +5467,9 @@ in order to save resources when the integration does not need to be executed.
 Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
 
 The rules for using a Kubernetes CronJob are the following:
-- `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=60000`.
-- `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
-  `cron:tab?schedule=0/2$\{plus}*\{plus}*\{plus}*\{plus}?` or `quartz:trigger?cron=0\{plus}0/2\{plus}*\{plus}*\{plus}*\{plus}?`.
+  - `timer`: when periods can be written as cron expressions. E.g. `timer:tick?period=60000`.
+  - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
+    `cron:tab?schedule=0/2$\{plus}*\{plus}*\{plus}*\{plus}?` or `quartz:trigger?cron=0\{plus}0/2\{plus}*\{plus}*\{plus}*\{plus}?`.
 
 
 [cols="2,2a",options="header"]
@@ -5992,6 +5937,55 @@ int32
 
 
 Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
+
+|`startupProbeEnabled` +
+bool
+|
+
+
+Configures the startup probe for the integration container (default `false`).
+
+|`startupScheme` +
+string
+|
+
+
+Scheme to use when connecting to the startup probe (default `HTTP`).
+
+|`startupInitialDelay` +
+int32
+|
+
+
+Number of seconds after the container has started before the startup probe is initiated.
+
+|`startupTimeout` +
+int32
+|
+
+
+Number of seconds after which the startup probe times out.
+
+|`startupPeriod` +
+int32
+|
+
+
+How often to perform the startup probe.
+
+|`startupSuccessThreshold` +
+int32
+|
+
+
+Minimum consecutive successes for the startup probe to be considered successful after having failed.
+
+|`startupFailureThreshold` +
+int32
+|
+
+
+Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
 
 
 |===

@@ -38,11 +38,11 @@ We're going to show an example shortly.
 Suppose that you want to provide a Kamelet that allows users to search data on Twitter, providing a stream of information about a given keyword.
 Creating such a Kamelet is a fairly easy task: we can use options of the "camel-twitter" component without adding much processing logic.
 
-So the procedure of writing a simple Kamelet starts with scaffolding a new Kamelet resource, which can be done with the `kamel` CLI:
+So the procedure of writing a simple Kamelet starts with scaffolding a new Kamelet resource, which can be done with the Camel JBang CLI (`camel`):
 
 [source]
 ----
-kamel init twitter-search-source.kamelet.yaml
+camel init twitter-search-source.kamelet.yaml
 ----
 
 This produces a YAML file like the following one:
@@ -352,11 +352,11 @@ We write it using the Java DSL because that is the language that most Apache Cam
 
 TIP: For a great developer experience, we suggest to use https://code.visualstudio.com/[Visual Studio Code] with the https://marketplace.visualstudio.com/items?itemName=redhat.apache-camel-extension-pack[Camel Extension Pack]
 
-We start from scratch by creating an integration file
+We start from scratch by creating an integration file with Camel JBang CLI:
 
 [source]
 ----
-kamel init Earthquake.java
+camel init Earthquake.java
 ----
 
 This will scaffold a Java source file with a timer-to-log integration, that we'll edit according to our need.

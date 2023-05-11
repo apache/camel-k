@@ -19,11 +19,11 @@ package pipe
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
-	"github.com/pkg/errors"
 )
 
 func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext bindings.BindingContext) (*bindings.Binding, error) {
@@ -31,13 +31,13 @@ func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext binding
 	if errHandlConf != nil {
 		errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
 		if err != nil {
-			return nil, errors.Wrap(err, "could not parse error handler")
+			return nil, fmt.Errorf("could not parse error handler: %w", err)
 		}
 		// We need to get the translated URI from any referenced resource (ie, kamelets)
 		if errorHandlerSpec.Type() == v1.ErrorHandlerTypeSink {
 			errorHandlerBinding, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
 			if err != nil {
-				return nil, errors.Wrap(err, "could not determine error handler URI")
+				return nil, fmt.Errorf("could not determine error handler URI: %w", err)
 			}
 		} else {
 			// Create a new binding otherwise in order to store error handler application properties
@@ -48,7 +48,7 @@ func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext binding
 
 		err = setErrorHandlerConfiguration(errorHandlerBinding, errorHandlerSpec)
 		if err != nil {
-			return nil, errors.Wrap(err, "could not set integration error handler")
+			return nil, fmt.Errorf("could not set integration error handler: %w", err)
 		}
 
 		return errorHandlerBinding, nil
@@ -63,7 +63,7 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1.ErrorHandler, error) {
 		return nil, err
 	}
 	if len(properties) > 1 {
-		return nil, errors.Errorf("You must provide just 1 error handler, provided %d", len(properties))
+		return nil, fmt.Errorf("you must provide just 1 error handler, provided %d", len(properties))
 	}
 
 	for errHandlType, errHandlValue := range properties {
@@ -76,7 +76,7 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1.ErrorHandler, error) {
 		case v1.ErrorHandlerTypeSink:
 			dst = new(v1.ErrorHandlerSink)
 		default:
-			return nil, errors.Errorf("Unknown error handler type %s", errHandlType)
+			return nil, fmt.Errorf("unknown error handler type %s", errHandlType)
 		}
 
 		if err = json.Unmarshal(errHandlValue, dst); err != nil {
@@ -89,7 +89,7 @@ func parseErrorHandler(rawMessage v1.RawMessage) (v1.ErrorHandler, error) {
 		return dst, nil
 	}
 
-	return nil, errors.New("You must provide any supported error handler")
+	return nil, errors.New("you must provide any supported error handler")
 }
 
 func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHandler v1.ErrorHandler) error {

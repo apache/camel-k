@@ -23,8 +23,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/pkg/errors"
-
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -64,7 +62,7 @@ func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 		})
 
 	if err != nil {
-		return errors.Wrapf(err, "unable to set up field indexer for status.phase")
+		return fmt.Errorf("unable to set up field indexer for status.phase: %w", err)
 	}
 
 	return add(ctx, mgr, c, newReconciler(mgr, c))
