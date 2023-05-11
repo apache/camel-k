@@ -42,7 +42,7 @@ type kitOptions struct {
 
 func TestKitMaxBuildLimit(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		createOperator(ns, "500Mi", "8m0s", "--global", "--force")
+		createOperator(ns, "8m0s", "--global", "--force")
 
 		pl := Platform(ns)()
 		// set maximum number of running builds
