@@ -25,7 +25,6 @@ package builder
 import (
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -33,7 +32,6 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 type kitOptions struct {
@@ -142,7 +140,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 }
 
 func TestKitTimerToLogFullBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "500Mi", "8m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "timer-to-log", "8m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -150,7 +148,7 @@ func TestKitTimerToLogFullBuild(t *testing.T) {
 }
 
 func TestKitKnativeFullBuild(t *testing.T) {
-	doKitFullBuild(t, "knative", "500Mi", "8m0s", TestTimeoutLong, kitOptions{
+	doKitFullBuild(t, "knative", "8m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{
 			"camel-quarkus-knative",
 		},
@@ -158,7 +156,7 @@ func TestKitKnativeFullBuild(t *testing.T) {
 }
 
 func TestKitTimerToLogFullNativeBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "4Gi", "15m0s", TestTimeoutLong*3, kitOptions{
+	doKitFullBuild(t, "timer-to-log", "15m0s", TestTimeoutLong*3, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
@@ -168,27 +166,18 @@ func TestKitTimerToLogFullNativeBuild(t *testing.T) {
 	}, v1.BuildPhaseSucceeded, v1.IntegrationKitPhaseReady)
 }
 
-func doKitFullBuild(t *testing.T, name string, memoryLimit string, buildTimeout string, testTimeout time.Duration,
+func doKitFullBuild(t *testing.T, name string, buildTimeout string, testTimeout time.Duration,
 	options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
 	t.Helper()
 
 	WithNewTestNamespace(t, func(ns string) {
-		createOperator(ns, memoryLimit, buildTimeout)
+		createOperator(ns, buildTimeout)
 		doKitBuildInNamespace(name, ns, testTimeout, options, buildPhase, kitPhase)
 	})
 }
 
-func createOperator(ns string, memoryLimit string, buildTimeout string, installArgs ...string) {
-	strategy := os.Getenv("KAMEL_INSTALL_BUILD_PUBLISH_STRATEGY")
-	ocp, err := openshift.IsOpenShift(TestClient())
-	Expect(err).To(Succeed())
-
+func createOperator(ns string, buildTimeout string, installArgs ...string) {
 	args := []string{"--build-timeout", buildTimeout}
-	// TODO: configure build Pod resources if applicable
-	if strategy == "Spectrum" || ocp {
-		args = append(args, "--operator-resources", "limits.memory="+memoryLimit)
-	}
-
 	args = append(args, installArgs...)
 
 	operatorID := fmt.Sprintf("camel-k-%s", ns)
