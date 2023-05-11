@@ -355,7 +355,11 @@ func toPropertyMap(src interface{}) (map[string]interface{}, error) {
 }
 
 func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) ([]string, error) {
-	catalog, err := camel.DefaultCatalog()
+	runtime := v1.RuntimeSpec{
+		Version:  it.Status.RuntimeVersion,
+		Provider: v1.RuntimeProviderQuarkus,
+	}
+	catalog, err := camel.LoadCatalog(o.Context, c, o.Namespace, runtime)
 	if err != nil {
 		return nil, err
 	}
