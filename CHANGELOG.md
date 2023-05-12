@@ -55,6 +55,7 @@
 - Remove github.com/fatih/structs dependency [\#4033](https://github.com/apache/camel-k/issues/4033)
 - Remove all deprecated code in 1.x version [\#4026](https://github.com/apache/camel-k/issues/4026)
 - Bump Mandrel from 22.2.0 to 22.3.1 [\#4017](https://github.com/apache/camel-k/issues/4017)
+- add a new known issue to the Troubleshooting doc section [\#4007](https://github.com/apache/camel-k/issues/4007)
 - Remove dependency no longer maintained [\#3935](https://github.com/apache/camel-k/issues/3935)
 - Expose runtime details in `kamel version -a -v` [\#3836](https://github.com/apache/camel-k/issues/3836)
 - Remove KEP cryptic message when installing [\#3829](https://github.com/apache/camel-k/issues/3829)
