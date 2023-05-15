@@ -252,7 +252,7 @@ func dumpConditions(prefix string, conditions []corev1.PodCondition, t *testing.
 }
 
 func dumpLogs(ctx context.Context, c client.Client, prefix string, ns string, name string, container string, t *testing.T) error {
-	lines := int64(50)
+	lines := int64(250)
 	stream, err := c.CoreV1().Pods(ns).GetLogs(name, &corev1.PodLogOptions{
 		Container: container,
 		TailLines: &lines,
