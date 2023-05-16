@@ -22,10 +22,10 @@ updates:
     package-ecosystem: "gomod"
     schedule:
       interval: "daily"
-    allow:
-      - ignore:	k8s.io/api
-      - ignore:	k8s.io/apiextensions-apiserver
-      - ignore:	k8s.io/apimachinery
-      - ignore:	k8s.io/cli-runtime
-      - ignore:	k8s.io/client-go
-      - ignore:	k8s.io/kubectl
+    ignore:
+      - dependency-name: "k8s.io/api"      
+      - dependency-name: "k8s.io/apiextensions-apiserver"
+      - dependency-name: "k8s.io/apimachinery"
+      - dependency-name: "k8s.io/cli-runtime"
+      - dependency-name: "k8s.io/client-go"
+      - dependency-name: "k8s.io/kubectl"
