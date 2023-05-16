@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- camel- k with spring cloud config [\#4370](https://github.com/apache/camel-k/issues/4370)
+- Test failures, likely some regression [\#4358](https://github.com/apache/camel-k/issues/4358)
 - High memory Quarkus native check failing [\#4345](https://github.com/apache/camel-k/issues/4345)
 - Binding from a Strimzi CR is not properly decoded [\#4336](https://github.com/apache/camel-k/issues/4336)
 - Native "higher memory" checks not running [\#4328](https://github.com/apache/camel-k/issues/4328)
@@ -38,6 +40,7 @@
 - Unable to produce and consume in camel-k to apache kafka, getting error like "Connection to node -1 \(localhost/127.0.0.1:9092\) could not be established. Broker may not be available." [\#4186](https://github.com/apache/camel-k/issues/4186)
 - Remove additional custom labels utility [\#4183](https://github.com/apache/camel-k/issues/4183)
 - Camel K 2.x upgrade 1.x strategy [\#4179](https://github.com/apache/camel-k/issues/4179)
+- Customize Builder resources when Quarkus Native [\#4177](https://github.com/apache/camel-k/issues/4177)
 - Makefile not working on Mac [\#4175](https://github.com/apache/camel-k/issues/4175)
 - Kamelet development using Camel DSL instead of YAML DSL [\#4174](https://github.com/apache/camel-k/issues/4174)
 - Better naming of IntegrationKits to indicate whether the kit is native or non-native [\#4172](https://github.com/apache/camel-k/issues/4172)
