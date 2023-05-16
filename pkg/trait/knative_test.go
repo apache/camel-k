@@ -521,8 +521,10 @@ func NewFakeClient(namespace string) (client.Client, error) {
 			},
 			Spec: eventing.BrokerSpec{},
 			Status: eventing.BrokerStatus{
-				Address: duckv1.Addressable{
-					URL: brokerURL,
+				AddressStatus: duckv1.AddressStatus{
+					Address: &duckv1.Addressable{
+						URL: brokerURL,
+					},
 				},
 			},
 		},
