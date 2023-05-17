@@ -147,14 +147,6 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
-	if t.hasKitNativeType() {
-		// Force the build to run in a separate Pod
-		t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
-		e.BuildConfiguration.Strategy = v1.BuildStrategyPod
-		e.BuildConfiguration.RequestCPU = "1000m"
-		e.BuildConfiguration.RequestMemory = "4Gi"
-	}
-
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		t.applyWhileBuildingKit(e)
 

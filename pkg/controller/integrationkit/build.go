@@ -107,12 +107,13 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			}
 		}
 
-		// It has to be the same namespace as the operator as they must share a PVC
-		builderPodNamespace := platform.GetOperatorNamespace()
-		buildConfig := env.BuildConfiguration
+		// TODO : wrap in a func
+		// We may need to change certain builder configuration values
+		operatorNamespace := platform.GetOperatorNamespace()
+		buildConfig := v1.BuilderConfigurationTasks(env.Pipeline)
 		if buildConfig.IsEmpty() {
 			// default to IntegrationPlatform configuration
-			buildConfig = env.Platform.Status.Pipeline.BuildConfiguration
+			buildConfig = &env.Platform.Status.Pipeline.BuildConfiguration
 		} else if buildConfig.Strategy == "" {
 			// we always need to define a strategy, so we default to platform if none
 			buildConfig.Strategy = env.Platform.Status.Pipeline.BuildConfiguration.Strategy
@@ -121,7 +122,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		// nolint: contextcheck
 		if buildConfig.Strategy == v1.BuildStrategyPod {
 			// Pod strategy requires a PVC to exist. If it does not exist, we warn the user and fallback to Routine build strategy
-			if pvc, err := kubernetes.LookupPersistentVolumeClaim(env.Ctx, env.Client, builderPodNamespace, defaults.DefaultPVC); pvc != nil || err != nil {
+			if pvc, err := kubernetes.LookupPersistentVolumeClaim(env.Ctx, env.Client, operatorNamespace, defaults.DefaultPVC); pvc != nil || err != nil {
 				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 				if err != nil {
 					return nil, fmt.Errorf("error while creating Camel K Builder service account: %w", err)
@@ -132,9 +133,10 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Log.Info(`Warning: the operator was installed with an ephemeral storage, builder "pod" strategy is not supported: using "routine" build strategy as a fallback. We recommend to configure a PersistentVolumeClaim in order to be able to use "pod" builder strategy. Please consider that certain features such as Quarkus native require a "pod" builder strategy (hence a PVC) to work properly.`)
 			}
 		}
-
 		buildConfig.ToolImage = env.CamelCatalog.Image
-		buildConfig.BuilderPodNamespace = builderPodNamespace
+		buildConfig.BuilderPodNamespace = operatorNamespace
+		v1.SetBuilderConfigurationTasks(env.Pipeline, buildConfig)
+		/////////////////////////////
 
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{
@@ -152,8 +154,6 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Timeout: timeout,
 			},
 		}
-
-		build.SetBuilderConfiguration(&buildConfig)
 
 		// Set the integration kit instance as the owner and controller
 		if err := controllerutil.SetControllerReference(kit, build, action.client.GetScheme()); err != nil {

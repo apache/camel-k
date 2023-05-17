@@ -56,7 +56,13 @@ func (build *Build) BuilderPodNamespace() string {
 
 // BuilderConfiguration returns the builder configuration for this Build.
 func (build *Build) BuilderConfiguration() *BuildConfiguration {
-	for _, t := range build.Spec.Tasks {
+	return BuilderConfigurationTasks(build.Spec.Tasks)
+
+}
+
+// BuilderConfigurationTasks returns the builder configuration from the task list.
+func BuilderConfigurationTasks(tasks []Task) *BuildConfiguration {
+	for _, t := range tasks {
 		if t.Builder != nil {
 			return &t.Builder.Configuration
 		}
@@ -66,7 +72,12 @@ func (build *Build) BuilderConfiguration() *BuildConfiguration {
 
 // SetBuilderConfiguration set the configuration required for this Build.
 func (build *Build) SetBuilderConfiguration(conf *BuildConfiguration) {
-	for _, t := range build.Spec.Tasks {
+	SetBuilderConfigurationTasks(build.Spec.Tasks, conf)
+}
+
+// SetBuilderConfigurationTasks set the configuration required for the builder in the list of tasks.
+func SetBuilderConfigurationTasks(tasks []Task, conf *BuildConfiguration) {
+	for _, t := range tasks {
 		if t.Builder != nil {
 			t.Builder.Configuration = *conf
 			return

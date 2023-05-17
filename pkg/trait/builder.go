@@ -148,32 +148,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 			ExecutorImage: executorImage,
 		}})
 	}
-
-	if t.Strategy != "" {
-		t.L.Infof("User defined build strategy %s", t.Strategy)
-		switch t.Strategy {
-		case string(v1.BuildStrategyPod):
-			e.BuildConfiguration.Strategy = v1.BuildStrategyPod
-		case string(v1.BuildStrategyRoutine):
-			e.BuildConfiguration.Strategy = v1.BuildStrategyRoutine
-		default:
-			return fmt.Errorf("must specify either pod or routine build strategy, unknown %s", t.Strategy)
-		}
-	}
-
-	if t.RequestCPU != "" {
-		e.BuildConfiguration.RequestCPU = t.RequestCPU
-	}
-	if t.RequestMemory != "" {
-		e.BuildConfiguration.RequestMemory = t.RequestMemory
-	}
-	if t.LimitCPU != "" {
-		e.BuildConfiguration.LimitCPU = t.LimitCPU
-	}
-	if t.LimitMemory != "" {
-		e.BuildConfiguration.LimitMemory = t.LimitMemory
-	}
-
 	return nil
 }
 
@@ -186,14 +160,45 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
 
+	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
+		// The builder trait must define certain resources requirements when we have a native build
+		if quarkus, ok := trait.(*quarkusTrait); ok && pointer.BoolDeref(quarkus.Enabled, true) && quarkus.isNativeIntegration(e) {
+			// Force the build to run in a separate Pod
+			t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
+			t.Strategy = string(v1.BuildStrategyPod)
+			t.RequestCPU = "1000m"
+			t.RequestMemory = "4Gi"
+		}
+	}
+
+	buildConfig := v1.BuildConfiguration{
+		RequestCPU:    t.RequestCPU,
+		RequestMemory: t.RequestMemory,
+		LimitCPU:      t.LimitCPU,
+		LimitMemory:   t.LimitMemory,
+	}
+
+	if t.Strategy != "" {
+		t.L.Infof("User defined build strategy %s", t.Strategy)
+		switch t.Strategy {
+		case string(v1.BuildStrategyPod):
+			buildConfig.Strategy = v1.BuildStrategyPod
+		case string(v1.BuildStrategyRoutine):
+			buildConfig.Strategy = v1.BuildStrategyRoutine
+		default:
+			return nil, fmt.Errorf("must specify either pod or routine build strategy, unknown %s", t.Strategy)
+		}
+	}
+
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
-		BaseImage:    e.Platform.Status.Pipeline.BaseImage,
-		Runtime:      e.CamelCatalog.Runtime,
-		Dependencies: e.IntegrationKit.Spec.Dependencies,
-		Maven:        maven,
+		Configuration: buildConfig,
+		BaseImage:     e.Platform.Status.Pipeline.BaseImage,
+		Runtime:       e.CamelCatalog.Runtime,
+		Dependencies:  e.IntegrationKit.Spec.Dependencies,
+		Maven:         maven,
 	}
 
 	if task.Maven.Properties == nil {
