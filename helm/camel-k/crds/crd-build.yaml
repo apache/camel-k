@@ -77,44 +77,8 @@ spec:
           metadata:
             type: object
           spec:
-            description: BuildSpec defines the Build operation to be executed
+            description: PipelineSpec defines the Build operation to be executed
             properties:
-              configuration:
-                description: The configuration that should be used to perform the
-                  Build.
-                properties:
-                  limitCPU:
-                    description: The maximum amount of CPU required. Only used for
-                      `pod` strategy
-                    type: string
-                  limitMemory:
-                    description: The maximum amount of memory required. Only used
-                      for `pod` strategy
-                    type: string
-                  requestCPU:
-                    description: The minimum amount of CPU required. Only used for
-                      `pod` strategy
-                    type: string
-                  requestMemory:
-                    description: The minimum amount of memory required. Only used
-                      for `pod` strategy
-                    type: string
-                  strategy:
-                    description: the strategy to adopt
-                    enum:
-                    - routine
-                    - pod
-                    type: string
-                type: object
-              maxRunningBuilds:
-                description: the maximum amount of parallel running builds started
-                  by this operator instance
-                format: int32
-                type: integer
-              operatorNamespace:
-                description: The namespace where to run the builder Pod (must be the
-                  same of the operator in charge of this Build reconciliation).
-                type: string
               tasks:
                 description: The sequence of Build tasks to be performed as part of
                   the Build execution.
@@ -169,7 +133,8 @@ spec:
                           type: boolean
                       type: object
                     builder:
-                      description: a BuilderTask (base task)
+                      description: a BuilderTask, used to generate and package the
+                        project
                       properties:
                         baseImage:
                           description: the base image layer
@@ -177,6 +142,42 @@ spec:
                         buildDir:
                           description: workspace directory to use
                           type: string
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
+                              type: string
+                          type: object
                         dependencies:
                           description: the list of dependencies to use for this build
                           items:
@@ -572,6 +573,20 @@ spec:
                             type: string
                           type: array
                       type: object
+                    custom:
+                      description: UserTask is used to execute any generic custom
+                        operation
+                      properties:
+                        command:
+                          description: the command to execute
+                          type: string
+                        image:
+                          description: the container image to use
+                          type: string
+                        name:
+                          description: name of the task
+                          type: string
+                      type: object
                     kaniko:
                       description: a KanikoTask, for Kaniko strategy
                       properties:
@@ -678,14 +693,11 @@ spec:
                   type: object
                 type: array
               timeout:
-                description: Timeout defines the Build maximum execution duration.
-                  The Build deadline is set to the Build start time plus the Timeout
-                  duration. If the Build deadline is exceeded, the Build context is
-                  canceled, and its phase set to BuildPhaseFailed.
+                description: Timeout defines the Pipeline maximum execution duration.
+                  The Pipeline deadline is set to the Pipeline start time plus the
+                  Timeout duration. If the Pipeline deadline is exceeded, the Pipeline
+                  context is canceled, and its phase set to BuildPhaseFailed.
                 format: duration
-                type: string
-              toolImage:
-                description: The container image to be used to run the build.
                 type: string
             type: object
           status:

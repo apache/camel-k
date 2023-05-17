@@ -1614,7 +1614,7 @@ func BuildConfig(ns, name string) func() v1.BuildConfiguration {
 	return func() v1.BuildConfiguration {
 		build := Build(ns, name)()
 		if build != nil {
-			return build.Spec.Configuration
+			return *build.BuilderConfiguration()
 		}
 		return v1.BuildConfiguration{}
 	}
@@ -1882,7 +1882,7 @@ func PlatformBuildCatalogToolTimeout(ns string) func() *metav1.Duration {
 		if p == nil {
 			return &metav1.Duration{}
 		}
-		return p.Status.Build.BuildCatalogToolTimeout
+		return p.Status.Pipeline.BuildCatalogToolTimeout
 	}
 }
 
@@ -1892,7 +1892,7 @@ func PlatformTimeout(ns string) func() *metav1.Duration {
 		if p == nil {
 			return &metav1.Duration{}
 		}
-		return p.Status.Build.Timeout
+		return p.Status.Pipeline.Timeout
 	}
 }
 

@@ -12,7 +12,7 @@ The `kubectl` CLI provides convenient commands, to create a ConfigMap or a Secre
 $ kubectl create configmap maven-settings --from-file=settings.xml
 ----
 
-The created ConfigMap or Secret can then be referenced in the IntegrationPlatform resource, from the `spec.build.maven.settings` field, e.g.:
+The created ConfigMap or Secret can then be referenced in the IntegrationPlatform resource, from the `spec.pipeline.maven.settings` field, e.g.:
 
 [source,yaml]
 ----
@@ -21,7 +21,7 @@ kind: IntegrationPlatform
 metadata:
   name: camel-k
 spec:
-  build:
+  pipeline:
     maven:
       settings:
         configMapKeyRef:
@@ -173,7 +173,7 @@ The Secret can contain X.509 certificates, and PKCS#7 formatted certificate chai
 A JKS formatted keystore is automatically created to store the CA certificate(s), and configured to be used as a trusted certificate(s) by the Maven commands.
 The root CA certificates are also imported into the created keystore.
 
-The created Secret can then be referenced in the IntegrationPlatform resource, from the `spec.build.maven.caSecret` field, e.g.:
+The created Secret can then be referenced in the IntegrationPlatform resource, from the `spec.pipeline.maven.caSecret` field, e.g.:
 
 [source,yaml]
 ----
@@ -182,7 +182,7 @@ kind: IntegrationPlatform
 metadata:
   name: camel-k
 spec:
-  build:
+  pipeline:
     maven:
       caSecret:
         key: tls.crt
@@ -206,7 +206,7 @@ The Maven https://maven.apache.org/guides/mini/guide-using-extensions.html[exten
 $ kamel install --maven-extension fi.yle.tools:aws-maven:1.4.2
 ----
 
-The IntegrationPlatform resource stores extensions in the `spec.build.maven.extension` field, e.g:
+The IntegrationPlatform resource stores extensions in the `spec.pipeline.maven.extension` field, e.g:
 
 [source,yaml]
 ----
@@ -216,7 +216,7 @@ metadata:
   name: camel-k
 spec:
   build:
-    maven:
+    pipeline:
       extension:
       - artifactId: aws-maven
         groupId: fi.yle.tools

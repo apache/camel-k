@@ -171,7 +171,7 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 }
 
 func configureResources(build *v1.Build, container *corev1.Container) {
-	conf := build.Spec.Configuration
+	conf := *build.BuilderConfiguration()
 	requestsList := container.Resources.Requests
 	limitsList := container.Resources.Limits
 	var err error
@@ -272,7 +272,7 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 
 	container := corev1.Container{
 		Name:            taskName,
-		Image:           build.Spec.ToolImage,
+		Image:           build.BuilderConfiguration().ToolImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command: []string{
 			"kamel",

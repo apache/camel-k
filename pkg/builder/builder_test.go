@@ -51,7 +51,7 @@ func TestFailure(t *testing.T) {
 	registerSteps(steps)
 
 	build := &v1.Build{
-		Spec: v1.BuildSpec{
+		Spec: v1.PipelineSpec{
 			Tasks: []v1.Task{
 				{
 					Builder: &v1.BuilderTask{

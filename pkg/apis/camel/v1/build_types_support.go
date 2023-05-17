@@ -44,9 +44,34 @@ func NewBuildList() BuildList {
 	}
 }
 
-// OperatorNamespace returns the namespace of the operator in charge to reconcile this Build.
+// BuilderPodNamespace returns the namespace of the operator in charge to reconcile this Build.
 func (build *Build) BuilderPodNamespace() string {
-	return build.Spec.BuilderPodNamespace
+	for _, t := range build.Spec.Tasks {
+		if t.Builder != nil {
+			return t.Builder.Configuration.BuilderPodNamespace
+		}
+	}
+	return ""
+}
+
+// BuilderConfiguration returns the builder configuration for this Build.
+func (build *Build) BuilderConfiguration() *BuildConfiguration {
+	for _, t := range build.Spec.Tasks {
+		if t.Builder != nil {
+			return &t.Builder.Configuration
+		}
+	}
+	return &BuildConfiguration{}
+}
+
+// SetBuilderConfiguration set the configuration required for this Build.
+func (build *Build) SetBuilderConfiguration(conf *BuildConfiguration) {
+	for _, t := range build.Spec.Tasks {
+		if t.Builder != nil {
+			t.Builder.Configuration = *conf
+			return
+		}
+	}
 }
 
 func (buildPhase *BuildPhase) String() string {

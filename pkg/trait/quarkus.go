@@ -293,7 +293,7 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 }
 
 func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
-	build := getBuilderTask(e.BuildTasks)
+	build := getBuilderTask(e.Pipeline)
 	if build == nil {
 		return fmt.Errorf("unable to find builder task: %s", e.Integration.Name)
 	}
@@ -322,14 +322,14 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 		}
 		steps = append(steps, builder.Image.NativeImageContext)
 		// Spectrum does not rely on Dockerfile to assemble the image
-		if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
+		if e.Platform.Status.Pipeline.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
 			steps = append(steps, builder.Image.ExecutableDockerfile)
 		}
 	} else {
 		build.Maven.Properties["quarkus.package.type"] = string(traitv1.FastJarPackageType)
 		steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext)
 		// Spectrum does not rely on Dockerfile to assemble the image
-		if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
+		if e.Platform.Status.Pipeline.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum {
 			steps = append(steps, builder.Image.JvmDockerfile)
 		}
 	}

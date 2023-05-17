@@ -150,7 +150,7 @@ func TestSkipRegistryInstallation(t *testing.T) {
 		Expect(KamelInstallWithID(operatorID, ns, "--skip-registry-setup").Execute()).To(Succeed())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(func() v1.RegistrySpec {
-			return Platform(ns)().Spec.Build.Registry
+			return Platform(ns)().Spec.Pipeline.Registry
 		}, TestTimeoutMedium).Should(Equal(v1.RegistrySpec{}))
 	})
 }
@@ -234,10 +234,10 @@ func TestInstallWithPublishStrategyOptions(t *testing.T) {
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(func() map[string]string {
-			return Platform(ns)().Spec.Build.PublishStrategyOptions
+			return Platform(ns)().Spec.Pipeline.PublishStrategyOptions
 		}).Should(HaveKeyWithValue("KanikoExecutorImage", "foo"))
 		Eventually(func() map[string]string {
-			return Platform(ns)().Spec.Build.PublishStrategyOptions
+			return Platform(ns)().Spec.Pipeline.PublishStrategyOptions
 		}).Should(HaveKeyWithValue("KanikoWarmerImage", "bar"))
 	})
 }

@@ -72,23 +72,23 @@ func (t *builderTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
+	e.Pipeline = append(e.Pipeline, v1.Task{Builder: builderTask})
 
-	switch e.Platform.Status.Build.PublishStrategy {
+	switch e.Platform.Status.Pipeline.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Spectrum: &v1.SpectrumTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{Spectrum: &v1.SpectrumTask{
 			BaseTask: v1.BaseTask{
 				Name: "spectrum",
 			},
 			PublishTask: v1.PublishTask{
-				BaseImage: e.Platform.Status.Build.BaseImage,
+				BaseImage: e.Platform.Status.Pipeline.BaseImage,
 				Image:     getImageName(e),
-				Registry:  e.Platform.Status.Build.Registry,
+				Registry:  e.Platform.Status.Pipeline.Registry,
 			},
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
-		e.BuildTasks = append(e.BuildTasks, v1.Task{S2i: &v1.S2iTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{S2i: &v1.S2iTask{
 			BaseTask: v1.BaseTask{
 				Name: "s2i",
 			},
@@ -98,47 +98,47 @@ func (t *builderTrait) Apply(e *Environment) error {
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
 		var platform string
 		var found bool
-		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
+		if platform, found = e.Platform.Status.Pipeline.PublishStrategyOptions[builder.BuildahPlatform]; !found {
 			platform = ""
 			t.L.Infof("Attribute platform for buildah not found, default from host will be used!")
 		} else {
 			t.L.Infof("User defined %s platform, will be used from buildah!", platform)
 		}
 		var executorImage string
-		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahImage]; found {
+		if image, found := e.Platform.Status.Pipeline.PublishStrategyOptions[builder.BuildahImage]; found {
 			executorImage = image
 			t.L.Infof("User defined executor image %s will be used for buildah", image)
 		}
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{Buildah: &v1.BuildahTask{
 			Platform: platform,
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
 			},
 			PublishTask: v1.PublishTask{
 				Image:    getImageName(e),
-				Registry: e.Platform.Status.Build.Registry,
+				Registry: e.Platform.Status.Pipeline.Registry,
 			},
 			Verbose:       t.Verbose,
 			ExecutorImage: executorImage,
 		}})
 	//nolint: staticcheck,nolintlint
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
-		persistentVolumeClaim := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]
-		cacheEnabled := e.Platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
+		persistentVolumeClaim := e.Platform.Status.Pipeline.PublishStrategyOptions[builder.KanikoPVCName]
+		cacheEnabled := e.Platform.Status.Pipeline.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
 
 		var executorImage string
-		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoExecutorImage]; found {
+		if image, found := e.Platform.Status.Pipeline.PublishStrategyOptions[builder.KanikoExecutorImage]; found {
 			executorImage = image
 			t.L.Infof("User defined executor image %s will be used for kaniko", image)
 		}
 
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Kaniko: &v1.KanikoTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{Kaniko: &v1.KanikoTask{
 			BaseTask: v1.BaseTask{
 				Name: "kaniko",
 			},
 			PublishTask: v1.PublishTask{
 				Image:    getImageName(e),
-				Registry: e.Platform.Status.Build.Registry,
+				Registry: e.Platform.Status.Pipeline.Registry,
 			},
 			Cache: v1.KanikoTaskCache{
 				Enabled:               &cacheEnabled,
@@ -179,7 +179,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	maven := v1.MavenBuildSpec{
-		MavenSpec: e.Platform.Status.Build.Maven,
+		MavenSpec: e.Platform.Status.Pipeline.Maven,
 	}
 	// Add Maven repositories defined in the IntegrationKit
 	for _, repo := range e.IntegrationKit.Spec.Repositories {
@@ -190,7 +190,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
-		BaseImage:    e.Platform.Status.Build.BaseImage,
+		BaseImage:    e.Platform.Status.Pipeline.BaseImage,
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		Maven:        maven,
@@ -225,9 +225,9 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 }
 
 func getImageName(e *Environment) string {
-	organization := e.Platform.Status.Build.Registry.Organization
+	organization := e.Platform.Status.Pipeline.Registry.Organization
 	if organization == "" {
 		organization = e.Platform.Namespace
 	}
-	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
+	return e.Platform.Status.Pipeline.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
 }

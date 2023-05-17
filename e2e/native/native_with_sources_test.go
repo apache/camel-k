@@ -45,7 +45,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 		pl := Platform(ns)()
 		// set a longer timeout than default as for some reason the builder hit the timeout
-		pl.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
+		pl.Spec.Pipeline.BuildCatalogToolTimeout = &metav1.Duration{
 			Duration: 5 * time.Minute,
 		}
 		TestClient().Update(TestContext, pl)

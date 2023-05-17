@@ -26,17 +26,35 @@ import (
 // BuildConfigurationApplyConfiguration represents an declarative configuration of the BuildConfiguration type for use
 // with apply.
 type BuildConfigurationApplyConfiguration struct {
-	Strategy      *v1.BuildStrategy `json:"strategy,omitempty"`
-	RequestCPU    *string           `json:"requestCPU,omitempty"`
-	RequestMemory *string           `json:"requestMemory,omitempty"`
-	LimitCPU      *string           `json:"limitCPU,omitempty"`
-	LimitMemory   *string           `json:"limitMemory,omitempty"`
+	ToolImage           *string           `json:"toolImage,omitempty"`
+	BuilderPodNamespace *string           `json:"operatorNamespace,omitempty"`
+	Strategy            *v1.BuildStrategy `json:"strategy,omitempty"`
+	RequestCPU          *string           `json:"requestCPU,omitempty"`
+	RequestMemory       *string           `json:"requestMemory,omitempty"`
+	LimitCPU            *string           `json:"limitCPU,omitempty"`
+	LimitMemory         *string           `json:"limitMemory,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs an declarative configuration of the BuildConfiguration type for use with
 // apply.
 func BuildConfiguration() *BuildConfigurationApplyConfiguration {
 	return &BuildConfigurationApplyConfiguration{}
+}
+
+// WithToolImage sets the ToolImage field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ToolImage field is set to the value of the last call.
+func (b *BuildConfigurationApplyConfiguration) WithToolImage(value string) *BuildConfigurationApplyConfiguration {
+	b.ToolImage = &value
+	return b
+}
+
+// WithBuilderPodNamespace sets the BuilderPodNamespace field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the BuilderPodNamespace field is set to the value of the last call.
+func (b *BuildConfigurationApplyConfiguration) WithBuilderPodNamespace(value string) *BuildConfigurationApplyConfiguration {
+	b.BuilderPodNamespace = &value
+	return b
 }
 
 // WithStrategy sets the Strategy field in the declarative configuration to the given value

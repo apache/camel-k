@@ -41,7 +41,7 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	err = quarkusTrait.Apply(environment)
 	assert.Nil(t, err)
 
-	build := getBuilderTask(environment.BuildTasks)
+	build := getBuilderTask(environment.Pipeline)
 	assert.NotNil(t, t, build)
 
 	assert.Len(t, build.Steps, len(builder.Quarkus.CommonSteps)+3)
@@ -105,7 +105,7 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{},
-		BuildTasks: []v1.Task{
+		Pipeline: []v1.Task{
 			{
 				Builder: &v1.BuilderTask{},
 			},

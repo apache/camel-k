@@ -20,7 +20,7 @@ Registry configuration can be set upon installation using command:
 $ kamel install --registry registry-host.io --organization your-user-id-or-org --registry-secret the-push-kubernetes-secret-name
 ----
 
-Alternatively, the same settings can be set in the `.spec.build.registry` section of the `IntegrationPlatform` resource.
+Alternatively, the same settings can be set in the `.spec.pipeline.registry` section of the `IntegrationPlatform` resource.
 
 [source,yaml]
 ----
@@ -31,7 +31,7 @@ metadata:
     app: camel-k
   name: camel-k
 spec:
-  build:
+  pipeline:
     registry:
       address: registry-host.io
       organization: your-user-id-or-org

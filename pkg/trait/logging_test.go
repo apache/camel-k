@@ -84,7 +84,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 			Status: v1.IntegrationPlatformStatus{
 				Phase: v1.IntegrationPlatformPhaseReady,
 				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-					Build: v1.IntegrationPlatformBuildSpec{
+					Pipeline: v1.IntegrationPlatformPipelineSpec{
 						RuntimeVersion: c.Runtime.Version,
 					},
 				},

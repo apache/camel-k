@@ -87,7 +87,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
+				Pipeline: v1.IntegrationPlatformPipelineSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
 				},
@@ -207,7 +207,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
+				Pipeline: v1.IntegrationPlatformPipelineSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
 				},
@@ -395,7 +395,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
-				Build: v1.IntegrationPlatformBuildSpec{
+				Pipeline: v1.IntegrationPlatformPipelineSpec{
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
 					RuntimeVersion:  catalog.Runtime.Version,
