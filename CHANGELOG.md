@@ -6,10 +6,12 @@
 
 **Closed issues:**
 
+- No such property: header for class: Script1 [\#4385](https://github.com/apache/camel-k/issues/4385)
 - camel- k with spring cloud config [\#4370](https://github.com/apache/camel-k/issues/4370)
 - Test failures, likely some regression [\#4358](https://github.com/apache/camel-k/issues/4358)
 - High memory Quarkus native check failing [\#4345](https://github.com/apache/camel-k/issues/4345)
 - Binding from a Strimzi CR is not properly decoded [\#4336](https://github.com/apache/camel-k/issues/4336)
+- Camel-k does not terminate previous pods after updating of integration [\#4333](https://github.com/apache/camel-k/issues/4333)
 - Native "higher memory" checks not running [\#4328](https://github.com/apache/camel-k/issues/4328)
 - TestKamelReset test flakiness [\#4316](https://github.com/apache/camel-k/issues/4316)
 - Cannot set GOMAXPROCS [\#4299](https://github.com/apache/camel-k/issues/4299)
@@ -58,6 +60,7 @@
 - Remove github.com/fatih/structs dependency [\#4033](https://github.com/apache/camel-k/issues/4033)
 - Remove all deprecated code in 1.x version [\#4026](https://github.com/apache/camel-k/issues/4026)
 - Bump Mandrel from 22.2.0 to 22.3.1 [\#4017](https://github.com/apache/camel-k/issues/4017)
+- Some API warnings reported while contributing operator 1.11.1 [\#4016](https://github.com/apache/camel-k/issues/4016)
 - add a new known issue to the Troubleshooting doc section [\#4007](https://github.com/apache/camel-k/issues/4007)
 - Remove dependency no longer maintained [\#3935](https://github.com/apache/camel-k/issues/3935)
 - Expose runtime details in `kamel version -a -v` [\#3836](https://github.com/apache/camel-k/issues/3836)
