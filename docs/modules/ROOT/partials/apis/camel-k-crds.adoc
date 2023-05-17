@@ -2415,6 +2415,7 @@ IntegrationPlatformBuildPublishStrategy defines the strategy used to package and
 IntegrationPlatformBuildSpec contains platform related pipeline information.
 This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
 You can define the build strategy, the image registry to use and the Maven configuration to adopt.
+Deprecated: use IntegrationPlatformPipelineSpec instead.
 
 [cols="2,2a",options="header"]
 |===
