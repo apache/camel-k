@@ -227,15 +227,19 @@ func newBuildWithLayoutInPhase(namespace string, name string, layout string, pha
 				v1.IntegrationKitLayoutLabel: layout,
 			},
 		},
-		Spec: v1.BuildSpec{
-			Configuration: v1.BuildConfiguration{
-				Strategy: v1.BuildStrategyRoutine,
+		Spec: v1.PipelineSpec{
+			Tasks: []v1.Task{
+				{
+					Builder: &v1.BuilderTask{
+						Configuration: v1.BuildConfiguration{
+							Strategy:            v1.BuildStrategyRoutine,
+							ToolImage:           "camel:latest",
+							BuilderPodNamespace: "ns",
+						},
+					},
+				},
 			},
-			ToolImage:           "camel:latest",
-			BuilderPodNamespace: "ns",
-			Tasks:               []v1.Task{},
-			Timeout:             metav1.Duration{Duration: 5 * time.Minute},
-			MaxRunningBuilds:    3,
+			Timeout: metav1.Duration{Duration: 5 * time.Minute},
 		},
 		Status: v1.BuildStatus{
 			Phase: phase,

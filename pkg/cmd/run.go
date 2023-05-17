@@ -842,12 +842,12 @@ func (o *runCmdOptions) getPlatform(cmd *cobra.Command, c client.Client, it *v1.
 	if err != nil {
 		return nil, err
 	}
-	if ca := pl.Status.Build.Registry.CA; ca != "" {
+	if ca := pl.Status.Pipeline.Registry.CA; ca != "" {
 		o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a custom certificate [%s] \n", ca)
 		o.PrintVerboseOut(cmd, "Please make sure Kamel CLI is configured to use it or the operation will fail.")
 		o.PrintVerboseOut(cmd, "More information can be found here https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file")
 	}
-	if secret := pl.Status.Build.Registry.Secret; secret != "" {
+	if secret := pl.Status.Pipeline.Registry.Secret; secret != "" {
 		o.PrintfVerboseOutf(cmd, "We've noticed the image registry is configured with a Secret [%s] \n", secret)
 		o.PrintVerboseOut(cmd, "Please configure Docker authentication correctly or the operation will fail (by default it's $HOME/.docker/config.json).")
 		o.PrintVerboseOut(cmd, "More information can be found here https://docs.docker.com/engine/reference/commandline/login/")
@@ -969,7 +969,7 @@ func (o *runCmdOptions) getRegistry(platform *v1.IntegrationPlatform) string {
 	if registry != "" {
 		return registry
 	}
-	return platform.Status.Build.Registry.Address
+	return platform.Status.Pipeline.Registry.Address
 }
 
 func (o *runCmdOptions) skipChecksums() bool {
@@ -1269,7 +1269,7 @@ func writeChecksumToFile(filepath string, hash hash.Hash) error {
 }
 
 func (o *runCmdOptions) getSpectrumOptions(platform *v1.IntegrationPlatform, cmd *cobra.Command) spectrum.Options {
-	insecure := platform.Status.Build.Registry.Insecure
+	insecure := platform.Status.Pipeline.Registry.Insecure
 	var stdout io.Writer
 	if o.Verbose {
 		stdout = cmd.OutOrStdout()
@@ -1294,7 +1294,7 @@ func getArtifactHTTPPath(dependency maven.Dependency, platform *v1.IntegrationPl
 	// Some vendors don't allow '/' or '.' in repository name so let's replace them with '_'
 	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, "/", "_")
 	artifactHTTPPath = strings.ReplaceAll(artifactHTTPPath, ".", "_")
-	organization := platform.Status.Build.Registry.Organization
+	organization := platform.Status.Pipeline.Registry.Organization
 	if organization == "" {
 		organization = ns
 	}

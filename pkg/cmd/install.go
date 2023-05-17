@@ -146,7 +146,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)")
 	cmd.Flags().StringArray("operator-env-vars", nil, "Add an environment variable to set in the operator Pod(s), as <name=value>")
 	cmd.Flags().StringP("log-level", "z", "info", "The level of operator logging (default - info): info or 0, debug or 1")
-	cmd.Flags().Int("max-running-builds", 0, "Maximum number of parallel running builds")
+	cmd.Flags().Int("max-running-pipelines", 0, "Maximum number of parallel running pipelines")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
@@ -193,7 +193,7 @@ type installCmdOptions struct {
 	MavenCASecret               string   `mapstructure:"maven-ca-secret"`
 	MavenCLIOptions             []string `mapstructure:"maven-cli-options"`
 	HealthPort                  int32    `mapstructure:"health-port"`
-	MaxRunningBuilds            int32    `mapstructure:"max-running-builds"`
+	MaxRunningPipelines         int32    `mapstructure:"max-running-pipelines"`
 	Monitoring                  bool     `mapstructure:"monitoring"`
 	MonitoringPort              int32    `mapstructure:"monitoring-port"`
 	TraitProfile                string   `mapstructure:"trait-profile"`
@@ -473,21 +473,21 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 	}
 
 	if registrySecretName != "" {
-		platform.Spec.Build.Registry.Secret = registrySecretName
+		platform.Spec.Pipeline.Registry.Secret = registrySecretName
 	}
 
 	if len(o.MavenProperties) > 0 {
-		platform.Spec.Build.Maven.Properties = make(map[string]string)
+		platform.Spec.Pipeline.Maven.Properties = make(map[string]string)
 		for _, property := range o.MavenProperties {
 			kv := strings.Split(property, "=")
 			if len(kv) == 2 {
-				platform.Spec.Build.Maven.Properties[kv[0]] = kv[1]
+				platform.Spec.Pipeline.Maven.Properties[kv[0]] = kv[1]
 			}
 		}
 	}
 
 	if size := len(o.MavenExtensions); size > 0 {
-		platform.Spec.Build.Maven.Extension = make([]v1.MavenArtifact, 0, size)
+		platform.Spec.Pipeline.Maven.Extension = make([]v1.MavenArtifact, 0, size)
 		for _, extension := range o.MavenExtensions {
 			gav := strings.Split(extension, ":")
 			if len(gav) != 2 && len(gav) != 3 {
@@ -501,29 +501,29 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 			if len(gav) == 3 {
 				ext.Version = gav[2]
 			}
-			platform.Spec.Build.Maven.Extension = append(platform.Spec.Build.Maven.Extension, ext)
+			platform.Spec.Pipeline.Maven.Extension = append(platform.Spec.Pipeline.Maven.Extension, ext)
 		}
 	}
 
 	if o.MavenLocalRepository != "" {
-		platform.Spec.Build.Maven.LocalRepository = o.MavenLocalRepository
+		platform.Spec.Pipeline.Maven.LocalRepository = o.MavenLocalRepository
 	}
 
 	if len(o.MavenCLIOptions) > 0 {
-		platform.Spec.Build.Maven.CLIOptions = o.MavenCLIOptions
+		platform.Spec.Pipeline.Maven.CLIOptions = o.MavenCLIOptions
 	}
 
 	if o.RuntimeVersion != "" {
-		platform.Spec.Build.RuntimeVersion = o.RuntimeVersion
+		platform.Spec.Pipeline.RuntimeVersion = o.RuntimeVersion
 	}
 	if o.BaseImage != "" {
-		platform.Spec.Build.BaseImage = o.BaseImage
+		platform.Spec.Pipeline.BaseImage = o.BaseImage
 	}
 	if o.BuildStrategy != "" {
-		platform.Spec.Build.BuildConfiguration.Strategy = v1.BuildStrategy(o.BuildStrategy)
+		platform.Spec.Pipeline.BuildConfiguration.Strategy = v1.BuildStrategy(o.BuildStrategy)
 	}
 	if o.BuildPublishStrategy != "" {
-		platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)
+		platform.Spec.Pipeline.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)
 	}
 	if o.BuildTimeout != "" {
 		d, err := time.ParseDuration(o.BuildTimeout)
@@ -531,12 +531,12 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 			return nil, err
 		}
 
-		platform.Spec.Build.Timeout = &metav1.Duration{
+		platform.Spec.Pipeline.Timeout = &metav1.Duration{
 			Duration: d,
 		}
 	}
-	if o.MaxRunningBuilds > 0 {
-		platform.Spec.Build.MaxRunningBuilds = o.MaxRunningBuilds
+	if o.MaxRunningPipelines > 0 {
+		platform.Spec.Pipeline.MaxRunningPipelines = o.MaxRunningPipelines
 	}
 
 	if o.TraitProfile != "" {
@@ -552,7 +552,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 		if err != nil {
 			return nil, err
 		}
-		platform.Spec.Build.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
+		platform.Spec.Pipeline.Maven.Settings.ConfigMapKeyRef = &corev1.ConfigMapKeySelector{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: platform.Name + "-maven-settings",
 			},
@@ -565,7 +565,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 		if err != nil {
 			return nil, err
 		}
-		platform.Spec.Build.Maven.Settings = mavenSettings
+		platform.Spec.Pipeline.Maven.Settings = mavenSettings
 	}
 
 	if o.MavenCASecret != "" {
@@ -573,7 +573,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 		if err != nil {
 			return nil, err
 		}
-		platform.Spec.Build.Maven.CASecrets = append(platform.Spec.Build.Maven.CASecrets, *secret)
+		platform.Spec.Pipeline.Maven.CASecrets = append(platform.Spec.Pipeline.Maven.CASecrets, *secret)
 	}
 
 	if o.ClusterType != "" {
@@ -584,7 +584,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 		}
 	}
 	if len(o.BuildPublishStrategyOptions) > 0 {
-		if err = o.addBuildPublishStrategyOptions(&platform.Spec.Build); err != nil {
+		if err = o.addBuildPublishStrategyOptions(&platform.Spec.Pipeline); err != nil {
 			return nil, err
 		}
 	}
@@ -774,16 +774,16 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	return result
 }
 
-// addBuildPublishStrategyOptions parses and adds all the build publish strategy options to the given IntegrationPlatformBuildSpec.
-func (o *installCmdOptions) addBuildPublishStrategyOptions(build *v1.IntegrationPlatformBuildSpec) error {
+// addBuildPublishStrategyOptions parses and adds all the build publish strategy options to the given IntegrationPlatformPipelineSpec.
+func (o *installCmdOptions) addBuildPublishStrategyOptions(pipeline *v1.IntegrationPlatformPipelineSpec) error {
 	for _, option := range o.BuildPublishStrategyOptions {
 		kv := strings.Split(option, "=")
 		if len(kv) == 2 {
 			key := kv[0]
-			if builder.IsSupportedPublishStrategyOption(build.PublishStrategy, key) {
-				build.AddOption(key, kv[1])
+			if builder.IsSupportedPublishStrategyOption(pipeline.PublishStrategy, key) {
+				pipeline.AddOption(key, kv[1])
 			} else {
-				return fmt.Errorf("build publish strategy option '%s' not supported. %s", option, supportedOptionsAsString(build.PublishStrategy))
+				return fmt.Errorf("build publish strategy option '%s' not supported. %s", option, supportedOptionsAsString(pipeline.PublishStrategy))
 			}
 		} else {
 			return fmt.Errorf("build publish strategy option '%s' not in the expected format (name=value)", option)

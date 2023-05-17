@@ -219,12 +219,12 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 	}
 
 	mc := maven.NewContext(tmpDir)
-	mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
-	mc.AdditionalArguments = e.Platform.Status.Build.Maven.CLIOptions
+	mc.LocalRepository = e.Platform.Status.Pipeline.Maven.LocalRepository
+	mc.AdditionalArguments = e.Platform.Status.Pipeline.Maven.CLIOptions
 	mc.AddArgument("-Dopenapi.spec=" + in)
 	mc.AddArgument("-Ddsl.out=" + out)
 
-	if settings, err := kubernetes.ResolveValueSource(e.Ctx, e.Client, e.Platform.Namespace, &e.Platform.Status.Build.Maven.Settings); err != nil {
+	if settings, err := kubernetes.ResolveValueSource(e.Ctx, e.Client, e.Platform.Namespace, &e.Platform.Status.Pipeline.Maven.Settings); err != nil {
 		return err
 	} else if settings != "" {
 		mc.UserSettings = []byte(settings)
@@ -239,7 +239,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		return err
 	}
 	mc.GlobalSettings = data
-	secrets := e.Platform.Status.Build.Maven.CASecrets
+	secrets := e.Platform.Status.Pipeline.Maven.CASecrets
 
 	if secrets != nil {
 		certsData, err := kubernetes.GetSecretsRefData(e.Ctx, e.Client, e.Platform.Namespace, secrets)
@@ -258,7 +258,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		)
 	}
 
-	ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Build.GetTimeout().Duration)
+	ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Pipeline.GetTimeout().Duration)
 	defer cancel()
 	err = project.Command(mc).Do(ctx)
 	if err != nil {

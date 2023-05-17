@@ -108,17 +108,17 @@ func (command *describePlatformCommandOptions) describeIntegrationPlatform(cmd *
 }
 
 func getPlatformBaseImage(spec v1.IntegrationPlatformSpec) string {
-	return spec.Build.BaseImage
+	return spec.Pipeline.BaseImage
 }
 
 func getPlatformRuntimeVersion(spec v1.IntegrationPlatformSpec) string {
-	return spec.Build.RuntimeVersion
+	return spec.Pipeline.RuntimeVersion
 }
 
 func getPlatformMavenLocalRepository(spec v1.IntegrationPlatformSpec) string {
-	return spec.Build.Maven.LocalRepository
+	return spec.Pipeline.Maven.LocalRepository
 }
 
 func getPlatformPublishStrategy(spec v1.IntegrationPlatformSpec) string {
-	return string(spec.Build.PublishStrategy)
+	return string(spec.Pipeline.PublishStrategy)
 }

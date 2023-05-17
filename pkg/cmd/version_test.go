@@ -85,10 +85,10 @@ func TestVersionClientVerbose(t *testing.T) {
 func TestOperatorVersionVerbose(t *testing.T) {
 	platform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	platform.Status.Version = defaults.Version
-	platform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	platform.Status.Pipeline.RuntimeVersion = defaults.DefaultRuntimeVersion
 	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	catalog := v1.NewCamelCatalog(platform.Namespace, defaults.DefaultRuntimeVersion)
-	catalog.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Build.RuntimeProvider, Version: platform.Status.Build.RuntimeVersion}}
+	catalog.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Pipeline.RuntimeProvider, Version: platform.Status.Pipeline.RuntimeVersion}}
 	// mocked catalog versions
 	catalog.Spec.Runtime.Metadata = map[string]string{
 		"camel-quarkus.version": "2.16.0",

@@ -48,8 +48,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.BuildConfigurationApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuilderTask"):
 		return &camelv1.BuilderTaskApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("BuildSpec"):
-		return &camelv1.BuildSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuildStatus"):
 		return &camelv1.BuildStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelArtifact"):
@@ -128,6 +126,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.IntegrationPlatformKameletRepositorySpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformKameletSpec"):
 		return &camelv1.IntegrationPlatformKameletSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformPipelineSpec"):
+		return &camelv1.IntegrationPlatformPipelineSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformSpec"):
 		return &camelv1.IntegrationPlatformSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformStatus"):
@@ -166,6 +166,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.PipeApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("PipeCondition"):
 		return &camelv1.PipeConditionApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("PipelineSpec"):
+		return &camelv1.PipelineSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("PipeSpec"):
 		return &camelv1.PipeSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("PipeStatus"):
@@ -204,6 +206,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.TraitsApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("TraitSpec"):
 		return &camelv1.TraitSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("UserTask"):
+		return &camelv1.UserTaskApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("ValueSource"):
 		return &camelv1.ValueSourceApplyConfiguration{}
 

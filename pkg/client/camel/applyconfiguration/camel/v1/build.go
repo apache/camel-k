@@ -30,8 +30,8 @@ import (
 type BuildApplyConfiguration struct {
 	v1.TypeMetaApplyConfiguration    `json:",inline"`
 	*v1.ObjectMetaApplyConfiguration `json:"metadata,omitempty"`
-	Spec                             *BuildSpecApplyConfiguration   `json:"spec,omitempty"`
-	Status                           *BuildStatusApplyConfiguration `json:"status,omitempty"`
+	Spec                             *PipelineSpecApplyConfiguration `json:"spec,omitempty"`
+	Status                           *BuildStatusApplyConfiguration  `json:"status,omitempty"`
 }
 
 // Build constructs an declarative configuration of the Build type for use with
@@ -206,7 +206,7 @@ func (b *BuildApplyConfiguration) ensureObjectMetaApplyConfigurationExists() {
 // WithSpec sets the Spec field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Spec field is set to the value of the last call.
-func (b *BuildApplyConfiguration) WithSpec(value *BuildSpecApplyConfiguration) *BuildApplyConfiguration {
+func (b *BuildApplyConfiguration) WithSpec(value *PipelineSpecApplyConfiguration) *BuildApplyConfiguration {
 	b.Spec = value
 	return b
 }

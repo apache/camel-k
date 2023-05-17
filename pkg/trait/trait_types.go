@@ -187,7 +187,7 @@ type Environment struct {
 	PostActions           []func(*Environment) error
 	PostStepProcessors    []func(*Environment) error
 	PostProcessors        []func(*Environment) error
-	BuildTasks            []v1.Task
+	Pipeline              []v1.Task
 	ConfiguredTraits      []Trait
 	ExecutedTraits        []Trait
 	EnvVars               []corev1.EnvVar

@@ -99,8 +99,8 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			annotations[v1.OperatorIDAnnotation] = operatorID
 		}
 
-		timeout := env.Platform.Status.Build.GetTimeout()
-		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
+		timeout := env.Platform.Status.Pipeline.GetTimeout()
+		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Pipeline.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
 			// Increase the timeout to a sensible default
 			timeout = metav1.Duration{
 				Duration: 10 * time.Minute,
@@ -112,10 +112,10 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		buildConfig := env.BuildConfiguration
 		if buildConfig.IsEmpty() {
 			// default to IntegrationPlatform configuration
-			buildConfig = env.Platform.Status.Build.BuildConfiguration
+			buildConfig = env.Platform.Status.Pipeline.BuildConfiguration
 		} else if buildConfig.Strategy == "" {
 			// we always need to define a strategy, so we default to platform if none
-			buildConfig.Strategy = env.Platform.Status.Build.BuildConfiguration.Strategy
+			buildConfig.Strategy = env.Platform.Status.Pipeline.BuildConfiguration.Strategy
 		}
 
 		// nolint: contextcheck
@@ -133,6 +133,9 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			}
 		}
 
+		buildConfig.ToolImage = env.CamelCatalog.Image
+		buildConfig.BuilderPodNamespace = builderPodNamespace
+
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -144,15 +147,13 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Labels:      labels,
 				Annotations: annotations,
 			},
-			Spec: v1.BuildSpec{
-				Configuration:       buildConfig,
-				ToolImage:           env.CamelCatalog.Image,
-				BuilderPodNamespace: builderPodNamespace,
-				Tasks:               env.BuildTasks,
-				Timeout:             timeout,
-				MaxRunningBuilds:    env.Platform.Status.Build.MaxRunningBuilds,
+			Spec: v1.PipelineSpec{
+				Tasks:   env.Pipeline,
+				Timeout: timeout,
 			},
 		}
+
+		build.SetBuilderConfiguration(&buildConfig)
 
 		// Set the integration kit instance as the owner and controller
 		if err := controllerutil.SetControllerReference(kit, build, action.client.GetScheme()); err != nil {

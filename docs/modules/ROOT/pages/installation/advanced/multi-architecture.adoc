@@ -59,11 +59,11 @@ If you want change the default architecture of buildah build strategy, you must 
 kubectl edit ip
 ----
 
-This command will open the editor with the yaml of `IntegrationPlatform`, to change the architecture you can fill inside `spec.build.PublishStrategyOptions` as below
+This command will open the editor with the yaml of `IntegrationPlatform`, to change the architecture you can fill inside `spec.pipeline.PublishStrategyOptions` as below
 [source,yaml]
 ----
 spec:
-  build:
+  pipeline:
     PublishStrategyOptions:
       BuildahPlatform: linux/arm/v8
 ----
@@ -73,7 +73,7 @@ After few seconds the yaml will be updated and that field is imported inside sta
 [source,yaml]
 ----
 status:
-  build:
+  pipeline:
     PublishStrategyOptions:
       BuildahPlatform: linux/arm/v8
 ----

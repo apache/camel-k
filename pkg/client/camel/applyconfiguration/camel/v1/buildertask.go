@@ -23,13 +23,14 @@ package v1
 // with apply.
 type BuilderTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
-	BaseImage                  *string                           `json:"baseImage,omitempty"`
-	Runtime                    *RuntimeSpecApplyConfiguration    `json:"runtime,omitempty"`
-	Dependencies               []string                          `json:"dependencies,omitempty"`
-	Steps                      []string                          `json:"steps,omitempty"`
-	Maven                      *MavenBuildSpecApplyConfiguration `json:"maven,omitempty"`
-	BuildDir                   *string                           `json:"buildDir,omitempty"`
-	Sources                    []SourceSpecApplyConfiguration    `json:"sources,omitempty"`
+	Configuration              *BuildConfigurationApplyConfiguration `json:"configuration,omitempty"`
+	BaseImage                  *string                               `json:"baseImage,omitempty"`
+	Runtime                    *RuntimeSpecApplyConfiguration        `json:"runtime,omitempty"`
+	Dependencies               []string                              `json:"dependencies,omitempty"`
+	Steps                      []string                              `json:"steps,omitempty"`
+	Maven                      *MavenBuildSpecApplyConfiguration     `json:"maven,omitempty"`
+	BuildDir                   *string                               `json:"buildDir,omitempty"`
+	Sources                    []SourceSpecApplyConfiguration        `json:"sources,omitempty"`
 }
 
 // BuilderTaskApplyConfiguration constructs an declarative configuration of the BuilderTask type for use with
@@ -43,6 +44,14 @@ func BuilderTask() *BuilderTaskApplyConfiguration {
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *BuilderTaskApplyConfiguration) WithName(value string) *BuilderTaskApplyConfiguration {
 	b.Name = &value
+	return b
+}
+
+// WithConfiguration sets the Configuration field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Configuration field is set to the value of the last call.
+func (b *BuilderTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *BuilderTaskApplyConfiguration {
+	b.Configuration = value
 	return b
 }
 

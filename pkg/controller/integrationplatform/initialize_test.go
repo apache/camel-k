@@ -53,7 +53,7 @@ func TestTimeouts_Default(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.Pipeline.GetTimeout().Duration)
 }
 
 func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
@@ -66,7 +66,7 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	timeout, err := time.ParseDuration("1m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Timeout = &metav1.Duration{
+	ip.Spec.Pipeline.Timeout = &metav1.Duration{
 		Duration: timeout,
 	}
 
@@ -83,7 +83,7 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, 1*time.Minute, answer.Status.Build.GetTimeout().Duration)
+	assert.Equal(t, 1*time.Minute, answer.Status.Pipeline.GetTimeout().Duration)
 }
 
 func TestTimeouts_Truncated(t *testing.T) {
@@ -96,7 +96,7 @@ func TestTimeouts_Truncated(t *testing.T) {
 	bt, err := time.ParseDuration("5m1ms")
 	assert.Nil(t, err)
 
-	ip.Spec.Build.Timeout = &metav1.Duration{
+	ip.Spec.Pipeline.Timeout = &metav1.Duration{
 		Duration: bt,
 	}
 
@@ -113,5 +113,5 @@ func TestTimeouts_Truncated(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)
+	assert.Equal(t, 5*time.Minute, answer.Status.Pipeline.GetTimeout().Duration)
 }

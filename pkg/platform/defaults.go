@@ -72,18 +72,18 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		}
 	}
 
-	if p.Status.Build.PublishStrategy == "" {
+	if p.Status.Pipeline.PublishStrategy == "" {
 		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
-			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
+			p.Status.Pipeline.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
-			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
+			p.Status.Pipeline.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
 		}
-		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
+		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Pipeline.PublishStrategy)
 	}
 
-	if p.Status.Build.BuildConfiguration.Strategy == "" {
-		p.Status.Build.BuildConfiguration.Strategy = v1.BuildStrategyPod
-		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
+	if p.Status.Pipeline.BuildConfiguration.Strategy == "" {
+		p.Status.Pipeline.BuildConfiguration.Strategy = v1.BuildStrategyPod
+		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Pipeline.BuildConfiguration.Strategy)
 	}
 
 	err := setPlatformDefaults(p, verbose)
@@ -91,7 +91,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
+	if p.Status.Pipeline.BuildConfiguration.Strategy == v1.BuildStrategyPod {
 		if err := CreateBuilderServiceAccount(ctx, c, p); err != nil {
 			return fmt.Errorf("cannot ensure service account is present: %w", err)
 		}
@@ -102,12 +102,12 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if verbose && p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Build.Registry.Address == "" {
+	if verbose && p.Status.Pipeline.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I && p.Status.Pipeline.Registry.Address == "" {
 		log.Log.Info("No registry specified for publishing images")
 	}
 
-	if verbose && p.Status.Build.GetTimeout().Duration != 0 {
-		log.Log.Infof("Maven Timeout set to %s", p.Status.Build.GetTimeout().Duration)
+	if verbose && p.Status.Pipeline.GetTimeout().Duration != 0 {
+		log.Log.Infof("Maven Timeout set to %s", p.Status.Pipeline.GetTimeout().Duration)
 	}
 
 	return nil
@@ -131,11 +131,11 @@ func CreateBuilderServiceAccount(ctx context.Context, client client.Client, p *v
 
 func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
-		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
-		p.Status.Build.Registry.Address == "" {
+		p.Status.Pipeline.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
+		p.Status.Pipeline.Registry.Address == "" {
 		log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
 		// Default to using OpenShift internal container images registry when using a strategy other than S2I
-		p.Status.Build.Registry.Address = "image-registry.openshift-image-registry.svc:5000"
+		p.Status.Pipeline.Registry.Address = "image-registry.openshift-image-registry.svc:5000"
 
 		// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
 		cm, err := createServiceCaBundleConfigMap(ctx, c, p)
@@ -143,10 +143,10 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 			return err
 		}
 		log.Debugf("Integration Platform %s [%s]: setting registry certificate authority", p.Name, p.Namespace)
-		p.Status.Build.Registry.CA = cm.Name
+		p.Status.Pipeline.Registry.CA = cm.Name
 
 		// Default to using the registry secret that's configured for the builder service account
-		if p.Status.Build.Registry.Secret == "" {
+		if p.Status.Pipeline.Registry.Secret == "" {
 			log.Debugf("Integration Platform %s [%s]: setting registry secret", p.Name, p.Namespace)
 			// Bind the required role to push images to the registry
 			err := createBuilderRegistryRoleBinding(ctx, c, p)
@@ -162,24 +162,24 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 			// We may want to read the secret keys instead of relying on the secret name scheme
 			for _, secret := range sa.Secrets {
 				if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
-					p.Status.Build.Registry.Secret = secret.Name
+					p.Status.Pipeline.Registry.Secret = secret.Name
 
 					break
 				}
 			}
 		}
 	}
-	if p.Status.Build.Registry.Address == "" {
+	if p.Status.Pipeline.Registry.Address == "" {
 		// try KEP-1755
 		address, err := image.GetRegistryAddress(ctx, c)
 		if err != nil && verbose {
 			log.Error(err, "Cannot find a registry where to push images via KEP-1755")
 		} else if err == nil && address != nil {
-			p.Status.Build.Registry.Address = *address
+			p.Status.Pipeline.Registry.Address = *address
 		}
 	}
 
-	log.Debugf("Final Registry Address: %s", p.Status.Build.Registry.Address)
+	log.Debugf("Final Registry Address: %s", p.Status.Pipeline.Registry.Address)
 	return nil
 }
 
@@ -215,60 +215,60 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 		target.Status.Profile = source.Status.Profile
 	}
 
-	if target.Status.Build.PublishStrategy == "" {
-		target.Status.Build.PublishStrategy = source.Status.Build.PublishStrategy
+	if target.Status.Pipeline.PublishStrategy == "" {
+		target.Status.Pipeline.PublishStrategy = source.Status.Pipeline.PublishStrategy
 	}
-	if target.Status.Build.PublishStrategyOptions == nil {
+	if target.Status.Pipeline.PublishStrategyOptions == nil {
 		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", target.Name, target.Namespace)
-		target.Status.Build.PublishStrategyOptions = source.Status.Build.PublishStrategyOptions
+		target.Status.Pipeline.PublishStrategyOptions = source.Status.Pipeline.PublishStrategyOptions
 	}
-	if target.Status.Build.BuildConfiguration.Strategy == "" {
-		target.Status.Build.BuildConfiguration.Strategy = source.Status.Build.BuildConfiguration.Strategy
+	if target.Status.Pipeline.BuildConfiguration.Strategy == "" {
+		target.Status.Pipeline.BuildConfiguration.Strategy = source.Status.Pipeline.BuildConfiguration.Strategy
 	}
 
-	if target.Status.Build.RuntimeVersion == "" {
+	if target.Status.Pipeline.RuntimeVersion == "" {
 		log.Debugf("Integration Platform %s [%s]: setting runtime version", target.Name, target.Namespace)
-		target.Status.Build.RuntimeVersion = source.Status.Build.RuntimeVersion
+		target.Status.Pipeline.RuntimeVersion = source.Status.Pipeline.RuntimeVersion
 	}
-	if target.Status.Build.BaseImage == "" {
+	if target.Status.Pipeline.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", target.Name, target.Namespace)
-		target.Status.Build.BaseImage = source.Status.Build.BaseImage
+		target.Status.Pipeline.BaseImage = source.Status.Pipeline.BaseImage
 	}
 
-	if target.Status.Build.Maven.LocalRepository == "" {
+	if target.Status.Pipeline.Maven.LocalRepository == "" {
 		log.Debugf("Integration Platform %s [%s]: setting local repository", target.Name, target.Namespace)
-		target.Status.Build.Maven.LocalRepository = source.Status.Build.Maven.LocalRepository
+		target.Status.Pipeline.Maven.LocalRepository = source.Status.Pipeline.Maven.LocalRepository
 	}
 
-	if len(source.Status.Build.Maven.CLIOptions) > 0 && len(target.Status.Build.Maven.CLIOptions) == 0 {
+	if len(source.Status.Pipeline.Maven.CLIOptions) > 0 && len(target.Status.Pipeline.Maven.CLIOptions) == 0 {
 		log.Debugf("Integration Platform %s [%s]: setting CLI options", target.Name, target.Namespace)
-		target.Status.Build.Maven.CLIOptions = make([]string, len(source.Status.Build.Maven.CLIOptions))
-		copy(target.Status.Build.Maven.CLIOptions, source.Status.Build.Maven.CLIOptions)
+		target.Status.Pipeline.Maven.CLIOptions = make([]string, len(source.Status.Pipeline.Maven.CLIOptions))
+		copy(target.Status.Pipeline.Maven.CLIOptions, source.Status.Pipeline.Maven.CLIOptions)
 	}
 
-	if len(source.Status.Build.Maven.Properties) > 0 {
+	if len(source.Status.Pipeline.Maven.Properties) > 0 {
 		log.Debugf("Integration Platform %s [%s]: setting Maven properties", target.Name, target.Namespace)
-		if len(target.Status.Build.Maven.Properties) == 0 {
-			target.Status.Build.Maven.Properties = make(map[string]string, len(source.Status.Build.Maven.Properties))
+		if len(target.Status.Pipeline.Maven.Properties) == 0 {
+			target.Status.Pipeline.Maven.Properties = make(map[string]string, len(source.Status.Pipeline.Maven.Properties))
 		}
 
-		for key, val := range source.Status.Build.Maven.Properties {
+		for key, val := range source.Status.Pipeline.Maven.Properties {
 			// only set unknown properties on target
-			if _, ok := target.Status.Build.Maven.Properties[key]; !ok {
-				target.Status.Build.Maven.Properties[key] = val
+			if _, ok := target.Status.Pipeline.Maven.Properties[key]; !ok {
+				target.Status.Pipeline.Maven.Properties[key] = val
 			}
 		}
 	}
 
-	if len(source.Status.Build.Maven.Extension) > 0 && len(target.Status.Build.Maven.Extension) == 0 {
+	if len(source.Status.Pipeline.Maven.Extension) > 0 && len(target.Status.Pipeline.Maven.Extension) == 0 {
 		log.Debugf("Integration Platform %s [%s]: setting Maven extensions", target.Name, target.Namespace)
-		target.Status.Build.Maven.Extension = make([]v1.MavenArtifact, len(source.Status.Build.Maven.Extension))
-		copy(target.Status.Build.Maven.Extension, source.Status.Build.Maven.Extension)
+		target.Status.Pipeline.Maven.Extension = make([]v1.MavenArtifact, len(source.Status.Pipeline.Maven.Extension))
+		copy(target.Status.Pipeline.Maven.Extension, source.Status.Pipeline.Maven.Extension)
 	}
 
-	if target.Status.Build.Registry.Address == "" && source.Status.Build.Registry.Address != "" {
+	if target.Status.Pipeline.Registry.Address == "" && source.Status.Pipeline.Registry.Address != "" {
 		log.Debugf("Integration Platform %s [%s]: setting registry", target.Name, target.Namespace)
-		source.Status.Build.Registry.DeepCopyInto(&target.Status.Build.Registry)
+		source.Status.Pipeline.Registry.DeepCopyInto(&target.Status.Pipeline.Registry)
 	}
 
 	if err := target.Status.Traits.Merge(source.Status.Traits); err != nil {
@@ -278,20 +278,15 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	}
 
 	// Build timeout
-	if target.Status.Build.Timeout == nil {
+	if target.Status.Pipeline.Timeout == nil {
 		log.Debugf("Integration Platform %s [%s]: setting build timeout", target.Name, target.Namespace)
-		target.Status.Build.Timeout = source.Status.Build.Timeout
+		target.Status.Pipeline.Timeout = source.Status.Pipeline.Timeout
 	}
 
 	// Catalog tools build timeout
-	if target.Status.Build.BuildCatalogToolTimeout == nil {
+	if target.Status.Pipeline.BuildCatalogToolTimeout == nil {
 		log.Debugf("Integration Platform %s [%s]: setting build camel catalog tool timeout", target.Name, target.Namespace)
-		target.Status.Build.BuildCatalogToolTimeout = source.Status.Build.BuildCatalogToolTimeout
-	}
-
-	if target.Status.Build.MaxRunningBuilds <= 0 {
-		log.Debugf("Integration Platform %s [%s]: setting max running builds", target.Name, target.Namespace)
-		target.Status.Build.MaxRunningBuilds = source.Status.Build.MaxRunningBuilds
+		target.Status.Pipeline.BuildCatalogToolTimeout = source.Status.Pipeline.BuildCatalogToolTimeout
 	}
 
 	if len(target.Status.Kamelet.Repositories) == 0 {
@@ -301,88 +296,88 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 }
 
 func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
-	if p.Status.Build.PublishStrategyOptions == nil {
+	if p.Status.Pipeline.PublishStrategyOptions == nil {
 		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", p.Name, p.Namespace)
-		p.Status.Build.PublishStrategyOptions = map[string]string{}
+		p.Status.Pipeline.PublishStrategyOptions = map[string]string{}
 	}
-	if p.Status.Build.RuntimeVersion == "" {
+	if p.Status.Pipeline.RuntimeVersion == "" {
 		log.Debugf("Integration Platform %s [%s]: setting runtime version", p.Name, p.Namespace)
-		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+		p.Status.Pipeline.RuntimeVersion = defaults.DefaultRuntimeVersion
 	}
-	if p.Status.Build.BaseImage == "" {
+	if p.Status.Pipeline.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", p.Name, p.Namespace)
-		p.Status.Build.BaseImage = defaults.BaseImage()
+		p.Status.Pipeline.BaseImage = defaults.BaseImage()
 	}
-	if p.Status.Build.Maven.LocalRepository == "" {
+	if p.Status.Pipeline.Maven.LocalRepository == "" {
 		log.Debugf("Integration Platform %s [%s]: setting local repository", p.Name, p.Namespace)
-		p.Status.Build.Maven.LocalRepository = defaults.LocalRepository
+		p.Status.Pipeline.Maven.LocalRepository = defaults.LocalRepository
 	}
-	if len(p.Status.Build.Maven.CLIOptions) == 0 {
+	if len(p.Status.Pipeline.Maven.CLIOptions) == 0 {
 		log.Debugf("Integration Platform %s [%s]: setting CLI options", p.Name, p.Namespace)
-		p.Status.Build.Maven.CLIOptions = []string{
+		p.Status.Pipeline.Maven.CLIOptions = []string{
 			"-V",
 			"--no-transfer-progress",
 			"-Dstyle.color=never",
 		}
 	}
-	if _, ok := p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]; !ok {
+	if _, ok := p.Status.Pipeline.PublishStrategyOptions[builder.KanikoPVCName]; !ok {
 		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", p.Name, p.Namespace)
-		p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName] = p.Name
+		p.Status.Pipeline.PublishStrategyOptions[builder.KanikoPVCName] = p.Name
 	}
 
 	// Build timeout
-	if p.Status.Build.GetTimeout().Duration == 0 {
-		p.Status.Build.Timeout = &metav1.Duration{
+	if p.Status.Pipeline.GetTimeout().Duration == 0 {
+		p.Status.Pipeline.Timeout = &metav1.Duration{
 			Duration: 5 * time.Minute,
 		}
 	} else {
-		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)
+		d := p.Status.Pipeline.GetTimeout().Duration.Truncate(time.Second)
 
-		if verbose && p.Status.Build.GetTimeout().Duration != d {
-			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetTimeout().Duration, d)
+		if verbose && p.Status.Pipeline.GetTimeout().Duration != d {
+			log.Log.Infof("Build timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Pipeline.GetTimeout().Duration, d)
 		}
 
 		log.Debugf("Integration Platform %s [%s]: setting build timeout", p.Name, p.Namespace)
-		p.Status.Build.Timeout = &metav1.Duration{
+		p.Status.Pipeline.Timeout = &metav1.Duration{
 			Duration: d,
 		}
 	}
 
 	// Catalog tools build timeout
-	if p.Status.Build.GetBuildCatalogToolTimeout().Duration == 0 {
+	if p.Status.Pipeline.GetBuildCatalogToolTimeout().Duration == 0 {
 		log.Debugf("Integration Platform %s [%s]: setting default build camel catalog tool timeout (1 minute)", p.Name, p.Namespace)
-		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
+		p.Status.Pipeline.BuildCatalogToolTimeout = &metav1.Duration{
 			Duration: 1 * time.Minute,
 		}
 	} else {
-		d := p.Status.Build.GetBuildCatalogToolTimeout().Duration.Truncate(time.Second)
+		d := p.Status.Pipeline.GetBuildCatalogToolTimeout().Duration.Truncate(time.Second)
 
-		if verbose && p.Status.Build.GetBuildCatalogToolTimeout().Duration != d {
-			log.Log.Infof("Build catalog tools timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetBuildCatalogToolTimeout().Duration, d)
+		if verbose && p.Status.Pipeline.GetBuildCatalogToolTimeout().Duration != d {
+			log.Log.Infof("Build catalog tools timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Pipeline.GetBuildCatalogToolTimeout().Duration, d)
 		}
 
 		log.Debugf("Integration Platform %s [%s]: setting build catalog tools timeout", p.Name, p.Namespace)
-		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
+		p.Status.Pipeline.BuildCatalogToolTimeout = &metav1.Duration{
 			Duration: d,
 		}
 	}
 
-	if p.Status.Build.MaxRunningBuilds <= 0 {
+	if p.Status.Pipeline.MaxRunningPipelines <= 0 {
 		log.Debugf("Integration Platform %s [%s]: setting max running builds", p.Name, p.Namespace)
-		if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyRoutine {
-			p.Status.Build.MaxRunningBuilds = 3
-		} else if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
-			p.Status.Build.MaxRunningBuilds = 10
+		if p.Status.Pipeline.BuildConfiguration.Strategy == v1.BuildStrategyRoutine {
+			p.Status.Pipeline.MaxRunningPipelines = 3
+		} else if p.Status.Pipeline.BuildConfiguration.Strategy == v1.BuildStrategyPod {
+			p.Status.Pipeline.MaxRunningPipelines = 10
 		}
 	}
 
-	_, cacheEnabled := p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
-	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
+	_, cacheEnabled := p.Status.Pipeline.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
+	if p.Status.Pipeline.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
 		// Default to disabling Kaniko cache warmer
 		// Using the cache warmer pod seems unreliable with the current Kaniko version
 		// and requires relying on a persistent volume.
 		defaultKanikoBuildCache := "false"
-		p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] = defaultKanikoBuildCache
+		p.Status.Pipeline.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] = defaultKanikoBuildCache
 		if verbose {
 			log.Log.Infof("Kaniko cache set to %s", defaultKanikoBuildCache)
 		}
@@ -397,10 +392,10 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	setStatusAdditionalInfo(p)
 
 	if verbose {
-		log.Log.Infof("RuntimeVersion set to %s", p.Status.Build.RuntimeVersion)
-		log.Log.Infof("BaseImage set to %s", p.Status.Build.BaseImage)
-		log.Log.Infof("LocalRepository set to %s", p.Status.Build.Maven.LocalRepository)
-		log.Log.Infof("Timeout set to %s", p.Status.Build.GetTimeout())
+		log.Log.Infof("RuntimeVersion set to %s", p.Status.Pipeline.RuntimeVersion)
+		log.Log.Infof("BaseImage set to %s", p.Status.Pipeline.BaseImage)
+		log.Log.Infof("LocalRepository set to %s", p.Status.Pipeline.Maven.LocalRepository)
+		log.Log.Infof("Timeout set to %s", p.Status.Pipeline.GetTimeout())
 	}
 
 	return nil
@@ -410,9 +405,9 @@ func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 	platform.Status.Info = make(map[string]string)
 
 	log.Debugf("Integration Platform %s [%s]: setting build publish strategy", platform.Name, platform.Namespace)
-	if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah {
+	if platform.Spec.Pipeline.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah {
 		platform.Status.Info["buildahVersion"] = defaults.BuildahVersion
-	} else if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
+	} else if platform.Spec.Pipeline.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
 		platform.Status.Info["kanikoVersion"] = defaults.KanikoVersion
 	}
 	log.Debugf("Integration Platform %s [%s]: setting status info", platform.Name, platform.Namespace)

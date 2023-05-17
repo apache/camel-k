@@ -69,8 +69,8 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 	if err = platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {
 		return nil, err
 	}
-	if platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
-		cacheEnabled := platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
+	if platform.Status.Pipeline.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
+		cacheEnabled := platform.Status.Pipeline.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
 		if cacheEnabled {
 			// Create the persistent volume claim used by the Kaniko cache
 			action.L.Info("Create persistent volume claim")
@@ -121,7 +121,7 @@ func createPersistentVolumeClaim(ctx context.Context, client client.Client, plat
 	if err != nil {
 		return err
 	}
-	pvcName := platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]
+	pvcName := platform.Status.Pipeline.PublishStrategyOptions[builder.KanikoPVCName]
 	pvc := &corev1.PersistentVolumeClaim{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
