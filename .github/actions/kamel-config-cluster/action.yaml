@@ -20,7 +20,7 @@ description: 'Delegates to respective cluster action depending on type of reques
 
 inputs:
   cluster-type:
-    description: 'The type of cluster required: [kind, ocp3, custom]'
+    description: 'The type of cluster required: [kind, custom]'
     required: true
     default: 'kind'
   cluster-config-data:
@@ -54,11 +54,6 @@ runs:
       uses: ./.github/actions/kamel-config-cluster-kind
       if: ${{ env.CLUSTER_TYPE == 'kind' }}
 
-    - id: execute-ocp3
-      name: Maybe Execute Minishift Cluster
-      uses: ./.github/actions/kamel-config-cluster-ocp3
-      if: ${{ env.CLUSTER_TYPE == 'ocp3' }}
-
     - id: execute-custom
       name: Maybe Execute Custom Cluster
       uses: ./.github/actions/kamel-config-cluster-custom
@@ -69,10 +64,10 @@ runs:
 
     - id: execute-invalid
       name: Execute Invalid Cluster
-      if: ${{ env.CLUSTER_TYPE != 'kind' &&  env.CLUSTER_TYPE != 'ocp3' &&  env.CLUSTER_TYPE != 'custom' }}
+      if: ${{ env.CLUSTER_TYPE != 'kind' &&  env.CLUSTER_TYPE != 'custom' }}
       shell: bash
       run: |
-        echo "Error: Unrecognised cluster request for type of cluster. Should be kind, ocp3 or custom."
+        echo "Error: Unrecognised cluster request for type of cluster. Should be kind or custom."
         exit 1
 
     - id: cluster-config
@@ -104,18 +99,6 @@ runs:
             -q "${{ steps.execute-custom.outputs.cluster-image-registry-pull-host }}" \
             -s "${{ steps.execute-custom.outputs.cluster-image-registry-insecure }}" \
             -u "${{ steps.execute-custom.outputs.cluster-kube-user-ctx }}"
-            ;;
-        ocp3)
-          # Does not require cluster-catalog-source-name or namespace
-          ./.github/actions/kamel-config-cluster/output-config.sh \
-            -a "${{ steps.execute-ocp3.outputs.cluster-kube-admin-user-ctx }}" \
-            -g "${{ steps.execute-ocp3.outputs.cluster-global-operator-namespace }}" \
-            -n "${{ steps.execute-ocp3.outputs.cluster-image-namespace }}" \
-            -o "${{ steps.execute-ocp3.outputs.cluster-has-olm }}" \
-            -p "${{ steps.execute-ocp3.outputs.cluster-image-registry-push-host }}" \
-            -q "${{ steps.execute-ocp3.outputs.cluster-image-registry-pull-host }}" \
-            -s "${{ steps.execute-ocp3.outputs.cluster-image-registry-insecure }}" \
-            -u "${{ steps.execute-ocp3.outputs.cluster-kube-user-ctx }}"
             ;;
         esac
 
