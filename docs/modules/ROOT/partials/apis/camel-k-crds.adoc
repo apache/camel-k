@@ -5495,6 +5495,13 @@ string
 
 When using `pod` strategy, the maximum amount of memory required by the pod builder.
 
+|`tasks` +
+[]string
+|
+
+
+A list of tasks to be executed (available only when using `pod` strategy) with format <name>;<container-image>;<container-command>
+
 
 |===
 
@@ -7503,6 +7510,40 @@ The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'
 
 
 
+
+[#_camel_apache_org_v1_trait_Task]
+=== Task
+
+A Task is a generic operation run on the project
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`name` +
+string
+|
+
+
+The name of the task to execute
+
+|`image` +
+string
+|
+
+
+The container image to use
+
+|`command` +
+string
+|
+
+
+The command to execute
+
+
+|===
 
 [#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait

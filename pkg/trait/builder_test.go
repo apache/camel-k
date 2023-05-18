@@ -173,3 +173,32 @@ func createNominalBuilderTraitTest() *builderTrait {
 
 	return builderTrait
 }
+
+func TestCustomTaskBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+	builderTask := findCustomTaskByName(env.Pipeline, "builder")
+	publisherTask := findCustomTaskByName(env.Pipeline, "spectrum")
+	customTask := findCustomTaskByName(env.Pipeline, "test")
+	assert.NotNil(t, customTask)
+	assert.NotNil(t, builderTask)
+	assert.NotNil(t, publisherTask)
+	assert.Equal(t, 3, len(env.Pipeline))
+	assert.Equal(t, "test", customTask.Custom.Name)
+	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
+	assert.Equal(t, "ls", customTask.Custom.ContainerCommand)
+}
+
+func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
+	for _, t := range tasks {
+		if t.Custom != nil && t.Custom.Name == name {
+			return t
+		}
+	}
+	return v1.Task{}
+}
