@@ -6,9 +6,9 @@
 
 **Closed issues:**
 
+- Delete stale branches [\#4389](https://github.com/apache/camel-k/issues/4389)
 - No such property: header for class: Script1 [\#4385](https://github.com/apache/camel-k/issues/4385)
 - camel- k with spring cloud config [\#4370](https://github.com/apache/camel-k/issues/4370)
-- Test failures, likely some regression [\#4358](https://github.com/apache/camel-k/issues/4358)
 - High memory Quarkus native check failing [\#4345](https://github.com/apache/camel-k/issues/4345)
 - Binding from a Strimzi CR is not properly decoded [\#4336](https://github.com/apache/camel-k/issues/4336)
 - Camel-k does not terminate previous pods after updating of integration [\#4333](https://github.com/apache/camel-k/issues/4333)
