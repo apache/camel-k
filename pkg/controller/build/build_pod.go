@@ -160,6 +160,8 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 			addBuildTaskToPod(build, task.S2i.Name, pod)
 		case task.Spectrum != nil:
 			addBuildTaskToPod(build, task.Spectrum.Name, pod)
+		case task.Custom != nil:
+			addCustomTaskToPod(build, task.Custom, pod)
 		}
 	}
 
@@ -528,6 +530,19 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 	addContainerToPod(build, container, pod)
 
 	return nil
+}
+
+func addCustomTaskToPod(build *v1.Build, task *v1.UserTask, pod *corev1.Pod) {
+	container := corev1.Container{
+		Name:            task.Name,
+		Image:           task.ContainerImage,
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Command:         strings.Split(task.ContainerCommand, " "),
+		WorkingDir:      filepath.Join(builderDir, build.Name),
+		Env:             proxyFromEnvironment(),
+	}
+
+	addContainerToPod(build, container, pod)
 }
 
 func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.Pod) {

@@ -37,4 +37,16 @@ type BuilderTrait struct {
 	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
 	// When using `pod` strategy, the maximum amount of memory required by the pod builder.
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
+	// A list of tasks to be executed (available only when using `pod` strategy) with format <name>;<container-image>;<container-command>
+	Tasks []string `property:"tasks" json:"tasks,omitempty"`
+}
+
+// A Task is a generic operation run on the project
+type Task struct {
+	// The name of the task to execute
+	Name string `property:"name" json:"name,omitempty"`
+	// The container image to use
+	Image string `property:"image" json:"image,omitempty"`
+	// The command to execute
+	Command string `property:"command" json:"command,omitempty"`
 }

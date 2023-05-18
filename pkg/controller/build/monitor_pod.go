@@ -19,7 +19,6 @@ package build
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -36,6 +35,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
 )
 
 const timeoutAnnotation = "camel.apache.org/timeout"
@@ -169,7 +169,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 	case corev1.PodFailed:
 		phase := v1.BuildPhaseFailed
 		message := "Pod failed"
-		if terminationMessage := action.getTerminationMessage(pod); terminationMessage != "" {
+		if terminationMessage := action.getTerminationMessage(ctx, pod); terminationMessage != "" {
 			message = terminationMessage
 		}
 		if pod.DeletionTimestamp != nil {
@@ -304,37 +304,36 @@ func (action *monitorPodAction) getTerminatedTime(pod *corev1.Pod) metav1.Time {
 	return finishedAt
 }
 
-func (action *monitorPodAction) getTerminationMessage(pod *corev1.Pod) string {
-	var terminationMessages []terminationMessage
-
+func (action *monitorPodAction) getTerminationMessage(ctx context.Context, pod *corev1.Pod) string {
 	var containers []corev1.ContainerStatus
 	containers = append(containers, pod.Status.InitContainerStatuses...)
 	containers = append(containers, pod.Status.ContainerStatuses...)
 
 	for _, container := range containers {
-		if t := container.State.Terminated; t != nil && t.ExitCode != 0 && t.Message != "" {
-			terminationMessages = append(terminationMessages, terminationMessage{
+		if t := container.State.Terminated; t != nil && t.ExitCode != 0 {
+			if t.Message != "" {
+				return fmt.Sprintf("Container %s failed with: %s", container.Name, t.Message)
+			}
+
+			var maxLines int64
+			maxLines = 20
+			logOptions := corev1.PodLogOptions{
 				Container: container.Name,
-				Message:   t.Message,
-			})
+				TailLines: &maxLines,
+			}
+			message, err := log.DumpLog(ctx, action.client, pod, logOptions)
+			if err != nil {
+				action.L.Errorf(err, "Dumping log for %s Pod failed", pod.Name)
+				return fmt.Sprintf(
+					"Container %s failed. Operator was not able to retrieve the error message, please, check the container log from %s Pod",
+					container.Name,
+					pod.Name,
+				)
+			}
+
+			return fmt.Sprintf("Container %s failed with: %s", container.Name, message)
 		}
 	}
 
-	switch len(terminationMessages) {
-	case 0:
-		return ""
-	case 1:
-		return terminationMessages[0].Message
-	default:
-		message, err := json.Marshal(terminationMessages)
-		if err != nil {
-			return ""
-		}
-		return string(message)
-	}
-}
-
-type terminationMessage struct {
-	Container string `json:"container,omitempty"`
-	Message   string `json:"message,omitempty"`
+	return ""
 }

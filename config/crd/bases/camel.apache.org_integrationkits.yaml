@@ -229,6 +229,12 @@ spec:
                         description: The strategy to use, either `pod` or `routine`
                           (default routine)
                         type: string
+                      tasks:
+                        description: A list of tasks to be executed (available only
+                          when using `pod` strategy) with format <name>;<container-image>;<container-command>
+                        items:
+                          type: string
+                        type: array
                       verbose:
                         description: Enable verbose logging on build components that
                           support it (e.g. Kaniko build pod).

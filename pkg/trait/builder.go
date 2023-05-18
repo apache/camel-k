@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
@@ -61,6 +62,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
+	// Building task
 	builderTask, err := t.builderTask(e)
 	if err != nil {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
@@ -71,9 +73,14 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}
 		return nil
 	}
-
 	e.Pipeline = append(e.Pipeline, v1.Task{Builder: builderTask})
 
+	// Custom tasks
+	if t.Tasks != nil {
+		e.Pipeline = append(e.Pipeline, t.customTasks()...)
+	}
+
+	// Publishing task
 	switch e.Platform.Status.Pipeline.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
 		e.Pipeline = append(e.Pipeline, v1.Task{Spectrum: &v1.SpectrumTask{
@@ -235,4 +242,22 @@ func getImageName(e *Environment) string {
 		organization = e.Platform.Namespace
 	}
 	return e.Platform.Status.Pipeline.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
+}
+
+func (t *builderTrait) customTasks() []v1.Task {
+	var customTasks []v1.Task
+	for _, t := range t.Tasks {
+		// TODO, better strategy than a simple split!
+		splitted := strings.Split(t, ";")
+		customTasks = append(customTasks, v1.Task{
+			Custom: &v1.UserTask{
+				BaseTask: v1.BaseTask{
+					Name: splitted[0],
+				},
+				ContainerImage:   splitted[1],
+				ContainerCommand: splitted[2],
+			},
+		})
+	}
+	return customTasks
 }
