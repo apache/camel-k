@@ -24,6 +24,7 @@ package common
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -75,6 +76,10 @@ func TestKamelCLIRun(t *testing.T) {
 				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			})
 
+			// GIST does not like GITHUB_TOKEN apparently, we must temporary remove it
+			os.Setenv("GITHUB_TOKEN_TMP", os.Getenv("GITHUB_TOKEN"))
+			os.Unsetenv("GITHUB_TOKEN")
+
 			t.Run("Gist (ID)", func(t *testing.T) {
 				name := "github-gist-id"
 				Expect(KamelRunWithID(operatorID, ns, "--name", name,
@@ -98,6 +103,10 @@ func TestKamelCLIRun(t *testing.T) {
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
 				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 			})
+
+			// Revert GITHUB TOKEN
+			os.Setenv("GITHUB_TOKEN", os.Getenv("GITHUB_TOKEN_TMP"))
+			os.Unsetenv("GITHUB_TOKEN_TMP")
 		})
 
 		t.Run("Run and update", func(t *testing.T) {
