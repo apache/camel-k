@@ -25,9 +25,9 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// PipelineSpec defines the Build operation to be executed
+// PipelineSpec defines the Pipeline to be execute
 type PipelineSpec struct {
-	// The sequence of Build tasks to be performed as part of the Build execution.
+	// The sequence of Pipeline tasks to be performed.
 	Tasks []Task `json:"tasks,omitempty"`
 	// Timeout defines the Pipeline maximum execution duration.
 	// The Pipeline deadline is set to the Pipeline start time plus the Timeout duration.
