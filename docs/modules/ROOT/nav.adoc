@@ -43,6 +43,7 @@
 ** xref:configuration/runtime-properties.adoc[Properties]
 ** xref:configuration/runtime-config.adoc[Runtime configuration]
 ** xref:configuration/runtime-resources.adoc[Runtime resources]
+* xref:pipeline/pipeline.adoc[Pipeline]
 * Observability
 ** xref:observability/logging.adoc[Logging]
 *** xref:observability/logging/operator.adoc[Operator]
