@@ -301,7 +301,7 @@ func (action *monitorPodAction) getTerminatedTime(pod *corev1.Pod) metav1.Time {
 	return finishedAt
 }
 
-// setConditionsFromTerminationMessages sets a condition for all those containers which have been terminated (successfully or not)
+// setConditionsFromTerminationMessages sets a condition for all those containers which have been terminated (successfully or not).
 func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context.Context, pod *corev1.Pod, buildStatus *v1.BuildStatus) {
 	var containers []corev1.ContainerStatus
 	containers = append(containers, pod.Status.InitContainerStatuses...)
@@ -309,6 +309,7 @@ func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context
 
 	for _, container := range containers {
 		if t := container.State.Terminated; t != nil {
+			var err error
 			terminationMessage := t.Message
 			// Dynamic condition type (it depends on each container name)
 			containerConditionType := v1.BuildConditionType(fmt.Sprintf("Container %s succeeded", container.Name))
@@ -316,22 +317,22 @@ func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context
 			if t.ExitCode != 0 {
 				containerSucceeded = corev1.ConditionFalse
 			}
-
-			var maxLines int64
-			// TODO we can make it a user variable !?
-			maxLines = 10
-			logOptions := corev1.PodLogOptions{
-				Container: container.Name,
-				TailLines: &maxLines,
-			}
-			terminationMessage, err := log.DumpLog(ctx, action.client, pod, logOptions)
-			if err != nil {
-				action.L.Errorf(err, "Dumping log for %s container in %s Pod failed", container.Name, pod.Name)
-				terminationMessage = fmt.Sprintf(
-					"Operator was not able to retrieve the error message, please, check the container %s log directly from %s Pod",
-					container.Name,
-					pod.Name,
-				)
+			if terminationMessage == "" {
+				// TODO we can make it a user variable !?
+				var maxLines int64 = 10
+				logOptions := corev1.PodLogOptions{
+					Container: container.Name,
+					TailLines: &maxLines,
+				}
+				terminationMessage, err = log.DumpLog(ctx, action.client, pod, logOptions)
+				if err != nil {
+					action.L.Errorf(err, "Dumping log for %s container in %s Pod failed", container.Name, pod.Name)
+					terminationMessage = fmt.Sprintf(
+						"Operator was not able to retrieve the error message, please, check the container %s log directly from %s Pod",
+						container.Name,
+						pod.Name,
+					)
+				}
 			}
 
 			terminationReason := fmt.Sprintf("%s (%d)", t.Reason, t.ExitCode)
