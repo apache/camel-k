@@ -245,11 +245,11 @@ func getImageName(e *Environment) string {
 }
 
 func (t *builderTrait) customTasks() []v1.Task {
-	var customTasks []v1.Task
-	for _, t := range t.Tasks {
+	customTasks := make([]v1.Task, 0, len(t.Tasks))
+	for i, t := range t.Tasks {
 		// TODO, better strategy than a simple split!
 		splitted := strings.Split(t, ";")
-		customTasks = append(customTasks, v1.Task{
+		customTasks[i] = v1.Task{
 			Custom: &v1.UserTask{
 				BaseTask: v1.BaseTask{
 					Name: splitted[0],
@@ -257,7 +257,7 @@ func (t *builderTrait) customTasks() []v1.Task {
 				ContainerImage:   splitted[1],
 				ContainerCommand: splitted[2],
 			},
-		})
+		}
 	}
 	return customTasks
 }

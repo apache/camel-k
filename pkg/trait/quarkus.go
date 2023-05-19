@@ -347,15 +347,6 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	}
 }
 
-func (t *quarkusTrait) hasKitNativeType() bool {
-	for _, v := range t.PackageTypes {
-		if v == traitv1.NativePackageType {
-			return true
-		}
-	}
-	return false
-}
-
 func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
 	if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
 		container := e.GetIntegrationContainer()
