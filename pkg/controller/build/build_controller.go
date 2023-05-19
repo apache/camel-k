@@ -141,11 +141,13 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	targetLog := rlog.ForBuild(target)
 
 	var actions []Action
-
+	ip, err := platform.GetOrFindForResource(ctx, r.client, &instance, true)
+	if err != nil {
+		rlog.Error(err, "Could not find a platform bound to this Build")
+		return reconcile.Result{}, err
+	}
 	buildMonitor := Monitor{
-		// TODO enable this where we have the MaxRunningPipelines (the platform likely)
-		// maxRunningBuilds: instance.Spec.MaxRunningBuilds,
-		maxRunningBuilds: 10,
+		maxRunningBuilds: ip.Status.Pipeline.MaxRunningPipelines,
 	}
 
 	switch instance.BuilderConfiguration().Strategy {
