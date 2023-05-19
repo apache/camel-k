@@ -139,7 +139,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		finishedAt := action.getTerminatedTime(pod)
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
-
+		action.setConditionsFromTerminationMessages(ctx, pod, &build.Status)
 		monitorFinishedBuild(build)
 
 		buildCreator := kubernetes.GetCamelCreator(build)
@@ -168,15 +168,12 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 
 	case corev1.PodFailed:
 		phase := v1.BuildPhaseFailed
-		message := "Pod failed"
-		if terminationMessage := action.getTerminationMessage(ctx, pod); terminationMessage != "" {
-			message = terminationMessage
-		}
+		message := fmt.Sprintf("Builder Pod %s failed (see conditions for more details)", pod.Name)
 		if pod.DeletionTimestamp != nil {
 			phase = v1.BuildPhaseInterrupted
-			message = "Pod deleted"
+			message = fmt.Sprintf("Builder Pod %s deleted", pod.Name)
 		} else if _, ok := pod.GetAnnotations()[timeoutAnnotation]; ok {
-			message = "Build timeout"
+			message = fmt.Sprintf("Builder Pod %s timeout", pod.Name)
 		}
 		// Do not override errored build
 		if build.Status.Phase == v1.BuildPhaseError {
@@ -187,7 +184,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		finishedAt := action.getTerminatedTime(pod)
 		duration := finishedAt.Sub(build.Status.StartedAt.Time)
 		build.Status.Duration = duration.String()
-
+		action.setConditionsFromTerminationMessages(ctx, pod, &build.Status)
 		monitorFinishedBuild(build)
 
 		buildCreator := kubernetes.GetCamelCreator(build)
@@ -304,36 +301,42 @@ func (action *monitorPodAction) getTerminatedTime(pod *corev1.Pod) metav1.Time {
 	return finishedAt
 }
 
-func (action *monitorPodAction) getTerminationMessage(ctx context.Context, pod *corev1.Pod) string {
+// setConditionsFromTerminationMessages sets a condition for all those containers which have been terminated (successfully or not)
+func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context.Context, pod *corev1.Pod, buildStatus *v1.BuildStatus) {
 	var containers []corev1.ContainerStatus
 	containers = append(containers, pod.Status.InitContainerStatuses...)
 	containers = append(containers, pod.Status.ContainerStatuses...)
 
 	for _, container := range containers {
-		if t := container.State.Terminated; t != nil && t.ExitCode != 0 {
-			if t.Message != "" {
-				return fmt.Sprintf("Container %s failed with: %s", container.Name, t.Message)
+		if t := container.State.Terminated; t != nil {
+			terminationMessage := t.Message
+			// Dynamic condition type (it depends on each container name)
+			containerConditionType := v1.BuildConditionType(fmt.Sprintf("Container %s succeeded", container.Name))
+			containerSucceeded := corev1.ConditionTrue
+			if t.ExitCode != 0 {
+				containerSucceeded = corev1.ConditionFalse
 			}
 
 			var maxLines int64
-			maxLines = 20
+			// TODO we can make it a user variable !?
+			maxLines = 10
 			logOptions := corev1.PodLogOptions{
 				Container: container.Name,
 				TailLines: &maxLines,
 			}
-			message, err := log.DumpLog(ctx, action.client, pod, logOptions)
+			terminationMessage, err := log.DumpLog(ctx, action.client, pod, logOptions)
 			if err != nil {
-				action.L.Errorf(err, "Dumping log for %s Pod failed", pod.Name)
-				return fmt.Sprintf(
-					"Container %s failed. Operator was not able to retrieve the error message, please, check the container log from %s Pod",
+				action.L.Errorf(err, "Dumping log for %s container in %s Pod failed", container.Name, pod.Name)
+				terminationMessage = fmt.Sprintf(
+					"Operator was not able to retrieve the error message, please, check the container %s log directly from %s Pod",
 					container.Name,
 					pod.Name,
 				)
 			}
 
-			return fmt.Sprintf("Container %s failed with: %s", container.Name, message)
+			terminationReason := fmt.Sprintf("%s (%d)", t.Reason, t.ExitCode)
+			buildStatus.SetCondition(containerConditionType, containerSucceeded, terminationReason, terminationMessage)
 		}
 	}
 
-	return ""
 }

@@ -93,7 +93,7 @@ func TestBuilderTrait(t *testing.T) {
 		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Resources.Requests.Memory().String(), TestTimeoutShort).Should(Equal("2Gi"))
 		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Resources.Limits.Memory().String(), TestTimeoutShort).Should(Equal("3Gi"))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Run custom pipeline task", func(t *testing.T) {
@@ -114,8 +114,49 @@ func TestBuilderTrait(t *testing.T) {
 		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
 		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[1].Name, TestTimeoutShort).Should(Equal("custom1"))
 		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[2].Name, TestTimeoutShort).Should(Equal("custom2"))
+
+		// Check containers conditions
+		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(
+			Build(
+				ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
+			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(
+			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
+			TestTimeoutShort).Should(ContainSubstring("generated-bytecode.jar"))
+		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(
+			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Status,
+			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(
+			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Message,
+			TestTimeoutShort).Should(ContainSubstring("</project>"))
+
+		// Check logs
 		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
 		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-runtime-bom</artifactId>`))
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+
+	name = "java-error"
+	t.Run("Run custom pipeline task error", func(t *testing.T) {
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+			"-t", "builder.tasks=custom1;alpine;cat missingfile.txt",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+		integrationKitName := IntegrationKit(ns, name)()
+		// Check containers conditions
+		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(BuildConditions(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(
+			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
+			TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+		Eventually(
+			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
+			TestTimeoutShort).Should(ContainSubstring("No such file or directory"))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
