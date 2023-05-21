@@ -60,6 +60,7 @@
 - Secret managers parsing errors [\#4080](https://github.com/apache/camel-k/issues/4080)
 - Remove deprecated linters [\#4061](https://github.com/apache/camel-k/issues/4061)
 - Remove github.com/fatih/structs dependency [\#4033](https://github.com/apache/camel-k/issues/4033)
+- Camel K does not automatically add dependency JacksonXML [\#4027](https://github.com/apache/camel-k/issues/4027)
 - Remove all deprecated code in 1.x version [\#4026](https://github.com/apache/camel-k/issues/4026)
 - Bump Mandrel from 22.2.0 to 22.3.1 [\#4017](https://github.com/apache/camel-k/issues/4017)
 - Some API warnings reported while contributing operator 1.11.1 [\#4016](https://github.com/apache/camel-k/issues/4016)
