@@ -26,8 +26,6 @@ import (
 
 	"github.com/scylladb/go-set/strset"
 
-	infp "gopkg.in/inf.v0"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -225,8 +223,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		if resource.NewScaledQuantity(300, 6).Cmp(memory) > 0 {
 			percentage = 25
 		}
-		memory.AsDec().Mul(memory.AsDec(), infp.NewDec(percentage, 2))
-		args = append(args, fmt.Sprintf("-Xmx%dM", memory.ScaledValue(resource.Mega)))
+		memScaled := memory.ScaledValue(resource.Mega) * percentage / 100
+		args = append(args, fmt.Sprintf("-Xmx%dM", memScaled))
 	}
 
 	// Add mounted resources to the class path
