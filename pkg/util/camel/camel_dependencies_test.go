@@ -18,6 +18,7 @@ limitations under the License.
 package camel
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,4 +31,40 @@ func TestNormalizeDependency(t *testing.T) {
 	assert.Equal(t, "camel:file", NormalizeDependency("camel-quarkus:file"))
 	assert.Equal(t, "camel-k:knative", NormalizeDependency("camel-k-knative"))
 	assert.Equal(t, "camel-k:knative", NormalizeDependency("camel-k:knative"))
+	assert.Equal(t, "mvn:org.apache.camel:camel-file", NormalizeDependency("mvn:org.apache.camel:camel-file"))
+	assert.Equal(t, "mvn:org.apache.camel.quarkus:camel-quarkus-file", NormalizeDependency("mvn:org.apache.camel.quarkus:camel-quarkus-file"))
+	assert.Equal(t, "mvn:org.apache.camel:camel-k-knative", NormalizeDependency("mvn:org.apache.camel:camel-k-knative"))
+}
+
+func TestValidateDependency(t *testing.T) {
+	catalog, err := DefaultCatalog()
+	assert.Nil(t, err)
+
+	output := strings.Builder{}
+	ValidateDependency(catalog, "", &output)
+	assert.Equal(t, "", output.String())
+
+	output.Reset()
+	ValidateDependency(catalog, "camel:file", &output)
+	assert.Equal(t, "", output.String())
+
+	output.Reset()
+	ValidateDependency(catalog, "camel-quarkus-file", &output)
+	assert.Equal(t, "", output.String())
+
+	output.Reset()
+	ValidateDependency(catalog, "camel-quarkus:file", &output)
+	assert.Equal(t, "", output.String())
+
+	output.Reset()
+	ValidateDependency(catalog, "camel:unknown", &output)
+	assert.Equal(t, "Warning: dependency camel:unknown not found in Camel catalog\n", output.String())
+
+	output.Reset()
+	ValidateDependency(catalog, "mvn:org.apache.camel:camel-foo", &output)
+	assert.Equal(t, "Warning: do not use mvn:org.apache.camel:camel-foo. Use camel:foo instead\n", output.String())
+
+	output.Reset()
+	ValidateDependency(catalog, "mvn:org.apache.camel.quarkus:camel-quarkus-foo", &output)
+	assert.Equal(t, "Warning: do not use mvn:org.apache.camel.quarkus:camel-quarkus-foo. Use camel:foo instead\n", output.String())
 }

@@ -138,6 +138,22 @@ func TestKamelCLIRun(t *testing.T) {
 		Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
 	})
 
+	t.Run("Run custom dependency", func(t *testing.T) {
+		// Run integration with camel-resilience4j dependency which is not listed in Camel catalog
+		name := "custom-dependency"
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
+			"-d", "camel:resilience4j").Execute()).To(Succeed())
+
+		// Integration should also run with camel-resilience4j in dependencies
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+		// Clean up
+		Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+	})
+
 	/*
 	 * TODO
 	 * The dependency cannot be read by maven while building. See #3708

@@ -19,7 +19,6 @@ package trait
 
 import (
 	"github.com/scylladb/go-set/strset"
-
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -57,9 +56,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	dependencies := strset.New()
 
 	if e.Integration.Spec.Dependencies != nil {
-		if err := camel.ValidateDependenciesE(e.CamelCatalog, e.Integration.Spec.Dependencies); err != nil {
-			return err
-		}
+		camel.ValidateDependencies(e.CamelCatalog, e.Integration.Spec.Dependencies, t.L)
 		dependencies.Add(e.Integration.Spec.Dependencies...)
 	}
 
