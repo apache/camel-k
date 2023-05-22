@@ -37,7 +37,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/resource"
 	"github.com/magiconair/properties"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -175,7 +174,7 @@ func validatePropertyFile(fileName string) error {
 	}
 
 	if file, err := os.Stat(fileName); err != nil {
-		return errors.Wrapf(err, "unable to access property file %s", fileName)
+		return fmt.Errorf("unable to access property file %s", fileName)
 	} else if file.IsDir() {
 		return fmt.Errorf("property file %s is a directory", fileName)
 	}
