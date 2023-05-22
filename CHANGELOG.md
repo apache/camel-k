@@ -80,6 +80,9 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.12 to 0.6.16 [\#4400](https://github.com/apache/camel-k/pull/4400) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump k8s.io/klog/v2 from 2.80.2-0.20221028030830-9ae4992afb54 to 2.100.1 [\#4399](https://github.com/apache/camel-k/pull/4399) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): remove go-homedir dependency [\#4397](https://github.com/apache/camel-k/pull/4397) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/mattn/go-shellwords from 1.0.3 to 1.0.12 [\#4394](https://github.com/apache/camel-k/pull/4394) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/onsi/gomega from 1.27.6 to 1.27.7 [\#4393](https://github.com/apache/camel-k/pull/4393) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/stretchr/testify from 1.8.2 to 1.8.3 [\#4392](https://github.com/apache/camel-k/pull/4392) ([dependabot[bot]](https://github.com/apps/dependabot))
