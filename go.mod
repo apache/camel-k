@@ -57,7 +57,7 @@ require (
 	k8s.io/cli-runtime v0.25.6
 	k8s.io/client-go v0.25.6
 	k8s.io/gengo v0.0.0-20221011193443-fad74ee6edd9
-	k8s.io/klog/v2 v2.80.2-0.20221028030830-9ae4992afb54
+	k8s.io/klog/v2 v2.100.1
 	k8s.io/kubectl v0.25.6
 	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2
 	knative.dev/eventing v0.37.0
