@@ -122,10 +122,10 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(runtimeVersion) {
-			ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Pipeline.GetTimeout().Duration)
+			ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Build.GetTimeout().Duration)
 			defer cancel()
 			catalog, err = camel.GenerateCatalog(ctx, e.Client,
-				ns, e.Platform.Status.Pipeline.Maven, runtime, []maven.Dependency{})
+				ns, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
 			if err != nil {
 				return err
 			}
@@ -257,8 +257,8 @@ func determineRuntimeVersion(e *Environment) string {
 	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
 		return e.IntegrationKit.Status.RuntimeVersion
 	}
-	if e.Platform != nil && e.Platform.Status.Pipeline.RuntimeVersion != "" {
-		return e.Platform.Status.Pipeline.RuntimeVersion
+	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
+		return e.Platform.Status.Build.RuntimeVersion
 	}
 	return ""
 }

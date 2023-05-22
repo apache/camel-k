@@ -50,7 +50,7 @@ func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
 			Status: v1.IntegrationPlatformStatus{
 				Phase: v1.IntegrationPlatformPhaseReady,
 				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
-					Pipeline: v1.IntegrationPlatformPipelineSpec{
+					Build: v1.IntegrationPlatformBuildSpec{
 						RuntimeVersion: catalog.Runtime.Version,
 					},
 				},

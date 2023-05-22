@@ -67,7 +67,7 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 	}
 
 	// Make basic options for building image in the registry
-	options, err := makeSpectrumOptions(ctx, action.client, platform.Namespace, platform.Status.Pipeline.Registry)
+	options, err := makeSpectrumOptions(ctx, action.client, platform.Namespace, platform.Status.Build.Registry)
 	if err != nil {
 		return catalog, err
 	}
@@ -79,7 +79,7 @@ func initialize(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v
 	target := catalog.DeepCopy()
 	imageName := fmt.Sprintf(
 		"%s/camel-k-runtime-%s-builder:%s",
-		ip.Status.Pipeline.Registry.Address,
+		ip.Status.Build.Registry.Address,
 		catalog.Spec.Runtime.Provider,
 		strings.ToLower(catalog.Spec.Runtime.Version),
 	)
@@ -116,7 +116,7 @@ func initialize(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v
 	options.Base = catalog.Spec.GetQuarkusToolingImage()
 	options.Target = imageName
 
-	err := buildRuntimeBuilderWithTimeout(options, ip.Status.Pipeline.GetBuildCatalogToolTimeout().Duration)
+	err := buildRuntimeBuilderWithTimeout(options, ip.Status.Build.GetBuildCatalogToolTimeout().Duration)
 
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError

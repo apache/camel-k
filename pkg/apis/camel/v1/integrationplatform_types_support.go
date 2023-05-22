@@ -174,7 +174,7 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 }
 
 // IsOptionEnabled tells if provided option key is present in PublishStrategyOptions and enabled
-func (b IntegrationPlatformPipelineSpec) IsOptionEnabled(option string) bool {
+func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
 	//Key defined in builder/kaniko.go
 	if enabled, ok := b.PublishStrategyOptions[option]; ok {
 		res, err := strconv.ParseBool(enabled)
@@ -187,7 +187,7 @@ func (b IntegrationPlatformPipelineSpec) IsOptionEnabled(option string) bool {
 }
 
 // AddOption add a publish strategy option
-func (b *IntegrationPlatformPipelineSpec) AddOption(option string, value string) {
+func (b *IntegrationPlatformBuildSpec) AddOption(option string, value string) {
 	options := b.PublishStrategyOptions
 	if options == nil {
 		options = make(map[string]string)
@@ -197,7 +197,7 @@ func (b *IntegrationPlatformPipelineSpec) AddOption(option string, value string)
 }
 
 // GetTimeout returns the specified duration or a default one
-func (b IntegrationPlatformPipelineSpec) GetTimeout() metav1.Duration {
+func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	if b.Timeout == nil {
 		return metav1.Duration{}
 	}
@@ -205,7 +205,7 @@ func (b IntegrationPlatformPipelineSpec) GetTimeout() metav1.Duration {
 }
 
 // GetBuildCatalogToolTimeout returns the specified duration or a default one
-func (b IntegrationPlatformPipelineSpec) GetBuildCatalogToolTimeout() metav1.Duration {
+func (b IntegrationPlatformBuildSpec) GetBuildCatalogToolTimeout() metav1.Duration {
 	if b.BuildCatalogToolTimeout == nil {
 		return metav1.Duration{}
 	}

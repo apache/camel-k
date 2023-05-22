@@ -55,7 +55,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 
 	if pointer.BoolDeref(t.Auto, true) {
 		if t.SecretName == "" {
-			secret := e.Platform.Status.Pipeline.Registry.Secret
+			secret := e.Platform.Status.Build.Registry.Secret
 			if secret != "" {
 				key := ctrl.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
 				obj := corev1.Secret{}

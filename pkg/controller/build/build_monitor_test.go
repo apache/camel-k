@@ -227,7 +227,7 @@ func newBuildWithLayoutInPhase(namespace string, name string, layout string, pha
 				v1.IntegrationKitLayoutLabel: layout,
 			},
 		},
-		Spec: v1.PipelineSpec{
+		Spec: v1.BuildSpec{
 			Tasks: []v1.Task{
 				{
 					Builder: &v1.BuilderTask{

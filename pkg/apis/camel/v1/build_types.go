@@ -25,16 +25,29 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// PipelineSpec defines the Pipeline to be execute
-type PipelineSpec struct {
-	// The sequence of Pipeline tasks to be performed.
+// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropiate
+// to think it as pipeline.
+type BuildSpec struct {
+	// The sequence of tasks (pipeline) to be performed.
 	Tasks []Task `json:"tasks,omitempty"`
-	// Timeout defines the Pipeline maximum execution duration.
-	// The Pipeline deadline is set to the Pipeline start time plus the Timeout duration.
-	// If the Pipeline deadline is exceeded, the Pipeline context is canceled,
+	// The configuration that should be used to perform the Build.
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	Configuration BuildConfiguration `json:"configuration,omitempty"`
+	// The container image to be used to run the build.
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	ToolImage string `json:"toolImage,omitempty"`
+	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	BuilderPodNamespace string `json:"operatorNamespace,omitempty"`
+	// Timeout defines the Build maximum execution duration.
+	// The Build deadline is set to the Build start time plus the Timeout duration.
+	// If the Build deadline is exceeded, the Build context is canceled,
 	// and its phase set to BuildPhaseFailed.
 	// +kubebuilder:validation:Format=duration
 	Timeout metav1.Duration `json:"timeout,omitempty"`
+	// the maximum amount of parallel running builds started by this operator instance
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.
@@ -240,8 +253,8 @@ type Build struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   PipelineSpec `json:"spec,omitempty"`
-	Status BuildStatus  `json:"status,omitempty"`
+	Spec   BuildSpec   `json:"spec,omitempty"`
+	Status BuildStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -147,7 +147,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		return reconcile.Result{}, err
 	}
 	buildMonitor := Monitor{
-		maxRunningBuilds: ip.Status.Pipeline.MaxRunningPipelines,
+		maxRunningBuilds: ip.Status.Build.MaxRunningBuilds,
 	}
 
 	switch instance.BuilderConfiguration().Strategy {

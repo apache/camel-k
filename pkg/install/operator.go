@@ -635,7 +635,7 @@ func NewPlatform(
 	if !skipRegistrySetup {
 		// Let's apply registry settings whether it's OpenShift or not
 		// Some OpenShift variants such as Microshift might not have a built-in registry
-		pl.Spec.Pipeline.Registry = registry
+		pl.Spec.Build.Registry = registry
 
 		if !isOpenShift && registry.Address == "" {
 			// This operation should be done here in the installer
@@ -656,11 +656,11 @@ func NewPlatform(
 				return nil, errors.New("cannot find a registry where to push images")
 			}
 
-			pl.Spec.Pipeline.Registry.Address = *address
-			pl.Spec.Pipeline.Registry.Insecure = true
-			if pl.Spec.Pipeline.PublishStrategy == "" {
+			pl.Spec.Build.Registry.Address = *address
+			pl.Spec.Build.Registry.Insecure = true
+			if pl.Spec.Build.PublishStrategy == "" {
 				// Use spectrum in insecure dev clusters by default
-				pl.Spec.Pipeline.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
+				pl.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
 			}
 		}
 	}

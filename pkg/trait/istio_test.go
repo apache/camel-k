@@ -61,7 +61,7 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterOpenShift,
 				Profile: v1.TraitProfileKnative,
-				Pipeline: v1.IntegrationPlatformPipelineSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
 					RuntimeVersion: catalog.Runtime.Version,
 				},
 			},

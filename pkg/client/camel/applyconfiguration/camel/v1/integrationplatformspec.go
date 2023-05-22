@@ -26,13 +26,12 @@ import (
 // IntegrationPlatformSpecApplyConfiguration represents an declarative configuration of the IntegrationPlatformSpec type for use
 // with apply.
 type IntegrationPlatformSpecApplyConfiguration struct {
-	Cluster       *v1.IntegrationPlatformCluster                     `json:"cluster,omitempty"`
-	Profile       *v1.TraitProfile                                   `json:"profile,omitempty"`
-	Build         *IntegrationPlatformBuildSpecApplyConfiguration    `json:"build,omitempty"`
-	Pipeline      *IntegrationPlatformPipelineSpecApplyConfiguration `json:"pipeline,omitempty"`
-	Traits        *TraitsApplyConfiguration                          `json:"traits,omitempty"`
-	Configuration []ConfigurationSpecApplyConfiguration              `json:"configuration,omitempty"`
-	Kamelet       *IntegrationPlatformKameletSpecApplyConfiguration  `json:"kamelet,omitempty"`
+	Cluster       *v1.IntegrationPlatformCluster                    `json:"cluster,omitempty"`
+	Profile       *v1.TraitProfile                                  `json:"profile,omitempty"`
+	Build         *IntegrationPlatformBuildSpecApplyConfiguration   `json:"build,omitempty"`
+	Traits        *TraitsApplyConfiguration                         `json:"traits,omitempty"`
+	Configuration []ConfigurationSpecApplyConfiguration             `json:"configuration,omitempty"`
+	Kamelet       *IntegrationPlatformKameletSpecApplyConfiguration `json:"kamelet,omitempty"`
 }
 
 // IntegrationPlatformSpecApplyConfiguration constructs an declarative configuration of the IntegrationPlatformSpec type for use with
@@ -62,14 +61,6 @@ func (b *IntegrationPlatformSpecApplyConfiguration) WithProfile(value v1.TraitPr
 // If called multiple times, the Build field is set to the value of the last call.
 func (b *IntegrationPlatformSpecApplyConfiguration) WithBuild(value *IntegrationPlatformBuildSpecApplyConfiguration) *IntegrationPlatformSpecApplyConfiguration {
 	b.Build = value
-	return b
-}
-
-// WithPipeline sets the Pipeline field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Pipeline field is set to the value of the last call.
-func (b *IntegrationPlatformSpecApplyConfiguration) WithPipeline(value *IntegrationPlatformPipelineSpecApplyConfiguration) *IntegrationPlatformSpecApplyConfiguration {
-	b.Pipeline = value
 	return b
 }
 
