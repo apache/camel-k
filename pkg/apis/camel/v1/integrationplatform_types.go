@@ -32,11 +32,8 @@ type IntegrationPlatformSpec struct {
 	// the profile you wish to use. It will apply certain traits which are required by the specific profile chosen.
 	// It usually relates the Cluster with the optional definition of special profiles (ie, Knative)
 	Profile TraitProfile `json:"profile,omitempty"`
-	// Deprecated: no longer used in Camel K version 2, maintained for backward compatibility with version 1.
 	// specify how to build the Integration/IntegrationKits
 	Build IntegrationPlatformBuildSpec `json:"build,omitempty"`
-	// specify how to build the Integration/IntegrationKits
-	Pipeline IntegrationPlatformPipelineSpec `json:"pipeline,omitempty"`
 	// list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationPlatform
 	Traits Traits `json:"traits,omitempty"`
 	// Deprecated:
@@ -71,10 +68,10 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
-// +kubebuilder:printcolumn:name="Build strategy",type=string,JSONPath=`.status.pipeline.buildStrategy`,description="The default build strategy"
-// +kubebuilder:printcolumn:name="Publish strategy",type=string,JSONPath=`.status.pipeline.publishStrategy`,description="The default publish strategy"
-// +kubebuilder:printcolumn:name="Registry address",type=string,JSONPath=`.status.pipeline.registry.address`,description="The container registry address"
-// +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.pipeline.runtimeVersion`,description="The default runtime version"
+// +kubebuilder:printcolumn:name="Build strategy",type=string,JSONPath=`.status.build.buildStrategy`,description="The default build strategy"
+// +kubebuilder:printcolumn:name="Publish strategy",type=string,JSONPath=`.status.build.publishStrategy`,description="The default publish strategy"
+// +kubebuilder:printcolumn:name="Registry address",type=string,JSONPath=`.status.build.registry.address`,description="The container registry address"
+// +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.build.runtimeVersion`,description="The default runtime version"
 
 // IntegrationPlatform is the resource used to drive the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
@@ -110,10 +107,9 @@ const (
 // AllIntegrationPlatformClusters --
 var AllIntegrationPlatformClusters = []IntegrationPlatformCluster{IntegrationPlatformClusterOpenShift, IntegrationPlatformClusterKubernetes}
 
-// IntegrationPlatformBuildSpec contains platform related pipeline information.
+// IntegrationPlatformBuildSpec contains platform related build information.
 // This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
 // You can define the build strategy, the image registry to use and the Maven configuration to adopt.
-// Deprecated: use IntegrationPlatformPipelineSpec instead.
 type IntegrationPlatformBuildSpec struct {
 	// the configuration required to build an Integration container image
 	BuildConfiguration BuildConfiguration `json:"buildConfiguration,omitempty"`
@@ -138,35 +134,6 @@ type IntegrationPlatformBuildSpec struct {
 	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
 	// the maximum amount of parallel running pipelines started by this operator instance
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
-}
-
-// IntegrationPlatformPipelineSpec contains platform related pipeline information.
-// This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
-// You can define the build strategy, the image registry to use and the Maven configuration to adopt.
-type IntegrationPlatformPipelineSpec struct {
-	// the configuration required to build an Integration container image
-	BuildConfiguration BuildConfiguration `json:"buildConfiguration,omitempty"`
-	// the strategy to adopt for publishing an Integration container image
-	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
-	// the Camel K Runtime dependency version
-	RuntimeVersion string `json:"runtimeVersion,omitempty"`
-	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
-	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
-	// a base image that can be used as base layer for all images.
-	// It can be useful if you want to provide some custom base image with further utility softwares
-	BaseImage string `json:"baseImage,omitempty"`
-	// the image registry used to push/pull Integration images
-	Registry RegistrySpec `json:"registry,omitempty"`
-	// the timeout (in seconds) to use when creating the build tools container image
-	BuildCatalogToolTimeout *metav1.Duration `json:"buildCatalogToolTimeout,omitempty"`
-	// how much time to wait before time out the pipeline process
-	Timeout *metav1.Duration `json:"timeout,omitempty"`
-	// Maven configuration used to build the Camel/Camel-Quarkus applications
-	Maven MavenSpec `json:"maven,omitempty"`
-	// Generic options that can used by any publish strategy
-	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
-	// the maximum amount of parallel running pipelines started by this operator instance
-	MaxRunningPipelines int32 `json:"maxRunningPipelines,omitempty"`
 }
 
 // IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform

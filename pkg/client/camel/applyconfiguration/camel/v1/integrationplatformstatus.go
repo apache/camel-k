@@ -64,14 +64,6 @@ func (b *IntegrationPlatformStatusApplyConfiguration) WithBuild(value *Integrati
 	return b
 }
 
-// WithPipeline sets the Pipeline field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Pipeline field is set to the value of the last call.
-func (b *IntegrationPlatformStatusApplyConfiguration) WithPipeline(value *IntegrationPlatformPipelineSpecApplyConfiguration) *IntegrationPlatformStatusApplyConfiguration {
-	b.Pipeline = value
-	return b
-}
-
 // WithTraits sets the Traits field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Traits field is set to the value of the last call.

@@ -69,7 +69,7 @@ func initializeRunCmdOptionsWithOutput(t *testing.T) (*runCmdOptions, *cobra.Com
 	t.Helper()
 	defaultIntegrationPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	c := v1.NewCamelCatalog(defaultIntegrationPlatform.Namespace, defaults.DefaultRuntimeVersion)
-	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: defaultIntegrationPlatform.Status.Pipeline.RuntimeProvider, Version: defaultIntegrationPlatform.Status.Pipeline.RuntimeVersion}}
+	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: defaultIntegrationPlatform.Status.Build.RuntimeProvider, Version: defaultIntegrationPlatform.Status.Build.RuntimeVersion}}
 	fakeClient, _ := test.NewFakeClient(&defaultIntegrationPlatform, &c)
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)

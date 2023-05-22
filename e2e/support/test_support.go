@@ -1892,7 +1892,7 @@ func PlatformBuildCatalogToolTimeout(ns string) func() *metav1.Duration {
 		if p == nil {
 			return &metav1.Duration{}
 		}
-		return p.Status.Pipeline.BuildCatalogToolTimeout
+		return p.Status.Build.BuildCatalogToolTimeout
 	}
 }
 
@@ -1902,7 +1902,7 @@ func PlatformTimeout(ns string) func() *metav1.Duration {
 		if p == nil {
 			return &metav1.Duration{}
 		}
-		return p.Status.Pipeline.Timeout
+		return p.Status.Build.Timeout
 	}
 }
 

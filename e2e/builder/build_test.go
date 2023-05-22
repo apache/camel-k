@@ -46,7 +46,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 
 		pl := Platform(ns)()
 		// set maximum number of running builds
-		pl.Spec.Pipeline.MaxRunningPipelines = 2
+		pl.Spec.Build.MaxRunningBuilds = 2
 		if err := TestClient().Update(TestContext, pl); err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -60,7 +60,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 			WithNewTestNamespace(t, func(ns2 string) {
 				pl1 := v1.NewIntegrationPlatform(ns1, fmt.Sprintf("camel-k-%s", ns))
 				pl.Spec.DeepCopyInto(&pl1.Spec)
-				pl1.Spec.Pipeline.Maven.Settings = v1.ValueSource{}
+				pl1.Spec.Build.Maven.Settings = v1.ValueSource{}
 				pl1.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
 				if err := TestClient().Create(TestContext, &pl1); err != nil {
 					t.Error(err)
@@ -71,7 +71,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 
 				pl2 := v1.NewIntegrationPlatform(ns2, fmt.Sprintf("camel-k-%s", ns))
 				pl.Spec.DeepCopyInto(&pl2.Spec)
-				pl2.Spec.Pipeline.Maven.Settings = v1.ValueSource{}
+				pl2.Spec.Build.Maven.Settings = v1.ValueSource{}
 				pl2.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
 				if err := TestClient().Create(TestContext, &pl2); err != nil {
 					t.Error(err)

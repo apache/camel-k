@@ -529,7 +529,7 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
-				Pipeline: v1.IntegrationPlatformPipelineSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
 					RuntimeVersion: catalog.Runtime.Version,
 				},
 			},

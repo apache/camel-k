@@ -40,23 +40,23 @@ func TestLocalPlatform(t *testing.T) {
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		pl := Platform(ns)()
-		pl.Spec.Pipeline.Maven.Properties = make(map[string]string)
-		pl.Spec.Pipeline.Maven.Properties["build-global-prop1"] = "build-global-value1"
+		pl.Spec.Build.Maven.Properties = make(map[string]string)
+		pl.Spec.Build.Maven.Properties["build-global-prop1"] = "build-global-value1"
 		// set maximum number of running builds
-		pl.Spec.Pipeline.MaxRunningPipelines = 1
+		pl.Spec.Build.MaxRunningBuilds = 1
 		if err := TestClient().Update(TestContext, pl); err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
 		Eventually(PlatformHas(ns, func(pl *v1.IntegrationPlatform) bool {
-			return pl.Status.Pipeline.MaxRunningPipelines == 1
+			return pl.Status.Build.MaxRunningBuilds == 1
 		}), TestTimeoutMedium).Should(BeTrue())
 
 		WithNewTestNamespace(t, func(ns1 string) {
 			localPlatform := v1.NewIntegrationPlatform(ns1, operatorID)
-			localPlatform.Spec.Pipeline.Maven.Properties = make(map[string]string)
-			localPlatform.Spec.Pipeline.Maven.Properties["build-local-prop1"] = "build-local-value1"
+			localPlatform.Spec.Build.Maven.Properties = make(map[string]string)
+			localPlatform.Spec.Build.Maven.Properties["build-local-prop1"] = "build-local-value1"
 			localPlatform.SetOperatorID(operatorID)
 
 			localPlatform.Spec.Traits.Container = &traitv1.ContainerTrait{
@@ -73,18 +73,18 @@ func TestLocalPlatform(t *testing.T) {
 			}), TestTimeoutShort).Should(BeTrue())
 
 			Eventually(PlatformHas(ns1, func(pl *v1.IntegrationPlatform) bool {
-				return pl.Status.Pipeline.MaxRunningPipelines == 1
+				return pl.Status.Build.MaxRunningBuilds == 1
 			}), TestTimeoutShort).Should(BeTrue())
 
 			local := Platform(ns1)()
-			Expect(local.Status.Pipeline.PublishStrategy).To(Equal(pl.Status.Pipeline.PublishStrategy))
-			Expect(local.Status.Pipeline.BuildConfiguration.Strategy).To(Equal(pl.Status.Pipeline.BuildConfiguration.Strategy))
-			Expect(local.Status.Pipeline.Maven.LocalRepository).To(Equal(pl.Status.Pipeline.Maven.LocalRepository))
-			Expect(local.Status.Pipeline.Maven.CLIOptions).To(ContainElements(pl.Status.Pipeline.Maven.CLIOptions))
-			Expect(local.Status.Pipeline.Maven.Extension).To(BeEmpty())
-			Expect(local.Status.Pipeline.Maven.Properties).To(HaveLen(2))
-			Expect(local.Status.Pipeline.Maven.Properties["build-global-prop1"]).To(Equal("build-global-value1"))
-			Expect(local.Status.Pipeline.Maven.Properties["build-local-prop1"]).To(Equal("build-local-value1"))
+			Expect(local.Status.Build.PublishStrategy).To(Equal(pl.Status.Build.PublishStrategy))
+			Expect(local.Status.Build.BuildConfiguration.Strategy).To(Equal(pl.Status.Build.BuildConfiguration.Strategy))
+			Expect(local.Status.Build.Maven.LocalRepository).To(Equal(pl.Status.Build.Maven.LocalRepository))
+			Expect(local.Status.Build.Maven.CLIOptions).To(ContainElements(pl.Status.Build.Maven.CLIOptions))
+			Expect(local.Status.Build.Maven.Extension).To(BeEmpty())
+			Expect(local.Status.Build.Maven.Properties).To(HaveLen(2))
+			Expect(local.Status.Build.Maven.Properties["build-global-prop1"]).To(Equal("build-global-value1"))
+			Expect(local.Status.Build.Maven.Properties["build-local-prop1"]).To(Equal("build-local-value1"))
 
 			Expect(KamelRunWithID(operatorID, ns1, "--name", "local-integration", "files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPod(ns1, "local-integration"), TestTimeoutMedium).Should(Not(BeNil()))

@@ -143,12 +143,12 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 
 	infos["Name"] = platform.Name
 	infos["Version"] = platform.Status.Version
-	infos["Publish strategy"] = string(platform.Status.Pipeline.PublishStrategy)
-	infos["Runtime version"] = platform.Status.Pipeline.RuntimeVersion
-	infos["Registry address"] = platform.Status.Pipeline.Registry.Address
+	infos["Publish strategy"] = string(platform.Status.Build.PublishStrategy)
+	infos["Runtime version"] = platform.Status.Build.RuntimeVersion
+	infos["Registry address"] = platform.Status.Build.Registry.Address
 	infos["Git commit"] = platform.Status.Info["gitCommit"]
 
-	catalog, err := camel.LoadCatalog(ctx, c, namespace, v1.RuntimeSpec{Version: platform.Status.Pipeline.RuntimeVersion, Provider: platform.Status.Pipeline.RuntimeProvider})
+	catalog, err := camel.LoadCatalog(ctx, c, namespace, v1.RuntimeSpec{Version: platform.Status.Build.RuntimeVersion, Provider: platform.Status.Build.RuntimeProvider})
 	if err != nil {
 		return nil, err
 	}

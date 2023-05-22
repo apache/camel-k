@@ -156,7 +156,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 
 		pl := Platform(ns)()
 		// set a very short timeout to simulate the timeout
-		pl.Spec.Pipeline.BuildCatalogToolTimeout = &metav1.Duration{
+		pl.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
 			Duration: 1 * time.Second,
 		}
 		TestClient().Update(TestContext, pl)

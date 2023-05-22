@@ -77,11 +77,58 @@ spec:
           metadata:
             type: object
           spec:
-            description: PipelineSpec defines the Build operation to be executed
+            description: BuildSpec defines the list of tasks to be execute for a Build.
+              From Camel K version 2, it would be more appropiate to think it as pipeline.
             properties:
+              configuration:
+                description: 'The configuration that should be used to perform the
+                  Build. Deprecated: no longer in use in Camel K 2 - maintained for
+                  backward compatibility'
+                properties:
+                  limitCPU:
+                    description: The maximum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  limitMemory:
+                    description: The maximum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
+                  operatorNamespace:
+                    description: The namespace where to run the builder Pod (must
+                      be the same of the operator in charge of this Build reconciliation).
+                    type: string
+                  requestCPU:
+                    description: The minimum amount of CPU required. Only used for
+                      `pod` strategy
+                    type: string
+                  requestMemory:
+                    description: The minimum amount of memory required. Only used
+                      for `pod` strategy
+                    type: string
+                  strategy:
+                    description: the strategy to adopt
+                    enum:
+                    - routine
+                    - pod
+                    type: string
+                  toolImage:
+                    description: The container image to be used to run the build.
+                    type: string
+                type: object
+              maxRunningBuilds:
+                description: 'the maximum amount of parallel running builds started
+                  by this operator instance Deprecated: no longer in use in Camel
+                  K 2 - maintained for backward compatibility'
+                format: int32
+                type: integer
+              operatorNamespace:
+                description: 'The namespace where to run the builder Pod (must be
+                  the same of the operator in charge of this Build reconciliation).
+                  Deprecated: no longer in use in Camel K 2 - maintained for backward
+                  compatibility'
+                type: string
               tasks:
-                description: The sequence of Build tasks to be performed as part of
-                  the Build execution.
+                description: The sequence of tasks (pipeline) to be performed.
                 items:
                   description: Task represents the abstract task. Only one of the
                     task should be configured to represent the specific task chosen.
@@ -693,11 +740,18 @@ spec:
                   type: object
                 type: array
               timeout:
-                description: Timeout defines the Pipeline maximum execution duration.
+                description: Timeout defines the Build maximum execution duration.
+                  The Build deadline is set to the Build start time plus the Timeout
+                  duration. If the Build deadline is exceeded, the Build context is
+                  canceled, Timeout defines the Pipeline maximum execution duration.
                   The Pipeline deadline is set to the Pipeline start time plus the
                   Timeout duration. If the Pipeline deadline is exceeded, the Pipeline
                   context is canceled, and its phase set to BuildPhaseFailed.
                 format: duration
+                type: string
+              toolImage:
+                description: 'The container image to be used to run the build. Deprecated:
+                  no longer in use in Camel K 2 - maintained for backward compatibility'
                 type: string
             type: object
           status:

@@ -55,11 +55,11 @@ func addTestPromoteCmd(options RootCmdOptions, rootCmd *cobra.Command) *promoteC
 func TestIntegrationNotCompatible(t *testing.T) {
 	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Pipeline.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
 	dstPlatform.Status.Version = "0.0.1"
-	dstPlatform.Status.Pipeline.RuntimeVersion = "0.0.1"
+	dstPlatform.Status.Build.RuntimeVersion = "0.0.1"
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration := nominalIntegration("my-it-test")
 	srcCatalog := createTestCamelCatalog(srcPlatform)
@@ -78,11 +78,11 @@ func TestIntegrationNotCompatible(t *testing.T) {
 func TestIntegrationDryRun(t *testing.T) {
 	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Pipeline.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
 	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Pipeline.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultIntegration := nominalIntegration("my-it-test")
 	srcCatalog := createTestCamelCatalog(srcPlatform)
@@ -116,11 +116,11 @@ func nominalIntegration(name string) v1.Integration {
 func TestPipeDryRun(t *testing.T) {
 	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
 	srcPlatform.Status.Version = defaults.Version
-	srcPlatform.Status.Pipeline.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
 	dstPlatform.Status.Version = defaults.Version
-	dstPlatform.Status.Pipeline.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	defaultKB := nominalPipe("my-kb-test")
 	defaultIntegration := nominalIntegration("my-kb-test")
@@ -157,6 +157,6 @@ func nominalPipe(name string) v1.Pipe {
 
 func createTestCamelCatalog(platform v1.IntegrationPlatform) v1.CamelCatalog {
 	c := v1.NewCamelCatalog(platform.Namespace, defaults.DefaultRuntimeVersion)
-	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Pipeline.RuntimeProvider, Version: platform.Status.Pipeline.RuntimeVersion}}
+	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Build.RuntimeProvider, Version: platform.Status.Build.RuntimeVersion}}
 	return c
 }

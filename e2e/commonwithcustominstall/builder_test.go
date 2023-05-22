@@ -66,7 +66,7 @@ func TestBuilderTimeout(t *testing.T) {
 
 		pl := Platform(ns)()
 		// set a short timeout to simulate the build timeout
-		pl.Spec.Pipeline.Timeout = &metav1.Duration{
+		pl.Spec.Build.Timeout = &metav1.Duration{
 			Duration: 10 * time.Second,
 		}
 		TestClient().Update(TestContext, pl)
