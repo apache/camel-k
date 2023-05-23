@@ -289,6 +289,11 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 		target.Status.Build.BuildCatalogToolTimeout = source.Status.Build.BuildCatalogToolTimeout
 	}
 
+	if target.Status.Build.MaxRunningBuilds <= 0 {
+		log.Debugf("Integration Platform %s [%s]: setting max running builds", target.Name, target.Namespace)
+		target.Status.Build.MaxRunningBuilds = source.Status.Build.MaxRunningBuilds
+	}
+
 	if len(target.Status.Kamelet.Repositories) == 0 {
 		log.Debugf("Integration Platform %s [%s]: setting kamelet repositories", target.Name, target.Namespace)
 		target.Status.Kamelet.Repositories = source.Status.Kamelet.Repositories
