@@ -35,7 +35,7 @@ RUN tar -xC ${MVNW_DIR} -f ${MVNW_DIR}mvnw.tar \
 # Used by mvnw to download maven dist into it
 ENV MAVEN_USER_HOME="${MAVEN_HOME}"
 # Install a default mvnw distribution at build time and prepare the config for formatting log
-RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default \
+RUN ${MVNW_DIR}mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default \
     && cp -r /usr/share/maven/lib/. $(cat ${MVNW_DIR}default)/lib \
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider*
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
@@ -44,8 +44,10 @@ ADD build/_maven_output /tmp/local/m2
 ADD build/_kamelets /kamelets
 
 RUN mkdir -p /etc/maven/m2 \
-    && chgrp -R 0 /etc/maven/m2 \
+    && chgrp -R 1000 /etc/maven/m2 \
     && chmod -R g=u /etc/maven/m2 \
+    && chgrp -R 1000 /tmp/local/m2 \
+    && chmod -R g=u /tmp/local/m2 \
     && chgrp -R 0 /kamelets \
     && chmod -R g=u /kamelets \
     && chgrp -R 0 ${MAVEN_HOME} \
