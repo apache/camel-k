@@ -158,7 +158,7 @@ func addBOM(project *maven.Project, dependency string) error {
 
 func addCamelComponent(project *maven.Project, catalog *RuntimeCatalog, dependency string) {
 	artifactID := strings.TrimPrefix(dependency, "camel:")
-	if catalog != nil && catalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
+	if catalog != nil && catalog.Runtime.Provider == v1.RuntimeProviderQuarkus && catalog.IsValidArtifact(artifactID) {
 		if !strings.HasPrefix(artifactID, "camel-") {
 			artifactID = "camel-quarkus-" + artifactID
 		}

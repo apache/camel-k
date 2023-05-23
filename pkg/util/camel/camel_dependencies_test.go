@@ -18,9 +18,11 @@ limitations under the License.
 package camel
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,4 +69,77 @@ func TestValidateDependency(t *testing.T) {
 	output.Reset()
 	ValidateDependency(catalog, "mvn:org.apache.camel.quarkus:camel-quarkus-foo", &output)
 	assert.Equal(t, "Warning: do not use mvn:org.apache.camel.quarkus:camel-quarkus-foo. Use camel:foo instead\n", output.String())
+}
+
+func TestManageIntegrationDependencies(t *testing.T) {
+	catalog, err := DefaultCatalog()
+	assert.Nil(t, err)
+
+	tests := []struct {
+		name         string
+		dependencies []string
+		coordinates  string
+	}{
+		{
+			name: "basic_camel",
+			dependencies: []string{
+				"camel:direct",
+				"camel:log",
+				"camel:core",
+			},
+			coordinates: "org.apache.camel.quarkus:camel-quarkus-direct," +
+				"org.apache.camel.quarkus:camel-quarkus-log," +
+				"org.apache.camel.quarkus:camel-quarkus-core",
+		},
+		{
+			name: "camel_quarkus",
+			dependencies: []string{
+				"camel:direct",
+				"camel-quarkus:log",
+				"camel:camel-quarkus-core",
+			},
+			coordinates: "org.apache.camel.quarkus:camel-quarkus-direct," +
+				"org.apache.camel.quarkus:camel-quarkus-log," +
+				"org.apache.camel.quarkus:camel-quarkus-core",
+		},
+		{
+			name: "camel_k",
+			dependencies: []string{
+				"camel:direct",
+				"camel-k:webhook",
+			},
+			coordinates: "org.apache.camel.quarkus:camel-quarkus-direct," +
+				"org.apache.camel.k:camel-k-webhook",
+		},
+		{
+			name: "not_in_catalog",
+			dependencies: []string{
+				"camel:direct",
+				"camel:resiliance4j",
+			},
+			coordinates: "org.apache.camel.quarkus:camel-quarkus-direct," +
+				"org.apache.camel:camel-resiliance4j",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			project := maven.Project{}
+
+			err = ManageIntegrationDependencies(&project, test.dependencies, catalog)
+			assert.Nil(t, err)
+
+			coordinates := strings.Builder{}
+			for i, d := range project.Dependencies {
+				if i == 0 {
+					_, err = fmt.Fprintf(&coordinates, "%s:%s", d.GroupID, d.ArtifactID)
+					assert.Nil(t, err)
+				} else {
+					_, err = fmt.Fprintf(&coordinates, ",%s:%s", d.GroupID, d.ArtifactID)
+					assert.Nil(t, err)
+				}
+			}
+			assert.Equal(t, test.coordinates, coordinates.String(), coordinates)
+		})
+	}
 }
