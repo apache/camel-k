@@ -80,6 +80,10 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): remove autogen resource file [\#4405](https://github.com/apache/camel-k/pull/4405) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/common from 0.43.0 to 0.44.0 [\#4404](https://github.com/apache/camel-k/pull/4404) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.16 to 0.6.17 [\#4403](https://github.com/apache/camel-k/pull/4403) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): remove gopkg.in/inf.v0 [\#4401](https://github.com/apache/camel-k/pull/4401) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.12 to 0.6.16 [\#4400](https://github.com/apache/camel-k/pull/4400) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.80.2-0.20221028030830-9ae4992afb54 to 2.100.1 [\#4399](https://github.com/apache/camel-k/pull/4399) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): remove go-homedir dependency [\#4397](https://github.com/apache/camel-k/pull/4397) ([squakez](https://github.com/squakez))
