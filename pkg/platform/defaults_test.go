@@ -82,19 +82,15 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPlatformClusterOpenShift, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
-
-	// TODO assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
-
+	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
-
 	assert.NotNil(t, ip.Status.Traits)
 	assert.NotNil(t, ip.Status.Traits.Logging)
 	assert.Equal(t, "DEBUG", ip.Status.Traits.Logging.Level)
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)
-
 	assert.Equal(t, 2, len(ip.Status.Build.Maven.Properties))
 	assert.Equal(t, "global_value1", ip.Status.Build.Maven.Properties["global_prop1"])
 	assert.Equal(t, "global_value2", ip.Status.Build.Maven.Properties["global_prop2"])
@@ -148,6 +144,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 				BuildConfiguration: v1.BuildConfiguration{
 					Strategy: v1.BuildStrategyPod,
 				},
+				MaxRunningBuilds: 1,
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"local_prop1":  "local_value1",
@@ -172,19 +169,15 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
-
-	// TODO assert.True(t, ip.Status.Build.MaxRunningBuilds == 1)
-
+	assert.True(t, ip.Status.Build.MaxRunningBuilds == 1)
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
-
 	assert.NotNil(t, ip.Status.Traits)
 	assert.NotNil(t, ip.Status.Traits.Logging)
 	assert.Equal(t, "DEBUG", ip.Status.Traits.Logging.Level)
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)
-
 	assert.Equal(t, 3, len(ip.Status.Build.Maven.Properties))
 	assert.Equal(t, "global_value1", ip.Status.Build.Maven.Properties["global_prop1"])
 	assert.Equal(t, "local_value2", ip.Status.Build.Maven.Properties["global_prop2"])
