@@ -114,7 +114,7 @@ var (
 
 func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
 	var ugfid int64 = 1000
-	var nonRoot bool = true
+	var nonRoot = true
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
