@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Sudden validate issue [\#4408](https://github.com/apache/camel-k/issues/4408)
 - Delete stale branches [\#4389](https://github.com/apache/camel-k/issues/4389)
 - No such property: header for class: Script1 [\#4385](https://github.com/apache/camel-k/issues/4385)
 - camel- k with spring cloud config [\#4370](https://github.com/apache/camel-k/issues/4370)
@@ -21,6 +22,7 @@
 - Should uninstall --all remove PersistentVolumeClaim? [\#4285](https://github.com/apache/camel-k/issues/4285)
 - Add statical check if integration refers to components supported by Camel K [\#4283](https://github.com/apache/camel-k/issues/4283)
 - Camel K 2.0 release process [\#4282](https://github.com/apache/camel-k/issues/4282)
+- Transform the Build into a Pipeline [\#4281](https://github.com/apache/camel-k/issues/4281)
 - Camel-k install and uninstall on a fresh kind cluster in Linux [\#4277](https://github.com/apache/camel-k/issues/4277)
 - Kamelet redis-source not working [\#4276](https://github.com/apache/camel-k/issues/4276)
 - Failed to fetch data from Mysql database using camel-k [\#4264](https://github.com/apache/camel-k/issues/4264)
