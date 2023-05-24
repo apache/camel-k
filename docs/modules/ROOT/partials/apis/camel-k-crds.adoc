@@ -7434,40 +7434,6 @@ The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'
 
 
 
-[#_camel_apache_org_v1_trait_Task]
-=== Task
-
-A Task is a generic operation run on the project
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`name` +
-string
-|
-
-
-The name of the task to execute
-
-|`image` +
-string
-|
-
-
-The container image to use
-
-|`command` +
-string
-|
-
-
-The command to execute
-
-
-|===
-
 [#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait
 
