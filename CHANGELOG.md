@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Sudden validate issue [\#4408](https://github.com/apache/camel-k/issues/4408)
 - Delete stale branches [\#4389](https://github.com/apache/camel-k/issues/4389)
 - No such property: header for class: Script1 [\#4385](https://github.com/apache/camel-k/issues/4385)
 - camel- k with spring cloud config [\#4370](https://github.com/apache/camel-k/issues/4370)
@@ -21,6 +22,7 @@
 - Should uninstall --all remove PersistentVolumeClaim? [\#4285](https://github.com/apache/camel-k/issues/4285)
 - Add statical check if integration refers to components supported by Camel K [\#4283](https://github.com/apache/camel-k/issues/4283)
 - Camel K 2.0 release process [\#4282](https://github.com/apache/camel-k/issues/4282)
+- Transform the Build into a Pipeline [\#4281](https://github.com/apache/camel-k/issues/4281)
 - Camel-k install and uninstall on a fresh kind cluster in Linux [\#4277](https://github.com/apache/camel-k/issues/4277)
 - Kamelet redis-source not working [\#4276](https://github.com/apache/camel-k/issues/4276)
 - Failed to fetch data from Mysql database using camel-k [\#4264](https://github.com/apache/camel-k/issues/4264)
@@ -80,6 +82,8 @@
 
 **Merged pull requests:**
 
+- Revert "chore\(ci\): remove autogen resource file" [\#4409](https://github.com/apache/camel-k/pull/4409) ([squakez](https://github.com/squakez))
+- feat\(core\): Change Operator and Builder Pod user as non root 1000 [\#4407](https://github.com/apache/camel-k/pull/4407) ([gansheer](https://github.com/gansheer))
 - chore\(ci\): remove autogen resource file [\#4405](https://github.com/apache/camel-k/pull/4405) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.43.0 to 0.44.0 [\#4404](https://github.com/apache/camel-k/pull/4404) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.16 to 0.6.17 [\#4403](https://github.com/apache/camel-k/pull/4403) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -92,6 +96,7 @@
 - chore\(deps\): bump github.com/stretchr/testify from 1.8.2 to 1.8.3 [\#4392](https://github.com/apache/camel-k/pull/4392) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/sirupsen/logrus from 1.9.0 to 1.9.2 [\#4390](https://github.com/apache/camel-k/pull/4390) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Remove unused ocp3 option from CI cluster config [\#4386](https://github.com/apache/camel-k/pull/4386) ([claudio4j](https://github.com/claudio4j))
+- feat: enable generic Pipeline [\#4384](https://github.com/apache/camel-k/pull/4384) ([squakez](https://github.com/squakez))
 - Improve error logging with external KAMEL\_BIN [\#4383](https://github.com/apache/camel-k/pull/4383) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(deps\): bump github.com/otiai10/copy from 1.9.0 to 1.11.0 [\#4382](https://github.com/apache/camel-k/pull/4382) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/evanphx/json-patch from 4.12.0+incompatible to 5.6.0+incompatible [\#4381](https://github.com/apache/camel-k/pull/4381) ([dependabot[bot]](https://github.com/apps/dependabot))
