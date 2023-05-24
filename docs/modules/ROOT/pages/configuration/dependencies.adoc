@@ -39,6 +39,13 @@ kamel run -d camel:http Integration.java
 ```
 In this case, the dependency will be added with the correct version. Note that the standard notation for specifying a Camel dependency is `camel:xxx`, while `kamel` also accepts `camel-xxx` for usability.
 
+While resolving Camel dependencies (`camel:xxx` or `camel-xxx`) the Camel K operator tries to find the dependency in the xref:architecture/cr/camel-catalog.adoc[Camel catalog].
+In case the dependency is not listed in the catalog for some reason you will be provided with am error.
+Please make sure to use Camel dependencies listed in the catalog as these components are eligible to being used in Camel K (e.g. due to proper version resolving and runtime optimization).
+Using Camel dependencies not listed in the catalog may lead to unexpected behavior and is not supported.
+In case you do have a custom Camel component that you want to use as part of an Integration you can add this as an external Maven dependency using the respective Maven coordinates of your project.
+Please do not use one of the reserved the Camel groupIds (`org.apache.camel`) in that case.
+
 *External dependencies* can be added using the `-d` flag, the `mvn` prefix, and the maven coordinates:
 ```
 kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
