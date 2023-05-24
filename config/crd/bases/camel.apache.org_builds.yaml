@@ -743,10 +743,7 @@ spec:
                 description: Timeout defines the Build maximum execution duration.
                   The Build deadline is set to the Build start time plus the Timeout
                   duration. If the Build deadline is exceeded, the Build context is
-                  canceled, Timeout defines the Pipeline maximum execution duration.
-                  The Pipeline deadline is set to the Pipeline start time plus the
-                  Timeout duration. If the Pipeline deadline is exceeded, the Pipeline
-                  context is canceled, and its phase set to BuildPhaseFailed.
+                  canceled, and its phase set to BuildPhaseFailed.
                 format: duration
                 type: string
               toolImage:
