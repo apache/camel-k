@@ -628,9 +628,6 @@ Deprecated: no longer in use in Camel K 2 - maintained for backward compatibilit
 Timeout defines the Build maximum execution duration.
 The Build deadline is set to the Build start time plus the Timeout duration.
 If the Build deadline is exceeded, the Build context is canceled,
-Timeout defines the Pipeline maximum execution duration.
-The Pipeline deadline is set to the Pipeline start time plus the Timeout duration.
-If the Pipeline deadline is exceeded, the Pipeline context is canceled,
 and its phase set to BuildPhaseFailed.
 
 |`maxRunningBuilds` +

@@ -228,6 +228,10 @@ traits:
     type: string
     description: When using `pod` strategy, the maximum amount of memory required
       by the pod builder.
+  - name: tasks
+    type: '[]string'
+    description: A list of tasks to be executed (available only when using `pod` strategy)
+      with format <name>;<container-image>;<container-command>
 - name: camel
   platform: true
   profiles:
