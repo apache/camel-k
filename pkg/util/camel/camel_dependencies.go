@@ -49,53 +49,65 @@ func NormalizeDependency(dependency string) string {
 	return newDep
 }
 
-type Output interface {
-	OutOrStdout() io.Writer
-	ErrOrStderr() io.Writer
-}
-
 // ValidateDependencies validates dependencies against Camel catalog.
 // It only shows warning and does not throw error in case the Catalog is just not complete
 // and we don't want to let it stop the process.
-func ValidateDependencies(catalog *RuntimeCatalog, dependencies []string, out Output) {
+func ValidateDependencies(catalog *RuntimeCatalog, dependencies []string, out io.Writer) {
 	for _, d := range dependencies {
 		ValidateDependency(catalog, d, out)
 	}
 }
 
 // ValidateDependency validates a dependency against Camel catalog.
-// It only shows warning and does not throw error in case the Catalog is just not complete
+// It only shows warning and does not throw error in case the Catalog is just not complete,
 // and we don't want to let it stop the process.
-func ValidateDependency(catalog *RuntimeCatalog, dependency string, out Output) {
+func ValidateDependency(catalog *RuntimeCatalog, dependency string, out io.Writer) {
+	if err := ValidateDependencyE(catalog, dependency); err != nil {
+		fmt.Fprintf(out, "Warning: %s\n", err.Error())
+	}
+
 	switch {
-	case strings.HasPrefix(dependency, "camel:"):
-		artifact := strings.TrimPrefix(dependency, "camel:")
-		if ok := catalog.IsValidArtifact(artifact); !ok {
-			fmt.Fprintf(out.ErrOrStderr(), "Warning: dependency %s not found in Camel catalog\n", dependency)
-		}
 	case strings.HasPrefix(dependency, "mvn:org.apache.camel:"):
 		component := strings.Split(dependency, ":")[2]
-		fmt.Fprintf(out.ErrOrStderr(), "Warning: do not use %s. Use %s instead\n",
+		fmt.Fprintf(out, "Warning: do not use %s. Use %s instead\n",
 			dependency, NormalizeDependency(component))
 	case strings.HasPrefix(dependency, "mvn:org.apache.camel.quarkus:"):
 		component := strings.Split(dependency, ":")[2]
-		fmt.Fprintf(out.ErrOrStderr(), "Warning: do not use %s. Use %s instead\n",
+		fmt.Fprintf(out, "Warning: do not use %s. Use %s instead\n",
 			dependency, NormalizeDependency(component))
 	}
+}
 
+// ValidateDependencyE validates a dependency against Camel catalog and throws error
+// in case it does not exist in the catalog.
+func ValidateDependencyE(catalog *RuntimeCatalog, dependency string) error {
+	var artifact string
+	switch {
+	case strings.HasPrefix(dependency, "camel:"):
+		artifact = strings.TrimPrefix(dependency, "camel:")
+	case strings.HasPrefix(dependency, "camel-quarkus:"):
+		artifact = strings.TrimPrefix(dependency, "camel-quarkus:")
+	case strings.HasPrefix(dependency, "camel-"):
+		artifact = dependency
+	}
+
+	if artifact == "" {
+		return nil
+	}
+
+	if ok := catalog.IsValidArtifact(artifact); !ok {
+		return fmt.Errorf("dependency %s not found in Camel catalog", dependency)
+	}
+
+	return nil
 }
 
 // ValidateDependenciesE validates dependencies against Camel catalog and throws error
-// if it doesn't exist in the catalog.
+// in case it does not exist in the catalog.
 func ValidateDependenciesE(catalog *RuntimeCatalog, dependencies []string) error {
 	for _, dependency := range dependencies {
-		if !strings.HasPrefix(dependency, "camel:") {
-			continue
-		}
-
-		artifact := strings.TrimPrefix(dependency, "camel:")
-		if ok := catalog.IsValidArtifact(artifact); !ok {
-			return fmt.Errorf("dependency %s not found in Camel catalog", dependency)
+		if err := ValidateDependencyE(catalog, dependency); err != nil {
+			return err
 		}
 	}
 
