@@ -18,11 +18,16 @@ limitations under the License.
 package catalog
 
 import (
+	"archive/tar"
 	"bufio"
+	"compress/gzip"
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -32,9 +37,19 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/s2i"
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	gcrv1 "github.com/google/go-containerregistry/pkg/v1"
+	buildv1 "github.com/openshift/api/build/v1"
+	imagev1 "github.com/openshift/api/image/v1"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
 // NewInitializeAction returns a action that initializes the catalog configuration when not provided by the user.
@@ -66,16 +81,20 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 		return catalog, nil
 	}
 
+	if platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I {
+		return initializeS2i(ctx, action.client, platform, catalog)
+	}
+	// Default to spectrum
 	// Make basic options for building image in the registry
 	options, err := makeSpectrumOptions(ctx, action.client, platform.Namespace, platform.Status.Build.Registry)
 	if err != nil {
 		return catalog, err
 	}
+	return initializeSpectrum(options, platform, catalog)
 
-	return initialize(options, platform, catalog)
 }
 
-func initialize(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+func initializeSpectrum(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
 	imageName := fmt.Sprintf(
 		"%s/camel-k-runtime-%s-builder:%s",
@@ -99,7 +118,7 @@ func initialize(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v
 	options.Stderr = newStdW
 	options.Stdout = newStdW
 
-	if !imageSnapshot(options) && imageExists(options) {
+	if !imageSnapshot(options.Base) && imageExistsSpectrum(options) {
 		target.Status.Phase = v1.CamelCatalogPhaseReady
 		target.Status.SetCondition(
 			v1.CamelCatalogConditionReady,
@@ -116,7 +135,7 @@ func initialize(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v
 	options.Base = catalog.Spec.GetQuarkusToolingImage()
 	options.Target = imageName
 
-	err := buildRuntimeBuilderWithTimeout(options, ip.Status.Build.GetBuildCatalogToolTimeout().Duration)
+	err := buildRuntimeBuilderWithTimeoutSpectrum(options, ip.Status.Build.GetBuildCatalogToolTimeout().Duration)
 
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
@@ -139,7 +158,254 @@ func initialize(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v
 	return target, nil
 }
 
-func imageExists(options spectrum.Options) bool {
+func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+	target := catalog.DeepCopy()
+	// No registry in s2i
+	imageName := fmt.Sprintf(
+		"camel-k-runtime-%s-builder",
+		catalog.Spec.Runtime.Provider,
+	)
+	imageTag := strings.ToLower(catalog.Spec.Runtime.Version)
+
+	// Dockfile
+	dockerfile := string([]byte(`
+		FROM ` + catalog.Spec.GetQuarkusToolingImage() + `
+		USER 1000
+		ADD /usr/local/bin/kamel /usr/local/bin/kamel
+		ADD /usr/share/maven/mvnw/ /usr/share/maven/mvnw/
+	`))
+
+	// BuildConfig
+	bc := &buildv1.BuildConfig{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: buildv1.GroupVersion.String(),
+			Kind:       "BuildConfig",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      imageName,
+			Namespace: ip.Namespace,
+			Labels: map[string]string{
+				kubernetes.CamelCreatorLabelKind:      v1.CamelCatalogKind,
+				kubernetes.CamelCreatorLabelName:      catalog.Name,
+				kubernetes.CamelCreatorLabelNamespace: catalog.Namespace,
+				kubernetes.CamelCreatorLabelVersion:   catalog.ResourceVersion,
+				"camel.apache.org/runtime.version":    catalog.Spec.Runtime.Version,
+				"camel.apache.org/runtime.provider":   string(catalog.Spec.Runtime.Provider),
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: catalog.APIVersion,
+					Kind:       catalog.Kind,
+					Name:       catalog.Name,
+					UID:        catalog.UID,
+				},
+			},
+		},
+		Spec: buildv1.BuildConfigSpec{
+			CommonSpec: buildv1.CommonSpec{
+				Source: buildv1.BuildSource{
+					Type:       buildv1.BuildSourceBinary,
+					Dockerfile: &dockerfile,
+				},
+				Strategy: buildv1.BuildStrategy{
+					DockerStrategy: &buildv1.DockerBuildStrategy{},
+				},
+				Output: buildv1.BuildOutput{
+					To: &corev1.ObjectReference{
+						Kind: "ImageStreamTag",
+						Name: imageName + ":" + imageTag,
+					},
+				},
+			},
+		},
+	}
+
+	// ImageStream
+	is := &imagev1.ImageStream{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: imagev1.GroupVersion.String(),
+			Kind:       "ImageStream",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      bc.Name,
+			Namespace: bc.Namespace,
+			Labels: map[string]string{
+				kubernetes.CamelCreatorLabelKind:      v1.CamelCatalogKind,
+				kubernetes.CamelCreatorLabelName:      catalog.Name,
+				kubernetes.CamelCreatorLabelNamespace: catalog.Namespace,
+				kubernetes.CamelCreatorLabelVersion:   catalog.ResourceVersion,
+				"camel.apache.org/runtime.provider":   string(catalog.Spec.Runtime.Provider),
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: catalog.APIVersion,
+					Kind:       catalog.Kind,
+					Name:       catalog.Name,
+					UID:        catalog.UID,
+				},
+			},
+		},
+		Spec: imagev1.ImageStreamSpec{
+			LookupPolicy: imagev1.ImageLookupPolicy{
+				Local: true,
+			},
+		},
+	}
+
+	if !imageSnapshot(imageName+":"+imageTag) && imageExistsS2i(ctx, c, is) {
+		target.Status.Phase = v1.CamelCatalogPhaseReady
+		target.Status.SetCondition(
+			v1.CamelCatalogConditionReady,
+			corev1.ConditionTrue,
+			"Builder Image",
+			"Container image exists on registry (later)",
+		)
+		target.Status.Image = imageName
+		return target, nil
+	}
+
+	err := c.Delete(ctx, bc)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+
+	err = c.Create(ctx, bc)
+	if err != nil {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+
+	err = c.Delete(ctx, is)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+
+	err = c.Create(ctx, is)
+	if err != nil {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+
+	err = util.WithTempDir(imageName+"-s2i-", func(tmpDir string) error {
+		archive := filepath.Join(tmpDir, "archive.tar.gz")
+
+		archiveFile, err := os.Create(archive)
+		if err != nil {
+			return fmt.Errorf("cannot create tar archive: %w", err)
+		}
+
+		err = tarEntries(archiveFile, "/usr/local/bin/kamel:/usr/local/bin/kamel",
+			"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/")
+		if err != nil {
+			return fmt.Errorf("cannot tar path entry: %w", err)
+		}
+
+		f, err := util.Open(archive)
+		if err != nil {
+			return err
+		}
+
+		restClient, err := apiutil.RESTClientForGVK(
+			schema.GroupVersionKind{Group: "build.openshift.io", Version: "v1"}, false,
+			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()))
+		if err != nil {
+			return err
+		}
+
+		r := restClient.Post().
+			Namespace(bc.Namespace).
+			Body(bufio.NewReader(f)).
+			Resource("buildconfigs").
+			Name(bc.Name).
+			SubResource("instantiatebinary").
+			Do(ctx)
+
+		if r.Error() != nil {
+			return fmt.Errorf("cannot instantiate binary: %w", err)
+		}
+
+		data, err := r.Raw()
+		if err != nil {
+			return fmt.Errorf("no raw data retrieved: %w", err)
+		}
+
+		s2iBuild := buildv1.Build{}
+		err = json.Unmarshal(data, &s2iBuild)
+		if err != nil {
+			return fmt.Errorf("cannot unmarshal instantiated binary response: %w", err)
+		}
+
+		err = s2i.WaitForS2iBuildCompletion(ctx, c, &s2iBuild)
+		if err != nil {
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+				// nolint: contextcheck
+				if err := s2i.CancelBuild(context.Background(), c, &s2iBuild); err != nil {
+					return fmt.Errorf("cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
+				}
+			}
+			return err
+		}
+		if s2iBuild.Status.Output.To != nil {
+			Log.Infof("Camel K builder container image %s:%s@%s created", imageName, imageTag, s2iBuild.Status.Output.To.ImageDigest)
+		}
+
+		err = c.Get(ctx, ctrl.ObjectKeyFromObject(is), is)
+		if err != nil {
+			return err
+		}
+
+		if is.Status.DockerImageRepository == "" {
+			return errors.New("dockerImageRepository not available in ImageStream")
+		}
+
+		target.Status.Phase = v1.CamelCatalogPhaseReady
+		target.Status.SetCondition(
+			v1.CamelCatalogConditionReady,
+			corev1.ConditionTrue,
+			"Builder Image",
+			"Container image successfully built",
+		)
+		target.Status.Image = is.Status.DockerImageRepository + ":" + imageTag
+
+		return f.Close()
+	})
+
+	if err != nil {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+
+	return target, nil
+}
+
+func imageExistsSpectrum(options spectrum.Options) bool {
 	Log.Infof("Checking if Camel K builder container %s already exists...", options.Base)
 	ctrImg, err := spectrum.Pull(options)
 	if ctrImg != nil && err == nil {
@@ -156,18 +422,38 @@ func imageExists(options spectrum.Options) bool {
 	return false
 }
 
-func imageSnapshot(options spectrum.Options) bool {
-	return strings.HasSuffix(options.Base, "snapshot")
+func imageExistsS2i(ctx context.Context, c client.Client, is *imagev1.ImageStream) bool {
+	Log.Infof("Checking if Camel K builder container %s already exists...", is.Name)
+	key := ctrl.ObjectKey{
+		Namespace: is.Namespace,
+		Name:      is.Name,
+	}
+
+	err := c.Get(ctx, key, is)
+
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			Log.Infof("Couldn't pull image due to %s", err.Error())
+		}
+		Log.Info("Could not find Camel K builder container")
+		return false
+	}
+	Log.Info("Found Camel K builder container ")
+	return true
 }
 
-func buildRuntimeBuilderWithTimeout(options spectrum.Options, timeout time.Duration) error {
+func imageSnapshot(imageName string) bool {
+	return strings.HasSuffix(imageName, "snapshot")
+}
+
+func buildRuntimeBuilderWithTimeoutSpectrum(options spectrum.Options, timeout time.Duration) error {
 	// Backward compatibility with IP which had not a timeout field
 	if timeout == 0 {
-		return buildRuntimeBuilderImage(options)
+		return buildRuntimeBuilderImageSpectrum(options)
 	}
 	result := make(chan error, 1)
 	go func() {
-		result <- buildRuntimeBuilderImage(options)
+		result <- buildRuntimeBuilderImageSpectrum(options)
 	}()
 	select {
 	case <-time.After(timeout):
@@ -179,7 +465,7 @@ func buildRuntimeBuilderWithTimeout(options spectrum.Options, timeout time.Durat
 
 // This func will take care to dynamically build an image that will contain the tools required
 // by the catalog build plus kamel binary and a maven wrapper required for the build.
-func buildRuntimeBuilderImage(options spectrum.Options) error {
+func buildRuntimeBuilderImageSpectrum(options spectrum.Options) error {
 	if options.Base == "" {
 		return fmt.Errorf("missing base image, likely catalog is not compatible with this Camel K version")
 	}
@@ -189,7 +475,6 @@ func buildRuntimeBuilderImage(options spectrum.Options) error {
 		options.Jobs = jobs
 	}
 
-	// TODO support also S2I
 	_, err := spectrum.Build(options,
 		"/usr/local/bin/kamel:/usr/local/bin/",
 		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/")
@@ -226,4 +511,61 @@ func makeSpectrumOptions(ctx context.Context, c client.Client, platformNamespace
 	options.Recursive = true
 
 	return options, nil
+}
+
+// Add entries (files or folders) into tar with the possibility to change its path.
+func tarEntries(writer io.Writer, files ...string) error {
+
+	gzw := gzip.NewWriter(writer)
+	defer util.CloseQuietly(gzw)
+
+	tw := tar.NewWriter(gzw)
+	defer util.CloseQuietly(tw)
+
+	// Iterate over files and and add them to the tar archive
+	for _, fileDetail := range files {
+		fileSource := strings.Split(fileDetail, ":")[0]
+		fileTarget := strings.Split(fileDetail, ":")[1]
+		// ensure the src actually exists before trying to tar it
+		if _, err := os.Stat(fileSource); err != nil {
+			return fmt.Errorf("unable to tar files: %w", err)
+		}
+
+		if err := filepath.Walk(fileSource, func(file string, fi os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !fi.Mode().IsRegular() {
+				return nil
+			}
+
+			header, err := tar.FileInfoHeader(fi, fi.Name())
+			if err != nil {
+				return err
+			}
+
+			// update the name to correctly reflect the desired destination when un-taring
+			header.Name = strings.TrimPrefix(strings.ReplaceAll(file, fileSource, fileTarget), string(filepath.Separator))
+
+			if err := tw.WriteHeader(header); err != nil {
+				return err
+			}
+
+			f, err := util.Open(file)
+			if err != nil {
+				return err
+			}
+
+			if _, err := io.Copy(tw, f); err != nil {
+				return err
+			}
+
+			return f.Close()
+		}); err != nil {
+			return fmt.Errorf("unable to tar: %w", err)
+		}
+
+	}
+	return nil
 }
