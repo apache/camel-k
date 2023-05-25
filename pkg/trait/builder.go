@@ -245,7 +245,7 @@ func getImageName(e *Environment) string {
 }
 
 func (t *builderTrait) customTasks() []v1.Task {
-	customTasks := make([]v1.Task, len(t.Tasks), len(t.Tasks))
+	customTasks := make([]v1.Task, len(t.Tasks))
 	for i, t := range t.Tasks {
 		// TODO, better strategy than a simple split!
 		splitted := strings.Split(t, ";")
