@@ -42,7 +42,7 @@ import (
 
 func addDependency(cmd *cobra.Command, it *v1.Integration, dependency string, catalog *camel.RuntimeCatalog) {
 	normalized := camel.NormalizeDependency(dependency)
-	camel.ValidateDependency(catalog, normalized, cmd)
+	camel.ValidateDependency(catalog, normalized, cmd.ErrOrStderr())
 	it.Spec.AddDependency(normalized)
 }
 

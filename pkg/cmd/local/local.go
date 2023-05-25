@@ -57,7 +57,7 @@ func GetDependencies(ctx context.Context, cmd *cobra.Command, srcs, userDependen
 	}
 
 	// Validate user-provided dependencies against Camel catalog
-	camel.ValidateDependencies(catalog, userDependencies, cmd)
+	camel.ValidateDependencies(catalog, userDependencies, cmd.ErrOrStderr())
 
 	// Get top-level dependencies from sources
 	dependencies, err := getTopLevelDependencies(ctx, catalog, srcs)
