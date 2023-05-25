@@ -272,6 +272,12 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 		)
 	}
 
+	var envVars = proxyFromEnvironment()
+	envVars = append(envVars, corev1.EnvVar{
+		Name:  "HOME",
+		Value: filepath.Join(builderDir, build.Name),
+	})
+
 	container := corev1.Container{
 		Name:            taskName,
 		Image:           build.BuilderConfiguration().ToolImage,
@@ -287,7 +293,7 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 			taskName,
 		},
 		WorkingDir: filepath.Join(builderDir, build.Name),
-		Env:        proxyFromEnvironment(),
+		Env:        envVars,
 	}
 
 	configureResources(build, &container)

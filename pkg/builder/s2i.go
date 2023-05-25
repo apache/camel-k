@@ -29,7 +29,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -49,6 +48,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/s2i"
 )
 
 type s2iTask struct {
@@ -203,11 +203,11 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 			return fmt.Errorf("cannot unmarshal instantiated binary response: %w", err)
 		}
 
-		err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
+		err = s2i.WaitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
 		if err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 				// nolint: contextcheck
-				if err := t.cancelBuild(context.Background(), &s2iBuild); err != nil {
+				if err := s2i.CancelBuild(context.Background(), t.c, &s2iBuild); err != nil {
 					log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
 				}
 			}
@@ -253,44 +253,6 @@ func (t *s2iTask) getControllerReference() metav1.Object {
 		}
 	}
 	return owner
-}
-
-func (t *s2iTask) waitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buildv1.Build) error {
-	key := ctrl.ObjectKeyFromObject(build)
-	for {
-		select {
-
-		case <-ctx.Done():
-			return ctx.Err()
-
-		case <-time.After(1 * time.Second):
-			err := c.Get(ctx, key, build)
-			if err != nil {
-				if apierrors.IsNotFound(err) {
-					continue
-				}
-				return err
-			}
-
-			if build.Status.Phase == buildv1.BuildPhaseComplete {
-				return nil
-			} else if build.Status.Phase == buildv1.BuildPhaseCancelled ||
-				build.Status.Phase == buildv1.BuildPhaseFailed ||
-				build.Status.Phase == buildv1.BuildPhaseError {
-				return errors.New("build failed")
-			}
-		}
-	}
-}
-
-func (t *s2iTask) cancelBuild(ctx context.Context, build *buildv1.Build) error {
-	target := build.DeepCopy()
-	target.Status.Cancelled = true
-	if err := t.c.Patch(ctx, target, ctrl.MergeFrom(build)); err != nil {
-		return err
-	}
-	*build = *target
-	return nil
 }
 
 func tarDir(src string, writers ...io.Writer) error {
