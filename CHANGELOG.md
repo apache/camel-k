@@ -6,10 +6,12 @@
 
 **Closed issues:**
 
+- Minor validation issue on Task [\#4413](https://github.com/apache/camel-k/issues/4413)
 - Sudden validate issue [\#4408](https://github.com/apache/camel-k/issues/4408)
 - Delete stale branches [\#4389](https://github.com/apache/camel-k/issues/4389)
 - No such property: header for class: Script1 [\#4385](https://github.com/apache/camel-k/issues/4385)
 - camel- k with spring cloud config [\#4370](https://github.com/apache/camel-k/issues/4370)
+- Camel k 1.12.0: camel:jta not found in Camel catalog [\#4361](https://github.com/apache/camel-k/issues/4361)
 - Test failures, likely some regression [\#4358](https://github.com/apache/camel-k/issues/4358)
 - High memory Quarkus native check failing [\#4345](https://github.com/apache/camel-k/issues/4345)
 - Cron Trait initiates shutdown for nested exchange \(Split EIP\) [\#4343](https://github.com/apache/camel-k/issues/4343)
