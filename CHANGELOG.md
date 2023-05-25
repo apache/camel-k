@@ -6,10 +6,12 @@
 
 **Closed issues:**
 
+- Minor validation issue on Task [\#4413](https://github.com/apache/camel-k/issues/4413)
 - Sudden validate issue [\#4408](https://github.com/apache/camel-k/issues/4408)
 - Delete stale branches [\#4389](https://github.com/apache/camel-k/issues/4389)
 - No such property: header for class: Script1 [\#4385](https://github.com/apache/camel-k/issues/4385)
 - camel- k with spring cloud config [\#4370](https://github.com/apache/camel-k/issues/4370)
+- Camel k 1.12.0: camel:jta not found in Camel catalog [\#4361](https://github.com/apache/camel-k/issues/4361)
 - Test failures, likely some regression [\#4358](https://github.com/apache/camel-k/issues/4358)
 - High memory Quarkus native check failing [\#4345](https://github.com/apache/camel-k/issues/4345)
 - Cron Trait initiates shutdown for nested exchange \(Split EIP\) [\#4343](https://github.com/apache/camel-k/issues/4343)
@@ -82,6 +84,10 @@
 
 **Merged pull requests:**
 
+- feat\(ci\): publish arm64 architecture [\#4416](https://github.com/apache/camel-k/pull/4416) ([squakez](https://github.com/squakez))
+- fix\(trait\): minor lint [\#4415](https://github.com/apache/camel-k/pull/4415) ([squakez](https://github.com/squakez))
+- chore: remove useless code [\#4412](https://github.com/apache/camel-k/pull/4412) ([squakez](https://github.com/squakez))
+- chore: Improve Camel dependency validation [\#4411](https://github.com/apache/camel-k/pull/4411) ([christophd](https://github.com/christophd))
 - Revert "chore\(ci\): remove autogen resource file" [\#4409](https://github.com/apache/camel-k/pull/4409) ([squakez](https://github.com/squakez))
 - feat\(core\): Change Operator and Builder Pod user as non root 1000 [\#4407](https://github.com/apache/camel-k/pull/4407) ([gansheer](https://github.com/gansheer))
 - chore\(ci\): remove autogen resource file [\#4405](https://github.com/apache/camel-k/pull/4405) ([squakez](https://github.com/squakez))
