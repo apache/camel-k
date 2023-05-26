@@ -79,22 +79,31 @@ runs:
         MAVEN_REPOSITORY=$(make get-staging-repo)
         echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
         echo "MAVEN_REPOSITORY=$MAVEN_REPOSITORY" >> $GITHUB_ENV
+    - name: Install newer docker CLI supporting multi platform build
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install ca-certificates curl gnupg
+        sudo install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo chmod a+r /etc/apt/keyrings/docker.gpg
+        echo \
+        "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    - name: Set up QEMU (required by multi platform build)
+      uses: docker/setup-qemu-action@v2        
     - name: Login to Container Registry
       uses: docker/login-action@v1
       with:
         username: ${{ inputs.secretDockerHubUser }}
         password: ${{ inputs.secretDockerHubPassword }}
-    - name: Codegen
+    - name: Build and release containers
       shell: bash
       run: |
-        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} codegen set-version build-resources
-    - name: Build
-      shell: bash
-      run: |
-        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
-    - name: Check
-      shell: bash
-      run: ls -l
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} codegen set-version build-resources release-nightly
     - name: Create Release
       id: create_release
       uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
