@@ -39,15 +39,20 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/s2i"
+
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
 	gcrv1 "github.com/google/go-containerregistry/pkg/v1"
+
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
@@ -175,6 +180,8 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		ADD /usr/share/maven/mvnw/ /usr/share/maven/mvnw/
 	`))
 
+	owner := catalogReference(catalog)
+
 	// BuildConfig
 	bc := &buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
@@ -191,14 +198,6 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 				kubernetes.CamelCreatorLabelVersion:   catalog.ResourceVersion,
 				"camel.apache.org/runtime.version":    catalog.Spec.Runtime.Version,
 				"camel.apache.org/runtime.provider":   string(catalog.Spec.Runtime.Provider),
-			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: catalog.APIVersion,
-					Kind:       catalog.Kind,
-					Name:       catalog.Name,
-					UID:        catalog.UID,
-				},
 			},
 		},
 		Spec: buildv1.BuildConfigSpec{
@@ -236,14 +235,6 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 				kubernetes.CamelCreatorLabelVersion:   catalog.ResourceVersion,
 				"camel.apache.org/runtime.provider":   string(catalog.Spec.Runtime.Provider),
 			},
-			OwnerReferences: []metav1.OwnerReference{
-				{
-					APIVersion: catalog.APIVersion,
-					Kind:       catalog.Kind,
-					Name:       catalog.Name,
-					UID:        catalog.UID,
-				},
-			},
 		},
 		Spec: imagev1.ImageStreamSpec{
 			LookupPolicy: imagev1.ImageLookupPolicy{
@@ -264,18 +255,7 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		return target, nil
 	}
 
-	err := c.Delete(ctx, bc)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		target.Status.Phase = v1.CamelCatalogPhaseError
-		target.Status.SetErrorCondition(
-			v1.CamelCatalogConditionReady,
-			"Builder Image",
-			err,
-		)
-		return target, err
-	}
-
-	err = c.Create(ctx, bc)
+	err := s2i.BuildConfig(ctx, c, bc, owner)
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
 		target.Status.SetErrorCondition(
@@ -286,18 +266,7 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		return target, err
 	}
 
-	err = c.Delete(ctx, is)
-	if err != nil && !k8serrors.IsNotFound(err) {
-		target.Status.Phase = v1.CamelCatalogPhaseError
-		target.Status.SetErrorCondition(
-			v1.CamelCatalogConditionReady,
-			"Builder Image",
-			err,
-		)
-		return target, err
-	}
-
-	err = c.Create(ctx, is)
+	err = s2i.ImageStream(ctx, c, is, owner)
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
 		target.Status.SetErrorCondition(
@@ -568,4 +537,13 @@ func tarEntries(writer io.Writer, files ...string) error {
 
 	}
 	return nil
+}
+
+func catalogReference(catalog *v1.CamelCatalog) *unstructured.Unstructured {
+	owner := &unstructured.Unstructured{}
+	owner.SetName(catalog.Name)
+	owner.SetUID(catalog.UID)
+	owner.SetAPIVersion(catalog.APIVersion)
+	owner.SetKind(catalog.Kind)
+	return owner
 }

@@ -21,12 +21,18 @@ package s2i
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	buildv1 "github.com/openshift/api/build/v1"
+	imagev1 "github.com/openshift/api/image/v1"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // Cancel the s2i Build by updating its status.
@@ -67,4 +73,36 @@ func WaitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buil
 			}
 		}
 	}
+}
+
+// Create the BuildConfig of the build with the right owner after having deleted it it already existed.
+func BuildConfig(ctx context.Context, c client.Client, bc *buildv1.BuildConfig, owner metav1.Object) error {
+	if err := c.Delete(ctx, bc); err != nil && !apierrors.IsNotFound(err) {
+		return fmt.Errorf("cannot delete build config: %w", err)
+	}
+
+	if err := ctrlutil.SetOwnerReference(owner, bc, c.GetScheme()); err != nil {
+		return fmt.Errorf("cannot set owner reference on BuildConfig: %s: %w", bc.Name, err)
+	}
+
+	if err := c.Create(ctx, bc); err != nil {
+		return fmt.Errorf("cannot create build config: %w", err)
+	}
+	return nil
+}
+
+// Create the ImageStream for the builded image with the right owner after having deleted it it already existed.
+func ImageStream(ctx context.Context, c client.Client, is *imagev1.ImageStream, owner metav1.Object) error {
+	if err := c.Delete(ctx, is); err != nil && !apierrors.IsNotFound(err) {
+		return fmt.Errorf("cannot delete image stream: %w", err)
+	}
+
+	if err := ctrlutil.SetOwnerReference(owner, is, c.GetScheme()); err != nil {
+		return fmt.Errorf("cannot set owner reference on ImageStream: %s: %w", is.Name, err)
+	}
+
+	if err := c.Create(ctx, is); err != nil {
+		return fmt.Errorf("cannot create image stream: %w", err)
+	}
+	return nil
 }

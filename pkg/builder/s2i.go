@@ -31,7 +31,6 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -39,7 +38,6 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
@@ -90,11 +88,6 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		},
 	}
 
-	err := t.c.Delete(ctx, bc)
-	if err != nil && !apierrors.IsNotFound(err) {
-		return status.Failed(fmt.Errorf("cannot delete build config: %w", err))
-	}
-
 	// Set the build controller as owner reference
 	owner := t.getControllerReference()
 	if owner == nil {
@@ -102,13 +95,9 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		owner = t.build
 	}
 
-	if err := ctrlutil.SetOwnerReference(owner, bc, t.c.GetScheme()); err != nil {
-		return status.Failed(fmt.Errorf("cannot set owner reference on BuildConfig: %s: %w", bc.Name, err))
-	}
-
-	err = t.c.Create(ctx, bc)
+	err := s2i.BuildConfig(ctx, t.c, bc, owner)
 	if err != nil {
-		return status.Failed(fmt.Errorf("cannot create build config: %w", err))
+		return status.Failed(err)
 	}
 
 	is := &imagev1.ImageStream{
@@ -128,18 +117,9 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		},
 	}
 
-	err = t.c.Delete(ctx, is)
-	if err != nil && !apierrors.IsNotFound(err) {
-		return status.Failed(fmt.Errorf("cannot delete image stream: %w", err))
-	}
-
-	if err := ctrlutil.SetOwnerReference(owner, is, t.c.GetScheme()); err != nil {
-		return status.Failed(fmt.Errorf("cannot set owner reference on ImageStream: %s: %w", is.Name, err))
-	}
-
-	err = t.c.Create(ctx, is)
+	err = s2i.ImageStream(ctx, t.c, is, owner)
 	if err != nil {
-		return status.Failed(fmt.Errorf("cannot create image stream: %w", err))
+		return status.Failed(err)
 	}
 
 	err = util.WithTempDir(t.build.Name+"-s2i-", func(tmpDir string) error {
