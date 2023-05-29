@@ -32,8 +32,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
-
-	"github.com/gregjones/httpcache"
 )
 
 type githubKameletRepository struct {
@@ -45,7 +43,7 @@ type githubKameletRepository struct {
 }
 
 func newGithubKameletRepository(owner, repo, path, ref string) KameletRepository {
-	httpClient := httpcache.NewMemoryCacheTransport().Client()
+	httpClient := &http.Client{}
 	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
 		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 		ctx := context.WithValue(context.Background(), oauth2.HTTPClient, httpClient)
