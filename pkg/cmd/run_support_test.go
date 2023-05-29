@@ -78,3 +78,11 @@ func TestDownloadDependencyWithoutFileName(t *testing.T) {
 	_, err = os.Stat(path)
 	assert.Nil(t, err)
 }
+
+func TestExtractTraitNames(t *testing.T) {
+	traitProps := []string{"container.enabled=true", "no-trait.noval=1", "nothing"}
+	tn := extractTraitNames(traitProps)
+	assert.Equal(t, "container", tn[0])
+	assert.Equal(t, "no-trait", tn[1])
+	assert.Equal(t, "nothing", tn[2])
+}

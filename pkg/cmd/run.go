@@ -298,7 +298,7 @@ func (o *runCmdOptions) validate() error {
 	}
 	catalog := trait.NewCatalog(client)
 
-	return validateTraits(catalog, o.Traits)
+	return validateTraits(catalog, extractTraitNames(o.Traits))
 }
 
 func filterBuildPropertyFiles(maybePropertyFiles []string) []string {
