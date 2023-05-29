@@ -204,14 +204,6 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 				d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
 					fmt.Sprintf("--health-port=%d", cfg.Health.Port))
 				d.Spec.Template.Spec.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(int(cfg.Health.Port))
-				var ugfid int64 = 1000
-				var nonRoot = true
-				d.Spec.Template.Spec.SecurityContext = &corev1.PodSecurityContext{
-					FSGroup:      &ugfid,
-					RunAsGroup:   &ugfid,
-					RunAsUser:    &ugfid,
-					RunAsNonRoot: &nonRoot,
-				}
 			}
 		}
 
