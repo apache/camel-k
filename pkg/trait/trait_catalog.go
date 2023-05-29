@@ -20,11 +20,8 @@ package trait
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"sort"
 	"strings"
-
-	"github.com/fatih/structs"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -154,42 +151,6 @@ func (c *Catalog) GetTrait(id string) Trait {
 		}
 	}
 	return nil
-}
-
-// ComputeTraitsProperties returns all key/value configuration properties that can be used to configure traits.
-func (c *Catalog) ComputeTraitsProperties() []string {
-	results := make([]string, 0)
-	for _, trait := range c.AllTraits() {
-		trait := trait // pin
-		c.processFields(structs.Fields(trait), func(name string) {
-			results = append(results, string(trait.ID())+"."+name)
-		})
-	}
-
-	return results
-}
-
-func (c *Catalog) processFields(fields []*structs.Field, processor func(string)) {
-	for _, f := range fields {
-		if f.IsEmbedded() && f.IsExported() && f.Kind() == reflect.Struct {
-			c.processFields(f.Fields(), processor)
-		}
-
-		if f.IsEmbedded() {
-			continue
-		}
-
-		property := f.Tag("property")
-
-		if property != "" {
-			items := strings.Split(property, ",")
-			if f.Kind() == reflect.Map {
-				processor(items[0] + ".*")
-			} else {
-				processor(items[0])
-			}
-		}
-	}
 }
 
 type Finder interface {

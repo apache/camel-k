@@ -30,7 +30,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -89,18 +88,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	if err != nil {
 		return err
 	}
-
 	catalog := trait.NewCatalog(c)
-	tp := catalog.ComputeTraitsProperties()
-	for _, t := range command.Traits {
-		kv := strings.SplitN(t, "=", 2)
-
-		if !util.StringSliceExists(tp, kv[0]) {
-			fmt.Fprintln(cmd.OutOrStdout(), "Error:", t, "is not a valid trait property")
-			return nil
-		}
-	}
-
 	kit := v1.NewIntegrationKit(command.Namespace, args[0])
 	key := ctrl.ObjectKey{
 		Namespace: command.Namespace,

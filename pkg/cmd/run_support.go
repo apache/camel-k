@@ -218,3 +218,12 @@ func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 
 	return catalog, nil
 }
+
+func extractTraitNames(traitProps []string) []string {
+	traitNameProps := make([]string, len(traitProps))
+	for i, tp := range traitProps {
+		splits := strings.Split(tp, ".")
+		traitNameProps[i] = splits[0]
+	}
+	return traitNameProps
+}

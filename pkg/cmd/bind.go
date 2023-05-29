@@ -169,7 +169,7 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	}
 	catalog := trait.NewCatalog(client)
 
-	return validateTraits(catalog, o.Traits)
+	return validateTraits(catalog, extractTraitNames(o.Traits))
 }
 
 func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {

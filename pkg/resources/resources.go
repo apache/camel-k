@@ -174,6 +174,18 @@ var assets = func() http.FileSystem {
 			name:    "manager",
 			modTime: time.Time{},
 		},
+		"/manager/bundle": &vfsgen۰DirInfo{
+			name:    "bundle",
+			modTime: time.Time{},
+		},
+		"/manager/bundle/manifests": &vfsgen۰DirInfo{
+			name:    "manifests",
+			modTime: time.Time{},
+		},
+		"/manager/bundle/metadata": &vfsgen۰DirInfo{
+			name:    "metadata",
+			modTime: time.Time{},
+		},
 		"/manager/operator-deployment.yaml": &vfsgen۰CompressedFileInfo{
 			name:             "operator-deployment.yaml",
 			modTime:          time.Time{},
@@ -686,6 +698,7 @@ var assets = func() http.FileSystem {
 		fs["/crd/bases/camel.apache.org_pipes.yaml"].(os.FileInfo),
 	}
 	fs["/manager"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
+		fs["/manager/bundle"].(os.FileInfo),
 		fs["/manager/operator-deployment.yaml"].(os.FileInfo),
 		fs["/manager/operator-pvc.yaml"].(os.FileInfo),
 		fs["/manager/operator-service-account.yaml"].(os.FileInfo),
@@ -698,6 +711,10 @@ var assets = func() http.FileSystem {
 		fs["/manager/patch-resource-requirements.yaml"].(os.FileInfo),
 		fs["/manager/patch-toleration.yaml"].(os.FileInfo),
 		fs["/manager/patch-watch-namespace-global.yaml"].(os.FileInfo),
+	}
+	fs["/manager/bundle"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
+		fs["/manager/bundle/manifests"].(os.FileInfo),
+		fs["/manager/bundle/metadata"].(os.FileInfo),
 	}
 	fs["/prometheus"].(*vfsgen۰DirInfo).entries = []os.FileInfo{
 		fs["/prometheus/operator-pod-monitor.yaml"].(os.FileInfo),
