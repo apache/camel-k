@@ -20,10 +20,10 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 1.12.1-SNAPSHOT
+VERSION ?= 1.12.1
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 1.12.0
-RUNTIME_VERSION := 1.17.1-SNAPSHOT
+RUNTIME_VERSION := 1.17.1
 BUILDAH_VERSION := 1.23.3
 KANIKO_VERSION := 0.17.1
 CONTROLLER_GEN_VERSION := v0.6.1
@@ -79,7 +79,7 @@ OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE_NAME := docker.io/camelk/camel-k
-STAGING_RUNTIME_REPO :=
+STAGING_RUNTIME_REPO := https://repository.apache.org/content/repositories/orgapachecamel-1565
 
 # Kamelets options
 INSTALL_DEFAULT_KAMELETS ?= true
