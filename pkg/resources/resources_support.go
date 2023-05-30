@@ -31,10 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
-//
 // ResourceAsString returns the named resource content as string.
-//
-//go:generate go run ../../cmd/util/vfs-gen resources config
 func ResourceAsString(name string) (string, error) {
 	data, err := Resource(name)
 	return string(data), err
