@@ -6,7 +6,10 @@
 
 **Merged pull requests:**
 
+- Removed coverage badge 3rd party dependency [\#4423](https://github.com/apache/camel-k/pull/4423) ([realMartinez](https://github.com/realMartinez))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.17 to 0.6.18 [\#4422](https://github.com/apache/camel-k/pull/4422) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): release doc polishing [\#4421](https://github.com/apache/camel-k/pull/4421) ([squakez](https://github.com/squakez))
+- chore: more archived deps removals [\#4419](https://github.com/apache/camel-k/pull/4419) ([squakez](https://github.com/squakez))
 - feat\(core\): Support S2I for builder image generation [\#4417](https://github.com/apache/camel-k/pull/4417) ([gansheer](https://github.com/gansheer))
 - feat\(ci\): publish arm64 architecture [\#4416](https://github.com/apache/camel-k/pull/4416) ([squakez](https://github.com/squakez))
 - fix\(trait\): minor lint [\#4415](https://github.com/apache/camel-k/pull/4415) ([squakez](https://github.com/squakez))
