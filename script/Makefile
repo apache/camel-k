@@ -344,7 +344,7 @@ else
 endif
 
 build-resources:
-	./script/get_catalog.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+	./script/get_catalog.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
 	go generate ./pkg/...
 
 bundle-kamelets:

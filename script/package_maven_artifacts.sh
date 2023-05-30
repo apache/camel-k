@@ -57,13 +57,7 @@ if [ -z "${local_runtime_dir}" ]; then
     sed -i "s;<url>https://repository\.apache\.org/content/repositories/orgapachecamel-.*</url>;<url>$staging_repo</url>;" $location/maven-settings.xml
   fi
 
-  #TODO: remove this check once Camel K 1.16.0 is released
-  if [[ $camel_k_runtime_version != *"SNAPSHOT"* ]]; then
-    echo "WARN: Package Camel K runtime artifacts temporary removed because of https://github.com/apache/camel-k-runtime/pull/928 issue"
-    echo "Please, remove this check when Camel K Runtime 1.16.0 is officially released"
-    exit 0
-  fi
-  echo "Downloading Camel K runtime $camel_k_runtime_version M2 (may take some minute ...)"
+  echo "INFO: Downloading Camel K runtime $camel_k_runtime_version M2 (may take some minute ...)"
   mvn -q dependency:copy -Dartifact="org.apache.camel.k:apache-camel-k-runtime:$camel_k_runtime_version:zip:m2" \
     -Dmdep.useBaseVersion=true \
     -DoutputDirectory=${rootdir}/build/m2 \
@@ -72,9 +66,7 @@ if [ -z "${local_runtime_dir}" ]; then
   unzip -q -o $PWD/build/m2/apache-camel-k-runtime-${camel_k_runtime_version}-m2.zip -d $camel_k_destination
 else
   # Local M2 distro
-  echo "Installing local Camel K runtime $camel_k_runtime_version M2 from $local_runtime_dir (may take some minute ...)"
+  echo "INFO: Installing local Camel K runtime $camel_k_runtime_version M2 from $local_runtime_dir (may take some minute ...)"
   mvn -q -f $local_runtime_dir/distribution clean install
   unzip -q -o $local_runtime_dir/distribution/target/apache-camel-k-runtime-${camel_k_runtime_version}-m2.zip -d $camel_k_destination
 fi
-
-
