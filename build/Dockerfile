@@ -46,6 +46,8 @@ ADD build/_kamelets /kamelets
 RUN mkdir -p /etc/maven/m2 \
     && chgrp -R 0 /etc/maven/m2 \
     && chmod -R g=u /etc/maven/m2 \
+    && chgrp -R 0 /tmp/local/m2 \
+    && chmod -R g=u /tmp/local/m2 \
     && chgrp -R 0 /kamelets \
     && chmod -R g=u /kamelets \
     && chgrp -R 0 ${MAVEN_HOME} \
