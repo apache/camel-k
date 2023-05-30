@@ -55,7 +55,7 @@ jobs:
 
       - name: Go Coverage Badge
 
-        uses: tj-actions/coverage-badge-go@v2
+        uses: ./.github/actions/coverage-badge
         with:
           filename: coverage.out
           target: badge.out
@@ -65,13 +65,6 @@ jobs:
           replacement=$(grep -o 'https://[^)]*' badge.out)
           target="(?:https:\/\/img\.shields\.io\/badge\/Coverage).*?(?=\.svg)"
           perl -i -pe "s|${target}|${replacement}|g" README.adoc
-          
-          
-      - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v12
-        id: verify-changed-files
-        with:
-          files: README.adoc
 
       - name: Commit changes
         shell: bash
