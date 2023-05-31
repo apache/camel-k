@@ -1,0 +1,91 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: Generate SBOM (Camel K)
+
+on:
+  schedule:
+  - cron: '30 19 * * 0'
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "release-*"
+    paths-ignore:
+      - 'docs/**'
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+  push:
+    branches:
+      - main
+      - "release-*"
+    paths-ignore:
+      - 'docs/**'
+      - 'proposals/**'
+      - '**.md'
+      - '**.adoc'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+  workflow_dispatch:
+    inputs:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        # TODO: test an all the supported OS
+        # [ubuntu-20.04, macos-latest, windows-latest]
+        os: [ubuntu-20.04]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        submodules: recursive
+    - name: Execute Build (make)
+      uses: ./.github/actions/e2e-build
+    - name: Generate SBOM
+      uses: CycloneDX/gh-gomod-generate-sbom@v1
+      with:
+        version: v1
+        args: mod -licenses -json -output camel-k-sbom/camel-k-sbom.json
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5.0.1
+      with:
+        base: main
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: automatic-periodic-sync
+        title: '[Github Actions] Periodic Sync Camel K SBOM'
+        body: |
+          Periodic Sync of Camel K Main Branch for SBOM Generation.
+          see https://github.com/apache/camel-k/blob/main/.github/workflows/generate-sbom-main.yml
