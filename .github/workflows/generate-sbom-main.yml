@@ -72,7 +72,7 @@ jobs:
     - name: Execute Build (make)
       uses: ./.github/actions/e2e-build
     - name: Generate SBOM
-      uses: CycloneDX/gh-gomod-generate-sbom@v1
+      uses: ./.github/actions/gh-go-mod-generate-sbom
       with:
         version: v1
         args: mod -licenses -json -output camel-k-sbom/camel-k-sbom.json
