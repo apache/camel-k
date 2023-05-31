@@ -20,6 +20,7 @@ package builder
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -198,10 +199,10 @@ func sanitizeDependencies(ctx *builderContext) error {
 func injectProfiles(ctx *builderContext) error {
 	if ctx.Build.Maven.Profiles != nil {
 		profiles := ""
-		for _, profile := range ctx.Build.Maven.Profiles {
-			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &profile)
+		for i := range ctx.Build.Maven.Profiles {
+			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.Profiles[i])
 			if err != nil {
-				return err
+				return fmt.Errorf("could not load profile : %s: %w. ", ctx.Build.Maven.Profiles[i].String(), err)
 			}
 			if val != "" {
 				profiles += val

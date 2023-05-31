@@ -27,6 +27,7 @@ type TaskApplyConfiguration struct {
 	Kaniko   *KanikoTaskApplyConfiguration   `json:"kaniko,omitempty"`
 	Spectrum *SpectrumTaskApplyConfiguration `json:"spectrum,omitempty"`
 	S2i      *S2iTaskApplyConfiguration      `json:"s2i,omitempty"`
+	Jib      *JibTaskApplyConfiguration      `json:"jib,omitempty"`
 	Custom   *UserTaskApplyConfiguration     `json:"custom,omitempty"`
 }
 
@@ -73,6 +74,14 @@ func (b *TaskApplyConfiguration) WithSpectrum(value *SpectrumTaskApplyConfigurat
 // If called multiple times, the S2i field is set to the value of the last call.
 func (b *TaskApplyConfiguration) WithS2i(value *S2iTaskApplyConfiguration) *TaskApplyConfiguration {
 	b.S2i = value
+	return b
+}
+
+// WithJib sets the Jib field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Jib field is set to the value of the last call.
+func (b *TaskApplyConfiguration) WithJib(value *JibTaskApplyConfiguration) *TaskApplyConfiguration {
+	b.Jib = value
 	return b
 }
 

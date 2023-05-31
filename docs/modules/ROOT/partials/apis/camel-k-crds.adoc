@@ -332,6 +332,30 @@ Generic raw message, typically a map containing the keys (trait parameters) and 
 
 |===
 
+[#_camel_apache_org_v1_Args]
+=== Args
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Container, Container>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`arg` +
+string
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_Artifact]
 === Artifact
 
@@ -385,6 +409,7 @@ a checksum (SHA1) of the content
 
 * <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
 * <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_JibTask, JibTask>>
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 * <<#_camel_apache_org_v1_S2iTask, S2iTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
@@ -1368,6 +1393,37 @@ the value to assign to the configuration (syntax may vary depending on the `Type
 
 |===
 
+[#_camel_apache_org_v1_Container]
+=== Container
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PluginConfiguration, PluginConfiguration>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`entrypoint` +
+string
+|
+
+
+
+
+|`args` +
+*xref:#_camel_apache_org_v1_Args[Args]*
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_DataSpec]
 === DataSpec
 
@@ -1850,6 +1906,37 @@ string
 
 |===
 
+[#_camel_apache_org_v1_ExtraDirectories]
+=== ExtraDirectories
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PluginConfiguration, PluginConfiguration>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`paths>path` +
+*xref:#_camel_apache_org_v1_Path[[\]Path]*
+|
+
+
+
+
+|`permissions>permission` +
+*xref:#_camel_apache_org_v1_Permission[[\]Permission]*
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_Failure]
 === Failure
 
@@ -1923,6 +2010,37 @@ maximum number of attempts
 *(Optional)*
 
 time of the attempt execution
+
+
+|===
+
+[#_camel_apache_org_v1_Filter]
+=== Filter
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PluginExtensionConfiguration, PluginExtensionConfiguration>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`glob` +
+string
+|
+
+
+
+
+|`toLayer` +
+string
+|
+
+
+
 
 
 |===
@@ -3420,6 +3538,37 @@ string
 JSONSchemaURL represents a schema url.
 
 
+[#_camel_apache_org_v1_JibTask]
+=== JibTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+JibTask is used to configure Jib
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_KameletCondition]
 === KameletCondition
 
@@ -3893,6 +4042,75 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 
 |===
 
+[#_camel_apache_org_v1_Path]
+=== Path
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_ExtraDirectories, ExtraDirectories>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`from` +
+string
+|
+
+
+
+
+|`into` +
+string
+|
+
+
+
+
+|`excludes>exclude` +
+[]string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_Permission]
+=== Permission
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_ExtraDirectories, ExtraDirectories>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`file` +
+string
+|
+
+
+
+
+|`mode` +
+string
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_PipeCondition]
 === PipeCondition
 
@@ -4097,6 +4315,133 @@ Selector allows to identify pods belonging to the pipe
 
 |===
 
+[#_camel_apache_org_v1_PluginConfiguration]
+=== PluginConfiguration
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`container` +
+*xref:#_camel_apache_org_v1_Container[Container]*
+|
+
+
+
+
+|`allowInsecureRegistries` +
+string
+|
+
+
+
+
+|`extraDirectories` +
+*xref:#_camel_apache_org_v1_ExtraDirectories[ExtraDirectories]*
+|
+
+
+
+
+|`pluginExtensions` +
+*xref:#_camel_apache_org_v1_PluginExtensions[PluginExtensions]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_PluginExtension]
+=== PluginExtension
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PluginExtensions, PluginExtensions>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`implementation` +
+string
+|
+
+
+
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_PluginExtensionConfiguration[PluginExtensionConfiguration]*
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_PluginExtensionConfiguration]
+=== PluginExtensionConfiguration
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PluginExtension, PluginExtension>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`filters>Filter` +
+*xref:#_camel_apache_org_v1_Filter[[\]Filter]*
+|
+
+
+
+
+|`_implementation` +
+string
+|
+
+
+
+
+
+|===
+
+[#_camel_apache_org_v1_PluginExtensions]
+=== PluginExtensions
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_PluginConfiguration, PluginConfiguration>>
+
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`pluginExtension` +
+*xref:#_camel_apache_org_v1_PluginExtension[PluginExtension]*
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_PluginProperties]
 === PluginProperties(`map[string]github.com/apache/camel-k/v2/pkg/apis/camel/v1.StringOrProperties` alias)
 
@@ -4277,6 +4622,7 @@ the specification
 *Appears on:*
 
 * <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
+* <<#_camel_apache_org_v1_JibTask, JibTask>>
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
 
@@ -4835,6 +5181,13 @@ a SpectrumTask, for Spectrum strategy
 
 
 a S2iTask, for S2I strategy
+
+|`jib` +
+*xref:#_camel_apache_org_v1_JibTask[JibTask]*
+|
+
+
+a JibTask, for Jib strategy
 
 |`custom` +
 *xref:#_camel_apache_org_v1_UserTask[UserTask]*

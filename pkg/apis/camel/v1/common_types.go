@@ -302,6 +302,17 @@ type ValueSource struct {
 	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
 }
 
+// String returns a string representation of ValueSource
+func (o *ValueSource) String() string {
+	text := ""
+	if o.ConfigMapKeyRef != nil {
+		text = "configmap:" + o.ConfigMapKeyRef.Name + "/" + o.ConfigMapKeyRef.Key
+	} else if o.SecretKeyRef != nil {
+		text = "secret:" + o.SecretKeyRef.Name + "/" + o.SecretKeyRef.Key
+	}
+	return text
+}
+
 // RuntimeSpec represents the configuration for the Java runtime in charge to execute the Camel application
 type RuntimeSpec struct {
 	// Camel K Runtime version
