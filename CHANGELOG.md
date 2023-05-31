@@ -4,12 +4,24 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.12.1...HEAD)
 
+**Closed issues:**
+
+- SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
+- Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
+
 **Merged pull requests:**
 
+- \[Github Actions\] Periodic Sync Camel K SBOM [\#4436](https://github.com/apache/camel-k/pull/4436) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): bump knative.dev/eventing from 0.37.0 to 0.37.1 [\#4434](https://github.com/apache/camel-k/pull/4434) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/spf13/viper from 1.15.0 to 1.16.0 [\#4433](https://github.com/apache/camel-k/pull/4433) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/stretchr/testify from 1.8.3 to 1.8.4 [\#4432](https://github.com/apache/camel-k/pull/4432) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): remove deps and unused CLIs [\#4428](https://github.com/apache/camel-k/pull/4428) ([squakez](https://github.com/squakez))
+- chore\(deps\): remove old replacements [\#4427](https://github.com/apache/camel-k/pull/4427) ([squakez](https://github.com/squakez))
 - Removed coverage badge 3rd party dependency [\#4423](https://github.com/apache/camel-k/pull/4423) ([realMartinez](https://github.com/realMartinez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.17 to 0.6.18 [\#4422](https://github.com/apache/camel-k/pull/4422) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): release doc polishing [\#4421](https://github.com/apache/camel-k/pull/4421) ([squakez](https://github.com/squakez))
 - chore: more archived deps removals [\#4419](https://github.com/apache/camel-k/pull/4419) ([squakez](https://github.com/squakez))
+- Fix some OLM tests recently broken [\#4418](https://github.com/apache/camel-k/pull/4418) ([gansheer](https://github.com/gansheer))
 - feat\(core\): Support S2I for builder image generation [\#4417](https://github.com/apache/camel-k/pull/4417) ([gansheer](https://github.com/gansheer))
 - feat\(ci\): publish arm64 architecture [\#4416](https://github.com/apache/camel-k/pull/4416) ([squakez](https://github.com/squakez))
 - fix\(trait\): minor lint [\#4415](https://github.com/apache/camel-k/pull/4415) ([squakez](https://github.com/squakez))
