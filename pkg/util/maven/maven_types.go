@@ -37,11 +37,12 @@ type Build struct {
 }
 
 type Plugin struct {
-	GroupID      string       `xml:"groupId"`
-	ArtifactID   string       `xml:"artifactId"`
-	Version      string       `xml:"version,omitempty"`
-	Executions   []Execution  `xml:"executions>execution,omitempty"`
-	Dependencies []Dependency `xml:"dependencies>dependency,omitempty"`
+	GroupID       string                 `xml:"groupId"`
+	ArtifactID    string                 `xml:"artifactId"`
+	Version       string                 `xml:"version,omitempty"`
+	Executions    []Execution            `xml:"executions>execution,omitempty"`
+	Dependencies  []Dependency           `xml:"dependencies>dependency,omitempty"`
+	Configuration v1.PluginConfiguration `xml:"configuration,omitempty"`
 }
 
 type Execution struct {

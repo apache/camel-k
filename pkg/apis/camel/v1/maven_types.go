@@ -103,3 +103,54 @@ type StringOrProperties struct {
 
 type Properties map[string]string
 type PluginProperties map[string]StringOrProperties
+
+type PluginConfiguration struct {
+	Container               Container        `xml:"container" json:"container"`
+	AllowInsecureRegistries string           `xml:"allowInsecureRegistries" json:"allowInsecureRegistries"`
+	ExtraDirectories        ExtraDirectories `xml:"extraDirectories" json:"extraDirectories"`
+	PluginExtensions        PluginExtensions `xml:"pluginExtensions" json:"pluginExtensions"`
+}
+
+type Container struct {
+	Entrypoint string `xml:"entrypoint" json:"entrypoint"`
+	Args       Args   `xml:"args" json:"args"`
+}
+
+type Args struct {
+	Arg string `xml:"arg" json:"arg"`
+}
+
+type ExtraDirectories struct {
+	Paths Paths `xml:"paths" json:"paths"`
+}
+
+type Paths struct {
+	Path Path `xml:"path" json:"path"`
+}
+
+type Path struct {
+	From string `xml:"from" json:"from"`
+	Into string `xml:"into" json:"into"`
+}
+
+type PluginExtensions struct {
+	PluginExtension PluginExtension `xml:"pluginExtension" json:"pluginExtension"`
+}
+
+type PluginExtension struct {
+	Implementation string                       `xml:"implementation" json:"implementation"`
+	Configuration  PluginExtensionConfiguration `xml:"configuration" json:"configuration"`
+}
+
+type PluginExtensionConfiguration struct {
+	Filters        Filters `xml:"filters" json:"filters"`
+	Implementation string  `xml:"implementation,attr" json:"_implementation"`
+}
+
+type Filters struct {
+	Filter Filter `xml:"filter" json:"filter"`
+}
+
+type Filter struct {
+	Glob string `xml:"glob" json:"glob"`
+}

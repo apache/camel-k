@@ -142,6 +142,11 @@ func (c *Command) Do(ctx context.Context) error {
 
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
+	// generate maven file
+	if err := generateMavenContext(c.context, cmd.Args); err != nil {
+		return err
+	}
+
 	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
 }
 
@@ -237,6 +242,11 @@ func generateProjectStructure(context Context, project Project) error {
 	}
 
 	return nil
+}
+
+// Create a MAVEN_CONTEXT file containing all arguments for a maven command
+func generateMavenContext(context Context, args []string) error {
+	return util.WriteToFile(filepath.Join(context.Path, "MAVEN_CONTEXT"), strings.Join(args, " "))
 }
 
 // We expect a maven wrapper under /usr/share/maven/mvnw.

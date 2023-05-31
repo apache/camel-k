@@ -62,6 +62,12 @@ func (b *Build) Task(task v1.Task) Task {
 			build: b.build,
 			task:  task.S2i,
 		}
+	case task.Jib != nil:
+		return &jibTask{
+			c:     b.builder.client,
+			build: b.build,
+			task:  task.Jib,
+		}
 	}
 
 	return &emptyTask{
@@ -137,6 +143,12 @@ func (b *Build) TaskByName(name string) Task {
 				c:     b.builder.client,
 				build: b.build,
 				task:  task.S2i,
+			}
+		case task.Jib != nil && task.Jib.Name == name:
+			return &jibTask{
+				c:     b.builder.client,
+				build: b.build,
+				task:  task.Jib,
 			}
 		}
 	}

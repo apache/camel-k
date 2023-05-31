@@ -634,6 +634,43 @@ spec:
                           description: name of the task
                           type: string
                       type: object
+                    jib:
+                      description: a JibTask, for Jib strategy
+                      properties:
+                        baseImage:
+                          description: base image layer
+                          type: string
+                        contextDir:
+                          description: can be useful to share info with other tasks
+                          type: string
+                        image:
+                          description: final image name
+                          type: string
+                        name:
+                          description: name of the task
+                          type: string
+                        registry:
+                          description: where to publish the final image
+                          properties:
+                            address:
+                              description: the URI to access
+                              type: string
+                            ca:
+                              description: the configmap which stores the Certificate
+                                Authority
+                              type: string
+                            insecure:
+                              description: if the container registry is insecure (ie,
+                                http only)
+                              type: boolean
+                            organization:
+                              description: the registry organization
+                              type: string
+                            secret:
+                              description: the secret where credentials are stored
+                              type: string
+                          type: object
+                      type: object
                     kaniko:
                       description: a KanikoTask, for Kaniko strategy
                       properties:

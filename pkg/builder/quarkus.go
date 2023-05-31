@@ -206,6 +206,48 @@ func GenerateQuarkusProjectCommon(runtimeVersion string, quarkusVersion string, 
 				},
 			},
 		},
+		maven.Plugin{
+			GroupID:    "com.google.cloud.tools",
+			ArtifactID: "jib-maven-plugin",
+			Version:    "3.3.1",
+			Dependencies: []maven.Dependency{
+				{
+					GroupID:    "com.google.cloud.tools",
+					ArtifactID: "jib-layer-filter-extension-maven",
+					Version:    "0.3.0",
+				},
+			},
+			Configuration: v1.PluginConfiguration{
+				Container: v1.Container{
+					Entrypoint: "INHERIT",
+					Args: v1.Args{
+						Arg: "jshell",
+					},
+				},
+				AllowInsecureRegistries: "true",
+				ExtraDirectories: v1.ExtraDirectories{
+					Paths: v1.Paths{
+						Path: v1.Path{
+							From: "../context",
+							Into: "/deployments",
+						},
+					},
+				},
+				PluginExtensions: v1.PluginExtensions{
+					PluginExtension: v1.PluginExtension{
+						Implementation: "com.google.cloud.tools.jib.maven.extension.layerfilter.JibLayerFilterExtension",
+						Configuration: v1.PluginExtensionConfiguration{
+							Implementation: "com.google.cloud.tools.jib.maven.extension.layerfilter.Configuration",
+							Filters: v1.Filters{
+								Filter: v1.Filter{
+									Glob: "/app/**",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	)
 
 	return p
