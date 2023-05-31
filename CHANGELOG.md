@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v1.12.1...HEAD)
+
+**Closed issues:**
+
+- SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
+- Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
+
 ## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-05-29)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.12.1...v1.12.1)
