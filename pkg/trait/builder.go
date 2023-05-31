@@ -28,6 +28,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/jib"
 	mvn "github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
@@ -120,6 +121,18 @@ func (t *builderTrait) Apply(e *Environment) error {
 			},
 		}})
 
+	case v1.IntegrationPlatformBuildPublishStrategyJib:
+		pipelineTasks = append(pipelineTasks, v1.Task{Jib: &v1.JibTask{
+			BaseTask: v1.BaseTask{
+				Name: "jib",
+			},
+			PublishTask: v1.PublishTask{
+				BaseImage: e.Platform.Status.Build.BaseImage,
+				Image:     getImageName(e),
+				Registry:  e.Platform.Status.Build.Registry,
+			},
+		}})
+
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
 			BaseTask: v1.BaseTask{
@@ -181,6 +194,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			ExecutorImage: executorImage,
 		}})
 	}
+
 	// add local pipeline tasks to env pipeline
 	e.Pipeline = append(e.Pipeline, pipelineTasks...)
 	return nil
@@ -284,12 +298,18 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		}
 	}
 
+	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
+		if err := jib.CreateProfileConfigmap(e.Ctx, e.Client, e.IntegrationKit); err != nil {
+			return nil, fmt.Errorf("could not create default maven jib profile: %w. ", err)
+		}
+		t.MavenProfiles = append(t.MavenProfiles, "configmap:"+e.IntegrationKit.Name+"-publish-jib-profile/profile.xml")
+	}
+
 	// User provides a maven profile
 	if t.MavenProfiles != nil {
 		mavenProfiles := make([]v1.ValueSource, 0)
 		for _, v := range t.MavenProfiles {
 			if v != "" {
-				// TODO parametrize message with input
 				mavenProfile, err := v1.DecodeValueSource(v, "profile.xml",
 					"illegal profile definition, syntax: configmap|secret:resource-name[/profile path]")
 				if err != nil {
@@ -300,10 +320,6 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		}
 		task.Maven.Profiles = mavenProfiles
 	}
-	// add jib profile
-	/*if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
-		t.L.Info("GFO - You should add jib profile")
-	}*/
 
 	steps := make([]builder.Step, 0)
 	steps = append(steps, builder.Project.CommonSteps...)

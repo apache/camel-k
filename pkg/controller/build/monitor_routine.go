@@ -148,6 +148,13 @@ tasks:
 					break tasks
 				}
 				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
+
+			} else if t := task.Jib; t != nil && t.ContextDir == "" {
+				if buildDir == "" {
+					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+					break tasks
+				}
+				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			}
 
 			// Execute the task

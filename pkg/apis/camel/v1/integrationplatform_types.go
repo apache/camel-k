@@ -165,6 +165,9 @@ const (
 	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
 	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
+	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
+	// in order to push the incremental images to the image repository.
+	IntegrationPlatformBuildPublishStrategyJib IntegrationPlatformBuildPublishStrategy = "Jib"
 )
 
 // IntegrationPlatformBuildPublishStrategies the list of all available publish strategies
@@ -173,6 +176,7 @@ var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublis
 	IntegrationPlatformBuildPublishStrategyKaniko,
 	IntegrationPlatformBuildPublishStrategyS2I,
 	IntegrationPlatformBuildPublishStrategySpectrum,
+	IntegrationPlatformBuildPublishStrategyJib,
 }
 
 // IntegrationPlatformPhase is the phase of an IntegrationPlatform

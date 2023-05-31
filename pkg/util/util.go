@@ -236,9 +236,18 @@ func RandomInt63() int64 {
 	return randomSourceUTC.Int63()
 }
 
+func EncodeXMLWithoutHeader(content interface{}) ([]byte, error) {
+	return encodeXML(content, "")
+}
+
 func EncodeXML(content interface{}) ([]byte, error) {
+
+	return encodeXML(content, xml.Header)
+}
+
+func encodeXML(content interface{}, xmlHeader string) ([]byte, error) {
 	w := &bytes.Buffer{}
-	w.WriteString(xml.Header)
+	w.WriteString(xmlHeader)
 
 	e := xml.NewEncoder(w)
 	e.Indent("", "  ")

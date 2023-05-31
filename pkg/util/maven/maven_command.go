@@ -142,7 +142,12 @@ func (c *Command) Do(ctx context.Context) error {
 
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
-	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
+	// generate maven file
+	if err := generateMavenContext(c.context.Path, args); err != nil {
+		return err
+	}
+
+	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
 }
 
 func NewContext(buildDir string) Context {
@@ -243,7 +248,7 @@ func generateProjectStructure(context Context, project Project) error {
 func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
 	cmd.Dir = c.context.Path
-	return util.RunAndLog(ctx, cmd, mavenLogHandler, mavenLogHandler)
+	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
 }
 
 // ParseGAV decodes the provided Maven GAV into the corresponding Dependency.
@@ -278,4 +283,17 @@ func ParseGAV(gav string) (Dependency, error) {
 	}
 
 	return dep, nil
+}
+
+// Create a MAVEN_CONTEXT file containing all arguments for a maven command.
+func generateMavenContext(path string, args []string) error {
+	// TODO refactor maven code to avoid creating a file to pass command args
+	commandArgs := make([]string, 0)
+	for _, arg := range args {
+		if arg != "package" && len(strings.TrimSpace(arg)) != 0 {
+			commandArgs = append(commandArgs, strings.TrimSpace(arg))
+		}
+	}
+
+	return util.WriteToFile(filepath.Join(path, "MAVEN_CONTEXT"), strings.Join(commandArgs, " "))
 }

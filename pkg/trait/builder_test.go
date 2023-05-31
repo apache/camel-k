@@ -126,6 +126,9 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseBuildSubmitted,
 			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-kit",
+			},
 		},
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
@@ -290,5 +293,25 @@ func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
 	err := builderTrait.Apply(env)
 
 	assert.NotNil(t, err)
+	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
+	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	assert.Contains(t, env.IntegrationKit.Status.Conditions[0].Message, "fakeprofile")
+}
 
+func TestMavenBuilderTraitJib(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+
+	assert.Equal(t, v1.ValueSource{
+		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "my-kit-publish-jib-profile",
+			},
+			Key: "profile.xml",
+		},
+	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[0])
 }

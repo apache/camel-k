@@ -106,3 +106,54 @@ type StringOrProperties struct {
 
 type Properties map[string]string
 type PluginProperties map[string]StringOrProperties
+
+type PluginConfiguration struct {
+	Container               Container        `xml:"container" json:"container"`
+	AllowInsecureRegistries string           `xml:"allowInsecureRegistries" json:"allowInsecureRegistries"`
+	ExtraDirectories        ExtraDirectories `xml:"extraDirectories" json:"extraDirectories"`
+	PluginExtensions        PluginExtensions `xml:"pluginExtensions" json:"pluginExtensions"`
+}
+
+type Container struct {
+	Entrypoint string `xml:"entrypoint" json:"entrypoint"`
+	Args       Args   `xml:"args" json:"args"`
+}
+
+type Args struct {
+	Arg string `xml:"arg" json:"arg"`
+}
+
+type ExtraDirectories struct {
+	Paths       []Path       `xml:"paths>path" json:"paths>path"`
+	Permissions []Permission `xml:"permissions>permission,omitempty" json:"permissions>permission,omitempty"`
+}
+
+type Path struct {
+	From     string   `xml:"from" json:"from"`
+	Into     string   `xml:"into" json:"into"`
+	Excludes []string `xml:"excludes>exclude,omitempty" json:"excludes>exclude,omitempty"`
+}
+
+type Permission struct {
+	File string `xml:"file" json:"file"`
+	Mode string `xml:"mode" json:"mode"`
+}
+
+type PluginExtensions struct {
+	PluginExtension PluginExtension `xml:"pluginExtension" json:"pluginExtension"`
+}
+
+type PluginExtension struct {
+	Implementation string                       `xml:"implementation" json:"implementation"`
+	Configuration  PluginExtensionConfiguration `xml:"configuration" json:"configuration"`
+}
+
+type PluginExtensionConfiguration struct {
+	Filters        []Filter `xml:"filters>Filter" json:"filters>Filter"`
+	Implementation string   `xml:"implementation,attr" json:"_implementation"`
+}
+
+type Filter struct {
+	Glob    string `xml:"glob" json:"glob"`
+	ToLayer string `xml:"toLayer,omitempty" json:"toLayer,omitempty"`
+}

@@ -48,7 +48,7 @@ const (
 
 var mavenLogger = log.WithName("maven.build")
 
-func mavenLogHandler(s string) string {
+func MavenLogHandler(s string) string {
 	mavenLog, parseError := parseLog(s)
 	if parseError == nil {
 		normalizeLog(mavenLog)
