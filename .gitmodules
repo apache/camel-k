@@ -4,7 +4,6 @@
 [submodule ".github/actions/changelog"]
 	path = .github/actions/changelog
 	url = https://github.com/CharMixer/auto-changelog-action
-[submodule ".github/actions/action-dotenv-to-setenv"]
-	path = .github/actions/action-dotenv-to-setenv
-        url = https://github.com/c-py/action-dotenv-to-setenv.git
-	branch = tags/v3
+[submodule ".github/actions/gh-go-mod-generate-sbom"]
+	path = .github/actions/gh-go-mod-generate-sbom
+	url = https://github.com/CycloneDX/gh-gomod-generate-sbom/
