@@ -55,6 +55,18 @@ runs:
       run: |
         make update-default-camel generate codegen update-docs
         git add -A && git commit -m 'chore: nightly resource refresh' && echo "refresh=1" >> $GITHUB_ENV || echo "No changes to make update-docs"
+    - name: Generate SBOM
+      uses: ./.github/actions/gh-go-mod-generate-sbom
+      with:
+        version: v1
+        args: mod -licenses -json -output camel-k-sbom/camel-k-sbom.json
+    - name: Commit SBOM
+      shell: bash
+      env:
+        CI_USER: "github-actions[bot]"
+        CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+      run: |
+        git add camel-k-sbom/camel-k-sbom.json && git commit -m 'Periodic Sync of Camel K Main Branch for SBOM Generation' 
     - name: Push changes
       shell: bash
       if: env.changelog == 1 || env.refresh == 1
