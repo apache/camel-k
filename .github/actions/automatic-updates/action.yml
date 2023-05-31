@@ -60,10 +60,10 @@ runs:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
       run: |
-        git add camel-k-sbom/camel-k-sbom.json && git commit -m 'Periodic Sync of Camel K Main Branch for SBOM Generation' 
+        git add camel-k-sbom/camel-k-sbom.json && git commit -m 'Periodic Sync of Camel K Main Branch for SBOM Generation' && echo "sbom=1" >> $GITHUB_ENV || echo "No changes to SBOM"
     - name: Push changes
       shell: bash
-      if: env.changelog == 1 || env.refresh == 1
+      if: env.changelog == 1 || env.refresh == 1 || env.sbom == 1
       env:
         CI_USER: "github-actions[bot]"
         CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
