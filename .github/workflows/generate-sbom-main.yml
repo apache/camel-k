@@ -17,11 +17,6 @@
 
 name: Generate SBOM (Camel K)
 
-on:
-  schedule:
-  - cron: '30 19 * * 0'
-  workflow_dispatch:
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -50,6 +45,8 @@ on:
       - 'KEYS'
       - 'LICENSE'
       - 'NOTICE'
+  schedule:
+  - cron: '30 19 * * 0'
   workflow_dispatch:
     inputs:
 
