@@ -21,30 +21,6 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 on:
-  pull_request:
-    branches:
-      - main
-      - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
-  push:
-    branches:
-      - main
-      - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'proposals/**'
-      - '**.md'
-      - '**.adoc'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
   schedule:
   - cron: '30 19 * * 0'
   workflow_dispatch:
