@@ -28,7 +28,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/google/go-github/v32/github"
+	"github.com/google/go-github/v52/github"
 	"golang.org/x/oauth2"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
