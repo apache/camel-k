@@ -72,7 +72,7 @@ concurrency:
 
 jobs:
   common-it-single-operator-installation:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -95,7 +95,7 @@ jobs:
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
 
   common-it-custom-operator-installation:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code

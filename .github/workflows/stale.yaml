@@ -23,7 +23,7 @@ on:
 
 jobs:
   stale:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/stale@v3
       with:
@@ -34,14 +34,14 @@ jobs:
         stale-issue-label: status/stale
         exempt-issue-labels: 'status/never-stale,kind/bug'
         stale-issue-message: |
-          This issue has been automatically marked as stale due to 90 days of inactivity. 
+          This issue has been automatically marked as stale due to 90 days of inactivity.
           It will be closed if no further activity occurs within 15 days.
           If you think that’s incorrect or the issue should never stale, please simply write any comment.
           Thanks for your contributions!
         stale-pr-label: status/stale
         exempt-pr-labels: status/never-stale
         stale-pr-message: |
-          This PR has been automatically marked as stale due to 90 days of inactivity. 
+          This PR has been automatically marked as stale due to 90 days of inactivity.
           It will be closed if no further activity occurs within 15 days.
           If you think that’s incorrect or the issue should never stale, please simply write any comment.
           Thanks for your contributions!
