@@ -142,8 +142,14 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 	var actions []Action
 
+	// build monitor with strictly sequential builds, only one single build running at a time
 	buildMonitor := Monitor{
-		maxRunningBuilds: instance.Spec.MaxRunningBuilds,
+		maxRunningBuilds: 1,
+	}
+
+	if instance.Spec.MaxRunningBuilds > 0 {
+		// set max running builds according to build spec to allow parallel builds for this operator
+		buildMonitor.maxRunningBuilds = instance.Spec.MaxRunningBuilds
 	}
 
 	switch instance.Spec.Strategy {
