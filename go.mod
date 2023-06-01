@@ -7,7 +7,7 @@ require (
 	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
 	github.com/apache/camel-k/v2/pkg/client/camel v0.0.0
 	github.com/apache/camel-k/v2/pkg/kamelet/repository v0.0.0
-	github.com/container-tools/spectrum v0.6.18
+	github.com/container-tools/spectrum v0.6.19
 	github.com/evanphx/json-patch v5.6.0+incompatible
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.2.4
