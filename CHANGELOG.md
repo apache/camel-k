@@ -11,7 +11,13 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): use ubuntu-latest [\#4445](https://github.com/apache/camel-k/pull/4445) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 [\#4442](https://github.com/apache/camel-k/pull/4442) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 in /pkg/kamelet/repository [\#4441](https://github.com/apache/camel-k/pull/4441) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.18 to 0.6.19 [\#4439](https://github.com/apache/camel-k/pull/4439) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/google/go-containerregistry from 0.13.0 to 0.15.2 [\#4438](https://github.com/apache/camel-k/pull/4438) ([dependabot[bot]](https://github.com/apps/dependabot))
 - \[Github Actions\] Periodic Sync Camel K SBOM [\#4436](https://github.com/apache/camel-k/pull/4436) ([github-actions[bot]](https://github.com/apps/github-actions))
+- chore\(deps\): update github.com/google/go-github/v52 [\#4435](https://github.com/apache/camel-k/pull/4435) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/eventing from 0.37.0 to 0.37.1 [\#4434](https://github.com/apache/camel-k/pull/4434) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/spf13/viper from 1.15.0 to 1.16.0 [\#4433](https://github.com/apache/camel-k/pull/4433) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/stretchr/testify from 1.8.3 to 1.8.4 [\#4432](https://github.com/apache/camel-k/pull/4432) ([dependabot[bot]](https://github.com/apps/dependabot))
