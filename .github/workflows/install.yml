@@ -87,7 +87,7 @@ jobs:
           -q "${{ github.event.inputs.log-level }}" \
           -t "${{ github.event.inputs.test-filters }}"
 
-    - name: Install and upgrade test (OLM)
+    - name: Install (Non OLM)
       uses: ./.github/actions/e2e-install
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}

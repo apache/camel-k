@@ -52,7 +52,18 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 
 		// Should both install the CRDs and kamel in the given namespace
-		Expect(Kamel("install", "-n", ns, "--olm=false", "--force", "--base-image", defaults.BaseImage()).Execute()).To(Succeed())
+		Expect(Kamel(
+			"install",
+			"-n",
+			ns,
+			"--olm=false",
+			"--force",
+			"--base-image",
+			defaults.BaseImage(),
+			// TODO: remove GOMAXPROCS when https://github.com/apache/camel-k/issues/4312 is closed
+			"--operator-env-vars",
+			"GOMAXPROCS=1",
+		).Execute()).To(Succeed())
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
