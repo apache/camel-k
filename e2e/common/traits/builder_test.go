@@ -37,9 +37,8 @@ import (
 func TestBuilderTrait(t *testing.T) {
 	RegisterTestingT(t)
 
-	name := "java"
-
 	t.Run("Run build strategy routine", func(t *testing.T) {
+		name := "java"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.strategy=routine").Execute()).To(Succeed())
@@ -51,6 +50,33 @@ func TestBuilderTrait(t *testing.T) {
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
+		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategySequential))
+		// Default resource CPU Check
+		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(ns, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(ns, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
+
+		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(BeNil())
+
+		// We need to remove the kit as well
+		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
+	})
+
+	t.Run("Run build order strategy fifo", func(t *testing.T) {
+		name := "java-fifo-strategy"
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+			"-t", "builder.order-strategy=fifo").Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+		integrationKitName := IntegrationKit(ns, name)()
+		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
+		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
+		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyFIFO))
 		// Default resource CPU Check
 		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
 		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
@@ -64,6 +90,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run build resources configuration", func(t *testing.T) {
+		name := "java-resource-config"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.request-cpu=500m",
@@ -81,6 +108,7 @@ func TestBuilderTrait(t *testing.T) {
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 
 		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyPod))
+		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategySequential))
 		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal("500m"))
 		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal("1000m"))
 		Eventually(BuildConfig(ns, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal("2Gi"))
@@ -98,6 +126,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run custom pipeline task", func(t *testing.T) {
+		name := "java-pipeline"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.tasks=custom1;alpine;tree",
@@ -141,8 +170,8 @@ func TestBuilderTrait(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
-	name = "java-error"
 	t.Run("Run custom pipeline task error", func(t *testing.T) {
+		name := "java-error"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.tasks=custom1;alpine;cat missingfile.txt",

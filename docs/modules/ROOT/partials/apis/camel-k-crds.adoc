@@ -533,6 +533,13 @@ The namespace where to run the builder Pod (must be the same of the operator in 
 
 the strategy to adopt
 
+|`orderStrategy` +
+*xref:#_camel_apache_org_v1_BuildOrderStrategy[BuildOrderStrategy]*
+|
+
+
+the build order strategy to adopt
+
 |`requestCPU` +
 string
 |
@@ -563,6 +570,16 @@ The maximum amount of memory required. Only used for `pod` strategy
 
 
 |===
+
+[#_camel_apache_org_v1_BuildOrderStrategy]
+=== BuildOrderStrategy(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_BuildConfiguration, BuildConfiguration>>
+
+BuildOrderStrategy specifies how builds are reconciled and queued.
+
 
 [#_camel_apache_org_v1_BuildPhase]
 === BuildPhase(`string` alias)
@@ -5389,6 +5406,13 @@ string
 
 
 The strategy to use, either `pod` or `routine` (default routine)
+
+|`orderStrategy` +
+string
+|
+
+
+The build order strategy to use, either `fifo` or `sequential` (default sequential)
 
 |`requestCPU` +
 string

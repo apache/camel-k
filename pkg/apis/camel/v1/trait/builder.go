@@ -29,6 +29,8 @@ type BuilderTrait struct {
 	Properties []string `property:"properties" json:"properties,omitempty"`
 	// The strategy to use, either `pod` or `routine` (default routine)
 	Strategy string `property:"strategy" json:"strategy,omitempty"`
+	// The build order strategy to use, either `fifo` or `sequential` (default sequential)
+	OrderStrategy string `property:"order-strategy" json:"orderStrategy,omitempty"`
 	// When using `pod` strategy, the minimum amount of CPU required by the pod builder.
 	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
 	// When using `pod` strategy, the minimum amount of memory required by the pod builder.

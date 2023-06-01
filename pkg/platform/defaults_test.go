@@ -28,8 +28,34 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
+
+func TestIntegrationPlatformDefaults(t *testing.T) {
+	ip := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      DefaultPlatformName,
+			Namespace: "ns",
+		},
+	}
+
+	c, err := test.NewFakeClient(&ip)
+	assert.Nil(t, err)
+
+	err = ConfigureDefaults(context.TODO(), c, &ip, false)
+	assert.Nil(t, err)
+
+	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
+	assert.Equal(t, v1.TraitProfile(""), ip.Status.Profile)
+	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
+	assert.Equal(t, v1.BuildOrderStrategySequential, ip.Status.Build.BuildConfiguration.OrderStrategy)
+	assert.Equal(t, defaults.BaseImage(), ip.Status.Build.BaseImage)
+	assert.Equal(t, defaults.LocalRepository, ip.Status.Build.Maven.LocalRepository)
+	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
+	assert.Equal(t, 3, len(ip.Status.Build.Maven.CLIOptions))
+	assert.NotNil(t, ip.Status.Traits)
+}
 
 func TestApplyGlobalPlatformSpec(t *testing.T) {
 	global := v1.IntegrationPlatform{
@@ -40,7 +66,8 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
 				BuildConfiguration: v1.BuildConfiguration{
-					Strategy: v1.BuildStrategyRoutine,
+					Strategy:      v1.BuildStrategyRoutine,
+					OrderStrategy: v1.BuildOrderStrategyFIFO,
 				},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
@@ -83,6 +110,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPlatformClusterOpenShift, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
+	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
@@ -187,7 +215,8 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
 				BuildConfiguration: v1.BuildConfiguration{
-					Strategy: v1.BuildStrategyRoutine,
+					Strategy:      v1.BuildStrategyRoutine,
+					OrderStrategy: v1.BuildOrderStrategySequential,
 				},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
@@ -224,7 +253,8 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
 				BuildConfiguration: v1.BuildConfiguration{
-					Strategy: v1.BuildStrategyPod,
+					Strategy:      v1.BuildStrategyPod,
+					OrderStrategy: v1.BuildOrderStrategyFIFO,
 				},
 				MaxRunningBuilds: 1,
 				Maven: v1.MavenSpec{
@@ -251,6 +281,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
+	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.True(t, ip.Status.Build.MaxRunningBuilds == 1)
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)

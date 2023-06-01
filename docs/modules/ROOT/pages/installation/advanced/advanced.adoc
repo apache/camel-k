@@ -26,6 +26,7 @@ We have several configuration used to influence the building of an integration:
 --build-publish-strategy string               Set the build publish strategy
 --build-publish-strategy-option stringArray   Add a build publish strategy option, as <name=value>
 --build-strategy string                       Set the build strategy
+--build-order-strategy string                 Set the build order strategy
 --build-timeout string                        Set how long the build process can last
 ```
 A very important set of configuration you can provide is related to Maven:

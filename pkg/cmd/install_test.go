@@ -107,6 +107,13 @@ func TestInstallBuildStrategyFlag(t *testing.T) {
 	assert.Equal(t, "someString", installCmdOptions.BuildStrategy)
 }
 
+func TestInstallBuildOrderStrategyFlag(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-order-strategy", "someString")
+	assert.Nil(t, err)
+	assert.Equal(t, "someString", installCmdOptions.BuildOrderStrategy)
+}
+
 func TestInstallBuildTimeoutFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-timeout", "10")

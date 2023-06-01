@@ -181,9 +181,10 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		}
 		// The builder trait must define certain resources requirements when we have a native build
 		if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
-			// Force the build to run in a separate Pod
+			// Force the build to run in a separate Pod and strictly sequential
 			t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
 			t.Strategy = string(v1.BuildStrategyPod)
+			t.OrderStrategy = string(v1.BuildOrderStrategySequential)
 			t.RequestCPU = "1000m"
 			t.RequestMemory = "4Gi"
 		}
@@ -198,13 +199,39 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 
 	if t.Strategy != "" {
 		t.L.Infof("User defined build strategy %s", t.Strategy)
-		switch t.Strategy {
-		case string(v1.BuildStrategyPod):
-			buildConfig.Strategy = v1.BuildStrategyPod
-		case string(v1.BuildStrategyRoutine):
-			buildConfig.Strategy = v1.BuildStrategyRoutine
-		default:
-			return nil, fmt.Errorf("must specify either pod or routine build strategy, unknown %s", t.Strategy)
+		found := false
+		for _, s := range v1.BuildStrategies {
+			if string(s) == t.Strategy {
+				found = true
+				buildConfig.Strategy = s
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.BuildStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return nil, fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", t.Strategy, strings.Join(strategies, ", "))
+		}
+	}
+
+	if t.OrderStrategy != "" {
+		t.L.Infof("User defined build order strategy %s", t.OrderStrategy)
+		found := false
+		for _, s := range v1.BuildOrderStrategies {
+			if string(s) == t.OrderStrategy {
+				found = true
+				buildConfig.OrderStrategy = s
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.BuildOrderStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return nil, fmt.Errorf("unknown build order strategy: %s. One of [%s] is expected", t.OrderStrategy, strings.Join(strategies, ", "))
 		}
 	}
 

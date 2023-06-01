@@ -43,6 +43,8 @@ type BuildConfiguration struct {
 	BuilderPodNamespace string `json:"operatorNamespace,omitempty"`
 	// the strategy to adopt
 	Strategy BuildStrategy `property:"strategy" json:"strategy,omitempty"`
+	// the build order strategy to adopt
+	OrderStrategy BuildOrderStrategy `property:"order-strategy" json:"orderStrategy,omitempty"`
 	// The minimum amount of CPU required. Only used for `pod` strategy
 	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
 	// The minimum amount of memory required. Only used for `pod` strategy
@@ -70,12 +72,28 @@ const (
 	// mitigated by the presence of a Maven proxy.
 	// Available for both Quarkus JVM and Native mode.
 	BuildStrategyPod BuildStrategy = "pod"
+
+	// BuildOrderStrategyFIFO performs the builds with first in first out strategy based on the creation timestamp.
+	// The strategy allows builds to run in parallel to each other but oldest builds will be run first.
+	BuildOrderStrategyFIFO BuildOrderStrategy = "fifo"
+	// BuildOrderStrategySequential runs builds strictly sequential so that only one single build per operator namespace is running at a time.
+	BuildOrderStrategySequential BuildOrderStrategy = "sequential"
 )
 
 // BuildStrategies is a list of strategies allowed for the build
 var BuildStrategies = []BuildStrategy{
 	BuildStrategyRoutine,
 	BuildStrategyPod,
+}
+
+// BuildOrderStrategy specifies how builds are reconciled and queued.
+// +kubebuilder:validation:Enum=fifo;sequential
+type BuildOrderStrategy string
+
+// BuildOrderStrategies is a list of order strategies allowed for the build
+var BuildOrderStrategies = []BuildOrderStrategy{
+	BuildOrderStrategyFIFO,
+	BuildOrderStrategySequential,
 }
 
 // ConfigurationSpec represents a generic configuration specification

@@ -107,6 +107,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
 	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
+	cmd.Flags().String("build-order-strategy", "", "Set the build order strategy")
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
 	cmd.Flags().StringArray("build-publish-strategy-option", nil, "Add a build publish strategy option, as <name=value>")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
@@ -181,6 +182,7 @@ type installCmdOptions struct {
 	OperatorImage               string   `mapstructure:"operator-image"`
 	OperatorImagePullPolicy     string   `mapstructure:"operator-image-pull-policy"`
 	BuildStrategy               string   `mapstructure:"build-strategy"`
+	BuildOrderStrategy          string   `mapstructure:"build-order-strategy"`
 	BuildPublishStrategy        string   `mapstructure:"build-publish-strategy"`
 	BuildPublishStrategyOptions []string `mapstructure:"build-publish-strategy-options"`
 	BuildTimeout                string   `mapstructure:"build-timeout"`
@@ -524,6 +526,9 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 	if o.BuildStrategy != "" {
 		platform.Spec.Build.BuildConfiguration.Strategy = v1.BuildStrategy(o.BuildStrategy)
 	}
+	if o.BuildOrderStrategy != "" {
+		platform.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategy(o.BuildOrderStrategy)
+	}
 	if o.BuildPublishStrategy != "" {
 		platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)
 	}
@@ -746,6 +751,23 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 				strategies = append(strategies, string(s))
 			}
 			return fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", o.BuildStrategy, strings.Join(strategies, ", "))
+		}
+	}
+
+	if o.BuildOrderStrategy != "" {
+		found := false
+		for _, s := range v1.BuildOrderStrategies {
+			if string(s) == o.BuildOrderStrategy {
+				found = true
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.BuildOrderStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return fmt.Errorf("unknown build order strategy: %s. One of [%s] is expected", o.BuildOrderStrategy, strings.Join(strategies, ", "))
 		}
 	}
 

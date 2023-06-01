@@ -36,6 +36,15 @@ At the moment the available strategies are:
 - buildStrategy: pod (each build is run in a separate pod, the operator monitors the pod state)
 - buildStrategy: routine (each build is run as a go routine inside the operator pod)
 
+[[build-order-strategy]]
+== Build order strategy
+
+You can choose from different build order strategies. The strategy defines in which order queued builds are run.
+At the moment the available strategies are:
+
+- buildOrderStrategy: sequential (runs builds strictly sequential so that only one single build per operator namespace is running at a time.)
+- buildOrderStrategy: fifo (performs the builds with first in first out strategy based on the creation timestamp. The strategy allows builds to run in parallel to each other but oldest builds will be run first.)
+
 [[build-queue]]
 == Build queues
 
