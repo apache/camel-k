@@ -24,7 +24,7 @@ on:
 
 jobs:
   backport:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Backport
     steps:
       - name: "Checkout camel-k"
