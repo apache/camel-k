@@ -137,8 +137,8 @@ github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:z
 github.com/cockroachdb/datadriven v0.0.0-20200714090401-bf6692d28da5/go.mod h1:h6jFvWxBdQXxjopDMZyH2UVceIRfR84bdzbkoKrsWNo=
 github.com/cockroachdb/errors v1.2.4/go.mod h1:rQD95gz6FARkaKkQXUksEje/d9a6wBJoCr5oaCLELYA=
 github.com/cockroachdb/logtags v0.0.0-20190617123548-eb05cc24525f/go.mod h1:i/u985jwjWRlyHXQbwatDASoW0RMlZ/3i9yJHE2xLkI=
-github.com/container-tools/spectrum v0.6.18 h1:ZS96NC0TlNmLcLirBojoA9ZFPXBgT7+ldMmDXmk7dLA=
-github.com/container-tools/spectrum v0.6.18/go.mod h1:Fold9t93SxS7EcJnamm5NCZeTcVBHJuF2eszzveC5O8=
+github.com/container-tools/spectrum v0.6.19 h1:apWuVAr5lIHMwN+HoKebbVizfBCzU6cSVDsFSV3jyzI=
+github.com/container-tools/spectrum v0.6.19/go.mod h1:G4Z1eSMjjH41baHaIMEMtMuo4sWhwUBrYIlqOTAFMqE=
 github.com/containerd/stargz-snapshotter/estargz v0.14.1 h1:n9M2GDSWM96pyipFTA0DaU+zdtzi3Iwsnj/rIHr1yFM=
 github.com/containerd/stargz-snapshotter/estargz v0.14.1/go.mod h1:uPtMw6ucGJYwImjhxk/oghZmfElF/841u86wReNggNk=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
