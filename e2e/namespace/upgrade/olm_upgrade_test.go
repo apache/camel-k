@@ -79,6 +79,9 @@ func TestOLMAutomaticUpgrade(t *testing.T) {
 			"--olm-source", catalogSourceName,
 			"--olm-source-namespace", ns,
 			"--base-image", defaults.BaseImage(),
+			// TODO: remove GOMAXPROCS when https://github.com/apache/camel-k/issues/4312 is closed
+			"--operator-env-vars",
+			"GOMAXPROCS=1",
 		}
 
 		if prevUpdateChannel != "" {
