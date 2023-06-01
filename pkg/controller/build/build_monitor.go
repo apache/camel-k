@@ -33,7 +33,8 @@ import (
 var runningBuilds sync.Map
 
 type Monitor struct {
-	maxRunningBuilds int32
+	maxRunningBuilds   int32
+	buildOrderStrategy v1.BuildOrderStrategy
 }
 
 func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Build) (bool, error) {
@@ -43,15 +44,15 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 		return true
 	})
 
-	if runningBuildsTotal >= bm.maxRunningBuilds {
-		requestName := build.Name
-		requestNamespace := build.Namespace
-		buildCreator := kubernetes.GetCamelCreator(build)
-		if buildCreator != nil {
-			requestName = buildCreator.Name
-			requestNamespace = buildCreator.Namespace
-		}
+	requestName := build.Name
+	requestNamespace := build.Namespace
+	buildCreator := kubernetes.GetCamelCreator(build)
+	if buildCreator != nil {
+		requestName = buildCreator.Name
+		requestNamespace = buildCreator.Namespace
+	}
 
+	if runningBuildsTotal >= bm.maxRunningBuilds {
 		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "max-running-builds-limit", runningBuildsTotal).
 			ForBuild(build).Infof("Maximum number of running builds (%d) exceeded - the build gets enqueued", runningBuildsTotal)
 
@@ -84,18 +85,22 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 		return false, err
 	}
 
-	// Emulate a serialized working queue to only allow one build to run at a given time.
-	// This is currently necessary for the incremental build to work as expected.
-	// We may want to explicitly manage build priority as opposed to relying on
-	// the reconciliation loop to handle the queuing.
-	for _, b := range builds.Items {
-		if b.Status.Phase == v1.BuildPhasePending || b.Status.Phase == v1.BuildPhaseRunning {
-			// Let's requeue the build in case one is already running
-			return false, nil
-		}
+	var allowed bool
+	switch bm.buildOrderStrategy {
+	case v1.BuildOrderStrategyFIFO:
+		// Check on builds that have been created before the current build and grant precedence if any.
+		allowed = !builds.HasScheduledBuildsBefore(build)
+	case v1.BuildOrderStrategySequential:
+		// Emulate a serialized working queue to only allow one build to run at a given time.
+		// Let's requeue the build in case one is already running
+		allowed = !builds.HasRunningBuilds()
+	default:
+		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "order-strategy", bm.buildOrderStrategy).
+			ForBuild(build).Infof("Unsupported build order strategy (%s) - the build gets enqueued", bm.buildOrderStrategy)
+		allowed = false
 	}
 
-	return true, nil
+	return allowed, nil
 }
 
 func monitorRunningBuild(build *v1.Build) {

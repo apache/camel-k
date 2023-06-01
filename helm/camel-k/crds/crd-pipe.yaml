@@ -6466,6 +6466,10 @@ spec:
                             description: When using `pod` strategy, the maximum amount
                               of memory required by the pod builder.
                             type: string
+                          orderStrategy:
+                            description: The build order strategy to use, either `fifo`
+                              or `sequential` (default sequential)
+                            type: string
                           properties:
                             description: A list of properties to be provided to the
                               build task

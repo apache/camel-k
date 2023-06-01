@@ -201,3 +201,28 @@ func (c BuildCondition) GetReason() string {
 func (c BuildCondition) GetMessage() string {
 	return c.Message
 }
+
+func (bl BuildList) HasRunningBuilds() bool {
+	for _, b := range bl.Items {
+		if b.Status.Phase == BuildPhasePending || b.Status.Phase == BuildPhaseRunning {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (bl BuildList) HasScheduledBuildsBefore(build *Build) bool {
+	for _, b := range bl.Items {
+		if b.Name == build.Name {
+			continue
+		}
+
+		if (b.Status.Phase == BuildPhaseInitialization || b.Status.Phase == BuildPhaseScheduling) &&
+			b.CreationTimestamp.Before(&build.CreationTimestamp) {
+			return true
+		}
+	}
+
+	return false
+}

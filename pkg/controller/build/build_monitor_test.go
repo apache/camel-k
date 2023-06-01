@@ -30,7 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestMonitorBuilds(t *testing.T) {
+func TestMonitorSequentialBuilds(t *testing.T) {
 	testcases := []struct {
 		name     string
 		running  []*v1.Build
@@ -49,7 +49,7 @@ func TestMonitorBuilds(t *testing.T) {
 			name:     "allowNewNativeBuild",
 			running:  []*v1.Build{},
 			finished: []*v1.Build{},
-			build:    newNativeBuild("ns", "my-build"),
+			build:    newNativeBuild("ns", "my-native-build"),
 			allowed:  true,
 		},
 		{
@@ -69,7 +69,7 @@ func TestMonitorBuilds(t *testing.T) {
 				newNativeBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 				newNativeBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed),
 			},
-			build:   newNativeBuild("ns", "my-build"),
+			build:   newNativeBuild("ns", "my-native-build"),
 			allowed: true,
 		},
 		{
@@ -144,7 +144,8 @@ func TestMonitorBuilds(t *testing.T) {
 			assert.Nil(t, err)
 
 			bm := Monitor{
-				maxRunningBuilds: 3,
+				maxRunningBuilds:   3,
+				buildOrderStrategy: v1.BuildOrderStrategySequential,
 			}
 
 			// reset running builds in memory cache
@@ -167,7 +168,8 @@ func TestAllowBuildRequeue(t *testing.T) {
 	assert.Nil(t, err)
 
 	bm := Monitor{
-		maxRunningBuilds: 3,
+		maxRunningBuilds:   3,
+		buildOrderStrategy: v1.BuildOrderStrategySequential,
 	}
 
 	runningBuild := newBuild("some-ns", "my-build-1")
@@ -189,6 +191,165 @@ func TestAllowBuildRequeue(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.True(t, allowed)
+}
+
+func TestMonitorFIFOBuilds(t *testing.T) {
+	testcases := []struct {
+		name    string
+		running []*v1.Build
+		builds  []*v1.Build
+		build   *v1.Build
+		allowed bool
+	}{
+		{
+			name:    "allowNewBuild",
+			running: []*v1.Build{},
+			builds:  []*v1.Build{},
+			build:   newBuild("ns", "my-build"),
+			allowed: true,
+		},
+		{
+			name:    "allowNewNativeBuild",
+			running: []*v1.Build{},
+			builds:  []*v1.Build{},
+			build:   newNativeBuild("ns1", "my-build"),
+			allowed: true,
+		},
+		{
+			name:    "allowNewBuildWhenOthersFinished",
+			running: []*v1.Build{},
+			builds: []*v1.Build{
+				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+				newBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed),
+			},
+			build:   newBuild("ns", "my-build"),
+			allowed: true,
+		},
+		{
+			name:    "allowNewNativeBuildWhenOthersFinished",
+			running: []*v1.Build{},
+			builds: []*v1.Build{
+				newNativeBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+				newNativeBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed),
+			},
+			build:   newNativeBuild("ns", "my-build"),
+			allowed: true,
+		},
+		{
+			name: "limitMaxRunningBuilds",
+			running: []*v1.Build{
+				newBuild("some-ns", "my-build-1"),
+				newBuild("other-ns", "my-build-2"),
+				newBuild("another-ns", "my-build-3"),
+			},
+			builds: []*v1.Build{
+				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+			},
+			build:   newBuild("ns", "my-build"),
+			allowed: false,
+		},
+		{
+			name: "limitMaxRunningNativeBuilds",
+			running: []*v1.Build{
+				newBuildInPhase("some-ns", "my-build-1", v1.BuildPhaseRunning),
+				newNativeBuildInPhase("other-ns", "my-build-2", v1.BuildPhaseRunning),
+				newNativeBuildInPhase("another-ns", "my-build-3", v1.BuildPhaseRunning),
+			},
+			builds: []*v1.Build{
+				newNativeBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+			},
+			build:   newNativeBuildInPhase("ns", "my-build", v1.BuildPhaseInitialization),
+			allowed: false,
+		},
+		{
+			name: "allowParallelBuildsWithDifferentLayout",
+			running: []*v1.Build{
+				newNativeBuildInPhase("ns", "my-build-1", v1.BuildPhaseRunning),
+			},
+			build:   newBuild("ns", "my-build"),
+			allowed: true,
+		},
+		{
+			name: "allowParallelBuildsInSameNamespace",
+			running: []*v1.Build{
+				newBuild("ns", "my-build-1"),
+				newBuild("other-ns", "my-build-2"),
+			},
+			builds: []*v1.Build{
+				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+				newBuildInPhase("other-ns", "my-build-new", v1.BuildPhaseScheduling),
+			},
+			build:   newBuild("ns", "my-build"),
+			allowed: true,
+		},
+		{
+			name: "queueBuildWhenOlderBuildIsAlreadyInitialized",
+			running: []*v1.Build{
+				newBuild("ns", "my-build-1"),
+				newBuild("other-ns", "my-build-2"),
+			},
+			builds: []*v1.Build{
+				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+				newBuildInPhase("ns", "my-build-new", v1.BuildPhaseInitialization),
+			},
+			build:   newBuild("ns", "my-build"),
+			allowed: false,
+		},
+		{
+			name: "queueBuildWhenOlderBuildIsAlreadyScheduled",
+			running: []*v1.Build{
+				newBuild("ns", "my-build-1"),
+				newBuild("other-ns", "my-build-2"),
+			},
+			builds: []*v1.Build{
+				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+				newBuildInPhase("ns", "my-build-new", v1.BuildPhaseScheduling),
+			},
+			build:   newBuild("ns", "my-build"),
+			allowed: false,
+		},
+		{
+			name: "allowBuildsInNewNamespace",
+			running: []*v1.Build{
+				newBuild("some-ns", "my-build-1"),
+				newBuild("other-ns", "my-build-2"),
+			},
+			builds: []*v1.Build{
+				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
+			},
+			build:   newBuild("ns", "my-build"),
+			allowed: true,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			var initObjs []runtime.Object
+			for _, build := range append(tc.running, tc.builds...) {
+				initObjs = append(initObjs, build)
+			}
+
+			c, err := test.NewFakeClient(initObjs...)
+
+			assert.Nil(t, err)
+
+			bm := Monitor{
+				maxRunningBuilds:   3,
+				buildOrderStrategy: v1.BuildOrderStrategyFIFO,
+			}
+
+			// reset running builds in memory cache
+			cleanRunningBuildsMonitor()
+			for _, build := range tc.running {
+				monitorRunningBuild(build)
+			}
+
+			allowed, err := bm.canSchedule(context.TODO(), c, tc.build)
+
+			assert.Nil(t, err)
+			assert.Equal(t, tc.allowed, allowed)
+		})
+	}
 }
 
 func cleanRunningBuildsMonitor() {
@@ -226,6 +387,7 @@ func newBuildWithLayoutInPhase(namespace string, name string, layout string, pha
 			Labels: map[string]string{
 				v1.IntegrationKitLayoutLabel: layout,
 			},
+			CreationTimestamp: metav1.NewTime(time.Now()),
 		},
 		Spec: v1.BuildSpec{
 			Tasks: []v1.Task{
@@ -233,6 +395,7 @@ func newBuildWithLayoutInPhase(namespace string, name string, layout string, pha
 					Builder: &v1.BuilderTask{
 						Configuration: v1.BuildConfiguration{
 							Strategy:            v1.BuildStrategyRoutine,
+							OrderStrategy:       v1.BuildOrderStrategySequential,
 							ToolImage:           "camel:latest",
 							BuilderPodNamespace: "ns",
 						},

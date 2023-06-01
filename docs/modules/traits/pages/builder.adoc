@@ -40,6 +40,10 @@ The following configuration options are available:
 | string
 | The strategy to use, either `pod` or `routine` (default routine)
 
+| builder.order-strategy
+| string
+| The build order strategy to use, either `fifo` or `sequential` (default sequential)
+
 | builder.request-cpu
 | string
 | When using `pod` strategy, the minimum amount of CPU required by the pod builder.

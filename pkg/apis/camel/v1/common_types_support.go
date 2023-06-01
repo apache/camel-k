@@ -159,6 +159,7 @@ var _ json.Unmarshaler = (*RawMessage)(nil)
 // IsEmpty -- .
 func (bc *BuildConfiguration) IsEmpty() bool {
 	return bc.Strategy == "" &&
+		bc.OrderStrategy == "" &&
 		bc.RequestCPU == "" &&
 		bc.RequestMemory == "" &&
 		bc.LimitCPU == "" &&

@@ -116,6 +116,12 @@ spec:
                         description: The namespace where to run the builder Pod (must
                           be the same of the operator in charge of this Build reconciliation).
                         type: string
+                      orderStrategy:
+                        description: the build order strategy to adopt
+                        enum:
+                        - fifo
+                        - sequential
+                        type: string
                       requestCPU:
                         description: The minimum amount of CPU required. Only used
                           for `pod` strategy
@@ -461,6 +467,10 @@ spec:
                       limitMemory:
                         description: When using `pod` strategy, the maximum amount
                           of memory required by the pod builder.
+                        type: string
+                      orderStrategy:
+                        description: The build order strategy to use, either `fifo`
+                          or `sequential` (default sequential)
                         type: string
                       properties:
                         description: A list of properties to be provided to the build
@@ -1753,6 +1763,12 @@ spec:
                         description: The namespace where to run the builder Pod (must
                           be the same of the operator in charge of this Build reconciliation).
                         type: string
+                      orderStrategy:
+                        description: the build order strategy to adopt
+                        enum:
+                        - fifo
+                        - sequential
+                        type: string
                       requestCPU:
                         description: The minimum amount of CPU required. Only used
                           for `pod` strategy
@@ -2146,6 +2162,10 @@ spec:
                       limitMemory:
                         description: When using `pod` strategy, the maximum amount
                           of memory required by the pod builder.
+                        type: string
+                      orderStrategy:
+                        description: The build order strategy to use, either `fifo`
+                          or `sequential` (default sequential)
                         type: string
                       properties:
                         description: A list of properties to be provided to the build

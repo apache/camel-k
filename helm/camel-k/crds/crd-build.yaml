@@ -97,6 +97,12 @@ spec:
                     description: The namespace where to run the builder Pod (must
                       be the same of the operator in charge of this Build reconciliation).
                     type: string
+                  orderStrategy:
+                    description: the build order strategy to adopt
+                    enum:
+                    - fifo
+                    - sequential
+                    type: string
                   requestCPU:
                     description: The minimum amount of CPU required. Only used for
                       `pod` strategy
@@ -205,6 +211,12 @@ spec:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
                                 this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - fifo
+                              - sequential
                               type: string
                             requestCPU:
                               description: The minimum amount of CPU required. Only

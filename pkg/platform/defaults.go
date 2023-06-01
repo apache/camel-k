@@ -97,6 +97,11 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
 	}
 
+	if p.Status.Build.BuildConfiguration.OrderStrategy == "" {
+		p.Status.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategySequential
+		log.Debugf("Integration Platform %s [%s]: setting build order strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.OrderStrategy)
+	}
+
 	err := setPlatformDefaults(p, verbose)
 	if err != nil {
 		return err
@@ -235,6 +240,10 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	}
 	if target.Status.Build.BuildConfiguration.Strategy == "" {
 		target.Status.Build.BuildConfiguration.Strategy = source.Status.Build.BuildConfiguration.Strategy
+	}
+
+	if target.Status.Build.BuildConfiguration.OrderStrategy == "" {
+		target.Status.Build.BuildConfiguration.OrderStrategy = source.Status.Build.BuildConfiguration.OrderStrategy
 	}
 
 	if target.Status.Build.RuntimeVersion == "" {

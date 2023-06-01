@@ -82,6 +82,7 @@ func TestLocalPlatform(t *testing.T) {
 			local := Platform(ns1)()
 			Expect(local.Status.Build.PublishStrategy).To(Equal(pl.Status.Build.PublishStrategy))
 			Expect(local.Status.Build.BuildConfiguration.Strategy).To(Equal(pl.Status.Build.BuildConfiguration.Strategy))
+			Expect(local.Status.Build.BuildConfiguration.OrderStrategy).To(Equal(pl.Status.Build.BuildConfiguration.OrderStrategy))
 			Expect(local.Status.Build.Maven.LocalRepository).To(Equal(pl.Status.Build.Maven.LocalRepository))
 			Expect(local.Status.Build.Maven.CLIOptions).To(ContainElements(pl.Status.Build.Maven.CLIOptions))
 			Expect(local.Status.Build.Maven.Extension).To(BeEmpty())
