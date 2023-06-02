@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package olm
+package upgrade
 
 import (
 	"os"
@@ -37,7 +37,7 @@ import (
 )
 
 // WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
-func TestOperatorUpgrade(t *testing.T) {
+func TestCLIOperatorUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		Expect(ok).To(BeTrue())

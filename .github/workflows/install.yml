@@ -111,8 +111,32 @@ jobs:
           -q "${{ github.event.inputs.log-level }}" \
           -t "${{ github.event.inputs.test-filters }}"
 
-    - name: Install and upgrade test (OLM)
+    - name: Install (OLM)
       uses: ./.github/actions/e2e-install-olm
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+
+  upgrade:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        submodules: recursive
+    - name: Convert input parameters to env vars
+      shell: bash
+      run: |
+        ./.github/workflows/manual-exec-process-inputs.sh \
+          -i "${{ github.event.inputs.pre-built-kamel-image }}" \
+          -p "${{ github.event.inputs.skip-problematic }}" \
+          -q "${{ github.event.inputs.log-level }}" \
+          -t "${{ github.event.inputs.test-filters }}"
+
+    - name: Upgrade
+      uses: ./.github/actions/e2e-install-upgrade
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
