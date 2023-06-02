@@ -11,6 +11,9 @@
 
 **Merged pull requests:**
 
+- chore\(e2e\): split upgrade from install [\#4454](https://github.com/apache/camel-k/pull/4454) ([squakez](https://github.com/squakez))
+- chore\(deps\): revert vfs-gen removal [\#4450](https://github.com/apache/camel-k/pull/4450) ([gansheer](https://github.com/gansheer))
+- fix\(ci\): temporarily repair upgrade checks [\#4449](https://github.com/apache/camel-k/pull/4449) ([squakez](https://github.com/squakez))
 - chore\(ci\): use ubuntu-latest [\#4445](https://github.com/apache/camel-k/pull/4445) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 [\#4442](https://github.com/apache/camel-k/pull/4442) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 in /pkg/kamelet/repository [\#4441](https://github.com/apache/camel-k/pull/4441) ([dependabot[bot]](https://github.com/apps/dependabot))
