@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"sort"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -55,9 +56,13 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *prometheusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// Add the Camel Quarkus Micrometer extension and micrometer registry for prometheus
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-micrometer")
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.micrometer:micrometer-registry-prometheus")
+		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityPrometheus]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
+			}
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(e.Integration.Status.Dependencies)
+		}
 		return nil
 	}
 

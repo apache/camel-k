@@ -301,32 +301,38 @@ const (
 	// ServiceTypeUser service user type label marker
 	ServiceTypeUser = "user"
 
-	// CapabilityRest defines the REST API service exposure capability
-	CapabilityRest = "rest"
-	// CapabilityHealth defines the health monitoring capability
-	CapabilityHealth = "health"
-	// CapabilityCron defines the cron execution capability
-	CapabilityCron = "cron"
-	// CapabilityPlatformHTTP defines the http service exposure capability
-	CapabilityPlatformHTTP = "platform-http"
-	// CapabilityCircuitBreaker defines the circuit breaker capability
-	CapabilityCircuitBreaker = "circuit-breaker"
-	// CapabilityTracing defines the tracing (opentracing) capability
-	CapabilityTracing = "tracing"
-	// CapabilityTelemetry defines the telemetry (opentelemetry) capability
-	CapabilityTelemetry = "telemetry"
-	// CapabilityMaster defines the master capability
-	CapabilityMaster = "master"
-	// CapabilityResumeKafka defines the resume capability
-	CapabilityResumeKafka = "resume-kafka"
 	// CapabilityAwsSecretsManager defines the aws secrets manager capability
 	CapabilityAwsSecretsManager = "aws-secrets-manager"
-	// CapabilityGcpSecretManager defines the gcp secret manager capability
-	CapabilityGcpSecretManager = "gcp-secret-manager"
 	// CapabilityAzureKeyVault defines the azure key vault capability
 	CapabilityAzureKeyVault = "azure-key-vault"
+	// CapabilityCircuitBreaker defines the circuit breaker capability
+	CapabilityCircuitBreaker = "circuit-breaker"
+	// CapabilityCron defines the cron execution capability
+	CapabilityCron = "cron"
+	// CapabilityGcpSecretManager defines the gcp secret manager capability
+	CapabilityGcpSecretManager = "gcp-secret-manager"
 	// CapabilityHashicorpVault defines the Hashicorp Vault capability
 	CapabilityHashicorpVault = "hashicorp-vault"
+	// CapabilityHealth defines the health monitoring capability
+	CapabilityHealth = "health"
+	// CapabilityJolokia defines the jolokia capability
+	CapabilityJolokia = "jolokia"
+	// CapabilityKnative defines the knative capability
+	CapabilityKnative = "knative"
+	// CapabilityMaster defines the master capability
+	CapabilityMaster = "master"
+	// CapabilityPlatformHTTP defines the http service exposure capability
+	CapabilityPlatformHTTP = "platform-http"
+	// CapabilityPrometheus defines the Prometheus capability
+	CapabilityPrometheus = "prometheus"
+	// CapabilityRest defines the REST API service exposure capability
+	CapabilityRest = "rest"
+	// CapabilityResumeKafka defines the resume capability
+	CapabilityResumeKafka = "resume-kafka"
+	// CapabilityTelemetry defines the telemetry (opentelemetry) capability
+	CapabilityTelemetry = "telemetry"
+	// CapabilityTracing defines the tracing (opentracing) capability
+	CapabilityTracing = "tracing"
 )
 
 // +kubebuilder:object:generate=false

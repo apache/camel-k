@@ -18,6 +18,7 @@ limitations under the License.
 package aws
 
 import (
+	"sort"
 	"strconv"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -100,9 +101,13 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 
 func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAwsSecretsManager)
-		// Add the Camel Quarkus AWS Secrets Manager
-		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-aws-secrets-manager")
+		if capability, ok := environment.CamelCatalog.Runtime.Capabilities[v1.CapabilityAwsSecretsManager]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, dependency.GetDependencyID())
+			}
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(environment.Integration.Status.Dependencies)
+		}
 	}
 
 	if environment.IntegrationInRunningPhases() {

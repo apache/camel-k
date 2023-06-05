@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -54,16 +55,13 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
 
 func (t *jolokiaTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// Add the Camel management and Jolokia agent dependencies
-		// Also add the Camel JAXB dependency, that's required by Hawtio
-
-		if e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel-quarkus:management")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
+		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityJolokia]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
+			}
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(e.Integration.Status.Dependencies)
 		}
-
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm")
-
 		return nil
 	}
 

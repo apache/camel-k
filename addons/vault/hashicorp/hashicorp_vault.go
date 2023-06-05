@@ -18,6 +18,8 @@ limitations under the License.
 package hashicorp
 
 import (
+	"sort"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -77,9 +79,13 @@ func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, e
 
 func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityHashicorpVault)
-		// Add the Camel Quarkus AWS Secrets Manager
-		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-hashicorp-vault")
+		if capability, ok := environment.CamelCatalog.Runtime.Capabilities[v1.CapabilityHashicorpVault]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, dependency.GetDependencyID())
+			}
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(environment.Integration.Status.Dependencies)
+		}
 	}
 
 	if environment.IntegrationInRunningPhases() {

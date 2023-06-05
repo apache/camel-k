@@ -38,6 +38,14 @@ spec:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
     capabilities:
+      aws-secrets-manager:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-aws-secrets-manager
+      azure-key-vault:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-azure-key-vault
       circuit-breaker:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -46,10 +54,32 @@ spec:
         dependencies:
         - groupId: org.apache.camel.k
           artifactId: camel-k-cron
+      gcp-secret-manager:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-google-secret-manager
+      hashicorp-vault:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-hashicorp-vault
       health:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-microprofile-health
+      jolokia:
+        dependencies:
+        - groupId: org.apache.camel
+          artifactId: camel-jaxb
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-management
+        - groupId: org.jolokia
+          artifactId: jolokia-jvm
+      knative:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-knative-impl
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-knative
       master:
         dependencies:
         - groupId: org.apache.camel.k
@@ -58,6 +88,12 @@ spec:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-platform-http
+      prometheus:
+        dependencies:
+        - groupId: io.micrometer
+          artifactId: micrometer-registry-prometheus
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-micrometer
       rest:
         dependencies:
         - groupId: org.apache.camel.quarkus

@@ -19,6 +19,7 @@ package master
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"k8s.io/utils/pointer"
@@ -160,6 +161,8 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 		for _, dep := range t.delegateDependencies {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dep)
 		}
+		// sort the dependencies to get always the same list if they don't change
+		sort.Strings(e.Integration.Status.Dependencies)
 
 	} else if e.IntegrationInRunningPhases() {
 		serviceAccount := e.Integration.Spec.ServiceAccountName

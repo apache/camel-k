@@ -18,6 +18,7 @@ limitations under the License.
 package gcp
 
 import (
+	"sort"
 	"strconv"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -101,9 +102,13 @@ func (t *gcpSecretManagerTrait) Configure(environment *trait.Environment) (bool,
 
 func (t *gcpSecretManagerTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityGcpSecretManager)
-		// Add the Camel Quarkus Google Secrets Manager dependency
-		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-google-secret-manager")
+		if capability, ok := environment.CamelCatalog.Runtime.Capabilities[v1.CapabilityGcpSecretManager]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, dependency.GetDependencyID())
+			}
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(environment.Integration.Status.Dependencies)
+		}
 	}
 
 	if environment.IntegrationInRunningPhases() {

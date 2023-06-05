@@ -180,9 +180,14 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {
-	if pointer.BoolDeref(t.SinkBinding, false) {
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:knative")
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative-impl")
+	if pointer.BoolDeref(t.SinkBinding, false) && e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+		if capability, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityKnative]; ok {
+			for _, dependency := range capability.Dependencies {
+				util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dependency.GetDependencyID())
+			}
+			// sort the dependencies to get always the same list if they don't change
+			sort.Strings(e.Integration.Status.Dependencies)
+		}
 	}
 
 	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {
