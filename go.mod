@@ -9,6 +9,7 @@ require (
 	github.com/apache/camel-k/v2/pkg/kamelet/repository v0.0.0
 	github.com/container-tools/spectrum v0.6.18
 	github.com/evanphx/json-patch v5.6.0+incompatible
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.2.4
 	github.com/google/go-containerregistry v0.13.0
@@ -26,7 +27,6 @@ require (
 	github.com/prometheus/client_golang v1.15.1
 	github.com/prometheus/client_model v0.4.0
 	github.com/prometheus/common v0.44.0
-	github.com/radovskyb/watcher v1.0.7
 	github.com/redhat-developer/service-binding-operator v1.3.4
 	github.com/rs/xid v1.5.0
 	github.com/scylladb/go-set v1.0.2
@@ -86,7 +86,6 @@ require (
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
-	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/zapr v1.2.3 // indirect
