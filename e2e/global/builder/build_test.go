@@ -60,26 +60,9 @@ func TestKitMaxBuildLimit(t *testing.T) {
 
 		WithNewTestNamespace(t, func(ns1 string) {
 			WithNewTestNamespace(t, func(ns2 string) {
-				pl1 := v1.NewIntegrationPlatform(ns1, fmt.Sprintf("camel-k-%s", ns))
-				pl.Spec.DeepCopyInto(&pl1.Spec)
-				pl1.Spec.Build.Maven.Settings = v1.ValueSource{}
-				pl1.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
-				if err := TestClient().Create(TestContext, &pl1); err != nil {
-					t.Error(err)
-					t.FailNow()
-				}
-
+				createOperator(ns1, "500Mi", "8m0s", "--skip-operator-setup", "-x", fmt.Sprintf("camel-k-%s", ns))
 				Eventually(PlatformPhase(ns1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
-				pl2 := v1.NewIntegrationPlatform(ns2, fmt.Sprintf("camel-k-%s", ns))
-				pl.Spec.DeepCopyInto(&pl2.Spec)
-				pl2.Spec.Build.Maven.Settings = v1.ValueSource{}
-				pl2.SetOperatorID(fmt.Sprintf("camel-k-%s", ns))
-				if err := TestClient().Create(TestContext, &pl2); err != nil {
-					t.Error(err)
-					t.FailNow()
-				}
-
+				createOperator(ns2, "500Mi", "8m0s", "--skip-operator-setup", "-x", fmt.Sprintf("camel-k-%s", ns))
 				Eventually(PlatformPhase(ns2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				doKitBuildInNamespace(buildA, ns, TestTimeoutShort, kitOptions{
