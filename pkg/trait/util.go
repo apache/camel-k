@@ -27,8 +27,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/scylladb/go-set/strset"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -41,6 +39,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -86,7 +85,7 @@ func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 }
 
 func collectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
-	result := strset.New()
+	result := sets.NewSet()
 
 	for _, c := range configurable {
 		c := c
@@ -209,8 +208,8 @@ func filterTransferableAnnotations(annotations map[string]string) map[string]str
 }
 
 // ExtractSourceDependencies extracts dependencies from source.
-func ExtractSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) (*strset.Set, error) {
-	dependencies := strset.New()
+func ExtractSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) (*sets.Set, error) {
+	dependencies := sets.NewSet()
 
 	// Add auto-detected dependencies
 	meta, err := metadata.Extract(catalog, source)
