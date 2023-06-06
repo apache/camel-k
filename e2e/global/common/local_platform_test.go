@@ -54,7 +54,10 @@ func TestLocalPlatform(t *testing.T) {
 		}), TestTimeoutMedium).Should(BeTrue())
 
 		WithNewTestNamespace(t, func(ns1 string) {
-			localPlatform := v1.NewIntegrationPlatform(ns1, operatorID)
+			// Install platform (use the installer to get staging if present)
+			Expect(KamelInstallWithID("local-platform", ns1, "--skip-operator-setup").Execute()).To(Succeed())
+
+			localPlatform := Platform(ns1)()
 			localPlatform.Spec.Build.Maven.Properties = make(map[string]string)
 			localPlatform.Spec.Build.Maven.Properties["build-local-prop1"] = "build-local-value1"
 			localPlatform.SetOperatorID(operatorID)
@@ -63,7 +66,7 @@ func TestLocalPlatform(t *testing.T) {
 				LimitCPU: "0.1",
 			}
 
-			if err := TestClient().Create(TestContext, &localPlatform); err != nil {
+			if err := TestClient().Update(TestContext, localPlatform); err != nil {
 				t.Error(err)
 				t.FailNow()
 			}
