@@ -24,7 +24,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/scylladb/go-set/strset"
 	"github.com/stretchr/testify/assert"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -38,6 +37,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
@@ -109,7 +109,9 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", crMountPath, rdMountPath, "/mount/path").List()
+	s := sets.NewSet()
+	s.Add("./resources", crMountPath, rdMountPath, "/mount/path")
+	cp := s.List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{
@@ -141,7 +143,9 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	cp := strset.New("./resources", crMountPath, rdMountPath, "/mount/path").List()
+	st := sets.NewSet()
+	st.Add("./resources", crMountPath, rdMountPath, "/mount/path")
+	cp := st.List()
 	sort.Strings(cp)
 
 	assert.Equal(t, []string{

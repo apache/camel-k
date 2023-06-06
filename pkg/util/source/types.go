@@ -18,7 +18,7 @@ limitations under the License.
 package source
 
 import (
-	"github.com/scylladb/go-set/strset"
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
 // Metadata represents metadata for Integration source.
@@ -28,7 +28,7 @@ type Metadata struct {
 	// All end URIs of defined routes
 	ToURIs []string
 	// All inferred dependencies required to run the integration
-	Dependencies *strset.Set
+	Dependencies *sets.Set
 	// ExposesHTTPServices indicates if a route defined by the source is exposed
 	// through HTTP
 	ExposesHTTPServices bool
@@ -36,9 +36,8 @@ type Metadata struct {
 	// are activated from external calls, including HTTP (useful to determine if the
 	// integration can scale to 0)
 	PassiveEndpoints bool
-	// RequiredCapabilities lists the capabilities required by the integration
-	// to run
-	RequiredCapabilities *strset.Set
+	// RequiredCapabilities lists the capabilities required by the integration to run
+	RequiredCapabilities *sets.Set
 	// All kamelets
 	Kamelets []string
 }
@@ -48,15 +47,17 @@ func NewMetadata() Metadata {
 	return Metadata{
 		FromURIs:             make([]string, 0),
 		ToURIs:               make([]string, 0),
-		Dependencies:         strset.New(),
-		RequiredCapabilities: strset.New(),
+		Dependencies:         sets.NewSet(),
+		RequiredCapabilities: sets.NewSet(),
 	}
 }
 
+// AddRequiredCapability -- .
 func (m *Metadata) AddRequiredCapability(capability string) {
 	m.RequiredCapabilities.Add(capability)
 }
 
+// AddDependency -- .
 func (m *Metadata) AddDependency(dependency string) {
 	m.Dependencies.Add(dependency)
 }

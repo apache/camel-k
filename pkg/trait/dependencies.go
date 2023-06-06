@@ -18,8 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"github.com/scylladb/go-set/strset"
-
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -28,6 +26,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
 type dependenciesTrait struct {
@@ -54,7 +53,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		e.Integration.Status.Dependencies = make([]string, 0)
 	}
 
-	dependencies := strset.New()
+	dependencies := sets.NewSet()
 
 	if e.Integration.Spec.Dependencies != nil {
 		if err := camel.ValidateDependenciesE(e.CamelCatalog, e.Integration.Spec.Dependencies); err != nil {

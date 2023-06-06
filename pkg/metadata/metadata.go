@@ -18,10 +18,9 @@ limitations under the License.
 package metadata
 
 import (
-	"github.com/scylladb/go-set/strset"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 	src "github.com/apache/camel-k/v2/pkg/util/source"
 )
 
@@ -57,8 +56,8 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 	return src.Metadata{
 		FromURIs:             f,
 		ToURIs:               t,
-		Dependencies:         strset.Union(m1.Dependencies, m2.Dependencies),
-		RequiredCapabilities: strset.Union(m1.RequiredCapabilities, m2.RequiredCapabilities),
+		Dependencies:         sets.Union(m1.Dependencies, m2.Dependencies),
+		RequiredCapabilities: sets.Union(m1.RequiredCapabilities, m2.RequiredCapabilities),
 		ExposesHTTPServices:  m1.ExposesHTTPServices || m2.ExposesHTTPServices,
 		PassiveEndpoints:     m1.PassiveEndpoints && m2.PassiveEndpoints,
 	}
