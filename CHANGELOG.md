@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- \[Regression\] likely all cmd/utils were required by CI [\#4460](https://github.com/apache/camel-k/issues/4460)
 - SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
+- Operator is not able to push builder image to the internal registry \(OpenShift cluster\) [\#4297](https://github.com/apache/camel-k/issues/4297)
 - Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
 
 ## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-05-29)
