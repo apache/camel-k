@@ -6,14 +6,20 @@
 
 **Closed issues:**
 
+- \[Regression\] likely all cmd/utils were required by CI [\#4460](https://github.com/apache/camel-k/issues/4460)
 - SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
+- Operator is not able to push builder image to the internal registry \(OpenShift cluster\) [\#4297](https://github.com/apache/camel-k/issues/4297)
 - Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
 
 **Merged pull requests:**
 
+- fix\(ci\): bring back CLIs required by ci tasks [\#4461](https://github.com/apache/camel-k/pull/4461) ([squakez](https://github.com/squakez))
+- chore\(ci\): define IMAGE\_ARCH parameter [\#4457](https://github.com/apache/camel-k/pull/4457) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/sirupsen/logrus from 1.9.2 to 1.9.3 [\#4455](https://github.com/apache/camel-k/pull/4455) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(e2e\): split upgrade from install [\#4454](https://github.com/apache/camel-k/pull/4454) ([squakez](https://github.com/squakez))
 - chore\(deps\): revert vfs-gen removal [\#4450](https://github.com/apache/camel-k/pull/4450) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): temporarily repair upgrade checks [\#4449](https://github.com/apache/camel-k/pull/4449) ([squakez](https://github.com/squakez))
+- chore\(deps\): replace github.com/radovskyb/watcher with github.com/fsn… [\#4448](https://github.com/apache/camel-k/pull/4448) ([squakez](https://github.com/squakez))
 - chore\(ci\): use ubuntu-latest [\#4445](https://github.com/apache/camel-k/pull/4445) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 [\#4442](https://github.com/apache/camel-k/pull/4442) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 in /pkg/kamelet/repository [\#4441](https://github.com/apache/camel-k/pull/4441) ([dependabot[bot]](https://github.com/apps/dependabot))
