@@ -52,6 +52,7 @@ require (
 	k8s.io/apimachinery v0.25.6
 	k8s.io/cli-runtime v0.25.6
 	k8s.io/client-go v0.25.6
+	k8s.io/gengo v0.0.0-20221011193443-fad74ee6edd9
 	k8s.io/klog/v2 v2.100.1
 	k8s.io/kubectl v0.25.6
 	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2
@@ -139,8 +140,10 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/tools v0.9.1 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/api v0.122.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
