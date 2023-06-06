@@ -89,7 +89,7 @@ else
   fi
 
   if [ -n "${REGISTRY_PUSH_HOST}" ]; then
-    RULES="${RULES} images-push"
+    RULES="${RULES} image-push"
   fi
 
   make ${RULES}
@@ -98,9 +98,9 @@ fi
 echo "Moving kamel binary to be visible on PATH"
 
 if [ "$RUNNER_OS" == "macOS" ]; then
-  ${SUDO} mv ./kamel /usr/local/bin
+  ${SUDO} mv $(readlink kamel) /usr/local/bin/kamel
 else
-  ${SUDO} mv ./kamel /usr/bin
+  ${SUDO} mv $(readlink kamel) /usr/bin/kamel
 fi
 echo "Kamel version installed: $(kamel version)"
 

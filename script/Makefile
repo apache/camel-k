@@ -343,7 +343,7 @@ test-quarkus-native-high-memory: do-build
 
 build-kamel:
 	@echo "####### Building kamel CLI for $(IMAGE_ARCH) architecture..."
-	GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
 	# Symbolic link to a local CLI
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
@@ -436,6 +436,10 @@ ifeq ($(IMAGE_ARCH), amd64)
 else
 	docker build --platform=linux/$(IMAGE_ARCH) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH) -f build/Dockerfile .
 endif
+
+# Mainly used for internal CI purposes
+image-push:
+	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)

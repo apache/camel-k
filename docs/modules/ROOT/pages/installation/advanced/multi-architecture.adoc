@@ -1,37 +1,24 @@
 [[multi-architecture-props]]
 = Multi Architecture
 
-To use kamel inside other architecture like arm64 you must build it and use Buildah as builder strategy.
+NOTE: this part is evolving quickly during development of version 2 so it may be slightly inaccurate.
 
-NOTE: For now only arm64 is supported as other architectures
+To use Camel K operator with any architecture like `arm64` you must use Buildah as builder strategy.
 
-[[multi-architecture-build]]
-== Build and Publish Kamel
-
-As first step it's necessary to build kamel project `https://github.com/apache/camel-k` manually and push image to own docker repository.
-
-I suggest to create a free docker image repository with `docker-hub` or `ghcr`.
-
-[source,shell]
-.script/Makefile
-----
-make build images-arch images-push
-----
-
-NOTE: The base image of kamel operator is graalvm because multi architecture quarkus-mandrel image not published yet
+Since version 2, Camel K is publishing an ARM64 architecture beside the default AMD64 architecture. You need to reference this as `apache/camel-k:<version>-arm64`. You can build your particular architecture from source, following the guidelines in xref:contributing/local-development.adoc[Local development].
 
 [[multi-architecture-install]]
-== Install Kamel
+== Install Camel K ARM64 operator
 
-Proceed with installation of kamel inside kubernetes cluster with the below command
+Proceed with installation of kamel inside kubernetes cluster with the below command:
 
 [source,shell]
 ----
-./kamel install --build-publish-strategy=Buildah --registry YOUR_REGISTRY --registry-auth-username YOUR_USERNAME --registry-auth-password YOUR_PASSWORD
+kamel install --operator-image=apache/camel-k:<version>-arm64 --build-publish-strategy Buildah --build-publish-strategy-option BuildahPlatform=linux/arm/v8 --registry ...
 ----
 
 [[multi-architecture-use]]
-== Use kamel
+== Test an integration
 
 Build and run an integration
 
@@ -52,7 +39,7 @@ kamel run hello.groovy
 [[multi-architecture-configure-optional]]
 == Optional Buildah Configuration
 
-If you want change the default architecture of buildah build strategy, you must edit integration platform manually.
+If you want change the default architecture of Buildah build strategy once this is installed, you must edit integration platform manually.
 
 [source,shell]
 ----
@@ -78,4 +65,4 @@ status:
       BuildahPlatform: linux/arm/v8
 ----
 
-NOTE: It's important to know buidah supports only amd64 and arm64
+NOTE: It's important to know Buidah supports only amd64 and arm64

@@ -31,6 +31,7 @@ This command will build and publish your actual Camel K development version to t
 
 You can provide any customization required such as `--log-level`, `--operator-id`, etcetera. Mind that you need to use `./kamel` in order to use the development binary you've just built, as tipically, `kamel` is the production CLI you have installed in your binary path.
 
+[[local-camel-k-runtime]]
 === Local Camel K runtime
 
 Camel K integrations are based on https://github.com/apache/camel-k-runtime[Camel K runtime], generally paired with the operator release. If you need to specify a different runtime, or you have a local Camel K Runtime that you want to test you need to build a Camel K version bundled with the local Camel K Runtime bits
@@ -41,3 +42,13 @@ make images CAMEL_K_RUNTIME_DIR=<path/to/local/ck-runtime/project>
 
 Once this is done you need to re-install via `./kamel install`.
 
+[[local-multi-arch]]
+=== Local Multiple Architecture
+
+Since Camel K version 2 we're introducing the support for multiple architecture. If you want to build your container image operator for a specific architecture, you can provide a parameter, `IMAGE_ARCH`. See the example:
+
+----
+IMAGE_ARCH=arm64 make images
+----
+
+With this configuration, you will build an ARM64 architecture container image that you can reference later as `apache/camel-k:<version>-arm64`.
