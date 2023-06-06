@@ -35,7 +35,8 @@ BASE_IMAGE := docker.io/eclipse-temurin:11
 DEFAULT_PVC := camel-k-pvc
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
-
+# Default value, change to your architecture accordingly
+IMAGE_ARCH ?= amd64
 #
 # Situations when user wants to override
 # the image name and version
@@ -341,14 +342,10 @@ test-quarkus-native-high-memory: do-build
 	go test -timeout 180m -v ./e2e/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
-	@echo "####### Building kamel CLI..."
-	@# Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
-	@# it would not run on older versions. See https://github.com/apache/camel-k/pull/2141#issuecomment-800990117
-ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	CGO_ENABLED=0 go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
-else
-	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
-endif
+	@echo "####### Building kamel CLI for $(IMAGE_ARCH) architecture..."
+	GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+	# Symbolic link to a local CLI
+	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
 build-resources:
 	./script/get_catalog.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
@@ -418,9 +415,6 @@ dir-licenses:
 check-licenses:
 	./script/check_licenses.sh
 
-check-platform:
-	./script/check_platform.sh
-
 # The below are dependencies needed for maven structured logs. We must bundle into the final container image.
 maven-overlay:
 	@echo "####### Preparing maven dependencies bundle..."
@@ -428,24 +422,20 @@ maven-overlay:
 	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION) build/_maven_overlay
 
 kamel-overlay:
-	@echo "####### Copying kamel CLI to output build directory..."
-	mkdir -p build/_output/bin
-ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	cp kamel build/_output/bin
-else ifeq ($(shell uname -m), arm64)
-	GOOS=linux GOARCH=arm64 go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
-else
-	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
-endif
+	@echo "####### Copy arch $(IMAGE_ARCH) CLI into output build directory..."
+	cp build/_output/bin/kamel-$(IMAGE_ARCH) build/_output/bin/kamel
 
 images: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
 	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
 endif
-	@echo "####### Building Camel K operator container image..."
+	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-	docker build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
-	docker build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 -f build/Dockerfile .
+ifeq ($(IMAGE_ARCH), amd64)
+	docker build --platform=linux/$(IMAGE_ARCH) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+else
+	docker build --platform=linux/$(IMAGE_ARCH) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH) -f build/Dockerfile .
+endif
 
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
@@ -497,11 +487,11 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile git-tag
+release: clean codegen set-module-version set-version build-resources check-licenses images images-push cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile fabric8-crds git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses images images-push-staging cross-compile fabric8-crds git-tag
 
-release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile
+release-nightly: clean codegen set-module-version set-version build-resources images images-push cross-compile
 
 release-helm:
 	./script/release_helm.sh
