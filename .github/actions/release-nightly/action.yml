@@ -103,8 +103,9 @@ runs:
     - name: Build and release containers
       shell: bash
       run: |
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} images-nightly
+        make IMAGE_ARCH=arm64 VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} images-nightly
         make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
-        make IMAGE_ARCH=arm64 VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
     - name: Create Release
       id: create_release
       uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
