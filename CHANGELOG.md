@@ -1,29 +1,30 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v1.12.1...HEAD)
-
-**Closed issues:**
-
-- SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
-- Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
-
-## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-05-29)
+## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.12.1...v1.12.1)
 
-## [pkg/kamelet/repository/v1.12.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.12.1) (2023-05-29)
+## [pkg/kamelet/repository/v1.12.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.12.1...pkg/kamelet/repository/v1.12.1)
 
-## [pkg/apis/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.12.1) (2023-05-29)
+## [pkg/apis/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.1...pkg/apis/camel/v1.12.1)
 
-## [pkg/client/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.1) (2023-05-29)
+## [pkg/client/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.1...pkg/client/camel/v1.12.1)
+
+**Closed issues:**
+
+- Nightly release get wrong tag when staging [\#4468](https://github.com/apache/camel-k/issues/4468)
+- \[Regression\] likely all cmd/utils were required by CI [\#4460](https://github.com/apache/camel-k/issues/4460)
+- TestLocalPlatform likely fail when staging [\#4458](https://github.com/apache/camel-k/issues/4458)
+- SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
+- Remove unused/unmaintained dependencies [\#4326](https://github.com/apache/camel-k/issues/4326)
+- Operator is not able to push builder image to the internal registry \(OpenShift cluster\) [\#4297](https://github.com/apache/camel-k/issues/4297)
+- Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
 
 ## [camel-k-crds-1.12.1](https://github.com/apache/camel-k/tree/camel-k-crds-1.12.1) (2023-05-29)
 
