@@ -108,7 +108,7 @@ A docker image `camelk/camel-k:<version>` will be pushed to the staging organiza
 A combined release can be immediately tested with the following install command:
 
 ```
-kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION
+kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-$APACHE_NEXUS_RUNTIME_REPO_ID
 ```
 
 [[release-notes]]
