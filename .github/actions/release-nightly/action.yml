@@ -63,7 +63,7 @@ runs:
     - name: Get nightly version and update date
       shell: bash
       run: |
-        V=$(make get-version | sed s/-SNAPSHOT/-nightly/)
+        V="$(make get-version | sed s/-SNAPSHOT//)-nightly"
         D=$(date)
         echo "VERSION=$V" >> $GITHUB_ENV
         echo "UPD_DATE=$D" >> $GITHUB_ENV
