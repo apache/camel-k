@@ -495,7 +495,11 @@ release: clean codegen set-module-version set-version build-resources check-lice
 
 release-staging: clean codegen set-module-version set-version build-resources check-licenses images images-push-staging cross-compile fabric8-crds git-tag
 
-release-nightly: clean codegen set-module-version set-version build-resources images images-push cross-compile
+# Build images
+images-nightly: clean codegen set-module-version set-version build-resources images
+
+# Release artifacts
+release-nightly: cross-compile images-push
 
 release-helm:
 	./script/release_helm.sh
