@@ -4,15 +4,12 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.12.1...HEAD)
 
-**Closed issues:**
-
-- \[Regression\] likely all cmd/utils were required by CI [\#4460](https://github.com/apache/camel-k/issues/4460)
-- SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
-- Operator is not able to push builder image to the internal registry \(OpenShift cluster\) [\#4297](https://github.com/apache/camel-k/issues/4297)
-- Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
-
 **Merged pull requests:**
 
+- chore\(ci\): split image build from deploy [\#4467](https://github.com/apache/camel-k/pull/4467) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump knative.dev/serving from 0.37.1 to 0.37.2 [\#4464](https://github.com/apache/camel-k/pull/4464) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): TestLocalPlatform [\#4463](https://github.com/apache/camel-k/pull/4463) ([squakez](https://github.com/squakez))
+- chore\(deps\): home made Set to replace github.com/scylladb/go-set [\#4462](https://github.com/apache/camel-k/pull/4462) ([squakez](https://github.com/squakez))
 - fix\(ci\): bring back CLIs required by ci tasks [\#4461](https://github.com/apache/camel-k/pull/4461) ([squakez](https://github.com/squakez))
 - chore\(ci\): define IMAGE\_ARCH parameter [\#4457](https://github.com/apache/camel-k/pull/4457) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/sirupsen/logrus from 1.9.2 to 1.9.3 [\#4455](https://github.com/apache/camel-k/pull/4455) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -159,21 +156,31 @@
 - Chore: docker, jvm unit tests [\#4154](https://github.com/apache/camel-k/pull/4154) ([realMartinez](https://github.com/realMartinez))
 - fix\(builder\): native from source should rebuild  [\#4153](https://github.com/apache/camel-k/pull/4153) ([squakez](https://github.com/squakez))
 
-## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-05-29)
+## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.12.1...v1.12.1)
 
-## [pkg/kamelet/repository/v1.12.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.12.1) (2023-05-29)
+## [pkg/kamelet/repository/v1.12.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.12.1...pkg/kamelet/repository/v1.12.1)
 
-## [pkg/apis/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.12.1) (2023-05-29)
+## [pkg/apis/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.1...pkg/apis/camel/v1.12.1)
 
-## [pkg/client/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.1) (2023-05-29)
+## [pkg/client/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.1) (2023-06-07)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.1...pkg/client/camel/v1.12.1)
+
+**Closed issues:**
+
+- Nightly release get wrong tag when staging [\#4468](https://github.com/apache/camel-k/issues/4468)
+- \[Regression\] likely all cmd/utils were required by CI [\#4460](https://github.com/apache/camel-k/issues/4460)
+- TestLocalPlatform likely fail when staging [\#4458](https://github.com/apache/camel-k/issues/4458)
+- SBOM for Camel K [\#4430](https://github.com/apache/camel-k/issues/4430)
+- Remove unused/unmaintained dependencies [\#4326](https://github.com/apache/camel-k/issues/4326)
+- Operator is not able to push builder image to the internal registry \(OpenShift cluster\) [\#4297](https://github.com/apache/camel-k/issues/4297)
+- Configure memory resource requests on builder pods [\#1092](https://github.com/apache/camel-k/issues/1092)
 
 ## [camel-k-crds-1.12.1](https://github.com/apache/camel-k/tree/camel-k-crds-1.12.1) (2023-05-29)
 
