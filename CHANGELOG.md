@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/onsi/gomega from 1.27.7 to 1.27.8 [\#4470](https://github.com/apache/camel-k/pull/4470) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): split image build from deploy [\#4467](https://github.com/apache/camel-k/pull/4467) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/serving from 0.37.1 to 0.37.2 [\#4464](https://github.com/apache/camel-k/pull/4464) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): TestLocalPlatform [\#4463](https://github.com/apache/camel-k/pull/4463) ([squakez](https://github.com/squakez))
