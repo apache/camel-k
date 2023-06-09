@@ -160,3 +160,92 @@ func createTestCamelCatalog(platform v1.IntegrationPlatform) v1.CamelCatalog {
 	c.Spec = v1.CamelCatalogSpec{Runtime: v1.RuntimeSpec{Provider: platform.Status.Build.RuntimeProvider, Version: platform.Status.Build.RuntimeVersion}}
 	return c
 }
+
+func TestIntegrationWithMetadataDryRun(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultIntegration := nominalIntegration("my-it-test")
+	defaultIntegration.Annotations = map[string]string{
+		"camel.apache.org/operator.id": "camel-k",
+		"my-annotation":                "my-value",
+	}
+	defaultIntegration.Labels = map[string]string{
+		"my-label": "my-value",
+	}
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    my-annotation: my-value
+  creationTimestamp: null
+  labels:
+    my-label: my-value
+  name: my-it-test
+  namespace: prod-namespace
+spec:
+  traits:
+    container:
+      image: my-special-image
+status: {}
+`, output)
+}
+
+func TestPipeWithMetadataDryRun(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultKB := nominalPipe("my-kb-test")
+	defaultKB.Annotations = map[string]string{
+		"camel.apache.org/operator.id": "camel-k",
+		"my-annotation":                "my-value",
+	}
+	defaultKB.Labels = map[string]string{
+		"my-label": "my-value",
+	}
+	defaultIntegration := nominalIntegration("my-kb-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    my-annotation: my-value
+  creationTimestamp: null
+  labels:
+    my-label: my-value
+  name: my-kb-test
+  namespace: prod-namespace
+  resourceVersion: "1"
+spec:
+  integration:
+    traits:
+      container:
+        image: my-special-image
+  sink: {}
+  source: {}
+status: {}
+`, output)
+}
