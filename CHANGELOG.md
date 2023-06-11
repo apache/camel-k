@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v1.12.1...HEAD)
 
+**Closed issues:**
+
+- Issue with connecting to microsoft sql server from camel-k [\#4465](https://github.com/apache/camel-k/issues/4465)
+
 **Merged pull requests:**
 
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.19 to 0.6.20 [\#4472](https://github.com/apache/camel-k/pull/4472) ([dependabot[bot]](https://github.com/apps/dependabot))
