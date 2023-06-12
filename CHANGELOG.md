@@ -6,10 +6,16 @@
 
 **Closed issues:**
 
+- Issue while working on multiple endpoint in camel-k. [\#4475](https://github.com/apache/camel-k/issues/4475)
+- Kamel promote export without annotations [\#4471](https://github.com/apache/camel-k/issues/4471)
 - Issue with connecting to microsoft sql server from camel-k [\#4465](https://github.com/apache/camel-k/issues/4465)
+- Release 1.12.1 [\#4396](https://github.com/apache/camel-k/issues/4396)
 
 **Merged pull requests:**
 
+- chore\(ci\): bump replace version [\#4478](https://github.com/apache/camel-k/pull/4478) ([squakez](https://github.com/squakez))
+- chore\(ci\): Helm 1.12.1 [\#4474](https://github.com/apache/camel-k/pull/4474) ([squakez](https://github.com/squakez))
+- fix\(cmd\): promote annotations/labels [\#4473](https://github.com/apache/camel-k/pull/4473) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.19 to 0.6.20 [\#4472](https://github.com/apache/camel-k/pull/4472) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/onsi/gomega from 1.27.7 to 1.27.8 [\#4470](https://github.com/apache/camel-k/pull/4470) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): split image build from deploy [\#4467](https://github.com/apache/camel-k/pull/4467) ([squakez](https://github.com/squakez))
