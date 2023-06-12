@@ -60,9 +60,6 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 			"--force",
 			"--base-image",
 			defaults.BaseImage(),
-			// TODO: remove GOMAXPROCS when https://github.com/apache/camel-k/issues/4312 is closed
-			"--operator-env-vars",
-			"GOMAXPROCS=1",
 		).Execute()).To(Succeed())
 
 		// Check the operator pod is running
