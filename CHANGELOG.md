@@ -6,7 +6,10 @@
 
 **Closed issues:**
 
+- Issue while working on multiple endpoint in camel-k. [\#4475](https://github.com/apache/camel-k/issues/4475)
+- Kamel promote export without annotations [\#4471](https://github.com/apache/camel-k/issues/4471)
 - Issue with connecting to microsoft sql server from camel-k [\#4465](https://github.com/apache/camel-k/issues/4465)
+- Release 1.12.1 [\#4396](https://github.com/apache/camel-k/issues/4396)
 
 ## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-06-07)
 
