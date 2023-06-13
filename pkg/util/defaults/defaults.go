@@ -40,9 +40,6 @@ const (
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
 
-	// DefaultPVC --
-	DefaultPVC = "camel-k-pvc"
-
 	// ImageName --
 	ImageName = "docker.io/apache/camel-k"
 

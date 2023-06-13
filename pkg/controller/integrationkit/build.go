@@ -121,16 +121,9 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		// nolint: contextcheck
 		if buildConfig.Strategy == v1.BuildStrategyPod {
-			// Pod strategy requires a PVC to exist. If it does not exist, we warn the user and fallback to Routine build strategy
-			if pvc, err := kubernetes.LookupPersistentVolumeClaim(env.Ctx, env.Client, operatorNamespace, defaults.DefaultPVC); pvc != nil || err != nil {
-				err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
-				if err != nil {
-					return nil, fmt.Errorf("error while creating Camel K Builder service account: %w", err)
-				}
-			} else {
-				// Fallback to Routine strategy
-				buildConfig.Strategy = v1.BuildStrategyRoutine
-				Log.Info(`Warning: the operator was installed with an ephemeral storage, builder "pod" strategy is not supported: using "routine" build strategy as a fallback. We recommend to configure a PersistentVolumeClaim in order to be able to use "pod" builder strategy. Please consider that certain features such as Quarkus native require a "pod" builder strategy (hence a PVC) to work properly.`)
+			err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
+			if err != nil {
+				return nil, fmt.Errorf("error while creating Camel K Builder service account: %w", err)
 			}
 		}
 		buildConfig.ToolImage = env.CamelCatalog.Image

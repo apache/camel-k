@@ -35,26 +35,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestBuilderPodFallback(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--storage=false").Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-
-		t.Run("run yaml", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			Eventually(Logs(ns, OperatorPod(ns)().Name, corev1.PodLogOptions{})).Should(ContainSubstring(`the operator was installed with an ephemeral storage, builder \"pod\" strategy is not supported: using \"routine\" build strategy as a fallback.`))
-		})
-	})
-}
-
 func TestBuilderTimeout(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)

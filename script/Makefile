@@ -32,7 +32,6 @@ OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
 BASE_IMAGE := eclipse-temurin:11
-DEFAULT_PVC := camel-k-pvc
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 # Default value, change to your architecture accordingly
@@ -193,9 +192,6 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // LocalRepository -- " >> $(VERSIONFILE)
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // DefaultPVC -- " >> $(VERSIONFILE)
-	@echo "  DefaultPVC = \"$(DEFAULT_PVC)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)
@@ -651,7 +647,7 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	@INSTALL_DEFAULT_PVC=false $(KUSTOMIZE) build config/manifests | \
+	@$(KUSTOMIZE) build config/manifests | \
 		$(OPERATOR_SDK) generate bundle \
 			-q --overwrite --version $(OPERATOR_VERSION) \
 			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)

@@ -54,7 +54,6 @@ func TestBasicInstallation(t *testing.T) {
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
-		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
 
 		t.Run("run yaml", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
@@ -107,7 +106,6 @@ func TestEphemeralInstallation(t *testing.T) {
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
-		Eventually(OperatorPodPVCName(ns)).Should(Equal(""))
 	})
 }
 

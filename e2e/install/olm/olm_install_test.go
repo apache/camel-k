@@ -35,9 +35,7 @@ import (
 
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
@@ -97,63 +95,6 @@ func TestOLMInstallation(t *testing.T) {
 
 		// Check the IntegrationPlatform has been reconciled
 		Eventually(PlatformVersion(ns)).Should(ContainSubstring(ipVersionPrefix))
-		// By default, an OLM installation has no PVC installed
-		Eventually(OperatorPodPVCName(ns)).Should(Equal(""))
-
-		t.Run("run smoke test ephemeral", func(t *testing.T) {
-			name := "yaml"
-			Expect(Kamel("run", "-n", ns, "files/yaml.yaml").Execute()).To(Succeed())
-			// Check the Integration runs correctly
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
-			// Check the Integration version matches that of the current operator
-			Expect(IntegrationVersion(ns, name)()).To(ContainSubstring(ipVersionPrefix))
-			// Check the operator is warning
-			Eventually(Logs(ns, OperatorPod(ns)().Name, corev1.PodLogOptions{})).Should(ContainSubstring(`the operator was installed with an ephemeral storage, builder \"pod\" strategy is not supported: using \"routine\" build strategy as a fallback.`))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		})
-
-		t.Run("run smoke test pvc", func(t *testing.T) {
-			pvc, err := createIfNotExistsCamelKPVC(ns)
-			if err != nil {
-				assert.Fail(t, err.Error())
-			}
-			// We alter the subscription to use a PVC
-			subscription, err := GetSubscription(ns)
-			Expect(err).To(BeNil())
-			Expect(subscription).NotTo(BeNil())
-			// Change the Subscription to let it use the PVC
-			editedSubscription := subscription.DeepCopy()
-			volume := corev1.Volume{
-				Name: defaults.DefaultPVC,
-				VolumeSource: corev1.VolumeSource{
-					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: pvc.Name,
-					},
-				},
-			}
-			if editedSubscription.Spec.Config.Volumes == nil {
-				editedSubscription.Spec.Config.Volumes = make([]corev1.Volume, 0, 1)
-			}
-			editedSubscription.Spec.Config.Volumes = append(editedSubscription.Spec.Config.Volumes, volume)
-			vm := corev1.VolumeMount{
-				MountPath: defaults.LocalRepository,
-				Name:      volume.Name,
-			}
-			if editedSubscription.Spec.Config.VolumeMounts == nil {
-				editedSubscription.Spec.Config.VolumeMounts = make([]corev1.VolumeMount, 0, 1)
-			}
-			editedSubscription.Spec.Config.VolumeMounts = append(editedSubscription.Spec.Config.VolumeMounts, vm)
-
-			Expect(TestClient().Update(TestContext, editedSubscription)).To(Succeed())
-
-			Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
-			Expect(KamelRun(ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(Logs(ns, OperatorPod(ns)().Name, corev1.PodLogOptions{})).ShouldNot(ContainSubstring(`the operator was installed with an ephemeral storage, builder \"pod\" strategy is not supported: using \"routine\" build strategy as a fallback.`))
-		})
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -161,31 +102,4 @@ func TestOLMInstallation(t *testing.T) {
 		// Clean up cluster-wide resources that are not removed by OLM
 		Expect(Kamel("uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
 	})
-}
-
-func createIfNotExistsCamelKPVC(ns string) (*corev1.PersistentVolumeClaim, error) {
-	// Verify if a PVC already exists
-	camelKPVC, err := kubernetes.LookupPersistentVolumeClaim(TestContext, TestClient(), ns, defaults.DefaultPVC)
-	if err != nil {
-		return nil, err
-	}
-	if camelKPVC != nil {
-		fmt.Printf("A persistent volume claim for \"%s\" already exist, reusing it\n", defaults.DefaultPVC)
-		return camelKPVC, nil
-	}
-
-	defaultStorageClass, err := kubernetes.LookupDefaultStorageClass(TestContext, TestClient())
-	if err != nil {
-		return nil, err
-	}
-
-	camelKPVC = kubernetes.NewPersistentVolumeClaim(
-		ns,
-		defaults.DefaultPVC,
-		defaultStorageClass.Name,
-		"20Gi",
-		corev1.PersistentVolumeAccessMode("ReadWriteOnce"),
-	)
-
-	return camelKPVC, TestClient().Create(TestContext, camelKPVC)
 }

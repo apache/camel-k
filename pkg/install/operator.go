@@ -40,7 +40,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/resources"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -62,7 +61,6 @@ type OperatorConfiguration struct {
 	NodeSelectors         []string
 	ResourcesRequirements []string
 	EnvVars               []string
-	Storage               OperatorStorageConfiguration
 }
 
 type OperatorHealthConfiguration struct {
@@ -96,43 +94,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		return err
 	}
 
-	var camelKPVC *corev1.PersistentVolumeClaim
-	if cfg.Storage.Enabled {
-		camelKPVC, err = installPVC(ctx, cmd, c, cfg, collection)
-		if err != nil {
-			return err
-		}
-	}
-
 	customizer := func(o ctrl.Object) ctrl.Object {
-		if camelKPVC != nil {
-			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
-					volume := corev1.Volume{
-						Name: defaults.DefaultPVC,
-						VolumeSource: corev1.VolumeSource{
-							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-								ClaimName: camelKPVC.Name,
-							},
-						},
-					}
-					if d.Spec.Template.Spec.Volumes == nil {
-						d.Spec.Template.Spec.Volumes = make([]corev1.Volume, 0, 1)
-					}
-					d.Spec.Template.Spec.Volumes = append(d.Spec.Template.Spec.Volumes, volume)
-
-					vm := corev1.VolumeMount{
-						MountPath: defaults.LocalRepository,
-						Name:      volume.Name,
-					}
-					if d.Spec.Template.Spec.Containers[0].VolumeMounts == nil {
-						d.Spec.Template.Spec.Containers[0].VolumeMounts = make([]corev1.VolumeMount, 0, 1)
-					}
-					d.Spec.Template.Spec.Containers[0].VolumeMounts = append(d.Spec.Template.Spec.Containers[0].VolumeMounts, vm)
-				}
-			}
-		}
-
 		if cfg.CustomImage != "" {
 			if d, ok := o.(*appsv1.Deployment); ok {
 				if d.Labels["camel.apache.org/component"] == "operator" {
@@ -392,49 +354,6 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	}
 
 	return nil
-}
-
-func installPVC(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection) (*corev1.PersistentVolumeClaim, error) {
-	// Verify if a PVC already exists
-	camelKPVC, err := kubernetes.LookupPersistentVolumeClaim(ctx, c, cfg.Namespace, defaults.DefaultPVC)
-	if err != nil {
-		return nil, err
-	}
-	if camelKPVC != nil {
-		fmt.Fprintf(cmd.ErrOrStderr(), "A persistent volume claim for \"%s\" already exist, reusing it\n", defaults.DefaultPVC)
-		return camelKPVC, nil
-	}
-
-	// Use a dynamic volume based on storage classes
-	storageClassName, err := getStorageClassName(ctx, c, cfg.Storage.ClassName)
-	if err != nil {
-		return nil, err
-	}
-	if storageClassName != "" {
-		fmt.Fprintf(cmd.ErrOrStderr(), "Using storage class \"%s\" to create \"%s\" volume for the operator\n", storageClassName, defaults.DefaultPVC)
-		camelKPVC = kubernetes.NewPersistentVolumeClaim(
-			cfg.Namespace,
-			defaults.DefaultPVC,
-			storageClassName,
-			cfg.Storage.Capacity,
-			corev1.PersistentVolumeAccessMode(cfg.Storage.AccessMode),
-		)
-		err = ObjectOrCollect(ctx, c, cfg.Namespace, collection, false, camelKPVC)
-		return camelKPVC, err
-	}
-	fmt.Fprintf(cmd.ErrOrStderr(), "Could not find a default storage class in the cluster. The operator will be installed with an ephemeral storage. Bear in mind certain build strategies such as \"pod\" may not work as expected.\n")
-	return nil, nil
-}
-
-func getStorageClassName(ctx context.Context, c client.Client, cfgStorageClassName string) (string, error) {
-	if cfgStorageClassName != "" {
-		return cfgStorageClassName, nil
-	}
-	defaultStorageClass, err := kubernetes.LookupDefaultStorageClass(ctx, c)
-	if err != nil {
-		return "", err
-	}
-	return defaultStorageClass.Name, nil
 }
 
 func installNamespacedRoleBinding(ctx context.Context, c client.Client, collection *kubernetes.Collection, namespace string, path string) error {
