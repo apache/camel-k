@@ -2025,25 +2025,6 @@ func OperatorPod(ns string) func() *corev1.Pod {
 	}
 }
 
-func OperatorPodPVCName(ns string) func() string {
-	return func() string {
-		operatorPod := OperatorPod(ns)()
-		if operatorPod.Spec.Volumes == nil {
-			return ""
-		}
-		volumes := OperatorPod(ns)().Spec.Volumes
-		if volumes == nil {
-			return ""
-		}
-		for _, v := range volumes {
-			if v.Name == defaults.DefaultPVC {
-				return defaults.DefaultPVC
-			}
-		}
-		return ""
-	}
-}
-
 // Find one Pod filtered by namespace ns and label app.kubernetes.io/name value appName.
 func Pod(ns string, appName string) func() (*corev1.Pod, error) {
 	return func() (*corev1.Pod, error) {

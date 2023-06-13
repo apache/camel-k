@@ -256,19 +256,6 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 			},
 		)
 	}
-	if !hasVolume(pod, defaults.DefaultPVC) {
-		pod.Spec.Volumes = append(pod.Spec.Volumes,
-			// Maven repo volume
-			corev1.Volume{
-				Name: defaults.DefaultPVC,
-				VolumeSource: corev1.VolumeSource{
-					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: defaults.DefaultPVC,
-					},
-				},
-			},
-		)
-	}
 
 	var envVars = proxyFromEnvironment()
 	envVars = append(envVars, corev1.EnvVar{
@@ -554,12 +541,6 @@ func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
 			MountPath: filepath.Join(builderDir, build.Name),
-		})
-	}
-	if hasVolume(pod, defaults.DefaultPVC) {
-		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
-			Name:      defaults.DefaultPVC,
-			MountPath: defaults.LocalRepository,
 		})
 	}
 

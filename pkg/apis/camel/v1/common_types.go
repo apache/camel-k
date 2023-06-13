@@ -61,11 +61,14 @@ type BuildStrategy string
 
 const (
 	// BuildStrategyRoutine performs the build in a routine (will be executed as a process inside the same Camel K operator `Pod`).
-	// A routine may be preferred to a `pod` strategy since it reuse the Maven repository dependency cached locally. It is executed as
+	// A routine may be preferred to a `pod` strategy since it is in general quicker to execute. It is executed as
 	// a parallel process, so you may need to consider the quantity of concurrent build process running simultaneously.
+	// Only available for Quarkus JVM mode.
 	BuildStrategyRoutine BuildStrategy = "routine"
-	// BuildStrategyPod performs the build in a `Pod` (will schedule a new builder ephemeral `Pod` which will take care of the build action).
-	// This strategy has the limitation that every build will have to download all the dependencies required by the Maven build.
+	// BuildStrategyPod performs the build in a `Pod` (will schedule a new builder `Pod` which will take care of the build action).
+	// This strategy has the limitation that every build will have to download all the dependencies required by the Maven build which should be
+	// mitigated by the presence of a Maven proxy.
+	// Available for both Quarkus JVM and Native mode.
 	BuildStrategyPod BuildStrategy = "pod"
 )
 
