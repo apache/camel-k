@@ -37,6 +37,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/s2i"
 
@@ -285,8 +286,12 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 			return fmt.Errorf("cannot create tar archive: %w", err)
 		}
 
-		err = tarEntries(archiveFile, "/usr/local/bin/kamel:/usr/local/bin/kamel",
-			"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/")
+		err = tarEntries(archiveFile,
+			"/usr/local/bin/kamel:/usr/local/bin/kamel",
+			"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
+			// Required for snapshots dependencies in the runtimes
+			defaults.LocalRepository+":"+defaults.LocalRepository,
+		)
 		if err != nil {
 			return fmt.Errorf("cannot tar path entry: %w", err)
 		}
@@ -446,7 +451,10 @@ func buildRuntimeBuilderImageSpectrum(options spectrum.Options) error {
 
 	_, err := spectrum.Build(options,
 		"/usr/local/bin/kamel:/usr/local/bin/",
-		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/")
+		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
+		// Required for snapshots dependencies in the runtimes
+		defaults.LocalRepository+":"+defaults.LocalRepository,
+	)
 	if err != nil {
 		return err
 	}

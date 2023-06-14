@@ -19,11 +19,13 @@ ARG MAVEN_DEFAULT_VERSION="3.8.6"
 ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
+ARG MVN_REPO="/etc/maven/m2"
 
 USER 0
 
 # Maven configuration
 RUN mkdir -p ${MAVEN_HOME}
+RUN mkdir -p ${MVN_REPO}
 COPY build/_maven_overlay/ /usr/share/maven/lib/
 ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
@@ -40,14 +42,11 @@ RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> 
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider*
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
-ADD build/_maven_output /tmp/local/m2
+ADD build/_maven_output ${MVN_REPO}
 ADD build/_kamelets /kamelets
 
-RUN mkdir -p /etc/maven/m2 \
-    && chgrp -R 0 /etc/maven/m2 \
-    && chmod -R g=u /etc/maven/m2 \
-    && chgrp -R 0 /tmp/local/m2 \
-    && chmod -R g=u /tmp/local/m2 \
+RUN chgrp -R 0 ${MVN_REPO} \
+    && chmod -R g=u ${MVN_REPO} \
     && chgrp -R 0 /kamelets \
     && chmod -R g=u /kamelets \
     && chgrp -R 0 ${MAVEN_HOME} \
