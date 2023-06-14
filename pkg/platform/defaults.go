@@ -233,6 +233,10 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	if target.Status.Build.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", target.Name, target.Namespace)
 		target.Status.Build.BaseImage = source.Status.Build.BaseImage
+		// Workaround to ensure the default image from buildah is full name. Any baseImage override is in charge of it's validity
+		if target.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && defaults.IsBaseImageDefault() {
+			target.Status.Build.BaseImage = builder.BuildahDefaultBaseImageName
+		}
 	}
 
 	if target.Status.Build.Maven.LocalRepository == "" {
@@ -312,6 +316,10 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", p.Name, p.Namespace)
 		p.Status.Build.BaseImage = defaults.BaseImage()
+		// Workaround to ensure the default image from buildah is full name. Any baseImage override is in charge of it's validity
+		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && defaults.IsBaseImageDefault() {
+			p.Status.Build.BaseImage = builder.BuildahDefaultBaseImageName
+		}
 	}
 	if p.Status.Build.Maven.LocalRepository == "" {
 		log.Debugf("Integration Platform %s [%s]: setting local repository", p.Name, p.Namespace)
