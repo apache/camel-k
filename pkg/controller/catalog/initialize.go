@@ -42,7 +42,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/s2i"
 
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
-	gcrv1 "github.com/google/go-containerregistry/pkg/v1"
 
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
@@ -179,6 +178,7 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		USER 1000
 		ADD /usr/local/bin/kamel /usr/local/bin/kamel
 		ADD /usr/share/maven/mvnw/ /usr/share/maven/mvnw/
+		ADD ` + defaults.LocalRepository + ` ` + defaults.LocalRepository + `
 	`))
 
 	owner := catalogReference(catalog)
@@ -383,13 +383,13 @@ func imageExistsSpectrum(options spectrum.Options) bool {
 	Log.Infof("Checking if Camel K builder container %s already exists...", options.Base)
 	ctrImg, err := spectrum.Pull(options)
 	if ctrImg != nil && err == nil {
-		var hash gcrv1.Hash
-		if hash, err = ctrImg.Digest(); err != nil {
+		if hash, err := ctrImg.Digest(); err != nil {
 			Log.Errorf(err, "Cannot calculate digest")
 			return false
+		} else {
+			Log.Infof("Found Camel K builder container with digest %s", hash.String())
+			return true
 		}
-		Log.Infof("Found Camel K builder container with digest %s", hash.String())
-		return true
 	}
 
 	Log.Infof("Couldn't pull image due to %s", err.Error())
