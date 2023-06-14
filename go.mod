@@ -22,7 +22,6 @@ require (
 	github.com/onsi/gomega v1.27.8
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.13.0
-	github.com/otiai10/copy v1.12.0
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.60.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/prometheus/client_model v0.4.0

@@ -98,17 +98,6 @@ func TestBasicInstallation(t *testing.T) {
 	})
 }
 
-func TestEphemeralInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--storage=false").Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-	})
-}
-
 func TestAlternativeImageInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)

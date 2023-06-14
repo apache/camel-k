@@ -107,7 +107,6 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			}
 		}
 
-		// TODO : wrap in a func
 		// We may need to change certain builder configuration values
 		operatorNamespace := platform.GetOperatorNamespace()
 		buildConfig := v1.BuilderConfigurationTasks(env.Pipeline)
@@ -129,7 +128,6 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		buildConfig.ToolImage = env.CamelCatalog.Image
 		buildConfig.BuilderPodNamespace = operatorNamespace
 		v1.SetBuilderConfigurationTasks(env.Pipeline, buildConfig)
-		/////////////////////////////
 
 		build = &v1.Build{
 			TypeMeta: metav1.TypeMeta{

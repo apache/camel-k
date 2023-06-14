@@ -113,7 +113,8 @@ var (
 )
 
 func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
-	var ugfid int64 = 1000
+	// TODO we must find a way to run this non-root
+	var ugfid int64 = 0
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -258,10 +259,16 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 	}
 
 	var envVars = proxyFromEnvironment()
-	envVars = append(envVars, corev1.EnvVar{
-		Name:  "HOME",
-		Value: filepath.Join(builderDir, build.Name),
-	})
+	envVars = append(envVars,
+		corev1.EnvVar{
+			Name:  "HOME",
+			Value: filepath.Join(builderDir, build.Name),
+		},
+		/*corev1.EnvVar{
+			Name:  "MAVEN_USER_HOME",
+			Value: "/usr/share/maven",
+		},*/
+	)
 
 	container := corev1.Container{
 		Name:            taskName,
