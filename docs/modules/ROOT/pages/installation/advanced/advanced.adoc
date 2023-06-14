@@ -3,18 +3,6 @@
 
 Camel K Operators offers several possibility of customization. The default installation could be good in the most of the cases, but, we have a series of configuration that can be applied when you want to fine tune your Camel K operator and get the very best of it. The following settings will work for an installation via `kamel` CLI, but the same configuration could be done with the other xref:installation/installation.adoc[installation procedures] by applying the required changes on the related configuration files.
 
-[[storage]]
-== Storage
-
-Since version 2.0, Camel K requires some persistent storage. You can change the storage configuration using the following settings:
-
-```
---storage                                     If false, it won't use a persistent storage (recommended for development purpose only) (default true)
---storage-access-mode string                  Persistent Volume Access Mode (any of ReadWriteOnce, ReadOnlyMany, ReadWriteMany or ReadWriteOncePod)(default "ReadWriteOnce")
---storage-capacity string                     How much capacity to use (default "20Gi")
---storage-class-name string                   Use a storage class name to create a dynamic volume (if empty will look up for cluster default)
-```
-
 [[resources]]
 == Resource management
 
@@ -52,17 +40,20 @@ A very important set of configuration you can provide is related to Maven:
 ```
 You can learn more in details in the xref:installation/advanced/maven.adoc[Maven configuration] page.
 
-Finally, you can change the registry where to host your integration containers:
+[[publish-configuration]]
+== Publish configuration
+
+Camel K requires a container registry where to store the applications built. These are the main configurations:
 
 ```
---organization string                         A organization on the Docker registry that can be used to publish images
---registry string                             A Docker registry that can be used to publish images
---registry-auth-file string                   A docker registry configuration file containing authorization tokens for pushing and pulling images
---registry-auth-password string               The docker registry authentication password
---registry-auth-server string                 The docker registry authentication server
---registry-auth-username string               The docker registry authentication username
---registry-insecure                           Configure to configure registry access in insecure mode or not
---registry-secret string                      A secret used to push/pull images to the Docker registry
+--organization string                         A organization on the Docker Hub that can be used to publish images
+--registry string                             A container registry that can be used to publish images
+--registry-auth-file string                   A container registry configuration file containing authorization tokens for pushing and pulling images
+--registry-auth-password string               The container registry authentication password
+--registry-auth-server string                 The container registry authentication server
+--registry-auth-username string               The container registry authentication username
+--registry-insecure                           Configure registry access in insecure mode or not (`http` vs `https`)
+--registry-secret string                      A secret used to push/pull images to the container registry
 ```
 We have a dedicated section to explain more in details xref:installation/registry/registry.adoc[how to configure a registry].
 
