@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/oauth2 from 0.8.0 to 0.9.0 [\#4486](https://github.com/apache/camel-k/pull/4486) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/term from 0.8.0 to 0.9.0 [\#4482](https://github.com/apache/camel-k/pull/4482) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/text from 0.9.0 to 0.10.0 [\#4481](https://github.com/apache/camel-k/pull/4481) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): remove workaround pre 1.12.1 [\#4479](https://github.com/apache/camel-k/pull/4479) ([squakez](https://github.com/squakez))
