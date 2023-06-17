@@ -223,7 +223,6 @@
 - Kamelet redis-source not working [\#4276](https://github.com/apache/camel-k/issues/4276)
 - Failed to fetch data from Mysql database using camel-k [\#4264](https://github.com/apache/camel-k/issues/4264)
 - Mention the published "generated extension" for Java in the docs [\#4262](https://github.com/apache/camel-k/issues/4262)
-- unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - unable to execute "kamel run" in secure mode [\#4249](https://github.com/apache/camel-k/issues/4249)
 - Acquiring lock at startup is taking long [\#4246](https://github.com/apache/camel-k/issues/4246)
 - Builder pod that hit timeout is not terminated [\#4241](https://github.com/apache/camel-k/issues/4241)
