@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/1.12.2-nightly...HEAD)
+
+**Closed issues:**
+
+- Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
+
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.12.1...1.12.2-nightly)
