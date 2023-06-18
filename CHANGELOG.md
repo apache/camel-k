@@ -4,6 +4,10 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/1.12.2-nightly...HEAD)
 
+**Closed issues:**
+
+- Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
+
 **Merged pull requests:**
 
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.20 to 0.6.21 [\#4490](https://github.com/apache/camel-k/pull/4490) ([dependabot[bot]](https://github.com/apps/dependabot))
