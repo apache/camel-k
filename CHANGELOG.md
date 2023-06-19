@@ -6,10 +6,13 @@
 
 **Closed issues:**
 
+- Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/otiai10/copy from 1.11.0 to 1.12.0 [\#4494](https://github.com/apache/camel-k/pull/4494) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.15.1 to 1.16.0 [\#4491](https://github.com/apache/camel-k/pull/4491) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.20 to 0.6.21 [\#4490](https://github.com/apache/camel-k/pull/4490) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/sync from 0.2.0 to 0.3.0 [\#4488](https://github.com/apache/camel-k/pull/4488) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.8.0 to 0.9.0 [\#4486](https://github.com/apache/camel-k/pull/4486) ([dependabot[bot]](https://github.com/apps/dependabot))
