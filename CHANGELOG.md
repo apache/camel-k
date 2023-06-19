@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
