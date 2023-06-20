@@ -20,13 +20,14 @@ name: coverage report
 on:
   pull_request:
 
-permissions:
-  pull-requests: write
-  issues: write
-
 jobs:
   report:
     runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      issues: write
+
     steps:
 
       - name: Checkout
