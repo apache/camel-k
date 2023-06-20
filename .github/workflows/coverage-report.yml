@@ -19,7 +19,7 @@ name: coverage report
 
 on:
   pull_request:
-  
+
 permissions:
   pull-requests: write
 
@@ -65,27 +65,27 @@ jobs:
           echo "COV_DIFF=$coverage_difference" >> $GITHUB_ENV
 
       - name: Comment
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
 
             if(${{env.POS_DIFF  == 'POS'}}){
-              github.issues.createComment({
+              github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: ':camel: **Thank You for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: +**${{env.COV_DIFF}}%**'
               })
             }else if(${{env.POS_DIFF == 'NEG'}}){
-              github.issues.createComment({
+              github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: ':camel: **Thank You for contributing!** :camel: \n\n  **Code Coverage Report** :warning:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: **${{env.COV_DIFF}}%**'
               })
             }else{
-              github.issues.createComment({
+              github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
