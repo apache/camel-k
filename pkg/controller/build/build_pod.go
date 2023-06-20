@@ -113,8 +113,7 @@ var (
 )
 
 func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
-	// TODO we must find a way to run this non-root
-	var ugfid int64 = 0
+	var ugfid int64 = 1001
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -264,10 +263,6 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 			Name:  "HOME",
 			Value: filepath.Join(builderDir, build.Name),
 		},
-		/*corev1.EnvVar{
-			Name:  "MAVEN_USER_HOME",
-			Value: "/usr/share/maven",
-		},*/
 	)
 
 	container := corev1.Container{
@@ -384,6 +379,7 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		image = fmt.Sprintf("%s:v%s", builder.BuildahDefaultImageName, defaults.BuildahVersion)
 	}
 
+	var root int64 = 0
 	container := corev1.Container{
 		Name:            task.Name,
 		Image:           image,
@@ -393,6 +389,11 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		Env:             env,
 		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
 		VolumeMounts:    volumeMounts,
+		// Buildah requires root privileges
+		SecurityContext: &corev1.SecurityContext{
+			RunAsUser:  &root,
+			RunAsGroup: &root,
+		},
 	}
 
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)

@@ -65,7 +65,8 @@ func TestKustomizeUninstallBasic(t *testing.T) {
 		Eventually(OperatorPod(ns)).Should(BeNil())
 		Eventually(Platform(ns)).Should(BeNil())
 		// The operator can dynamically create a for its builders
-		Eventually(Role(ns)).Should(HaveLen(1))
+		// so, in case there is a build strategy "pod", expect this to have 1 role
+		Eventually(Role(ns)).Should(BeNil())
 		Eventually(ClusterRole()).Should(BeNil())
 		// CRDs should be still there
 		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
