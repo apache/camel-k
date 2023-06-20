@@ -59,7 +59,7 @@ func TestBuilderTimeout(t *testing.T) {
 
 		t.Run("run yaml", func(t *testing.T) {
 			name := "yaml"
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
 			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 			integrationKitName := IntegrationKit(ns, name)()

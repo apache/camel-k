@@ -70,6 +70,7 @@ func TestBuilderTrait(t *testing.T) {
 			"-t", "builder.limit-cpu=1000m",
 			"-t", "builder.request-memory=2Gi",
 			"-t", "builder.limit-memory=3Gi",
+			"-t", "builder.strategy=pod",
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -101,10 +102,11 @@ func TestBuilderTrait(t *testing.T) {
 			"--name", name,
 			"-t", "builder.tasks=custom1;alpine;tree",
 			"-t", "builder.tasks=custom2;alpine;cat maven/pom.xml",
+			"-t", "builder.strategy=pod",
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		integrationKitName := IntegrationKit(ns, name)()
@@ -144,13 +146,14 @@ func TestBuilderTrait(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.tasks=custom1;alpine;cat missingfile.txt",
+			"-t", "builder.strategy=pod",
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 		integrationKitName := IntegrationKit(ns, name)()
 		// Check containers conditions
-		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
-		Eventually(BuildConditions(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(Build(ns, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
+		Eventually(BuildConditions(ns, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
 		Eventually(
 			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
 			TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
