@@ -1752,6 +1752,17 @@ func DeleteCamelCatalog(ns, name string) func() bool {
 	}
 }
 
+func DefaultCamelCatalogPhase(ns string) func() v1.CamelCatalogPhase {
+	return func() v1.CamelCatalogPhase {
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+		c := CamelCatalog(ns, catalogName)()
+		if c == nil {
+			return ""
+		}
+		return c.Status.Phase
+	}
+}
+
 func CamelCatalogPhase(ns, name string) func() v1.CamelCatalogPhase {
 	return func() v1.CamelCatalogPhase {
 		c := CamelCatalog(ns, name)()
