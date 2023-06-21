@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
+- Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
 
