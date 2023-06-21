@@ -1,0 +1,50 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: operator-build
+spec:
+  workspaces:
+  - name: shared-workspace
+  tasks:
+  - name: fetch-repository
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: url
+      value: https://github.com/apache/camel-k-examples/
+  - name: kamel-run
+    taskRef:
+      name: kamel-run
+    runAfter:
+    - fetch-repository
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: filename
+      value: generic-examples/languages/routes.yaml
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: operator-build-run
+spec:
+  pipelineRef:
+    name: operator-build
+  taskRunSpecs:
+    - pipelineTaskName: kamel-run
+      taskServiceAccountName: camel-k-tekton
+  workspaces:
+  - name: shared-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
