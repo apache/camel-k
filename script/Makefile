@@ -342,8 +342,8 @@ test-quarkus-native-high-memory: do-build
 	go test -timeout 180m -v ./e2e/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
-	@echo "####### Building kamel CLI for $(IMAGE_ARCH) architecture..."
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+	@echo "####### Building kamel CLI for $(GOOS) $(IMAGE_ARCH) architecture..."
+	CGO_ENABLED=0 GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
 	# Symbolic link to a local CLI
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
@@ -422,8 +422,16 @@ maven-overlay:
 	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION) build/_maven_overlay
 
 kamel-overlay:
-	@echo "####### Copy arch $(IMAGE_ARCH) CLI into output build directory..."
+	mkdir -p build/_output/bin
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	@echo "####### Copying Linux platform arch $(IMAGE_ARCH) CLI into output build directory..."
+else
+	@echo "####### (Re)Building a Linux platform arch $(IMAGE_ARCH) CLI "
+	@echo "####### Likely you're on a non Linux host, so I need to build a Linux CLI to bundle in the container image"
+	GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+endif
 	cp build/_output/bin/kamel-$(IMAGE_ARCH) build/_output/bin/kamel
+
 
 images: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))

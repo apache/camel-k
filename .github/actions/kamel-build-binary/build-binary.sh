@@ -98,6 +98,8 @@ fi
 echo "Moving kamel binary to be visible on PATH"
 
 if [ "$RUNNER_OS" == "macOS" ]; then
+  # We need to build the binary for the proper platform if we're not on Linux
+  make build
   ${SUDO} mv $(readlink kamel) /usr/local/bin/kamel
 else
   ${SUDO} mv $(readlink kamel) /usr/bin/kamel
