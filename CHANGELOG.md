@@ -6,11 +6,14 @@
 
 **Closed issues:**
 
+- Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
+- Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 
 **Merged pull requests:**
 
+- feat\(cicd\): onboard Camel K Tekton task [\#4499](https://github.com/apache/camel-k/pull/4499) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/otiai10/copy from 1.11.0 to 1.12.0 [\#4494](https://github.com/apache/camel-k/pull/4494) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.15.1 to 1.16.0 [\#4491](https://github.com/apache/camel-k/pull/4491) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.20 to 0.6.21 [\#4490](https://github.com/apache/camel-k/pull/4490) ([dependabot[bot]](https://github.com/apps/dependabot))
