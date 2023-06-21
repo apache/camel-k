@@ -44,7 +44,7 @@ spec:
       name: Phase
       type: string
     - description: The default build strategy
-      jsonPath: .status.build.buildStrategy
+      jsonPath: .status.build.buildConfiguration.strategy
       name: Build strategy
       type: string
     - description: The default publish strategy
