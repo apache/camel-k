@@ -68,7 +68,7 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
-// +kubebuilder:printcolumn:name="Build strategy",type=string,JSONPath=`.status.build.buildStrategy`,description="The default build strategy"
+// +kubebuilder:printcolumn:name="Build strategy",type=string,JSONPath=`.status.build.buildConfiguration.strategy`,description="The default build strategy"
 // +kubebuilder:printcolumn:name="Publish strategy",type=string,JSONPath=`.status.build.publishStrategy`,description="The default publish strategy"
 // +kubebuilder:printcolumn:name="Registry address",type=string,JSONPath=`.status.build.registry.address`,description="The container registry address"
 // +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.build.runtimeVersion`,description="The default runtime version"
