@@ -1,0 +1,76 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: kamel-run-test
+spec:
+  workspaces:
+  - name: shared-workspace
+  tasks:
+  - name: fetch-repository
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared-workspace
+    params:
+    - name: url
+      value: https://github.com/apache/camel-k-examples/
+  - name: kamel-run
+    taskRef:
+      name: kamel-run
+    runAfter:
+    - fetch-repository
+    workspaces:
+    - name: source
+      workspace: shared-workspace
+    params:
+    - name: filename
+      value: generic-examples/languages/routes.yaml
+    - name: wait
+      value: "true"
+  - name: verify-it-phase
+    runAfter:
+    - kamel-run
+    params:
+    - name: it-name
+      value: $(tasks.kamel-run.results.integration-name)
+    - name: it-phase
+      value: $(tasks.kamel-run.results.integration-phase)
+    taskSpec:
+      params:
+      - name: it-name
+      - name: it-phase
+      steps:
+      - name: bash
+        image: ubuntu
+        script: |
+          if [[ ! $(params.it-name) == "sample"]]; then
+            echo "Expected integration name sample (was $(params.it-name))"
+            exit 1
+          fi
+          if [[ ! $(params.it-phase) == "running"]]; then
+            echo "Expected integration phase running (was $(params.it-phase))"
+            exit 1
+          fi
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: kamel-run-test-run
+spec:
+  pipelineRef:
+    name: kamel-run-test
+  taskRunSpecs:
+    - pipelineTaskName: kamel-run
+      taskServiceAccountName: camel-k-tekton
+  workspaces:
+  - name: shared-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
