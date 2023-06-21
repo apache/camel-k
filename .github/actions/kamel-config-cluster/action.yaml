@@ -164,6 +164,19 @@ runs:
 
         echo "Complete"
 
+      #
+      # Install a Maven Proxy repository
+      #
+    - id: install-maven-proxy
+      name: Install Maven proxy repository
+      shell: bash
+      run: |
+        kubectl create namespace nexus
+        kubectl apply -f ./.github/actions/kamel-config-cluster/nexus.yaml -n nexus
+        kubectl rollout status deployment nexus -n nexus --timeout=180s
+        echo "TEST_ENABLE_NEXUS=true" >> $GITHUB_OUTPUT
+        echo "Maven proxy repository up and running!"
+
 outputs:
   cluster-image-registry-push-host:
     description: "The image registry to which to push images"
