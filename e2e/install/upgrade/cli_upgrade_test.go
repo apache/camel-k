@@ -91,6 +91,7 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		// Check the IntegrationPlatform has been reconciled
+		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		Eventually(PlatformVersion(ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the Integration hasn't been upgraded
@@ -99,6 +100,8 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		// Force the Integration upgrade
 		Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
+		// A catalog should be created with the new configuration
+		Eventually(DefaultCamelCatalogPhase(ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 		// Check the Integration version has been upgraded
 		Eventually(IntegrationVersion(ns, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 
