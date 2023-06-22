@@ -43,8 +43,8 @@
 ** xref:configuration/runtime-config.adoc[Runtime configuration]
 ** xref:configuration/runtime-resources.adoc[Runtime resources]
 * Pipelines
-* xref:pipeline/pipeline.adoc[Basic]
-* xref:pipeline/tekton.adoc[Tekton]
+** xref:pipeline/pipeline.adoc[Basic]
+** xref:pipeline/tekton.adoc[Tekton]
 * Observability
 ** xref:observability/logging.adoc[Logging]
 *** xref:observability/logging/operator.adoc[Operator]
