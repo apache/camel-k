@@ -8,11 +8,18 @@
 
 - Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
+- Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
+- Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.21 to 0.6.24 [\#4507](https://github.com/apache/camel-k/pull/4507) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Increase log lines to 150 when dumping pod logs in e2e tests [\#4506](https://github.com/apache/camel-k/pull/4506) ([claudio4j](https://github.com/claudio4j))
+- Fix: show IntegrationPlatform build stragegy field [\#4505](https://github.com/apache/camel-k/pull/4505) ([claudio4j](https://github.com/claudio4j))
+- chore\(e2e\): wait for the catalog to be ready [\#4503](https://github.com/apache/camel-k/pull/4503) ([squakez](https://github.com/squakez))
+- fix\(ci\): use released action version [\#4500](https://github.com/apache/camel-k/pull/4500) ([squakez](https://github.com/squakez))
 - feat\(cicd\): onboard Camel K Tekton task [\#4499](https://github.com/apache/camel-k/pull/4499) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/otiai10/copy from 1.11.0 to 1.12.0 [\#4494](https://github.com/apache/camel-k/pull/4494) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.15.1 to 1.16.0 [\#4491](https://github.com/apache/camel-k/pull/4491) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -21,6 +28,7 @@
 - chore\(deps\): bump golang.org/x/oauth2 from 0.8.0 to 0.9.0 [\#4486](https://github.com/apache/camel-k/pull/4486) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/term from 0.8.0 to 0.9.0 [\#4482](https://github.com/apache/camel-k/pull/4482) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/text from 0.9.0 to 0.10.0 [\#4481](https://github.com/apache/camel-k/pull/4481) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(build\): complete repo name for default baseImage [\#4480](https://github.com/apache/camel-k/pull/4480) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): remove workaround pre 1.12.1 [\#4479](https://github.com/apache/camel-k/pull/4479) ([squakez](https://github.com/squakez))
 
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
