@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:038ae769-c8dc-4b9b-abd9-3afabcbc4656",
+  "serialNumber": "urn:uuid:2012c439-b416-49ee-b2a7-eb50b255259e",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-06-21T23:47:28Z",
+    "timestamp": "2023-06-22T23:49:26Z",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230622234844-014d625b16db?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20230621234131-05d32ca02579",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230621234131-05d32ca02579?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20230622234844-014d625b16db",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230622234844-014d625b16db?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -423,18 +423,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230622234844-014d625b16db?type=module",
       "type": "library",
       "name": "github.com/apache/camel-k/v2/pkg/apis/camel",
-      "version": "v0.0.0-20230621234131-05d32ca02579",
+      "version": "v0.0.0-20230622234844-014d625b16db",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "7aa80cb2627a6324887be9ce9b321b0cceab164ca0d874c4cf591e3c63b8e4a0"
+          "content": "cad883fd727c634f9f2f59cb943c0a5c41d0da065cc8e63ab32c3f16a8ceee55"
         }
       ],
-      "purl": "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230621234131-05d32ca02579?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230622234844-014d625b16db?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k/v2/pkg/apis/camel",
@@ -443,18 +443,18 @@
       ]
     },
     {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230622234844-014d625b16db?type=module",
       "type": "library",
       "name": "github.com/apache/camel-k/v2/pkg/client/camel",
-      "version": "v0.0.0-20230621234131-05d32ca02579",
+      "version": "v0.0.0-20230622234844-014d625b16db",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "44ae0acd513fb6b053ff1fa11e61eb3a15136dac17196a9b5d11e75cff207f13"
+          "content": "f3c047a8f6da4a428e641319a5a87f064c36abbbfb190778965a79454f3c7153"
         }
       ],
-      "purl": "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230621234131-05d32ca02579?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230622234844-014d625b16db?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k/v2/pkg/client/camel",
@@ -463,18 +463,18 @@
       ]
     },
     {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230622234844-014d625b16db?type=module",
       "type": "library",
       "name": "github.com/apache/camel-k/v2/pkg/kamelet/repository",
-      "version": "v0.0.0-20230621234131-05d32ca02579",
+      "version": "v0.0.0-20230622234844-014d625b16db",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "8611ed8c8ab019d63f2acfee78f8dccd3b4dd2958a86dd0af1c29fbeaaeb122c"
+          "content": "d1a59429d1e9706960581d9692d4be38d4bc71c572d0b4d73fcf84e165e05806"
         }
       ],
-      "purl": "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230621234131-05d32ca02579?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230622234844-014d625b16db?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k/v2/pkg/kamelet/repository",
@@ -686,18 +686,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/github.com/container-tools/spectrum@v0.6.21?type=module",
+      "bom-ref": "pkg:golang/github.com/container-tools/spectrum@v0.6.24?type=module",
       "type": "library",
       "name": "github.com/container-tools/spectrum",
-      "version": "v0.6.21",
+      "version": "v0.6.24",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "8167701cfa701fdc6566451572e2530613fb10bff50c7db084882307f68e971c"
+          "content": "abf6fe35b9b3b733899e2ff06f7d493912b7c057a585958b58cc8df22eaf0385"
         }
       ],
-      "purl": "pkg:golang/github.com/container-tools/spectrum@v0.6.21?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/github.com/container-tools/spectrum@v0.6.24?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/container-tools/spectrum",
@@ -4064,13 +4064,13 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230622234844-014d625b16db?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
-        "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
-        "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
-        "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230621234131-05d32ca02579?type=module",
-        "pkg:golang/github.com/container-tools/spectrum@v0.6.21?type=module",
+        "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230622234844-014d625b16db?type=module",
+        "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230622234844-014d625b16db?type=module",
+        "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230622234844-014d625b16db?type=module",
+        "pkg:golang/github.com/container-tools/spectrum@v0.6.24?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.6.0+incompatible?type=module",
         "pkg:golang/github.com/fsnotify/fsnotify@v1.6.0?type=module",
         "pkg:golang/github.com/gertd/go-pluralize@v0.2.1?type=module",
@@ -4226,7 +4226,7 @@
       "ref": "pkg:golang/github.com/antlr/antlr4/runtime/Go/antlr@v1.4.10?type=module"
     },
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230622234844-014d625b16db?type=module",
       "dependsOn": [
         "pkg:golang/github.com/imdario/mergo@v0.3.13?type=module",
         "pkg:golang/github.com/stretchr/testify@v1.8.4?type=module",
@@ -4252,9 +4252,9 @@
       ]
     },
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230622234844-014d625b16db?type=module",
       "dependsOn": [
-        "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
+        "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230622234844-014d625b16db?type=module",
         "pkg:golang/k8s.io/api@v0.25.6?type=module",
         "pkg:golang/k8s.io/apimachinery@v0.25.6?type=module",
         "pkg:golang/k8s.io/client-go@v0.25.6?type=module",
@@ -4298,10 +4298,10 @@
       ]
     },
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230621234131-05d32ca02579?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2/pkg/kamelet/repository@v0.0.0-20230622234844-014d625b16db?type=module",
       "dependsOn": [
-        "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
-        "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230621234131-05d32ca02579?type=module",
+        "pkg:golang/github.com/apache/camel-k/v2/pkg/apis/camel@v0.0.0-20230622234844-014d625b16db?type=module",
+        "pkg:golang/github.com/apache/camel-k/v2/pkg/client/camel@v0.0.0-20230622234844-014d625b16db?type=module",
         "pkg:golang/github.com/stretchr/testify@v1.8.4?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.9.0?type=module",
         "pkg:golang/k8s.io/apimachinery@v0.25.6?type=module",
@@ -4429,7 +4429,7 @@
       ]
     },
     {
-      "ref": "pkg:golang/github.com/container-tools/spectrum@v0.6.21?type=module",
+      "ref": "pkg:golang/github.com/container-tools/spectrum@v0.6.24?type=module",
       "dependsOn": [
         "pkg:golang/github.com/containerd/stargz-snapshotter/estargz@v0.14.3?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.1?type=module",
