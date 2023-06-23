@@ -8,7 +8,10 @@
 
 - Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
+- Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
+- pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
+- Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
@@ -2502,7 +2505,6 @@
 - Kamelet using Java DSL [\#2117](https://github.com/apache/camel-k/issues/2117)
 - Add sample using Flink [\#2116](https://github.com/apache/camel-k/issues/2116)
 - OLM installation may fail with default values [\#2113](https://github.com/apache/camel-k/issues/2113)
-- Runtime reload configmap/secret when they change [\#2106](https://github.com/apache/camel-k/issues/2106)
 - Kamelet - Possible to pre configure component options [\#2081](https://github.com/apache/camel-k/issues/2081)
 - Monitor integration related events [\#2025](https://github.com/apache/camel-k/issues/2025)
 - Switch to UBI minimal  [\#2007](https://github.com/apache/camel-k/issues/2007)
