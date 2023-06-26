@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
 - Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
+- Problems reading boolean values for traits using comments [\#4493](https://github.com/apache/camel-k/issues/4493)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
