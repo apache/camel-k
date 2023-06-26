@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:17-jdk as base
 
 ARG MAVEN_DEFAULT_VERSION="3.8.6"
 ARG MAVEN_HOME="/usr/share/maven"
@@ -56,3 +56,11 @@ RUN mkdir -p /etc/maven/m2 \
 USER 1000
 
 ADD build/_output/bin/kamel /usr/local/bin/kamel
+
+FROM golang:1.18 as go
+
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+FROM base as debug
+
+COPY --from=go /go/bin/dlv /usr/local/bin/dlv

@@ -54,7 +54,7 @@ RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
-
+DEBUG_MODE ?= false
 
 # olm bundle vars
 MANAGER := config/manager
@@ -120,6 +120,10 @@ $(warning Could not retrieve a valid Git Commit)
 endif
 
 GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
+
+ifeq ($(DEBUG_MODE),true)
+GOFLAGS += -gcflags="all=-N -l"
+endif
 
 define LICENSE_HEADER
 Licensed to the Apache Software Foundation (ASF) under one or more
@@ -432,6 +436,16 @@ else
 endif
 	cp build/_output/bin/kamel-$(IMAGE_ARCH) build/_output/bin/kamel
 
+TARGET_STAGE := base
+ifeq ($(DEBUG_MODE),true)
+	TARGET_STAGE := debug
+	CUSTOM_IMAGE := $(CUSTOM_IMAGE)-debug
+endif
+
+DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+ifneq ($(IMAGE_ARCH), amd64)
+	DOCKER_TAG := $(DOCKER_TAG)-$(IMAGE_ARCH)
+endif
 
 images: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
@@ -439,11 +453,7 @@ ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-ifeq ($(IMAGE_ARCH), amd64)
-	docker build --platform=linux/$(IMAGE_ARCH) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
-else
-	docker build --platform=linux/$(IMAGE_ARCH) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH) -f build/Dockerfile .
-endif
+	docker build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
 
 # Mainly used for internal CI purposes
 image-push:

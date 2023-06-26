@@ -57,6 +57,7 @@ type OperatorConfiguration struct {
 	ClusterType           string
 	Health                OperatorHealthConfiguration
 	Monitoring            OperatorMonitoringConfiguration
+	Debugging             OperatorDebuggingConfiguration
 	Tolerations           []string
 	NodeSelectors         []string
 	ResourcesRequirements []string
@@ -66,6 +67,12 @@ type OperatorConfiguration struct {
 
 type OperatorHealthConfiguration struct {
 	Port int32
+}
+
+type OperatorDebuggingConfiguration struct {
+	Enabled bool
+	Port    int32
+	Path    string
 }
 
 type OperatorMonitoringConfiguration struct {
@@ -208,6 +215,22 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 			var ugfid int64 = 0
 			d.Spec.Template.Spec.SecurityContext = &corev1.PodSecurityContext{
 				FSGroup: &ugfid,
+			}
+		}
+		if cfg.Debugging.Enabled {
+			if d, ok := o.(*appsv1.Deployment); ok {
+				if d.Labels["camel.apache.org/component"] == "operator" {
+					d.Spec.Template.Spec.Containers[0].Command = []string{"dlv",
+						fmt.Sprintf("--listen=:%d", cfg.Debugging.Port), "--headless=true", "--api-version=2",
+						"exec", cfg.Debugging.Path, "--", "operator", "--leader-election=false"}
+					d.Spec.Template.Spec.Containers[0].Ports = append(d.Spec.Template.Spec.Containers[0].Ports, corev1.ContainerPort{
+						Name:          "delve",
+						ContainerPort: cfg.Debugging.Port,
+					})
+					// In debug mode, the Liveness probe must be removed otherwise K8s will consider the pod as dead
+					// while debugging
+					d.Spec.Template.Spec.Containers[0].LivenessProbe = nil
+				}
 			}
 		}
 

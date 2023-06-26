@@ -176,3 +176,7 @@ config/**/*.gen.json
 # Fabric8 CRDs
 java/target
 pkg/resources/resources.go
+
+# MAC OS files
+.DS_Store
+
