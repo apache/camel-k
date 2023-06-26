@@ -199,8 +199,7 @@ func hasMatchingTraits(traitMap trait.Options, kitTraitMap trait.Options) (bool,
 	catalog := trait.NewCatalog(nil)
 
 	for _, t := range catalog.AllTraits() {
-		if t == nil || !t.InfluencesKit() {
-			// We don't store the trait configuration if the trait cannot influence the kit behavior
+		if t == nil {
 			continue
 		}
 
@@ -211,17 +210,17 @@ func hasMatchingTraits(traitMap trait.Options, kitTraitMap trait.Options) (bool,
 		if !ok1 && !ok2 {
 			continue
 		}
-		if !ok1 || !ok2 {
-			return false, nil
-		}
-		if ct, ok := t.(trait.ComparableTrait); ok {
-			// if it's match trait use its matches method to determine the match
-			if match, err := matchesComparableTrait(ct, it, kt); !match || err != nil {
-				return false, err
-			}
-		} else {
-			if !matchesTrait(it, kt) {
-				return false, nil
+
+		if t.InfluencesKit() && t.InfluencesBuild(it, kt) {
+			if ct, ok := t.(trait.ComparableTrait); ok {
+				// if it's match trait use its matches method to determine the match
+				if match, err := matchesComparableTrait(ct, it, kt); !match || err != nil {
+					return false, err
+				}
+			} else {
+				if !matchesTrait(it, kt) {
+					return false, nil
+				}
 			}
 		}
 	}

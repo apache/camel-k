@@ -53,6 +53,11 @@ func (t *registryTrait) InfluencesKit() bool {
 	return true
 }
 
+// InfluencesBuild overrides base class method.
+func (t *registryTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
+	return true
+}
+
 func (t *registryTrait) Configure(e *Environment) (bool, error) {
 	// disabled by default
 	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, false) {

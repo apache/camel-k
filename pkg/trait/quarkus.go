@@ -106,6 +106,11 @@ func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }
 
+// InfluencesBuild overrides base class method.
+func (t *quarkusTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
+	return true
+}
+
 var _ ComparableTrait = &quarkusTrait{}
 
 func (t *quarkusTrait) Matches(trait Trait) bool {
