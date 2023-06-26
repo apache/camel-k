@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
 - Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
+- Problems reading boolean values for traits using comments [\#4493](https://github.com/apache/camel-k/issues/4493)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
@@ -16,6 +18,7 @@
 
 **Merged pull requests:**
 
+- feat\(trait\): add InfluencesBuild\(\) func [\#4512](https://github.com/apache/camel-k/pull/4512) ([squakez](https://github.com/squakez))
 - fix\(helm\): proper CRDs [\#4510](https://github.com/apache/camel-k/pull/4510) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.24 to 0.6.25 [\#4509](https://github.com/apache/camel-k/pull/4509) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.21 to 0.6.24 [\#4507](https://github.com/apache/camel-k/pull/4507) ([dependabot[bot]](https://github.com/apps/dependabot))
