@@ -43,6 +43,7 @@ type Trait interface {
 	Configure(environment *Environment) (bool, error)
 	Apply(environment *Environment) error
 	InfluencesKit() bool
+	InfluencesBuild(this, prev map[string]interface{}) bool
 	IsPlatformTrait() bool
 	RequiresIntegrationPlatform() bool
 	IsAllowedInProfile(v1.TraitProfile) bool
@@ -57,5 +58,7 @@ Once configured, the `Apply()` method will be called along the build or initiali
 The `Order()` method helps in resolving the order of execution of different traits. As every trait can be expected to be run before or after another trait, or any other controller operation.
 
 The `InfluencesKit()`, `IsPlatformTrait()` and `RequiresIntegrationPlatform()` methods are easy to understand. They are used to determine if a trait has to influence an `IntegrationKit` build/initialization, if it's a platform trait (ie, needed by the platform itself) or are requiring the presence of an `IntegrationPlatform`.
+
+The presence of `InfluencesBuild()` will let specify the level of granularity of a trait down to its properties for a rebuild. So, if you need, you can compare the traits properties coming from the `prev` (previous) Integration to decide if it is worth to rebuild an Integration or the trait can reuse the one already provided in `this` version.
 
 Finally, through the `IsAllowedInProfile()` method we can override the default behavior (allow the trait for any profile). We must specify the profile we expect for this trait to be executed properly.
