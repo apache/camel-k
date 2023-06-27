@@ -173,8 +173,14 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	}
 
 	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
+		quarkus, ok := trait.(*quarkusTrait)
+		isNativeIntegration := quarkus.isNativeIntegration(e)
+		isNativeKit, err := quarkus.isNativeKit(e)
+		if err != nil {
+			return nil, err
+		}
 		// The builder trait must define certain resources requirements when we have a native build
-		if quarkus, ok := trait.(*quarkusTrait); ok && pointer.BoolDeref(quarkus.Enabled, true) && quarkus.isNativeIntegration(e) {
+		if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
 			// Force the build to run in a separate Pod
 			t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
 			t.Strategy = string(v1.BuildStrategyPod)
