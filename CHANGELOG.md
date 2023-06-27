@@ -6,15 +6,22 @@
 
 **Closed issues:**
 
+- Allow to remote debug the Operator [\#4513](https://github.com/apache/camel-k/issues/4513)
 - Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
+- CamelCatalog generated twice [\#4504](https://github.com/apache/camel-k/issues/4504)
 - Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
 - Problems reading boolean values for traits using comments [\#4493](https://github.com/apache/camel-k/issues/4493)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
+- Missing license header [\#4469](https://github.com/apache/camel-k/issues/4469)
+- Rework CLIs required by operator build process [\#4466](https://github.com/apache/camel-k/issues/4466)
+- Horizontal scaling ability for operators [\#4173](https://github.com/apache/camel-k/issues/4173)
+- Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
+- Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
 
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
 
