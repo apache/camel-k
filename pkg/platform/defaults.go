@@ -82,7 +82,18 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.BuildConfiguration.Strategy == "" {
-		p.Status.Build.BuildConfiguration.Strategy = v1.BuildStrategyRoutine
+		defaultStrategy := v1.BuildStrategyRoutine
+		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah ||
+			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
+			defaultStrategy = v1.BuildStrategyPod
+			log.Infof("Integration Platform %s [%s]: setting fallback build strategy %s because PublishStrategy is configured as %s",
+				p.Name,
+				p.Namespace,
+				defaultStrategy,
+				p.Status.Build.PublishStrategy,
+			)
+		}
+		p.Status.Build.BuildConfiguration.Strategy = defaultStrategy
 		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
 	}
 
