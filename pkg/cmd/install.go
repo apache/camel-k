@@ -140,6 +140,11 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
 	cmd.Flags().Int("monitoring-port", 8080, "The port of the metrics endpoint")
 
+	// debugging
+	cmd.Flags().Bool("debugging", false, "To enable or disable the operator debugging")
+	cmd.Flags().Int("debugging-port", 4040, "The port of the debugger")
+	cmd.Flags().String("debugging-path", "/usr/local/bin/kamel", "The path to the kamel executable file")
+
 	// Operator settings
 	cmd.Flags().StringArray("toleration", nil, "Add a Toleration to the operator Pod")
 	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
@@ -196,6 +201,9 @@ type installCmdOptions struct {
 	MaxRunningBuilds            int32    `mapstructure:"max-running-pipelines"`
 	Monitoring                  bool     `mapstructure:"monitoring"`
 	MonitoringPort              int32    `mapstructure:"monitoring-port"`
+	Debugging                   bool     `mapstructure:"debugging"`
+	DebuggingPort               int32    `mapstructure:"debugging-port"`
+	DebuggingPath               string   `mapstructure:"debugging-path"`
 	TraitProfile                string   `mapstructure:"trait-profile"`
 	Tolerations                 []string `mapstructure:"tolerations"`
 	NodeSelectors               []string `mapstructure:"node-selectors"`
@@ -426,6 +434,11 @@ func (o *installCmdOptions) setupOperator(
 		Monitoring: install.OperatorMonitoringConfiguration{
 			Enabled: o.Monitoring,
 			Port:    o.MonitoringPort,
+		},
+		Debugging: install.OperatorDebuggingConfiguration{
+			Enabled: o.Debugging,
+			Port:    o.DebuggingPort,
+			Path:    o.DebuggingPath,
 		},
 		Tolerations:           o.Tolerations,
 		NodeSelectors:         o.NodeSelectors,

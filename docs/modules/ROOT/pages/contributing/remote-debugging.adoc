@@ -1,0 +1,90 @@
+[[remote-debugging]]
+= Remote Debugging Camel-K
+
+In this article, we describe the steps needed to be able to remotely debug the Camel-K operator directly from the K8s cluster.
+By doing so, you are sure that the operator is executed in the same context as your target environment, which is not the case
+if the operator is launched on the local machine.
+
+[[publish-image]]
+== Publish the image
+
+The first thing to do is to build a specific docker image of the Camel-K operator for the debug mode, indeed the `kamel` program
+will then be built without compiler optimizations, and inlining but also the docker image will launch the operator through
+https://github.com/go-delve/delve[`delve`] to be able to remote debug it.
+
+[source,shell]
+----
+DEBUG_MODE=true make images
+----
+
+Once done, a docker image of type `docker.io/apache/camel-k-debug:2.0.0-SNAPSHOT` has been pushed into your local docker image registry.
+
+If you are using Minikube, before executing the previous command make sure to set up properly the environment
+variables in your terminal by executing the command `eval $(minikube -p minikube docker-env)`, in that case the image is
+directly pushed into the registry of Minikube, so you can skip the end of the section.
+
+For other clusters like for example `kind` where the registry is accessible locally from `localhost:5001`, simply tag the
+image to match with the new host and port with the next command:
+
+[source,shell]
+----
+docker tag docker.io/apache/camel-k-debug:2.0.0-SNAPSHOT localhost:5001/apache/camel-k-debug:2.0.0-SNAPSHOT
+----
+
+Then push the image to the target registry with the next command:
+[source,shell]
+----
+docker push localhost:5001/apache/camel-k-debug:2.0.0-SNAPSHOT
+----
+
+To ensure that the image has been pushed with success, let's query the registry https://docs.docker.com/registry/spec/api/#listing-repositories[using the API]
+[source,shell]
+----
+curl http://localhost:5001/v2/_catalog
+{"repositories":["apache/camel-k-debug"]}
+----
+
+[[install-operator]]
+== Install the operator
+
+Since the docker image is ready to be used, we can now install the operator with the debugging flags to make sure that
+the operator will be launched properly with the debug port open on its pod.
+
+First, let's create a namespace in which the operator will be installed, here the namespace is `test`.
+[source,shell]
+----
+kubectl create ns test
+namespace/test created
+----
+
+Then, install the operator with the image that we built before
+[source,shell]
+----
+./kamel install --olm=false --operator-image apache/camel-k-debug:2.0.0-SNAPSHOT --debugging -n test
+----
+It will install the operator using `apache/camel-k-debug:2.0.0-SNAPSHOT` as docker image and launch it in debug mode.
+
+[[port-forward]]
+== Open the port on the pod
+
+The operator is now waiting for a remote connection, but to make it possible, we need to make the debugging port
+accessible from outside the cluster thanks to the following `port-forward` command:
+
+[source,shell]
+----
+kubectl port-forward -n test $(kubectl get po -l app=camel-k -oname -n test) 4040:4040
+Forwarding from 127.0.0.1:4040 -> 4040
+Forwarding from [::1]:4040 -> 4040
+----
+This command port forwards the port `4040` of the pod to the local port `4040` which makes it accessible from `localhost`.
+Where `4040` is the default port of delve configured in the pod manifest, but it can be changed when installing the
+operator thanks to the flag `--debugging-port=4040`.
+
+[[configure-ide]]
+== Configure your IDE
+
+At this stage, you simply need to configure your favorite IDE to remote debug the operator using `localhost` as host and
+`4040` as port:
+
+* https://www.jetbrains.com/help/go/attach-to-running-go-processes-with-debugger.html#step-3-create-the-remote-run-debug-configuration-on-the-client-computer[Configure IDEA]
+* https://go.googlesource.com/vscode-go/+/HEAD/docs/debugging.md#remote-debugging[Configure VSCode]
