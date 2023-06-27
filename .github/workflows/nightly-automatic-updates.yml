@@ -29,7 +29,7 @@ jobs:
     name: Automatic updates on main branch
     steps:
     - name: "Checkout code"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: main
         persist-credentials: false
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: "Checkout code"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: release-1.10.x
         persist-credentials: false
