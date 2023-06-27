@@ -6,18 +6,29 @@
 
 **Closed issues:**
 
+- Allow to remote debug the Operator [\#4513](https://github.com/apache/camel-k/issues/4513)
 - Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
+- CamelCatalog generated twice [\#4504](https://github.com/apache/camel-k/issues/4504)
 - Question: use camel dependency version 3.20.3 or higher [\#4502](https://github.com/apache/camel-k/issues/4502)
 - Problems reading boolean values for traits using comments [\#4493](https://github.com/apache/camel-k/issues/4493)
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
+- Missing license header [\#4469](https://github.com/apache/camel-k/issues/4469)
+- Rework CLIs required by operator build process [\#4466](https://github.com/apache/camel-k/issues/4466)
+- Horizontal scaling ability for operators [\#4173](https://github.com/apache/camel-k/issues/4173)
+- Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
+- Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
 
 **Merged pull requests:**
 
+- chore\(ci\): Upgrade github/non github actions [\#4518](https://github.com/apache/camel-k/pull/4518) ([gansheer](https://github.com/gansheer))
+- Ref \#4513: Allow to remote debug the Operator [\#4517](https://github.com/apache/camel-k/pull/4517) ([essobedo](https://github.com/essobedo))
+- chore\(ci\) : Fix licence missing/invalid format [\#4515](https://github.com/apache/camel-k/pull/4515) ([gansheer](https://github.com/gansheer))
+- fix\(trait\): retrieve non cached version of generated Camel Catalog [\#4514](https://github.com/apache/camel-k/pull/4514) ([squakez](https://github.com/squakez))
 - feat\(trait\): add InfluencesBuild\(\) func [\#4512](https://github.com/apache/camel-k/pull/4512) ([squakez](https://github.com/squakez))
 - fix\(helm\): proper CRDs [\#4510](https://github.com/apache/camel-k/pull/4510) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.24 to 0.6.25 [\#4509](https://github.com/apache/camel-k/pull/4509) ([dependabot[bot]](https://github.com/apps/dependabot))
