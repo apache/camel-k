@@ -32,7 +32,7 @@ runs:
   using: "composite"
   steps:
     - name: Install Go ${{ inputs.goVersion }}
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v4
       with:
         go-version: ${{ inputs.goVersion }}
     - name: Generate changelog
