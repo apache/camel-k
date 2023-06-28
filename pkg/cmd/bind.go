@@ -39,6 +39,9 @@ import (
 
 // newCmdBind --.
 func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions) {
+
+	fmt.Println("Draft change to see coverage in action...")
+	
 	options := bindCmdOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
