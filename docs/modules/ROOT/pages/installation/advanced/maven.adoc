@@ -1,18 +1,47 @@
 = Configure Maven
 
+Camel K builds are performed by Maven. For this reason it may requires certain Maven best practices that will make your application to run faster, more secure and more resiliently. The Maven configuration is defined at IntegrationPlatform level. Have a look at the following sections to discover how to configure Maven in Camel K.
+
+[[maven-proxy]]
+== Maven Repository Manager (Proxy)
+
+The first best practice we suggest is to provide a https://maven.apache.org/repository-management.html[Maven Repository Manager] that acts as an intermediary between the cluster and the various artifacts repositories that may be required by Camel K.
+
+If your company has already one available in the cluster, you should use it. If not, we suggest you to take the opportunity and xref:installation/advanced/maven-proxy.adoc[run a Maven proxy beside your Camel K operator]. There are many benefits by introducing a proxy, above all the reduction in the time required to download dependencies (which are cached in the proxy) and inherently the egress bandwidth cost saving.
+
+You can create a `settings.xml` file as illustred below:
+
+```xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <mirrors>
+        <mirror>
+            <id>camel-k-maven-repository-manager</id>
+            <name>Maven Repository Manager</name>
+            <url>MAVEN_PROXY_URL[:MAVEN_PROXY_PORT]/</url>
+            <mirrorOf>*</mirrorOf>
+        </mirror>
+    </mirrors>
+</settings>
+```
+
+You can use any id or name. What's important is the location where to expect the service and the `mirrorOf` configuration which specifies that this service acts as a proxy for any repository required by the operator build. See the next paragraph to learn how to apply this configuration to your Camel K operator.
+
 [[maven-settings]]
 == Maven Settings
 
-The Maven settings, used by the Camel K operator, can be provided in a ConfigMap or a Secret.
+In general you can https://maven.apache.org/settings.html[tune Maven] with any parameter expected by `settings.xml` configuration file. Once you have the file ready you can create a Configmap or a Secret in order to use it in your Camel K installation:
 
-The `kubectl` CLI provides convenient commands, to create a ConfigMap or a Secret from a file, e.g.:
+```
+kubectl create cm my-maven-proxy --from-file settings.xml
+```
 
-[source,console]
-----
-$ kubectl create configmap maven-settings --from-file=settings.xml
-----
+Once the Configmap/Secret is ready, then, you can configure it in your Camel K operator directly at installation time:
 
-The created ConfigMap or Secret can then be referenced in the IntegrationPlatform resource, from the `spec.pipeline.maven.settings` field, e.g.:
+```
+kamel install --maven-settings configmap:my-maven-proxy/settings.xml
+```
+
+The ConfigMap or Secret can then be also referenced in the IntegrationPlatform resource, from the `spec.pipeline.maven.settings` field, e.g.:
 
 [source,yaml]
 ----
@@ -28,6 +57,8 @@ spec:
           key: settings.xml
           name: maven-settings
 ----
+
+This last method is useful when you introduce any configuration while Camel K operator is running (it won't require a restart).
 
 [[maven-settings-security]]
 === Maven Settings Security
@@ -67,14 +98,10 @@ The IntegrationPlatform resource can be edited directly, to reference the Config
 $ kubectl edit ip camel-k
 ----
 
-Alternatively, the Kamel CLI provides the `--maven-settings` option, with the `install` command, that can be used to configure the Maven settings at installation time, e.g.:
+[[maven-repositories]]
+== Maven Repositories
 
-[source,console]
-----
-$ kamel install --maven-settings=configmap|secret:name[/key]
-----
-
-In case you only want to configure remote repositories, you can use the `--maven-repository` option, that automatically generates a `settings.xml` file and relieves from creating a ConfigMap or Secret, e.g.:
+In case you only want to configure remote repositories, you can use the `--maven-repository` option, that automatically generates a `settings.xml` file (which is stored as a Configmap anyway):
 
 [source,console]
 ----

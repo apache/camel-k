@@ -27,6 +27,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
@@ -94,6 +95,87 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.Equal(t, 2, len(ip.Status.Build.Maven.Properties))
 	assert.Equal(t, "global_value1", ip.Status.Build.Maven.Properties["global_prop1"])
 	assert.Equal(t, "global_value2", ip.Status.Build.Maven.Properties["global_prop2"])
+}
+
+func TestPlatformBuildahUpdateOverrideLocalPlatformSpec(t *testing.T) {
+	global := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+			},
+		},
+	}
+
+	c, err := test.NewFakeClient(&global)
+	assert.Nil(t, err)
+
+	err = ConfigureDefaults(context.TODO(), c, &global, false)
+	assert.Nil(t, err)
+	assert.Equal(t, builder.BuildahDefaultBaseImageName, global.Status.Build.BaseImage)
+
+	ip := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "local-camel-k",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				BaseImage:       "overridden",
+			},
+		},
+	}
+
+	ip.ResyncStatusFullConfig()
+
+	applyPlatformSpec(&global, &ip)
+
+	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyBuildah, ip.Status.Build.PublishStrategy)
+	assert.Equal(t, "overridden", ip.Status.Build.BaseImage)
+}
+
+func TestPlatformBuildahUpdateDefaultLocalPlatformSpec(t *testing.T) {
+
+	global := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				BaseImage:       "overridden",
+			},
+		},
+	}
+
+	c, err := test.NewFakeClient(&global)
+	assert.Nil(t, err)
+
+	err = ConfigureDefaults(context.TODO(), c, &global, false)
+	assert.Nil(t, err)
+	assert.Equal(t, "overridden", global.Status.Build.BaseImage)
+
+	ip := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "local-camel-k",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+			},
+		},
+	}
+
+	ip.ResyncStatusFullConfig()
+
+	applyPlatformSpec(&global, &ip)
+
+	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyBuildah, ip.Status.Build.PublishStrategy)
+	assert.Equal(t, builder.BuildahDefaultBaseImageName, ip.Status.Build.BaseImage)
 }
 
 func TestRetainLocalPlatformSpec(t *testing.T) {

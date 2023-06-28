@@ -113,7 +113,7 @@ var (
 )
 
 func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
-	var ugfid int64 = 1000
+	var ugfid int64 = 1001
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -256,25 +256,14 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 			},
 		)
 	}
-	if !hasVolume(pod, defaults.DefaultPVC) {
-		pod.Spec.Volumes = append(pod.Spec.Volumes,
-			// Maven repo volume
-			corev1.Volume{
-				Name: defaults.DefaultPVC,
-				VolumeSource: corev1.VolumeSource{
-					PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-						ClaimName: defaults.DefaultPVC,
-					},
-				},
-			},
-		)
-	}
 
 	var envVars = proxyFromEnvironment()
-	envVars = append(envVars, corev1.EnvVar{
-		Name:  "HOME",
-		Value: filepath.Join(builderDir, build.Name),
-	})
+	envVars = append(envVars,
+		corev1.EnvVar{
+			Name:  "HOME",
+			Value: filepath.Join(builderDir, build.Name),
+		},
+	)
 
 	container := corev1.Container{
 		Name:            taskName,
@@ -390,6 +379,7 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		image = fmt.Sprintf("%s:v%s", builder.BuildahDefaultImageName, defaults.BuildahVersion)
 	}
 
+	var root int64 = 0
 	container := corev1.Container{
 		Name:            task.Name,
 		Image:           image,
@@ -399,6 +389,11 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 		Env:             env,
 		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
 		VolumeMounts:    volumeMounts,
+		// Buildah requires root privileges
+		SecurityContext: &corev1.SecurityContext{
+			RunAsUser:  &root,
+			RunAsGroup: &root,
+		},
 	}
 
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
@@ -554,12 +549,6 @@ func addContainerToPod(build *v1.Build, container corev1.Container, pod *corev1.
 		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
 			Name:      builderVolume,
 			MountPath: filepath.Join(builderDir, build.Name),
-		})
-	}
-	if hasVolume(pod, defaults.DefaultPVC) {
-		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{
-			Name:      defaults.DefaultPVC,
-			MountPath: defaults.LocalRepository,
 		})
 	}
 

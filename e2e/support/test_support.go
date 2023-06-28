@@ -1752,6 +1752,17 @@ func DeleteCamelCatalog(ns, name string) func() bool {
 	}
 }
 
+func DefaultCamelCatalogPhase(ns string) func() v1.CamelCatalogPhase {
+	return func() v1.CamelCatalogPhase {
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+		c := CamelCatalog(ns, catalogName)()
+		if c == nil {
+			return ""
+		}
+		return c.Status.Phase
+	}
+}
+
 func CamelCatalogPhase(ns, name string) func() v1.CamelCatalogPhase {
 	return func() v1.CamelCatalogPhase {
 		c := CamelCatalog(ns, name)()
@@ -2011,25 +2022,6 @@ func OperatorPod(ns string) func() *corev1.Pod {
 			return nil
 		}
 		return &lst.Items[0]
-	}
-}
-
-func OperatorPodPVCName(ns string) func() string {
-	return func() string {
-		operatorPod := OperatorPod(ns)()
-		if operatorPod.Spec.Volumes == nil {
-			return ""
-		}
-		volumes := OperatorPod(ns)().Spec.Volumes
-		if volumes == nil {
-			return ""
-		}
-		for _, v := range volumes {
-			if v.Name == defaults.DefaultPVC {
-				return defaults.DefaultPVC
-			}
-		}
-		return ""
 	}
 }
 

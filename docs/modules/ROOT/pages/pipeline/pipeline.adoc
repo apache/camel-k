@@ -47,8 +47,8 @@ Altough the main goal of this custom task execution is to have a success/failure
     lastUpdateTime: "2023-05-19T09:56:02Z"
     message: |
       ...
-      {"level":"info","ts":1684490148.080175,"logger":"camel-k.builder","msg":"base image: docker.io/eclipse-temurin:11"}
-      {"level":"info","ts":1684490148.0801787,"logger":"camel-k.builder","msg":"resolved base image: docker.io/eclipse-temurin:11"}
+      {"level":"info","ts":1684490148.080175,"logger":"camel-k.builder","msg":"base image: eclipse-temurin:11"}
+      {"level":"info","ts":1684490148.0801787,"logger":"camel-k.builder","msg":"resolved base image: eclipse-temurin:11"}
     reason: Completed (0)
     status: "True"
     type: Container builder succeeded

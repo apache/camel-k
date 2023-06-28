@@ -24,11 +24,11 @@ package cli
 
 import (
 	"fmt"
+	. "github.com/onsi/gomega"
 	"testing"
 
-	. "github.com/onsi/gomega"
-
 	. "github.com/apache/camel-k/v2/e2e/support"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/olm"
 )
 
@@ -38,6 +38,7 @@ func TestBasicUninstall(t *testing.T) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(DefaultCamelCatalogPhase(ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 
 		// should be completely removed on uninstall
 		Expect(Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute()).To(Succeed())

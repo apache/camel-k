@@ -24,15 +24,14 @@ VERSION ?= 2.0.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 1.12.1
 RUNTIME_VERSION := 2.16.0-SNAPSHOT
-BUILDAH_VERSION := 1.23.3
+BUILDAH_VERSION := 1.30.0
 KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.25.6
 OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-BASE_IMAGE := docker.io/eclipse-temurin:11
-DEFAULT_PVC := camel-k-pvc
+BASE_IMAGE := eclipse-temurin:11
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 # Default value, change to your architecture accordingly
@@ -54,7 +53,7 @@ RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
-
+DEBUG_MODE ?= false
 
 # olm bundle vars
 MANAGER := config/manager
@@ -120,6 +119,10 @@ $(warning Could not retrieve a valid Git Commit)
 endif
 
 GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
+
+ifeq ($(DEBUG_MODE),true)
+GOFLAGS += -gcflags="all=-N -l"
+endif
 
 define LICENSE_HEADER
 Licensed to the Apache Software Foundation (ASF) under one or more
@@ -189,9 +192,6 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // LocalRepository -- " >> $(VERSIONFILE)
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // DefaultPVC -- " >> $(VERSIONFILE)
-	@echo "  DefaultPVC = \"$(DEFAULT_PVC)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)
@@ -342,8 +342,8 @@ test-quarkus-native-high-memory: do-build
 	go test -timeout 180m -v ./e2e/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
-	@echo "####### Building kamel CLI for $(IMAGE_ARCH) architecture..."
-	CGO_ENABLED=0 GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+	@echo "####### Building kamel CLI for $(GOOS) $(IMAGE_ARCH) architecture..."
+	CGO_ENABLED=0 GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
 	# Symbolic link to a local CLI
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
@@ -422,8 +422,26 @@ maven-overlay:
 	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION) build/_maven_overlay
 
 kamel-overlay:
-	@echo "####### Copy arch $(IMAGE_ARCH) CLI into output build directory..."
+	mkdir -p build/_output/bin
+ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	@echo "####### Copying Linux platform arch $(IMAGE_ARCH) CLI into output build directory..."
+else
+	@echo "####### (Re)Building a Linux platform arch $(IMAGE_ARCH) CLI "
+	@echo "####### Likely you're on a non Linux host, so I need to build a Linux CLI to bundle in the container image"
+	GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+endif
 	cp build/_output/bin/kamel-$(IMAGE_ARCH) build/_output/bin/kamel
+
+TARGET_STAGE := base
+ifeq ($(DEBUG_MODE),true)
+	TARGET_STAGE := debug
+	CUSTOM_IMAGE := $(CUSTOM_IMAGE)-debug
+endif
+
+DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+ifneq ($(IMAGE_ARCH), amd64)
+	DOCKER_TAG := $(DOCKER_TAG)-$(IMAGE_ARCH)
+endif
 
 images: build kamel-overlay maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
@@ -431,11 +449,7 @@ ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-ifeq ($(IMAGE_ARCH), amd64)
-	docker build --platform=linux/$(IMAGE_ARCH) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
-else
-	docker build --platform=linux/$(IMAGE_ARCH) -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH) -f build/Dockerfile .
-endif
+	docker build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
 
 # Mainly used for internal CI purposes
 image-push:
@@ -633,7 +647,7 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	@INSTALL_DEFAULT_PVC=false $(KUSTOMIZE) build config/manifests | \
+	@$(KUSTOMIZE) build config/manifests | \
 		$(OPERATOR_SDK) generate bundle \
 			-q --overwrite --version $(OPERATOR_VERSION) \
 			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)

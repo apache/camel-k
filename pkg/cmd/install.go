@@ -140,6 +140,11 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
 	cmd.Flags().Int("monitoring-port", 8080, "The port of the metrics endpoint")
 
+	// debugging
+	cmd.Flags().Bool("debugging", false, "To enable or disable the operator debugging")
+	cmd.Flags().Int("debugging-port", 4040, "The port of the debugger")
+	cmd.Flags().String("debugging-path", "/usr/local/bin/kamel", "The path to the kamel executable file")
+
 	// Operator settings
 	cmd.Flags().StringArray("toleration", nil, "Add a Toleration to the operator Pod")
 	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
@@ -150,12 +155,6 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
-
-	// Storage settings
-	cmd.Flags().Bool("storage", true, "If false, it won't use a persistent storage (recommended for development purpose only)")
-	cmd.Flags().String("storage-class-name", "", "Use a storage class name to create a dynamic volume (if empty will look up for cluster default)")
-	cmd.Flags().String("storage-capacity", "20Gi", "How much capacity to use")
-	cmd.Flags().String("storage-access-mode", "ReadWriteOnce", "Persistent Volume Access Mode (any of ReadWriteOnce, ReadOnlyMany, ReadWriteMany or ReadWriteOncePod)")
 
 	return &cmd, &options
 }
@@ -196,6 +195,9 @@ type installCmdOptions struct {
 	MaxRunningBuilds            int32    `mapstructure:"max-running-pipelines"`
 	Monitoring                  bool     `mapstructure:"monitoring"`
 	MonitoringPort              int32    `mapstructure:"monitoring-port"`
+	Debugging                   bool     `mapstructure:"debugging"`
+	DebuggingPort               int32    `mapstructure:"debugging-port"`
+	DebuggingPath               string   `mapstructure:"debugging-path"`
 	TraitProfile                string   `mapstructure:"trait-profile"`
 	Tolerations                 []string `mapstructure:"tolerations"`
 	NodeSelectors               []string `mapstructure:"node-selectors"`
@@ -205,8 +207,6 @@ type installCmdOptions struct {
 	registry                    v1.RegistrySpec
 	registryAuth                registry.Auth
 	RegistryAuthFile            string `mapstructure:"registry-auth-file"`
-	Storage                     bool   `mapstructure:"storage"`
-	storageOptions              install.OperatorStorageConfiguration
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, _ []string) error {
@@ -427,13 +427,15 @@ func (o *installCmdOptions) setupOperator(
 			Enabled: o.Monitoring,
 			Port:    o.MonitoringPort,
 		},
+		Debugging: install.OperatorDebuggingConfiguration{
+			Enabled: o.Debugging,
+			Port:    o.DebuggingPort,
+			Path:    o.DebuggingPath,
+		},
 		Tolerations:           o.Tolerations,
 		NodeSelectors:         o.NodeSelectors,
 		ResourcesRequirements: o.ResourcesRequirements,
 		EnvVars:               o.EnvVars,
-	}
-	if o.Storage {
-		cfg.Storage = o.storageOptions
 	}
 
 	return install.OperatorOrCollect(o.Context, cmd, c, cfg, output, o.Force)
@@ -687,13 +689,6 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	o.olmOptions.SourceNamespace = viper.GetString(path + ".olm-source-namespace")
 	o.olmOptions.StartingCSV = viper.GetString(path + ".olm-starting-csv")
 	o.olmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
-
-	if o.Storage {
-		o.storageOptions.Enabled = true
-		o.storageOptions.ClassName = viper.GetString(path + ".storage-class-name")
-		o.storageOptions.AccessMode = viper.GetString(path + ".storage-access-mode")
-		o.storageOptions.Capacity = viper.GetString(path + ".storage-capacity")
-	}
 
 	return nil
 }

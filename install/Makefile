@@ -85,7 +85,6 @@ ROLEBIN_TO_CROLEBIN_PATCH := $(RBAC)/patch-rolebinding-to-clusterrolebinding
 PORTS_PATCH := patch-ports
 LOG_LEVEL_PATCH := patch-log-level
 INSTALL_DEFAULT_KAMELETS_PATCH := patch-install-default-kamelets
-INSTALL_DEFAULT_PVC_PATCH := patch-install-default-pvc
 IMAGE_PULL_POLICY_PATCH := patch-image-pull-policy-always
 WATCH_NAMESPACE_PATCH := patch-watch-namespace-global
 # Platform patches
@@ -356,12 +355,6 @@ ifeq ($(INSTALL_DEFAULT_KAMELETS),false)
 	@$(call add-remove-kind-patch,$(MANAGER),add,$(INSTALL_DEFAULT_KAMELETS_PATCH).$(YAML),Deployment)
 else
 	@$(call add-remove-kind-patch,$(MANAGER),remove,$(INSTALL_DEFAULT_KAMELETS_PATCH).$(YAML),Deployment)
-endif
-# Set the INSTALL_DEFAULT_PVC config depending on var
-ifeq ($(INSTALL_DEFAULT_PVC),true)
-	@$(call add-remove-kind-patch,$(MANAGER),add,$(INSTALL_DEFAULT_PVC_PATCH).$(YAML),Deployment)
-else
-	@$(call add-remove-kind-patch,$(MANAGER),remove,$(INSTALL_DEFAULT_PVC_PATCH).$(YAML),Deployment)
 endif
 ifeq ($(DRY_RUN), false)
 	@$(KUSTOMIZE) build $(KOPTIONS) $@ | kubectl apply -f -

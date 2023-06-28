@@ -54,7 +54,6 @@ func TestBasicInstallation(t *testing.T) {
 		Eventually(Platform(ns)).ShouldNot(BeNil())
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
-		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
 
 		t.Run("run yaml", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
@@ -96,18 +95,6 @@ func TestBasicInstallation(t *testing.T) {
 		})
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestEphemeralInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--storage=false").Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-		Eventually(OperatorPodPVCName(ns)).Should(Equal(""))
 	})
 }
 

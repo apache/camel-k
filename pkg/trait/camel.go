@@ -27,12 +27,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
@@ -56,6 +58,11 @@ func (t *camelTrait) IsPlatformTrait() bool {
 // InfluencesKit overrides base class method.
 func (t *camelTrait) InfluencesKit() bool {
 	return true
+}
+
+// InfluencesBuild only when the runtime has changed.
+func (t *camelTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
+	return this["runtimeVersion"] != prev["runtimeVersion"]
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, error) {
@@ -157,6 +164,21 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 						catalogName, err)
 
 				}
+			}
+
+			// verify that the catalog was generated
+			ct, err := kubernetes.GetUnstructured(
+				e.Ctx,
+				e.Client,
+				schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "CamelCatalog"},
+				catalogName,
+				e.Integration.Namespace,
+			)
+			if ct == nil || err != nil {
+				return fmt.Errorf("unable to create catalog runtime=%s, provider=%s, name=%s: %w",
+					runtime.Version,
+					runtime.Provider,
+					catalogName, err)
 			}
 		}
 	}

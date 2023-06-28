@@ -7,12 +7,11 @@ require (
 	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
 	github.com/apache/camel-k/v2/pkg/client/camel v0.0.0
 	github.com/apache/camel-k/v2/pkg/kamelet/repository v0.0.0
-	github.com/container-tools/spectrum v0.6.21
+	github.com/container-tools/spectrum v0.6.25
 	github.com/evanphx/json-patch v5.6.0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.2.4
-	github.com/google/go-containerregistry v0.15.2
 	github.com/google/go-github/v52 v52.0.0
 	github.com/google/uuid v1.3.0
 	github.com/jpillora/backoff v1.0.0
@@ -22,7 +21,6 @@ require (
 	github.com/onsi/gomega v1.27.8
 	github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible
 	github.com/operator-framework/api v0.13.0
-	github.com/otiai10/copy v1.12.0
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.60.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/prometheus/client_model v0.4.0
@@ -102,6 +100,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
+	github.com/google/go-containerregistry v0.15.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3 // indirect

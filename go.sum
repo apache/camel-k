@@ -144,8 +144,8 @@ github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:z
 github.com/cockroachdb/datadriven v0.0.0-20200714090401-bf6692d28da5/go.mod h1:h6jFvWxBdQXxjopDMZyH2UVceIRfR84bdzbkoKrsWNo=
 github.com/cockroachdb/errors v1.2.4/go.mod h1:rQD95gz6FARkaKkQXUksEje/d9a6wBJoCr5oaCLELYA=
 github.com/cockroachdb/logtags v0.0.0-20190617123548-eb05cc24525f/go.mod h1:i/u985jwjWRlyHXQbwatDASoW0RMlZ/3i9yJHE2xLkI=
-github.com/container-tools/spectrum v0.6.21 h1:gWdwHPpwH9xlZkUVcuJTBhP7EL/1DH2whIgjB/aOlxw=
-github.com/container-tools/spectrum v0.6.21/go.mod h1:d8DzKzN7xh+IlnE2Qm0I4gW1HMxtI3D5Xz40mnYG9+8=
+github.com/container-tools/spectrum v0.6.25 h1:4ylked+luclZR8fhNne5MRloAyabdbjTD2vq1NGvJ8Q=
+github.com/container-tools/spectrum v0.6.25/go.mod h1:3fma3EdEYhDf5WiyI4pj8uxT0MH6oT/LTH8YRHTAjuc=
 github.com/containerd/stargz-snapshotter/estargz v0.14.3 h1:OqlDCK3ZVUO6C3B/5FSkDwbkEETK84kQgEeFwDC+62k=
 github.com/containerd/stargz-snapshotter/estargz v0.14.3/go.mod h1:KY//uOCIkSuNAHhJogcZtrNHdKrA99/FCCRjE3HD36o=
 github.com/coreos/bbolt v1.3.2/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkEiiKk=
@@ -552,9 +552,6 @@ github.com/openshift/api v3.9.1-0.20190927182313-d4a64ec2cbd8+incompatible/go.mo
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
 github.com/operator-framework/api v0.13.0 h1:V1vUluRwajSBdDPCnzgTWDnn5LYxLk66VPVGMw3B7Uc=
 github.com/operator-framework/api v0.13.0/go.mod h1:FTiYGm11fZQ3cSX+EQHc/UWoGZAwkGfyeHU+wMJ8jmA=
-github.com/otiai10/copy v1.12.0 h1:cLMgSQnXBs1eehF0Wy/FAGsgDTDmAqFR7rQylBb1nDY=
-github.com/otiai10/copy v1.12.0/go.mod h1:rSaLseMUsZFFbsFGc7wCJnnkTAvdc5L6VWxPE4308Ww=
-github.com/otiai10/mint v1.5.1 h1:XaPLeE+9vGbuyEHem1JNk3bYc7KKqyI/na0/mLd/Kks=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pelletier/go-toml v1.9.3/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
