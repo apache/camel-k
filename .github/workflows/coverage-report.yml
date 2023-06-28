@@ -30,28 +30,70 @@ jobs:
 
     steps:
 
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false 
-          fetch-depth: 0
-      
       - name: Setup go
         uses: actions/setup-go@v3
         with:
           go-version: '1.18'
           check-latest: true
 
-      - name: Run Test
+      - name: Get Old Coverage
+        shell: bash
+        run: |
+          git clone https://github.com/apache/camel-k.git
+          cd camel-k
+          old_coverage="$(grep -o -P '(?<=Coverage-)(.*)(?=%)' README.adoc)"
+          cd ..
+          rm -rf camel-k
+
+      - name: Checkout
+        shell: bash
+        run: |
+          git clone ${{github.server_url}}/${{ github.repository }}.git
+          cd camel-k
+          git checkout ${{ github.event.pull_request.head.ref }}
+
+      - name: Commit
+        shell: bash
+        working-directory: ./camel-k
+        env:
+          CI_USER: "github-actions[bot]"
+          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+        run: |
+          git config --local user.email "$CI_EMAIL"
+          git config --local user.name "$CI_USER"
+          git remote add upstream https://github.com/apache/camel-k.git
+          git fetch upstream
+          git add --all && git commit -m 'chore: coverage report PR changes' && echo "pr_changes=1" >> $GITHUB_ENV || echo "No changes to PR"
+          
+      - name: Push and Rebase
+        shell: bash
+        working-directory: ./camel-k
+        if: env.pr_changes == 1
+        env:
+          CI_USER: "github-actions[bot]"
+          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+          CI_TOKEN: ${{ inputs.secretGithubToken }}
+        run: |
+          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ inputs.branch-ref }}
+          git pull --rebase upstream main || git rebase --abort && echo "rebaseAborted=1" >> $GITHUB_ENV
+
+      - name: Get New Coverage
+        shell: bash
+        working-directory: ./camel-k
+        if: env.rebaseAborted != 1
+        env:
+          CI_USER: "github-actions[bot]"
+          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+          CI_TOKEN: ${{ inputs.secretGithubToken }}
         run: |
           go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
-      - name: Extract Coverage
-        shell: bash
-        run: |
           new_coverage="$(grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs)"
-          old_coverage="$(grep -o -P '(?<=Coverage-)(.*)(?=%)' README.adoc)"
+
+          echo "OLD - $old_coverage"
+          echo "NEW - $new_coverage"
+
           coverage_difference=$(bc <<< $new_coverage-$old_coverage)
 
           if (( $(echo "$coverage_difference > 0" |bc -l) )); then
@@ -65,8 +107,10 @@ jobs:
           echo "NEW_COV=$new_coverage" >> $GITHUB_ENV
           echo "OLD_COV=$old_coverage" >> $GITHUB_ENV
           echo "COV_DIFF=$coverage_difference" >> $GITHUB_ENV
+         
 
-      - name: Comment
+      - name: Comment Coverage
+        if: env.rebaseAborted != 1
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -94,3 +138,15 @@ jobs:
               body: ':camel: **Thank You for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage unchanged.'
               })
             }
+
+      - name: Comment Merge Conflicts
+        if: env.rebaseAborted == 1
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: ':camel: **Thank You for contributing!** :camel: \n\n  Unable to create **Coverage Report** :warning:. \n Merge conflicts found.'
