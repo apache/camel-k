@@ -72,7 +72,7 @@ jobs:
           CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
           CI_TOKEN: ${{ inputs.secretGithubToken }}
         run: |
-          git pull --rebase upstream main || git rebase --abort && echo "rebaseAborted=1" >> $GITHUB_ENV
+          git pull --rebase upstream main && echo "rebaseAborted=0" >> $GITHUB_ENV || echo "rebaseAborted=1" >> $GITHUB_ENV
 
       - name: Get New Coverage
         shell: bash
@@ -118,21 +118,21 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: ':camel: **Thank You for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: +**${{env.COV_DIFF}}%**'
+                body: ':camel: **Thank you for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: +**${{env.COV_DIFF}}%**'
               })
             }else if(${{env.POS_DIFF == 'NEG'}}){
               github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ':camel: **Thank You for contributing!** :camel: \n\n  **Code Coverage Report** :warning:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: **${{env.COV_DIFF}}%**'
+              body: ':camel: **Thank you for contributing!** :camel: \n\n  **Code Coverage Report** :warning:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: **${{env.COV_DIFF}}%**'
               })
             }else{
               github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ':camel: **Thank You for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage unchanged.'
+              body: ':camel: **Thank you for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage unchanged.'
               })
             }
 
@@ -146,5 +146,5 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: ':camel: **Thank You for contributing!** :camel: \n\n  Unable to create **Coverage Report** :warning:. \n Merge conflicts found.'
+                body: ':camel: **Thank you for contributing!** :camel: \n\n  Unable to create **Coverage Report** :warning:. \n Merge conflicts found.'
               })
