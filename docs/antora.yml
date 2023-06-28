@@ -39,7 +39,7 @@ asciidoc:
     camel-quarkus-version: 2.16.0
     camel-quarkus-docs-version: 2.16.x
     quarkus-version: 2.16.0.Final
-    buildah-version: 1.23.3
+    buildah-version: 1.30.0
     kaniko-version: 1.9.1
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.25.6
