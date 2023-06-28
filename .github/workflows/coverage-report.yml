@@ -52,7 +52,7 @@ jobs:
           cd camel-k
           git checkout ${{ github.event.pull_request.head.ref }}
 
-      - name: Commit
+      - name: Fetch
         shell: bash
         working-directory: ./camel-k
         env:
@@ -63,18 +63,15 @@ jobs:
           git config --local user.name "$CI_USER"
           git remote add upstream https://github.com/apache/camel-k.git
           git fetch upstream
-          git add --all && git commit -m 'chore: coverage report PR changes' && echo "pr_changes=1" >> $GITHUB_ENV || echo "No changes to PR"
           
-      - name: Push and Rebase
+      - name: Rebase
         shell: bash
         working-directory: ./camel-k
-        if: env.pr_changes == 1
         env:
           CI_USER: "github-actions[bot]"
           CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
           CI_TOKEN: ${{ inputs.secretGithubToken }}
         run: |
-          git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ inputs.branch-ref }}
           git pull --rebase upstream main || git rebase --abort && echo "rebaseAborted=1" >> $GITHUB_ENV
 
       - name: Get New Coverage
@@ -150,3 +147,4 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: ':camel: **Thank You for contributing!** :camel: \n\n  Unable to create **Coverage Report** :warning:. \n Merge conflicts found.'
+              })
