@@ -72,7 +72,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		switch build.Status.Phase {
 
 		case v1.BuildPhasePending:
-			if pod, err = newBuildPod(ctx, action.reader, build); err != nil {
+			if pod, err = newBuildPod(ctx, action.reader, action.client, build); err != nil {
 				return nil, err
 			}
 

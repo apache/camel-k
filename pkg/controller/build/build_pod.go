@@ -33,9 +33,11 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const (
@@ -112,8 +114,22 @@ var (
 	}
 )
 
-func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.Pod, error) {
+func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build *v1.Build) (*corev1.Pod, error) {
 	var ugfid int64 = 1001
+	podSecurityContext := &corev1.PodSecurityContext{
+		RunAsUser:  &ugfid,
+		RunAsGroup: &ugfid,
+		FSGroup:    &ugfid,
+	}
+	for _, task := range build.Spec.Tasks {
+		// get pod security context from security context constraint configuration in namespace
+		if task.S2i != nil {
+			podSecurityContextConstrained, _ := openshift.GetOpenshiftPodSecurityContextRestricted(ctx, client, build.BuilderPodNamespace())
+			if podSecurityContextConstrained != nil {
+				podSecurityContext = podSecurityContextConstrained
+			}
+		}
+	}
 	pod := &corev1.Pod{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: corev1.SchemeGroupVersion.String(),
@@ -130,11 +146,7 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 		Spec: corev1.PodSpec{
 			ServiceAccountName: platform.BuilderServiceAccount,
 			RestartPolicy:      corev1.RestartPolicyNever,
-			SecurityContext: &corev1.PodSecurityContext{
-				RunAsUser:  &ugfid,
-				RunAsGroup: &ugfid,
-				FSGroup:    &ugfid,
-			},
+			SecurityContext:    podSecurityContext,
 		},
 	}
 
@@ -143,7 +155,7 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 	for _, task := range build.Spec.Tasks {
 		switch {
 		case task.Builder != nil:
-			addBuildTaskToPod(build, task.Builder.Name, pod)
+			addBuildTaskToPod(ctx, client, build, task.Builder.Name, pod)
 		case task.Buildah != nil:
 			err := addBuildahTaskToPod(ctx, c, build, task.Buildah, pod)
 			if err != nil {
@@ -155,9 +167,9 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, build *v1.Build) (*corev1.P
 				return nil, err
 			}
 		case task.S2i != nil:
-			addBuildTaskToPod(build, task.S2i.Name, pod)
+			addBuildTaskToPod(ctx, client, build, task.S2i.Name, pod)
 		case task.Spectrum != nil:
-			addBuildTaskToPod(build, task.Spectrum.Name, pod)
+			addBuildTaskToPod(ctx, client, build, task.Spectrum.Name, pod)
 		case task.Custom != nil:
 			addCustomTaskToPod(build, task.Custom, pod)
 		}
@@ -244,7 +256,7 @@ func buildPodName(build *v1.Build) string {
 	return "camel-k-" + build.Name + "-builder"
 }
 
-func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
+func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Build, taskName string, pod *corev1.Pod) {
 	if !hasVolume(pod, builderVolume) {
 		pod.Spec.Volumes = append(pod.Spec.Volumes,
 			// EmptyDir volume used to share the build state across tasks
@@ -281,6 +293,14 @@ func addBuildTaskToPod(build *v1.Build, taskName string, pod *corev1.Pod) {
 		},
 		WorkingDir: filepath.Join(builderDir, build.Name),
 		Env:        envVars,
+	}
+
+	// get security context from security context constraint configuration in namespace
+	if taskName == "s2i" {
+		securityContextConstrained, _ := openshift.GetOpenshiftSecurityContextRestricted(ctx, client, build.BuilderPodNamespace())
+		if securityContextConstrained != nil {
+			container.SecurityContext = securityContextConstrained
+		}
 	}
 
 	configureResources(build, &container)

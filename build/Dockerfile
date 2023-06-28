@@ -45,14 +45,16 @@ ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/log
 ADD build/_maven_output ${MVN_REPO}
 ADD build/_kamelets /kamelets
 
-RUN chgrp -R 1001 ${MVN_REPO} \
-    && chown -R 1001 ${MVN_REPO} \
+RUN chgrp -R 0 ${MVN_REPO} \
+    && chown -R 1001:0 ${MVN_REPO} \
+    && chmod -R 775 ${MVN_REPO} \
     && chgrp -R 0 /kamelets \
     && chmod -R g=u /kamelets \
-    && chgrp -R 1001 ${MAVEN_HOME} \
-    && chown -R 1001 ${MAVEN_HOME}
+    && chgrp -R 0 ${MAVEN_HOME} \
+    && chown -R 1001:0 ${MAVEN_HOME} \
+    && chmod -R 775 ${MAVEN_HOME}
 
-USER 1001
+USER 1001:0
 
 ADD build/_output/bin/kamel /usr/local/bin/kamel
 
