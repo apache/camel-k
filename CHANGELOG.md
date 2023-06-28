@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Make command fails on MacOS due to TestGenerateKeystore [\#4516](https://github.com/apache/camel-k/issues/4516)
 - Allow to remote debug the Operator [\#4513](https://github.com/apache/camel-k/issues/4513)
 - Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
 - CamelCatalog generated twice [\#4504](https://github.com/apache/camel-k/issues/4504)
@@ -16,12 +17,18 @@
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
 - Missing license header [\#4469](https://github.com/apache/camel-k/issues/4469)
 - Rework CLIs required by operator build process [\#4466](https://github.com/apache/camel-k/issues/4466)
+- Use maven distribution available in the operator image [\#4429](https://github.com/apache/camel-k/issues/4429)
+- kamel run | custom dependencies | local files | K8S Cluster with GHCR    [\#4398](https://github.com/apache/camel-k/issues/4398)
+- Integration builder can't pull the builder image from the insecure registry [\#4236](https://github.com/apache/camel-k/issues/4236)
 - Horizontal scaling ability for operators [\#4173](https://github.com/apache/camel-k/issues/4173)
 - Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
+- Multi architecture support - Operator and builder pods [\#4148](https://github.com/apache/camel-k/issues/4148)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
+- Deprecated Github actions / warnings [\#3766](https://github.com/apache/camel-k/issues/3766)
 - Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
+- introduce code coverage report for each pr [\#559](https://github.com/apache/camel-k/issues/559)
 
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
 
