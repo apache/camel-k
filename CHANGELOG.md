@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Make command fails on MacOS due to TestGenerateKeystore [\#4516](https://github.com/apache/camel-k/issues/4516)
 - Allow to remote debug the Operator [\#4513](https://github.com/apache/camel-k/issues/4513)
 - Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
 - CamelCatalog generated twice [\#4504](https://github.com/apache/camel-k/issues/4504)
@@ -16,15 +17,23 @@
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
 - Missing license header [\#4469](https://github.com/apache/camel-k/issues/4469)
 - Rework CLIs required by operator build process [\#4466](https://github.com/apache/camel-k/issues/4466)
+- Use maven distribution available in the operator image [\#4429](https://github.com/apache/camel-k/issues/4429)
+- kamel run | custom dependencies | local files | K8S Cluster with GHCR    [\#4398](https://github.com/apache/camel-k/issues/4398)
+- Integration builder can't pull the builder image from the insecure registry [\#4236](https://github.com/apache/camel-k/issues/4236)
 - Horizontal scaling ability for operators [\#4173](https://github.com/apache/camel-k/issues/4173)
 - Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
+- Multi architecture support - Operator and builder pods [\#4148](https://github.com/apache/camel-k/issues/4148)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
+- Deprecated Github actions / warnings [\#3766](https://github.com/apache/camel-k/issues/3766)
 - Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
+- introduce code coverage report for each pr [\#559](https://github.com/apache/camel-k/issues/559)
 
 **Merged pull requests:**
 
+- chore:  coverage report fixes [\#4522](https://github.com/apache/camel-k/pull/4522) ([realMartinez](https://github.com/realMartinez))
+- Ref \#4236: Describe how to install kind with a local registry [\#4521](https://github.com/apache/camel-k/pull/4521) ([essobedo](https://github.com/essobedo))
 - chore\(ci\): Upgrade github/non github actions [\#4518](https://github.com/apache/camel-k/pull/4518) ([gansheer](https://github.com/gansheer))
 - Ref \#4513: Allow to remote debug the Operator [\#4517](https://github.com/apache/camel-k/pull/4517) ([essobedo](https://github.com/essobedo))
 - chore\(ci\) : Fix licence missing/invalid format [\#4515](https://github.com/apache/camel-k/pull/4515) ([gansheer](https://github.com/gansheer))
@@ -38,11 +47,13 @@
 - chore\(e2e\): wait for the catalog to be ready [\#4503](https://github.com/apache/camel-k/pull/4503) ([squakez](https://github.com/squakez))
 - fix\(ci\): use released action version [\#4500](https://github.com/apache/camel-k/pull/4500) ([squakez](https://github.com/squakez))
 - feat\(cicd\): onboard Camel K Tekton task [\#4499](https://github.com/apache/camel-k/pull/4499) ([squakez](https://github.com/squakez))
+- feat/coverage report workflow [\#4495](https://github.com/apache/camel-k/pull/4495) ([realMartinez](https://github.com/realMartinez))
 - chore\(deps\): bump github.com/otiai10/copy from 1.11.0 to 1.12.0 [\#4494](https://github.com/apache/camel-k/pull/4494) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.15.1 to 1.16.0 [\#4491](https://github.com/apache/camel-k/pull/4491) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.20 to 0.6.21 [\#4490](https://github.com/apache/camel-k/pull/4490) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/sync from 0.2.0 to 0.3.0 [\#4488](https://github.com/apache/camel-k/pull/4488) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.8.0 to 0.9.0 [\#4486](https://github.com/apache/camel-k/pull/4486) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat: remove the need for a storage [\#4483](https://github.com/apache/camel-k/pull/4483) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/term from 0.8.0 to 0.9.0 [\#4482](https://github.com/apache/camel-k/pull/4482) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/text from 0.9.0 to 0.10.0 [\#4481](https://github.com/apache/camel-k/pull/4481) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(build\): complete repo name for default baseImage [\#4480](https://github.com/apache/camel-k/pull/4480) ([gansheer](https://github.com/gansheer))
