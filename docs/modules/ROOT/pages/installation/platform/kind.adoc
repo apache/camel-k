@@ -1,25 +1,118 @@
 [[installation-on-kind]]
 = Installing Camel K on Kind
 
-Installing Camel K on Kind, with a public registry, doesn't require any special configuration.
+[[with-public-registry]]
+== With a public registry
 
+Installing Camel K on Kind, with a public registry doesn't require any special configuration.
 
 Assuming you have Kind installed, then start by creating a cluster:
 
-```
+[source,shell]
+----
 kind create cluster
-```
+----
 
 Create a secret with your registry username and password:
 
-```
+[source,shell]
+----
 kubectl -n default create secret docker-registry external-registry-secret --docker-username my-user --docker-password "password"
-```
+----
 
 Install Camel K operator on the cluster in the default namespace:
 
-```
+[source,shell]
+----
 kamel install --olm=false -n default --registry docker.io --organization my-org-or-username --registry-secret external-registry-secret --wait
-```
+----
 
 Make sure to replace the `my-org-or-username` with your actual username or organization used to host the images.
+
+[[with-local-registry]]
+== With a local registry
+
+Installing Camel K on Kind, with a local insecure registry doesn't require any special configuration.
+
+Assuming you have Kind installed, then start by creating a cluster with a pre-configured local registry by executing the
+following script:
+
+[source,shell]
+----
+#!/bin/sh
+set -o errexit
+
+# 1. Create registry container unless it already exists
+reg_name='kind-registry'
+reg_port='5001'
+if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
+  docker run \
+    -d --restart=always -p "127.0.0.1:${reg_port}:5000" --name "${reg_name}" \
+    registry:2
+fi
+
+# 2. Create kind cluster with containerd registry config dir enabled
+# TODO: kind will eventually enable this by default and this patch will
+# be unnecessary.
+#
+# See:
+# https://github.com/kubernetes-sigs/kind/issues/2875
+# https://github.com/containerd/containerd/blob/main/docs/cri/config.md#registry-configuration
+# See: https://github.com/containerd/containerd/blob/main/docs/hosts.md
+cat <<EOF | kind create cluster --config=-
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+containerdConfigPatches:
+- |-
+  [plugins."io.containerd.grpc.v1.cri".registry]
+    config_path = "/etc/containerd/certs.d"
+EOF
+
+# 3. Add the registry config to the nodes
+# This tells containerd to access the local registry using the http protocol
+REGISTRY_DIR="/etc/containerd/certs.d/${reg_name}:5000"
+for node in $(kind get nodes); do
+  docker exec "${node}" mkdir -p "${REGISTRY_DIR}"
+  cat <<EOF | docker exec -i "${node}" cp /dev/stdin "${REGISTRY_DIR}/hosts.toml"
+[host."http://${reg_name}:5000"]
+EOF
+done
+
+# 4. Connect the registry to the cluster network if not already connected
+# This allows kind to bootstrap the network but ensures they're on the same network
+if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
+  docker network connect "kind" "${reg_name}"
+fi
+
+# 5. Document the local registry
+# https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-registry-hosting
+  namespace: kube-public
+data:
+  localRegistryHosting.v1: |
+    host: "localhost:${reg_port}"
+    help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
+EOF
+----
+NOTE: The content of this script is based on https://kind.sigs.k8s.io/docs/user/local-registry/[the official script] but with
+some slight changes to adapt it to Camel-K.
+
+The local registry is then listening on port `5001`, so we can push the docker image of the operator directly to `localhost:5001`.
+Assuming that you want to use a snapshot version (created with `make images`), simply create a tag with the proper host
+then push it to the local registry with the following commands:
+
+[source,shell]
+----
+docker tag apache/camel-k:2.0.0-SNAPSHOT localhost:5001/apache/camel-k:2.0.0-SNAPSHOT
+docker push localhost:5001/apache/camel-k:2.0.0-SNAPSHOT
+----
+
+Finally, install Camel K operator on the cluster in the default namespace:
+[source,shell]
+----
+kamel install --olm=false --operator-image kind-registry:5000/apache/camel-k:2.0.0-SNAPSHOT --registry kind-registry:5000 --registry-insecure
+----
