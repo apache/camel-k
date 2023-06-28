@@ -7,7 +7,7 @@ Camel K builds are performed by Maven. For this reason it may requires certain M
 
 The first best practice we suggest is to provide a https://maven.apache.org/repository-management.html[Maven Repository Manager] that acts as an intermediary between the cluster and the various artifacts repositories that may be required by Camel K.
 
-If your company has already one available in the cluster, you should use it. If not, we suggest you to take the opportunity and xref:maven-proxy.adoc[run a Maven proxy beside your Camel K operator]. There are many benefits by introducing a proxy, above all the reduction in the time required to download dependencies (which are cached in the proxy) and inherently the egress bandwidth cost saving.
+If your company has already one available in the cluster, you should use it. If not, we suggest you to take the opportunity and xref:installation/advanced/maven-proxy.adoc[run a Maven proxy beside your Camel K operator]. There are many benefits by introducing a proxy, above all the reduction in the time required to download dependencies (which are cached in the proxy) and inherently the egress bandwidth cost saving.
 
 You can create a `settings.xml` file as illustred below:
 
