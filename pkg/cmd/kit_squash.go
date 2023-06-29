@@ -20,13 +20,14 @@ package cmd
 import (
 	"bufio"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/apache/camel-k/pkg/platform"
-	platformutil "github.com/apache/camel-k/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/platform"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -42,8 +43,8 @@ import (
 
 	remote "github.com/google/go-containerregistry/pkg/v1/remote"
 
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/pkg/util/digest"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/digest"
 )
 
 type KitNode struct {
@@ -54,14 +55,14 @@ type KitNode struct {
 	usedByChildren int
 }
 
-func newCmdGC(rootCmdOptions *RootCmdOptions) (*cobra.Command, *gcCmdOptions) {
-	options := gcCmdOptions{
+func newKitSquashCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitSquashCommandOptions) {
+	options := kitSquashCommandOptions{
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:   "gc",
-		Short: "Garbage collect unused resources.",
-		Long:  `Delete all unused resources. IntegrationKits that aren't referenced by integrations will be removed.`,
+		Use:   "squash",
+		Short: "Squash and delete unused Integration Kits",
+		Long:  `Squash and delete unused Image Kits. Affected Integrations will be redeployed. Make sure to have delete rights to the Image Registry.`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if err := decode(&options)(cmd, args); err != nil {
 				return err
@@ -72,34 +73,32 @@ func newCmdGC(rootCmdOptions *RootCmdOptions) (*cobra.Command, *gcCmdOptions) {
 			return options.run(cmd, args)
 		},
 	}
-	cmd.Flags().BoolP("assumeyes", "y", false, "Do not ask user to confirm resources to be deleted")
-	cmd.Flags().BoolP("dry-run", "d", false, "Only list resources to be deleted without removing them")
-	cmd.Flags().BoolP("remove-images", "r", false, "When set to true, unused images will be deleted from the image registry. Image layers that are not used will be squashed and new images will created. Integrations whose Image changed will be redeployed. Please make sure you have push and delete rights in the Image Regsitry beforehand.")
+	cmd.Flags().BoolP("assumeyes", "y", false, "Do not ask user to confirm Kits to be deleted")
+	cmd.Flags().BoolP("dry-run", "d", false, "Only list Kits to be deleted without removing them")
 
 	return &cmd, &options
 }
 
-type gcCmdOptions struct {
-	// TODO: add option to list namespaces when searching for integrations and integrationkits (due to promote feature when changing)
+type kitSquashCommandOptions struct {
+	// TODO: add option to list Namespaces when searching for Integrations and Integration Kits
 	*RootCmdOptions
 	KitsToDelete []*KitNode
 	KitsToSquash [][]*KitNode
 	UsedImages   map[string][]v1.Integration
 	AssumeYes    bool `mapstructure:"assumeyes"`
 	DryRun       bool `mapstructure:"dry-run"`
-	RemoveImages bool `mapstructure:"remove-images"`
 }
 
-func (o *gcCmdOptions) preRun(cmd *cobra.Command, args []string) error {
+func (o *kitSquashCommandOptions) preRun(cmd *cobra.Command, args []string) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
 		return err
 	}
-	kits, err := o.getKits(c)
+	kits, err := getKits(o.Context, c, o.Namespace)
 	if err != nil {
 		return err
 	}
-	integrations, err := o.getIntegrations(c)
+	integrations, err := getIntegrations(o.Context, c, o.Namespace)
 	if err != nil {
 		return err
 	}
@@ -109,29 +108,15 @@ func (o *gcCmdOptions) preRun(cmd *cobra.Command, args []string) error {
 	o.KitsToDelete = make([]*KitNode, 0)
 	o.KitsToSquash = make([][]*KitNode, 0)
 
-	if !o.RemoveImages {
-		// simply delete kits not referenced by an integration
-		for _, kit := range kits {
-			curr := kit
-			if o.UsedImages[kit.Status.Image] == nil {
-				node := &KitNode{
-					Kit:  &curr,
-					Used: false,
-				}
-				o.KitsToDelete = append(o.KitsToDelete, node)
-			}
-		}
-	} else {
-		// let's build some trees where nodes are integrationkits. This will help us decide which ones to: keep, delete or squash
-		roots, err := buildTrees(kits, o.UsedImages)
-		if err != nil {
-			return err
-		}
-		for _, root := range roots {
-			toDelete, toSquash := o.trimTree(root)
-			o.KitsToDelete = append(o.KitsToDelete, toDelete...)
-			o.KitsToSquash = append(o.KitsToSquash, toSquash...)
-		}
+	// let's build some trees where nodes are IntegrationKits. This will help us decide which ones to: keep, delete or squash
+	roots, err := buildTrees(kits, o.UsedImages)
+	if err != nil {
+		return err
+	}
+	for _, root := range roots {
+		toDelete, toSquash := o.trimTree(root)
+		o.KitsToDelete = append(o.KitsToDelete, toDelete...)
+		o.KitsToSquash = append(o.KitsToSquash, toSquash...)
 	}
 	o.printInfo(cmd)
 	if o.DryRun || o.AssumeYes || o.nothingToDo() {
@@ -141,7 +126,7 @@ func (o *gcCmdOptions) preRun(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *gcCmdOptions) run(cmd *cobra.Command, args []string) error {
+func (o *kitSquashCommandOptions) run(cmd *cobra.Command, args []string) error {
 	if o.DryRun || o.nothingToDo() {
 		return nil
 	}
@@ -163,11 +148,11 @@ func (o *gcCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *gcCmdOptions) nothingToDo() bool {
+func (o *kitSquashCommandOptions) nothingToDo() bool {
 	return len(o.KitsToSquash) == 0 && len(o.KitsToDelete) == 0
 }
 
-func (o *gcCmdOptions) printInfo(cmd *cobra.Command) {
+func (o *kitSquashCommandOptions) printInfo(cmd *cobra.Command) {
 	if o.nothingToDo() {
 		fmt.Fprintln(cmd.OutOrStdout(), "Nothing to do")
 		return
@@ -197,7 +182,7 @@ func (o *gcCmdOptions) printInfo(cmd *cobra.Command) {
 	for _, kit := range o.KitsToDelete {
 		fmt.Fprintln(cmd.OutOrStdout(), fmt.Sprintf("%s in namespace: %s", kit.Kit.Name, kit.Kit.Namespace))
 	}
-	if len(o.KitsToDelete) != 0 && o.RemoveImages {
+	if len(o.KitsToDelete) != 0 {
 		fmt.Fprintln(cmd.OutOrStdout(), "\nThe following Images will be deleted from the Image Registry:")
 		for _, kit := range o.KitsToDelete {
 			fmt.Fprintln(cmd.OutOrStdout(), kit.Kit.Status.Image)
@@ -205,28 +190,7 @@ func (o *gcCmdOptions) printInfo(cmd *cobra.Command) {
 	}
 }
 
-func ask(cmd *cobra.Command) bool {
-	fmt.Fprintln(cmd.OutOrStdout(), "\nContinue Y/N ?")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		s, _ := reader.ReadString('\n')
-		s = strings.TrimSuffix(s, "\n")
-		s = strings.ToLower(s)
-		if len(s) > 1 {
-			fmt.Fprintln(os.Stderr, "Please enter Y or N")
-			continue
-		}
-		if strings.Compare(s, "n") == 0 {
-			return true
-		} else if strings.Compare(s, "y") == 0 {
-			return false
-		} else {
-			continue
-		}
-	}
-}
-
-func (*gcCmdOptions) trimTree(root *KitNode) ([]*KitNode, [][]*KitNode) {
+func (*kitSquashCommandOptions) trimTree(root *KitNode) ([]*KitNode, [][]*KitNode) {
 	toDelete := make([]*KitNode, 0)
 	toSquash := make([][]*KitNode, 0)
 	// let's build a post order list of the tree nodes
@@ -266,7 +230,7 @@ func (*gcCmdOptions) trimTree(root *KitNode) ([]*KitNode, [][]*KitNode) {
 }
 
 // This will squash all unused layers in an image into one layer and replace it in the image registry
-func (o *gcCmdOptions) squashLayers(toFlatten [][]*KitNode, c client.Client, cache map[string][]name.Option, usedImages map[string][]v1.Integration) error {
+func (o *kitSquashCommandOptions) squashLayers(toFlatten [][]*KitNode, c client.Client, cache map[string][]name.Option, usedImages map[string][]v1.Integration) error {
 	for _, kitnodes := range toFlatten {
 		child := kitnodes[0]
 		parent := kitnodes[len(kitnodes)-1]
@@ -420,35 +384,85 @@ func (o *gcCmdOptions) squashLayers(toFlatten [][]*KitNode, c client.Client, cac
 	return nil
 }
 
-func (o *gcCmdOptions) deleteKits(toDelete []*KitNode, c client.Client, cache map[string][]name.Option) error {
+func (o *kitSquashCommandOptions) deleteKits(toDelete []*KitNode, c client.Client, cache map[string][]name.Option) error {
 	for _, kitnode := range toDelete {
 		kit := kitnode.Kit
-		if o.RemoveImages {
-			tag, err := o.getTag(c, kit, cache)
-			if err != nil {
-				return err
-			}
-			err = remote.Delete(tag)
-			if err != nil {
-				return err
-			}
+		tag, err := o.getTag(c, kit, cache)
+		if err != nil {
+			return err
+		}
+		err = remote.Delete(tag)
+		if err != nil {
+			return err
 		}
 		c.Delete(o.Context, kit)
 	}
 	return nil
 }
-func (o *gcCmdOptions) getIntegrations(c client.Client) ([]v1.Integration, error) {
+
+func (o *kitSquashCommandOptions) getTag(c client.Client, kit *v1.IntegrationKit, cache map[string][]name.Option) (name.Reference, error) {
+	options, err := o.getPlatformOptions(c, kit, cache)
+	if err != nil {
+		return nil, err
+	}
+	return name.ParseReference(kit.Status.Image, options...)
+}
+
+func (o *kitSquashCommandOptions) getPlatformOptions(c client.Client, kit *v1.IntegrationKit, cache map[string][]name.Option) ([]name.Option, error) {
+	platformName := kit.Status.Platform
+	if platformName == "" {
+		platformName = platform.DefaultPlatformName
+	}
+	key := fmt.Sprintf("%s/%s", kit.ObjectMeta.Namespace, platformName)
+	options := cache[key]
+	if options != nil {
+		return options, nil
+	}
+	platform, err := platformutil.GetForResource(o.Context, c, kit)
+	if err != nil {
+		return nil, err
+	}
+	options = []name.Option{name.StrictValidation}
+	if platform.Status.Build.Registry.Insecure {
+		options = append(options, name.Insecure)
+	}
+	cache[key] = options
+	return options, nil
+}
+
+func ask(cmd *cobra.Command) bool {
+	fmt.Fprintln(cmd.OutOrStdout(), "\nContinue Y/N ?")
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		s, _ := reader.ReadString('\n')
+		s = strings.TrimSuffix(s, "\n")
+		s = strings.ToLower(s)
+		if len(s) > 1 {
+			fmt.Fprintln(os.Stderr, "Please enter Y or N")
+			continue
+		}
+		if strings.Compare(s, "n") == 0 {
+			return true
+		} else if strings.Compare(s, "y") == 0 {
+			return false
+		} else {
+			continue
+		}
+	}
+}
+
+func getIntegrations(context context.Context, c client.Client, ns string) ([]v1.Integration, error) {
 	list := v1.NewIntegrationList()
-	if err := c.List(o.Context, &list, client.InNamespace(o.Namespace)); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve Integrations from namespace %s", o.Namespace))
+	if err := c.List(context, &list, client.InNamespace(ns)); err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve Integrations from namespace %s", ns))
 	}
 	return list.Items, nil
 }
 
-func (o *gcCmdOptions) getKits(c client.Client) ([]v1.IntegrationKit, error) {
+func getKits(context context.Context, c client.Client, ns string) ([]v1.IntegrationKit, error) {
 	list := v1.NewIntegrationKitList()
-	if err := c.List(o.Context, &list, client.InNamespace(o.Namespace)); err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve IntegrationKits from namespace %s", o.Namespace))
+	if err := c.List(context, &list, client.InNamespace(ns)); err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("could not retrieve IntegrationKits from namespace %s", ns))
 	}
 	for _, kit := range list.Items {
 		curr := kit
@@ -459,36 +473,6 @@ func (o *gcCmdOptions) getKits(c client.Client) ([]v1.IntegrationKit, error) {
 		}
 	}
 	return list.Items, nil
-}
-
-func (o *gcCmdOptions) getTag(c client.Client, kit *v1.IntegrationKit, cache map[string][]name.Option) (name.Reference, error) {
-	options, err := o.getPlatformOptions(c, kit, cache)
-	if err != nil {
-		return nil, err
-	}
-	return name.ParseReference(kit.Status.Image, options...)
-}
-
-func (o *gcCmdOptions) getPlatformOptions(c client.Client, kit *v1.IntegrationKit, cache map[string][]name.Option) ([]name.Option, error) {
-	platformName := kit.Status.Platform
-	if platformName == "" {
-		platformName = platform.DefaultPlatformName
-	}
-	key := fmt.Sprintf("%s/%s", kit.ObjectMeta.Namespace, platformName)
-	options := cache[key]
-	if options != nil {
-		return options, nil
-	}
-	platform, err := platformutil.Get(o.Context, c, kit.ObjectMeta.Namespace, platformName)
-	if err != nil {
-		return nil, err
-	}
-	options = []name.Option{name.StrictValidation}
-	if platform.Status.Build.Registry.Insecure {
-		options = append(options, name.Insecure)
-	}
-	cache[key] = options
-	return options, nil
 }
 
 func initNodes(kits []v1.IntegrationKit, usedImages map[string][]v1.Integration) (map[string]*KitNode, error) {

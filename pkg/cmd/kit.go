@@ -31,6 +31,8 @@ func newCmdKit(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd.AddCommand(cmdOnly(newKitCreateCmd(rootCmdOptions)))
 	cmd.AddCommand(cmdOnly(newKitDeleteCmd(rootCmdOptions)))
 	cmd.AddCommand(cmdOnly(newKitGetCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newKitPruneCmd(rootCmdOptions)))
+	cmd.AddCommand(cmdOnly(newKitSquashCmd(rootCmdOptions)))
 
 	return &cmd
 }

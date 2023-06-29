@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package registry
+package cli
 
 import (
 	"archive/tar"
@@ -35,15 +35,15 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	platformutil "github.com/apache/camel-k/pkg/platform"
+	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 
-	testutil "github.com/apache/camel-k/e2e/support/util"
-	v1 "github.com/apache/camel-k/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/apache/camel-k/pkg/client"
-	"github.com/apache/camel-k/pkg/util/digest"
-	"github.com/apache/camel-k/pkg/util/openshift"
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/digest"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
+
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/uuid"
 
@@ -54,125 +54,119 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 
-	. "github.com/apache/camel-k/e2e/support"
+	. "github.com/apache/camel-k/v2/e2e/support"
+	"github.com/apache/camel-k/v2/e2e/support/util"
 )
 
-func TestGCIntegrationKits(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Avoid running on OpenShift until Image Registry supports delete operation")
-			return
+func TestSquashIntegrationKits(t *testing.T) {
+	RegisterTestingT(t)
+
+	ocp, err := openshift.IsOpenShift(TestClient())
+	assert.Nil(t, err)
+	if ocp {
+		t.Skip("Avoid running on OpenShift until Image Registry supports delete operation")
+		return
+	}
+	t.Run("Squash IntegrationKits", func(t *testing.T) {
+		// make sure kits are deleted
+		Expect(DeleteKits(ns)).To(Succeed())
+		tests := []struct {
+			title    string
+			tree     string
+			toDelete string
+			toSquash string
+		}{
+			// Syntax for n ary trees in preorder traversal is NAME(f|t)| where:
+			// Name is the name of the kit,
+			// t : kit is used
+			// f : kit is unused
+			// | marks the end of children
+			{
+				title:    "Nothing to do",
+				tree:     "",
+				toDelete: "",
+				toSquash: "",
+			},
+			{
+				title:    "Single used kit ",
+				tree:     "a(t)",
+				toDelete: "",
+				toSquash: "",
+			},
+			{
+				title:    "Single unused kit",
+				tree:     "a(f)",
+				toDelete: "a",
+				toSquash: "",
+			},
+			{
+				title:    "Basic tree",
+				tree:     "a(f)b(t)",
+				toDelete: "a",
+				toSquash: "ba",
+			},
+			{
+				title:    "Simple tree line",
+				tree:     "a(f)b(f)c(f)d(f)e(t)",
+				toDelete: "abcd",
+				toSquash: "edcba",
+			},
+			{
+				title:    "Tree",
+				tree:     "a(f)b(f)e(f)|f(f)k(t)|||c(t)|d(f)g(t)|h(f)|i(f)|j(t)|||",
+				toDelete: "befhi",
+				toSquash: "kfb",
+			},
 		}
-		// TODO: delete me and replace with KameRunWithID
-		// operatorID := "camel-k-clean-kits"
-		// TODO: delete me and replace with KameRunWithID
-		// Expect(KamelInstallWithID(operatorID, ns, "--wait").Execute()).To(Succeed())
 
-		t.Run("Garbage Collect IntegrationKits", func(t *testing.T) {
-			// TODO: delete me !
-			ns = "camel-k"
-			tests := []struct {
-				title    string
-				tree     string
-				toDelete string
-				toSquash string
-			}{
-				// {
-				// 	title:    "Nothing to do",
-				// 	tree:     "",
-				// 	toDelete: "",
-				// 	toSquash: "",
-				// },
-				// {
-				// 	title:    "Single kit that is used",
-				// 	tree:     "a(t)",
-				// 	toDelete: "",
-				// 	toSquash: "",
-				// },
-				// {
-				// 	title:    "Single kit that is unused",
-				// 	tree:     "a(f)",
-				// 	toDelete: "a",
-				// 	toSquash: "",
-				// },
-				// {
-				// 	title:    "Basic tree",
-				// 	tree:     "a(f)b(t)",
-				// 	toDelete: "a",
-				// 	toSquash: "ba",
-				// },
-				{
-					title:    "Simple tree line",
-					tree:     "a(f)b(f)c(f)d(f)e(t)",
-					toDelete: "abcd",
-					toSquash: "edcba",
-				},
-				// Simple Tree
-				// {
-				// 	// Syntax for n ary tree in preorder traversal is NAME(f|t)| where:
-				// 	// Name is the name of the kit,
-				// 	// t : kit is used
-				// 	// f : kit is unused
-				// 	// | marks the end of children
-				// 	title:    "Simple tree",
-				// 	tree:     "a(f)b(f)e(f)|f(f)k(t)|||c(t)|d(f)g(t)|h(f)|i(f)|j(t)|||",
-				// 	toDelete: "befhi",
-				// 	toSquash: "kfb",
-				// },
-			}
+		for _, curr := range tests {
+			thetest := curr
+			t.Run(thetest.title, func(t *testing.T) {
+				// build kit tree
+				nodes := buildKits(thetest.tree, operatorID, ns, t)
 
-			for _, curr := range tests {
-				thetest := curr
-				t.Run(thetest.title, func(t *testing.T) {
-					// build kit tree
-					nodes := buildKitsFromTree(thetest.tree, ns, t)
+				// check dry run
+				checkDryRunLogs(ns, thetest.toDelete, thetest.toSquash, nodes, t)
 
-					// check dry run
-					checkDryRunLogs(ns, thetest.toDelete, thetest.toSquash, nodes, t)
+				// check real run
+				Expect(Kamel("kit", "squash", "-y", "-n", ns).Execute()).To(Succeed())
 
-					// check real run
-					Expect(Kamel("gc", "-ry", "-n", ns).Execute()).To(Succeed())
-
-					for _, r := range thetest.toDelete {
-						kitName := string(r)
-						Eventually(Kit(ns, kitName), TestTimeoutShort).Should(BeNil())
-						kit := nodes[kitName].Kit
-						options, err := getPlatformOptions(TestContext, TestClient(), kit)
-						assert.NoError(t, err)
-						tag, err := getTag(kit, options)
-						assert.NoError(t, err)
-						// assert the image was deleted
-						_, err = remote.Image(tag)
-						assert.True(t, isNotFound(err))
-					}
-					for _, node := range nodes {
-						// It we shouldn't delete it then it should still exist
-						if !strings.Contains(thetest.toDelete, node.Name) {
-							oldKit := node.Kit
-							newKit := Kit(ns, oldKit.Name)()
-							assert.NotNil(t, newKit)
-							// Image has been squashed then the Image has changed
-							if strings.Contains(curr.toSquash, node.Name) {
-								assert.True(t, oldKit.Status.Image != newKit.Status.Image)
-							}
-						}
-						if node.Used {
-							// check that the integration still runs fine
-							for _, message := range node.ExpectedMessages {
-								Eventually(IntegrationLogs(ns, node.Name), TestTimeoutShort).Should(ContainSubstring(message))
-							}
+				for _, r := range thetest.toDelete {
+					kitName := string(r)
+					Eventually(Kit(ns, kitName), TestTimeoutShort).Should(BeNil())
+					kit := nodes[kitName].Kit
+					options, err := getPlatformOptions(TestContext, TestClient(), kit)
+					assert.NoError(t, err)
+					tag, err := getTag(kit, options)
+					assert.NoError(t, err)
+					// assert the image was deleted
+					_, err = remote.Image(tag)
+					assert.True(t, isNotFound(err))
+				}
+				for _, node := range nodes {
+					// It we shouldn't delete it then it should still exist
+					if !strings.Contains(thetest.toDelete, node.Name) {
+						oldKit := node.Kit
+						newKit := Kit(ns, oldKit.Name)()
+						assert.NotNil(t, newKit)
+						// Image has been squashed then the Image has changed
+						if strings.Contains(curr.toSquash, node.Name) {
+							assert.True(t, oldKit.Status.Image != newKit.Status.Image)
 						}
 					}
-					// Clean up
-					Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-					Expect(DeleteKits(ns)).To(Succeed())
+					if node.Used {
+						// check that the integration still runs fine
+						for _, message := range node.ExpectedMessages {
+							Eventually(IntegrationLogs(ns, node.Name), TestTimeoutShort).Should(ContainSubstring(message))
+						}
+					}
+				}
+				// Clean up
+				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+				Expect(DeleteKits(ns)).To(Succeed())
 
-				})
-			}
-		})
-
+			})
+		}
 	})
 }
 
@@ -182,7 +176,7 @@ func checkDryRunLogs(ns string, toDelete string, toSquash string, nodes map[stri
 	piper, pipew := io.Pipe()
 	defer pipew.Close()
 	defer piper.Close()
-	kamelBuild := KamelWithContext(TestContext, "gc", "-dr", "-n", ns)
+	kamelBuild := KamelWithContext(TestContext, "kit", "squash", "-d", "-n", ns)
 	kamelBuild.SetOut(pipew)
 	kamelBuild.SetErr(pipew)
 
@@ -213,7 +207,7 @@ func checkDryRunLogs(ns string, toDelete string, toSquash string, nodes map[stri
 	if len(toDelete) == 0 && len(toSquash) == 0 && len(redeployed) == 0 {
 		deleteness = append(deleteness, "Nothing to do")
 	}
-	logScanner := testutil.NewStrictLogScanner(ctx, piper, true, append(redeployed, append(squashness, deleteness...)...)...)
+	logScanner := util.NewStrictLogScanner(ctx, piper, true, append(redeployed, append(squashness, deleteness...)...)...)
 	go func() {
 		err := kamelBuild.Execute()
 		assert.NoError(t, err)
@@ -223,15 +217,15 @@ func checkDryRunLogs(ns string, toDelete string, toSquash string, nodes map[stri
 	Eventually(logScanner.ExactMatch(), TestTimeoutShort).Should(BeTrue())
 }
 
-func buildKitsFromTree(tree string, ns string, t *testing.T) map[string]*TestNode {
+func buildKits(tree string, operatorID string, ns string, t *testing.T) map[string]*TestNode {
 	scanner := bufio.NewScanner(strings.NewReader(tree))
 	scanner.Split(ScanTree)
 	nodes := make(map[string]*TestNode, 0)
-	buildKitsFromTreeRecur(nil, scanner, nodes, ns, t)
+	buildKitsRecur(nil, scanner, nodes, operatorID, ns, t)
 	return nodes
 }
 
-func buildKitsFromTreeRecur(node *TestNode, scanner *bufio.Scanner, nodes map[string]*TestNode, ns string, t *testing.T) {
+func buildKitsRecur(node *TestNode, scanner *bufio.Scanner, nodes map[string]*TestNode, operatorID string, ns string, t *testing.T) {
 	if !scanner.Scan() {
 		return
 	}
@@ -241,10 +235,10 @@ func buildKitsFromTreeRecur(node *TestNode, scanner *bufio.Scanner, nodes map[st
 			return
 		}
 		used := scanner.Text()
-		node := buildKit(nil, name, used, ns, t)
+		node := buildKit(nil, name, used, operatorID, ns, t)
 
 		nodes[name] = node
-		buildKitsFromTreeRecur(node, scanner, nodes, ns, t)
+		buildKitsRecur(node, scanner, nodes, operatorID, ns, t)
 		return
 	}
 	if name == "|" {
@@ -254,14 +248,14 @@ func buildKitsFromTreeRecur(node *TestNode, scanner *bufio.Scanner, nodes map[st
 		return
 	}
 	used := scanner.Text()
-	child := buildKit(node, name, used, ns, t)
+	child := buildKit(node, name, used, operatorID, ns, t)
 	nodes[child.Name] = child
 	node.Children = append(node.Children, child)
-	buildKitsFromTreeRecur(child, scanner, nodes, ns, t)
-	buildKitsFromTreeRecur(node, scanner, nodes, ns, t)
+	buildKitsRecur(child, scanner, nodes, operatorID, ns, t)
+	buildKitsRecur(node, scanner, nodes, operatorID, ns, t)
 }
 
-func buildKit(parent *TestNode, nodeName string, used string, ns string, t *testing.T) *TestNode {
+func buildKit(parent *TestNode, nodeName string, used string, operatorID string, ns string, t *testing.T) *TestNode {
 	var isUsed = false
 	if used == "t" {
 		isUsed = true
@@ -279,7 +273,7 @@ func buildKit(parent *TestNode, nodeName string, used string, ns string, t *test
 		node.Message = ""
 		node.ExpectedMessages = make([]string, 0)
 		// Create a root image. We will then manually create some layers on top of it to simulate a graph of integration kits
-		Expect(KamelRun(ns, "routes/FileRoute.java", "--name", node.Name).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/FileRoute.java", "--name", node.Name).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, node.Name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, node.Name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
@@ -297,7 +291,7 @@ func buildKit(parent *TestNode, nodeName string, used string, ns string, t *test
 		// it if not used then don't create a running integration
 		return node
 	}
-	Expect(KamelRun(ns, "routes/FileRoute.java", "--name", node.Name, "--kit", node.Name).Execute()).To(Succeed())
+	Expect(KamelRunWithID(operatorID, ns, "files/FileRoute.java", "--name", node.Name, "--kit", node.Name).Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, node.Name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, node.Name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationKit(ns, node.Name), TestTimeoutMedium).Should(Equal(node.Name))
