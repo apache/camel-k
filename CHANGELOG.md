@@ -23,6 +23,7 @@
 - Horizontal scaling ability for operators [\#4173](https://github.com/apache/camel-k/issues/4173)
 - Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
 - Multi architecture support - Operator and builder pods [\#4148](https://github.com/apache/camel-k/issues/4148)
+- Add message during Operator Installation that checks that Internal Image Registry is configured [\#4130](https://github.com/apache/camel-k/issues/4130)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
