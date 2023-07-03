@@ -100,6 +100,7 @@ spec:
                   orderStrategy:
                     description: the build order strategy to adopt
                     enum:
+                    - dependencies
                     - fifo
                     - sequential
                     type: string
@@ -215,6 +216,7 @@ spec:
                             orderStrategy:
                               description: the build order strategy to adopt
                               enum:
+                              - dependencies
                               - fifo
                               - sequential
                               type: string

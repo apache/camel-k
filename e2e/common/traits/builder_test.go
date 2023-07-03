@@ -63,6 +63,32 @@ func TestBuilderTrait(t *testing.T) {
 		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
 	})
 
+	t.Run("Run build order strategy dependencies", func(t *testing.T) {
+		name := "java-fifo-strategy"
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+			"-t", "builder.order-strategy=dependencies").Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+		integrationKitName := IntegrationKit(ns, name)()
+		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
+		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
+		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyDependencies))
+		// Default resource CPU Check
+		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(ns, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(ns, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
+
+		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(BeNil())
+
+		// We need to remove the kit as well
+		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
+	})
+
 	t.Run("Run build order strategy fifo", func(t *testing.T) {
 		name := "java-fifo-strategy"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",

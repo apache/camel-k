@@ -76,6 +76,10 @@ const (
 	// BuildOrderStrategyFIFO performs the builds with first in first out strategy based on the creation timestamp.
 	// The strategy allows builds to run in parallel to each other but oldest builds will be run first.
 	BuildOrderStrategyFIFO BuildOrderStrategy = "fifo"
+	// BuildOrderStrategyDependencies runs builds ordered by its required dependencies.
+	// Strategy looks at the list of dependencies required by an Integration and queues builds that may reuse base images produced by other
+	// scheduled builds in order to leverage the incremental build option. The strategy allows non-matching builds to run in parallel to each other.
+	BuildOrderStrategyDependencies BuildOrderStrategy = "dependencies"
 	// BuildOrderStrategySequential runs builds strictly sequential so that only one single build per operator namespace is running at a time.
 	BuildOrderStrategySequential BuildOrderStrategy = "sequential"
 )
@@ -87,12 +91,13 @@ var BuildStrategies = []BuildStrategy{
 }
 
 // BuildOrderStrategy specifies how builds are reconciled and queued.
-// +kubebuilder:validation:Enum=fifo;sequential
+// +kubebuilder:validation:Enum=dependencies;fifo;sequential
 type BuildOrderStrategy string
 
 // BuildOrderStrategies is a list of order strategies allowed for the build
 var BuildOrderStrategies = []BuildOrderStrategy{
 	BuildOrderStrategyFIFO,
+	BuildOrderStrategyDependencies,
 	BuildOrderStrategySequential,
 }
 

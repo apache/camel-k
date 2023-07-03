@@ -214,6 +214,80 @@ func TestKitMaxBuildLimitFIFOStrategy(t *testing.T) {
 	})
 }
 
+func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		createOperator(ns, "8m0s", "--global", "--force")
+
+		pl := Platform(ns)()
+		// set maximum number of running builds and order strategy
+		pl.Spec.Build.MaxRunningBuilds = 2
+		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyDependencies
+		if err := TestClient().Update(TestContext, pl); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		buildA := "integration-a"
+		buildB := "integration-b"
+		buildC := "integration-c"
+
+		doKitBuildInNamespace(buildA, ns, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:timer", "camel:log",
+			},
+			traits: []string{
+				"builder.properties=build-property=A",
+			},
+		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+
+		doKitBuildInNamespace(buildB, ns, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:cron", "camel:log", "camel:joor",
+			},
+			traits: []string{
+				"builder.properties=build-property=B",
+			},
+		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+
+		doKitBuildInNamespace(buildC, ns, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:timer", "camel:log", "camel:joor", "camel:http",
+			},
+			traits: []string{
+				"builder.properties=build-property=C",
+			},
+		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
+
+		var notExceedsMaxBuildLimit = func(runningBuilds int) bool {
+			return runningBuilds <= 2
+		}
+
+		limit := 0
+		for limit < 5 && BuildPhase(ns, buildA)() == v1.BuildPhaseRunning {
+			// verify that number of running builds does not exceed max build limit
+			Consistently(BuildsRunning(BuildPhase(ns, buildA), BuildPhase(ns, buildB), BuildPhase(ns, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
+			limit++
+		}
+
+		// make sure we have verified max build limit at least once
+		if limit == 0 {
+			t.Error(errors.New(fmt.Sprintf("Unexpected build phase '%s' for %s - not able to verify max builds limit", BuildPhase(ns, buildA)(), buildA)))
+			t.FailNow()
+		}
+
+		// verify that all builds are successful
+		Eventually(BuildPhase(ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(KitPhase(ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		Eventually(BuildPhase(ns, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(KitPhase(ns, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		Eventually(BuildPhase(ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(KitPhase(ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+	})
+}
+
 func TestKitTimerToLogFullBuild(t *testing.T) {
 	doKitFullBuild(t, "timer-to-log", "8m0s", TestTimeoutLong, kitOptions{
 		dependencies: []string{

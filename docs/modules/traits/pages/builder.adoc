@@ -42,7 +42,7 @@ The following configuration options are available:
 
 | builder.order-strategy
 | string
-| The build order strategy to use, either `fifo` or `sequential` (default sequential)
+| The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default sequential)
 
 | builder.request-cpu
 | string
