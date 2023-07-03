@@ -44,9 +44,9 @@ spec:
   #
   #
   # Build publish strategy for integrations
-  # ie. Buildah, Kaniko, S2I, Spectrum
+  # ie. Buildah, Kaniko, S2I, Spectrum, Jib
   #
-  #  publishStrategy: Buildah | Kaniko | S2I | Spectrum
+  #  publishStrategy: Buildah | Kaniko | S2I | Spectrum | Jib
   #
   # Set the camel-k runtime version
   #

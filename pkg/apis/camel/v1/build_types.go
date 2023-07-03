@@ -67,6 +67,8 @@ type Task struct {
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
 	// a S2iTask, for S2I strategy
 	S2i *S2iTask `json:"s2i,omitempty"`
+	// a JibTask, for Jib strategy
+	Jib *JibTask `json:"jib,omitempty"`
 
 	// User customizable task execution
 
@@ -152,6 +154,12 @@ type KanikoTaskCache struct {
 	Enabled *bool `json:"enabled,omitempty"`
 	// the PVC used to store the cache
 	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
+}
+
+// JibTask is used to configure Jib
+type JibTask struct {
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
 }
 
 // SpectrumTask is used to configure Spectrum

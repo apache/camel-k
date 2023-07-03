@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 const (
@@ -43,19 +44,23 @@ func init() {
 }
 
 type imageSteps struct {
-	IncrementalImageContext Step
-	NativeImageContext      Step
-	StandardImageContext    Step
-	ExecutableDockerfile    Step
-	JvmDockerfile           Step
+	IncrementalImageContext   Step
+	NativeImageContext        Step
+	StandardImageContext      Step
+	ExecutableDockerfile      Step
+	JvmDockerfile             Step
+	ExecutableJibCliBuildfile Step
+	JibCliBuildfile           Step
 }
 
 var Image = imageSteps{
-	IncrementalImageContext: NewStep(ApplicationPackagePhase, incrementalImageContext),
-	NativeImageContext:      NewStep(ApplicationPackagePhase, nativeImageContext),
-	StandardImageContext:    NewStep(ApplicationPackagePhase, standardImageContext),
-	ExecutableDockerfile:    NewStep(ApplicationPackagePhase+1, executableDockerfile),
-	JvmDockerfile:           NewStep(ApplicationPackagePhase+1, jvmDockerfile),
+	IncrementalImageContext:   NewStep(ApplicationPackagePhase, incrementalImageContext),
+	NativeImageContext:        NewStep(ApplicationPackagePhase, nativeImageContext),
+	StandardImageContext:      NewStep(ApplicationPackagePhase, standardImageContext),
+	ExecutableDockerfile:      NewStep(ApplicationPackagePhase+1, executableDockerfile),
+	JvmDockerfile:             NewStep(ApplicationPackagePhase+1, jvmDockerfile),
+	ExecutableJibCliBuildfile: NewStep(ApplicationPackagePhase+1, executableJibCliBuildfile),
+	JibCliBuildfile:           NewStep(ApplicationPackagePhase+1, jibCliBuildfile),
 }
 
 type artifactsSelector func(ctx *builderContext) error
@@ -116,6 +121,81 @@ func jvmDockerfile(ctx *builderContext) error {
 		return err
 	}
 
+	return nil
+}
+
+func executableJibCliBuildfile(ctx *builderContext) error {
+	// #nosec G202
+	jibcliBuildFile := []byte(`apiVersion: jib/v1alpha1
+kind: BuildFile
+from:
+  image: ` + ctx.BaseImage + `
+  platforms:
+    - architecture: amd64
+      os: linux
+workingDirectory: ` + DeploymentDir + `
+layers:
+  properties:
+    filePermissions: 775
+    directoryPermissions: 775
+    user: "nonroot"
+    group: "root"
+  entries:
+  - name: runner
+    files:
+    - src: ` + filepath.Join(ctx.Path, ContextDir) + `
+      dest: ` + DeploymentDir + `
+`)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "jibclibuild.yaml"), jibcliBuildFile, 0o400)
+	if err != nil {
+		return err
+	}
+	log.Info(string(jibcliBuildFile))
+	return nil
+}
+
+func jibCliBuildfile(ctx *builderContext) error {
+	// #nosec G202
+	jibcliBuildFile := []byte(`apiVersion: jib/v1alpha1
+kind: BuildFile
+from:
+  image: ` + ctx.BaseImage + `
+  platforms:
+    - architecture: amd64
+      os: linux
+workingDirectory: ` + DeploymentDir + `
+user: 1000
+layers:
+  entries:
+  - name: libboot
+    files:
+    - src: ` + filepath.Join(ctx.Path, ContextDir, "dependencies/lib/boot") + `
+      dest: ` + DeploymentDir + `/dependencies/lib/boot
+  - name: libmain
+    files:
+    - src: ` + filepath.Join(ctx.Path, ContextDir, "dependencies/lib/main") + `
+      dest: ` + DeploymentDir + `/dependencies/lib/main
+  - name: quarkus
+    files:
+    - src: ` + filepath.Join(ctx.Path, ContextDir, "dependencies/quarkus") + `
+      dest: ` + DeploymentDir + `/dependencies/quarkus
+  - name: app
+    files:
+    - src: ` + filepath.Join(ctx.Path, ContextDir, "dependencies/app") + `
+      dest: ` + DeploymentDir + `/dependencies/app
+  - name: context
+    files:
+    - src: ` + filepath.Join(ctx.Path, ContextDir) + `
+      dest: ` + DeploymentDir + `
+      excludes:
+      - "**/config.json"
+      - "**/google-cloud-tools-java**"
+      - "**/jib.yaml"
+`)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "jib.yaml"), jibcliBuildFile, 0o400)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

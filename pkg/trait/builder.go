@@ -107,6 +107,18 @@ func (t *builderTrait) Apply(e *Environment) error {
 			Tag: e.IntegrationKit.ResourceVersion,
 		}})
 
+	case v1.IntegrationPlatformBuildPublishStrategyJib:
+		e.Pipeline = append(e.Pipeline, v1.Task{Jib: &v1.JibTask{
+			BaseTask: v1.BaseTask{
+				Name: "jib",
+			},
+			PublishTask: v1.PublishTask{
+				BaseImage: e.Platform.Status.Build.BaseImage,
+				Image:     getImageName(e),
+				Registry:  e.Platform.Status.Build.Registry,
+			},
+		}})
+
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
 		var platform string
 		var found bool

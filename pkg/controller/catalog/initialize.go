@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -39,6 +40,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/s2i"
 
@@ -89,6 +91,9 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 
 	if platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyS2I {
 		return initializeS2i(ctx, action.client, platform, catalog)
+	}
+	if platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
+		return initializeJib(ctx, action.client, platform, catalog)
 	}
 	// Default to spectrum
 	// Make basic options for building image in the registry
@@ -387,6 +392,107 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 	return target, nil
 }
 
+func initializeJib(ctx context.Context, c client.Client, ip *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+	target := catalog.DeepCopy()
+
+	organization := ip.Status.Build.Registry.Organization
+	if organization == "" {
+		organization = ip.Namespace
+	}
+	imageName := fmt.Sprintf(
+		"%s/%s/camel-k-runtime-%s-builder:%s",
+		ip.Status.Build.Registry.Address,
+		organization,
+		catalog.Spec.Runtime.Provider,
+		strings.ToLower(catalog.Spec.Runtime.Version),
+	)
+
+	jibBuildFileName := fmt.Sprintf(
+		"camel-k-runtime-%s-builder-jib.yaml",
+		catalog.Spec.Runtime.Provider,
+	)
+
+	root := os.TempDir()
+	jibContextDir, err := os.MkdirTemp(root, "jib-builder")
+	if err != nil {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+	defer os.RemoveAll(jibContextDir)
+
+	if ip.Status.Build.Registry.Secret != "" {
+		_, err = builder.MountJibSecret(ctx, c, ip.Namespace, ip.Status.Build.Registry.Secret, jibContextDir)
+		if err != nil {
+			target.Status.Phase = v1.CamelCatalogPhaseError
+			target.Status.SetErrorCondition(
+				v1.CamelCatalogConditionReady,
+				"Builder Image",
+				err,
+			)
+			return target, err
+		}
+	}
+
+	err = jibBuildFile(catalog, jibContextDir, jibBuildFileName)
+	if err != nil {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+
+	jibCmd := "/opt/jib/bin/jib"
+	jibArgs := []string{"build",
+		"--target=" + imageName,
+		"--build-file=" + filepath.Join(jibContextDir, jibBuildFileName),
+		"--image-metadata-out=" + filepath.Join(jibContextDir, "jibimage.json")}
+
+	if ip.Status.Build.Registry.Insecure {
+		jibArgs = append(jibArgs, "--allow-insecure-registries")
+	}
+
+	cmd := exec.CommandContext(ctx, jibCmd, jibArgs...)
+
+	cmd.Dir = jibContextDir
+
+	env := os.Environ()
+	env = append(env, "HOME="+jibContextDir)
+	cmd.Env = env
+
+	var loggerInfo = func(s string) string { log.Info(s); return "" }
+	var loggerError = func(s string) string { log.Error(nil, s); return "" }
+
+	err = util.RunAndLog(ctx, cmd, loggerInfo, loggerError)
+	if err != nil {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetErrorCondition(
+			v1.CamelCatalogConditionReady,
+			"Builder Image",
+			err,
+		)
+		return target, err
+	}
+
+	target.Status.Phase = v1.CamelCatalogPhaseReady
+	target.Status.SetCondition(
+		v1.CamelCatalogConditionReady,
+		corev1.ConditionTrue,
+		"Builder Image",
+		"Container image successfully built",
+	)
+	target.Status.Image = imageName
+
+	return target, nil
+}
+
 func imageExistsSpectrum(options spectrum.Options) bool {
 	Log.Infof("Checking if Camel K builder container %s already exists...", options.Base)
 	ctrImg, err := spectrum.Pull(options)
@@ -577,4 +683,46 @@ func getS2iUserID(ctx context.Context, c client.Client, ip *v1.IntegrationPlatfo
 		return uidStr
 	}
 	return ugfidStr
+}
+func jibBuildFile(catalog *v1.CamelCatalog, jibContextDir string, jibBuildFileName string) error {
+	// #nosec G202
+	jibBuildFile := []byte(`apiVersion: jib/v1alpha1
+kind: BuildFile
+from:
+  image: ` + catalog.Spec.GetQuarkusToolingImage() + `
+  platforms:
+    - architecture: amd64
+      os: linux
+layers:
+  properties:
+    filePermissions: 755
+    directoryPermissions: 755
+    user: "1001"
+    group: "0"
+  entries:
+  - name: maven
+    files:
+    - src: /usr/share/maven/mvnw/
+      dest: /usr/share/maven/mvnw/
+  - name: jib-cli
+    files:
+    - src: /opt/jib
+      dest: /opt/jib
+  - name: kamel-cli
+    files:
+    - src: /usr/local/bin/kamel
+      dest: /usr/local/bin/kamel
+  - name: localrepo
+    files:
+    - src: ` + defaults.LocalRepository + `
+      dest: ` + defaults.LocalRepository + `
+`)
+
+	err := os.WriteFile(filepath.Join(jibContextDir, jibBuildFileName), jibBuildFile, 0o400)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

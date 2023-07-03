@@ -385,6 +385,7 @@ a checksum (SHA1) of the content
 
 * <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
 * <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
+* <<#_camel_apache_org_v1_JibTask, JibTask>>
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 * <<#_camel_apache_org_v1_S2iTask, S2iTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
@@ -3419,6 +3420,37 @@ string
 JSONSchemaURL represents a schema url.
 
 
+[#_camel_apache_org_v1_JibTask]
+=== JibTask
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Task, Task>>
+
+JibTask is used to configure Jib
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`BaseTask` +
+*xref:#_camel_apache_org_v1_BaseTask[BaseTask]*
+|(Members of `BaseTask` are embedded into this type.)
+
+
+
+
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_KameletCondition]
 === KameletCondition
 
@@ -4268,6 +4300,7 @@ the specification
 *Appears on:*
 
 * <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
+* <<#_camel_apache_org_v1_JibTask, JibTask>>
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
 
@@ -4826,6 +4859,13 @@ a SpectrumTask, for Spectrum strategy
 
 
 a S2iTask, for S2I strategy
+
+|`jib` +
+*xref:#_camel_apache_org_v1_JibTask[JibTask]*
+|
+
+
+a JibTask, for Jib strategy
 
 |`custom` +
 *xref:#_camel_apache_org_v1_UserTask[UserTask]*
