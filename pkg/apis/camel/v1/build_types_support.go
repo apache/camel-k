@@ -60,6 +60,25 @@ func (build *Build) BuilderConfiguration() *BuildConfiguration {
 
 }
 
+// BuilderDependencies returns the list of dependencies configured on by the builder task for this Build.
+func (build *Build) BuilderDependencies() []string {
+	if builder, ok := FindBuilderTask(build.Spec.Tasks); ok {
+		return builder.Dependencies
+	}
+
+	return []string{}
+}
+
+// FindBuilderTask returns the 1st builder task from the task list.
+func FindBuilderTask(tasks []Task) (*BuilderTask, bool) {
+	for _, t := range tasks {
+		if t.Builder != nil {
+			return t.Builder, true
+		}
+	}
+	return nil, false
+}
+
 // BuilderConfigurationTasks returns the builder configuration from the task list.
 func BuilderConfigurationTasks(tasks []Task) *BuildConfiguration {
 	for _, t := range tasks {
@@ -104,6 +123,11 @@ func (in *BuildStatus) Failed(err error) BuildStatus {
 	in.Error = err.Error()
 	in.Phase = BuildPhaseFailed
 	return *in
+}
+
+func (in *BuildStatus) IsFinished() bool {
+	return in.Phase == BuildPhaseSucceeded || in.Phase == BuildPhaseFailed ||
+		in.Phase == BuildPhaseInterrupted || in.Phase == BuildPhaseError
 }
 
 func (in *BuildStatus) SetCondition(condType BuildConditionType, status corev1.ConditionStatus, reason string, message string) {
@@ -212,7 +236,7 @@ func (bl BuildList) HasRunningBuilds() bool {
 	return false
 }
 
-func (bl BuildList) HasScheduledBuildsBefore(build *Build) bool {
+func (bl BuildList) HasScheduledBuildsBefore(build *Build) (bool, *Build) {
 	for _, b := range bl.Items {
 		if b.Name == build.Name {
 			continue
@@ -220,9 +244,65 @@ func (bl BuildList) HasScheduledBuildsBefore(build *Build) bool {
 
 		if (b.Status.Phase == BuildPhaseInitialization || b.Status.Phase == BuildPhaseScheduling) &&
 			b.CreationTimestamp.Before(&build.CreationTimestamp) {
-			return true
+			return true, &b
 		}
 	}
 
-	return false
+	return false, nil
+}
+
+// HasMatchingBuild visit all items in the list of builds and search for a scheduled build that matches the given build's dependencies.
+func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
+	required := build.BuilderDependencies()
+	if len(required) == 0 {
+		return false, nil
+	}
+
+	for _, b := range bl.Items {
+		if b.Name == build.Name || b.Status.IsFinished() {
+			continue
+		}
+
+		dependencies := b.BuilderDependencies()
+		dependencyMap := make(map[string]int, len(dependencies))
+		for i, item := range dependencies {
+			dependencyMap[item] = i
+		}
+
+		allMatching := true
+		missing := 0
+		for _, item := range required {
+			if _, ok := dependencyMap[item]; !ok {
+				allMatching = false
+				missing++
+			}
+		}
+
+		// Heuristic approach: if there are too many unrelated libraries then this image is
+		// not suitable to be used as base image
+		if !allMatching && missing >= len(required)/2 {
+			continue
+		}
+
+		// handle suitable build that has started already
+		if b.Status.Phase == BuildPhasePending || b.Status.Phase == BuildPhaseRunning {
+			return true, &b
+		}
+
+		// handle suitable scheduled build
+		if b.Status.Phase == BuildPhaseInitialization || b.Status.Phase == BuildPhaseScheduling {
+			if allMatching && len(required) == len(dependencies) {
+				// seems like both builds require exactly the same list of dependencies
+				// additionally check for the creation timestamp
+				if b.CreationTimestamp.Before(&build.CreationTimestamp) {
+					return true, &b
+				}
+			} else if missing > 0 {
+				// found another suitable scheduled build with fewer dependencies that should build first in order to reuse the produced image
+				return true, &b
+			}
+		}
+	}
+
+	return false, nil
 }

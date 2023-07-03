@@ -19,6 +19,7 @@ package build
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"k8s.io/apimachinery/pkg/labels"
@@ -54,7 +55,7 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 
 	if runningBuildsTotal >= bm.maxRunningBuilds {
 		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "max-running-builds-limit", runningBuildsTotal).
-			ForBuild(build).Infof("Maximum number of running builds (%d) exceeded - the build gets enqueued", runningBuildsTotal)
+			ForBuild(build).Infof("Maximum number of running builds (%d) exceeded - the build (%s) gets enqueued", runningBuildsTotal, build.Name)
 
 		// max number of running builds limit exceeded
 		return false, nil
@@ -85,19 +86,37 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 		return false, err
 	}
 
-	var allowed bool
+	var reason string
+	allowed := true
 	switch bm.buildOrderStrategy {
 	case v1.BuildOrderStrategyFIFO:
 		// Check on builds that have been created before the current build and grant precedence if any.
-		allowed = !builds.HasScheduledBuildsBefore(build)
+		if hasScheduledBuildsBefore, otherBuild := builds.HasScheduledBuildsBefore(build); hasScheduledBuildsBefore {
+			reason = fmt.Sprintf("Waiting for build (%s) because it has been created before", otherBuild.Name)
+			allowed = false
+		}
+	case v1.BuildOrderStrategyDependencies:
+		// Check on the Integration dependencies and see if we should queue the build in order to leverage incremental builds
+		// because there is already another build in the making that matches the requirements
+		if hasMatchingBuild, otherBuild := builds.HasMatchingBuild(build); hasMatchingBuild {
+			reason = fmt.Sprintf("Waiting for build (%s) to finish in order to use incremental image builds", otherBuild.Name)
+			allowed = false
+		}
 	case v1.BuildOrderStrategySequential:
 		// Emulate a serialized working queue to only allow one build to run at a given time.
 		// Let's requeue the build in case one is already running
-		allowed = !builds.HasRunningBuilds()
+		if hasRunningBuilds := builds.HasRunningBuilds(); hasRunningBuilds {
+			reason = "Found a running build in this namespace"
+			allowed = false
+		}
 	default:
-		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "order-strategy", bm.buildOrderStrategy).
-			ForBuild(build).Infof("Unsupported build order strategy (%s) - the build gets enqueued", bm.buildOrderStrategy)
+		reason = fmt.Sprintf("Unsupported build order strategy (%s)", bm.buildOrderStrategy)
 		allowed = false
+	}
+
+	if !allowed {
+		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "order-strategy", bm.buildOrderStrategy).
+			ForBuild(build).Infof("%s - the build (%s) gets enqueued", reason, build.Name)
 	}
 
 	return allowed, nil

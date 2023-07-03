@@ -214,8 +214,8 @@ traits:
     description: The strategy to use, either `pod` or `routine` (default routine)
   - name: order-strategy
     type: string
-    description: The build order strategy to use, either `fifo` or `sequential` (default
-      sequential)
+    description: The build order strategy to use, either `dependencies`, `fifo` or
+      `sequential` (default sequential)
   - name: request-cpu
     type: string
     description: When using `pod` strategy, the minimum amount of CPU required by

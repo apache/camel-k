@@ -6195,8 +6195,8 @@ spec:
                           of memory required by the pod builder.
                         type: string
                       orderStrategy:
-                        description: The build order strategy to use, either `fifo`
-                          or `sequential` (default sequential)
+                        description: The build order strategy to use, either `dependencies`,
+                          `fifo` or `sequential` (default sequential)
                         type: string
                       properties:
                         description: A list of properties to be provided to the build
