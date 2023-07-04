@@ -102,9 +102,14 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 
 func initializeSpectrum(options spectrum.Options, ip *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
+	organization := ip.Status.Build.Registry.Organization
+	if organization == "" {
+		organization = catalog.Namespace
+	}
 	imageName := fmt.Sprintf(
-		"%s/camel-k-runtime-%s-builder:%s",
+		"%s/%s/camel-k-runtime-%s-builder:%s",
 		ip.Status.Build.Registry.Address,
+		organization,
 		catalog.Spec.Runtime.Provider,
 		strings.ToLower(catalog.Spec.Runtime.Version),
 	)
