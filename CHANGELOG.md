@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
+- Builder image name missing the organization configuration [\#4525](https://github.com/apache/camel-k/issues/4525)
 - Make command fails on MacOS due to TestGenerateKeystore [\#4516](https://github.com/apache/camel-k/issues/4516)
 - Allow to remote debug the Operator [\#4513](https://github.com/apache/camel-k/issues/4513)
 - Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
@@ -15,6 +17,7 @@
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
+- Can't install Camel-K 2.0 nightly on OpenShift cluster [\#4476](https://github.com/apache/camel-k/issues/4476)
 - Missing license header [\#4469](https://github.com/apache/camel-k/issues/4469)
 - Rework CLIs required by operator build process [\#4466](https://github.com/apache/camel-k/issues/4466)
 - Use maven distribution available in the operator image [\#4429](https://github.com/apache/camel-k/issues/4429)
@@ -33,6 +36,8 @@
 
 **Merged pull requests:**
 
+- fix\(ctrl\): dynamic builder registry organization [\#4529](https://github.com/apache/camel-k/pull/4529) ([squakez](https://github.com/squakez))
+- fix\(ci\): proper arch label [\#4527](https://github.com/apache/camel-k/pull/4527) ([squakez](https://github.com/squakez))
 - chore:  coverage report fixes [\#4522](https://github.com/apache/camel-k/pull/4522) ([realMartinez](https://github.com/realMartinez))
 - Ref \#4236: Describe how to install kind with a local registry [\#4521](https://github.com/apache/camel-k/pull/4521) ([essobedo](https://github.com/essobedo))
 - chore\(ci\): Upgrade github/non github actions [\#4518](https://github.com/apache/camel-k/pull/4518) ([gansheer](https://github.com/gansheer))
@@ -53,6 +58,7 @@
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.15.1 to 1.16.0 [\#4491](https://github.com/apache/camel-k/pull/4491) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.20 to 0.6.21 [\#4490](https://github.com/apache/camel-k/pull/4490) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/sync from 0.2.0 to 0.3.0 [\#4488](https://github.com/apache/camel-k/pull/4488) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(core\): Permissions on operator and builder pods \(S2I compatibility\) [\#4487](https://github.com/apache/camel-k/pull/4487) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.8.0 to 0.9.0 [\#4486](https://github.com/apache/camel-k/pull/4486) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat: remove the need for a storage [\#4483](https://github.com/apache/camel-k/pull/4483) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/term from 0.8.0 to 0.9.0 [\#4482](https://github.com/apache/camel-k/pull/4482) ([dependabot[bot]](https://github.com/apps/dependabot))
