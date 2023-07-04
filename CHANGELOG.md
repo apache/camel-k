@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
+- Builder image name missing the organization configuration [\#4525](https://github.com/apache/camel-k/issues/4525)
 - Make command fails on MacOS due to TestGenerateKeystore [\#4516](https://github.com/apache/camel-k/issues/4516)
 - Allow to remote debug the Operator [\#4513](https://github.com/apache/camel-k/issues/4513)
 - Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
@@ -15,6 +17,7 @@
 - Alter namespace where the Push of Operator sends the image generated [\#4492](https://github.com/apache/camel-k/issues/4492)
 - Empty build strategy [\#4485](https://github.com/apache/camel-k/issues/4485)
 - pod-template with knative in rest integration [\#4484](https://github.com/apache/camel-k/issues/4484)
+- Can't install Camel-K 2.0 nightly on OpenShift cluster [\#4476](https://github.com/apache/camel-k/issues/4476)
 - Missing license header [\#4469](https://github.com/apache/camel-k/issues/4469)
 - Rework CLIs required by operator build process [\#4466](https://github.com/apache/camel-k/issues/4466)
 - Use maven distribution available in the operator image [\#4429](https://github.com/apache/camel-k/issues/4429)
