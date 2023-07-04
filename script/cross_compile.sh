@@ -32,7 +32,7 @@ shift
 build_flags="$*"
 
 cross_compile () {
-	local label=$1
+	local label="$1-$2-$3"
 	local extension=""
 	export GOOS=$2
 	export GOARCH=$3
@@ -57,11 +57,11 @@ cross_compile () {
 	pushd . && cd ${targetdir} && tar -zcvf ../../${label}.tar.gz $(ls -A) && popd
 }
 
-cross_compile ${basename}-${version}-linux-64bit linux amd64
-cross_compile ${basename}-${version}-linux-64bit linux arm64
-cross_compile ${basename}-${version}-mac-64bit darwin amd64
-cross_compile ${basename}-${version}-mac-arm64bit darwin arm64
-cross_compile ${basename}-${version}-windows-64bit windows amd64
+cross_compile ${basename}-${version} linux amd64
+cross_compile ${basename}-${version} linux arm64
+cross_compile ${basename}-${version} darwin amd64
+cross_compile ${basename}-${version} darwin arm64
+cross_compile ${basename}-${version} windows amd64
 
 
 rm -rf ${builddir}
