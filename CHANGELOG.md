@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- Add `description` to KameletBinding and Integration [\#4535](https://github.com/apache/camel-k/issues/4535)
 - Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
 - Builder image name missing the organization configuration [\#4525](https://github.com/apache/camel-k/issues/4525)
+- Unable to run the code by adding Jar files as depedency [\#4524](https://github.com/apache/camel-k/issues/4524)
 - Make command fails on MacOS due to TestGenerateKeystore [\#4516](https://github.com/apache/camel-k/issues/4516)
 - Allow to remote debug the Operator [\#4513](https://github.com/apache/camel-k/issues/4513)
 - Updating a property will cause Integration to rebuild [\#4511](https://github.com/apache/camel-k/issues/4511)
@@ -26,9 +28,11 @@
 - Horizontal scaling ability for operators [\#4173](https://github.com/apache/camel-k/issues/4173)
 - Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
 - Multi architecture support - Operator and builder pods [\#4148](https://github.com/apache/camel-k/issues/4148)
+- how to add custom component in camel-k [\#4145](https://github.com/apache/camel-k/issues/4145)
 - Add message during Operator Installation that checks that Internal Image Registry is configured [\#4130](https://github.com/apache/camel-k/issues/4130)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
+- camel k bypassing maven settings.xml when using proxy [\#3991](https://github.com/apache/camel-k/issues/3991)
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 - Deprecated Github actions / warnings [\#3766](https://github.com/apache/camel-k/issues/3766)
 - Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
