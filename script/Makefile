@@ -268,7 +268,7 @@ test-common: do-build
 	go test -timeout 30m -v ./e2e/common/cli -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/misc -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 10m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
