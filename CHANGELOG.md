@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Add `description` to KameletBinding and Integration [\#4535](https://github.com/apache/camel-k/issues/4535)
+- TestHealthTrait flakiness [\#4532](https://github.com/apache/camel-k/issues/4532)
 - Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
 - Builder image name missing the organization configuration [\#4525](https://github.com/apache/camel-k/issues/4525)
 - Unable to run the code by adding Jar files as depedency [\#4524](https://github.com/apache/camel-k/issues/4524)
@@ -29,6 +30,7 @@
 - Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
 - Multi architecture support - Operator and builder pods [\#4148](https://github.com/apache/camel-k/issues/4148)
 - how to add custom component in camel-k [\#4145](https://github.com/apache/camel-k/issues/4145)
+- how to set body of OUT message in yaml DSL? [\#4144](https://github.com/apache/camel-k/issues/4144)
 - Add message during Operator Installation that checks that Internal Image Registry is configured [\#4130](https://github.com/apache/camel-k/issues/4130)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
@@ -36,12 +38,19 @@
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 - Deprecated Github actions / warnings [\#3766](https://github.com/apache/camel-k/issues/3766)
 - Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
+- Build order strategy [\#592](https://github.com/apache/camel-k/issues/592)
 - introduce code coverage report for each pr [\#559](https://github.com/apache/camel-k/issues/559)
 
 **Merged pull requests:**
 
+- chore\(ci\): Remove unused Dockerfile.arch [\#4538](https://github.com/apache/camel-k/pull/4538) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump golang.org/x/term from 0.9.0 to 0.10.0 [\#4537](https://github.com/apache/camel-k/pull/4537) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.9.0 to 0.10.0 [\#4536](https://github.com/apache/camel-k/pull/4536) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): increase trait test timeout [\#4533](https://github.com/apache/camel-k/pull/4533) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump golang.org/x/text from 0.10.0 to 0.11.0 [\#4530](https://github.com/apache/camel-k/pull/4530) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ctrl\): dynamic builder registry organization [\#4529](https://github.com/apache/camel-k/pull/4529) ([squakez](https://github.com/squakez))
 - fix\(ci\): proper arch label [\#4527](https://github.com/apache/camel-k/pull/4527) ([squakez](https://github.com/squakez))
+- fix\(\#592\): Introduce build order strategy [\#4523](https://github.com/apache/camel-k/pull/4523) ([christophd](https://github.com/christophd))
 - chore:  coverage report fixes [\#4522](https://github.com/apache/camel-k/pull/4522) ([realMartinez](https://github.com/realMartinez))
 - Ref \#4236: Describe how to install kind with a local registry [\#4521](https://github.com/apache/camel-k/pull/4521) ([essobedo](https://github.com/essobedo))
 - chore\(ci\): Upgrade github/non github actions [\#4518](https://github.com/apache/camel-k/pull/4518) ([gansheer](https://github.com/gansheer))
