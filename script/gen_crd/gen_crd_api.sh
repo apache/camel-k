@@ -24,6 +24,10 @@ crd_file_kamelets=$rootdir/docs/modules/ROOT/partials/apis/kamelets-crds.adoc
 # version of gen-crd-api-reference-docs:
 #   https://github.com/ahmetb/gen-crd-api-reference-docs/pull/45
 
+## update the kubernetes version for the generated links
+ver=$(grep k8s.io/client-go ${rootdir}/go.mod |sed 's/.*v0\.\(..\)\../\1/g')
+sed -i "/docsURLTemplate/s/\(kubernetes-api\/v1\.\)../\1${ver}/" $location/gen-*.json
+
 echo "Generating CRD API documentation..."
 # to run a local copy use something like
 #go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
@@ -34,6 +38,8 @@ go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
     -api-dir "github.com/apache/camel-k/v2/pkg/apis/camel/v1" \
     -out-file $crd_file_camel
 
+# the v1alpha1 kamelet api is deprecated and will stay here until
+# the new Pipe api is mature
 #go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
 go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
     -config $location/gen-kamelets-crd-api-config.json \
