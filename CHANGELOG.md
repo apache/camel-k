@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Add `description` to KameletBinding and Integration [\#4535](https://github.com/apache/camel-k/issues/4535)
+- TestHealthTrait flakiness [\#4532](https://github.com/apache/camel-k/issues/4532)
 - Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
 - Builder image name missing the organization configuration [\#4525](https://github.com/apache/camel-k/issues/4525)
 - Unable to run the code by adding Jar files as depedency [\#4524](https://github.com/apache/camel-k/issues/4524)
@@ -29,6 +30,7 @@
 - Observability documentation - Update to micrometer extension [\#4157](https://github.com/apache/camel-k/issues/4157)
 - Multi architecture support - Operator and builder pods [\#4148](https://github.com/apache/camel-k/issues/4148)
 - how to add custom component in camel-k [\#4145](https://github.com/apache/camel-k/issues/4145)
+- how to set body of OUT message in yaml DSL? [\#4144](https://github.com/apache/camel-k/issues/4144)
 - Add message during Operator Installation that checks that Internal Image Registry is configured [\#4130](https://github.com/apache/camel-k/issues/4130)
 - Helm Node Selector [\#4096](https://github.com/apache/camel-k/issues/4096)
 - Update the version of the kind-action [\#4063](https://github.com/apache/camel-k/issues/4063)
@@ -36,6 +38,7 @@
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 - Deprecated Github actions / warnings [\#3766](https://github.com/apache/camel-k/issues/3766)
 - Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
+- Build order strategy [\#592](https://github.com/apache/camel-k/issues/592)
 - introduce code coverage report for each pr [\#559](https://github.com/apache/camel-k/issues/559)
 
 ## [1.12.2-nightly](https://github.com/apache/camel-k/tree/1.12.2-nightly) (2023-06-13)
