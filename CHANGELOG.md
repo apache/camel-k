@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Camel K API doc has dead links to k8s ObjectMeta [\#4540](https://github.com/apache/camel-k/issues/4540)
 - Add `description` to KameletBinding and Integration [\#4535](https://github.com/apache/camel-k/issues/4535)
 - TestHealthTrait flakiness [\#4532](https://github.com/apache/camel-k/issues/4532)
 - Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
@@ -38,11 +39,14 @@
 - Onboard Camel K Tekton tasks [\#3795](https://github.com/apache/camel-k/issues/3795)
 - Deprecated Github actions / warnings [\#3766](https://github.com/apache/camel-k/issues/3766)
 - Document supported components [\#2228](https://github.com/apache/camel-k/issues/2228)
+- Runtime reload configmap/secret when they change [\#2106](https://github.com/apache/camel-k/issues/2106)
 - Build order strategy [\#592](https://github.com/apache/camel-k/issues/592)
 - introduce code coverage report for each pr [\#559](https://github.com/apache/camel-k/issues/559)
 
 **Merged pull requests:**
 
+- chore: Change order of how resources get dumped [\#4544](https://github.com/apache/camel-k/pull/4544) ([christophd](https://github.com/christophd))
+- Fix kubernetes version link in the generated api docs [\#4541](https://github.com/apache/camel-k/pull/4541) ([claudio4j](https://github.com/claudio4j))
 - chore\(ci\): Remove unused Dockerfile.arch [\#4538](https://github.com/apache/camel-k/pull/4538) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump golang.org/x/term from 0.9.0 to 0.10.0 [\#4537](https://github.com/apache/camel-k/pull/4537) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.9.0 to 0.10.0 [\#4536](https://github.com/apache/camel-k/pull/4536) ([dependabot[bot]](https://github.com/apps/dependabot))
