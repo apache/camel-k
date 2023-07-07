@@ -13,6 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+FROM alpine:latest AS jibcli
+ARG JIB_CLI_VERSION=0.12.0
+ARG JIB_HOME="/opt/jib"
+RUN apk --no-cache add ca-certificates \
+    curl \
+    unzip \
+    && rm -rf /var/cache/apk/*
+# replace xargs command not available in some base images
+RUN set -xe \
+    && curl -sSL -o jib.zip https://github.com/GoogleContainerTools/jib/releases/download/v${JIB_CLI_VERSION}-cli/jib-jre-${JIB_CLI_VERSION}.zip \
+    && unzip jib.zip  \
+    && rm jib.zip \
+    && mv jib-${JIB_CLI_VERSION} ${JIB_HOME} \
+    && sed -i "s/xargs -n1/tr \' \'  \'\\\n\'/g" ${JIB_HOME}/bin/jib
+
 FROM eclipse-temurin:17-jdk as base
 
 ARG MAVEN_DEFAULT_VERSION="3.8.6"
@@ -20,6 +35,8 @@ ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
 ARG MVN_REPO="/etc/maven/m2"
+
+ARG JIB_HOME="/opt/jib"
 
 USER 0
 
@@ -42,6 +59,8 @@ RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> 
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider*
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
+COPY --from=jibcli ${JIB_HOME} ${JIB_HOME}
+
 ADD build/_maven_output ${MVN_REPO}
 ADD build/_kamelets /kamelets
 
@@ -52,7 +71,9 @@ RUN chgrp -R 0 ${MVN_REPO} \
     && chmod -R g=u /kamelets \
     && chgrp -R 0 ${MAVEN_HOME} \
     && chown -R 1001:0 ${MAVEN_HOME} \
-    && chmod -R 775 ${MAVEN_HOME}
+    && chmod -R 775 ${MAVEN_HOME} \
+    && chown -R 1001:0 ${JIB_HOME} \
+    && chmod -R 775 ${JIB_HOME}
 
 USER 1001:0
 
