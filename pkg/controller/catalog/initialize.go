@@ -39,6 +39,7 @@ import (
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/jib"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
@@ -426,7 +427,7 @@ func initializeJib(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 	defer os.RemoveAll(jibContextDir)
 
 	if ip.Status.Build.Registry.Secret != "" {
-		_, err = builder.MountJibSecret(ctx, c, ip.Namespace, ip.Status.Build.Registry.Secret, jibContextDir)
+		_, err = jib.MountJibSecret(ctx, c, ip.Namespace, ip.Status.Build.Registry.Secret, jibContextDir)
 		if err != nil {
 			target.Status.Phase = v1.CamelCatalogPhaseError
 			target.Status.SetErrorCondition(
@@ -449,14 +450,14 @@ func initializeJib(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		return target, err
 	}
 
-	jibCmd := "/opt/jib/bin/jib"
-	jibArgs := []string{"build",
-		"--target=" + imageName,
-		"--build-file=" + filepath.Join(jibContextDir, jibBuildFileName),
-		"--image-metadata-out=" + filepath.Join(jibContextDir, "jibimage.json")}
+	jibCmd := jib.JibCliCmdBinary
+	jibArgs := []string{jib.JibCliCmdBuild,
+		jib.JibCliParamTarget + imageName,
+		jib.JibCliParamBuildFile + filepath.Join(jibContextDir, jibBuildFileName),
+		jib.JibCliParamOutput + filepath.Join(jibContextDir, "jibimage.json")}
 
 	if ip.Status.Build.Registry.Insecure {
-		jibArgs = append(jibArgs, "--allow-insecure-registries")
+		jibArgs = append(jibArgs, jib.JibCliParamInsecureRegistry)
 	}
 
 	cmd := exec.CommandContext(ctx, jibCmd, jibArgs...)
@@ -684,6 +685,8 @@ func getS2iUserID(ctx context.Context, c client.Client, ip *v1.IntegrationPlatfo
 	}
 	return ugfidStr
 }
+
+// Create the jibcli BuildConfig file.
 func jibBuildFile(catalog *v1.CamelCatalog, jibContextDir string, jibBuildFileName string) error {
 	// #nosec G202
 	jibBuildFile := []byte(`apiVersion: jib/v1alpha1

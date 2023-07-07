@@ -26,9 +26,8 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/jib"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"go.uber.org/multierr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type jibTask struct {
@@ -106,20 +105,20 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 
 	registryConfigDir := ""
 	if t.task.Registry.Secret != "" {
-		registryConfigDir, err = MountJibSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret, contextDir)
+		registryConfigDir, err = jib.MountJibSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret, contextDir)
 		if err != nil {
 			return status.Failed(err)
 		}
 	}
 
-	jibCmd := "/opt/jib/bin/jib"
-	jibArgs := []string{"build",
-		"--target=" + t.task.Image,
-		"--build-file=" + filepath.Join(contextDir, "jib.yaml"),
-		"--image-metadata-out=" + filepath.Join(contextDir, "jibimage.json")}
+	jibCmd := jib.JibCliCmdBinary
+	jibArgs := []string{jib.JibCliCmdBuild,
+		jib.JibCliParamTarget + t.task.Image,
+		jib.JibCliParamBuildFile + filepath.Join(contextDir, "jib.yaml"),
+		jib.JibCliParamOutput + filepath.Join(contextDir, "jibimage.json")}
 
 	if pushInsecure || pullInsecure {
-		jibArgs = append(jibArgs, "--allow-insecure-registries")
+		jibArgs = append(jibArgs, jib.JibCliParamInsecureRegistry)
 	}
 
 	cmd := exec.CommandContext(ctx, jibCmd, jibArgs...)
@@ -157,31 +156,4 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	return status
-}
-
-func MountJibSecret(ctx context.Context, c client.Client, namespace, name string, jibContextDir string) (string, error) {
-	dockerConfigDir := filepath.Join(jibContextDir, ".docker")
-
-	err := util.CreateDirectory(dockerConfigDir)
-	if err != nil {
-		return "", err
-	}
-
-	secret, err := c.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
-	if err != nil {
-		if removeErr := os.RemoveAll(dockerConfigDir); removeErr != nil {
-			err = multierr.Append(err, removeErr)
-		}
-		return "", err
-	}
-
-	for file, content := range secret.Data {
-		if err := os.WriteFile(filepath.Join(dockerConfigDir, remap(file)), content, 0o600); err != nil {
-			if removeErr := os.Remove(filepath.Join(dockerConfigDir, remap(file))); removeErr != nil {
-				err = multierr.Append(err, removeErr)
-			}
-			return "", err
-		}
-	}
-	return dockerConfigDir, nil
 }
