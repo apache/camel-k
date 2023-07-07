@@ -52,48 +52,19 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		return err
 	}
 
-	// IntegrationPlatforms
-	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
+	// Integrations
+	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d platforms:\n", len(pls.Items))
-	for _, p := range pls.Items {
-		ref := p
+	t.Logf("Found %d integrations:\n", len(its.Items))
+	for _, integration := range its.Items {
+		ref := integration
 		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
 		t.Logf("---\n%s\n---\n", string(pdata))
-	}
-
-	// CamelCatalogs
-	cats, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d catalogs:\n", len(cats.Items))
-	for _, c := range cats.Items {
-		ref := c
-		cdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(cdata))
-	}
-
-	// Builds
-	builds, err := camelClient.CamelV1().Builds(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	t.Logf("Found %d builds:\n", len(builds.Items))
-	for _, build := range builds.Items {
-		data, err := kubernetes.ToYAMLNoManagedFields(&build)
-		if err != nil {
-			return err
-		}
-		t.Logf("---\n%s\n---\n", string(data))
 	}
 
 	// IntegrationKits
@@ -111,19 +82,18 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
-	// Integrations
-	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
+	// Builds
+	builds, err := camelClient.CamelV1().Builds(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d integrations:\n", len(its.Items))
-	for _, integration := range its.Items {
-		ref := integration
-		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+	t.Logf("Found %d builds:\n", len(builds.Items))
+	for _, build := range builds.Items {
+		data, err := kubernetes.ToYAMLNoManagedFields(&build)
 		if err != nil {
 			return err
 		}
-		t.Logf("---\n%s\n---\n", string(pdata))
+		t.Logf("---\n%s\n---\n", string(data))
 	}
 
 	// Configmaps
@@ -201,6 +171,36 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 				t.Logf("%sERROR while reading the logs: %v\n", pad, err)
 			}
 		}
+	}
+
+	// IntegrationPlatforms
+	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d platforms:\n", len(pls.Items))
+	for _, p := range pls.Items {
+		ref := p
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	// CamelCatalogs
+	cats, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d catalogs:\n", len(cats.Items))
+	for _, c := range cats.Items {
+		ref := c
+		cdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(cdata))
 	}
 
 	// Services
