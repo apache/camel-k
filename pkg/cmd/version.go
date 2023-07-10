@@ -148,7 +148,7 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 	infos["Registry address"] = platform.Status.Build.Registry.Address
 	infos["Git commit"] = platform.Status.Info["gitCommit"]
 
-	catalog, err := camel.LoadCatalog(ctx, c, namespace, v1.RuntimeSpec{Version: platform.Status.Build.RuntimeVersion, Provider: platform.Status.Build.RuntimeProvider})
+	catalog, err := camel.LoadCatalog(ctx, c, platform.Namespace, v1.RuntimeSpec{Version: platform.Status.Build.RuntimeVersion, Provider: platform.Status.Build.RuntimeProvider})
 	if err != nil {
 		return nil, err
 	}
