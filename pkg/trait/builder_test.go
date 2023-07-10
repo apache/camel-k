@@ -202,3 +202,22 @@ func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
 	}
 	return v1.Task{}
 }
+
+func TestMavenProfileBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.MavenProfile = "configmap:maven-profile/owasp-profile.xml"
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+
+	assert.Equal(t, v1.ValueSource{
+		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "maven-profile",
+			},
+			Key: "owasp-profile.xml",
+		},
+	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profile)
+}

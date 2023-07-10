@@ -19,6 +19,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -104,6 +105,89 @@ func TestTraitsMerge(t *testing.T) {
 			"serviceName": "test-integration",
 		}),
 		t1.Addons["telemetry"])
+}
+
+func TestDecodeValueSourceValid(t *testing.T) {
+	res, err := DecodeValueSource("configmap:my-configmap", "defaultkey", "errorMessage")
+	require.NoError(t, err)
+
+	assert.NotNil(t, res)
+	assert.Nil(t, res.SecretKeyRef)
+	assert.NotNil(t, res.ConfigMapKeyRef)
+	assert.Equal(t, "defaultkey", res.ConfigMapKeyRef.Key)
+
+	res, err = DecodeValueSource("configmap:my-configmap/my-key", "defaultkey", "errorMessage")
+	require.NoError(t, err)
+
+	assert.NotNil(t, res)
+	assert.Nil(t, res.SecretKeyRef)
+	assert.NotNil(t, res.ConfigMapKeyRef)
+	assert.Equal(t, "my-key", res.ConfigMapKeyRef.Key)
+
+	res, err = DecodeValueSource("secret:my-secret/mykey", "defaultkey", "errorMessage")
+	require.NoError(t, err)
+
+	assert.NotNil(t, res)
+	assert.Nil(t, res.ConfigMapKeyRef)
+	assert.NotNil(t, res.SecretKeyRef)
+	assert.Equal(t, "mykey", res.SecretKeyRef.Key)
+
+	res, err = DecodeValueSource("secret:my-secret", "defaultkey", "errorMessage")
+	require.NoError(t, err)
+
+	assert.NotNil(t, res)
+	assert.Nil(t, res.ConfigMapKeyRef)
+	assert.NotNil(t, res.SecretKeyRef)
+	assert.Equal(t, "defaultkey", res.SecretKeyRef.Key)
+}
+
+func TestDecodeValueSourceInvalid(t *testing.T) {
+	testcases := []struct {
+		name         string
+		input        string
+		defaultKey   string
+		errorMessage string
+	}{
+		{
+			name:         "invalidResource",
+			input:        "invalid:my-resource",
+			defaultKey:   "defaultKey",
+			errorMessage: "invalidResource",
+		},
+		{
+			name:         "noResourceName",
+			input:        "secret:",
+			defaultKey:   "defaultKey",
+			errorMessage: "noResourceName",
+		},
+		{
+			name:         "invalidResourceName",
+			input:        "configmap:***",
+			defaultKey:   "defaultKey",
+			errorMessage: "errorMessage",
+		},
+		{
+			name:         "invalidResourceKey",
+			input:        "configmap:my-cm/-",
+			defaultKey:   "defaultKey",
+			errorMessage: "invalidResourceKey",
+		},
+		{
+			name:         "invalidResourceNameWithKey",
+			input:        "configmap:/my-key",
+			defaultKey:   "defaultKey",
+			errorMessage: "invalidResourceNameWithKey",
+		}}
+
+	for i, tc := range testcases {
+		t.Run(fmt.Sprintf("test-%d-%s", i, tc.name), func(t *testing.T) {
+			res, err := DecodeValueSource(tc.input, tc.defaultKey, tc.errorMessage)
+			assert.NotNil(t, err)
+			assert.Equal(t, ValueSource{}, res)
+			assert.Equal(t, err.Error(), tc.errorMessage)
+		})
+	}
+
 }
 
 func configurationFromMap(t *testing.T, configMap map[string]interface{}) *trait.Configuration {

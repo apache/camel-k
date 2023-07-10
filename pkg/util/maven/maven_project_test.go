@@ -80,6 +80,7 @@ const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
       </releases>
     </pluginRepository>
   </pluginRepositories>
+  <profiles><profile><id>custom</id></profile></profiles>
 </project>`
 
 func TestPomGeneration(t *testing.T) {
@@ -128,6 +129,8 @@ func TestPomGeneration(t *testing.T) {
 			},
 		},
 	}
+
+	project.Profiles = ProfilesContent{InnerXML: `<profile><id>custom</id></profile>`}
 
 	pom, err := util.EncodeXML(project)
 

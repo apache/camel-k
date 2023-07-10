@@ -80,6 +80,7 @@ type Project struct {
 	Repositories         []v1.Repository       `xml:"repositories>repository,omitempty"`
 	PluginRepositories   []v1.Repository       `xml:"pluginRepositories>pluginRepository,omitempty"`
 	Build                *Build                `xml:"build,omitempty"`
+	Profiles             ProfilesContent       `xml:"profiles,omitempty"`
 }
 
 // Exclusion models a dependency exclusion.
@@ -131,4 +132,8 @@ type Proxy struct {
 	Username      string `xml:"username,omitempty"`
 	Password      string `xml:"password,omitempty"`
 	NonProxyHosts string `xml:"nonProxyHosts,omitempty"`
+}
+
+type ProfilesContent struct {
+	InnerXML string `xml:",innerxml"`
 }
