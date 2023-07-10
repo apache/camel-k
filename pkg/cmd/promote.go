@@ -151,7 +151,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if o.OutputFormat != "" {
-		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat, c.GetScheme())
+		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
 	}
 	replaced, err := o.replaceResource(destIntegration)
 	if !replaced {
@@ -503,11 +503,9 @@ func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) 
 	return kubernetes.ReplaceResource(o.Context, o._client, res)
 }
 
-//
 // RoleBinding is required to allow access to images in one namespace
 // by another namespace. Without this on rbac-enabled clusters, the
 // image cannot be pulled.
-//
 func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS string, destNS string) error {
 	rb := &rbacv1.RoleBinding{
 		TypeMeta: metav1.TypeMeta{
