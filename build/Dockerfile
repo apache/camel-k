@@ -43,6 +43,8 @@ RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> 
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
 ADD build/_maven_output ${MVN_REPO}
+# Fix https://github.com/moby/moby/issues/37965
+RUN true
 ADD build/_kamelets /kamelets
 
 RUN chgrp -R 0 ${MVN_REPO} \

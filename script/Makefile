@@ -23,7 +23,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.0.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 1.12.1
-RUNTIME_VERSION := 2.16.0-SNAPSHOT
+DEFAULT_RUNTIME_VERSION := 2.16.0
 BUILDAH_VERSION := 1.30.0
 KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
@@ -179,7 +179,7 @@ codegen:
 	@echo "  Version = \"$(CUSTOM_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
-	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "  DefaultRuntimeVersion = \"$(DEFAULT_RUNTIME_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // BuildahVersion -- " >> $(VERSIONFILE)
 	@echo "  BuildahVersion = \"$(BUILDAH_VERSION)\"" >> $(VERSIONFILE)
@@ -348,7 +348,7 @@ build-kamel:
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
 build-resources:
-	./script/get_catalog.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
 	go generate ./pkg/...
 
 bundle-kamelets:
@@ -419,7 +419,7 @@ check-licenses:
 maven-overlay:
 	@echo "####### Preparing maven dependencies bundle..."
 	mkdir -p build/_maven_overlay
-	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION) build/_maven_overlay
+	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION) build/_maven_overlay
 
 kamel-overlay:
 	mkdir -p build/_output/bin
@@ -444,8 +444,8 @@ ifneq ($(IMAGE_ARCH), amd64)
 endif
 
 images: build kamel-overlay maven-overlay bundle-kamelets
-ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
-	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
+ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
+	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output

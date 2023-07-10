@@ -169,6 +169,7 @@ func initializeSpectrum(options spectrum.Options, ip *v1.IntegrationPlatform, ca
 	return target, nil
 }
 
+// nolint: maintidx // TODO: refactor the code
 func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatform, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
 	// No registry in s2i
@@ -180,14 +181,18 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 
 	uidStr := getS2iUserID(ctx, c, ip, catalog)
 
-	// Dockfile
-	dockerfile := string([]byte(`
+	// Dockerfile
+	dockerfile := `
 		FROM ` + catalog.Spec.GetQuarkusToolingImage() + `
 		USER ` + uidStr + `:0
 		ADD --chown=` + uidStr + `:0 /usr/local/bin/kamel /usr/local/bin/kamel
 		ADD --chown=` + uidStr + `:0 /usr/share/maven/mvnw/ /usr/share/maven/mvnw/
+	`
+	if imageSnapshot(imageName + ":" + imageTag) {
+		dockerfile = dockerfile + `
 		ADD --chown=` + uidStr + `:0 ` + defaults.LocalRepository + ` ` + defaults.LocalRepository + `
-	`))
+	`
+	}
 
 	owner := catalogReference(catalog)
 
@@ -294,12 +299,15 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 			return fmt.Errorf("cannot create tar archive: %w", err)
 		}
 
-		err = tarEntries(archiveFile,
+		directories := []string{
 			"/usr/local/bin/kamel:/usr/local/bin/kamel",
 			"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
-			// Required for snapshots dependencies in the runtimes
-			defaults.LocalRepository+":"+defaults.LocalRepository,
-		)
+		}
+		if imageSnapshot(imageName + ":" + imageTag) {
+			directories = append(directories, defaults.LocalRepository+":"+defaults.LocalRepository)
+		}
+
+		err = tarEntries(archiveFile, directories...)
 		if err != nil {
 			return fmt.Errorf("cannot tar path entry: %w", err)
 		}
@@ -459,12 +467,15 @@ func buildRuntimeBuilderImageSpectrum(options spectrum.Options) error {
 		options.Jobs = jobs
 	}
 
-	_, err := spectrum.Build(options,
+	directories := []string{
 		"/usr/local/bin/kamel:/usr/local/bin/",
 		"/usr/share/maven/mvnw/:/usr/share/maven/mvnw/",
-		// Required for snapshots dependencies in the runtimes
-		defaults.LocalRepository+":"+defaults.LocalRepository,
-	)
+	}
+	if imageSnapshot(options.Target) {
+		directories = append(directories, defaults.LocalRepository+":"+defaults.LocalRepository)
+	}
+
+	_, err := spectrum.Build(options, directories...)
 	if err != nil {
 		return err
 	}
