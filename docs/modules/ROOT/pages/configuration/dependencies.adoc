@@ -63,7 +63,7 @@ The content of `integration-dep.jar` will then be accessible in your integration
 You can also specify data files to be mounted in the running container:
 
 ```
-kamel run -d file://path/to/data.csv:path/in/container/data.csv Integration.java
+kamel run -d file://path/to/data.csv?targetPath=/in/container/data.csv Integration.java
 ```
 
 Specifying a directory with also work recursively.
