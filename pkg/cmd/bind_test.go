@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"os"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -25,6 +26,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const cmdBind = "bind"
@@ -244,4 +246,15 @@ func TestBindServiceAccountName(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Contains(t, output, "serviceAccountName: my-service-account")
+}
+
+func TestBindOutputWithoutKubernetesCluster(t *testing.T) {
+	tmpFile, err := os.CreateTemp("", "camel-k-kubeconfig-*")
+	require.NoError(t, err)
+
+	bindCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	bindCmdOptions._client = nil // remove the default fake client which can bypass this test
+	bindCmdOptions.KubeConfig = tmpFile.Name()
+	_, err = test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml")
+	require.NoError(t, err)
 }
