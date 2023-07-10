@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License. 
 # ---------------------------------------------------------------------------
-
-name: coverage report
+# test
+name: coverage-report
 
 on:
   pull_request_target:
@@ -36,115 +36,58 @@ jobs:
           go-version: '1.18'
           check-latest: true
 
+      - name: Checkout apache repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: apache/camel-k
+          path: old
+
       - name: Get Old Coverage
         shell: bash
         run: |
-          git clone https://github.com/apache/camel-k.git
-          cd camel-k
+          cd old
           old_coverage="$(grep -o -P '(?<=Coverage-)(.*)(?=%)' README.adoc)"
           cd ..
-          rm -rf camel-k
+          echo "OLD_COV=$old_coverage" >> $GITHUB_ENV
 
       - name: Checkout
-        shell: bash
-        run: |
-          git clone ${{github.server_url}}/${{ github.repository }}.git
-          cd camel-k
-          git checkout ${{ github.event.pull_request.head.ref }}
-
-      - name: Fetch
-        shell: bash
-        working-directory: ./camel-k
-        env:
-          CI_USER: "github-actions[bot]"
-          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
-        run: |
-          git config --local user.email "$CI_EMAIL"
-          git config --local user.name "$CI_USER"
-          git remote add upstream https://github.com/apache/camel-k.git
-          git fetch upstream
-          
-      - name: Rebase
-        shell: bash
-        working-directory: ./camel-k
-        env:
-          CI_USER: "github-actions[bot]"
-          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
-          CI_TOKEN: ${{ inputs.secretGithubToken }}
-        run: |
-          git pull --rebase upstream main && echo "rebaseAborted=0" >> $GITHUB_ENV || echo "rebaseAborted=1" >> $GITHUB_ENV
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          path: new
 
       - name: Get New Coverage
         shell: bash
-        working-directory: ./camel-k
-        if: env.rebaseAborted != 1
-        env:
-          CI_USER: "github-actions[bot]"
-          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
-          CI_TOKEN: ${{ inputs.secretGithubToken }}
         run: |
+          cd new
           go test -v ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
           new_coverage="$(grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs)"
-
-          echo "OLD - $old_coverage"
-          echo "NEW - $new_coverage"
-
-          coverage_difference=$(bc <<< $new_coverage-$old_coverage)
+          echo "NEW_COV=$new_coverage" >> $GITHUB_ENV
+          
+          coverage_difference=`echo "$new_coverage-${{env.OLD_COV}}" | bc`
+          echo "COV_DIFF=$coverage_difference" >> $GITHUB_ENV
 
           if (( $(echo "$coverage_difference > 0" |bc -l) )); then
-          echo "POS_DIFF=POS" >> $GITHUB_ENV
+          echo "POS_DIFF=POS" >> $GITHUB_ENV  
           elif (( $(echo "$coverage_difference < 0" |bc -l) )); then
           echo "POS_DIFF=NEG" >> $GITHUB_ENV
           else
           echo "POS_DIFF=ZERO" >> $GITHUB_ENV
           fi
-
-          echo "NEW_COV=$new_coverage" >> $GITHUB_ENV
-          echo "OLD_COV=$old_coverage" >> $GITHUB_ENV
-          echo "COV_DIFF=$coverage_difference" >> $GITHUB_ENV
          
-
-      - name: Comment Coverage
-        if: env.rebaseAborted != 1
-        uses: actions/github-script@v6
+      - name: Save env variables
+        run: |
+          mkdir -p ./pr
+          echo ${{ github.event.number }} > ./pr/NR
+          echo ${{env.OLD_COV}} > ./pr/OLD_COV
+          echo ${{env.NEW_COV}} > ./pr/NEW_COV
+          echo ${{env.COV_DIFF}} > ./pr/COV_DIFF
+          echo ${{env.POS_DIFF}} > ./pr/POS_DIFF
+      - uses: actions/upload-artifact@v2
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-
-            if(${{env.POS_DIFF  == 'POS'}}){
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: ':camel: **Thank you for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: +**${{env.COV_DIFF}}%**'
-              })
-            }else if(${{env.POS_DIFF == 'NEG'}}){
-              github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: ':camel: **Thank you for contributing!** :camel: \n\n  **Code Coverage Report** :warning:\n - Coverage changed from: **${{env.OLD_COV}}%** -> **${{env.NEW_COV}}%**\n- Coverage difference: **${{env.COV_DIFF}}%**'
-              })
-            }else{
-              github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: ':camel: **Thank you for contributing!** :camel: \n\n  **Code Coverage Report** :heavy_check_mark:\n - Coverage unchanged.'
-              })
-            }
-
-      - name: Comment Merge Conflicts
-        if: env.rebaseAborted == 1
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: ':camel: **Thank you for contributing!** :camel: \n\n  Unable to create **Coverage Report** :warning:. \n Merge conflicts found.'
-              })
+          name: pr
+          path: pr/
