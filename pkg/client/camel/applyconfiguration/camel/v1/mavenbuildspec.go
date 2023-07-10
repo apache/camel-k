@@ -59,6 +59,14 @@ func (b *MavenBuildSpecApplyConfiguration) WithProperties(entries map[string]str
 	return b
 }
 
+// WithProfile sets the Profile field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Profile field is set to the value of the last call.
+func (b *MavenBuildSpecApplyConfiguration) WithProfile(value *ValueSourceApplyConfiguration) *MavenBuildSpecApplyConfiguration {
+	b.Profile = value
+	return b
+}
+
 // WithSettings sets the Settings field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Settings field is set to the value of the last call.

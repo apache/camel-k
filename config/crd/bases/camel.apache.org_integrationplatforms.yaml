@@ -202,6 +202,48 @@ spec:
                       localRepository:
                         description: The path of the local Maven repository.
                         type: string
+                      profile:
+                        description: A reference to the ConfigMap or Secret key that
+                          contains the Maven profile.
+                        properties:
+                          configMapKeyRef:
+                            description: Selects a key of a ConfigMap.
+                            properties:
+                              key:
+                                description: The key to select.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                  TODO: Add other useful fields. apiVersion, kind,
+                                  uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the ConfigMap or its
+                                  key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                          secretKeyRef:
+                            description: Selects a key of a secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                  TODO: Add other useful fields. apiVersion, kind,
+                                  uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                        type: object
                       properties:
                         additionalProperties:
                           type: string
@@ -468,6 +510,16 @@ spec:
                       limitMemory:
                         description: When using `pod` strategy, the maximum amount
                           of memory required by the pod builder.
+                        type: string
+                      mavenProfile:
+                        description: 'A reference pointing to a configmap/secret that
+                          contains a maven profile. The content of the maven profile
+                          is expected to be a text containing a valid maven profile
+                          starting with `<profile>` and ending with `</profile>` that
+                          will be integrated as an inline profile in the POM. Syntax:
+                          [configmap|secret]:name[/key], where name represents the
+                          resource name, key optionally represents the resource key
+                          to be filtered (default key value = profile.xml).'
                         type: string
                       orderStrategy:
                         description: The build order strategy to use, either `dependencies`,
@@ -1850,6 +1902,48 @@ spec:
                       localRepository:
                         description: The path of the local Maven repository.
                         type: string
+                      profile:
+                        description: A reference to the ConfigMap or Secret key that
+                          contains the Maven profile.
+                        properties:
+                          configMapKeyRef:
+                            description: Selects a key of a ConfigMap.
+                            properties:
+                              key:
+                                description: The key to select.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                  TODO: Add other useful fields. apiVersion, kind,
+                                  uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the ConfigMap or its
+                                  key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                          secretKeyRef:
+                            description: Selects a key of a secret.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                  TODO: Add other useful fields. apiVersion, kind,
+                                  uid?'
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                        type: object
                       properties:
                         additionalProperties:
                           type: string
@@ -2164,6 +2258,16 @@ spec:
                       limitMemory:
                         description: When using `pod` strategy, the maximum amount
                           of memory required by the pod builder.
+                        type: string
+                      mavenProfile:
+                        description: 'A reference pointing to a configmap/secret that
+                          contains a maven profile. The content of the maven profile
+                          is expected to be a text containing a valid maven profile
+                          starting with `<profile>` and ending with `</profile>` that
+                          will be integrated as an inline profile in the POM. Syntax:
+                          [configmap|secret]:name[/key], where name represents the
+                          resource name, key optionally represents the resource key
+                          to be filtered (default key value = profile.xml).'
                         type: string
                       orderStrategy:
                         description: The build order strategy to use, either `dependencies`,

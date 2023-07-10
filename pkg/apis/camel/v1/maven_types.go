@@ -30,6 +30,9 @@ type MavenSpec struct {
 	// The Maven properties.
 	Properties map[string]string `json:"properties,omitempty"`
 	// A reference to the ConfigMap or Secret key that contains
+	// the Maven profile.
+	Profile ValueSource `json:"profile,omitempty"`
+	// A reference to the ConfigMap or Secret key that contains
 	// the Maven settings.
 	Settings ValueSource `json:"settings,omitempty"`
 	// A reference to the ConfigMap or Secret key that contains

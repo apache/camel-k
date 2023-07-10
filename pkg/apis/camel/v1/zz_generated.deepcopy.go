@@ -2000,6 +2000,7 @@ func (in *MavenSpec) DeepCopyInto(out *MavenSpec) {
 			(*out)[key] = val
 		}
 	}
+	in.Profile.DeepCopyInto(&out.Profile)
 	in.Settings.DeepCopyInto(&out.Settings)
 	in.SettingsSecurity.DeepCopyInto(&out.SettingsSecurity)
 	if in.CASecrets != nil {

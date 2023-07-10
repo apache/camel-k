@@ -29,6 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -224,4 +225,81 @@ func TestBuilderTrait(t *testing.T) {
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
+
+	t.Run("Run maven profile", func(t *testing.T) {
+		name := "java-maven-profile"
+
+		mavenProfileCm := newMavenProfileConfigMap(ns, "maven-profile", "owasp-profile")
+		Expect(TestClient().Create(TestContext, mavenProfileCm)).To(Succeed())
+
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+			"-t", "builder.maven-profile=configmap:maven-profile/owasp-profile",
+			"-t", "builder.tasks=custom1;alpine;cat maven/pom.xml",
+			"-t", "builder.strategy=pod",
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+		integrationKitName := IntegrationKit(ns, name)()
+		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
+		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(len(BuilderPod(ns, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(2))
+		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
+		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[1].Name, TestTimeoutShort).Should(Equal("custom1"))
+
+		// Check containers conditions
+		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(
+			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
+			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(
+			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
+			TestTimeoutShort).Should(ContainSubstring("</project>"))
+
+		// Check logs
+		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`<id>owasp-dependency-check</id>`))
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(TestClient().Delete(TestContext, mavenProfileCm)).To(Succeed())
+	})
+}
+
+func newMavenProfileConfigMap(ns, name, key string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		Data: map[string]string{
+			key: fmt.Sprintf(`
+<profile>
+  <id>owasp-dependency-check</id>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.owasp</groupId>
+        <artifactId>dependency-check-maven</artifactId>
+        <version>5.3.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</profile>
+`,
+			),
+		},
+	}
 }

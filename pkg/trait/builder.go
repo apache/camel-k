@@ -261,6 +261,16 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		}
 	}
 
+	// User provides a maven profile
+	if t.MavenProfile != "" {
+		mavenProfile, err := v1.DecodeValueSource(t.MavenProfile, "profile.xml",
+			"illegal profile definition, syntax: configmap|secret:resource-name[/profile path]")
+		if err != nil {
+			return nil, fmt.Errorf("invalid maven profile: %s: %w. ", t.MavenProfile, err)
+		}
+		task.Maven.Profile = mavenProfile
+	}
+
 	steps := make([]builder.Step, 0)
 	steps = append(steps, builder.Project.CommonSteps...)
 
