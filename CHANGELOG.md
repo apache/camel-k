@@ -45,6 +45,10 @@
 
 **Merged pull requests:**
 
+- fix: docs [\#4553](https://github.com/apache/camel-k/pull/4553) ([johnpoth](https://github.com/johnpoth))
+- Coverage report workflow rework [\#4551](https://github.com/apache/camel-k/pull/4551) ([realMartinez](https://github.com/realMartinez))
+- Fix Unable to retrieve CamelCatalog with global installation [\#4549](https://github.com/apache/camel-k/pull/4549) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.25 to 0.6.26 [\#4548](https://github.com/apache/camel-k/pull/4548) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore: Change order of how resources get dumped [\#4544](https://github.com/apache/camel-k/pull/4544) ([christophd](https://github.com/christophd))
 - Fix kubernetes version link in the generated api docs [\#4541](https://github.com/apache/camel-k/pull/4541) ([claudio4j](https://github.com/claudio4j))
 - chore\(ci\): Remove unused Dockerfile.arch [\#4538](https://github.com/apache/camel-k/pull/4538) ([gansheer](https://github.com/gansheer))
