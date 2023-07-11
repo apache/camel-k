@@ -36,6 +36,7 @@ import (
 
 func TestBuilderTrait(t *testing.T) {
 	RegisterTestingT(t)
+	operatorNamespace := GetOperatorNamespace(ns)
 
 	t.Run("Run build strategy routine", func(t *testing.T) {
 		name := "java"
@@ -49,15 +50,15 @@ func TestBuilderTrait(t *testing.T) {
 
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
-		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategySequential))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategySequential))
 		// Default resource CPU Check
-		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
 
-		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(BeNil())
+		Eventually(BuilderPod(operatorNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
 
 		// We need to remove the kit as well
 		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
@@ -75,15 +76,15 @@ func TestBuilderTrait(t *testing.T) {
 
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
-		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyDependencies))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyDependencies))
 		// Default resource CPU Check
-		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
 
-		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(BeNil())
+		Eventually(BuilderPod(operatorNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
 
 		// We need to remove the kit as well
 		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
@@ -101,15 +102,15 @@ func TestBuilderTrait(t *testing.T) {
 
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
-		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyFIFO))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyRoutine))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategyFIFO))
 		// Default resource CPU Check
-		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
 
-		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).Should(BeNil())
+		Eventually(BuilderPod(operatorNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
 
 		// We need to remove the kit as well
 		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
@@ -133,20 +134,20 @@ func TestBuilderTrait(t *testing.T) {
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 
-		Eventually(BuildConfig(ns, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyPod))
-		Eventually(BuildConfig(ns, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategySequential))
-		Eventually(BuildConfig(ns, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal("500m"))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal("1000m"))
-		Eventually(BuildConfig(ns, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal("2Gi"))
-		Eventually(BuildConfig(ns, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal("3Gi"))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().Strategy, TestTimeoutShort).Should(Equal(v1.BuildStrategyPod))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().OrderStrategy, TestTimeoutShort).Should(Equal(v1.BuildOrderStrategySequential))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestCPU, TestTimeoutShort).Should(Equal("500m"))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal("1000m"))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal("2Gi"))
+		Eventually(BuildConfig(operatorNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal("3Gi"))
 
-		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(BuilderPod(operatorNamespace, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
 		// Let's assert we set the resources on the builder container
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Resources.Requests.Cpu().String(), TestTimeoutShort).Should(Equal("500m"))
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Resources.Limits.Cpu().String(), TestTimeoutShort).Should(Equal("1"))
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Resources.Requests.Memory().String(), TestTimeoutShort).Should(Equal("2Gi"))
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Resources.Limits.Memory().String(), TestTimeoutShort).Should(Equal("3Gi"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[0].Resources.Requests.Cpu().String(), TestTimeoutShort).Should(Equal("500m"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[0].Resources.Limits.Cpu().String(), TestTimeoutShort).Should(Equal("1"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[0].Resources.Requests.Memory().String(), TestTimeoutShort).Should(Equal("2Gi"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[0].Resources.Limits.Memory().String(), TestTimeoutShort).Should(Equal("3Gi"))
 
 		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
 	})
@@ -166,32 +167,32 @@ func TestBuilderTrait(t *testing.T) {
 
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
-		Eventually(len(BuilderPod(ns, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(3))
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[1].Name, TestTimeoutShort).Should(Equal("custom1"))
-		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[2].Name, TestTimeoutShort).Should(Equal("custom2"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(len(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(3))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[1].Name, TestTimeoutShort).Should(Equal("custom1"))
+		Eventually(BuilderPod(operatorNamespace, builderKitName)().Spec.InitContainers[2].Name, TestTimeoutShort).Should(Equal("custom2"))
 
 		// Check containers conditions
-		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(Build(operatorNamespace, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
 		Eventually(
 			Build(
-				ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
+				operatorNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
 			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(
-			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
+			Build(operatorNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
 			TestTimeoutShort).Should(ContainSubstring("generated-bytecode.jar"))
-		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
+		Eventually(Build(operatorNamespace, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
 		Eventually(
-			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Status,
+			Build(operatorNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Status,
 			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(
-			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Message,
+			Build(operatorNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Message,
 			TestTimeoutShort).Should(ContainSubstring("</project>"))
 
 		// Check logs
-		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
-		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-runtime-bom</artifactId>`))
+		Eventually(Logs(operatorNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
+		Eventually(Logs(operatorNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-runtime-bom</artifactId>`))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
@@ -207,13 +208,13 @@ func TestBuilderTrait(t *testing.T) {
 		Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 		integrationKitName := IntegrationKit(ns, name)()
 		// Check containers conditions
-		Eventually(Build(ns, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
-		Eventually(BuildConditions(ns, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
+		Eventually(Build(operatorNamespace, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
+		Eventually(BuildConditions(operatorNamespace, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
 		Eventually(
-			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
+			Build(operatorNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
 			TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 		Eventually(
-			Build(ns, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
+			Build(operatorNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
 			TestTimeoutShort).Should(ContainSubstring("No such file or directory"))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
