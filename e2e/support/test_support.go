@@ -2741,3 +2741,12 @@ func DeleteCIProcessID() {
 		panic(err)
 	}
 }
+
+func GetOperatorNamespace(testNamespace string) string {
+	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
+	if globalTest {
+		return os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
+	} else {
+		return testNamespace
+	}
+}
