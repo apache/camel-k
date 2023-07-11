@@ -45,13 +45,12 @@ func isWindows() bool {
 }
 
 func TestPermissionDenied(t *testing.T) {
-	dir := "/tmp/filedir"
 
 	if isWindows() {
 		t.Skip("Test not reliably producing a result on a windows OS")
 	}
 
-	err := os.Mkdir(dir, 0700)
+	dir, err := os.MkdirTemp("/tmp", "camel-k-")
 	assert.Nil(t, err)
 
 	filename := filepath.Join(dir, "file.txt")
