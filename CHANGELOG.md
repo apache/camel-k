@@ -6,9 +6,12 @@
 
 **Closed issues:**
 
+- `kamel run` in output mode still requires connecting to a k8s cluster [\#4556](https://github.com/apache/camel-k/issues/4556)
+- Coverage reports does not report correct coverage [\#4555](https://github.com/apache/camel-k/issues/4555)
 - Camel K API doc has dead links to k8s ObjectMeta [\#4540](https://github.com/apache/camel-k/issues/4540)
 - Add `description` to KameletBinding and Integration [\#4535](https://github.com/apache/camel-k/issues/4535)
 - TestHealthTrait flakiness [\#4532](https://github.com/apache/camel-k/issues/4532)
+- Nightly release Windows CLI failing [\#4531](https://github.com/apache/camel-k/issues/4531)
 - Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
 - Builder image name missing the organization configuration [\#4525](https://github.com/apache/camel-k/issues/4525)
 - Unable to run the code by adding Jar files as depedency [\#4524](https://github.com/apache/camel-k/issues/4524)
@@ -45,8 +48,14 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): spectrum 6.0.28 [\#4564](https://github.com/apache/camel-k/pull/4564) ([squakez](https://github.com/squakez))
+- fix\(ci\): revert coverage report to comment  [\#4562](https://github.com/apache/camel-k/pull/4562) ([squakez](https://github.com/squakez))
+- \[TEST\] Fix BuilderTrait test on global operator installation [\#4561](https://github.com/apache/camel-k/pull/4561) ([bouskaJ](https://github.com/bouskaJ))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.26 to 0.6.27 [\#4559](https://github.com/apache/camel-k/pull/4559) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(\#4556\): disable creating k8s client in output mode [\#4557](https://github.com/apache/camel-k/pull/4557) ([anhpngt](https://github.com/anhpngt))
 - fix: docs [\#4553](https://github.com/apache/camel-k/pull/4553) ([johnpoth](https://github.com/johnpoth))
 - Coverage report workflow rework [\#4551](https://github.com/apache/camel-k/pull/4551) ([realMartinez](https://github.com/realMartinez))
+- chore: use fixed default runtime version [\#4550](https://github.com/apache/camel-k/pull/4550) ([squakez](https://github.com/squakez))
 - Fix Unable to retrieve CamelCatalog with global installation [\#4549](https://github.com/apache/camel-k/pull/4549) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.25 to 0.6.26 [\#4548](https://github.com/apache/camel-k/pull/4548) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore: Change order of how resources get dumped [\#4544](https://github.com/apache/camel-k/pull/4544) ([christophd](https://github.com/christophd))
