@@ -33,6 +33,7 @@ import (
 
 //
 // ResourceAsString returns the named resource content as string.
+// Warning : do not remove the go:generate line as it is used to update the resources file in case of CRD changes.
 //
 //go:generate go run ../../cmd/util/vfs-gen resources config
 func ResourceAsString(name string) (string, error) {

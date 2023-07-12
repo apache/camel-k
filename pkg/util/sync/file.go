@@ -20,38 +20,37 @@ package sync
 
 import (
 	"context"
-	"time"
 
-	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/radovskyb/watcher"
+	"github.com/fsnotify/fsnotify"
 )
 
 // File returns a channel that signals each time the content of the file changes.
 func File(ctx context.Context, path string) (<-chan bool, error) {
-	w := watcher.New()
-	if err := w.Add(path); err != nil {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
 		return nil, err
 	}
-	w.FilterOps(watcher.Write)
 
 	out := make(chan bool)
+
+	// Start listening for events.
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-w.Event:
-				out <- true
+			case event := <-watcher.Events:
+				if event.Has(fsnotify.Write) {
+					out <- true
+				}
 			}
 		}
 	}()
 
-	go func() {
-		if err := w.Start(200 * time.Millisecond); err != nil {
-			log.Error(err, "Error while starting watcher")
-			close(out)
-		}
-	}()
+	err = watcher.Add(path)
+	if err != nil {
+		return nil, err
+	}
 
 	return out, nil
 }

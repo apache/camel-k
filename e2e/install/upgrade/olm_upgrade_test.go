@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package olm
+package upgrade
 
 import (
 	"fmt"
@@ -47,7 +47,7 @@ import (
 
 const catalogSourceName = "test-camel-k-source"
 
-func TestOLMAutomaticUpgrade(t *testing.T) {
+func TestOLMOperatorUpgrade(t *testing.T) {
 	prevIIB := os.Getenv("CAMEL_K_PREV_IIB")
 	newIIB := os.Getenv("CAMEL_K_NEW_IIB")
 	kamel := os.Getenv("RELEASED_KAMEL_BIN")

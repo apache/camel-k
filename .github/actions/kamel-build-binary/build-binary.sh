@@ -8,7 +8,7 @@
 # (the "License"); you may not use this file except in compliance with
 # the License.  You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,7 +89,7 @@ else
   fi
 
   if [ -n "${REGISTRY_PUSH_HOST}" ]; then
-    RULES="${RULES} images-push"
+    RULES="${RULES} image-push"
   fi
 
   make ${RULES}
@@ -98,9 +98,11 @@ fi
 echo "Moving kamel binary to be visible on PATH"
 
 if [ "$RUNNER_OS" == "macOS" ]; then
-  ${SUDO} mv ./kamel /usr/local/bin
+  # We need to build the binary for the proper platform if we're not on Linux
+  make build
+  ${SUDO} mv $(readlink kamel) /usr/local/bin/kamel
 else
-  ${SUDO} mv ./kamel /usr/bin
+  ${SUDO} mv $(readlink kamel) /usr/bin/kamel
 fi
 echo "Kamel version installed: $(kamel version)"
 

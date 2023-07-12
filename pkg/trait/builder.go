@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
@@ -52,6 +53,11 @@ func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
+// InfluencesBuild overrides base class method.
+func (t *builderTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
+	return true
+}
+
 func (t *builderTrait) Configure(e *Environment) (bool, error) {
 	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
@@ -61,6 +67,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
+	// Building task
 	builderTask, err := t.builderTask(e)
 	if err != nil {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
@@ -71,12 +78,17 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}
 		return nil
 	}
+	e.Pipeline = append(e.Pipeline, v1.Task{Builder: builderTask})
 
-	e.BuildTasks = append(e.BuildTasks, v1.Task{Builder: builderTask})
+	// Custom tasks
+	if t.Tasks != nil {
+		e.Pipeline = append(e.Pipeline, t.customTasks()...)
+	}
 
+	// Publishing task
 	switch e.Platform.Status.Build.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Spectrum: &v1.SpectrumTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{Spectrum: &v1.SpectrumTask{
 			BaseTask: v1.BaseTask{
 				Name: "spectrum",
 			},
@@ -88,7 +100,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
-		e.BuildTasks = append(e.BuildTasks, v1.Task{S2i: &v1.S2iTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{S2i: &v1.S2iTask{
 			BaseTask: v1.BaseTask{
 				Name: "s2i",
 			},
@@ -109,7 +121,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			executorImage = image
 			t.L.Infof("User defined executor image %s will be used for buildah", image)
 		}
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Buildah: &v1.BuildahTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{Buildah: &v1.BuildahTask{
 			Platform: platform,
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
@@ -132,7 +144,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			t.L.Infof("User defined executor image %s will be used for kaniko", image)
 		}
 
-		e.BuildTasks = append(e.BuildTasks, v1.Task{Kaniko: &v1.KanikoTask{
+		e.Pipeline = append(e.Pipeline, v1.Task{Kaniko: &v1.KanikoTask{
 			BaseTask: v1.BaseTask{
 				Name: "kaniko",
 			},
@@ -148,19 +160,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 			ExecutorImage: executorImage,
 		}})
 	}
-
-	if t.Strategy != "" {
-		t.L.Infof("User defined build strategy %s", t.Strategy)
-		switch t.Strategy {
-		case string(v1.BuildStrategyPod):
-			e.BuildStrategy = v1.BuildStrategyPod
-		case string(v1.BuildStrategyRoutine):
-			e.BuildStrategy = v1.BuildStrategyRoutine
-		default:
-			return fmt.Errorf("must specify either pod or routine build strategy, unknown %s", t.Strategy)
-		}
-	}
-
 	return nil
 }
 
@@ -173,14 +172,78 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
 
+	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
+		quarkus, ok := trait.(*quarkusTrait)
+		isNativeIntegration := quarkus.isNativeIntegration(e)
+		isNativeKit, err := quarkus.isNativeKit(e)
+		if err != nil {
+			return nil, err
+		}
+		// The builder trait must define certain resources requirements when we have a native build
+		if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
+			// Force the build to run in a separate Pod and strictly sequential
+			t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
+			t.Strategy = string(v1.BuildStrategyPod)
+			t.OrderStrategy = string(v1.BuildOrderStrategySequential)
+			t.RequestCPU = "1000m"
+			t.RequestMemory = "4Gi"
+		}
+	}
+
+	buildConfig := v1.BuildConfiguration{
+		RequestCPU:    t.RequestCPU,
+		RequestMemory: t.RequestMemory,
+		LimitCPU:      t.LimitCPU,
+		LimitMemory:   t.LimitMemory,
+	}
+
+	if t.Strategy != "" {
+		t.L.Infof("User defined build strategy %s", t.Strategy)
+		found := false
+		for _, s := range v1.BuildStrategies {
+			if string(s) == t.Strategy {
+				found = true
+				buildConfig.Strategy = s
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.BuildStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return nil, fmt.Errorf("unknown build strategy: %s. One of [%s] is expected", t.Strategy, strings.Join(strategies, ", "))
+		}
+	}
+
+	if t.OrderStrategy != "" {
+		t.L.Infof("User defined build order strategy %s", t.OrderStrategy)
+		found := false
+		for _, s := range v1.BuildOrderStrategies {
+			if string(s) == t.OrderStrategy {
+				found = true
+				buildConfig.OrderStrategy = s
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.BuildOrderStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return nil, fmt.Errorf("unknown build order strategy: %s. One of [%s] is expected", t.OrderStrategy, strings.Join(strategies, ", "))
+		}
+	}
+
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
 			Name: "builder",
 		},
-		BaseImage:    e.Platform.Status.Build.BaseImage,
-		Runtime:      e.CamelCatalog.Runtime,
-		Dependencies: e.IntegrationKit.Spec.Dependencies,
-		Maven:        maven,
+		Configuration: buildConfig,
+		BaseImage:     e.Platform.Status.Build.BaseImage,
+		Runtime:       e.CamelCatalog.Runtime,
+		Dependencies:  e.IntegrationKit.Spec.Dependencies,
+		Maven:         maven,
 	}
 
 	if task.Maven.Properties == nil {
@@ -217,4 +280,22 @@ func getImageName(e *Environment) string {
 		organization = e.Platform.Namespace
 	}
 	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
+}
+
+func (t *builderTrait) customTasks() []v1.Task {
+	customTasks := make([]v1.Task, len(t.Tasks))
+	for i, t := range t.Tasks {
+		// TODO, better strategy than a simple split!
+		splitted := strings.Split(t, ";")
+		customTasks[i] = v1.Task{
+			Custom: &v1.UserTask{
+				BaseTask: v1.BaseTask{
+					Name: splitted[0],
+				},
+				ContainerImage:   splitted[1],
+				ContainerCommand: splitted[2],
+			},
+		}
+	}
+	return customTasks
 }

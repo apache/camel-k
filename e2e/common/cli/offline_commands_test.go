@@ -38,14 +38,6 @@ func TestKamelVersionWorksOffline(t *testing.T) {
 	assert.Nil(t, Kamel("version", "--kube-config", "non-existent-kubeconfig-file").Execute())
 }
 
-func TestKamelHelpTraitWorksOffline(t *testing.T) {
-	RegisterTestingT(t)
-
-	traitCmd := Kamel("help", "trait", "--all", "--kube-config", "non-existent-kubeconfig-file")
-	traitCmd.SetOut(io.Discard)
-	assert.Nil(t, traitCmd.Execute())
-}
-
 func TestKamelHelpOptionWorksOffline(t *testing.T) {
 	RegisterTestingT(t)
 

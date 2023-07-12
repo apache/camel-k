@@ -23,7 +23,7 @@ runs:
   steps:
     - id: install-cluster
       name: Install Cluster
-      uses: container-tools/kind-action@61f1afd4807b0dac84f3232ec99e45c63701d220
+      uses: container-tools/kind-action@v2.0.1
       if: ${{ env.CLUSTER_KIND_CONFIGURED != 'true' }}
       with:
         version: v0.14.0

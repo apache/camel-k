@@ -20,24 +20,24 @@ limitations under the License.
 package v1
 
 import (
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // IntegrationPlatformBuildSpecApplyConfiguration represents an declarative configuration of the IntegrationPlatformBuildSpec type for use
 // with apply.
 type IntegrationPlatformBuildSpecApplyConfiguration struct {
-	BuildStrategy           *v1.BuildStrategy                           `json:"buildStrategy,omitempty"`
-	PublishStrategy         *v1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
-	RuntimeVersion          *string                                     `json:"runtimeVersion,omitempty"`
-	RuntimeProvider         *v1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
-	BaseImage               *string                                     `json:"baseImage,omitempty"`
-	Registry                *RegistrySpecApplyConfiguration             `json:"registry,omitempty"`
-	BuildCatalogToolTimeout *metav1.Duration                            `json:"buildCatalogToolTimeout,omitempty"`
-	Timeout                 *metav1.Duration                            `json:"timeout,omitempty"`
-	Maven                   *MavenSpecApplyConfiguration                `json:"maven,omitempty"`
-	PublishStrategyOptions  map[string]string                           `json:"PublishStrategyOptions,omitempty"`
-	MaxRunningBuilds        *int32                                      `json:"maxRunningBuilds,omitempty"`
+	BuildConfiguration      *BuildConfigurationApplyConfiguration            `json:"buildConfiguration,omitempty"`
+	PublishStrategy         *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
+	RuntimeVersion          *string                                          `json:"runtimeVersion,omitempty"`
+	RuntimeProvider         *camelv1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
+	BaseImage               *string                                          `json:"baseImage,omitempty"`
+	Registry                *RegistrySpecApplyConfiguration                  `json:"registry,omitempty"`
+	BuildCatalogToolTimeout *metav1.Duration                                 `json:"buildCatalogToolTimeout,omitempty"`
+	Timeout                 *metav1.Duration                                 `json:"timeout,omitempty"`
+	Maven                   *MavenSpecApplyConfiguration                     `json:"maven,omitempty"`
+	PublishStrategyOptions  map[string]string                                `json:"PublishStrategyOptions,omitempty"`
+	MaxRunningBuilds        *int32                                           `json:"maxRunningBuilds,omitempty"`
 }
 
 // IntegrationPlatformBuildSpecApplyConfiguration constructs an declarative configuration of the IntegrationPlatformBuildSpec type for use with
@@ -46,18 +46,18 @@ func IntegrationPlatformBuildSpec() *IntegrationPlatformBuildSpecApplyConfigurat
 	return &IntegrationPlatformBuildSpecApplyConfiguration{}
 }
 
-// WithBuildStrategy sets the BuildStrategy field in the declarative configuration to the given value
+// WithBuildConfiguration sets the BuildConfiguration field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the BuildStrategy field is set to the value of the last call.
-func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithBuildStrategy(value v1.BuildStrategy) *IntegrationPlatformBuildSpecApplyConfiguration {
-	b.BuildStrategy = &value
+// If called multiple times, the BuildConfiguration field is set to the value of the last call.
+func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithBuildConfiguration(value *BuildConfigurationApplyConfiguration) *IntegrationPlatformBuildSpecApplyConfiguration {
+	b.BuildConfiguration = value
 	return b
 }
 
 // WithPublishStrategy sets the PublishStrategy field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the PublishStrategy field is set to the value of the last call.
-func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithPublishStrategy(value v1.IntegrationPlatformBuildPublishStrategy) *IntegrationPlatformBuildSpecApplyConfiguration {
+func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithPublishStrategy(value camelv1.IntegrationPlatformBuildPublishStrategy) *IntegrationPlatformBuildSpecApplyConfiguration {
 	b.PublishStrategy = &value
 	return b
 }
@@ -73,7 +73,7 @@ func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithRuntimeVersion(valu
 // WithRuntimeProvider sets the RuntimeProvider field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the RuntimeProvider field is set to the value of the last call.
-func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithRuntimeProvider(value v1.RuntimeProvider) *IntegrationPlatformBuildSpecApplyConfiguration {
+func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithRuntimeProvider(value camelv1.RuntimeProvider) *IntegrationPlatformBuildSpecApplyConfiguration {
 	b.RuntimeProvider = &value
 	return b
 }

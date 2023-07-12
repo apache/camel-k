@@ -426,7 +426,7 @@ func TestRunMissingTraitFlag(t *testing.T) {
 		"--trait", "bogus.missing",
 		integrationSource)
 	assert.NotNil(t, err)
-	assert.Equal(t, "bogus.missing is not a valid trait property", err.Error())
+	assert.Equal(t, "trait bogus does not exist in catalog", err.Error())
 	assert.Len(t, runCmdOptions.Traits, 1)
 	assert.Equal(t, "bogus.missing", runCmdOptions.Traits[0])
 }
@@ -668,7 +668,7 @@ func TestMissingTrait(t *testing.T) {
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "bogus.fail=i-must-fail")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
-	assert.Equal(t, "Error: bogus.fail=i-must-fail is not a valid trait property\n", output)
+	assert.Equal(t, "Error: trait bogus does not exist in catalog\n", output)
 	assert.NotNil(t, err)
 }
 

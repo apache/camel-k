@@ -37,13 +37,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/resource"
 	"github.com/magiconair/properties"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 func addDependency(cmd *cobra.Command, it *v1.Integration, dependency string, catalog *camel.RuntimeCatalog) {
 	normalized := camel.NormalizeDependency(dependency)
-	camel.ValidateDependency(catalog, normalized, cmd)
+	camel.ValidateDependency(catalog, normalized, cmd.ErrOrStderr())
 	it.Spec.AddDependency(normalized)
 }
 
@@ -175,7 +174,7 @@ func validatePropertyFile(fileName string) error {
 	}
 
 	if file, err := os.Stat(fileName); err != nil {
-		return errors.Wrapf(err, "unable to access property file %s", fileName)
+		return fmt.Errorf("unable to access property file %s", fileName)
 	} else if file.IsDir() {
 		return fmt.Errorf("property file %s is a directory", fileName)
 	}
@@ -218,4 +217,13 @@ func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
 	}
 
 	return catalog, nil
+}
+
+func extractTraitNames(traitProps []string) []string {
+	traitNameProps := make([]string, len(traitProps))
+	for i, tp := range traitProps {
+		splits := strings.Split(tp, ".")
+		traitNameProps[i] = splits[0]
+	}
+	return traitNameProps
 }

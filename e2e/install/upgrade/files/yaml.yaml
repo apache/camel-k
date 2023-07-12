@@ -15,3 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+- from:
+    uri: "timer:yaml"
+    parameters:
+      period: "5000"
+    steps:
+      - set-header:
+          name: "m"
+          constant: "string!"
+      - set-body:
+          simple: "Magic${header.m}"
+      - to: "log:info"

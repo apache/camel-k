@@ -44,7 +44,7 @@ spec:
       name: Phase
       type: string
     - description: The default build strategy
-      jsonPath: .status.build.buildStrategy
+      jsonPath: .status.build.buildConfiguration.strategy
       name: Build strategy
       type: string
     - description: The default publish strategy
@@ -89,7 +89,7 @@ spec:
                   PublishStrategyOptions:
                     additionalProperties:
                       type: string
-                    description: Generic options that can used by each publish strategy
+                    description: Generic options that can used by any publish strategy
                     type: object
                   baseImage:
                     description: a base image that can be used as base layer for all
@@ -100,13 +100,47 @@ spec:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
                     type: string
-                  buildStrategy:
-                    description: the strategy to adopt for building an Integration
-                      base image
-                    enum:
-                    - routine
-                    - pod
-                    type: string
+                  buildConfiguration:
+                    description: the configuration required to build an Integration
+                      container image
+                    properties:
+                      limitCPU:
+                        description: The maximum amount of CPU required. Only used
+                          for `pod` strategy
+                        type: string
+                      limitMemory:
+                        description: The maximum amount of memory required. Only used
+                          for `pod` strategy
+                        type: string
+                      operatorNamespace:
+                        description: The namespace where to run the builder Pod (must
+                          be the same of the operator in charge of this Build reconciliation).
+                        type: string
+                      orderStrategy:
+                        description: the build order strategy to adopt
+                        enum:
+                        - dependencies
+                        - fifo
+                        - sequential
+                        type: string
+                      requestCPU:
+                        description: The minimum amount of CPU required. Only used
+                          for `pod` strategy
+                        type: string
+                      requestMemory:
+                        description: The minimum amount of memory required. Only used
+                          for `pod` strategy
+                        type: string
+                      strategy:
+                        description: the strategy to adopt
+                        enum:
+                        - routine
+                        - pod
+                        type: string
+                      toolImage:
+                        description: The container image to be used to run the build.
+                        type: string
+                    type: object
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
                       applications
@@ -259,13 +293,13 @@ spec:
                         type: object
                     type: object
                   maxRunningBuilds:
-                    description: the maximum amount of parallel running builds started
-                      by this operator instance
+                    description: the maximum amount of parallel running pipelines
+                      started by this operator instance
                     format: int32
                     type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
-                      base image
+                      container image
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration
@@ -297,7 +331,8 @@ spec:
                     description: the Camel K Runtime dependency version
                     type: string
                   timeout:
-                    description: how much time to wait before time out the build process
+                    description: how much time to wait before time out the pipeline
+                      process
                     type: string
                 type: object
               cluster:
@@ -426,16 +461,42 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      limitCPU:
+                        description: When using `pod` strategy, the maximum amount
+                          of CPU required by the pod builder.
+                        type: string
+                      limitMemory:
+                        description: When using `pod` strategy, the maximum amount
+                          of memory required by the pod builder.
+                        type: string
+                      orderStrategy:
+                        description: The build order strategy to use, either `dependencies`,
+                          `fifo` or `sequential` (default sequential)
+                        type: string
                       properties:
                         description: A list of properties to be provided to the build
                           task
                         items:
                           type: string
                         type: array
+                      requestCPU:
+                        description: When using `pod` strategy, the minimum amount
+                          of CPU required by the pod builder.
+                        type: string
+                      requestMemory:
+                        description: When using `pod` strategy, the minimum amount
+                          of memory required by the pod builder.
+                        type: string
                       strategy:
                         description: The strategy to use, either `pod` or `routine`
                           (default routine)
                         type: string
+                      tasks:
+                        description: A list of tasks to be executed (available only
+                          when using `pod` strategy) with format <name>;<container-image>;<container-command>
+                        items:
+                          type: string
+                        type: array
                       verbose:
                         description: Enable verbose logging on build components that
                           support it (e.g. Kaniko build pod).
@@ -1676,7 +1737,7 @@ spec:
                   PublishStrategyOptions:
                     additionalProperties:
                       type: string
-                    description: Generic options that can used by each publish strategy
+                    description: Generic options that can used by any publish strategy
                     type: object
                   baseImage:
                     description: a base image that can be used as base layer for all
@@ -1687,13 +1748,47 @@ spec:
                     description: the timeout (in seconds) to use when creating the
                       build tools container image
                     type: string
-                  buildStrategy:
-                    description: the strategy to adopt for building an Integration
-                      base image
-                    enum:
-                    - routine
-                    - pod
-                    type: string
+                  buildConfiguration:
+                    description: the configuration required to build an Integration
+                      container image
+                    properties:
+                      limitCPU:
+                        description: The maximum amount of CPU required. Only used
+                          for `pod` strategy
+                        type: string
+                      limitMemory:
+                        description: The maximum amount of memory required. Only used
+                          for `pod` strategy
+                        type: string
+                      operatorNamespace:
+                        description: The namespace where to run the builder Pod (must
+                          be the same of the operator in charge of this Build reconciliation).
+                        type: string
+                      orderStrategy:
+                        description: the build order strategy to adopt
+                        enum:
+                        - dependencies
+                        - fifo
+                        - sequential
+                        type: string
+                      requestCPU:
+                        description: The minimum amount of CPU required. Only used
+                          for `pod` strategy
+                        type: string
+                      requestMemory:
+                        description: The minimum amount of memory required. Only used
+                          for `pod` strategy
+                        type: string
+                      strategy:
+                        description: the strategy to adopt
+                        enum:
+                        - routine
+                        - pod
+                        type: string
+                      toolImage:
+                        description: The container image to be used to run the build.
+                        type: string
+                    type: object
                   maven:
                     description: Maven configuration used to build the Camel/Camel-Quarkus
                       applications
@@ -1846,13 +1941,13 @@ spec:
                         type: object
                     type: object
                   maxRunningBuilds:
-                    description: the maximum amount of parallel running builds started
-                      by this operator instance
+                    description: the maximum amount of parallel running pipelines
+                      started by this operator instance
                     format: int32
                     type: integer
                   publishStrategy:
                     description: the strategy to adopt for publishing an Integration
-                      base image
+                      container image
                     type: string
                   registry:
                     description: the image registry used to push/pull Integration
@@ -1884,7 +1979,8 @@ spec:
                     description: the Camel K Runtime dependency version
                     type: string
                   timeout:
-                    description: how much time to wait before time out the build process
+                    description: how much time to wait before time out the pipeline
+                      process
                     type: string
                 type: object
               cluster:
@@ -2061,16 +2157,42 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      limitCPU:
+                        description: When using `pod` strategy, the maximum amount
+                          of CPU required by the pod builder.
+                        type: string
+                      limitMemory:
+                        description: When using `pod` strategy, the maximum amount
+                          of memory required by the pod builder.
+                        type: string
+                      orderStrategy:
+                        description: The build order strategy to use, either `dependencies`,
+                          `fifo` or `sequential` (default sequential)
+                        type: string
                       properties:
                         description: A list of properties to be provided to the build
                           task
                         items:
                           type: string
                         type: array
+                      requestCPU:
+                        description: When using `pod` strategy, the minimum amount
+                          of CPU required by the pod builder.
+                        type: string
+                      requestMemory:
+                        description: When using `pod` strategy, the minimum amount
+                          of memory required by the pod builder.
+                        type: string
                       strategy:
                         description: The strategy to use, either `pod` or `routine`
                           (default routine)
                         type: string
+                      tasks:
+                        description: A list of tasks to be executed (available only
+                          when using `pod` strategy) with format <name>;<container-image>;<container-command>
+                        items:
+                          type: string
+                        type: array
                       verbose:
                         description: Enable verbose logging on build components that
                           support it (e.g. Kaniko build pod).

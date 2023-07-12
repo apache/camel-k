@@ -44,6 +44,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.BuildahTaskApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuildCondition"):
 		return &camelv1.BuildConditionApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("BuildConfiguration"):
+		return &camelv1.BuildConfigurationApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuilderTask"):
 		return &camelv1.BuilderTaskApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("BuildSpec"):
@@ -202,6 +204,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.TraitsApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("TraitSpec"):
 		return &camelv1.TraitSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("UserTask"):
+		return &camelv1.UserTaskApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("ValueSource"):
 		return &camelv1.ValueSourceApplyConfiguration{}
 

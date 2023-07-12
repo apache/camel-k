@@ -68,7 +68,7 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
-// +kubebuilder:printcolumn:name="Build strategy",type=string,JSONPath=`.status.build.buildStrategy`,description="The default build strategy"
+// +kubebuilder:printcolumn:name="Build strategy",type=string,JSONPath=`.status.build.buildConfiguration.strategy`,description="The default build strategy"
 // +kubebuilder:printcolumn:name="Publish strategy",type=string,JSONPath=`.status.build.publishStrategy`,description="The default publish strategy"
 // +kubebuilder:printcolumn:name="Registry address",type=string,JSONPath=`.status.build.registry.address`,description="The container registry address"
 // +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.build.runtimeVersion`,description="The default runtime version"
@@ -111,9 +111,9 @@ var AllIntegrationPlatformClusters = []IntegrationPlatformCluster{IntegrationPla
 // This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
 // You can define the build strategy, the image registry to use and the Maven configuration to adopt.
 type IntegrationPlatformBuildSpec struct {
-	// the strategy to adopt for building an Integration base image
-	BuildStrategy BuildStrategy `json:"buildStrategy,omitempty"`
-	// the strategy to adopt for publishing an Integration base image
+	// the configuration required to build an Integration container image
+	BuildConfiguration BuildConfiguration `json:"buildConfiguration,omitempty"`
+	// the strategy to adopt for publishing an Integration container image
 	PublishStrategy IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	// the Camel K Runtime dependency version
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
@@ -126,13 +126,13 @@ type IntegrationPlatformBuildSpec struct {
 	Registry RegistrySpec `json:"registry,omitempty"`
 	// the timeout (in seconds) to use when creating the build tools container image
 	BuildCatalogToolTimeout *metav1.Duration `json:"buildCatalogToolTimeout,omitempty"`
-	// how much time to wait before time out the build process
+	// how much time to wait before time out the pipeline process
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 	// Maven configuration used to build the Camel/Camel-Quarkus applications
 	Maven MavenSpec `json:"maven,omitempty"`
-	// Generic options that can used by each publish strategy
+	// Generic options that can used by any publish strategy
 	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
-	// the maximum amount of parallel running builds started by this operator instance
+	// the maximum amount of parallel running pipelines started by this operator instance
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
 

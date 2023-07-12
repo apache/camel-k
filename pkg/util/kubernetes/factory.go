@@ -179,3 +179,16 @@ func NewPersistentVolumeClaim(ns, name, storageClassName, capacityStorage string
 	}
 	return &pvc
 }
+
+// ConfigureResource will set a resource on the specified resource list or returns an error.
+func ConfigureResource(resourceQty string, list corev1.ResourceList, name corev1.ResourceName) (corev1.ResourceList, error) {
+	if resourceQty != "" {
+		v, err := resource.ParseQuantity(resourceQty)
+		if err != nil {
+			return list, err
+		}
+		list[name] = v
+	}
+
+	return list, nil
+}

@@ -35,11 +35,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 	"go.uber.org/multierr"
 
 	yaml2 "gopkg.in/yaml.v2"
-
-	"github.com/scylladb/go-set/strset"
 )
 
 // Directories and file names:
@@ -334,7 +333,7 @@ func WriteFileWithBytesMarshallerContent(basePath string, filePath string, conte
 }
 
 func FindAllDistinctStringSubmatch(data string, regexps ...*regexp.Regexp) []string {
-	submatchs := strset.New()
+	submatchs := sets.NewSet()
 
 	for _, reg := range regexps {
 		hits := reg.FindAllStringSubmatch(data, -1)

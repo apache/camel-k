@@ -31,7 +31,7 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/google/go-github/v32/github"
+	"github.com/google/go-github/v52/github"
 )
 
 // Source represents the source file of an Integration.

@@ -18,7 +18,7 @@
 location=$(dirname $0)
 
 echo "Scraping information from Makefile"
-RUNTIME_VERSION=$(grep '^RUNTIME_VERSION := ' Makefile | sed 's/^.* \?= //')
+RUNTIME_VERSION=$(grep '^DEFAULT_RUNTIME_VERSION := ' Makefile | sed 's/^.* \?= //')
 
 CATALOG="$location/../resources/camel-catalog-$RUNTIME_VERSION.yaml"
 # This script requires the catalog to be available (via make build-resources for instance)

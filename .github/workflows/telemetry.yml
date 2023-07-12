@@ -70,11 +70,11 @@ concurrency:
 jobs:
   telemetry-it:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         persist-credentials: false
         submodules: recursive

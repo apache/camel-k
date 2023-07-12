@@ -30,7 +30,6 @@ cd $1/
 
 wget https://github.com/apache/camel-k/archive/refs/tags/v$1.tar.gz -O camel-k-sources-$1.tar.gz
 cp ../../../camel-k-client-$1-* .
-cp ../../../camel-k-examples-$1* .
 cp ../../../java/target/camel-k-crds-$1.jar .
 cd ../
 ./sign.sh $1/

@@ -27,8 +27,35 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
+
+func TestIntegrationPlatformDefaults(t *testing.T) {
+	ip := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      DefaultPlatformName,
+			Namespace: "ns",
+		},
+	}
+
+	c, err := test.NewFakeClient(&ip)
+	assert.Nil(t, err)
+
+	err = ConfigureDefaults(context.TODO(), c, &ip, false)
+	assert.Nil(t, err)
+
+	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
+	assert.Equal(t, v1.TraitProfile(""), ip.Status.Profile)
+	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
+	assert.Equal(t, v1.BuildOrderStrategySequential, ip.Status.Build.BuildConfiguration.OrderStrategy)
+	assert.Equal(t, defaults.BaseImage(), ip.Status.Build.BaseImage)
+	assert.Equal(t, defaults.LocalRepository, ip.Status.Build.Maven.LocalRepository)
+	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
+	assert.Equal(t, 3, len(ip.Status.Build.Maven.CLIOptions))
+	assert.NotNil(t, ip.Status.Traits)
+}
 
 func TestApplyGlobalPlatformSpec(t *testing.T) {
 	global := v1.IntegrationPlatform{
@@ -38,7 +65,10 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildStrategy: v1.BuildStrategyRoutine,
+				BuildConfiguration: v1.BuildConfiguration{
+					Strategy:      v1.BuildStrategyRoutine,
+					OrderStrategy: v1.BuildOrderStrategyFIFO,
+				},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"global_prop1": "global_value1",
@@ -79,23 +109,101 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformClusterOpenShift, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
-	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildStrategy)
-
+	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
+	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
-
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
-
 	assert.NotNil(t, ip.Status.Traits)
 	assert.NotNil(t, ip.Status.Traits.Logging)
 	assert.Equal(t, "DEBUG", ip.Status.Traits.Logging.Level)
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)
-
 	assert.Equal(t, 2, len(ip.Status.Build.Maven.Properties))
 	assert.Equal(t, "global_value1", ip.Status.Build.Maven.Properties["global_prop1"])
 	assert.Equal(t, "global_value2", ip.Status.Build.Maven.Properties["global_prop2"])
+}
+
+func TestPlatformBuildahUpdateOverrideLocalPlatformSpec(t *testing.T) {
+	global := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+			},
+		},
+	}
+
+	c, err := test.NewFakeClient(&global)
+	assert.Nil(t, err)
+
+	err = ConfigureDefaults(context.TODO(), c, &global, false)
+	assert.Nil(t, err)
+	assert.Equal(t, builder.BuildahDefaultBaseImageName, global.Status.Build.BaseImage)
+
+	ip := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "local-camel-k",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				BaseImage:       "overridden",
+			},
+		},
+	}
+
+	ip.ResyncStatusFullConfig()
+
+	applyPlatformSpec(&global, &ip)
+
+	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyBuildah, ip.Status.Build.PublishStrategy)
+	assert.Equal(t, "overridden", ip.Status.Build.BaseImage)
+}
+
+func TestPlatformBuildahUpdateDefaultLocalPlatformSpec(t *testing.T) {
+
+	global := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				BaseImage:       "overridden",
+			},
+		},
+	}
+
+	c, err := test.NewFakeClient(&global)
+	assert.Nil(t, err)
+
+	err = ConfigureDefaults(context.TODO(), c, &global, false)
+	assert.Nil(t, err)
+	assert.Equal(t, "overridden", global.Status.Build.BaseImage)
+
+	ip := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "local-camel-k",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+			},
+		},
+	}
+
+	ip.ResyncStatusFullConfig()
+
+	applyPlatformSpec(&global, &ip)
+
+	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyBuildah, ip.Status.Build.PublishStrategy)
+	assert.Equal(t, builder.BuildahDefaultBaseImageName, ip.Status.Build.BaseImage)
 }
 
 func TestRetainLocalPlatformSpec(t *testing.T) {
@@ -106,7 +214,10 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildStrategy: v1.BuildStrategyRoutine,
+				BuildConfiguration: v1.BuildConfiguration{
+					Strategy:      v1.BuildStrategyRoutine,
+					OrderStrategy: v1.BuildOrderStrategySequential,
+				},
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
 						"global_prop1": "global_value1",
@@ -141,7 +252,10 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				BuildStrategy:    v1.BuildStrategyPod,
+				BuildConfiguration: v1.BuildConfiguration{
+					Strategy:      v1.BuildStrategyPod,
+					OrderStrategy: v1.BuildOrderStrategyFIFO,
+				},
 				MaxRunningBuilds: 1,
 				Maven: v1.MavenSpec{
 					Properties: map[string]string{
@@ -166,20 +280,17 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)
-	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildStrategy)
-
+	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
+	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.True(t, ip.Status.Build.MaxRunningBuilds == 1)
-
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
-
 	assert.NotNil(t, ip.Status.Traits)
 	assert.NotNil(t, ip.Status.Traits.Logging)
 	assert.Equal(t, "DEBUG", ip.Status.Traits.Logging.Level)
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)
-
 	assert.Equal(t, 3, len(ip.Status.Build.Maven.Properties))
 	assert.Equal(t, "global_value1", ip.Status.Build.Maven.Properties["global_prop1"])
 	assert.Equal(t, "local_value2", ip.Status.Build.Maven.Properties["global_prop2"])

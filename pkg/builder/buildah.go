@@ -20,6 +20,7 @@ package builder
 const BuildahPlatform = "BuildahPlatform"
 const BuildahImage = "BuildahImage"
 const BuildahDefaultImageName = "quay.io/buildah/stable"
+const BuildahDefaultBaseImageName = "docker.io/library/eclipse-temurin:11"
 
 var buildahSupportedOptions = map[string]PublishStrategyOption{
 	BuildahPlatform: {

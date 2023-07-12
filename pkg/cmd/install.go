@@ -107,6 +107,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("operator-image", "", "Set the operator Image used for the operator deployment")
 	cmd.Flags().String("operator-image-pull-policy", "", "Set the operator ImagePullPolicy used for the operator deployment")
 	cmd.Flags().String("build-strategy", "", "Set the build strategy")
+	cmd.Flags().String("build-order-strategy", "", "Set the build order strategy")
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
 	cmd.Flags().StringArray("build-publish-strategy-option", nil, "Add a build publish strategy option, as <name=value>")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
@@ -140,22 +141,21 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().Bool("monitoring", false, "To enable or disable the operator monitoring")
 	cmd.Flags().Int("monitoring-port", 8080, "The port of the metrics endpoint")
 
+	// debugging
+	cmd.Flags().Bool("debugging", false, "To enable or disable the operator debugging")
+	cmd.Flags().Int("debugging-port", 4040, "The port of the debugger")
+	cmd.Flags().String("debugging-path", "/usr/local/bin/kamel", "The path to the kamel executable file")
+
 	// Operator settings
 	cmd.Flags().StringArray("toleration", nil, "Add a Toleration to the operator Pod")
 	cmd.Flags().StringArray("node-selector", nil, "Add a NodeSelector to the operator Pod")
 	cmd.Flags().StringArray("operator-resources", nil, "Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)")
 	cmd.Flags().StringArray("operator-env-vars", nil, "Add an environment variable to set in the operator Pod(s), as <name=value>")
 	cmd.Flags().StringP("log-level", "z", "info", "The level of operator logging (default - info): info or 0, debug or 1")
-	cmd.Flags().Int("max-running-builds", 0, "Maximum number of parallel running builds")
+	cmd.Flags().Int("max-running-pipelines", 0, "Maximum number of parallel running pipelines")
 
 	// save
 	cmd.Flags().Bool("save", false, "Save the install parameters into the default kamel configuration file (kamel-config.yaml)")
-
-	// Storage settings
-	cmd.Flags().Bool("storage", true, "If false, it won't use a persistent storage (recommended for development purpose only)")
-	cmd.Flags().String("storage-class-name", "", "Use a storage class name to create a dynamic volume (if empty will look up for cluster default)")
-	cmd.Flags().String("storage-capacity", "20Gi", "How much capacity to use")
-	cmd.Flags().String("storage-access-mode", "ReadWriteOnce", "Persistent Volume Access Mode (any of ReadWriteOnce, ReadOnlyMany, ReadWriteMany or ReadWriteOncePod)")
 
 	return &cmd, &options
 }
@@ -182,6 +182,7 @@ type installCmdOptions struct {
 	OperatorImage               string   `mapstructure:"operator-image"`
 	OperatorImagePullPolicy     string   `mapstructure:"operator-image-pull-policy"`
 	BuildStrategy               string   `mapstructure:"build-strategy"`
+	BuildOrderStrategy          string   `mapstructure:"build-order-strategy"`
 	BuildPublishStrategy        string   `mapstructure:"build-publish-strategy"`
 	BuildPublishStrategyOptions []string `mapstructure:"build-publish-strategy-options"`
 	BuildTimeout                string   `mapstructure:"build-timeout"`
@@ -193,9 +194,12 @@ type installCmdOptions struct {
 	MavenCASecret               string   `mapstructure:"maven-ca-secret"`
 	MavenCLIOptions             []string `mapstructure:"maven-cli-options"`
 	HealthPort                  int32    `mapstructure:"health-port"`
-	MaxRunningBuilds            int32    `mapstructure:"max-running-builds"`
+	MaxRunningBuilds            int32    `mapstructure:"max-running-pipelines"`
 	Monitoring                  bool     `mapstructure:"monitoring"`
 	MonitoringPort              int32    `mapstructure:"monitoring-port"`
+	Debugging                   bool     `mapstructure:"debugging"`
+	DebuggingPort               int32    `mapstructure:"debugging-port"`
+	DebuggingPath               string   `mapstructure:"debugging-path"`
 	TraitProfile                string   `mapstructure:"trait-profile"`
 	Tolerations                 []string `mapstructure:"tolerations"`
 	NodeSelectors               []string `mapstructure:"node-selectors"`
@@ -205,8 +209,6 @@ type installCmdOptions struct {
 	registry                    v1.RegistrySpec
 	registryAuth                registry.Auth
 	RegistryAuthFile            string `mapstructure:"registry-auth-file"`
-	Storage                     bool   `mapstructure:"storage"`
-	storageOptions              install.OperatorStorageConfiguration
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, _ []string) error {
@@ -427,13 +429,15 @@ func (o *installCmdOptions) setupOperator(
 			Enabled: o.Monitoring,
 			Port:    o.MonitoringPort,
 		},
+		Debugging: install.OperatorDebuggingConfiguration{
+			Enabled: o.Debugging,
+			Port:    o.DebuggingPort,
+			Path:    o.DebuggingPath,
+		},
 		Tolerations:           o.Tolerations,
 		NodeSelectors:         o.NodeSelectors,
 		ResourcesRequirements: o.ResourcesRequirements,
 		EnvVars:               o.EnvVars,
-	}
-	if o.Storage {
-		cfg.Storage = o.storageOptions
 	}
 
 	return install.OperatorOrCollect(o.Context, cmd, c, cfg, output, o.Force)
@@ -520,7 +524,10 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 		platform.Spec.Build.BaseImage = o.BaseImage
 	}
 	if o.BuildStrategy != "" {
-		platform.Spec.Build.BuildStrategy = v1.BuildStrategy(o.BuildStrategy)
+		platform.Spec.Build.BuildConfiguration.Strategy = v1.BuildStrategy(o.BuildStrategy)
+	}
+	if o.BuildOrderStrategy != "" {
+		platform.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategy(o.BuildOrderStrategy)
 	}
 	if o.BuildPublishStrategy != "" {
 		platform.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategy(o.BuildPublishStrategy)
@@ -688,13 +695,6 @@ func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	o.olmOptions.StartingCSV = viper.GetString(path + ".olm-starting-csv")
 	o.olmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
 
-	if o.Storage {
-		o.storageOptions.Enabled = true
-		o.storageOptions.ClassName = viper.GetString(path + ".storage-class-name")
-		o.storageOptions.AccessMode = viper.GetString(path + ".storage-access-mode")
-		o.storageOptions.Capacity = viper.GetString(path + ".storage-capacity")
-	}
-
 	return nil
 }
 
@@ -754,6 +754,23 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 		}
 	}
 
+	if o.BuildOrderStrategy != "" {
+		found := false
+		for _, s := range v1.BuildOrderStrategies {
+			if string(s) == o.BuildOrderStrategy {
+				found = true
+				break
+			}
+		}
+		if !found {
+			var strategies []string
+			for _, s := range v1.BuildOrderStrategies {
+				strategies = append(strategies, string(s))
+			}
+			return fmt.Errorf("unknown build order strategy: %s. One of [%s] is expected", o.BuildOrderStrategy, strings.Join(strategies, ", "))
+		}
+	}
+
 	if o.BuildPublishStrategy != "" {
 		found := false
 		for _, s := range v1.IntegrationPlatformBuildPublishStrategies {
@@ -775,15 +792,15 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 }
 
 // addBuildPublishStrategyOptions parses and adds all the build publish strategy options to the given IntegrationPlatformBuildSpec.
-func (o *installCmdOptions) addBuildPublishStrategyOptions(build *v1.IntegrationPlatformBuildSpec) error {
+func (o *installCmdOptions) addBuildPublishStrategyOptions(pipeline *v1.IntegrationPlatformBuildSpec) error {
 	for _, option := range o.BuildPublishStrategyOptions {
 		kv := strings.Split(option, "=")
 		if len(kv) == 2 {
 			key := kv[0]
-			if builder.IsSupportedPublishStrategyOption(build.PublishStrategy, key) {
-				build.AddOption(key, kv[1])
+			if builder.IsSupportedPublishStrategyOption(pipeline.PublishStrategy, key) {
+				pipeline.AddOption(key, kv[1])
 			} else {
-				return fmt.Errorf("build publish strategy option '%s' not supported. %s", option, supportedOptionsAsString(build.PublishStrategy))
+				return fmt.Errorf("build publish strategy option '%s' not supported. %s", option, supportedOptionsAsString(pipeline.PublishStrategy))
 			}
 		} else {
 			return fmt.Errorf("build publish strategy option '%s' not in the expected format (name=value)", option)

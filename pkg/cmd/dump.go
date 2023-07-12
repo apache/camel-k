@@ -90,6 +90,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		return err
 	}
 
+	// Integrations
 	its, err := camelClient.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -104,34 +105,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
 	}
 
-	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(out, "Found %d platforms:\n", len(pls.Items))
-	for _, p := range pls.Items {
-		ref := p
-		pdata, err := kubernetes.ToYAML(&ref)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
-	}
-
-	cat, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(out, "Found %d catalogs:\n", len(pls.Items))
-	for _, c := range cat.Items {
-		ref := c
-		cdata, err := kubernetes.ToYAML(&ref)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(out, "---\n%s\n---\n", string(cdata))
-	}
-
+	// IntegrationKits
 	iks, err := camelClient.CamelV1().IntegrationKits(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -146,6 +120,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
 	}
 
+	// ConfigMaps
 	cms, err := c.CoreV1().ConfigMaps(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -160,6 +135,7 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
 	}
 
+	// Deployments
 	deployments, err := c.AppsV1().Deployments(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -174,6 +150,37 @@ func dumpNamespace(ctx context.Context, c client.Client, ns string, out io.Write
 		fmt.Fprintf(out, "---\n%s\n---\n", string(data))
 	}
 
+	// IntegrationPlatforms
+	pls, err := camelClient.CamelV1().IntegrationPlatforms(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "Found %d platforms:\n", len(pls.Items))
+	for _, p := range pls.Items {
+		ref := p
+		pdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "---\n%s\n---\n", string(pdata))
+	}
+
+	// CamelCatalogs
+	cat, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(out, "Found %d catalogs:\n", len(pls.Items))
+	for _, c := range cat.Items {
+		ref := c
+		cdata, err := kubernetes.ToYAML(&ref)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(out, "---\n%s\n---\n", string(cdata))
+	}
+
+	// Pods and Logs
 	lst, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return err

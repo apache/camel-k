@@ -106,6 +106,11 @@ func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }
 
+// InfluencesBuild overrides base class method.
+func (t *quarkusTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
+	return true
+}
+
 var _ ComparableTrait = &quarkusTrait{}
 
 func (t *quarkusTrait) Matches(trait Trait) bool {
@@ -147,13 +152,6 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
-	if t.hasKitNativeType() {
-		// Force the build to run in a separate Pod
-		t.L.Info("Quarkus Native requires a build pod strategy")
-		e.BuildStrategy = v1.BuildStrategyPod
-		// TODO we may provide a set of sensible resource default values for the Pod spun off
-	}
-
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		t.applyWhileBuildingKit(e)
 
@@ -292,7 +290,7 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 }
 
 func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
-	build := getBuilderTask(e.BuildTasks)
+	build := getBuilderTask(e.Pipeline)
 	if build == nil {
 		return fmt.Errorf("unable to find builder task: %s", e.Integration.Name)
 	}
@@ -352,15 +350,6 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	default:
 		return false, fmt.Errorf("kit %q has more than one package type", e.IntegrationKit.Name)
 	}
-}
-
-func (t *quarkusTrait) hasKitNativeType() bool {
-	for _, v := range t.PackageTypes {
-		if v == traitv1.NativePackageType {
-			return true
-		}
-	}
-	return false
 }
 
 func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {

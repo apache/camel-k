@@ -25,15 +25,19 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// BuildSpec defines the Build operation to be executed
+// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropiate
+// to think it as pipeline.
 type BuildSpec struct {
-	// The sequence of Build tasks to be performed as part of the Build execution.
+	// The sequence of tasks (pipeline) to be performed.
 	Tasks []Task `json:"tasks,omitempty"`
-	// The strategy that should be used to perform the Build.
-	Strategy BuildStrategy `json:"strategy,omitempty"`
+	// The configuration that should be used to perform the Build.
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
+	Configuration BuildConfiguration `json:"configuration,omitempty"`
 	// The container image to be used to run the build.
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	ToolImage string `json:"toolImage,omitempty"`
 	// The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	BuilderPodNamespace string `json:"operatorNamespace,omitempty"`
 	// Timeout defines the Build maximum execution duration.
 	// The Build deadline is set to the Build start time plus the Timeout duration.
@@ -42,13 +46,19 @@ type BuildSpec struct {
 	// +kubebuilder:validation:Format=duration
 	Timeout metav1.Duration `json:"timeout,omitempty"`
 	// the maximum amount of parallel running builds started by this operator instance
+	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
 
 // Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.
 type Task struct {
-	// a BuilderTask (base task)
+	// Application building
+
+	// a BuilderTask, used to generate and package the project
 	Builder *BuilderTask `json:"builder,omitempty"`
+
+	// Application Publishing
+
 	// a BuildahTask, for Buildah strategy
 	Buildah *BuildahTask `json:"buildah,omitempty"`
 	// a KanikoTask, for Kaniko strategy
@@ -57,6 +67,10 @@ type Task struct {
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
 	// a S2iTask, for S2I strategy
 	S2i *S2iTask `json:"s2i,omitempty"`
+
+	// User customizable task execution
+
+	Custom *UserTask `json:"custom,omitempty"`
 }
 
 // BaseTask is a base for the struct hierarchy
@@ -68,6 +82,8 @@ type BaseTask struct {
 // BuilderTask is the generic task in charge of building the application image
 type BuilderTask struct {
 	BaseTask `json:",inline"`
+	// The configuration that should be used to perform the Build.
+	Configuration BuildConfiguration `json:"configuration,omitempty"`
 	// the base image layer
 	BaseImage string `json:"baseImage,omitempty"`
 	// the configuration required for the runtime application
@@ -151,6 +167,15 @@ type S2iTask struct {
 	ContextDir string `json:"contextDir,omitempty"`
 	// used by the ImageStream
 	Tag string `json:"tag,omitempty"`
+}
+
+// UserTask is used to execute any generic custom operation
+type UserTask struct {
+	BaseTask `json:",inline"`
+	// the container image to use
+	ContainerImage string `json:"image,omitempty"`
+	// the command to execute
+	ContainerCommand string `json:"command,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build

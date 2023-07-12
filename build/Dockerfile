@@ -13,17 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:17-jdk as base
 
 ARG MAVEN_DEFAULT_VERSION="3.8.6"
 ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
+ARG MVN_REPO="/etc/maven/m2"
 
 USER 0
 
 # Maven configuration
 RUN mkdir -p ${MAVEN_HOME}
+RUN mkdir -p ${MVN_REPO}
 COPY build/_maven_overlay/ /usr/share/maven/lib/
 ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
@@ -40,17 +42,28 @@ RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> 
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider*
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
-ADD build/_maven_output /tmp/local/m2
+ADD build/_maven_output ${MVN_REPO}
+# Fix https://github.com/moby/moby/issues/37965
+RUN true
 ADD build/_kamelets /kamelets
 
-RUN mkdir -p /etc/maven/m2 \
-    && chgrp -R 0 /etc/maven/m2 \
-    && chmod -R g=u /etc/maven/m2 \
+RUN chgrp -R 0 ${MVN_REPO} \
+    && chown -R 1001:0 ${MVN_REPO} \
+    && chmod -R 775 ${MVN_REPO} \
     && chgrp -R 0 /kamelets \
     && chmod -R g=u /kamelets \
     && chgrp -R 0 ${MAVEN_HOME} \
-    && chmod -R g=u ${MAVEN_HOME}
+    && chown -R 1001:0 ${MAVEN_HOME} \
+    && chmod -R 775 ${MAVEN_HOME}
 
-USER 1000
+USER 1001:0
 
 ADD build/_output/bin/kamel /usr/local/bin/kamel
+
+FROM golang:1.18 as go
+
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+FROM base as debug
+
+COPY --from=go /go/bin/dlv /usr/local/bin/dlv

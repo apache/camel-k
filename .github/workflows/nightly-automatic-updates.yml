@@ -25,11 +25,11 @@ on:
 jobs:
   main:
     if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Automatic updates on main branch
     steps:
     - name: "Checkout code"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: main
         persist-credentials: false
@@ -43,7 +43,7 @@ jobs:
 
   v1_12_x:
     if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v2
@@ -60,10 +60,10 @@ jobs:
 
   v1_10_x:
     if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: "Checkout code"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: release-1.10.x
         persist-credentials: false

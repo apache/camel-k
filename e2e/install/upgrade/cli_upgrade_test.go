@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package olm
+package upgrade
 
 import (
 	"os"
@@ -37,7 +37,7 @@ import (
 )
 
 // WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
-func TestOperatorUpgrade(t *testing.T) {
+func TestCLIOperatorUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		Expect(ok).To(BeTrue())
@@ -52,7 +52,15 @@ func TestOperatorUpgrade(t *testing.T) {
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 
 		// Should both install the CRDs and kamel in the given namespace
-		Expect(Kamel("install", "-n", ns, "--olm=false", "--force", "--base-image", defaults.BaseImage()).Execute()).To(Succeed())
+		Expect(Kamel(
+			"install",
+			"-n",
+			ns,
+			"--olm=false",
+			"--force",
+			"--base-image",
+			defaults.BaseImage(),
+		).Execute()).To(Succeed())
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
@@ -83,6 +91,7 @@ func TestOperatorUpgrade(t *testing.T) {
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		// Check the IntegrationPlatform has been reconciled
+		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		Eventually(PlatformVersion(ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the Integration hasn't been upgraded
@@ -91,6 +100,8 @@ func TestOperatorUpgrade(t *testing.T) {
 		// Force the Integration upgrade
 		Expect(Kamel("rebuild", name, "-n", ns).Execute()).To(Succeed())
 
+		// A catalog should be created with the new configuration
+		Eventually(DefaultCamelCatalogPhase(ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 		// Check the Integration version has been upgraded
 		Eventually(IntegrationVersion(ns, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 

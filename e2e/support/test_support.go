@@ -379,8 +379,12 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 			DisableFlagParsing: true,
 			RunE: func(cmd *cobra.Command, args []string) error {
 				externalBin := exec.CommandContext(ctx, kamelBin, args...)
-				var stdout io.Reader
+				var stdout, stderr io.Reader
 				stdout, err = externalBin.StdoutPipe()
+				if err != nil {
+					failTest(err)
+				}
+				stderr, err = externalBin.StderrPipe()
 				if err != nil {
 					failTest(err)
 				}
@@ -389,6 +393,10 @@ func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
 					return err
 				}
 				_, err = io.Copy(c.OutOrStdout(), stdout)
+				if err != nil {
+					return err
+				}
+				_, err = io.Copy(c.ErrOrStderr(), stderr)
 				if err != nil {
 					return err
 				}
@@ -1602,6 +1610,16 @@ func Build(ns, name string) func() *v1.Build {
 	}
 }
 
+func BuildConfig(ns, name string) func() v1.BuildConfiguration {
+	return func() v1.BuildConfiguration {
+		build := Build(ns, name)()
+		if build != nil {
+			return *build.BuilderConfiguration()
+		}
+		return v1.BuildConfiguration{}
+	}
+}
+
 func BuildPhase(ns, name string) func() v1.BuildPhase {
 	return func() v1.BuildPhase {
 		build := Build(ns, name)()
@@ -1609,6 +1627,16 @@ func BuildPhase(ns, name string) func() v1.BuildPhase {
 			return build.Status.Phase
 		}
 		return v1.BuildPhaseNone
+	}
+}
+
+func BuildConditions(ns, name string) func() []v1.BuildCondition {
+	return func() []v1.BuildCondition {
+		build := Build(ns, name)()
+		if build != nil && &build.Status != nil && build.Status.Conditions != nil {
+			return build.Status.Conditions
+		}
+		return nil
 	}
 }
 
@@ -1721,6 +1749,17 @@ func DeleteCamelCatalog(ns, name string) func() bool {
 			log.Error(err, "Got error while deleting the catalog")
 		}
 		return true
+	}
+}
+
+func DefaultCamelCatalogPhase(ns string) func() v1.CamelCatalogPhase {
+	return func() v1.CamelCatalogPhase {
+		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+		c := CamelCatalog(ns, catalogName)()
+		if c == nil {
+			return ""
+		}
+		return c.Status.Phase
 	}
 }
 
@@ -1983,25 +2022,6 @@ func OperatorPod(ns string) func() *corev1.Pod {
 			return nil
 		}
 		return &lst.Items[0]
-	}
-}
-
-func OperatorPodPVCName(ns string) func() string {
-	return func() string {
-		operatorPod := OperatorPod(ns)()
-		if operatorPod.Spec.Volumes == nil {
-			return ""
-		}
-		volumes := OperatorPod(ns)().Spec.Volumes
-		if volumes == nil {
-			return ""
-		}
-		for _, v := range volumes {
-			if v.Name == defaults.DefaultPVC {
-				return defaults.DefaultPVC
-			}
-		}
-		return ""
 	}
 }
 
@@ -2719,5 +2739,14 @@ func DeleteCIProcessID() {
 	err := os.Remove(ciPID)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func GetOperatorNamespace(testNamespace string) string {
+	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
+	if globalTest {
+		return os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
+	} else {
+		return testNamespace
 	}
 }

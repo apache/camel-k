@@ -29,4 +29,16 @@ type BuilderTrait struct {
 	Properties []string `property:"properties" json:"properties,omitempty"`
 	// The strategy to use, either `pod` or `routine` (default routine)
 	Strategy string `property:"strategy" json:"strategy,omitempty"`
+	// The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default sequential)
+	OrderStrategy string `property:"order-strategy" json:"orderStrategy,omitempty"`
+	// When using `pod` strategy, the minimum amount of CPU required by the pod builder.
+	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
+	// When using `pod` strategy, the minimum amount of memory required by the pod builder.
+	RequestMemory string `property:"request-memory" json:"requestMemory,omitempty"`
+	// When using `pod` strategy, the maximum amount of CPU required by the pod builder.
+	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
+	// When using `pod` strategy, the maximum amount of memory required by the pod builder.
+	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
+	// A list of tasks to be executed (available only when using `pod` strategy) with format <name>;<container-image>;<container-command>
+	Tasks []string `property:"tasks" json:"tasks,omitempty"`
 }

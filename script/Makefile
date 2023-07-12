@@ -22,20 +22,20 @@ SHELL := /bin/bash
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.0.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 1.12.0
-RUNTIME_VERSION := 2.16.0-SNAPSHOT
-BUILDAH_VERSION := 1.23.3
+LAST_RELEASED_VERSION ?= 1.12.1
+DEFAULT_RUNTIME_VERSION := 2.16.0
+BUILDAH_VERSION := 1.30.0
 KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.25.6
 OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-BASE_IMAGE := docker.io/eclipse-temurin:11
-DEFAULT_PVC := camel-k-pvc
+BASE_IMAGE := eclipse-temurin:11
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
-
+# Default value, change to your architecture accordingly
+IMAGE_ARCH ?= amd64
 #
 # Situations when user wants to override
 # the image name and version
@@ -53,7 +53,7 @@ RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
 LINT_GOGC := 10
 LINT_DEADLINE := 10m
-
+DEBUG_MODE ?= false
 
 # olm bundle vars
 MANAGER := config/manager
@@ -120,6 +120,10 @@ endif
 
 GOFLAGS = -ldflags "$(GOLDFLAGS)" -trimpath
 
+ifeq ($(DEBUG_MODE),true)
+GOFLAGS += -gcflags="all=-N -l"
+endif
+
 define LICENSE_HEADER
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -175,7 +179,7 @@ codegen:
 	@echo "  Version = \"$(CUSTOM_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
-	@echo "  DefaultRuntimeVersion = \"$(RUNTIME_VERSION)\"" >> $(VERSIONFILE)
+	@echo "  DefaultRuntimeVersion = \"$(DEFAULT_RUNTIME_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // BuildahVersion -- " >> $(VERSIONFILE)
 	@echo "  BuildahVersion = \"$(BUILDAH_VERSION)\"" >> $(VERSIONFILE)
@@ -188,9 +192,6 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // LocalRepository -- " >> $(VERSIONFILE)
 	@echo "  LocalRepository = \"$(LOCAL_REPOSITORY)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // DefaultPVC -- " >> $(VERSIONFILE)
-	@echo "  DefaultPVC = \"$(DEFAULT_PVC)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)
@@ -262,13 +263,13 @@ test-fmt: do-build
 #
 test-common: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 30m -v ./e2e/common/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 10m -v ./e2e/common/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/cli -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/misc -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 10m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
@@ -284,8 +285,8 @@ test-common-with-custom-install: do-build
 #
 test-install: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 40m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 40m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
@@ -293,16 +294,23 @@ test-install: do-build
 #
 test-install-olm: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
+	go test -timeout 30m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
+
+#
+# Upgrade procedure test (requires cluster to be setup accordingly, ie OLM)
+#
+test-install-upgrade: do-build
+	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 30m -v ./e2e/install/upgrade -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
 
 #
 # Knative tests that require the presence of KNative configuration
 #
 test-knative: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 30m -v ./e2e/knative/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 10m -v ./e2e/knative/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/knative/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 10m -v ./e2e/knative/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
@@ -334,17 +342,13 @@ test-quarkus-native-high-memory: do-build
 	go test -timeout 180m -v ./e2e/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
-	@echo "####### Building kamel CLI..."
-	@# Ensure the binary is statically linked when building on Linux due to ABI changes in newer glibc 2.32, otherwise
-	@# it would not run on older versions. See https://github.com/apache/camel-k/pull/2141#issuecomment-800990117
-ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	CGO_ENABLED=0 go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
-else
-	go build $(GOFLAGS) -o kamel ./cmd/kamel/*.go
-endif
+	@echo "####### Building kamel CLI for $(GOOS) $(IMAGE_ARCH) architecture..."
+	CGO_ENABLED=0 GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+	# Symbolic link to a local CLI
+	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
 build-resources:
-	./script/get_catalog.sh $(RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
 	go generate ./pkg/...
 
 bundle-kamelets:
@@ -411,58 +415,60 @@ dir-licenses:
 check-licenses:
 	./script/check_licenses.sh
 
-check-platform:
-	./script/check_platform.sh
-
 # The below are dependencies needed for maven structured logs. We must bundle into the final container image.
 maven-overlay:
 	@echo "####### Preparing maven dependencies bundle..."
 	mkdir -p build/_maven_overlay
-	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION) build/_maven_overlay
+	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION) build/_maven_overlay
 
 kamel-overlay:
-	@echo "####### Copying kamel CLI to output build directory..."
 	mkdir -p build/_output/bin
 ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	cp kamel build/_output/bin
-else ifeq ($(shell uname -m), arm64)
-	GOOS=linux GOARCH=arm64 go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+	@echo "####### Copying Linux platform arch $(IMAGE_ARCH) CLI into output build directory..."
 else
-	GOOS=linux go build $(GOFLAGS) -o build/_output/bin/kamel ./cmd/kamel/*.go
+	@echo "####### (Re)Building a Linux platform arch $(IMAGE_ARCH) CLI "
+	@echo "####### Likely you're on a non Linux host, so I need to build a Linux CLI to bundle in the container image"
+	GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+endif
+	cp build/_output/bin/kamel-$(IMAGE_ARCH) build/_output/bin/kamel
+
+TARGET_STAGE := base
+ifeq ($(DEBUG_MODE),true)
+	TARGET_STAGE := debug
+	CUSTOM_IMAGE := $(CUSTOM_IMAGE)-debug
+endif
+
+DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+ifneq ($(IMAGE_ARCH), amd64)
+	DOCKER_TAG := $(DOCKER_TAG)-$(IMAGE_ARCH)
 endif
 
 images: build kamel-overlay maven-overlay bundle-kamelets
-ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
-	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
+ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
+	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
-	@echo "####### Building Camel K operator container image..."
+	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-	docker build -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile .
+	docker build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
 
-images-arch: build kamel-overlay maven-overlay bundle-kamelets
-ifneq (,$(findstring SNAPSHOT,$(RUNTIME_VERSION)))
-	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(RUNTIME_VERSION)
-endif
-	@echo "####### Building Camel K operator container image for multi architectures..."
-	mkdir -p build/_maven_output
-	docker buildx rm --all-inactive --force
-	docker buildx create --append --name builder
-ifeq ($(shell uname -m), x86_x64)
-	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
-endif
-ifeq ($(shell uname -m), aarch64)
-	docker buildx build --platform=linux/arm64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
-endif
-ifeq ($(shell uname -m), arm64)
-	docker buildx build --platform=linux/amd64 -t $(CUSTOM_IMAGE):$(CUSTOM_VERSION) -f build/Dockerfile.arch .
-endif
+# Mainly used for internal CI purposes
+image-push:
+	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64
 
 images-push-staging:
 	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
+	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64
 	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
+	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64
+	# TODO: we can evaluate the usage of manifest and try the following
+	# docker manifest create $(CUSTOM_IMAGE):$(CUSTOM_VERSION) \
+	# --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 \
+	# --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64
+	# docker manifest push --purge $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
 get-image:
 	@echo $(CUSTOM_IMAGE)
@@ -499,11 +505,15 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-release: clean codegen set-module-version set-version build-resources check-licenses build images images-push cross-compile git-tag
+release: clean codegen set-module-version set-version build-resources check-licenses images images-push cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses build images images-push-staging cross-compile fabric8-crds git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses images images-push-staging cross-compile fabric8-crds git-tag
 
-release-nightly: clean codegen set-module-version set-version build-resources build images images-push cross-compile
+# Build images
+images-nightly: clean codegen set-module-version set-version build-resources images
+
+# Release artifacts
+release-nightly: cross-compile images-push
 
 release-helm:
 	./script/release_helm.sh
@@ -637,7 +647,7 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Sets the operator image to the preferred image:tag
 	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	@INSTALL_DEFAULT_PVC=false $(KUSTOMIZE) build config/manifests | \
+	@$(KUSTOMIZE) build config/manifests | \
 		$(OPERATOR_SDK) generate bundle \
 			-q --overwrite --version $(OPERATOR_VERSION) \
 			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)

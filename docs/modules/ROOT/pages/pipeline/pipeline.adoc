@@ -1,0 +1,105 @@
+[[build-pipeline]]
+= Build Pipeline
+
+Since version 2.0, we've introduced the concept of `Pipeline` in order to provide a degree of flexibility for those user that want to customize the entire building process. We can think of a pipeline as a series of tasks that can be executed after the project generation and before the artifact publishing into the container registry.
+
+In Camel K version 1 we used to have 2 static tasks: `builder` and `publisher` (named after the strategy adopted, ie, `spectrum`). Now you can include any futher task in the middle by opportunely configuring the Build. Let's see an example:
+
+```yaml
+spec:
+  tasks:
+  - builder:
+      ...
+  - custom:
+      command: tree
+      image: alpine
+      name: custom1
+  - custom:
+      command: cat maven/pom.xml
+      image: alpine
+      name: custom2
+  - spectrum:
+      ...
+```
+The custom tasks will be executed in the directory where the Camel K runtime Maven project was generated. In this example we're creating 2 tasks to retrieve certain values from the project just for the scope of illustrating the feature. For each task you need to specify a name, the container image which you want to use to run and the command to execute.
+
+The goal is to let the user perform custom tasks which may result in a success or a failure. If the task executed results in a failure, then, the entire build is stopped and fails accordingly.
+
+[[build-pipeline-trait]]
+== Configuring via builder trait
+
+We are aware that configuring the `Build` type directly is something that the majority of users won't do. For this reason we're enabling the same feature in the xref:traits:builder.adoc[Builder trait].
+
+Maintaining the example above as a reference, configuring a custom task will be as easy as adding a trait property when running your Integration, for instance, via CLI:
+
+```
+kamel run Test.java -t builder.tasks=custom1;alpine;tree -t builder.tasks="custom2;alpine;cat maven/pom.xml"
+```
+
+[[build-pipeline-result]]
+== Getting task execution status
+
+Altough the main goal of this custom task execution is to have a success/failure result, we thought it could be useful to get the log of each task to be consulted by the user. For this reason, you will be able to read it directly in the Build type. See the following example:
+
+```
+  conditions:
+  - lastTransitionTime: "2023-05-19T09:56:02Z"
+    lastUpdateTime: "2023-05-19T09:56:02Z"
+    message: |
+      ...
+      {"level":"info","ts":1684490148.080175,"logger":"camel-k.builder","msg":"base image: eclipse-temurin:11"}
+      {"level":"info","ts":1684490148.0801787,"logger":"camel-k.builder","msg":"resolved base image: eclipse-temurin:11"}
+    reason: Completed (0)
+    status: "True"
+    type: Container builder succeeded
+  - lastTransitionTime: "2023-05-19T09:56:02Z"
+    lastUpdateTime: "2023-05-19T09:56:02Z"
+    message: |2
+              │   │       ├── org.slf4j.slf4j-api-1.7.36.jar
+              │   │       └── org.yaml.snakeyaml-1.33.jar
+              │   ├── quarkus
+              │   │   ├── generated-bytecode.jar
+              │   │   └── quarkus-application.dat
+              │   ├── quarkus-app-dependencies.txt
+              │   └── quarkus-run.jar
+              └── quarkus-artifact.properties
+
+      21 directories, 294 files
+    reason: Completed (0)
+    status: "True"
+    type: Container custom1 succeeded
+  - lastTransitionTime: "2023-05-19T09:56:02Z"
+    lastUpdateTime: "2023-05-19T09:56:02Z"
+    message: |2-
+                    </properties>
+                  </configuration>
+                </execution>
+              </executions>
+              <dependencies></dependencies>
+            </plugin>
+          </plugins>
+          <extensions></extensions>
+        </build>
+      </project>
+    reason: Completed (0)
+    status: "True"
+    type: Container custom2 succeeded
+  - lastTransitionTime: "2023-05-19T09:56:02Z"
+    lastUpdateTime: "2023-05-19T09:56:02Z"
+    message: |
+      ...test-29ce59bf-178f-4c4f-9d12-407461533e2a/camel-k-kit-chjkf0vkglls73fhp9lg:339751: digest: sha256:62d184a112327221e5cac6bea862fc71341f3fc684f5060d1e137b4b7635db06 size: 1085"}
+    reason: Completed (0)
+    status: "True"
+    type: Container spectrum succeeded
+```
+
+Given the limited space we can use in a Kubernetes custom resource, we are truncating such log to the last lines of execution. One good strategy could be to leverage `reason` where we provide the execution status code (0, if success) and use an error code for each different exceptional situation you want to handle.
+
+If for any reason you still need to access the entire log of the execution, you can always access to the log of the builder `Pod` and the specific container that was executed, ie `kubectl logs camel-k-kit-chj2gpi9rcoc73cjfv2g-builder -c task1 -p`
+
+[[build-pipeline-examples]]
+== Custom tasks examples
+
+As we are using container registry for execution, you will be able to execute virtually any kind of task. You can provide your own container with tools required by your company or use any one available in the OSS.
+
+As the target of the execution is the project, before the artifact is published to the registry, you can execute any task to validate the project. We can think of any vulnerability tool scanner, quality of code or any other action you tipically perform in your build pipeline.

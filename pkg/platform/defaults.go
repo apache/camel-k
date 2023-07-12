@@ -81,9 +81,25 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
-	if p.Status.Build.BuildStrategy == "" {
-		p.Status.Build.BuildStrategy = v1.BuildStrategyPod
-		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildStrategy)
+	if p.Status.Build.BuildConfiguration.Strategy == "" {
+		defaultStrategy := v1.BuildStrategyRoutine
+		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah ||
+			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
+			defaultStrategy = v1.BuildStrategyPod
+			log.Infof("Integration Platform %s [%s]: setting fallback build strategy %s because PublishStrategy is configured as %s",
+				p.Name,
+				p.Namespace,
+				defaultStrategy,
+				p.Status.Build.PublishStrategy,
+			)
+		}
+		p.Status.Build.BuildConfiguration.Strategy = defaultStrategy
+		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
+	}
+
+	if p.Status.Build.BuildConfiguration.OrderStrategy == "" {
+		p.Status.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategySequential
+		log.Debugf("Integration Platform %s [%s]: setting build order strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.OrderStrategy)
 	}
 
 	err := setPlatformDefaults(p, verbose)
@@ -91,7 +107,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		return err
 	}
 
-	if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
+	if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
 		if err := CreateBuilderServiceAccount(ctx, c, p); err != nil {
 			return fmt.Errorf("cannot ensure service account is present: %w", err)
 		}
@@ -222,8 +238,12 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", target.Name, target.Namespace)
 		target.Status.Build.PublishStrategyOptions = source.Status.Build.PublishStrategyOptions
 	}
-	if target.Status.Build.BuildStrategy == "" {
-		target.Status.Build.BuildStrategy = source.Status.Build.BuildStrategy
+	if target.Status.Build.BuildConfiguration.Strategy == "" {
+		target.Status.Build.BuildConfiguration.Strategy = source.Status.Build.BuildConfiguration.Strategy
+	}
+
+	if target.Status.Build.BuildConfiguration.OrderStrategy == "" {
+		target.Status.Build.BuildConfiguration.OrderStrategy = source.Status.Build.BuildConfiguration.OrderStrategy
 	}
 
 	if target.Status.Build.RuntimeVersion == "" {
@@ -233,6 +253,10 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	if target.Status.Build.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", target.Name, target.Namespace)
 		target.Status.Build.BaseImage = source.Status.Build.BaseImage
+		// Workaround to ensure the default image from buildah is full name. Any baseImage override is in charge of it's validity
+		if target.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && defaults.IsBaseImageDefault() {
+			target.Status.Build.BaseImage = builder.BuildahDefaultBaseImageName
+		}
 	}
 
 	if target.Status.Build.Maven.LocalRepository == "" {
@@ -312,6 +336,10 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", p.Name, p.Namespace)
 		p.Status.Build.BaseImage = defaults.BaseImage()
+		// Workaround to ensure the default image from buildah is full name. Any baseImage override is in charge of it's validity
+		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && defaults.IsBaseImageDefault() {
+			p.Status.Build.BaseImage = builder.BuildahDefaultBaseImageName
+		}
 	}
 	if p.Status.Build.Maven.LocalRepository == "" {
 		log.Debugf("Integration Platform %s [%s]: setting local repository", p.Name, p.Namespace)
@@ -369,9 +397,9 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 	if p.Status.Build.MaxRunningBuilds <= 0 {
 		log.Debugf("Integration Platform %s [%s]: setting max running builds", p.Name, p.Namespace)
-		if p.Status.Build.BuildStrategy == v1.BuildStrategyRoutine {
+		if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyRoutine {
 			p.Status.Build.MaxRunningBuilds = 3
-		} else if p.Status.Build.BuildStrategy == v1.BuildStrategyPod {
+		} else if p.Status.Build.BuildConfiguration.Strategy == v1.BuildStrategyPod {
 			p.Status.Build.MaxRunningBuilds = 10
 		}
 	}

@@ -141,12 +141,17 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	targetLog := rlog.ForBuild(target)
 
 	var actions []Action
-
+	ip, err := platform.GetOrFindForResource(ctx, r.client, &instance, true)
+	if err != nil {
+		rlog.Error(err, "Could not find a platform bound to this Build")
+		return reconcile.Result{}, err
+	}
 	buildMonitor := Monitor{
-		maxRunningBuilds: instance.Spec.MaxRunningBuilds,
+		maxRunningBuilds:   ip.Status.Build.MaxRunningBuilds,
+		buildOrderStrategy: ip.Status.Build.BuildConfiguration.OrderStrategy,
 	}
 
-	switch instance.Spec.Strategy {
+	switch instance.BuilderConfiguration().Strategy {
 	case v1.BuildStrategyPod:
 		actions = []Action{
 			newInitializePodAction(r.reader),
@@ -209,7 +214,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		return reconcile.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	if target.Spec.Strategy == v1.BuildStrategyPod &&
+	if target.BuilderConfiguration().Strategy == v1.BuildStrategyPod &&
 		(target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
 		// Requeue running Build to poll Pod and signal timeout
 		return reconcile.Result{RequeueAfter: 1 * time.Second}, nil

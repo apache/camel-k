@@ -6,37 +6,50 @@ the technical process changes.
 
 NOTE: starting Camel K version 2, the release process of Kamelets catalog and Camel K Runtime is independent.
 
+[[releasing-settings]]
+== First time settings
+
+If it's the first time you are releasing Camel K, you may be required to follow certain configuration for `gpg` and `maven`. Just follow the instructions you can find in https://github.com/apache/camel-k-runtime[Camel K Runtime project] about release. They contain a simplified guidelines to the more generic https://github.com/apache/camel/blob/main/docs/user-manual/modules/ROOT/pages/release-guide.adoc[Camel release guide] required to setup the Maven environment and gpg for the release.
+
+=== Docker Hub staging setting
+
+This project staging is hosted on https://hub.docker.com/orgs/camelk/repositories[CamelK Docker Hub organization]. Make sure one of the organization administrator grant your personal user the right priviledges to push an image to this org.
+
+[[releasing-camel-k]]
+== Release Camel K
+
+As the process will do `git` operations, it is advisable that you clone the Camel K repository to some new location (ie /tmp/) in order to avoid to conflict with any other development in progress. Consider if you're about to release from `main` branch (generally a new major or minor version) or from a `release` branch (when you're about to release a patch version). In the latter case, you need to checkout to the proper release branch, ie `git checkout release-1.12.x`.
+
 [[releasing-camel-k-crds]]
-== Releasing Camel K CRD dependency
+=== Release Camel K CRD dependency
 
 Camel K ships a Maven dependency containing the CRDs required in Kubernetes. This dependency is available in `/java/` directory and has to be released togheter with Camel K. The process below is the same used for Camel K Runtime.
 
-Follow the https://github.com/apache/camel/blob/main/docs/user-manual/modules/ROOT/pages/release-guide.adoc[Camel release guide] in order to setup the Maven environment and gpg for the release.
-
 To prepare a release and check problems:
 ```
-./java/mvnw release:prepare -DdryRun -Prelease
+cd java
+./mvnw release:prepare -Prelease -DautoVersionSubmodules=true -DdryRun
 ```
 
 Check the signatures of the files, then clean and prepare the actual release:
 
 ```
-./java/mvnw release:clean -Prelease
-./java/mvnw release:prepare -Prelease
+./mvnw release:clean -Prelease
+./mvnw release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
 ```
 
 Then perform the release:
 
 ```
-./java/mvnw release:perform -Prelease
+./mvnw release:perform -Prelease [-s path/to/your/settings.xml]
 ```
 
 Go to https://repository.apache.org/ and close the staging repository.
 
 A URL will be generated for the repository, like: https://repository.apache.org/content/repositories/orgapachecamel-xxxx. The URL needs to be communicated during the voting process.
 
-[[releasing-camel-k]]
-== Releasing Camel K
+[[release-camel-k-operator]]
+=== Release Camel K Operator and CLI
 
 Releasing the Camel K main artifacts require some manual steps.
 
@@ -48,6 +61,7 @@ The following tasks need to be done:
 
 - Align `KAMELET_CATALOG_REPO_TAG` in Makefile to latest released tag of the camel-kamelets repository
 - Align `RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
+- Set the proper `VERSION`, likely just remove `-SNAPSHOT` suffix
 - Ensure `LAST_RELEASED_VERSION` points to latest released version of Camel K
 
 ```
@@ -57,32 +71,10 @@ make clean codegen set-version build-resources check-licenses
 Rebuild auto-generated data, including trait info:
 
 ```
-make generate
+make generate clean build-resources build
 ```
 
-Remove all snapshot files in the `/resources` directory, then run again:
-```
-# After removing snapshots from /resources
-make clean build-resources
-```
-
-Run build and basic tests:
-```
-make
-```
-
-Sync the main branch (with your changes) with upstream.
-
-```
-git add *
-git commit -m "preparing for next release"
-# assuming write permissions
-git push upstream main
-```
-
-If you are on an active branch and you're going to release on it the command will be
-
-Sync the main branch (with your changes) with upstream.
+Commit and push the changes done so far.
 
 ```
 git add *
@@ -93,9 +85,7 @@ git push upstream <branch_name>
 
 Now the release on staging can be executed.
 
-Change the version on Makefile to next version of camel-k (usually, just remove '-SNAPSHOT' from the version)
 ```
-# after removing '-SNAPSHOT' from current VERSION in makefile
 make release-staging
 ```
 
@@ -112,14 +102,13 @@ This will upload the sources, client and examples to the dist/dev repository in 
 
 A docker image `camelk/camel-k:<version>` will be pushed to the staging organization (`camelk`, not `apache`).
 
-
 [[testing]]
 == Do some testing
 
 A combined release can be immediately tested with the following install command:
 
 ```
-kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION
+kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-$APACHE_NEXUS_RUNTIME_REPO_ID
 ```
 
 [[release-notes]]
@@ -231,7 +220,9 @@ From the main branch:
 make release-helm
 ```
 
-Commit to the main branch the tar.gz file and the updated index that have been generated in `/docs/charts` and the updated `Chart.yaml`.
+Commit to the `main` branch the tar.gz file and the updated index that have been generated in `/docs/charts` and the updated `Chart.yaml`.
+
+NOTE: if you're releasing from a release branch, then, you need to generate the Helm chart in the specific release branch, and later manually commit the chart in `main` branch accordingly.
 
 Wait for them to be available on https://hub.helm.sh/.
 

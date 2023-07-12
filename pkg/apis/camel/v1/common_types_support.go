@@ -155,3 +155,13 @@ func SetAnnotation(obj *metav1.ObjectMeta, name string, value string) {
 
 var _ json.Marshaler = (*RawMessage)(nil)
 var _ json.Unmarshaler = (*RawMessage)(nil)
+
+// IsEmpty -- .
+func (bc *BuildConfiguration) IsEmpty() bool {
+	return bc.Strategy == "" &&
+		bc.OrderStrategy == "" &&
+		bc.RequestCPU == "" &&
+		bc.RequestMemory == "" &&
+		bc.LimitCPU == "" &&
+		bc.LimitMemory == ""
+}

@@ -26,22 +26,19 @@ const (
 	Version = "2.0.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "2.16.0-SNAPSHOT"
+	DefaultRuntimeVersion = "2.16.0"
 
 	// BuildahVersion --
-	BuildahVersion = "1.23.3"
+	BuildahVersion = "1.30.0"
 
 	// KanikoVersion --
 	KanikoVersion = "1.9.1"
 
 	// baseImage --
-	baseImage = "docker.io/eclipse-temurin:11"
+	baseImage = "eclipse-temurin:11"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
-
-	// DefaultPVC --
-	DefaultPVC = "camel-k-pvc"
 
 	// ImageName --
 	ImageName = "docker.io/apache/camel-k"

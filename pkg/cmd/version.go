@@ -20,25 +20,18 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"regexp"
-	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/Masterminds/semver"
-	"github.com/fatih/camelcase"
 	"github.com/spf13/cobra"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 // VersionVariant may be overridden at build time.
@@ -47,8 +40,6 @@ var VersionVariant = ""
 const (
 	infoVersion = "Version"
 )
-
-var replaceRegexp = regexp.MustCompile(`(\s+\.\s*)|(\s+-\s*)`)
 
 func newCmdVersion(rootCmdOptions *RootCmdOptions) (*cobra.Command, *versionCmdOptions) {
 	options := versionCmdOptions{
@@ -150,45 +141,26 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 		return nil, err
 	}
 
-	// Useful information
-	infos["name"] = platform.Name
-	infos["version"] = platform.Status.Version
-	infos["publishStrategy"] = string(platform.Status.Build.PublishStrategy)
-	infos["runtimeVersion"] = platform.Status.Build.RuntimeVersion
-	infos["registryAddress"] = platform.Status.Build.Registry.Address
+	infos["Name"] = platform.Name
+	infos["Version"] = platform.Status.Version
+	infos["Publish strategy"] = string(platform.Status.Build.PublishStrategy)
+	infos["Runtime version"] = platform.Status.Build.RuntimeVersion
+	infos["Registry address"] = platform.Status.Build.Registry.Address
+	infos["Git commit"] = platform.Status.Info["gitCommit"]
 
-	if platform.Status.Info != nil {
-		for k, v := range platform.Status.Info {
-			infos[k] = v
-		}
-	}
-
-	catalog, err := camel.LoadCatalog(ctx, c, namespace, v1.RuntimeSpec{Version: platform.Status.Build.RuntimeVersion, Provider: platform.Status.Build.RuntimeProvider})
+	catalog, err := camel.LoadCatalog(ctx, c, platform.Namespace, v1.RuntimeSpec{Version: platform.Status.Build.RuntimeVersion, Provider: platform.Status.Build.RuntimeProvider})
 	if err != nil {
 		return nil, err
 	}
 	if catalog == nil {
 		return nil, fmt.Errorf("CamelCatalog can't be found in %s namespace", platform.Namespace)
 	}
-	for k, v := range catalog.CamelCatalogSpec.Runtime.Metadata {
-		infos[k] = v
-	}
 
-	ccInfo := fromCamelCase(infos)
-	log.Debugf("Operator Info for namespace %s: %v", namespace, ccInfo)
-	return ccInfo, nil
-}
+	infos["Camel Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"]
+	infos["Camel version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"]
+	infos["Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"]
 
-func fromCamelCase(infos map[string]string) map[string]string {
-	textKeys := make(map[string]string)
-
-	for k, v := range infos {
-		key := cases.Title(language.English).String(strings.Join(camelcase.Split(k), " "))
-		key = replaceRegexp.ReplaceAllString(key, " ")
-		textKeys[key] = v
-	}
-
-	return textKeys
+	return infos, nil
 }
 
 func operatorVersion(ctx context.Context, c client.Client, namespace string) (string, error) {

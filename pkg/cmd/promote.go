@@ -353,7 +353,11 @@ func toPropertyMap(src interface{}) (map[string]interface{}, error) {
 }
 
 func (o *promoteCmdOptions) listKamelets(c client.Client, it *v1.Integration) ([]string, error) {
-	catalog, err := camel.DefaultCatalog()
+	runtime := v1.RuntimeSpec{
+		Version:  it.Status.RuntimeVersion,
+		Provider: v1.RuntimeProviderQuarkus,
+	}
+	catalog, err := camel.LoadCatalog(o.Context, c, o.Namespace, runtime)
 	if err != nil {
 		return nil, err
 	}
@@ -437,6 +441,8 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	dst := v1.NewIntegration(o.To, it.Name)
 	contImage := it.Status.Image
 	dst.Spec = *it.Spec.DeepCopy()
+	dst.Annotations = cloneAnnotations(it.Annotations)
+	dst.Labels = cloneLabels(it.Labels)
 	if dst.Spec.Traits.Container == nil {
 		dst.Spec.Traits.Container = &traitv1.ContainerTrait{}
 	}
@@ -444,9 +450,31 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	return &dst
 }
 
+// Return all annotations but the ones specific to source (ie, the operator).
+func cloneAnnotations(ann map[string]string) map[string]string {
+	newMap := make(map[string]string)
+	for k, v := range ann {
+		if k != v1.OperatorIDAnnotation {
+			newMap[k] = v
+		}
+	}
+	return newMap
+}
+
+// Return all labels. The method is a reference if in the future we need to apply any filtering.
+func cloneLabels(lbs map[string]string) map[string]string {
+	newMap := make(map[string]string)
+	for k, v := range lbs {
+		newMap[k] = v
+	}
+	return newMap
+}
+
 func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration) *v1.Pipe {
 	dst := v1.NewPipe(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
+	dst.Annotations = cloneAnnotations(kb.Annotations)
+	dst.Labels = cloneLabels(kb.Labels)
 	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {
 		dst.Spec.Integration = &v1.IntegrationSpec{}

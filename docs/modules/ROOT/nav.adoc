@@ -35,7 +35,6 @@
 ** xref:running/local.adoc[Run Locally]
 ** xref:running/promoting.adoc[Promote an Integration]
 ** xref:running/knative-sink.adoc[Knative Sinks]
-** xref:tutorials/tutorials.adoc[Examples]
 * xref:configuration/configuration.adoc[Configuration]
 ** xref:configuration/build-time-properties.adoc[Build time properties]
 ** xref:configuration/components.adoc[Components]
@@ -43,6 +42,9 @@
 ** xref:configuration/runtime-properties.adoc[Properties]
 ** xref:configuration/runtime-config.adoc[Runtime configuration]
 ** xref:configuration/runtime-resources.adoc[Runtime resources]
+* Pipelines
+** xref:pipeline/pipeline.adoc[Basic]
+** xref:pipeline/tekton.adoc[Tekton]
 * Observability
 ** xref:observability/logging.adoc[Logging]
 *** xref:observability/logging/operator.adoc[Operator]

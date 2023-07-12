@@ -15,14 +15,34 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-- op: add
-  path: /spec/template/spec/containers/0/volumeMounts
-  value:
-    - name: camel-k-pvc
-      mountPath: /etc/maven/m2
-- op: add
-  path: /spec/template/spec/volumes
-  value:
-    - name: camel-k-pvc
-      persistentVolumeClaim:
-        claimName: camel-k-pvc
+name: Go Coverage Badge
+description: Generate coverage badge for go projects
+inputs:
+  filename:
+    description: 'File containing the tests output'
+    required: true
+    default: coverage.out
+  target:
+    description: 'Target file (default "README.md")'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        EXTRA_ARGS=""
+
+        if [[ -n '${{ inputs.target }}'  ]]; then
+          EXTRA_ARGS+="-target=${{ inputs.target }}"
+        fi
+        
+        TEMP_DIR=$(mktemp -d)
+        curl -sf https://gobinaries.com/github.com/AlexBeauchemin/gobadge@v0.2.0 | PREFIX=$TEMP_DIR sh
+        $TEMP_DIR/gobadge -filename=${{ inputs.filename }} $EXTRA_ARGS
+        rm -rf $TEMP_DIR
+      id: coverage-badge-go
+      shell: bash
+
+branding:
+  icon: check-circle
+  color: white

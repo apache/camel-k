@@ -69,6 +69,11 @@ type Trait interface {
 	// InfluencesKit determines if the trait has any influence on Integration Kits
 	InfluencesKit() bool
 
+	// InfluencesBuild defines a low level of granularity for those traits which influences the build.
+	// The trait can specify if any particular trait configuration influences a build or not.
+	// Note: You must override this method if you override `InfluencesKit()`
+	InfluencesBuild(this, prev map[string]interface{}) bool
+
 	// IsPlatformTrait marks all fundamental traits that allow the platform to work
 	IsPlatformTrait() bool
 
@@ -135,6 +140,12 @@ func (trait *BaseTrait) InfluencesKit() bool {
 	return false
 }
 
+// InfluencesBuild defines a low level of granularity for those traits which influences the build.
+// The trait can specify if any particular trait configuration influences a build or not.
+func (trait *BaseTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
+	return false
+}
+
 // IsPlatformTrait marks all fundamental traits that allow the platform to work.
 func (trait *BaseTrait) IsPlatformTrait() bool {
 	return false
@@ -187,15 +198,13 @@ type Environment struct {
 	PostActions           []func(*Environment) error
 	PostStepProcessors    []func(*Environment) error
 	PostProcessors        []func(*Environment) error
-	BuildTasks            []v1.Task
+	Pipeline              []v1.Task
 	ConfiguredTraits      []Trait
 	ExecutedTraits        []Trait
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
 	Interceptors          []string
 	ServiceBindingSecret  string
-	// The strategy to adopt when building a Kit
-	BuildStrategy v1.BuildStrategy
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.

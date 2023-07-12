@@ -39,37 +39,14 @@ var knownAddons = []string{"keda", "master", "strimzi", "3scale", "tracing"}
 var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)(?:\[[0-9]+\]|\..+)*)=(.*)$`)
 
 func validateTraits(catalog *trait.Catalog, traits []string) error {
-	tp := catalog.ComputeTraitsProperties()
 	for _, t := range traits {
-		kv := strings.SplitN(t, "=", 2)
-		prefix := kv[0]
-		if strings.Contains(prefix, "[") {
-			prefix = prefix[0:strings.Index(prefix, "[")]
-		}
-		if valid, err := validateTrait(tp, prefix); err != nil {
-			return err
-		} else if !valid {
-			return fmt.Errorf("%s is not a valid trait property", t)
+		tr := catalog.GetTrait(t)
+		if tr == nil {
+			return fmt.Errorf("trait %s does not exist in catalog", t)
 		}
 	}
 
 	return nil
-}
-
-func validateTrait(properties []string, item string) (bool, error) {
-	for i := 0; i < len(properties); i++ {
-		if strings.HasSuffix(properties[i], ".*") {
-			if match, err := regexp.MatchString(properties[i], item); err != nil {
-				return false, err
-			} else if match {
-				return true, nil
-			}
-		} else if properties[i] == item {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }
 
 func configureTraits(options []string, traits interface{}, catalog trait.Finder) error {

@@ -170,3 +170,18 @@ func TestMissingResourceRequirements(t *testing.T) {
 	_, err := NewResourceRequirements(strings.Split(resReq, ","))
 	assert.NotNil(t, err)
 }
+
+func TestConfigureResources(t *testing.T) {
+	requestsList := make(v1.ResourceList)
+	requestsList, err := ConfigureResource("500m", requestsList, v1.ResourceCPU)
+	assert.Nil(t, err)
+	assert.Equal(t, "500m", requestsList.Cpu().String())
+	requestsList, err = ConfigureResource("5Gi", requestsList, v1.ResourceMemory)
+	assert.Nil(t, err)
+	assert.Equal(t, "5Gi", requestsList.Memory().String())
+	requestsList, err = ConfigureResource("5ss", requestsList, v1.ResourceCPU)
+	assert.NotNil(t, err)
+	// Assert previous values haven't changed
+	assert.Equal(t, "500m", requestsList.Cpu().String())
+	assert.Equal(t, "5Gi", requestsList.Memory().String())
+}

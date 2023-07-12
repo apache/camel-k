@@ -15,6 +15,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ---------------------------------------------------------------------------
+
 name: Nightly release
 
 env:
@@ -31,10 +33,10 @@ on:
 jobs:
   main:
     if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: "Checkout code"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: main
         persist-credentials: false
@@ -52,7 +54,7 @@ jobs:
 
   v1_12_x:
     if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v2
@@ -73,10 +75,10 @@ jobs:
 
   v1_10_x:
     if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: "Checkout code"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         ref: release-1.10.x
         persist-credentials: false

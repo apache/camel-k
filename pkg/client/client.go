@@ -23,8 +23,6 @@ import (
 	"os"
 	"path/filepath"
 
-	user "github.com/mitchellh/go-homedir"
-
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/scale"
 
@@ -212,7 +210,7 @@ func initialize(kubeconfig string) {
 }
 
 func getDefaultKubeConfigFile() (string, error) {
-	dir, err := user.Dir()
+	dir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}

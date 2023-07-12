@@ -95,6 +95,7 @@ rules:
   - ""
   resources:
   - pods/proxy
+  - pods/log
   verbs:
   - get
 - apiGroups:
@@ -178,3 +179,9 @@ rules:
   verbs:
   - get
   - list
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get

@@ -50,7 +50,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
-			assert.Empty(t, e.BuildTasks)
+			assert.Empty(t, e.Pipeline)
 		})
 	}
 }
@@ -71,7 +71,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 			assert.Nil(t, err)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
-			assert.Empty(t, e.BuildTasks)
+			assert.Empty(t, e.Pipeline)
 		})
 	}
 }
@@ -83,10 +83,10 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
-	assert.NotEmpty(t, env.BuildTasks)
-	assert.Len(t, env.BuildTasks, 2)
-	assert.NotNil(t, env.BuildTasks[0].Builder)
-	assert.NotNil(t, env.BuildTasks[1].S2i)
+	assert.NotEmpty(t, env.Pipeline)
+	assert.Len(t, env.Pipeline, 2)
+	assert.NotNil(t, env.Pipeline[0].Builder)
+	assert.NotNil(t, env.Pipeline[1].S2i)
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
@@ -96,10 +96,10 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
-	assert.NotEmpty(t, env.BuildTasks)
-	assert.Len(t, env.BuildTasks, 2)
-	assert.NotNil(t, env.BuildTasks[0].Builder)
-	assert.NotNil(t, env.BuildTasks[1].Kaniko)
+	assert.NotEmpty(t, env.Pipeline)
+	assert.Len(t, env.Pipeline, 2)
+	assert.NotNil(t, env.Pipeline[0].Builder)
+	assert.NotNil(t, env.Pipeline[1].Kaniko)
 }
 
 func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {
@@ -164,7 +164,7 @@ func TestMavenPropertyBuilderTrait(t *testing.T) {
 	err := builderTrait.Apply(env)
 
 	assert.Nil(t, err)
-	assert.Equal(t, "build-time-value1", env.BuildTasks[0].Builder.Maven.Properties["build-time-prop1"])
+	assert.Equal(t, "build-time-value1", env.Pipeline[0].Builder.Maven.Properties["build-time-prop1"])
 }
 
 func createNominalBuilderTraitTest() *builderTrait {
@@ -172,4 +172,33 @@ func createNominalBuilderTraitTest() *builderTrait {
 	builderTrait.Enabled = pointer.Bool(true)
 
 	return builderTrait
+}
+
+func TestCustomTaskBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+	builderTask := findCustomTaskByName(env.Pipeline, "builder")
+	publisherTask := findCustomTaskByName(env.Pipeline, "spectrum")
+	customTask := findCustomTaskByName(env.Pipeline, "test")
+	assert.NotNil(t, customTask)
+	assert.NotNil(t, builderTask)
+	assert.NotNil(t, publisherTask)
+	assert.Equal(t, 3, len(env.Pipeline))
+	assert.Equal(t, "test", customTask.Custom.Name)
+	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
+	assert.Equal(t, "ls", customTask.Custom.ContainerCommand)
+}
+
+func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
+	for _, t := range tasks {
+		if t.Custom != nil && t.Custom.Name == name {
+			return t
+		}
+	}
+	return v1.Task{}
 }

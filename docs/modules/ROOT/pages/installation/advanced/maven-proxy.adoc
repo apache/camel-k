@@ -1,0 +1,66 @@
+[[maven-proxy]]
+= Run a Maven Proxy
+
+Production or corporate environments generally relies on a corporate Maven repository manager that can be used as a proxy for your Camel K operator. This is a https://maven.apache.org/repository-management.html[Maven best practice] we want to foster as it improves efficiency while performing Camel K builds.
+
+If your environments has not yet any, here we provide some simple example that can be used as a reference to run your own Maven proxy beside Camel K.
+
+== Nexus Maven repository manager
+
+The following configuration is a very simple one from where you can start your own self managed Maven repository manager. It is based on https://www.sonatype.com/products/sonatype-nexus-repository[Nexus] and once it's up and running, it can work togheter with Camel K as explained in /camel-k/next/installation/advanced/maven.html#maven-proxy[Maven proxy configuration].
+
+NOTE: this configuration is NOT production ready. It is ephemeral and uses plain http protocol. It requires some important tuning in order to be used in a production environment.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus
+spec:
+  selector:
+    app: nexus
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+spec:
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      containers:
+        - name: nexus
+          image: sonatype/nexus3
+          ports:
+            - containerPort: 8081
+              name: 8081-tcp
+          livenessProbe:
+            httpGet:
+              path: /service/rest/v1/status
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /service/rest/v1/status
+              port: 8081
+            initialDelaySeconds: 90
+            periodSeconds: 3
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+      volumes:
+        - name: nexus-data
+          emptyDir: {}
+```
+
+Once you have created a file with this content (ie, `nexus.yaml`), then, you can apply to your cluster via `kubectl apply -f nexus.yaml`. Et voilá, after a few seconds, you will be able to use http://nexus/ as a Maven proxy repository.

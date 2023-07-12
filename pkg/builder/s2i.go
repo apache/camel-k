@@ -29,10 +29,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -40,7 +38,6 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	buildv1 "github.com/openshift/api/build/v1"
 	imagev1 "github.com/openshift/api/image/v1"
@@ -49,6 +46,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/s2i"
 )
 
 type s2iTask struct {
@@ -90,11 +88,6 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		},
 	}
 
-	err := t.c.Delete(ctx, bc)
-	if err != nil && !apierrors.IsNotFound(err) {
-		return status.Failed(fmt.Errorf("cannot delete build config: %w", err))
-	}
-
 	// Set the build controller as owner reference
 	owner := t.getControllerReference()
 	if owner == nil {
@@ -102,13 +95,9 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		owner = t.build
 	}
 
-	if err := ctrlutil.SetOwnerReference(owner, bc, t.c.GetScheme()); err != nil {
-		return status.Failed(fmt.Errorf("cannot set owner reference on BuildConfig: %s: %w", bc.Name, err))
-	}
-
-	err = t.c.Create(ctx, bc)
+	err := s2i.BuildConfig(ctx, t.c, bc, owner)
 	if err != nil {
-		return status.Failed(fmt.Errorf("cannot create build config: %w", err))
+		return status.Failed(err)
 	}
 
 	is := &imagev1.ImageStream{
@@ -128,18 +117,9 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		},
 	}
 
-	err = t.c.Delete(ctx, is)
-	if err != nil && !apierrors.IsNotFound(err) {
-		return status.Failed(fmt.Errorf("cannot delete image stream: %w", err))
-	}
-
-	if err := ctrlutil.SetOwnerReference(owner, is, t.c.GetScheme()); err != nil {
-		return status.Failed(fmt.Errorf("cannot set owner reference on ImageStream: %s: %w", is.Name, err))
-	}
-
-	err = t.c.Create(ctx, is)
+	err = s2i.ImageStream(ctx, t.c, is, owner)
 	if err != nil {
-		return status.Failed(fmt.Errorf("cannot create image stream: %w", err))
+		return status.Failed(err)
 	}
 
 	err = util.WithTempDir(t.build.Name+"-s2i-", func(tmpDir string) error {
@@ -203,11 +183,11 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 			return fmt.Errorf("cannot unmarshal instantiated binary response: %w", err)
 		}
 
-		err = t.waitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
+		err = s2i.WaitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
 		if err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 				// nolint: contextcheck
-				if err := t.cancelBuild(context.Background(), &s2iBuild); err != nil {
+				if err := s2i.CancelBuild(context.Background(), t.c, &s2iBuild); err != nil {
 					log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
 				}
 			}
@@ -253,44 +233,6 @@ func (t *s2iTask) getControllerReference() metav1.Object {
 		}
 	}
 	return owner
-}
-
-func (t *s2iTask) waitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buildv1.Build) error {
-	key := ctrl.ObjectKeyFromObject(build)
-	for {
-		select {
-
-		case <-ctx.Done():
-			return ctx.Err()
-
-		case <-time.After(1 * time.Second):
-			err := c.Get(ctx, key, build)
-			if err != nil {
-				if apierrors.IsNotFound(err) {
-					continue
-				}
-				return err
-			}
-
-			if build.Status.Phase == buildv1.BuildPhaseComplete {
-				return nil
-			} else if build.Status.Phase == buildv1.BuildPhaseCancelled ||
-				build.Status.Phase == buildv1.BuildPhaseFailed ||
-				build.Status.Phase == buildv1.BuildPhaseError {
-				return errors.New("build failed")
-			}
-		}
-	}
-}
-
-func (t *s2iTask) cancelBuild(ctx context.Context, build *buildv1.Build) error {
-	target := build.DeepCopy()
-	target.Status.Cancelled = true
-	if err := t.c.Patch(ctx, target, ctrl.MergeFrom(build)); err != nil {
-		return err
-	}
-	*build = *target
-	return nil
 }
 
 func tarDir(src string, writers ...io.Writer) error {

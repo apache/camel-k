@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/cobra"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
 
@@ -68,12 +67,6 @@ __kamel_dependency_type() {
         COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
 	    compopt -o nospace
     esac
-}
-
-__kamel_traits() {
-    local type_list="` + strings.Join(trait.NewCatalog(nil).ComputeTraitsProperties(), " ") + `"
-    COMPREPLY=( $( compgen -W "${type_list}" -- "$cur") )
-    compopt -o nospace
 }
 
 __kamel_languages() {

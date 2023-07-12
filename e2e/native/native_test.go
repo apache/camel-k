@@ -38,7 +38,6 @@ func TestNativeIntegrations(t *testing.T) {
 		operatorID := "camel-k-quarkus-native"
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--build-timeout", "90m0s",
-			"--operator-resources", "limits.memory=6.5Gi",
 			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
@@ -47,6 +46,7 @@ func TestNativeIntegrations(t *testing.T) {
 			name := "unsupported-js"
 			Expect(KamelRunWithID(operatorID, ns, "files/JavaScript.js", "--name", name,
 				"-t", "quarkus.package-type=native",
+				"-t", "builder.limit-memory=6.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
@@ -61,6 +61,7 @@ func TestNativeIntegrations(t *testing.T) {
 			name := "xml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Xml.xml", "--name", name,
 				"-t", "quarkus.package-type=native",
+				"-t", "builder.limit-memory=6.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
@@ -82,6 +83,7 @@ func TestNativeIntegrations(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name,
 				"-t", "quarkus.package-type=fast-jar",
 				"-t", "quarkus.package-type=native",
+				"-t", "builder.limit-memory=6.5Gi",
 			).Execute()).To(Succeed())
 
 			// Check that two Kits are created with distinct layout
@@ -133,6 +135,7 @@ func TestNativeIntegrations(t *testing.T) {
 				name := "yaml-native-2"
 				Expect(KamelRunWithID(operatorID, ns, "files/yaml2.yaml", "--name", name,
 					"-t", "quarkus.package-type=native",
+					"-t", "builder.limit-memory=6.5Gi",
 				).Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit

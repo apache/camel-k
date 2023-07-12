@@ -24,10 +24,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/scylladb/go-set/strset"
-
-	infp "gopkg.in/inf.v0"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,6 +37,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
 type jvmTrait struct {
@@ -98,7 +95,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		return fmt.Errorf("unable to find integration kit for integration %s", e.Integration.Name)
 	}
 
-	classpath := strset.New()
+	classpath := sets.NewSet()
 
 	classpath.Add("./resources")
 	classpath.Add(filepath.ToSlash(camel.ConfigResourcesMountPath))
@@ -225,8 +222,8 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		if resource.NewScaledQuantity(300, 6).Cmp(memory) > 0 {
 			percentage = 25
 		}
-		memory.AsDec().Mul(memory.AsDec(), infp.NewDec(percentage, 2))
-		args = append(args, fmt.Sprintf("-Xmx%dM", memory.ScaledValue(resource.Mega)))
+		memScaled := memory.ScaledValue(resource.Mega) * percentage / 100
+		args = append(args, fmt.Sprintf("-Xmx%dM", memScaled))
 	}
 
 	// Add mounted resources to the class path

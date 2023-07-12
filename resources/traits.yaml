@@ -212,6 +212,30 @@ traits:
   - name: strategy
     type: string
     description: The strategy to use, either `pod` or `routine` (default routine)
+  - name: order-strategy
+    type: string
+    description: The build order strategy to use, either `dependencies`, `fifo` or
+      `sequential` (default sequential)
+  - name: request-cpu
+    type: string
+    description: When using `pod` strategy, the minimum amount of CPU required by
+      the pod builder.
+  - name: request-memory
+    type: string
+    description: When using `pod` strategy, the minimum amount of memory required
+      by the pod builder.
+  - name: limit-cpu
+    type: string
+    description: When using `pod` strategy, the maximum amount of CPU required by
+      the pod builder.
+  - name: limit-memory
+    type: string
+    description: When using `pod` strategy, the maximum amount of memory required
+      by the pod builder.
+  - name: tasks
+    type: '[]string'
+    description: A list of tasks to be executed (available only when using `pod` strategy)
+      with format <name>;<container-image>;<container-command>
 - name: camel
   platform: true
   profiles:

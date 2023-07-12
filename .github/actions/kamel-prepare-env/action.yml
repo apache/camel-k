@@ -71,7 +71,7 @@ runs:
         distribution: 'temurin'
 
     - name: Set up Go
-      uses: actions/setup-go@v2 # Version 2 adds GOBIN to PATH
+      uses: actions/setup-go@v4
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
         go-version: 1.18.x

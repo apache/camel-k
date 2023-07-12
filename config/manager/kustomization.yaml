@@ -19,7 +19,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- operator-pvc.yaml
 - operator-deployment.yaml
 - operator-service-account.yaml
 
@@ -29,8 +28,5 @@ patchesStrategicMerge:
 - patch-resource-requirements.yaml
 patches:
 - path: patch-log-level.yaml
-  target:
-    kind: Deployment
-- path: patch-install-default-pvc.yaml
   target:
     kind: Deployment

@@ -31,7 +31,6 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	testutil "github.com/apache/camel-k/v2/e2e/support/util"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 
 	. "github.com/onsi/gomega"
 )
@@ -61,7 +60,6 @@ func TestOperatorBasic(t *testing.T) {
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(OperatorPodPVCName(ns)).Should(Equal(defaults.DefaultPVC))
 	})
 }
 
