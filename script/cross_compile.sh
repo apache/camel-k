@@ -38,6 +38,8 @@ cross_compile () {
 	export GOARCH=$3
 	export CGO_ENABLED=0
 
+	echo "####### Compiling for $GOOS operating system on $GOARCH architecture..."
+
 	if [ "${GOOS}" == "windows" ]; then
 		extension=".exe"
 	fi
