@@ -52,23 +52,36 @@ kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
 ```
 Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:installation/advanced/maven.adoc[Configure maven].
 
-[[local-dependencies]]
+[[local-remote-dependencies]]
+=== Local and remote dependencies
+
 *Local dependencies* can be added using the `-d` flag and the `file://` prefix:
 ```
 kamel run -d file://path/to/integration-dep.jar Integration.java
 ```
 
-The content of `integration-dep.jar` will then be accessible in your integration for you to use.
-
-You can also specify data files to be mounted in the running container:
+You can also specify data files and directories which will be mounted in the running container relative to the working directory:
 
 ```
 kamel run -d file://path/to/data.csv?targetPath=/in/container/data.csv Integration.java
 ```
 
-Specifying a directory with also work recursively.
+If the data files needs to be present at build time, you can also set `classpath` option to `true`:
 
-Note that this feature relies on the Image Registry being setup xref:cli/cli.adoc[correctly].
+```
+kamel run -d file://path/to/data.csv?targetPath=/in/container/data.csv&classpath=true Integration.java
+```
+
+Similarly, *remote dependencies* can be added with the `http(s)://` prefix:
+
+```
+kamel run -d https://raw.githubusercontent.com/example/data.csv|targetPath=/tmp/foo&classpath=true Integration.java
+```
+
+For a full list of options checkout `kamel run --help`.
+
+
+*Important note*: this will upload the dependencies and data files to the Image Registry. The CLI  and Operator need to be setup xref:cli/cli.adoc[correctly], especially if authentication or custom certificates are required.
 
 [[dependencies-kind-jitpack]]
 === Jitpack dependencies
