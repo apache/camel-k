@@ -66,7 +66,8 @@ jobs:
         working-directory: ./${{ github.event.pull_request.head.repo.name }}
         if: env.rebaseAborted != 1
         run: |
-          go test -v ./... -covermode=count -coverprofile=coverage.out
+          make build-resources
+          go test ./... -covermode=count -coverprofile=coverage.out
           go tool cover -func=coverage.out -o=coverage.out
 
           new_coverage="$(grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs)"
@@ -78,7 +79,8 @@ jobs:
         if: env.rebaseAborted != 1
         run: |
           git checkout upstream/${{ github.event.pull_request.base.ref }}
-          go test -v ./... -covermode=count -coverprofile=coverage_old.out
+          make build-resources
+          go test ./... -covermode=count -coverprofile=coverage_old.out
           go tool cover -func=coverage_old.out -o=coverage_old.out
 
           old_coverage="$(grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage_old.out | xargs)"
