@@ -51,7 +51,7 @@ func TestOpenAPI(t *testing.T) {
 
 	Eventually(IntegrationPodPhase(ns, "petstore"), TestTimeoutLong).
 		Should(Equal(corev1.PodRunning))
-	Eventually(Deployment(ns, "petstore"), TestTimeoutLong).
+	Eventually(DeploymentWithIntegrationLabel(ns, "petstore"), TestTimeoutLong).
 		Should(Not(BeNil()))
 
 	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
