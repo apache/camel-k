@@ -11,7 +11,7 @@ In Camel K version 2 we are supporting a Task which we're willing to include in 
 === Install the Task
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/apache/camel-k/main/tekton/kamel-run/0.1/kamel-run.yaml
+kubectl apply -f https://raw.githubusercontent.com/apache/camel-k/main/cicd/tekton/kamel-run/0.1/kamel-run.yaml
 ```
 === Parameters
 
