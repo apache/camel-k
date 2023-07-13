@@ -747,8 +747,10 @@ func (o *runCmdOptions) parseAndConvertToTrait(cmd *cobra.Command,
 		if err != nil {
 			return err
 		}
-		if err := parseConfig(o.Context, cmd, c, config, integration); err != nil {
-			return err
+		if o.OutputFormat == "" {
+			if err := parseConfig(o.Context, cmd, c, config, integration); err != nil {
+				return err
+			}
 		}
 		o.Traits = append(o.Traits, convertToTrait(convert(config), traitParam))
 	}
