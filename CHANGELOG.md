@@ -6,9 +6,14 @@
 
 **Closed issues:**
 
+- `kamel run` dry run may panic when no cluster [\#4566](https://github.com/apache/camel-k/issues/4566)
+- `kamel run` in output mode still requires connecting to a k8s cluster [\#4556](https://github.com/apache/camel-k/issues/4556)
+- Coverage reports does not report correct coverage [\#4555](https://github.com/apache/camel-k/issues/4555)
+- Dry run tries to use empty namespace [\#4543](https://github.com/apache/camel-k/issues/4543)
 - Camel K API doc has dead links to k8s ObjectMeta [\#4540](https://github.com/apache/camel-k/issues/4540)
 - Add `description` to KameletBinding and Integration [\#4535](https://github.com/apache/camel-k/issues/4535)
 - TestHealthTrait flakiness [\#4532](https://github.com/apache/camel-k/issues/4532)
+- Nightly release Windows CLI failing [\#4531](https://github.com/apache/camel-k/issues/4531)
 - Nightly release CLI binary \(Linux\) not working [\#4526](https://github.com/apache/camel-k/issues/4526)
 - Builder image name missing the organization configuration [\#4525](https://github.com/apache/camel-k/issues/4525)
 - Unable to run the code by adding Jar files as depedency [\#4524](https://github.com/apache/camel-k/issues/4524)
