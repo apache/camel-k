@@ -392,11 +392,10 @@ simpler solution that just requires your own machine:
 
 [source]
 ----
-kamel local run Earthquake.java
+camel run Earthquake.java
 ----
 
-The `local` keyword will tell Camel K to use your own machine (you need maven 3.6+ and Java 11+ in order for this to work).
-The integration will start and begin printing out earthquake data every 10 seconds.
+The `camel run` command relies on https://camel.apache.org/manual/camel-jbang.html[Camel JBang] to locally run the integration. The integration will start and begin printing out earthquake data every 10 seconds.
 
 I show an excerpt of what is printed by the integration:
 
@@ -576,7 +575,7 @@ public class Earthquake extends RouteBuilder {
 This looks the same as before, but notice that the `period` and `lookAhead` parameters are set in the modeline, while the route uses the `{\{period}}`
 and `{\{lookAhead}}` placeholders instead of the actual values.
 
-As before, this integration can be tested with `kamel local run Earthquake.java` (the modeline parameters will be automatically added by the kamel CLI).
+As before, this integration can be tested with `camel run Earthquake.java` (the modeline parameters will be automatically added by the kamel CLI).
 
 === Step 4 (optional): translate into YAML DSL
 
@@ -600,7 +599,7 @@ If we managed to reduce our integration to contain only a Camel route, convertin
     - set-header:
         name: CamelCaffeineAction
         constant: GET
-    - tod: "caffeine-cache:cache-${routeId}?key=lastUpdate"
+    - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
     - choice:
         when:
         - simple: "${header.CamelCaffeineActionHasResult}"
@@ -616,7 +615,7 @@ If we managed to reduce our integration to contain only a Camel route, convertin
     - set-header:
         name: CamelHttpMethod
         constant: GET
-    - tod: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
+    - toD: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
     - unmarshal:
         json: {}
     - set-property:
@@ -632,7 +631,7 @@ If we managed to reduce our integration to contain only a Camel route, convertin
     - set-header:
         name: CamelCaffeineAction
         constant: PUT
-    - tod: "caffeine-cache:cache-${routeId}?key=lastUpdate"
+    - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
     - claim-check:
         operation: Pop
     - split:
@@ -654,7 +653,7 @@ This route can be run like the previous one using the `kamel` CLI:
 
 [source]
 ----
-kamel local run earthquake.yaml
+camel run earthquake.yaml
 ----
 
 === Step 5: wrap it into a Kamelet
@@ -681,7 +680,7 @@ spec:
       - set-header:
           name: CamelCaffeineAction
           constant: GET
-      - tod: "caffeine-cache:cache-${routeId}?key=lastUpdate"
+      - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
       - choice:
           when:
           - simple: "${header.CamelCaffeineActionHasResult}"
@@ -697,7 +696,7 @@ spec:
       - set-header:
           name: CamelHttpMethod
           constant: GET
-      - tod: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
+      - toD: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
       - unmarshal:
           json: {}
       - set-property:
@@ -713,7 +712,7 @@ spec:
       - set-header:
           name: CamelCaffeineAction
           constant: PUT
-      - tod: "caffeine-cache:cache-${routeId}?key=lastUpdate"
+      - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
       - claim-check:
           operation: Pop
       - split:
@@ -823,7 +822,7 @@ spec:
       - set-header:
           name: CamelCaffeineAction
           constant: GET
-      - tod: "caffeine-cache:cache-${routeId}?key=lastUpdate"
+      - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
       - choice:
           when:
           - simple: "${header.CamelCaffeineActionHasResult}"
@@ -839,7 +838,7 @@ spec:
       - set-header:
           name: CamelHttpMethod
           constant: GET
-      - tod: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
+      - toD: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
       - unmarshal:
           json: {}
       - set-property:
@@ -855,7 +854,7 @@ spec:
       - set-header:
           name: CamelCaffeineAction
           constant: PUT
-      - tod: "caffeine-cache:cache-${routeId}?key=lastUpdate"
+      - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
       - claim-check:
           operation: Pop
       - split:
