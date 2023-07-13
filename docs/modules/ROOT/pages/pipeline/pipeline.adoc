@@ -25,7 +25,7 @@ The custom tasks will be executed in the directory where the Camel K runtime Mav
 
 The goal is to let the user perform custom tasks which may result in a success or a failure. If the task executed results in a failure, then, the entire build is stopped and fails accordingly.
 
-WARNING: The custom tasks are only available only when using pod strategy.
+> Warning: The custom tasks are only available only when using pod strategy.
 
 [[build-pipeline-trait]]
 == Configuring via builder trait
