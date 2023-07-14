@@ -32,7 +32,6 @@
 * xref:running/running.adoc[Run an Integration]
 ** xref:running/dev-mode.adoc[Developer mode]
 ** xref:running/run-from-github.adoc[Run from GitHub]
-** xref:running/local.adoc[Run Locally]
 ** xref:running/promoting.adoc[Promote an Integration]
 ** xref:running/knative-sink.adoc[Knative Sinks]
 * xref:configuration/configuration.adoc[Configuration]
