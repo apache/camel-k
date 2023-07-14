@@ -43,7 +43,7 @@ The following is an example of Kamelet that we'll use to discuss the various par
 .telegram-text-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: telegram-text-source # <1>
@@ -289,7 +289,7 @@ For example, here's an example of binding:
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: telegram-text-source-to-channel
@@ -297,7 +297,7 @@ spec:
   source: # <1>
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: telegram-text-source
     properties:
       botToken: the-token-here
@@ -337,7 +337,7 @@ The following binding can be created to push data into the `my-topic` topic:
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: telegram-text-source-to-kafka
@@ -345,7 +345,7 @@ spec:
   source:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: telegram-text-source
     properties:
       botToken: the-token-here
@@ -366,7 +366,7 @@ For example, the following binding is allowed:
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: telegram-text-source-to-channel
@@ -374,7 +374,7 @@ spec:
   source:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: telegram-text-source
     properties:
       botToken: the-token-here
@@ -398,7 +398,7 @@ You can easily tune your `Pipe` with xref:traits:traits.adoc[traits] configurati
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: timer-2-log-annotation
@@ -658,7 +658,7 @@ In a Pipe, the KEDA trait can be enabled using annotations:
 .my-keda-binding.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: my-keda-binding

@@ -14,7 +14,7 @@ Or as the value of the `sink` field in a `Pipe` resource, e.g.:
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: timer-source-binding
@@ -22,7 +22,7 @@ spec:
   source:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: timer-source
     properties:
       message: Event
