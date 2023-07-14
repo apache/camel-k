@@ -388,6 +388,102 @@ This Pipe explicitly defines an URI where data is going to be pushed.
 NOTE: the `uri` option is also conventionally used in Knative to specify a non-kubernetes destination.
 To comply with the Knative specifications, in case an "http" or "https" URI is used, Camel will send https://cloudevents.io/[CloudEvents] to the destination.
 
+=== Binding with data types
+
+When referencing Kamelets in a binding users may choose from one of the supported input/output data types provided by the Kamelet.
+The supported data types are declared on the Kamelet itself and give additional information about used header names, content type and content schema.
+
+.my-sample-source-to-log.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: my-sample-source-to-log
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: my-sample-source
+    data-types: # <1>
+      out:
+        format: text-plain # <2>
+  sink:
+    uri: "log:info"
+----
+<1> Specify the output data type on the referenced Kamelet source.
+<2> Select `text-plain` as an output data type of the `my-sample-source` Kamelet.
+
+The very same Kamelet `my-sample-source` may also provide a CloudEvents specific data type as an output which fits perfect for binding to a Knative broker.
+
+.my-sample-source-to-knative.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: my-sample-source-to-knative
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: my-sample-source
+    data-types:
+      out:
+        format: application-cloud-events # <1>
+  sink:
+    ref:
+      kind: Broker
+      apiVersion: eventing.knative.dev/v1
+      name: default
+----
+<1> Select `application-cloud-events` as an output data type of the `my-sample-source` Kamelet.
+
+Information about the supported data types can be found on the Kamelet itself.
+
+.my-sample-source.kamelet.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: my-sample-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+# ...
+  dataTypes:
+    out: # <1>
+      default: text-plain # <2>
+      types: # <3>
+        text-plain:
+          description: Output type as plain text.
+          mediaType: text/plain
+        application-cloud-events:
+          description: CloudEvents specific representation of the Kamelet output.
+          mediaType: application/cloudevents+json
+          schema: # <4>
+            # ...
+          dependencies: # <5>
+            - "camel:cloudevents"
+
+  template:
+    from:
+      uri: ...
+      steps:
+        - to: "kamelet:sink"
+----
+<1> Declared output data types of this Kamelet source
+<2> The output data type used by default
+<3> List of supported output types
+<4> Optional Json schema describing the `application/cloudevents+json` data type
+<5> Optional list of additional dependencies that are required by the data type.
+
+This way users may choose the best Kamelet data type for a specific use case when referencing Kamelets in a binding.
+
 === Error Handling
 
 You can configure an error handler in order to specify what to do when some event ends up with failure. See xref:kamelets/kameletbindings-error-handler.adoc[Pipes Error Handler User Guide] for more detail.
