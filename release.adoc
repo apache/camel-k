@@ -22,9 +22,15 @@ As the process will do git operations, it is advisable that you clone the Camel 
 
 === Create release branch from main branch
 
-Use the `release-branch` action in order to create a new branch from the `main` at a given moment. The action is in charge to scrape the actual version (it will remove any snapshot suffix) and to create the release branch accordingly. It also takes care to setup the required nightly actions in the new branch created.
+We have a script that simplify this process. As we do not only want to create and push a new branch, we also need to provide the CI tasks required for all the supported releases.
 
-Once the action is over, you can checkout the newly created release branch and continue with the release process.
+```
+git clone https://github.com/squakez/camel-k.git /tmp/camel-k
+cd /tmp/camel-k
+./script/release-branch.sh
+```
+
+NOTE: you can run the script with -d option to dry run and evaluate the changes before pushing them to the repo.
 
 [[releasing-camel-k-crds]]
 === Release Camel K CRD dependency
