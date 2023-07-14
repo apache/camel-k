@@ -17,6 +17,9 @@
 
 name: Nightly automatic updates
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 on:
   schedule:
     - cron:  '30 23 * * *'
