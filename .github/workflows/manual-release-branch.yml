@@ -21,6 +21,8 @@ on:
   workflow_dispatch:
     inputs:
 
+permissions: write-all
+
 jobs:
   release-branch:
     runs-on: ubuntu-latest
