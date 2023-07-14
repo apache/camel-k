@@ -6,8 +6,10 @@
 
 **Closed issues:**
 
+- `kamel run` dry run may panic when no cluster [\#4566](https://github.com/apache/camel-k/issues/4566)
 - `kamel run` in output mode still requires connecting to a k8s cluster [\#4556](https://github.com/apache/camel-k/issues/4556)
 - Coverage reports does not report correct coverage [\#4555](https://github.com/apache/camel-k/issues/4555)
+- Dry run tries to use empty namespace [\#4543](https://github.com/apache/camel-k/issues/4543)
 - Camel K API doc has dead links to k8s ObjectMeta [\#4540](https://github.com/apache/camel-k/issues/4540)
 - Add `description` to KameletBinding and Integration [\#4535](https://github.com/apache/camel-k/issues/4535)
 - TestHealthTrait flakiness [\#4532](https://github.com/apache/camel-k/issues/4532)
@@ -48,6 +50,17 @@
 
 **Merged pull requests:**
 
+- chore\(docs\): Add Kamelet data types documentation [\#4579](https://github.com/apache/camel-k/pull/4579) ([christophd](https://github.com/christophd))
+- fix\(ci\): revert branches [\#4578](https://github.com/apache/camel-k/pull/4578) ([squakez](https://github.com/squakez))
+- fix\(ci\): revert release action [\#4577](https://github.com/apache/camel-k/pull/4577) ([squakez](https://github.com/squakez))
+- feat\(ci\): release branch automation [\#4576](https://github.com/apache/camel-k/pull/4576) ([squakez](https://github.com/squakez))
+- chore\(doc\): runtime and quarkus [\#4575](https://github.com/apache/camel-k/pull/4575) ([squakez](https://github.com/squakez))
+- chore\(ci\): tidier wf organization [\#4574](https://github.com/apache/camel-k/pull/4574) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.28 to 0.6.29 [\#4573](https://github.com/apache/camel-k/pull/4573) ([dependabot[bot]](https://github.com/apps/dependabot))
+- docs: Remove references to kamel local [\#4572](https://github.com/apache/camel-k/pull/4572) ([claudio4j](https://github.com/claudio4j))
+- doc\(ci\): Fix pipelines docs [\#4570](https://github.com/apache/camel-k/pull/4570) ([gansheer](https://github.com/gansheer))
+- fix\(cli\): skip k8s lookup when dry-run [\#4567](https://github.com/apache/camel-k/pull/4567) ([squakez](https://github.com/squakez))
+- Find deployment via integration label [\#4565](https://github.com/apache/camel-k/pull/4565) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): spectrum 6.0.28 [\#4564](https://github.com/apache/camel-k/pull/4564) ([squakez](https://github.com/squakez))
 - fix\(ci\): revert coverage report to comment  [\#4562](https://github.com/apache/camel-k/pull/4562) ([squakez](https://github.com/squakez))
 - \[TEST\] Fix BuilderTrait test on global operator installation [\#4561](https://github.com/apache/camel-k/pull/4561) ([bouskaJ](https://github.com/bouskaJ))
