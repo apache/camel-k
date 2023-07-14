@@ -83,6 +83,7 @@ runs:
         filename: coverage.out
         target: badge.out
     - name: Convert Badge to adoc
+      shell: bash
       run: |
         replacement=$(grep -o 'https://[^)]*' badge.out)
         target="(?:https:\/\/img\.shields\.io\/badge\/Coverage).*?(?=\.svg)"
