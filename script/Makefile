@@ -159,7 +159,6 @@ bump-replace:
 	@sed -i 's/^KAMELET_CATALOG_REPO_TAG :=.*$//KAMELET_CATALOG_REPO_TAG := main/' ./script/Makefile
 
 bump: bump-replace codegen bundle
-	./script/bump_actions.sh $(LAST_RELEASED_VERSION)
 
 # Generates the version file
 codegen:
