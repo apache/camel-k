@@ -47,13 +47,11 @@ main() {
   then
     echo "❗ dry-run mode on, won't push any change!"
   else
-    git config --local user.email "$CI_EMAIL"
-    git config --local user.name "$CI_USER"
-    git add -A && git commit -m "chore: starting release branch for $new_release_branch" || true
-
-    git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:$new_release_branch
-    git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:main
-
+    git add --all
+    git commit -m "chore: starting release branch for $new_release_branch" || true
+    git push --set-upstream origin $new_release_branch
+    # We must push on main as well, as it contains the changes for CI workflows
+    git push --set-upstream origin main
     echo "🎉 Changes pushed correctly!"
   fi
 }
