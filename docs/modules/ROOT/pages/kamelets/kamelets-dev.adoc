@@ -389,7 +389,7 @@ spec:
 <6> Optional list of additional dependencies that are required by the data type.
 
 The sample Kamelet above declares two supported output data types `application-json` and `text-plain`.
-Each declared data type is backed by a specific Apache Camel https://camel.apache.org/manual/transformer.html[transformer] implementation that is capable of producing the specific output.
+Each declared data type is backed by a specific Apache Camel transformer implementation that is capable of producing the specific output.
 The respective transformer implementation may be provided by the Kamelet as a utility extension or by the underlying Apache Camel component.
 
 As a result the user may now choose the output data type when referencing the Kamelet in a binding.
