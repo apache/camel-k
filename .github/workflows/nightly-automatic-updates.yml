@@ -23,54 +23,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  main:
+  auto-updates:
+    strategy:
+      fail-fast: false
+      matrix:
+        ref-branch: [main, release-1.12.x, release-1.10.x]
+
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-latest
-    name: Automatic updates on main branch
+    name: Automatic updates on ${{ matrix.ref-branch }} branch
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v3
       with:
-        ref: main
+        ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
     - name: Automatic updates on main
       uses: ./.github/actions/automatic-updates
       with:
-        branch-ref: "main"
+        branch-ref: ${{ matrix.ref-branch }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
         goVersion: "1.18.x"
-
-  v1_12_x:
-    if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-latest
-    steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v2
-      with:
-        ref: release-1.12.x
-        persist-credentials: false
-        submodules: recursive
-    - name: Automatic updates on release-1.12.x branch
-      uses: ./.github/actions/automatic-updates
-      with:
-        branch-ref: "release-1.12.x"
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
-        goVersion: "1.18.x"
-
-  v1_10_x:
-    if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-latest
-    steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v3
-      with:
-        ref: release-1.10.x
-        persist-credentials: false
-        submodules: recursive
-    - name: Automatic updates on release-1.10.x branch
-      uses: ./.github/actions/automatic-updates
-      with:
-        branch-ref: "release-1.10.x"
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
-        goVersion: "1.17.x"
