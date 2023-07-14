@@ -18,7 +18,13 @@ This project staging is hosted on https://hub.docker.com/orgs/camelk/repositorie
 [[releasing-camel-k]]
 == Release Camel K
 
-As the process will do `git` operations, it is advisable that you clone the Camel K repository to some new location (ie /tmp/) in order to avoid to conflict with any other development in progress. Consider if you're about to release from `main` branch (generally a new major or minor version) or from a `release` branch (when you're about to release a patch version). In the latter case, you need to checkout to the proper release branch, ie `git checkout release-1.12.x`.
+As the process will do git operations, it is advisable that you clone the Camel K repository to some new location (ie /tmp/) in order to avoid to conflict with any other development in progress. If you’re starting a major or a minor release version, you need to create the respective `release-a.b.x` branch. It’s highly advisable not to release directly from `main` branch.
+
+=== Create release branch from main branch
+
+Use the `release-branch` action in order to create a new branch from the `main` at a given moment. The action is in charge to scrape the actual version (it will remove any snapshot suffix) and to create the release branch accordingly. It also takes care to setup the required nightly actions in the new branch created.
+
+Once the action is over, you can checkout the newly created release branch and continue with the release process.
 
 [[releasing-camel-k-crds]]
 === Release Camel K CRD dependency
