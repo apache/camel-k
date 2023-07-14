@@ -42,7 +42,7 @@ jobs:
         ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
-    - name: Automatic updates on main
+    - name: "Run upgrade action"
       uses: ./.github/actions/automatic-updates
       with:
         branch-ref: ${{ matrix.ref-branch }}

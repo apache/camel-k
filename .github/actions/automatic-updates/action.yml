@@ -77,6 +77,12 @@ runs:
         git add camel-k-sbom/camel-k-sbom.json && git commit -m 'chore: nightly SBOM update' && echo "sbom=1" >> $GITHUB_ENV || echo "No changes to SBOM"
 
     # Coverage badge
+    - name: Run Test
+      shell: bash
+      run: |
+        go test -v ./... -covermode=count -coverprofile=coverage.out
+        go tool cover -func=coverage.out -o=coverage.out
+        touch badge.out
     - name: Go Coverage Badge
       uses: ./.github/actions/coverage-badge
       with:
