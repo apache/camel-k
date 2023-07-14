@@ -49,9 +49,9 @@ main() {
   else
     git add --all
     git commit -m "chore: starting release branch for $new_release_branch" || true
-    git push --set-upstream origin $new_release_branch
+    git push -u origin $new_release_branch
     # We must push on main as well, as it contains the changes for CI workflows
-    git push --set-upstream origin main
+    git push origin main
     echo "🎉 Changes pushed correctly!"
   fi
 }
