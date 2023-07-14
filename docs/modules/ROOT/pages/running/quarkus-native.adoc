@@ -1,0 +1,7 @@
+= Run Quarkus native applications
+
+The default Camel runtime used by Camel K is Camel Quarkus (via Camel K Runtime dependency). This is a great choice for cloud development and by default we use the JVM mode which provides already enough optimization which makes Camel applications, first class Cloud Native applications.
+
+Quarkus (and Camel Quarkus) offers also the possibility to perform a build ahead of time (AOT) and have even further optimization, making your Camel application a native executable with very low footprint and immediate startup. This is known as Native mode and we can configure such behavior using the xref:traits:quarkus.adoc[Quarkus trait].
+
+See the examples provided in xref:traits:quarkus.adoc#_automatic_rollout_deployment_to_native_integration[Quarkus trait] documentation page to learn how to use the feature.

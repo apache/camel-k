@@ -31,6 +31,8 @@
 ** xref:cli/modeline.adoc[Modeline]
 * xref:running/running.adoc[Run an Integration]
 ** xref:running/dev-mode.adoc[Developer mode]
+** xref:running/runtime-version.adoc[Camel version]
+** xref:running/quarkus-native.adoc[Quarkus Native]
 ** xref:running/run-from-github.adoc[Run from GitHub]
 ** xref:running/promoting.adoc[Promote an Integration]
 ** xref:running/knative-sink.adoc[Knative Sinks]

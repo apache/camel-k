@@ -5,9 +5,7 @@ The Quarkus trait configures the Quarkus runtime.
 
 It's enabled by default.
 
-NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least
-4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build
-Pod (depending on the build strategy configured for the platform), must have enough memory available.
+NOTE: Compiling to a native build, i.e. when using `package-type=native` will always trigger a builder `Pod` strategy, performing the build in a Pod. There is a set of sensible resource configuration which can be adjusted using xref:traits:builder.adoc[Builder trait].
 
 
 This trait is available in the following profiles: **Kubernetes, Knative, OpenShift**.
