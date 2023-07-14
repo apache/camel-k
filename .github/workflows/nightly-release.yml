@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ref-branch: [main, release-2.0.x, release-2.0.x]
+        ref-branch: [main, release-1.12.x, release-2.0.x]
 
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-latest
