@@ -60,7 +60,7 @@ Camel K provide a very nice **dev mode** feature that will allow you to apply an
 [[running-integration-locally]]
 == Running an Integration locally
 
-During development, for most of the cases, if you are not using Camel K traits or specific camel quarkus configuration, you can use https://camel.apache.org/manual/camel-jbang.html[Camel JBang] to run the integration.
+During development, for most of the cases, if you are not using Camel K traits or specific camel quarkus configuration, you can use Camel JBang to run the integration.
 
 [[no-cli-integration]]
 == Running an Integration without CLI
