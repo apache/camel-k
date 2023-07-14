@@ -50,7 +50,7 @@ This produces a YAML file like the following one:
 .twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: twitter-search-source
@@ -96,7 +96,7 @@ The route provided in the initial scaffold (timer-to-log) is not what we need, s
 .twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 # ...
 spec:
@@ -129,7 +129,7 @@ We specify it in the `spec` -> `definition` part:
 .twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: twitter-search-source
@@ -195,7 +195,7 @@ the generated objects and other metadata (like the icon and the provider and you
 .twitter-search-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: twitter-search-source
@@ -293,7 +293,7 @@ Then you can create a binding like the following one to try it out:
 .twitter-search-source-binding.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: twitter-search-source-binding
@@ -301,7 +301,7 @@ spec:
   source:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: twitter-search-source
     properties:
       keywords: "Apache Camel"
@@ -664,7 +664,7 @@ As starting point, we may just wrap the previous YAML route into the Kamelet env
 .earthquake-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: earthquake-source
@@ -736,7 +736,7 @@ to the Kamelet itself. The way to express all this information is via a https://
 .earthquake-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: earthquake-source
@@ -778,7 +778,7 @@ The final result should look like:
 .earthquake-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: earthquake-source
@@ -891,7 +891,7 @@ To check if it works, you can create a simple binding:
 .earthquake-source-binding.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: earthquake-source-binding
@@ -899,7 +899,7 @@ spec:
   source:
     ref: # <1>
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: earthquake-source
     properties:
       period: 10000 # <2>
@@ -1098,7 +1098,7 @@ Having defined the main route template, we need to document the Kamelet and the 
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: telegram-sink
@@ -1215,7 +1215,7 @@ So, for example, to send a text message to a chat, we may create a binding like 
 .telegram-text-binding.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: telegram-text-binding
@@ -1223,7 +1223,7 @@ spec:
   source:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: timer-source
     properties:
       period: 10000
@@ -1231,7 +1231,7 @@ spec:
   sink:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: telegram-sink
     properties:
       authorizationToken: "put-your-own"
@@ -1259,7 +1259,7 @@ To check if we can also receive pictures using the above Kamelet, we can create 
 .telegram-text-binding.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: telegram-image-binding
@@ -1267,7 +1267,7 @@ spec:
   source:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: http-source
     properties:
       url: "https://github.com/apache/camel/raw/7204aa132662ab6cb8e3c5afea8b9b0859eff0e8/docs/img/logo.png"
@@ -1276,7 +1276,7 @@ spec:
   sink:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: telegram-sink
     properties:
       authorizationToken: "put-your-own"
@@ -1354,7 +1354,7 @@ send data to it via HTTP. Let's create a parameterized binding like the followin
 .webhook-to-telegram.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: webhook-to-telegram
@@ -1362,14 +1362,14 @@ spec:
   source:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: webhook-source
     properties:
       subpath: message
   sink:
     ref:
       kind: Kamelet
-      apiVersion: camel.apache.org/v1alpha1
+      apiVersion: camel.apache.org/v1
       name: telegram-sink
     properties:
       authorizationToken: "${telegram.authorization.token}"
@@ -1461,7 +1461,7 @@ For example:
 .aws-sqs-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: aws-sqs-source
@@ -1493,7 +1493,7 @@ The `queueURL` is a *metadata* parameter for the autoscaler. In order to configu
 .aws-sqs-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: aws-sqs-source
@@ -1533,7 +1533,7 @@ For example:
 .my-source.kamelet.yaml
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
   name: my-source

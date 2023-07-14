@@ -8,7 +8,7 @@ Pipes offer a mechanism to specify an error policy to adopt in case an event pro
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: my-kamelet-binding
@@ -35,7 +35,7 @@ There may be certain cases where you want to just ignore any failure happening o
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: my-kamelet-binding
@@ -56,7 +56,7 @@ Apache Camel offers a default behavior for handling any failure: log to standard
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: my-kamelet-binding
@@ -80,7 +80,7 @@ The `Sink` is probably the most interesting error handler type as it allows you 
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   name: my-kamelet-binding
@@ -94,7 +94,7 @@ spec:
       endpoint:
         ref: # <1>
           kind: Kamelet
-          apiVersion: camel.apache.org/v1alpha1
+          apiVersion: camel.apache.org/v1
           name: error-handler
         properties:
           message: "ERROR!" # <2>
