@@ -331,6 +331,144 @@ If everything goes right, you should get some tweets in the logs after the integ
 
 Refer to the xref:kamelets/kamelets-user.adoc[Kamelets User Guide] for more information on how to use it in different contexts (like Knative, Kafka, etc.).
 
+== Kamelet data types
+
+A Kamelet usually encapsulates a specific functionality and serves a very opinionated use case with well-defined input parameters and outcome.
+
+In order to enhance the Kamelet interoperability with other components the Kamelet may specify one to many data types for input, output and error scenarios.
+The declaration of supported Kamelet data types helps users to incorporate the Kamelet into their specific applications.
+
+When referencing a Kamelet users may choose from a list of supported input/output data types in order to gain best fit for the individual use case.
+
+Following from that each Kamelet may declare all supported input/output data types each of them providing additional information like header names, content type, content schema and so on.
+
+.my-sample-source.kamelet.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: my-sample-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+# ...
+  dataTypes:
+    out: # <1>
+      default: application-json # <2>
+      headers:
+        MySpecialCamelHeaderName: # <3>
+          type: string
+          description: Some specific header
+      types: # <4>
+        application-json:
+          description: Output type as Json object
+          mediaType: application/json
+          schema: # <5>
+            type: object
+            description: The Json object representing the my-sample source output
+            properties:
+              # ...
+          dependencies: # <6>
+            - "camel:jackson"
+        text-plain:
+          description: Output type as plain text
+          mediaType: text/plain
+  template:
+    from:
+      uri: ...
+      steps:
+        - to: "kamelet:sink"
+----
+<1> Declared output data types of this Kamelet source
+<2> The output data type used by default
+<3> Declaration of output headers with header name, type and description information
+<4> List of supported output types
+<5> Optional Json schema describing the `application-json` data type
+<6> Optional list of additional dependencies that are required by the data type.
+
+The sample Kamelet above declares two supported output data types `application-json` and `text-plain`.
+Each declared data type is backed by a specific Apache Camel https://camel.apache.org/manual/transformer.html[transformer] implementation that is capable of producing the specific output.
+The respective transformer implementation may be provided by the Kamelet as a utility extension or by the underlying Apache Camel component.
+
+As a result the user may now choose the output data type when referencing the Kamelet in a binding.
+
+.my-sample-source-binding.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: my-sample-source-binding
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: my-sample-source
+    data-types: # <1>
+      out:
+        format: text-plain # <2>
+  sink:
+    uri: "log:info"
+----
+<1> Chose the output data type on the Kamelet source reference in a Pipe.
+<2> Select `text-plain` as an output data type of the `my-sample-source` Kamelet.
+
+The very same concept of data types can also be used on Kamelet sinks and input data types.
+As soon as the user chooses a specific input data type for a Kamelet the Pipe processing will try to resolve a matching transformer implementation and apply its logic.
+
+You may also use a `data-type-action` Kamelet in your Pipe binding in order to apply a specific data type transformation at any step.
+
+.my-sample-source-binding.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: my-sample-source-binding
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: my-sample-source
+    data-types:
+      out:
+        format: application-json # <1>
+  steps:
+    - ref:
+        kind: Kamelet
+        apiVersion: camel.apache.org/v1alpha1
+        name: json-deserialize-action # <2>
+    - ref:
+        kind: Kamelet
+        apiVersion: camel.apache.org/v1alpha1
+        name: resolve-pojo-schema-action # <3>
+      properties:
+        mimeType: "avro/binary"
+        schema: >
+          { "name": "User", "type": "record", "namespace": "demo.kamelets", "fields": [{ "name": "id", "type": "string" }, { "name": "firstname", "type": "string" }, { "name": "lastname", "type": "string" }, { "name": "age", "type": "int" }] }
+    - ref:
+        kind: Kamelet
+        apiVersion: camel.apache.org/v1alpha1
+        name: data-type-action # <4>
+      properties:
+        scheme: "camel"
+        format: "avro-binary"
+  sink:
+    uri: "log:info"
+----
+<1> Chose the output data `application-json` type on the Kamelet source.
+<2> Deserialize the Json object with `json-deserialize-action`.
+<3> Declare a Avro schema
+<4> Use the `data-type-action` Kamelet to transform the Json object into Avro using the formerly declared schema
+
+The Pipe in the sample above uses a combination of Kamelet output data type, Json deserialization and Avro binary data type to transform the Kamelet source output.
+
+All referenced data types are backed by a specific transformer implementation either provided by the Kamelet itself or by pure Apache Camel functionality.
+
 == Creating a complex Kamelet
 
 We're now going to create a Kamelet with a high degree of complexity, to show how the Kamelet model can be used also to go over the
@@ -1290,7 +1428,7 @@ This will create a new integration that forwards the Apache Camel logo to your p
 The most obvious way to test a Kamelet is via an e2e tests that verifies if the Kamelet respects its specification.
 
 https://github.com/citrusframework/yaks[YAKS] is the framework of choice for such e2e tests. You can find more information and
-documentation starting from the YAKS github repository. Here we'll provide examples for the Kamelets above.
+documentation starting from the https://github.com/citrusframework/yaks[YAKS GitHub repository]. Here we'll provide examples for the Kamelets above.
 
 === Testing a source
 
@@ -1335,14 +1473,13 @@ We're also going to use the CLI:
 [source]
 ----
 # We assume the Kamelet is already installed in the namespace
-yaks test earthquake-source.feature
+yaks run earthquake-source.feature
 ----
 
 When testing a source, the backbone of the Gherking file that you'll write is similar to the one above.
 Depending on the source under test, you may need to stimulate the production of some data using additional Gherking steps
 before verifying that the data has been produced
 (in our case, it's better not to try to stimulate an earthquake :D).
-
 
 === Testing a sink
 
@@ -1433,7 +1570,7 @@ This can be run with the following command:
 [source]
 ----
 # We assume that both the webhook-source and the telegram-sink kamelet are already present in the namespace
-yaks test telegram-sink.feature --resource webhook-to-telegram.yaml --resource telegram-credentials.properties
+yaks run telegram-sink.feature --resource webhook-to-telegram.yaml --resource telegram-credentials.properties
 ----
 
 If everything goes well, you should receive a message during the test execution.
