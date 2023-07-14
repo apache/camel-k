@@ -25,7 +25,7 @@ As the process will do git operations, it is advisable that you clone the Camel 
 We have a script that simplify this process. As we do not only want to create and push a new branch, we also need to provide the CI tasks required for all the supported releases.
 
 ```
-git clone https://github.com/squakez/camel-k.git /tmp/camel-k
+git clone https://github.com/apache/camel-k.git /tmp/camel-k
 cd /tmp/camel-k
 ./script/release-branch.sh
 ```
