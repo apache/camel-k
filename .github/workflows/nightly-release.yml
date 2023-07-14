@@ -50,7 +50,7 @@ jobs:
       uses: ./.github/actions/release-nightly
       with:
         goVersion: "1.18.x"
-        javaVersion: "11"
+        javaVersion: "17"
         secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
         secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
         secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
