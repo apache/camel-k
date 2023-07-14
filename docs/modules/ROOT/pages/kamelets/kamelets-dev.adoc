@@ -395,7 +395,7 @@ simpler solution that just requires your own machine:
 camel run Earthquake.java
 ----
 
-The `camel run` command relies on https://camel.apache.org/manual/camel-jbang.html[Camel JBang] to locally run the integration. The integration will start and begin printing out earthquake data every 10 seconds.
+The `camel run` command relies on Camel JBang to locally run the integration. The integration will start and begin printing out earthquake data every 10 seconds.
 
 I show an excerpt of what is printed by the integration:
 
