@@ -61,7 +61,7 @@ func TestMetrics(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := "java"
 		operatorID := "camel-k-metrics"
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(KamelInstallWithID(operatorID, ns, "--log-level", "debug").Execute()).To(Succeed())
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
 			"-t", "prometheus.pod-monitor=false",
@@ -104,7 +104,7 @@ func TestMetrics(t *testing.T) {
 			err = NewLogWalker(&logs).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
-					"Message":     Equal("state transition"),
+					"Message":     Equal("State transition"),
 					"PhaseFrom":   Equal(string(v1.BuildPhaseScheduling)),
 					"PhaseTo":     Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
@@ -115,7 +115,7 @@ func TestMetrics(t *testing.T) {
 				}), LogEntryNoop).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
-					"Message":     Equal("state transition"),
+					"Message":     Equal("State transition"),
 					"PhaseFrom":   Equal(string(v1.BuildPhaseRunning)),
 					"PhaseTo":     Equal(string(v1.BuildPhaseSucceeded)),
 					"RequestName": Equal(build.Name),
@@ -422,7 +422,7 @@ func TestMetrics(t *testing.T) {
 			err = NewLogWalker(&logs).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.build"),
-					"Message":     Equal("state transition"),
+					"Message":     Equal("State transition"),
 					"PhaseFrom":   Equal(string(v1.BuildPhaseScheduling)),
 					"PhaseTo":     Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
