@@ -63,13 +63,7 @@ A URL will be generated for the repository, like: https://repository.apache.org/
 [[release-camel-k-operator]]
 === Release Camel K Operator and CLI
 
-Releasing the Camel K main artifacts require some manual steps.
-
-First thing is to checkout main branch and sync with upstream.
-
-Next, the version of the runtime libraries to use need to be aligned in the Makefile.
-
-The following tasks need to be done:
+Releasing the Camel K main artifacts require some manual steps. The following tasks need to be done:
 
 - Align `KAMELET_CATALOG_REPO_TAG` in Makefile to latest released tag of the camel-kamelets repository
 - Align `RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
