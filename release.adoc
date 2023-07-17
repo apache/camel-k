@@ -94,27 +94,22 @@ Now the release on staging can be executed.
 ```
 make release-staging
 ```
-
-Binary files will be generated and put in the project root directory, including examples.
-
-Now run:
-
-```
-cd release-utils/scripts/
-./upload-sources.sh <released_version> <released_version>
-```
-
-This will upload the sources, client and examples to the dist/dev repository in ASF.
-
-A docker image `camelk/camel-k:<version>` will be pushed to the staging organization (`camelk`, not `apache`).
+A docker image `camelk/camel-k:<version>` will be pushed to the staging organization (`camelk`, not `apache`). Binary files (CLIs) will be generated as well and put in the project root directory.
 
 [[testing]]
-== Do some testing
+=== Do some testing
 
 A combined release can be immediately tested with the following install command:
 
 ```
 kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-$APACHE_NEXUS_RUNTIME_REPO_ID
+```
+
+If tests are okey, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
+
+```
+cd release-utils/scripts/
+./upload-sources.sh <released_version> <released_version>
 ```
 
 [[release-notes]]
