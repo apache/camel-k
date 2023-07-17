@@ -46,6 +46,10 @@ func TestPlatformlessRun(t *testing.T) {
 		t.Skip("This test is for OpenShift only and cannot work when a custom platform configuration is needed")
 		return
 	}
+	if os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true" {
+		t.Skip("This test can't work with the global operator installation since the integration platform can be inherited.")
+		return
+	}
 
 	// Delete the platform from the namespace before running the integration
 	Eventually(DeletePlatform(ns)).Should(BeTrue())

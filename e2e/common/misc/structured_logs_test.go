@@ -57,7 +57,7 @@ func TestStructuredLogs(t *testing.T) {
 
 	it := Integration(ns, name)()
 	Expect(it).NotTo(BeNil())
-	build := Build(ns, it.Status.IntegrationKit.Name)()
+	build := Build(IntegrationKitNamespace(ns, name)(), IntegrationKit(ns, name)())()
 	Expect(build).NotTo(BeNil())
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

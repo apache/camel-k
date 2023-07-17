@@ -1013,6 +1013,19 @@ func IntegrationKit(ns string, name string) func() string {
 	}
 }
 
+func IntegrationKitNamespace(integrationNamespace string, name string) func() string {
+	return func() string {
+		it := Integration(integrationNamespace, name)()
+		if it == nil {
+			return ""
+		}
+		if it.Status.IntegrationKit == nil {
+			return ""
+		}
+		return it.Status.IntegrationKit.Namespace
+	}
+}
+
 func Kit(ns, name string) func() *v1.IntegrationKit {
 	return func() *v1.IntegrationKit {
 		kit := v1.NewIntegrationKit(ns, name)
