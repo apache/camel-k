@@ -85,8 +85,8 @@ Commit and push the changes done so far.
 ```
 git add *
 git commit -m "preparing for next release"
-# assuming write permissions
-git push upstream <branch_name>
+# assuming you're on release branch and have write permissions
+git push
 ```
 
 Now the release on staging can be executed.
