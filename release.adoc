@@ -99,13 +99,13 @@ A docker image `camelk/camel-k:<version>` will be pushed to the staging organiza
 [[testing]]
 === Do some testing
 
-A combined release can be immediately tested with the following install command:
+A release can be immediately tested with the following install command:
 
 ```
-kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-$APACHE_NEXUS_RUNTIME_REPO_ID
+kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION
 ```
 
-If tests are okey, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
+Make some test and if all is in order, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
 
 ```
 cd release-utils/scripts/
