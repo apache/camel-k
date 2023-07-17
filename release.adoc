@@ -137,13 +137,6 @@ export GITHUB_TOKEN=token
 
 A `release-notes.md` file is generated and can be attached to the release github issue for reference.
 
-[[documentation]]
-== Documentation updates
-
-The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30)
-
-After the vote has passed, update the camel-website `antora-playbook.yml` `content.sources` section for camel-k and camel-k-runtime to use the newly released versions, replacing the previous released version.
-
 [[voting]]
 == Voting
 
@@ -188,6 +181,13 @@ The milestone field in the release doc is the Github id for the milestone (e.g. 
 
 [[post-release]]
 == Post Release
+
+[[documentation]]
+== Documentation updates
+
+The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30)
+
+After the vote has passed, update the camel-website `antora-playbook.yml` `content.sources` section for camel-k and camel-k-runtime to use the newly released versions, replacing the previous released version.
 
 === Operator Hub
 
