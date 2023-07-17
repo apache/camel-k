@@ -70,4 +70,4 @@ runs:
       shell: bash
       run: |
         make images-all
-        make images-push-staging
+        make STAGING_IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k images-push-staging
