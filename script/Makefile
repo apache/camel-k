@@ -506,7 +506,11 @@ cross-compile:
 
 release: clean codegen set-module-version set-version build-resources check-licenses images images-push cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses images images-push-staging cross-compile fabric8-crds git-tag
+release-staging: clean codegen set-module-version set-version build-resources check-licenses images-all images-push-staging cross-compile fabric8-crds git-tag
+
+# Build all supported images
+images-all: images
+	make IMAGE_ARCH=arm64 images
 
 # Build images
 images-nightly: clean codegen set-module-version set-version build-resources images
