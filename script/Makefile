@@ -454,6 +454,9 @@ endif
 image-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
+images-all: images
+	make IMAGE_ARCH=arm64 images
+
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64
