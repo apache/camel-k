@@ -1,3 +1,4 @@
+
 = Releasing Apache Camel K
 
 This procedure describes all the steps required to release a new version of Apache Camel K.
@@ -99,10 +100,19 @@ A docker image `camelk/camel-k:<version>` will be pushed to the staging organiza
 [[testing]]
 === Do some testing
 
-A release can be immediately tested with the following install command:
+Make sure to test the CLI you're about to publish. Expand and test the platform and archicture according to your local environment specifications:
 
 ```
-kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION
+$ tar -xvf camel-k-client-2.0.0-linux-amd64.tar.gz
+...
+$ ./kamel version
+Camel K Client 2.0.0
+```
+
+If the version retrieved is the one expected you can run an installation procedure
+
+```
+$ ./kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION
 ```
 
 Make some test and if all is in order, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
