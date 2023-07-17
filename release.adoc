@@ -122,6 +122,8 @@ cd release-utils/scripts/
 ./upload-source.sh <released_version> <released_version>
 ```
 
+Check that all resources have been correctly uploaded to https://dist.apache.org/repos/dist/dev/camel/camel-k/<released_version>/ directory.
+
 [[release-notes]]
 == Release notes
 
