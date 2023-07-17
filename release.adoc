@@ -119,7 +119,7 @@ Make some test and if all is in order, you can upload the sources and CLIs to th
 
 ```
 cd release-utils/scripts/
-./upload-sources.sh <released_version> <released_version>
+./upload-source.sh <released_version> <released_version>
 ```
 
 [[release-notes]]
