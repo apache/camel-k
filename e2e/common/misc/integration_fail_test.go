@@ -63,10 +63,11 @@ func TestBadRouteIntegration(t *testing.T) {
 		// Integration in error
 		Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
 		kitName := IntegrationKit(ns, name)()
+		integrationKitNamespace := IntegrationKitNamespace(ns, name)()
 		// Kit in error
-		Eventually(KitPhase(ns, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseError))
+		Eventually(KitPhase(integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseError))
 		//Build in error with 5 attempts
-		build := Build(ns, kitName)()
+		build := Build(integrationKitNamespace, kitName)()
 		Eventually(build.Status.Phase, TestTimeoutShort).Should(Equal(v1.BuildPhaseError))
 		Eventually(build.Status.Failure.Recovery.Attempt, TestTimeoutShort).Should(Equal(5))
 	})
