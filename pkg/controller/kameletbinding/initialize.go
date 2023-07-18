@@ -52,6 +52,8 @@ func (action *initializeAction) CanHandle(binding *v1alpha1.KameletBinding) bool
 }
 
 func (action *initializeAction) Handle(ctx context.Context, binding *v1alpha1.KameletBinding) (*v1alpha1.KameletBinding, error) {
+	action.L.Info("Initializing KameletBinding")
+
 	it, err := CreateIntegrationFor(ctx, action.client, binding)
 	if err != nil {
 		binding.Status.Phase = v1alpha1.KameletBindingPhaseError

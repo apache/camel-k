@@ -193,7 +193,7 @@ type reconcileIntegrationKit struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling IntegrationKit")
+	rlog.Debug("Reconciling IntegrationKit")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -291,7 +291,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 				if targetPhase != instance.Status.Phase {
 					targetLog.Info(
-						"state transition",
+						"State transition",
 						"phase-from", instance.Status.Phase,
 						"phase-to", targetPhase,
 					)

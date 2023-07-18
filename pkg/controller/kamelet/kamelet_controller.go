@@ -113,7 +113,7 @@ type reconcileKamelet struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling Kamelet")
+	rlog.Debug("Reconciling Kamelet")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -164,7 +164,7 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 			continue
 		}
 
-		targetLog.Infof("Invoking action %s", a.Name())
+		targetLog.Debugf("Invoking action %s", a.Name())
 
 		phaseFrom := target.Status.Phase
 
@@ -186,7 +186,7 @@ func (r *reconcileKamelet) Reconcile(ctx context.Context, request reconcile.Requ
 
 			if targetPhase != phaseFrom {
 				targetLog.Info(
-					"state transition",
+					"State transition",
 					"phase-from", phaseFrom,
 					"phase-to", target.Status.Phase,
 				)
