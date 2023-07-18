@@ -102,7 +102,7 @@ func (action *scheduleAction) patchBuildStatus(ctx context.Context, build *v1.Bu
 	}
 
 	if target.Status.Phase != build.Status.Phase {
-		action.L.Info("state transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
+		action.L.Info("State transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
 	}
 	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 

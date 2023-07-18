@@ -76,6 +76,8 @@ func (action *initializeAction) CanHandle(catalog *v1.CamelCatalog) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+	action.L.Info("Initializing CamelCatalog")
+
 	platform, err := platformutil.GetOrFindLocal(ctx, action.client, catalog.Namespace)
 
 	if err != nil {

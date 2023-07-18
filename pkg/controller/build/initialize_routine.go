@@ -43,6 +43,8 @@ func (action *initializeRoutineAction) CanHandle(build *v1.Build) bool {
 
 // Handle handles the builds.
 func (action *initializeRoutineAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
+	action.L.Info("Initializing Build")
+
 	build.Status.Phase = v1.BuildPhaseScheduling
 
 	return build, nil
