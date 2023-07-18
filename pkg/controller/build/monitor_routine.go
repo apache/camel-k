@@ -211,7 +211,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 		return err
 	}
 	if target.Status.Phase != build.Status.Phase {
-		action.L.Info("state transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
+		action.L.Info("State transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
 	}
 	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 	build.Status = target.Status

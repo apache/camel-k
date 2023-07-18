@@ -49,6 +49,8 @@ func (action *initializePodAction) CanHandle(build *v1.Build) bool {
 
 // Handle handles the builds.
 func (action *initializePodAction) Handle(ctx context.Context, build *v1.Build) (*v1.Build, error) {
+	action.L.Info("Initializing Build")
+
 	if err := deleteBuilderPod(ctx, action.client, build); err != nil {
 		return nil, fmt.Errorf("cannot delete build pod: %w", err)
 	}

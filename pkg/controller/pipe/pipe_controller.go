@@ -143,7 +143,7 @@ type ReconcilePipe struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling Pipe")
+	rlog.Debug("Reconciling Pipe")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -190,7 +190,7 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 		a.InjectLogger(targetLog)
 
 		if a.CanHandle(target) {
-			targetLog.Infof("Invoking action %s", a.Name())
+			targetLog.Debugf("Invoking action %s", a.Name())
 
 			target, err = a.Handle(ctx, target)
 			if err != nil {
@@ -229,10 +229,19 @@ func (r *ReconcilePipe) update(ctx context.Context, base *v1.Pipe, target *v1.Pi
 
 	if target.Status.Phase != base.Status.Phase {
 		log.Info(
-			"state transition",
+			"State transition",
 			"phase-from", base.Status.Phase,
 			"phase-to", target.Status.Phase,
 		)
+
+		if target.Status.Phase == v1.PipePhaseError {
+			if cond := target.Status.GetCondition(v1.PipeIntegrationConditionError); cond != nil {
+				log.Info(
+					"Integration error",
+					"reason", cond.GetReason(),
+					"error-message", cond.GetMessage())
+			}
+		}
 	}
 
 	return nil

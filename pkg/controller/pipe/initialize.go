@@ -52,6 +52,8 @@ func (action *initializeAction) CanHandle(binding *v1.Pipe) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.Pipe, error) {
+	action.L.Info("Initializing Pipe")
+
 	it, err := CreateIntegrationFor(ctx, action.client, binding)
 	if err != nil {
 		binding.Status.Phase = v1.PipePhaseError

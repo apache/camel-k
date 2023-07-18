@@ -107,7 +107,7 @@ type reconcileBuild struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling Build")
+	rlog.Debug("Reconciling Build")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -176,7 +176,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		a.InjectRecorder(r.recorder)
 
 		if a.CanHandle(target) {
-			targetLog.Infof("Invoking action %s", a.Name())
+			targetLog.Debugf("Invoking action %s", a.Name())
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
@@ -192,10 +192,23 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 				if newTarget.Status.Phase != instance.Status.Phase {
 					targetLog.Info(
-						"state transition",
+						"State transition",
 						"phase-from", instance.Status.Phase,
 						"phase-to", newTarget.Status.Phase,
 					)
+
+					if newTarget.Status.Phase == v1.BuildPhaseError || newTarget.Status.Phase == v1.BuildPhaseFailed {
+						reason := string(newTarget.Status.Phase)
+
+						if newTarget.Status.Failure != nil {
+							reason = newTarget.Status.Failure.Reason
+						}
+
+						targetLog.Info(
+							"Build error",
+							"reason", reason,
+							"error-message", newTarget.Status.Error)
+					}
 				}
 
 				target = newTarget
