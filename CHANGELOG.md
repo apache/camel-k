@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.0.0...HEAD)
+
+**Closed issues:**
+
+- maxRunningBuilds ignore setup [\#4587](https://github.com/apache/camel-k/issues/4587)
+
 ## [v2.0.0](https://github.com/apache/camel-k/tree/v2.0.0) (2023-07-17)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v2.0.0...v2.0.0)
