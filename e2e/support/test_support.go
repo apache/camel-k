@@ -1500,7 +1500,25 @@ func CreateBinaryConfigmap(ns string, name string, data map[string][]byte) error
 	return TestClient().Create(TestContext, &cm)
 }
 
+func DeleteConfigmap(ns string, name string) error {
+	cm := corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	return TestClient().Delete(TestContext, &cm)
+}
+
 func CreatePlainTextSecret(ns string, name string, data map[string]string) error {
+	return CreatePlainTextSecretWithLabels(ns, name, data, map[string]string{})
+}
+
+func CreatePlainTextSecretWithLabels(ns string, name string, data map[string]string, labels map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -1509,6 +1527,7 @@ func CreatePlainTextSecret(ns string, name string, data map[string]string) error
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
+			Labels:    labels,
 		},
 		StringData: data,
 	}
@@ -1537,6 +1556,20 @@ func SecretByName(ns string, prefix string) func() *corev1.Secret {
 
 		return nil
 	}
+}
+
+func DeleteSecret(ns string, name string) error {
+	sec := corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	return TestClient().Delete(TestContext, &sec)
 }
 
 func KnativeService(ns string, name string) func() *servingv1.Service {
@@ -2396,6 +2429,16 @@ func CreateTimerKamelet(ns string, name string) func() error {
 	}
 
 	return CreateKamelet(ns, name, flow, props, nil)
+}
+
+func DeleteKamelet(ns string, name string) error {
+	kamelet := v1.Kamelet{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	return TestClient().Delete(TestContext, &kamelet)
 }
 
 func asTemplate(source map[string]interface{}) *v1.Template {
