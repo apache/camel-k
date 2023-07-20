@@ -97,8 +97,10 @@ func ImageStream(ctx context.Context, c client.Client, is *imagev1.ImageStream, 
 		return fmt.Errorf("cannot delete image stream: %w", err)
 	}
 
-	if err := ctrlutil.SetOwnerReference(owner, is, c.GetScheme()); err != nil {
-		return fmt.Errorf("cannot set owner reference on ImageStream: %s: %w", is.Name, err)
+	if owner != nil {
+		if err := ctrlutil.SetOwnerReference(owner, is, c.GetScheme()); err != nil {
+			return fmt.Errorf("cannot set owner reference on ImageStream: %s: %w", is.Name, err)
+		}
 	}
 
 	if err := c.Create(ctx, is); err != nil {

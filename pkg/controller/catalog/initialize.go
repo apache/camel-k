@@ -282,7 +282,7 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		return target, err
 	}
 
-	err = s2i.ImageStream(ctx, c, is, owner)
+	err = s2i.ImageStream(ctx, c, is, nil)
 	if err != nil {
 		target.Status.Phase = v1.CamelCatalogPhaseError
 		target.Status.SetErrorCondition(
