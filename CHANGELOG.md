@@ -10,6 +10,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump go.uber.org/automaxprocs from 1.5.2 to 1.5.3 [\#4588](https://github.com/apache/camel-k/pull/4588) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore: Refactor operator logs [\#4586](https://github.com/apache/camel-k/pull/4586) ([christophd](https://github.com/christophd))
 - Fix misc tests on global operator [\#4585](https://github.com/apache/camel-k/pull/4585) ([bouskaJ](https://github.com/bouskaJ))
 - chore\(doc\): detailed builder runtime info [\#4584](https://github.com/apache/camel-k/pull/4584) ([squakez](https://github.com/squakez))
