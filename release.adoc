@@ -124,26 +124,6 @@ cd release-utils/scripts/
 
 Check that all resources have been correctly uploaded to https://dist.apache.org/repos/dist/dev/camel/camel-k/<released_version>/ directory.
 
-[[release-notes]]
-== Release notes
-
-Release notes can be generated with:
-
-```
-# previous version released on same branch, e.g. 1.8.0
-export PREV=a.b.c
-# current version to be released, e.g. 1.8.1
-export CUR=x.y.z
-# Branch where both tags are present
-export BRANCH=main
-# Personal access Token for accessing Github API
-export GITHUB_TOKEN=token
-# Run the release-notes command
-./script/gen_release_notes.sh $PREV $CUR $BRANCH
-```
-
-A `release-notes.md` file is generated and can be attached to the release github issue for reference.
-
 [[voting]]
 == Voting
 
@@ -161,6 +141,10 @@ Republish docker image in the Apache org on Docker Hub:
 docker pull camelk/camel-k:$VERSION
 docker tag camelk/camel-k:$VERSION apache/camel-k:$VERSION
 docker push apache/camel-k:$VERSION
+# push any other supported architecture (ie, arm64)
+docker pull camelk/camel-k:$VERSION-arm64
+docker tag camelk/camel-k:$VERSION-arm64 apache/camel-k:$VERSION-arm64
+docker push apache/camel-k:$VERSION-arm64
 ```
 
 Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
@@ -171,6 +155,26 @@ cd release-utils/scripts/
 ```
 
 Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour sometimes.
+
+[[release-notes]]
+=== Release notes
+
+Release notes can be generated with:
+
+```
+# previous version released on same branch, e.g. 1.8.0
+export PREV=a.b.c
+# current version to be released, e.g. 1.8.1
+export CUR=x.y.z
+# Branch where both tags are present
+export BRANCH=main
+# Personal access Token for accessing Github API
+export GITHUB_TOKEN=token
+# Run the release-notes command
+./script/gen_release_notes.sh $PREV $CUR $BRANCH
+```
+
+A `release-notes.md` file is generated and can be attached to the release github issue for reference.
 
 Binary files can be now released on Github, together with release notes generated in previous step.
 Files need to be uploaded manually to a new Github release.
