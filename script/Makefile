@@ -518,7 +518,7 @@ images-nightly: clean codegen set-module-version set-version build-resources ima
 release-nightly: cross-compile images-push
 
 release-helm:
-	./script/release_helm.sh
+	./script/release_helm.sh ${VERSION}
 
 release-kustomize:
 	RELEASE_VERSION=$(CUSTOM_VERSION) \
