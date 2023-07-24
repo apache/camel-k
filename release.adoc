@@ -176,8 +176,8 @@ export GITHUB_TOKEN=token
 
 A `release-notes.md` file is generated and can be attached to the release github issue for reference.
 
-Binary files can be now released on Github, together with release notes generated in previous step.
-Files need to be uploaded manually to a new Github release.
+=== Github release
+Binary files can be now released on Github, together with release notes generated in previous step. Files need to be uploaded manually to a new Github release.
 
 Before announcing the release, a simple test should be done to verify that everything is in place (running a "Hello World" integration
 after an installation done with a simple `kamel install`). Do a simple final test.
@@ -185,10 +185,6 @@ after an installation done with a simple `kamel install`). Do a simple final tes
 The release can be now announced to dev@camel.apache.org and users@camel.apache.org.
 
 A PMC member with access to the @ApacheCamel Twitter account should announce the release on Twitter as well.
-
-Download section on the website needs to be put in sync to display the new release.
-Checkout the website and put an entry under `content/releases/k` with the version of the new release (copy the last release as template).
-The milestone field in the release doc is the Github id for the milestone (e.g. for v1.4.1, the milestone is 22).
 
 [[post-release]]
 == Post Release
