@@ -10,6 +10,8 @@
 
 **Merged pull requests:**
 
+- feat\(ci\): Helm release 2.0.0 [\#4592](https://github.com/apache/camel-k/pull/4592) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/onsi/gomega from 1.27.8 to 1.27.9 [\#4591](https://github.com/apache/camel-k/pull/4591) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump go.uber.org/automaxprocs from 1.5.2 to 1.5.3 [\#4588](https://github.com/apache/camel-k/pull/4588) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore: Refactor operator logs [\#4586](https://github.com/apache/camel-k/pull/4586) ([christophd](https://github.com/christophd))
 - Fix misc tests on global operator [\#4585](https://github.com/apache/camel-k/pull/4585) ([bouskaJ](https://github.com/bouskaJ))
