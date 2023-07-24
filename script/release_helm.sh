@@ -20,11 +20,12 @@ set -e
 location=$(dirname $0)
 rootdir=$(realpath $location/..)
 targetdir=$rootdir/docs/charts
+version=$1
 
 mkdir -p $targetdir
 
 cd $rootdir/helm
 
-helm package ./camel-k
+helm package ./camel-k --version $version
 mv camel-k-*.tgz $targetdir/
 helm repo index $targetdir --url https://apache.github.io/camel-k/charts/
