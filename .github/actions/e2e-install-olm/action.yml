@@ -61,7 +61,7 @@ runs:
     shell: bash
     run: |
       export KAMEL_VERSION=$(make get-last-released-version)
-      curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-64bit.tar.gz -o /tmp/kamel.tar.gz
+      curl -L https://github.com/apache/camel-k/releases/download/v${KAMEL_VERSION}/camel-k-client-${KAMEL_VERSION}-linux-amd64.tar.gz -o /tmp/kamel.tar.gz
       pushd /tmp && tar -zxf kamel.tar.gz && popd > /dev/null
       if [ ! -x /tmp/kamel ]; then
         echo "Error: No ${KAMEL_VERSION} downloaded correctly"
