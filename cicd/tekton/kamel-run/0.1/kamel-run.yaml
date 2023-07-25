@@ -19,7 +19,7 @@ spec:
   params:
     - name: camel-k-image
       description: The location of Camel K CLI image.
-      default: docker.io/apache/camel-k:1.12.0
+      default: docker.io/apache/camel-k:2.0.0
     - name: filename
       description: the Integration source we want to run
     - name: namespace
