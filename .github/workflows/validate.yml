@@ -22,10 +22,14 @@ on:
     branches:
       - main
       - "release-*"
+    paths:
+      - 'pkg/**'
   push:
     branches:
       - main
       - "release-*"
+    paths:
+      - 'pkg/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
