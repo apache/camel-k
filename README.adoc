@@ -1,7 +1,7 @@
 :toc: macro
 :toclevels: 3
 
-= :camel: + :cloud: = Apache Camel K
+= :camel: + :cloud: = Apache Camel K 2
 
 image:https://img.shields.io/github/license/openshift/origin.svg?maxAge=2592000["Licensed under Apache License version 2.0", link="https://www.apache.org/licenses/LICENSE-2.0"]
 image:https://goreportcard.com/badge/github.com/apache/camel-k["Go Report Card", link="https://goreportcard.com/report/github.com/apache/camel-k"]
