@@ -25,7 +25,7 @@ rm -rf /tmp/camel-k-runtime
 git clone --depth 1 https://github.com/apache/camel-k-runtime.git /tmp/camel-k-runtime
 ck_runtime_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f /tmp/camel-k-runtime/pom.xml)
 echo "INFO: last Camel K runtime version set at $ck_runtime_version"
-sed -i "s/^RUNTIME_VERSION := .*$/RUNTIME_VERSION := $ck_runtime_version/" $location/Makefile
+sed -i "s/^DEFAULT_RUNTIME_VERSION := .*$/DEFAULT_RUNTIME_VERSION := $ck_runtime_version/" $location/Makefile
 camel_version=$(grep -oPm1 "(?<=<camel-version>)[^<]+" /tmp/camel-k-runtime/pom.xml)
 
 rm -rf /tmp/camel-kamelets
