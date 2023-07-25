@@ -19,6 +19,8 @@ name: Coverage report
 
 on:
   pull_request_target:
+    paths:
+      - 'pkg/**'
 
 jobs:
   report:
