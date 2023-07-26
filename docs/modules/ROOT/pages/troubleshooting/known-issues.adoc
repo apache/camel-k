@@ -30,3 +30,16 @@ Or by patching your `IntegrationPlatform` resource directly if you have Camel K 
 ----
 $ kubectl patch ip camel-k --type='merge' -p '{"spec":{"build":{"publishStrategy":"kaniko"}}}'
 ----
+
+
+== `[Openshift] Repeated install/uninstall and removal of CamelCatalog leads to re-creation of builder image`
+
+Openshift's internal container image registry operates on image streams instead of directly on images. As a side effect in a non production usage it can lead to an increase of the container image storage. This is because the `uninstall` command will remove the CamelCatalog but can't remove the actual container image.
+
+In case you don't need any change in the CamelCatalog, the solutions is to use the following flag when uninstalling if you plan to install again after:
+
+[source,console]
+----
+kamel uninstall --skip-camel-catalogs
+----
+
