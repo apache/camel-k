@@ -35,7 +35,7 @@ const (
 	KanikoVersion = "1.9.1"
 
 	// baseImage --
-	baseImage = "eclipse-temurin:11"
+	baseImage = "eclipse-temurin:17"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"
