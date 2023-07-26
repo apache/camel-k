@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":b:c:g:i:l:n:q:s:v:x:z:" opt; do
+while getopts ":b:c:g:i:l:n:q:s:v:x:y:z:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
