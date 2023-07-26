@@ -272,6 +272,29 @@ test-common: do-build
 	exit $${FAILED}
 
 #
+# Smoke tests are a subset of common tests used to quickly verify the operator
+#
+test-smoke: do-build
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 10m -v ./e2e/common/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v \
+		./e2e/common/misc/default.go \
+		./e2e/common/misc/cron_test.go \
+		./e2e/common/misc/kamelet_test.go \
+		./e2e/common/misc/pipe_test.go \
+	 	-tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v \
+		./e2e/common/traits/default.go \
+		./e2e/common/traits/camel_test.go \
+		./e2e/common/traits/container_test.go \
+		./e2e/common/traits/openapi_test.go \
+		./e2e/common/traits/service_test.go \
+	 	-tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 10m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	exit $${FAILED}
+
+#
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
 test-common-with-custom-install: do-build
