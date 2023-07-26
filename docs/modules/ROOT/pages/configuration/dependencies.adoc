@@ -17,6 +17,28 @@ Automatic resolution is also a nice feature in xref:running/dev-mode.adoc[dev mo
 
 NOTE: Camel K won't be able to resolve automatically the dependencies when your routes specify dynamic URIs.
 
+[[dependencies-from-import]]
+== Import path dependencies
+
+While developing your route, you will start including references to Camel dependencies via Java (or any other DSL) import mechanism. Camel K is able to scan and detect such dependencies as well. Take the following example:
+
+```java
+import org.apache.camel.builder.RouteBuilder;
+...
+import org.apache.camel.component.kafka.KafkaComponent;
+
+public class Test extends RouteBuilder {
+
+    @Override
+    public void configure() throws Exception {
+        from("timer:java?period={{time:1000}}").
+            ...
+    }
+}
+
+```
+Camel K will be able to include `camel-kafka` dependency as it discover scanning the import paths. No need to specify it in such circumstances.
+
 [[dependencies-explicit]]
 == Add explicit dependencies
 
