@@ -101,7 +101,7 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
-			from("vm:bots/cippa").to("log:stash");
+			from("seda:bots/cippa").to("log:stash");
 			rest( ).get("").to("log:stash");
 		`,
 		},
