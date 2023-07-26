@@ -29,6 +29,10 @@ inputs:
     description: 'Indicates whether the advanced common integration tests should be launched (default false)'
     default: 'false'
     required: false
+  smoke-test-only:
+    description: 'Only run a subset of tests'
+    default: 'false'
+    required: false
 
 runs:
   using: "composite"
@@ -124,6 +128,7 @@ runs:
         -s "${{steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
         -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
         -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}" \
+        -y "${{ inputs.smoke-test-only }}" \
         -z "${{ inputs.with-custom-install }}"
 
   - name: Cleanup
