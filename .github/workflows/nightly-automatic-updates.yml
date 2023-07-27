@@ -47,4 +47,4 @@ jobs:
       with:
         branch-ref: ${{ matrix.ref-branch }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
-        goVersion: "1.18.x"
+        goVersion: "1.20.x"

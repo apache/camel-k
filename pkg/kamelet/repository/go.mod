@@ -1,6 +1,6 @@
 module github.com/apache/camel-k/v2/pkg/kamelet/repository
 
-go 1.18
+go 1.20
 
 require (
 	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
