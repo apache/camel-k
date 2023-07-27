@@ -152,6 +152,7 @@ func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra
 					}
 				}
 			} else {
+				//nolint:dupword
 				w.Writef(1, "Name\tLanguage\tCompression\tRef\tRef Key\n")
 				for _, s := range i.Sources() {
 					w.Writef(1, "%s\t%s\t%t\t%s\t%s\n",

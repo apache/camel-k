@@ -686,6 +686,7 @@ const yamlWithCircuitBreaker = `
             todo: "not implemented"
 `
 
+//nolint:dupword
 const yamlWithLanguages = `
 - from:
     uri: "direct:start"

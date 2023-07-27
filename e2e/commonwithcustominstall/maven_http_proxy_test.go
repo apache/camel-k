@@ -30,12 +30,12 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
-	rand2 "math/rand"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/olm"
 
@@ -62,7 +62,7 @@ func TestMavenProxy(t *testing.T) {
 		hostname := fmt.Sprintf("%s.%s.svc", "proxy", ns)
 
 		// Generate the TLS certificate
-		serialNumber := big.NewInt(rand2.Int63())
+		serialNumber := big.NewInt(util.RandomInt63())
 		cert := &x509.Certificate{
 			SerialNumber: serialNumber,
 			Subject: pkix.Name{

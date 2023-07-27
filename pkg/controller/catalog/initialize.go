@@ -352,7 +352,7 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		err = s2i.WaitForS2iBuildCompletion(ctx, c, &s2iBuild)
 		if err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-				// nolint: contextcheck
+				//nolint: contextcheck
 				if err := s2i.CancelBuild(context.Background(), c, &s2iBuild); err != nil {
 					return fmt.Errorf("cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
 				}
@@ -522,7 +522,7 @@ func tarEntries(writer io.Writer, files ...string) error {
 	tw := tar.NewWriter(gzw)
 	defer util.CloseQuietly(tw)
 
-	// Iterate over files and and add them to the tar archive
+	// Iterate over files and add them to the tar archive
 	for _, fileDetail := range files {
 		fileSource := strings.Split(fileDetail, ":")[0]
 		fileTarget := strings.Split(fileDetail, ":")[1]

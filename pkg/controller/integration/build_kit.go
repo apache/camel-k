@@ -68,8 +68,8 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
 			integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
 		if err != nil {
-			return nil, fmt.Errorf("unable to find integration kit %s/%s, %s: %w",
-				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err, err)
+			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
+				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 
 		}
 

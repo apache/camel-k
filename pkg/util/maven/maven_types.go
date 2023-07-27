@@ -66,7 +66,7 @@ type Settings struct {
 
 // Project models a Maven project.
 type Project struct {
-	XMLName              xml.Name
+	XMLName              xml.Name              `xml:"project"`
 	XMLNs                string                `xml:"xmlns,attr"`
 	XMLNsXsi             string                `xml:"xmlns:xsi,attr"`
 	XsiSchemaLocation    string                `xml:"xsi:schemaLocation,attr"`
