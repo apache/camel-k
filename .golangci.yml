@@ -24,6 +24,7 @@ linters:
   enable-all: true
   disable:
     - cyclop
+    - depguard
     - dupl
     - exhaustive
     - exhaustivestruct
@@ -50,12 +51,15 @@ linters:
     - nestif
     - nilnil
     - nlreturn
+    - nolintlint
     - nosnakecase
     - paralleltest
+    - revive
     - rowserrcheck
     - scopelint
     - structcheck
     - sqlclosecheck
+    - tagalign
     - tagliatelle
     - tenv
     - testpackage

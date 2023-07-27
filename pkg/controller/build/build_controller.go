@@ -185,9 +185,9 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 			}
 
 			if newTarget != nil {
-				if res, err := r.update(ctx, &instance, newTarget); err != nil {
+				if err := r.update(ctx, &instance, newTarget); err != nil {
 					camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
-					return res, err
+					return reconcile.Result{}, err
 				}
 
 				if newTarget.Status.Phase != instance.Status.Phase {
@@ -236,9 +236,9 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	return reconcile.Result{}, nil
 }
 
-func (r *reconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) (reconcile.Result, error) {
+func (r *reconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) error {
 	target.Status.ObservedGeneration = base.Generation
 	err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 
-	return reconcile.Result{}, err
+	return err
 }

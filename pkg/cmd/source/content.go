@@ -120,7 +120,7 @@ func loadContentHTTP(ctx context.Context, u fmt.Stringer) ([]byte, error) {
 		_ = resp.Body.Close()
 	}()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return []byte{}, fmt.Errorf("the provided URL %s is not reachable, error code is %d", u.String(), resp.StatusCode)
 	}
 

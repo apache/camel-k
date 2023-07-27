@@ -166,6 +166,7 @@ func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command
 		// Sources
 		if len(kamelet.Spec.Sources) > 0 {
 			w.Writef(0, "Sources:\t\n")
+			//nolint:dupword
 			w.Writef(1, "Name\tLanguage\tCompression\tRef\tRef Key\n")
 			for _, s := range kamelet.Spec.Sources {
 				w.Writef(1, "%s\t%s\t%t\t%s\t%s\n",

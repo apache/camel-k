@@ -212,6 +212,7 @@ const (
 )
 
 var randomSource = rand.NewSource(time.Now().UnixNano())
+var randomSourceUTC = rand.NewSource(time.Now().UTC().UnixNano())
 
 func RandomString(n int) string {
 	sb := strings.Builder{}
@@ -229,6 +230,10 @@ func RandomString(n int) string {
 	}
 
 	return sb.String()
+}
+
+func RandomInt63() int64 {
+	return randomSourceUTC.Int63()
 }
 
 func EncodeXML(content interface{}) ([]byte, error) {

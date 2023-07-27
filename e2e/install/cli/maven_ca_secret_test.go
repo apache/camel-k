@@ -32,7 +32,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
-	rand2 "math/rand"
 	"os"
 	"strings"
 	"testing"
@@ -52,6 +51,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
@@ -61,7 +61,7 @@ func TestMavenCASecret(t *testing.T) {
 		tlsMountPath := "/etc/tls/private"
 
 		// Generate the TLS certificate
-		serialNumber := big.NewInt(rand2.Int63())
+		serialNumber := big.NewInt(util.RandomInt63())
 		cert := &x509.Certificate{
 			SerialNumber: serialNumber,
 			Subject: pkix.Name{

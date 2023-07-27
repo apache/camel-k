@@ -21,7 +21,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"reflect"
 	"runtime"
@@ -85,7 +84,6 @@ func printVersion() {
 
 // Run starts the Camel K operator.
 func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID string) {
-	rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()
 
