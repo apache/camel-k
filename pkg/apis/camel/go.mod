@@ -1,6 +1,6 @@
 module github.com/apache/camel-k/v2/pkg/apis/camel
 
-go 1.18
+go 1.20
 
 require (
 	github.com/imdario/mergo v0.3.13
