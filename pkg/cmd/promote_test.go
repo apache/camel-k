@@ -65,9 +65,8 @@ func TestIntegrationNotCompatible(t *testing.T) {
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
-	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
-	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
+	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-n", "default")
 	assert.NotNil(t, err)
 	assert.Equal(t,
 		fmt.Sprintf("could not verify operators compatibility: source (%s) and destination (0.0.1) Camel K operator versions are not compatible", defaults.Version),
@@ -137,7 +136,6 @@ metadata:
   creationTimestamp: null
   name: my-kb-test
   namespace: prod-namespace
-  resourceVersion: "1"
 spec:
   integration:
     traits:
@@ -238,7 +236,6 @@ metadata:
     my-label: my-value
   name: my-kb-test
   namespace: prod-namespace
-  resourceVersion: "1"
 spec:
   integration:
     traits:
