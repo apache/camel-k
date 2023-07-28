@@ -6,10 +6,17 @@
 
 **Closed issues:**
 
+- Upgrade to Go 1.19.x or 1.20.x [\#4613](https://github.com/apache/camel-k/issues/4613)
 - Cannot build with Camel Quarkus 3.0.0 RC1 [\#4609](https://github.com/apache/camel-k/issues/4609)
 - \[Openshift\] Repeated install/uninstall and removal of CamelCatalog leads to re-creation of builder image [\#4569](https://github.com/apache/camel-k/issues/4569)
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
+- Release script utils: Remove examples upload since they don't exist anymore [\#4069](https://github.com/apache/camel-k/issues/4069)
+- Split Operator binary from Kamel CLI binary [\#3175](https://github.com/apache/camel-k/issues/3175)
+- Document installation on air-gapped clusters [\#1721](https://github.com/apache/camel-k/issues/1721)
+- Delegate installation to external tools [\#1503](https://github.com/apache/camel-k/issues/1503)
+- Tekton build strategy [\#682](https://github.com/apache/camel-k/issues/682)
+- kamel upgrade [\#355](https://github.com/apache/camel-k/issues/355)
 
 ## [2.1.0-nightly](https://github.com/apache/camel-k/tree/2.1.0-nightly) (2023-07-25)
 
