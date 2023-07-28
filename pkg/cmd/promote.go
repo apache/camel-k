@@ -49,14 +49,15 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "promote my-it --to [namespace]",
+		Use:     "promote my-it [--to <namespace>] [-x <promoted-operator-id>]",
 		Short:   "Promote an Integration/Pipe from an environment to another",
 		Long:    "Promote an Integration/Pipe from an environment to another, for example from a Development environment to a Production environment",
 		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
 
-	cmd.Flags().String("to", "", "The namespace where to promote the Integration")
+	cmd.Flags().String("to", "", "The namespace where to promote the Integration/Pipe")
+	cmd.Flags().StringP("to-operator", "x", "", "The operator id which will reconcile the promoted Integration/Pipe")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().BoolP("image", "i", false, "Output the container image only")
 
@@ -66,16 +67,20 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 type promoteCmdOptions struct {
 	*RootCmdOptions
 	To           string `mapstructure:"to" yaml:",omitempty"`
+	ToOperator   string `mapstructure:"to-operator" yaml:",omitempty"`
 	OutputFormat string `mapstructure:"output" yaml:",omitempty"`
 	Image        bool   `mapstructure:"image" yaml:",omitempty"`
 }
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("promote expects an Integration/Pipe name argument")
+		return errors.New("promote requires an Integration/Pipe name argument")
 	}
 	if o.To == "" {
-		return errors.New("promote expects a destination namespace as --to argument")
+		return errors.New("promote requires a destination namespace as --to argument")
+	}
+	if o.To == o.Namespace {
+		return errors.New("source and destination namespaces must be different in order to avoid promoted Integration/Pipe clashes with the source Integration/Pipe")
 	}
 	return nil
 }
@@ -457,7 +462,7 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	dst := v1.NewIntegration(o.To, it.Name)
 	contImage := it.Status.Image
 	dst.Spec = *it.Spec.DeepCopy()
-	dst.Annotations = cloneAnnotations(it.Annotations)
+	dst.Annotations = cloneAnnotations(it.Annotations, o.ToOperator)
 	dst.Labels = cloneLabels(it.Labels)
 	if dst.Spec.Traits.Container == nil {
 		dst.Spec.Traits.Container = &traitv1.ContainerTrait{}
@@ -466,13 +471,22 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	return &dst
 }
 
-// Return all annotations but the ones specific to source (ie, the operator).
-func cloneAnnotations(ann map[string]string) map[string]string {
+// Return all annotations overriding the operator Id if provided.
+func cloneAnnotations(ann map[string]string, operatorID string) map[string]string {
+	operatorIDAnnotationSet := false
 	newMap := make(map[string]string)
 	for k, v := range ann {
-		if k != v1.OperatorIDAnnotation {
+		if k == v1.OperatorIDAnnotation {
+			if operatorID != "" {
+				newMap[v1.OperatorIDAnnotation] = operatorID
+				operatorIDAnnotationSet = true
+			}
+		} else {
 			newMap[k] = v
 		}
+	}
+	if !operatorIDAnnotationSet && operatorID != "" {
+		newMap[v1.OperatorIDAnnotation] = operatorID
 	}
 	return newMap
 }
@@ -489,7 +503,7 @@ func cloneLabels(lbs map[string]string) map[string]string {
 func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration) *v1.Pipe {
 	dst := v1.NewPipe(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
-	dst.Annotations = cloneAnnotations(kb.Annotations)
+	dst.Annotations = cloneAnnotations(kb.Annotations, o.ToOperator)
 	dst.Labels = cloneLabels(kb.Labels)
 	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {
