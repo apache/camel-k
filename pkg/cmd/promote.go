@@ -88,19 +88,23 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not retrieve cluster client: %w", err)
 	}
-	opSource, err := operatorInfo(o.Context, c, o.Namespace)
-	if err != nil {
-		return fmt.Errorf("could not retrieve info for Camel K operator source: %w", err)
-	}
-	opDest, err := operatorInfo(o.Context, c, o.To)
-	if err != nil {
-		return fmt.Errorf("could not retrieve info for Camel K operator destination: %w", err)
+	if o.OutputFormat == "" {
+		// Skip these checks if in dry mode
+		opSource, err := operatorInfo(o.Context, c, o.Namespace)
+		if err != nil {
+			return fmt.Errorf("could not retrieve info for Camel K operator source: %w", err)
+		}
+		opDest, err := operatorInfo(o.Context, c, o.To)
+		if err != nil {
+			return fmt.Errorf("could not retrieve info for Camel K operator destination: %w", err)
+		}
+
+		err = checkOpsCompatibility(cmd, opSource, opDest)
+		if err != nil {
+			return fmt.Errorf("could not verify operators compatibility: %w", err)
+		}
 	}
 
-	err = checkOpsCompatibility(cmd, opSource, opDest)
-	if err != nil {
-		return fmt.Errorf("could not verify operators compatibility: %w", err)
-	}
 	promotePipe := false
 	var sourceIntegration *v1.Integration
 	// We first look if a Pipe with the name exists
@@ -118,40 +122,44 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning {
 		return fmt.Errorf("could not promote an Integration in %s status", sourceIntegration.Status.Phase)
 	}
-	err = o.validateDestResources(c, sourceIntegration)
-	if err != nil {
-		return fmt.Errorf("could not validate destination resources: %w", err)
+
+	if o.OutputFormat == "" {
+		// Skip these checks if in dry mode
+		err = o.validateDestResources(c, sourceIntegration)
+		if err != nil {
+			return fmt.Errorf("could not validate destination resources: %w", err)
+		}
 	}
 
 	// Pipe promotion
 	if promotePipe {
 		destPipe := o.editPipe(sourcePipe, sourceIntegration)
+		if o.OutputFormat != "" {
+			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
+		}
 		// Ensure the destination namespace has access to the source namespace images
 		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destPipe.Namespace)
 		if err != nil {
 			return err
 		}
 		replaced, err := o.replaceResource(destPipe)
-		if o.OutputFormat != "" {
-			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
-		}
 		if !replaced {
-			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
+			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Pipe "`+name+`" created`)
 		} else {
-			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" updated`)
+			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Pipe "`+name+`" updated`)
 		}
 		return err
 	}
 
 	// Plain Integration promotion
 	destIntegration := o.editIntegration(sourceIntegration)
+	if o.OutputFormat != "" {
+		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
+	}
 	// Ensure the destination namespace has access to the source namespace images
 	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
 	if err != nil {
 		return err
-	}
-	if o.OutputFormat != "" {
-		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
 	}
 	replaced, err := o.replaceResource(destIntegration)
 	if !replaced {
