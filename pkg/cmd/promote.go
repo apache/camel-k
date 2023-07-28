@@ -58,6 +58,7 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 
 	cmd.Flags().String("to", "", "The namespace where to promote the Integration")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().BoolP("image", "i", false, "Output the container image only")
 
 	return &cmd, &options
 }
@@ -66,6 +67,7 @@ type promoteCmdOptions struct {
 	*RootCmdOptions
 	To           string `mapstructure:"to" yaml:",omitempty"`
 	OutputFormat string `mapstructure:"output" yaml:",omitempty"`
+	Image        bool   `mapstructure:"image" yaml:",omitempty"`
 }
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
@@ -88,7 +90,7 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not retrieve cluster client: %w", err)
 	}
-	if o.OutputFormat == "" {
+	if !o.isDryRun() {
 		// Skip these checks if in dry mode
 		opSource, err := operatorInfo(o.Context, c, o.Namespace)
 		if err != nil {
@@ -123,7 +125,13 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not promote an Integration in %s status", sourceIntegration.Status.Phase)
 	}
 
-	if o.OutputFormat == "" {
+	// Image only mode
+	if o.Image {
+		showImageOnly(cmd, sourceIntegration)
+		return nil
+	}
+
+	if !o.isDryRun() {
 		// Skip these checks if in dry mode
 		err = o.validateDestResources(c, sourceIntegration)
 		if err != nil {
@@ -511,6 +519,10 @@ func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) 
 	return kubernetes.ReplaceResource(o.Context, o._client, res)
 }
 
+func (o *promoteCmdOptions) isDryRun() bool {
+	return o.OutputFormat != "" || o.Image
+}
+
 // RoleBinding is required to allow access to images in one namespace
 // by another namespace. Without this on rbac-enabled clusters, the
 // image cannot be pulled.
@@ -540,4 +552,8 @@ func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS s
 	err := applier.Apply(ctx, rb)
 
 	return err
+}
+
+func showImageOnly(cmd *cobra.Command, integration *v1.Integration) {
+	fmt.Fprintln(cmd.OutOrStdout(), integration.Status.Image)
 }

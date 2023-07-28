@@ -246,3 +246,42 @@ spec:
 status: {}
 `, output)
 }
+
+func TestItImageOnly(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultIntegration := nominalIntegration("my-it-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-i", "-n", "default")
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("my-special-image\n"), output)
+}
+
+func TestPipeImageOnly(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultKB := nominalPipe("my-kb-test")
+	defaultIntegration := nominalIntegration("my-kb-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-i", "-n", "default")
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("my-special-image\n"), output)
+}
