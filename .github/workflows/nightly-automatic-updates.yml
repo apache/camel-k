@@ -29,6 +29,7 @@ jobs:
   auto-updates:
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         ref-branch: [main, release-1.12.x, release-2.0.x]
 
