@@ -196,6 +196,10 @@ The version of Camel K and the main related dependencies are scraped automatical
 
 After the vote has passed, update the camel-website `antora-playbook.yml` `content.sources` section for camel-k and camel-k-runtime to use the newly released versions, replacing the previous released version.
 
+You also need to create an entry in the release section of Camel website project: https://github.com/apache/camel-website/tree/main/content/releases/k - you can use any previous document as a reference.
+
+NOTE: the milestone is the github project milestone ID used to track the release.
+
 === Operator Hub
 
 The https://github.com/k8s-operatorhub/community-operators/[OperatorHub] downstream channel should be synced to publish the latest version
