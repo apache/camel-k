@@ -12,6 +12,7 @@
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
 - Release script utils: Remove examples upload since they don't exist anymore [\#4069](https://github.com/apache/camel-k/issues/4069)
+- Use `govulncheck` to check security vulnerabilities [\#3753](https://github.com/apache/camel-k/issues/3753)
 - Split Operator binary from Kamel CLI binary [\#3175](https://github.com/apache/camel-k/issues/3175)
 - Document installation on air-gapped clusters [\#1721](https://github.com/apache/camel-k/issues/1721)
 - Delegate installation to external tools [\#1503](https://github.com/apache/camel-k/issues/1503)
