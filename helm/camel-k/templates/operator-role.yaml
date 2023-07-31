@@ -32,7 +32,9 @@ rules:
   - integrationkits
   - integrationplatforms
   - integrations
-  - bindings
+  - pipes
+  - kameletbindings
+  # Deprecated: kameletbindings CR
   - kamelets
   verbs:
   - create
@@ -56,8 +58,11 @@ rules:
   - integrationplatforms/status
   - integrations/scale
   - integrations/status
-  - bindings/status
-  - bindings/scale
+  - pipes/status
+  - pipes/scale
+  # Deprecated: kameletbindings CR
+  - kameletbindings/status
+  - kameletbindings/scale
   - kamelets/status
   verbs:
   - get
@@ -92,6 +97,7 @@ rules:
   - ""
   resources:
   - pods/proxy
+  - pods/log
   verbs:
   - get
 - apiGroups:
@@ -111,6 +117,7 @@ rules:
   resources:
   - roles
   - rolebindings
+  - clusterrolebindings
   verbs:
   - create
   - delete
@@ -167,6 +174,13 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
 - apiGroups:
   - ""
   resources:
