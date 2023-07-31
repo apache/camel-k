@@ -8,6 +8,7 @@
 
 - Upgrade to Go 1.19.x or 1.20.x [\#4613](https://github.com/apache/camel-k/issues/4613)
 - Cannot build with Camel Quarkus 3.0.0 RC1 [\#4609](https://github.com/apache/camel-k/issues/4609)
+- Changelog action is hitting github API rate limit [\#4596](https://github.com/apache/camel-k/issues/4596)
 - \[Openshift\] Repeated install/uninstall and removal of CamelCatalog leads to re-creation of builder image [\#4569](https://github.com/apache/camel-k/issues/4569)
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
