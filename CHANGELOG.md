@@ -6,14 +6,18 @@
 
 **Closed issues:**
 
+- Error running integration on Camel-K v2 [\#4632](https://github.com/apache/camel-k/issues/4632)
+- camel-k installed with helm does not create cluster role for pipes and kameletbindings [\#4629](https://github.com/apache/camel-k/issues/4629)
 - Include Camel release subproject in the release process [\#4627](https://github.com/apache/camel-k/issues/4627)
 - Bot updating docs/antora.yaml causes camel-website build to fail [\#4624](https://github.com/apache/camel-k/issues/4624)
 - Upgrade to Go 1.19.x or 1.20.x [\#4613](https://github.com/apache/camel-k/issues/4613)
 - Cannot build with Camel Quarkus 3.0.0 RC1 [\#4609](https://github.com/apache/camel-k/issues/4609)
 - \[Openshift\] Repeated install/uninstall and removal of CamelCatalog leads to re-creation of builder image [\#4569](https://github.com/apache/camel-k/issues/4569)
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
+- `kamel promote` dry run should not validate [\#4534](https://github.com/apache/camel-k/issues/4534)
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
 - Release script utils: Remove examples upload since they don't exist anymore [\#4069](https://github.com/apache/camel-k/issues/4069)
+- `kamel promote` with new tenancy model [\#3890](https://github.com/apache/camel-k/issues/3890)
 - Use `govulncheck` to check security vulnerabilities [\#3753](https://github.com/apache/camel-k/issues/3753)
 - Split Operator binary from Kamel CLI binary [\#3175](https://github.com/apache/camel-k/issues/3175)
 - Document installation on air-gapped clusters [\#1721](https://github.com/apache/camel-k/issues/1721)
@@ -23,7 +27,10 @@
 
 **Merged pull requests:**
 
+- chore: add license header [\#4631](https://github.com/apache/camel-k/pull/4631) ([squakez](https://github.com/squakez))
+- Fix missing role in helm chart [\#4630](https://github.com/apache/camel-k/pull/4630) ([claudio4j](https://github.com/claudio4j))
 - feat\(ci\): Add govulncheck as ci workflow [\#4623](https://github.com/apache/camel-k/pull/4623) ([gansheer](https://github.com/gansheer))
+- feat\(cmd\): improve `kamel promote` [\#4621](https://github.com/apache/camel-k/pull/4621) ([squakez](https://github.com/squakez))
 - feat\(build\): Upgrade to Golang 1.20 [\#4620](https://github.com/apache/camel-k/pull/4620) ([gansheer](https://github.com/gansheer))
 - chore\(e2e\): Test on kamelets configurations [\#4619](https://github.com/apache/camel-k/pull/4619) ([gansheer](https://github.com/gansheer))
 - fix: use non deprecated components [\#4616](https://github.com/apache/camel-k/pull/4616) ([squakez](https://github.com/squakez))
