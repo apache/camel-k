@@ -18,6 +18,7 @@
 *** xref:installation/registry/k3s.adoc[K3s]
 ** xref:installation/advanced/advanced.adoc[Advanced]
 *** xref:installation/advanced/kustomize.adoc[Install Using Kustomize]
+*** xref:installation/advanced/network.adoc[Network architecture]
 *** xref:installation/advanced/resources.adoc[Resource management]
 *** xref:installation/advanced/multi.adoc[Multiple Operators]
 *** xref:installation/advanced/http-proxy.adoc[HTTP Proxy]
