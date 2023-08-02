@@ -58,8 +58,8 @@ DEBUG_MODE ?= false
 # olm bundle vars
 MANAGER := config/manager
 MANIFESTS := config/manifests
-CHANNELS ?= $(shell v=$(OPERATOR_VERSION) && echo "stable-$${v%\.[0-9]}"),candidate,latest
-DEFAULT_CHANNEL ?= $(shell v=$(OPERATOR_VERSION) && echo "stable-$${v%\.[0-9]}")
+DEFAULT_CHANNEL ?= $(shell echo "stable-v$(word 1,$(subst ., ,$(lastword $(OPERATOR_VERSION))))")
+CHANNELS ?= $(DEFAULT_CHANNEL),latest
 PACKAGE := camel-k
 CSV_VERSION := $(OPERATOR_VERSION)
 CSV_NAME := $(PACKAGE).v$(CSV_VERSION)
@@ -578,7 +578,6 @@ endif
 
 operator-sdk: detect-os
 	@echo "####### Installing operator-sdk version $(OPERATOR_SDK_VERSION)..."
-	set -e ;\
 	curl \
 		-s -L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
 		-o operator-sdk ; \
