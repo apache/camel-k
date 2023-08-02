@@ -33,8 +33,8 @@ rules:
   - integrationplatforms
   - integrations
   - pipes
-  - kameletbindings
   # Deprecated: kameletbindings CR
+  - kameletbindings
   - kamelets
   verbs:
   - create
@@ -270,7 +270,8 @@ rules:
   - integrationkits/finalizers
   - integrationplatforms/finalizers
   - integrations/finalizers
-  - bindings/finalizers
+  - pipes/finalizers
+  - kameletbindings/finalizers
   verbs:
   - update
 - apiGroups:
