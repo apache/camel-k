@@ -16,6 +16,8 @@
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - `kamel promote` dry run should not validate [\#4534](https://github.com/apache/camel-k/issues/4534)
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
+- enabling backlog tracing for routes [\#4240](https://github.com/apache/camel-k/issues/4240)
+- Failure to deploy as native [\#4200](https://github.com/apache/camel-k/issues/4200)
 - Release script utils: Remove examples upload since they don't exist anymore [\#4069](https://github.com/apache/camel-k/issues/4069)
 - `kamel promote` with new tenancy model [\#3890](https://github.com/apache/camel-k/issues/3890)
 - Use `govulncheck` to check security vulnerabilities [\#3753](https://github.com/apache/camel-k/issues/3753)
@@ -27,6 +29,9 @@
 
 **Merged pull requests:**
 
+- fix\(helm\): pipes roles [\#4636](https://github.com/apache/camel-k/pull/4636) ([squakez](https://github.com/squakez))
+- chore\(olm\): bundle channel [\#4635](https://github.com/apache/camel-k/pull/4635) ([squakez](https://github.com/squakez))
+- Fix cron trait doc, timer usage is missing information [\#4633](https://github.com/apache/camel-k/pull/4633) ([claudio4j](https://github.com/claudio4j))
 - chore: add license header [\#4631](https://github.com/apache/camel-k/pull/4631) ([squakez](https://github.com/squakez))
 - Fix missing role in helm chart [\#4630](https://github.com/apache/camel-k/pull/4630) ([claudio4j](https://github.com/claudio4j))
 - feat\(ci\): Add govulncheck as ci workflow [\#4623](https://github.com/apache/camel-k/pull/4623) ([gansheer](https://github.com/gansheer))
