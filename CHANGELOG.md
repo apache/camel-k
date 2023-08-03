@@ -29,6 +29,9 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): use latest golang version [\#4640](https://github.com/apache/camel-k/pull/4640) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump go.uber.org/zap from 1.24.0 to 1.25.0 [\#4638](https://github.com/apache/camel-k/pull/4638) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(doc\): network architecture [\#4637](https://github.com/apache/camel-k/pull/4637) ([squakez](https://github.com/squakez))
 - fix\(helm\): pipes roles [\#4636](https://github.com/apache/camel-k/pull/4636) ([squakez](https://github.com/squakez))
 - chore\(olm\): bundle channel [\#4635](https://github.com/apache/camel-k/pull/4635) ([squakez](https://github.com/squakez))
 - Fix cron trait doc, timer usage is missing information [\#4633](https://github.com/apache/camel-k/pull/4633) ([claudio4j](https://github.com/claudio4j))
