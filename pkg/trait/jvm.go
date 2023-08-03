@@ -237,7 +237,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 
-	if pointer.BoolDeref(t.PrintCommand, true) {
+	if pointer.BoolDeref(t.PrintCommand, false) {
 		args = append([]string{"exec", "java"}, args...)
 		container.Command = []string{"/bin/sh", "-c"}
 		cmd := strings.Join(args, " ")
