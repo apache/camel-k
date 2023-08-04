@@ -67,6 +67,8 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
+	// local pipeline tasks
+	var pipelineTasks []v1.Task
 	// Building task
 	builderTask, err := t.builderTask(e)
 	if err != nil {
@@ -78,17 +80,36 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}
 		return nil
 	}
-	e.Pipeline = append(e.Pipeline, v1.Task{Builder: builderTask})
+
+	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
 	// Custom tasks
 	if t.Tasks != nil {
-		e.Pipeline = append(e.Pipeline, t.customTasks()...)
+		realBuildStrategy := builderTask.Configuration.Strategy
+		if realBuildStrategy == "" {
+			realBuildStrategy = e.Platform.Status.Build.BuildConfiguration.Strategy
+		}
+		if len(t.Tasks) > 0 && realBuildStrategy != v1.BuildStrategyPod {
+			e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
+			e.IntegrationKit.Status.SetCondition("IntegrationKitTasksValid",
+				corev1.ConditionFalse,
+				"IntegrationKitTasksValid",
+				fmt.Sprintf("Pipeline tasks unavailable when using `%s` platform build strategy: use `%s` instead.",
+					realBuildStrategy,
+					v1.BuildStrategyPod),
+			)
+			if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
+				return err
+			}
+			return nil
+		}
+		pipelineTasks = append(pipelineTasks, t.customTasks()...)
 	}
 
 	// Publishing task
 	switch e.Platform.Status.Build.PublishStrategy {
 	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
-		e.Pipeline = append(e.Pipeline, v1.Task{Spectrum: &v1.SpectrumTask{
+		pipelineTasks = append(pipelineTasks, v1.Task{Spectrum: &v1.SpectrumTask{
 			BaseTask: v1.BaseTask{
 				Name: "spectrum",
 			},
@@ -100,7 +121,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
-		e.Pipeline = append(e.Pipeline, v1.Task{S2i: &v1.S2iTask{
+		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
 			BaseTask: v1.BaseTask{
 				Name: "s2i",
 			},
@@ -121,7 +142,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			executorImage = image
 			t.L.Infof("User defined executor image %s will be used for buildah", image)
 		}
-		e.Pipeline = append(e.Pipeline, v1.Task{Buildah: &v1.BuildahTask{
+		pipelineTasks = append(pipelineTasks, v1.Task{Buildah: &v1.BuildahTask{
 			Platform: platform,
 			BaseTask: v1.BaseTask{
 				Name: "buildah",
@@ -144,7 +165,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			t.L.Infof("User defined executor image %s will be used for kaniko", image)
 		}
 
-		e.Pipeline = append(e.Pipeline, v1.Task{Kaniko: &v1.KanikoTask{
+		pipelineTasks = append(pipelineTasks, v1.Task{Kaniko: &v1.KanikoTask{
 			BaseTask: v1.BaseTask{
 				Name: "kaniko",
 			},
@@ -160,6 +181,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 			ExecutorImage: executorImage,
 		}})
 	}
+	// add local pipeline tasks to env pipeline
+	e.Pipeline = append(e.Pipeline, pipelineTasks...)
 	return nil
 }
 
