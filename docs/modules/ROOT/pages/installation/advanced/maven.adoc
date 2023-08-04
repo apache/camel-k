@@ -1,4 +1,4 @@
-= Configure Maven
+= Configuring Maven
 
 Camel K builds are performed by Maven. For this reason it may requires certain Maven best practices that will make your application to run faster, more secure and more resiliently. The Maven configuration is defined at IntegrationPlatform level. Have a look at the following sections to discover how to configure Maven in Camel K.
 
