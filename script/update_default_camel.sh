@@ -33,6 +33,12 @@ git clone https://github.com/apache/camel-kamelets.git /tmp/camel-kamelets
 pushd /tmp/camel-kamelets
 echo "INFO: Looking a suitable Kamelet tag for $camel_version camel version"
 kamelets_tag=$(git tag | grep $camel_version | sort -r | head -n 1)
+
+if [[ $kamelets_tag == "" ]]; then
+    echo "INFO: no tag found for $camel_version camel version. Fallback to main branch."
+    kamelets_tag="main"
+fi
+
 popd
 echo "INFO: Kamelets version set at $kamelets_tag"
 sed -i "s/^KAMELET_CATALOG_REPO_TAG := .*$/KAMELET_CATALOG_REPO_TAG := $kamelets_tag/" $location/Makefile
