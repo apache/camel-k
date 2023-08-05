@@ -29,6 +29,9 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): kamelet fallback to main branch [\#4645](https://github.com/apache/camel-k/pull/4645) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.32 to 0.6.33 [\#4643](https://github.com/apache/camel-k/pull/4643) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(trait\): don't print command by default [\#4642](https://github.com/apache/camel-k/pull/4642) ([squakez](https://github.com/squakez))
 - chore\(ci\): use latest golang version [\#4640](https://github.com/apache/camel-k/pull/4640) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump go.uber.org/zap from 1.24.0 to 1.25.0 [\#4638](https://github.com/apache/camel-k/pull/4638) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(doc\): network architecture [\#4637](https://github.com/apache/camel-k/pull/4637) ([squakez](https://github.com/squakez))
