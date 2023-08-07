@@ -29,6 +29,10 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/oauth2 from 0.10.0 to 0.11.0 [\#4652](https://github.com/apache/camel-k/pull/4652) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/text from 0.11.0 to 0.12.0 [\#4651](https://github.com/apache/camel-k/pull/4651) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/term from 0.10.0 to 0.11.0 [\#4650](https://github.com/apache/camel-k/pull/4650) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(doc\): registry configuration [\#4646](https://github.com/apache/camel-k/pull/4646) ([squakez](https://github.com/squakez))
 - chore\(ci\): kamelet fallback to main branch [\#4645](https://github.com/apache/camel-k/pull/4645) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.32 to 0.6.33 [\#4643](https://github.com/apache/camel-k/pull/4643) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(trait\): don't print command by default [\#4642](https://github.com/apache/camel-k/pull/4642) ([squakez](https://github.com/squakez))
