@@ -538,3 +538,14 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 		route.Spec.Port.TargetPort.StrVal,
 	)
 }
+
+func TestRouteAnnotation(t *testing.T) {
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	traitsCatalog := environment.Catalog
+
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+
+}
