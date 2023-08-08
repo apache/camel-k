@@ -29,6 +29,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.33 to 0.6.34 [\#4653](https://github.com/apache/camel-k/pull/4653) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.10.0 to 0.11.0 [\#4652](https://github.com/apache/camel-k/pull/4652) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/text from 0.11.0 to 0.12.0 [\#4651](https://github.com/apache/camel-k/pull/4651) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/term from 0.10.0 to 0.11.0 [\#4650](https://github.com/apache/camel-k/pull/4650) ([dependabot[bot]](https://github.com/apps/dependabot))
