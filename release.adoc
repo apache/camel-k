@@ -147,6 +147,7 @@ docker tag camelk/camel-k:$VERSION-arm64 apache/camel-k:$VERSION-arm64
 docker push apache/camel-k:$VERSION-arm64
 ```
 
+Release the staging repository at: https://repository.apache.org (Camel K CRD dependency).
 Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
 
 ```
