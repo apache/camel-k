@@ -31,6 +31,10 @@ package trait
 // nolint: tagliatelle
 type RouteTrait struct {
 	Trait `property:",squash" json:",inline"`
+	// The annotations added to route.
+	// This can be used to set route specific annotations
+	// See https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
+	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 	// To configure the host exposed by the route.
 	Host string `property:"host" json:"host,omitempty"`
 	// The TLS termination type, like `edge`, `passthrough` or `reencrypt`.

@@ -43,6 +43,10 @@ type routeTrait struct {
 func newRouteTrait() Trait {
 	return &routeTrait{
 		BaseTrait: NewBaseTrait("route", 2200),
+		RouteTrait: traitv1.RouteTrait{
+			Annotations: map[string]string{},
+			Host:        "",
+		},
 	}
 }
 
@@ -109,6 +113,7 @@ func (t *routeTrait) Apply(e *Environment) error {
 			Labels: map[string]string{
 				v1.IntegrationLabel: e.Integration.Name,
 			},
+			Annotations: t.Annotations,
 		},
 		Spec: routev1.RouteSpec{
 			Port: &routev1.RoutePort{
