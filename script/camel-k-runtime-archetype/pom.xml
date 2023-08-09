@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.camel.k.integration</groupId>
+  <artifactId>camel-k-integration</artifactId>
+  <version>2.0.0</version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <quarkus.package.type>fast-jar</quarkus.package.type>
+    <runtime.version>${RUNTIME_VERSION_CMD}</runtime.version>
+    <quarkus.version>${QUARKUS_VERSION_CMD}</quarkus.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.camel.k</groupId>
+        <artifactId>camel-k-runtime-bom</artifactId>
+        <version>${runtime.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.camel.quarkus</groupId>
+      <artifactId>camel-quarkus-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.camel.k</groupId>
+      <artifactId>camel-k-runtime</artifactId>
+    </dependency>
+  </dependencies>
+  <repositories></repositories>
+  <pluginRepositories></pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-maven-plugin</artifactId>
+        <version>${quarkus.version}</version>
+        <executions>
+          <execution>
+            <id>build-integration</id>
+            <goals>
+              <goal>build</goal>
+            </goals>
+            <configuration>
+              <properties>
+                <quarkus.banner.enabled>false</quarkus.banner.enabled>
+                <quarkus.camel.routes-discovery.enabled>false</quarkus.camel.routes-discovery.enabled>
+                <quarkus.camel.service.discovery.include-patterns>META-INF/services/org/apache/camel/datatype/converter/*</quarkus.camel.service.discovery.include-patterns>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies></dependencies>
+      </plugin>
+
+      <!-- TODO: We need to enable reproducible builds on the runtime -->
+      <!-- plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.2.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.10.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>3.1.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>3.1.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.3.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.12.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0</version>
+      </plugin -->
+
+    </plugins>
+    <extensions></extensions>
+  </build>
+</project>

@@ -1,0 +1,154 @@
+= Camel K offline
+
+Camel K is naturally developed to fit in an "open world" cluster model. It basically means that the default installation assumes it can pull and push resources from the Internet. However, there could be certain domains or use cases where this is a limitation. For this reason this guide will show you how to setup properly Camel K in an offline (or disconnected, or air gapped) cluster environment.
+
+In order to understand the content of this guide. It is good to have familiarity with the default xref:installation/advanced/network.adoc[network architecture]. Let's see again the diagram here:
+
+image::architecture/camel-k-network.svg[Network architecture, width=800]
+
+We can easily identify those components which requires access to the Internet and treat them separately: the image registry and the maven builds.
+
+[[registry]]
+== Container images registry
+
+The xref:installation/registry/registry.adoc[registry] is the component in charge to host the containers which are built from the operator and are used by the cluster to run the Camel applications. This component could be provided out of the box by the cluster, or should be operated by you (see the guide on xref:installation/registry/own.adoc[how to run your own registry]).
+
+As we're in a disconnected environment, we assume this component to be accessible by the cluster (through an IP or URL). However, the cluster need to use the Camel K container image in order to be installed. You therefore need to make sure that the cluster registry has preloaded the Camel K container image, which is `apache/camel-k:2.0.0` (or any version you're willing to use).
+
+We cannot provide any specific guideline on how to preload images in the cluster registry (as it vary on your infrastructure). However we expect this to be part of the documentation of the cluster in a disconnected mode. At the same manner, you'll need to make sure to include the following images which will be required by Camel K during its operations:
+
+* `quay.io/quarkus/quarkus-distroless-image:1.0`
+* `eclipse-temurin:17` (or any other base image you want to use)
+* `quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.2.0.0-Final-java11`
+
+The last one is the image used in the Camel K Runtime 2.16.0 version (the default one at the time of writing). Make sure to identify in the catalog (`.spec.runtime.metadata.quarkus.native-builder-image`) the one required in your installation.
+
+If you also plan to use Buildah or Kaniko strategy, you need to provide those images as well:
+
+* `quay.io/buildah/stable`
+* `gcr.io/kaniko-project/executor`
+* `gcr.io/kaniko-project/warmer`
+
+Same thing if you are planning to use any xref:pipeline/pipeline.adoc[custom pipeline]. You need to upload the expected image ahead of time.
+
+If all the above is set, then, you should be ready to pull and push from the container registry in Camel K as well.
+
+[[maven]]
+== Maven build configuration
+
+WARNING: This guide is a best effort development done to help the final user to create maven offline bundle and be able to run Camel K in offline mode. However, since the high degree of flexibility in the installation topology we cannot provide any level of support, only guidance on the possible configuration to adopt. Also, given the quantity of third party dependencies downloaded during the procedure we cannot ensure any protection against possible CVEs affecting these third party libraries. Use at your best convenience.
+
+The procedure contains a script that will package the entire set of Camel K Runtime dependencies required by Maven build in order to run offline builds.
+
+It requires that the Maven version from where you're running the scripts (likely your machine) is the same used in the Camel K operator target version (ie, 3.8.6 for Camel K version 2.0.0) - required to enforce reproducible builds.
+
+It's quite important to know that the operator will expect the dependencies to be owned by 1001 user. So, make sure that the script is executed by such a USER to avoid the maven build to fail due to privileges faults.
+
+The output of the script is a tar file containing all the tree of dependencies expected by Maven, allowing the target building system (ie, the Camel K operator) to be executed with `--offline` option.
+
+NOTE: it may not work in Quarkus native mode as the native build may require additional dependencies not available in the bundle.
+
+[[maven-script]]
+=== Offliner script
+
+The script is available in https://github.com/apache/camel-k[Camel K github repository]. You need to clone it and follow the instructions.
+
+You can run:
+
+```bash
+./script/offline_dependencies.sh <camel-k-runtime-version> --with <path/to/maven/version/matching/target>
+```
+
+After some time (up to 1 hour time), all the packaged dependencies will be available in a _tar.gz_ file in _/build/_ directory. It's a big file as it contains all the transitive dependencies required by *all Camel components*.
+
+[[maven-offline]]
+=== Configure Operator build offline
+
+The file produced above can be used in a variety of ways. We can only give a few tips on the most typical use cases, but the "operationalization" of the procedure is entirely up to the final user. Here a few ideas on how to use the bundle provided.
+
+[[maven-offline-operator]]
+=== Upload dependencies in the operator
+
+A simple strategy is to identify the Camel K operator maven repository directory (default, `/etc/maven/m2`), and just upload the file in the directory. Once the file is on the Pod, you can extract the content accordingly (ie, `tar -xzf`) accessing to the Pod (ie, `kubectl exec camel-k-<pod> -- /bin/bash`).
+
+Once the dependencies are copied, you can edit your IntegrationPlatform custom resource and include the `--offline` option in the `cliOptions` configuration:
+
+```yaml
+...
+spec:
+  build:
+...
+    maven:
+      cliOptions:
+      - -o
+```
+
+The downside of this procedure is that since the Pod is ephemeral, the content of the maven repository will be cleared on a Pod restart/reschedule. We therefore recommend for simple developments and demos.
+
+[[maven-offline-proxy]]
+=== Upload dependencies in the Maven Proxy
+
+The best practice we suggest is to always use a Maven Proxy. This is also the case of an offline installation. In such case you can check your Maven Repository Manager documentation and verify how to upload dependencies using the file created in the chapter above. You may also need to verify how to turn any possible access to the internet off.
+
+In this configuration, you won't need to perform any change on the Camel K operator (assuming the operator is already configured to use this proxy).
+
+[[maven-offline-volume]]
+=== Run in a volume
+
+Another possible alternative is to use a Kubernetes Volume where to host such dependencies. You can create a volume, then you can upload and extract the dependencies. You can now use the volume, changing the Camel K operator Deployment and mount such Persistent Volume to the maven repository directory (default, _/etc/maven/m2_).
+
+Edit your IntegrationPlatform custom resource and include the `--offline` option in the `cliOptions` configuration:
+
+```yaml
+...
+spec:
+  build:
+...
+    maven:
+      cliOptions:
+      - -o
+```
+
+[[maven-offline-initcontainer]]
+=== Run as initContainer
+
+You can create a container image which just contains the dependencies in a known folder. Let's call this image `my-camel-k-offliner:2.0.0`. This container can be used as _initContainer_ in order to fill the repository which will be shared with the Camel K operator container in the Deployment resource. For example:
+
+```yaml
+...
+spec:
+...
+  volumes:
+  - name: shared-m2
+    emptyDir: {}
+
+  initContainers:
+  - name: offline-container
+    image: my-camel-k-offliner:2.0.0
+    volumeMounts:
+    - name: shared-m2
+      mountPath: /usr/share/m2
+    command: ["/bin/bash"]
+    args: ["-c", "cp -r /etc/maven/m2/* /usr/share/m2/."]
+
+  containers:
+  - name: online-container
+    image: apache/camel-k:2.0.0
+    volumeMounts:
+    - name: shared-m2
+      mountPath: /etc/maven/m2
+...
+```
+
+Also in this case, you need to edit the IntegrationPlatform and add the `--offline` (or `-o`) option as shown above.
+
+[[maven-offline-own-image]]
+=== Create your own image from source
+
+Last option we may suggest is to build your own image of the operator from source and include in it the entire set of dependencies extracted. You need to extract everything under _/build/_maven_output_ directory. Then, run `make images` and it will create an image containing the whole repo. You can publish such image (which should have an average of 5 GB) calling it for instance `my-camel-k:2.0.0-offline` and later use to install the operator normally:
+
+```bash
+kamel install --operator-image my-camel-k:2.0.0-offline
+```
+
+Also here, you need to edit the IntegrationPlatform and add the `--offline` (or `-o`) option as shown above.

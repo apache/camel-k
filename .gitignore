@@ -37,6 +37,8 @@ index.Dockerfile
 
 # Temporary Build Files
 build/_output
+build/_offline
+build/camel-k-runtime-*-maven-offline.tar.gz
 build/_test
 build/_maven_output
 build/_maven_overlay

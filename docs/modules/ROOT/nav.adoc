@@ -8,6 +8,7 @@
 *** xref:installation/advanced/multi.adoc[Multiple Operators]
 *** xref:installation/advanced/http-proxy.adoc[HTTP Proxy]
 *** xref:installation/advanced/multi-architecture.adoc[Multi Architecture]
+*** xref:installation/advanced/offline.adoc[Offline]
 ** xref:contributing/upgrade.adoc[Upgrade]
 ** xref:contributing/uninstalling.adoc[Uninstalling]
 * Command Line Interface
