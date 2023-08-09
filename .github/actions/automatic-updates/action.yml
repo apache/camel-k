@@ -114,3 +114,9 @@ runs:
         CI_TOKEN: ${{ inputs.secretGithubToken }}
       run: |
         git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ inputs.branch-ref }}
+
+    # Give it a rest to avoid hitting Github API rate limit
+    - name: Sleep
+      shell: bash
+      run: |
+        sleep 1800
