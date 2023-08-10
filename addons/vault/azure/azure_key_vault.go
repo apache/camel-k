@@ -106,7 +106,7 @@ func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, er
 func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAzureKeyVault)
-		// Add the Camel Quarkus Azure Key Vault dependency
+		// TODO remove dependencies after runtime > 2.16.0
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-azure-key-vault")
 	}
 

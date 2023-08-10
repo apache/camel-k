@@ -55,7 +55,8 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
 
 func (t *prometheusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		// Add the Camel Quarkus Micrometer extension and micrometer registry for prometheus
+		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPrometheus)
+		// TODO remove dependencies after runtime > 2.16.0
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-micrometer")
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.micrometer:micrometer-registry-prometheus")
 		return nil

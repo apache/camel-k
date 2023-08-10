@@ -102,7 +102,7 @@ func (t *gcpSecretManagerTrait) Configure(environment *trait.Environment) (bool,
 func (t *gcpSecretManagerTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityGcpSecretManager)
-		// Add the Camel Quarkus Google Secrets Manager dependency
+		// TODO remove dependencies after runtime > 2.16.0
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-google-secret-manager")
 	}
 

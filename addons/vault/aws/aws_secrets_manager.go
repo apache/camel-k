@@ -100,7 +100,7 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAwsSecretsManager)
-		// Add the Camel Quarkus AWS Secrets Manager
+		// TODO remove dependencies after runtime > 2.16.0
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-aws-secrets-manager")
 	}
 
