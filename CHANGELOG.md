@@ -6,16 +6,19 @@
 
 **Closed issues:**
 
+- 404 in release page [\#4654](https://github.com/apache/camel-k/issues/4654)
 - Error running integration on Camel-K v2 [\#4632](https://github.com/apache/camel-k/issues/4632)
 - camel-k installed with helm does not create cluster role for pipes and kameletbindings [\#4629](https://github.com/apache/camel-k/issues/4629)
 - Include Camel release subproject in the release process [\#4627](https://github.com/apache/camel-k/issues/4627)
 - Bot updating docs/antora.yaml causes camel-website build to fail [\#4624](https://github.com/apache/camel-k/issues/4624)
 - Upgrade to Go 1.19.x or 1.20.x [\#4613](https://github.com/apache/camel-k/issues/4613)
 - Cannot build with Camel Quarkus 3.0.0 RC1 [\#4609](https://github.com/apache/camel-k/issues/4609)
+- Changelog action is hitting github API rate limit [\#4596](https://github.com/apache/camel-k/issues/4596)
 - \[Openshift\] Repeated install/uninstall and removal of CamelCatalog leads to re-creation of builder image [\#4569](https://github.com/apache/camel-k/issues/4569)
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - Documentation and validation for new feature Build Pipeline [\#4558](https://github.com/apache/camel-k/issues/4558)
 - `kamel promote` dry run should not validate [\#4534](https://github.com/apache/camel-k/issues/4534)
+- error while increasing the consumer count in kafka [\#4270](https://github.com/apache/camel-k/issues/4270)
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
 - enabling backlog tracing for routes [\#4240](https://github.com/apache/camel-k/issues/4240)
 - Failure to deploy as native [\#4200](https://github.com/apache/camel-k/issues/4200)
@@ -31,6 +34,7 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): Updates of otlp collector and some github actions [\#4660](https://github.com/apache/camel-k/pull/4660) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): sleep 30 minutes [\#4657](https://github.com/apache/camel-k/pull/4657) ([squakez](https://github.com/squakez))
 - feat\(install\): Camel K offline mode [\#4656](https://github.com/apache/camel-k/pull/4656) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.33 to 0.6.34 [\#4653](https://github.com/apache/camel-k/pull/4653) ([dependabot[bot]](https://github.com/apps/dependabot))
