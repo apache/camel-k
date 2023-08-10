@@ -28,7 +28,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -543,10 +542,18 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 
 func TestRouteAnnotation(t *testing.T) {
 	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": "true"}
+
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &traitv1.RouteTrait{
+			Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
+		},
+	}
+
 	traitsCatalog := environment.Catalog
 	err := traitsCatalog.apply(environment)
+
 	assert.Nil(t, err)
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
@@ -554,41 +561,6 @@ func TestRouteAnnotation(t *testing.T) {
 	})
 
 	assert.NotNil(t, route)
-	assert.True(t, reflect.DeepEqual(route.ObjectMeta.Annotations, map[string]string{}))
+	assert.True(t, reflect.DeepEqual(route.GetAnnotations(), annotationsTest))
 
-	route = createTestRoute(environment)
-	environment.Resources.Add(route)
-
-	assert.NotNil(t, environment.GetTrait("route"))
-
-	assert.NotNil(t, route)
-	assert.True(t, reflect.DeepEqual(route.ObjectMeta.Annotations, annotationsTest))
-
-}
-
-func createTestRoute(e *Environment) *routev1.Route {
-	return &routev1.Route{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Route",
-			APIVersion: routev1.GroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test",
-			Namespace: "",
-			Labels: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
-			},
-			Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
-		},
-		Spec: routev1.RouteSpec{
-			Port: &routev1.RoutePort{
-				TargetPort: intstr.FromString(""),
-			},
-			To: routev1.RouteTargetReference{
-				Kind: "Service",
-				Name: "",
-			},
-			Host: "",
-		},
-	}
 }
