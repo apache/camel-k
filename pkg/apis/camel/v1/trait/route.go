@@ -33,7 +33,8 @@ type RouteTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// The annotations added to route.
 	// This can be used to set route specific annotations
-	// See https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
+	// For annotations options see https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
+	// CLI usage example: -t "ingress.annotations.'nginx.ingress.kubernetes.io/use-regex'=true"
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 	// To configure the host exposed by the route.
 	Host string `property:"host" json:"host,omitempty"`
