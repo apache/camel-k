@@ -36,15 +36,17 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
+	// IntegrationDigestEnvVar --
 	IntegrationDigestEnvVar = "CAMEL_K_DIGEST"
 )
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag.
-func ComputeForIntegration(integration *v1.Integration) (string, error) {
+func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.ConfigMap, secrets []*corev1.Secret) (string, error) {
 	hash := sha256.New()
 	// Integration version is relevant
 	if _, err := hash.Write([]byte(integration.Status.Version)); err != nil {
@@ -130,6 +132,18 @@ func ComputeForIntegration(integration *v1.Integration) (string, error) {
 	for _, k := range sortedTraitAnnotationsKeys(integration) {
 		v := integration.Annotations[k]
 		if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, v))); err != nil {
+			return "", err
+		}
+	}
+
+	// Configmap and secret content
+	for _, cm := range configmaps {
+		if _, err := hash.Write([]byte(cm.String())); err != nil {
+			return "", err
+		}
+	}
+	for _, s := range secrets {
+		if _, err := hash.Write([]byte(s.String())); err != nil {
 			return "", err
 		}
 	}

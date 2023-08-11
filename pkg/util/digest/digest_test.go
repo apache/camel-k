@@ -27,13 +27,13 @@ import (
 
 func TestDigestUsesAnnotations(t *testing.T) {
 	it := v1.Integration{}
-	digest1, err := ComputeForIntegration(&it)
+	digest1, err := ComputeForIntegration(&it, nil, nil)
 	assert.NoError(t, err)
 
 	it.Annotations = map[string]string{
 		"another.annotation": "hello",
 	}
-	digest2, err := ComputeForIntegration(&it)
+	digest2, err := ComputeForIntegration(&it, nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, digest1, digest2)
 
@@ -41,7 +41,7 @@ func TestDigestUsesAnnotations(t *testing.T) {
 		"another.annotation":                   "hello",
 		"trait.camel.apache.org/cron.fallback": "true",
 	}
-	digest3, err := ComputeForIntegration(&it)
+	digest3, err := ComputeForIntegration(&it, nil, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, digest1, digest3)
 }

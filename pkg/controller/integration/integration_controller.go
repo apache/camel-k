@@ -384,7 +384,8 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 }
 
 func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration, log *log.Logger) error {
-	d, err := digest.ComputeForIntegration(target)
+	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, r.client, target)
+	d, err := digest.ComputeForIntegration(target, configmaps, secrets)
 	if err != nil {
 		return err
 	}
