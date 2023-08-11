@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Tekton ServiceAccount missing camelcatalog access [\#4666](https://github.com/apache/camel-k/issues/4666)
 - 404 in release page [\#4654](https://github.com/apache/camel-k/issues/4654)
 - Error running integration on Camel-K v2 [\#4632](https://github.com/apache/camel-k/issues/4632)
 - camel-k installed with helm does not create cluster role for pipes and kameletbindings [\#4629](https://github.com/apache/camel-k/issues/4629)
@@ -34,7 +35,12 @@
 
 **Merged pull requests:**
 
+- fix\(cicd\): Add list camelcatalog permission in tekton SA [\#4667](https://github.com/apache/camel-k/pull/4667) ([gansheer](https://github.com/gansheer))
+- feat: added annotations support for route trait [\#4664](https://github.com/apache/camel-k/pull/4664) ([realMartinez](https://github.com/realMartinez))
+- feat\(trait\): prepare to remove runtime dependencies [\#4663](https://github.com/apache/camel-k/pull/4663) ([squakez](https://github.com/squakez))
 - chore\(ci\): Updates of otlp collector and some github actions [\#4660](https://github.com/apache/camel-k/pull/4660) ([gansheer](https://github.com/gansheer))
+- chore\(e2e\): Test on kamelets configurations using configmaps [\#4659](https://github.com/apache/camel-k/pull/4659) ([gansheer](https://github.com/gansheer))
+- Enhance CamelCatalog can't be found error msg [\#4658](https://github.com/apache/camel-k/pull/4658) ([bouskaJ](https://github.com/bouskaJ))
 - fix\(ci\): sleep 30 minutes [\#4657](https://github.com/apache/camel-k/pull/4657) ([squakez](https://github.com/squakez))
 - feat\(install\): Camel K offline mode [\#4656](https://github.com/apache/camel-k/pull/4656) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.33 to 0.6.34 [\#4653](https://github.com/apache/camel-k/pull/4653) ([dependabot[bot]](https://github.com/apps/dependabot))
