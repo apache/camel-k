@@ -46,8 +46,8 @@ func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// TODO: we may need to add a timeout strategy, i.e give up after some time in case of an unrecoverable error.
 
-	// Check if the Integration has changed and requires a rebuild
-	hash, err := digest.ComputeForIntegration(integration)
+	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, action.client, integration)
+	hash, err := digest.ComputeForIntegration(integration, configmaps, secrets)
 	if err != nil {
 		return nil, err
 	}

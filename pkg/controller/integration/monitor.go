@@ -36,9 +36,11 @@ import (
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
 func NewMonitorAction() Action {
@@ -64,7 +66,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	// so handle it differently from the rest
 	if isInInitializationFailed(integration.Status) {
 		// Only check if the Integration requires a rebuild
-		return action.checkDigestAndRebuild(integration, nil)
+		return action.checkDigestAndRebuild(ctx, integration, nil)
 	}
 
 	// At that staged the Integration must have a Kit
@@ -80,7 +82,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	}
 
 	// Check if the Integration requires a rebuild
-	if changed, err := action.checkDigestAndRebuild(integration, kit); err != nil {
+	if changed, err := action.checkDigestAndRebuild(ctx, integration, kit); err != nil {
 		return nil, err
 	} else if changed != nil {
 		return changed, nil
@@ -175,10 +177,9 @@ func isInInitializationFailed(status v1.IntegrationStatus) bool {
 	return false
 }
 
-func (action *monitorAction) checkDigestAndRebuild(
-	integration *v1.Integration, kit *v1.IntegrationKit,
-) (*v1.Integration, error) {
-	hash, err := digest.ComputeForIntegration(integration)
+func (action *monitorAction) checkDigestAndRebuild(ctx context.Context, integration *v1.Integration, kit *v1.IntegrationKit) (*v1.Integration, error) {
+	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, action.client, integration)
+	hash, err := digest.ComputeForIntegration(integration, configmaps, secrets)
 	if err != nil {
 		return nil, err
 	}
@@ -201,6 +202,25 @@ func (action *monitorAction) checkDigestAndRebuild(
 	}
 
 	return nil, nil
+}
+
+func getIntegrationSecretsAndConfigmaps(ctx context.Context, client client.Client, integration *v1.Integration) ([]*corev1.Secret, []*corev1.ConfigMap) {
+	configmaps := make([]*corev1.ConfigMap, 0)
+	secrets := make([]*corev1.Secret, 0)
+	if integration.Spec.Traits.Mount != nil {
+		for _, c := range integration.Spec.Traits.Mount.Configs {
+			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
+				if conf.StorageType() == utilResource.StorageTypeConfigmap {
+					configmap := kubernetes.LookupConfigmap(ctx, client, integration.Namespace, conf.Name())
+					configmaps = append(configmaps, configmap)
+				} else if conf.StorageType() == utilResource.StorageTypeSecret {
+					secret := kubernetes.LookupSecret(ctx, client, integration.Namespace, conf.Name())
+					secrets = append(secrets, secret)
+				}
+			}
+		}
+	}
+	return secrets, configmaps
 }
 
 type controller interface {
