@@ -37,6 +37,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - camel.apache.org
+  resources:
+  - camelcatalogs
+  verbs:
+  - list
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
