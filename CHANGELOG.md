@@ -6,12 +6,14 @@
 
 **Closed issues:**
 
+- 404 in release page [\#4654](https://github.com/apache/camel-k/issues/4654)
 - Error running integration on Camel-K v2 [\#4632](https://github.com/apache/camel-k/issues/4632)
 - camel-k installed with helm does not create cluster role for pipes and kameletbindings [\#4629](https://github.com/apache/camel-k/issues/4629)
 - Include Camel release subproject in the release process [\#4627](https://github.com/apache/camel-k/issues/4627)
 - Bot updating docs/antora.yaml causes camel-website build to fail [\#4624](https://github.com/apache/camel-k/issues/4624)
 - Upgrade to Go 1.19.x or 1.20.x [\#4613](https://github.com/apache/camel-k/issues/4613)
 - Cannot build with Camel Quarkus 3.0.0 RC1 [\#4609](https://github.com/apache/camel-k/issues/4609)
+- Changelog action is hitting github API rate limit [\#4596](https://github.com/apache/camel-k/issues/4596)
 - \[Openshift\] Repeated install/uninstall and removal of CamelCatalog leads to re-creation of builder image [\#4569](https://github.com/apache/camel-k/issues/4569)
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - Documentation and validation for new feature Build Pipeline [\#4558](https://github.com/apache/camel-k/issues/4558)
