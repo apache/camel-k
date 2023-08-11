@@ -1381,6 +1381,11 @@ traits:
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
+  - name: annotations
+    type: map[string]string
+    description: 'The annotations added to route. This can be used to set route specific
+      annotations For annotations options see https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
+      CLI usage example: -t "route.annotations.''haproxy.router.openshift.io/balance''=true"'
   - name: host
     type: string
     description: To configure the host exposed by the route.

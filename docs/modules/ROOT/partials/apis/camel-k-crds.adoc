@@ -1311,6 +1311,7 @@ list of dependencies needed for this scope
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
 Capability is a particular feature which requires a well known set of dependencies
+which are specified in the runtime catalog
 
 [cols="2,2a",options="header"]
 |===
@@ -7279,6 +7280,16 @@ nolint: tagliatelle
 
 
 
+
+|`annotations` +
+map[string]string
+|
+
+
+The annotations added to route.
+This can be used to set route specific annotations
+For annotations options see https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
+CLI usage example: -t "route.annotations.'haproxy.router.openshift.io/balance'=true"
 
 |`host` +
 string
