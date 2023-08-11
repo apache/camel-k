@@ -219,6 +219,17 @@ func getIntegrationSecretsAndConfigmaps(ctx context.Context, client client.Clien
 				}
 			}
 		}
+		for _, r := range integration.Spec.Traits.Mount.Resources {
+			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
+				if conf.StorageType() == utilResource.StorageTypeConfigmap {
+					configmap := kubernetes.LookupConfigmap(ctx, client, integration.Namespace, conf.Name())
+					configmaps = append(configmaps, configmap)
+				} else if conf.StorageType() == utilResource.StorageTypeSecret {
+					secret := kubernetes.LookupSecret(ctx, client, integration.Namespace, conf.Name())
+					secrets = append(secrets, secret)
+				}
+			}
+		}
 	}
 	return secrets, configmaps
 }
