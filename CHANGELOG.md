@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Tekton ServiceAccount missing camelcatalog access [\#4666](https://github.com/apache/camel-k/issues/4666)
 - 404 in release page [\#4654](https://github.com/apache/camel-k/issues/4654)
 - Error running integration on Camel-K v2 [\#4632](https://github.com/apache/camel-k/issues/4632)
 - camel-k installed with helm does not create cluster role for pipes and kameletbindings [\#4629](https://github.com/apache/camel-k/issues/4629)
