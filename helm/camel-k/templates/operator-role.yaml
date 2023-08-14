@@ -44,6 +44,13 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+- apiGroups:
   - camel.apache.org
   resources:
   - builds
