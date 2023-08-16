@@ -3,7 +3,6 @@ module github.com/apache/camel-k/v2/pkg/client/camel
 go 1.20
 
 require (
-	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
 	k8s.io/api v0.25.6
 	k8s.io/apimachinery v0.25.6
 	k8s.io/client-go v0.25.6
@@ -50,6 +49,3 @@ require (
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
-
-// Local modules
-replace github.com/apache/camel-k/v2/pkg/apis/camel => ../../apis/camel

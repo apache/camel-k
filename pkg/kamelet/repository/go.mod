@@ -3,8 +3,6 @@ module github.com/apache/camel-k/v2/pkg/kamelet/repository
 go 1.20
 
 require (
-	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
-	github.com/apache/camel-k/v2/pkg/client/camel v0.0.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/oauth2 v0.7.0
 	k8s.io/apimachinery v0.25.6
@@ -58,8 +56,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
-
-// Local modules
-replace github.com/apache/camel-k/v2/pkg/apis/camel => ../../apis/camel
-
-replace github.com/apache/camel-k/v2/pkg/client/camel => ../../client/camel

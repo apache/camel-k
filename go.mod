@@ -4,9 +4,6 @@ go 1.20
 
 require (
 	github.com/Masterminds/semver v1.5.0
-	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
-	github.com/apache/camel-k/v2/pkg/client/camel v0.0.0
-	github.com/apache/camel-k/v2/pkg/kamelet/repository v0.0.0
 	github.com/container-tools/spectrum v0.6.34
 	github.com/evanphx/json-patch v5.6.0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -159,11 +156,4 @@ require (
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
-)
-
-// Local modules
-replace (
-	github.com/apache/camel-k/v2/pkg/apis/camel => ./pkg/apis/camel
-	github.com/apache/camel-k/v2/pkg/client/camel => ./pkg/client/camel
-	github.com/apache/camel-k/v2/pkg/kamelet/repository => ./pkg/kamelet/repository
 )

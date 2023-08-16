@@ -1,0 +1,8 @@
+go 1.20
+
+use (
+	.
+	./pkg/apis/camel
+	./pkg/client/camel
+	./pkg/kamelet/repository
+)
