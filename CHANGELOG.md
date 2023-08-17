@@ -6,6 +6,9 @@
 
 **Closed issues:**
 
+- Setup of Camel-K:  [\#4671](https://github.com/apache/camel-k/issues/4671)
+- unable to run sample integration [\#4670](https://github.com/apache/camel-k/issues/4670)
+- error: component not found for URI [\#4669](https://github.com/apache/camel-k/issues/4669)
 - Tekton ServiceAccount missing camelcatalog access [\#4666](https://github.com/apache/camel-k/issues/4666)
 - 404 in release page [\#4654](https://github.com/apache/camel-k/issues/4654)
 - Error running integration on Camel-K v2 [\#4632](https://github.com/apache/camel-k/issues/4632)
