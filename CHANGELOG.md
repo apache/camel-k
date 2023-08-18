@@ -6,6 +6,9 @@
 
 **Closed issues:**
 
+- Setup of Camel-K:  [\#4671](https://github.com/apache/camel-k/issues/4671)
+- unable to run sample integration [\#4670](https://github.com/apache/camel-k/issues/4670)
+- error: component not found for URI [\#4669](https://github.com/apache/camel-k/issues/4669)
 - Tekton ServiceAccount missing camelcatalog access [\#4666](https://github.com/apache/camel-k/issues/4666)
 - 404 in release page [\#4654](https://github.com/apache/camel-k/issues/4654)
 - Error running integration on Camel-K v2 [\#4632](https://github.com/apache/camel-k/issues/4632)
@@ -19,6 +22,9 @@
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - Documentation and validation for new feature Build Pipeline [\#4558](https://github.com/apache/camel-k/issues/4558)
 - `kamel promote` dry run should not validate [\#4534](https://github.com/apache/camel-k/issues/4534)
+- error  when moving file after processing in sftp [\#4306](https://github.com/apache/camel-k/issues/4306)
+- is there a component for kafka queue to create routes [\#4279](https://github.com/apache/camel-k/issues/4279)
+- Possibility to bring in pluggable and shareable trait configuration [\#4271](https://github.com/apache/camel-k/issues/4271)
 - error while increasing the consumer count in kafka [\#4270](https://github.com/apache/camel-k/issues/4270)
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
 - enabling backlog tracing for routes [\#4240](https://github.com/apache/camel-k/issues/4240)
