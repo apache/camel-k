@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Camel-k 2.0 - helm change role bindings  from kameletbindings  [\#4676](https://github.com/apache/camel-k/issues/4676)
 - Setup of Camel-K:  [\#4671](https://github.com/apache/camel-k/issues/4671)
 - unable to run sample integration [\#4670](https://github.com/apache/camel-k/issues/4670)
 - error: component not found for URI [\#4669](https://github.com/apache/camel-k/issues/4669)
