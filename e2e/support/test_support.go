@@ -1523,6 +1523,21 @@ func CreatePlainTextSecret(ns string, name string, data map[string]string) error
 	return CreatePlainTextSecretWithLabels(ns, name, data, map[string]string{})
 }
 
+func UpdateCreatePlainTextSecret(ns string, name string, data map[string]string) error {
+	sec := corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+		StringData: data,
+	}
+	return TestClient().Update(TestContext, &sec)
+}
+
 func CreatePlainTextSecretWithLabels(ns string, name string, data map[string]string, labels map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
