@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Update documentation and remove Tekton task from code [\#4678](https://github.com/apache/camel-k/issues/4678)
 - Camel-k 2.0 - helm change role bindings  from kameletbindings  [\#4676](https://github.com/apache/camel-k/issues/4676)
 - Setup of Camel-K:  [\#4671](https://github.com/apache/camel-k/issues/4671)
 - unable to run sample integration [\#4670](https://github.com/apache/camel-k/issues/4670)
@@ -42,6 +43,8 @@
 
 **Merged pull requests:**
 
+- chore\(ci\): Tekton task onboarded [\#4679](https://github.com/apache/camel-k/pull/4679) ([squakez](https://github.com/squakez))
+- Fix: Namespace permissions in api groups [\#4672](https://github.com/apache/camel-k/pull/4672) ([rajat965ng](https://github.com/rajat965ng))
 - fix\(cicd\): Add list camelcatalog permission in tekton SA [\#4667](https://github.com/apache/camel-k/pull/4667) ([gansheer](https://github.com/gansheer))
 - feat: added annotations support for route trait [\#4664](https://github.com/apache/camel-k/pull/4664) ([realMartinez](https://github.com/realMartinez))
 - feat\(trait\): prepare to remove runtime dependencies [\#4663](https://github.com/apache/camel-k/pull/4663) ([squakez](https://github.com/squakez))
