@@ -1518,7 +1518,7 @@ func CreatePlainTextSecret(ns string, name string, data map[string]string) error
 	return CreatePlainTextSecretWithLabels(ns, name, data, map[string]string{})
 }
 
-func UpdateCreatePlainTextSecret(ns string, name string, data map[string]string) error {
+func UpdatePlainTextSecret(ns string, name string, data map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
