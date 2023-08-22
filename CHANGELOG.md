@@ -38,14 +38,17 @@
 - Split Operator binary from Kamel CLI binary [\#3175](https://github.com/apache/camel-k/issues/3175)
 - Document installation on air-gapped clusters [\#1721](https://github.com/apache/camel-k/issues/1721)
 - Delegate installation to external tools [\#1503](https://github.com/apache/camel-k/issues/1503)
+- Automatically redeploy on config change [\#1235](https://github.com/apache/camel-k/issues/1235)
 - Tekton build strategy [\#682](https://github.com/apache/camel-k/issues/682)
 - kamel upgrade [\#355](https://github.com/apache/camel-k/issues/355)
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/google/uuid from 1.3.0 to 1.3.1 [\#4681](https://github.com/apache/camel-k/pull/4681) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): Tekton task onboarded [\#4679](https://github.com/apache/camel-k/pull/4679) ([squakez](https://github.com/squakez))
 - Fix: Namespace permissions in api groups [\#4672](https://github.com/apache/camel-k/pull/4672) ([rajat965ng](https://github.com/rajat965ng))
 - fix\(cicd\): Add list camelcatalog permission in tekton SA [\#4667](https://github.com/apache/camel-k/pull/4667) ([gansheer](https://github.com/gansheer))
+- feat\(ctrl\): configmap and secret hot reload [\#4665](https://github.com/apache/camel-k/pull/4665) ([squakez](https://github.com/squakez))
 - feat: added annotations support for route trait [\#4664](https://github.com/apache/camel-k/pull/4664) ([realMartinez](https://github.com/realMartinez))
 - feat\(trait\): prepare to remove runtime dependencies [\#4663](https://github.com/apache/camel-k/pull/4663) ([squakez](https://github.com/squakez))
 - chore\(ci\): Updates of otlp collector and some github actions [\#4660](https://github.com/apache/camel-k/pull/4660) ([gansheer](https://github.com/gansheer))
