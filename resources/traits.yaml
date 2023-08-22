@@ -1132,6 +1132,10 @@ traits:
   - name: volumes
     type: '[]string'
     description: 'A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]'
+  - name: hot-reload
+    type: bool
+    description: Enable "hot reload" when a secret/configmap mounted is edited (default
+      true)
 - name: openapi
   platform: true
   profiles:

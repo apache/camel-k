@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/utils/pointer"
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -186,7 +187,7 @@ func configmapEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, c
 
 	for _, integration := range list.Items {
 		found := false
-		if integration.Spec.Traits.Mount == nil {
+		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, true) {
 			continue
 		}
 		for _, c := range integration.Spec.Traits.Mount.Configs {
@@ -236,7 +237,7 @@ func secretEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, sec 
 
 	for _, integration := range list.Items {
 		found := false
-		if integration.Spec.Traits.Mount == nil {
+		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, true) {
 			continue
 		}
 		for _, c := range integration.Spec.Traits.Mount.Configs {

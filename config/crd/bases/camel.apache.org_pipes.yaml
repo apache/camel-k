@@ -7352,6 +7352,10 @@ spec:
                             description: Can be used to enable or disable a trait.
                               All traits share this common property.
                             type: boolean
+                          hotReload:
+                            description: Enable "hot reload" when a secret/configmap
+                              mounted is edited (default true)
+                            type: boolean
                           resources:
                             description: 'A list of resources (text or binary content)
                               pointing to configmap/secret. The resources are expected
