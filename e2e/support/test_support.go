@@ -430,7 +430,7 @@ func MakeWithContext(ctx context.Context, rule string, args ...string) *exec.Cmd
 	defaultArgs := strings.Fields(makeArgs)
 	args = append(defaultArgs, args...)
 
-	defaultDir := "../../../../install"
+	defaultDir := "."
 	makeDir := os.Getenv("CAMEL_K_TEST_MAKE_DIR")
 	if makeDir == "" {
 		makeDir = defaultDir
