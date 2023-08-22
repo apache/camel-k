@@ -336,7 +336,8 @@ spec:
                   capabilities:
                     additionalProperties:
                       description: Capability is a particular feature which requires
-                        a well known set of dependencies
+                        a well known set of dependencies which are specified in the
+                        runtime catalog
                       properties:
                         dependencies:
                           items:

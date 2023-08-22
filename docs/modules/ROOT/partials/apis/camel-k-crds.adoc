@@ -1311,6 +1311,7 @@ list of dependencies needed for this scope
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
 Capability is a particular feature which requires a well known set of dependencies
+which are specified in the runtime catalog
 
 [cols="2,2a",options="header"]
 |===
@@ -6854,6 +6855,13 @@ Syntax: [configmap{vbar}secret]:name[/key][@path], where name represents the res
 
 
 A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
+
+|`hotReload` +
+bool
+|
+
+
+Enable "hot reload" when a secret/configmap mounted is edited (default true)
 
 
 |===
