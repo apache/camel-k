@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Update documentation and remove Tekton task from code [\#4678](https://github.com/apache/camel-k/issues/4678)
 - Camel-k 2.0 - helm change role bindings  from kameletbindings  [\#4676](https://github.com/apache/camel-k/issues/4676)
 - Setup of Camel-K:  [\#4671](https://github.com/apache/camel-k/issues/4671)
 - unable to run sample integration [\#4670](https://github.com/apache/camel-k/issues/4670)
