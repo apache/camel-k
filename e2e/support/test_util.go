@@ -24,10 +24,15 @@ package support
 
 import (
 	"os"
+	"os/exec"
+	"strings"
+	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gexec"
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/onsi/gomega/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -49,4 +54,61 @@ func GetEnvOrDefault(key string, deflt string) string {
 	} else {
 		return deflt
 	}
+}
+
+func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
+	t.Helper()
+
+	var cmdOut strings.Builder
+	var cmdErr strings.Builder
+
+	defer func() {
+		if t.Failed() {
+			t.Logf("Output from make command:\n%s\n", cmdOut.String())
+			t.Logf("Error from make command:\n%s\n", cmdErr.String())
+		}
+	}()
+
+	session, err := gexec.Start(command, &cmdOut, &cmdErr)
+	session.Wait()
+	Eventually(session).Should(gexec.Exit(0))
+	assert.NoError(t, err)
+	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
+}
+
+//
+// Expect a command error with an exit code of 1
+//
+func ExpectExecError(t *testing.T, command *exec.Cmd) {
+	t.Helper()
+
+	var cmdOut strings.Builder
+	var cmdErr strings.Builder
+
+	defer func() {
+		if t.Failed() {
+			t.Logf("Output from make command:\n%s\n", cmdOut.String())
+			t.Logf("Error from make command:\n%s\n", cmdErr.String())
+		}
+	}()
+
+	session, err := gexec.Start(command, &cmdOut, &cmdErr)
+	session.Wait()
+	Eventually(session).ShouldNot(gexec.Exit(0))
+	assert.NoError(t, err)
+	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
+}
+
+// Clean up the cluster ready for the next set of tests
+func Cleanup() {
+	// Remove the locally installed operator
+	UninstallAll()
+
+	// Ensure the CRDs & ClusterRoles are reinstalled if not already
+	Kamel("install", "--olm=false", "--cluster-setup").Execute()
+}
+
+// Removes all items
+func UninstallAll() {
+	Kamel("uninstall", "--olm=false", "--all").Execute()
 }
