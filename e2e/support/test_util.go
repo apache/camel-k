@@ -64,8 +64,8 @@ func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
 
 	defer func() {
 		if t.Failed() {
-			t.Logf("Output from make command:\n%s\n", cmdOut.String())
-			t.Logf("Error from make command:\n%s\n", cmdErr.String())
+			t.Logf("Output from exec command:\n%s\n", cmdOut.String())
+			t.Logf("Error from exec command:\n%s\n", cmdErr.String())
 		}
 	}()
 
@@ -87,8 +87,8 @@ func ExpectExecError(t *testing.T, command *exec.Cmd) {
 
 	defer func() {
 		if t.Failed() {
-			t.Logf("Output from make command:\n%s\n", cmdOut.String())
-			t.Logf("Error from make command:\n%s\n", cmdErr.String())
+			t.Logf("Output from exec command:\n%s\n", cmdOut.String())
+			t.Logf("Error from exec command:\n%s\n", cmdErr.String())
 		}
 	}()
 
