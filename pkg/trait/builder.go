@@ -285,14 +285,25 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 	}
 
 	// User provides a maven profile
-	if t.MavenProfile != "" {
-		mavenProfile, err := v1.DecodeValueSource(t.MavenProfile, "profile.xml",
-			"illegal profile definition, syntax: configmap|secret:resource-name[/profile path]")
-		if err != nil {
-			return nil, fmt.Errorf("invalid maven profile: %s: %w. ", t.MavenProfile, err)
+	if t.MavenProfiles != nil {
+		mavenProfiles := make([]v1.ValueSource, 0)
+		for _, v := range t.MavenProfiles {
+			if v != "" {
+				// TODO parametrize message with input
+				mavenProfile, err := v1.DecodeValueSource(v, "profile.xml",
+					"illegal profile definition, syntax: configmap|secret:resource-name[/profile path]")
+				if err != nil {
+					return nil, fmt.Errorf("invalid maven profile: %s: %w. ", v, err)
+				}
+				mavenProfiles = append(mavenProfiles, mavenProfile)
+			}
 		}
-		task.Maven.Profile = mavenProfile
+		task.Maven.Profiles = mavenProfiles
 	}
+	// add jib profile
+	/*if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
+		t.L.Info("GFO - You should add jib profile")
+	}*/
 
 	steps := make([]builder.Step, 0)
 	steps = append(steps, builder.Project.CommonSteps...)

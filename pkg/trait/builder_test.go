@@ -255,10 +255,10 @@ func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
 	return v1.Task{}
 }
 
-func TestMavenProfileBuilderTrait(t *testing.T) {
+func TestMavenProfilesBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.MavenProfile = "configmap:maven-profile/owasp-profile.xml"
+	builderTrait.MavenProfiles = []string{"configmap:maven-profile/owasp-profile.xml", "secret:maven-profile-secret"}
 
 	err := builderTrait.Apply(env)
 
@@ -271,5 +271,24 @@ func TestMavenProfileBuilderTrait(t *testing.T) {
 			},
 			Key: "owasp-profile.xml",
 		},
-	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profile)
+	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[0])
+	assert.Equal(t, v1.ValueSource{
+		SecretKeyRef: &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "maven-profile-secret",
+			},
+			Key: "profile.xml",
+		},
+	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[1])
+}
+
+func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.MavenProfiles = []string{"fakeprofile"}
+
+	err := builderTrait.Apply(env)
+
+	assert.NotNil(t, err)
+
 }
