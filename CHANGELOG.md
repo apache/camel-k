@@ -24,6 +24,7 @@
 - Give the possibility to add a maven profile to an Integration project [\#4560](https://github.com/apache/camel-k/issues/4560)
 - Documentation and validation for new feature Build Pipeline [\#4558](https://github.com/apache/camel-k/issues/4558)
 - `kamel promote` dry run should not validate [\#4534](https://github.com/apache/camel-k/issues/4534)
+- Helm chart 0.13.1 failed to install [\#4497](https://github.com/apache/camel-k/issues/4497)
 - error  when moving file after processing in sftp [\#4306](https://github.com/apache/camel-k/issues/4306)
 - is there a component for kafka queue to create routes [\#4279](https://github.com/apache/camel-k/issues/4279)
 - Possibility to bring in pluggable and shareable trait configuration [\#4271](https://github.com/apache/camel-k/issues/4271)
@@ -35,6 +36,7 @@
 - Release script utils: Remove examples upload since they don't exist anymore [\#4069](https://github.com/apache/camel-k/issues/4069)
 - `kamel promote` with new tenancy model [\#3890](https://github.com/apache/camel-k/issues/3890)
 - Use `govulncheck` to check security vulnerabilities [\#3753](https://github.com/apache/camel-k/issues/3753)
+- update camel-k operator from 0.6.0 [\#3259](https://github.com/apache/camel-k/issues/3259)
 - Split Operator binary from Kamel CLI binary [\#3175](https://github.com/apache/camel-k/issues/3175)
 - Document installation on air-gapped clusters [\#1721](https://github.com/apache/camel-k/issues/1721)
 - Delegate installation to external tools [\#1503](https://github.com/apache/camel-k/issues/1503)
@@ -44,6 +46,7 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): helm install procedure  [\#4684](https://github.com/apache/camel-k/pull/4684) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/google/uuid from 1.3.0 to 1.3.1 [\#4681](https://github.com/apache/camel-k/pull/4681) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): Tekton task onboarded [\#4679](https://github.com/apache/camel-k/pull/4679) ([squakez](https://github.com/squakez))
 - Fix: Namespace permissions in api groups [\#4672](https://github.com/apache/camel-k/pull/4672) ([rajat965ng](https://github.com/rajat965ng))
