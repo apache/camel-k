@@ -38,6 +38,7 @@
 - Split Operator binary from Kamel CLI binary [\#3175](https://github.com/apache/camel-k/issues/3175)
 - Document installation on air-gapped clusters [\#1721](https://github.com/apache/camel-k/issues/1721)
 - Delegate installation to external tools [\#1503](https://github.com/apache/camel-k/issues/1503)
+- Automatically redeploy on config change [\#1235](https://github.com/apache/camel-k/issues/1235)
 - Tekton build strategy [\#682](https://github.com/apache/camel-k/issues/682)
 - kamel upgrade [\#355](https://github.com/apache/camel-k/issues/355)
 
