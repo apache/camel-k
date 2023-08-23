@@ -1,0 +1,48 @@
+name: Feature Request
+description: Suggest an idea for this project
+title: "[Feature]: "
+labels: ["kind/feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to Apache Camel K! 👋🎉 Thanks for taking the time to fill out this feature request.
+
+        Before you post:
+        - Please search for existing issues to avoid creating duplicate bugs/feature requests.
+        - Please be respectful and considerate of others (see [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md)).
+        - If you only have a question, you may get a faster response by asking in [our Zulip chat room](https://camel.zulipchat.com/login/) or [mailing list](https://camel.apache.org/community/mailing-list/).
+
+        Additional information helps us troubleshoot the issue faster.
+  - type: textarea
+    id: requirement
+    attributes:
+      label: Requirement
+      description: What kind of business use case are you trying to solve?
+      placeholder: |
+        As a [description of a user persona]
+        I want [functionality]
+        so that [benefit].
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: |
+        What in Camel K blocks you from solving the requirement?
+        If possible, describe the impact of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: |
+        What do you suggest to solve the problem or improve the existing situation?
+        It's ok if you don't have one.
+  - type: textarea
+    id: questions
+    attributes:
+      label: Open questions
+      description: Questions that should be answered before proceeding with implementation.

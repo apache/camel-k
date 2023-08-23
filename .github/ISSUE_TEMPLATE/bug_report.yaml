@@ -1,0 +1,89 @@
+name: Bug Report
+description: Create a report to help us improve
+title: "[Bug]: "
+labels: ["kind/bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to Apache Camel K! 👋🎉 Thanks for taking the time to fill out this bug report.
+
+        Before you post:
+        - Please search for existing issues to avoid creating duplicate bugs/feature requests.
+        - Please be respectful and considerate of others (see [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md)).
+        - If you only have a question, you may get a faster response by asking in [our Zulip chat room](https://camel.zulipchat.com/login/) or [mailing list](https://camel.apache.org/community/mailing-list/).
+
+        Additional information helps us troubleshoot the issue faster.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: |
+        Please describe the problem you are experiencing. What is not working?
+        Try to focus on the functional aspect of the issue, rather than technical details.
+      placeholder: |
+        While [description of the action/steps taken]
+        I noticed [description of the issue/bug]
+        as a result of that [impact].
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: What do you expected to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Please copy and paste any relevant log output.
+        This will be automatically formatted into code, so no need for backticks.
+        Please indicate from which component the logs originate.
+      render: shell
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: If applicable, add screenshots to help explain your problem.
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem.
+  - type: markdown
+    attributes:
+      value: |
+        ## Camel K setup
+        Please describe your Camel K setup.
+  - type: input
+    id: version
+    attributes:
+      label: Camel K version
+      description: Which version of the Camel K are you running?
+      placeholder: "Ex: v1.12.1"
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: Which language are you using for writing integrations? [supported languages](https://camel.apache.org/camel-k/next/languages/languages.html)
+      placeholder: "Ex: Java, XML, or YAML"
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      description: On which OS are you running Camel K?
+      placeholder: "Ex: Linux, Windows, etc."
