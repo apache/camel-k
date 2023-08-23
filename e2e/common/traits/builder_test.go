@@ -229,12 +229,15 @@ func TestBuilderTrait(t *testing.T) {
 	t.Run("Run maven profile", func(t *testing.T) {
 		name := "java-maven-profile"
 
-		mavenProfileCm := newMavenProfileConfigMap(ns, "maven-profile", "owasp-profile")
-		Expect(TestClient().Create(TestContext, mavenProfileCm)).To(Succeed())
+		mavenProfile1Cm := newMavenProfileConfigMap(ns, "maven-profile-owasp", "owasp-profile")
+		Expect(TestClient().Create(TestContext, mavenProfile1Cm)).To(Succeed())
+		mavenProfile2Cm := newMavenProfileConfigMap(ns, "maven-profile-dependency", "dependency-profile")
+		Expect(TestClient().Create(TestContext, mavenProfile2Cm)).To(Succeed())
 
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
-			"-t", "builder.maven-profile=configmap:maven-profile/owasp-profile",
+			"-t", "builder.maven-profiles=configmap:maven-profile-owasp/owasp-profile",
+			"-t", "builder.maven-profiles=configmap:maven-profile-dependency/dependency-profile",
 			"-t", "builder.tasks=custom1;alpine;cat maven/pom.xml",
 			"-t", "builder.strategy=pod",
 		).Execute()).To(Succeed())
@@ -260,10 +263,12 @@ func TestBuilderTrait(t *testing.T) {
 			TestTimeoutShort).Should(ContainSubstring("</project>"))
 
 		// Check logs
-		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`<id>owasp-dependency-check</id>`))
+		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`<id>owasp-profile</id>`))
+		Eventually(Logs(ns, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`<id>dependency-profile</id>`))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		Expect(TestClient().Delete(TestContext, mavenProfileCm)).To(Succeed())
+		Expect(TestClient().Delete(TestContext, mavenProfile1Cm)).To(Succeed())
+		Expect(TestClient().Delete(TestContext, mavenProfile2Cm)).To(Succeed())
 	})
 }
 
@@ -280,7 +285,7 @@ func newMavenProfileConfigMap(ns, name, key string) *corev1.ConfigMap {
 		Data: map[string]string{
 			key: fmt.Sprintf(`
 <profile>
-  <id>owasp-dependency-check</id>
+  <id>` + key + `</id>
   <build>
     <plugins>
       <plugin>

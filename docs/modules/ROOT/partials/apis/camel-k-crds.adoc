@@ -3837,8 +3837,8 @@ map[string]string
 
 The Maven properties.
 
-|`profile` +
-*xref:#_camel_apache_org_v1_ValueSource[ValueSource]*
+|`profiles` +
+*xref:#_camel_apache_org_v1_ValueSource[[\]ValueSource]*
 |
 
 
@@ -5451,12 +5451,12 @@ string
 
 When using `pod` strategy, the maximum amount of memory required by the pod builder.
 
-|`mavenProfile` +
-string
+|`mavenProfiles` +
+[]string
 |
 
 
-A reference pointing to a configmap/secret that contains a maven profile.
+A list of references pointing to configmaps/secrets that contains a maven profile.
 The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
 Syntax: [configmap{vbar}secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
 

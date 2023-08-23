@@ -64,6 +64,11 @@ func (in *BuilderTrait) DeepCopyInto(out *BuilderTrait) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.MavenProfiles != nil {
+		in, out := &in.MavenProfiles, &out.MavenProfiles
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Tasks != nil {
 		in, out := &in.Tasks, &out.Tasks
 		*out = make([]string, len(*in))

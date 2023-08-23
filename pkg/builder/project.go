@@ -41,7 +41,7 @@ func init() {
 		Project.GenerateProjectSettings,
 		Project.InjectDependencies,
 		Project.SanitizeDependencies,
-		Project.InjectProfile,
+		Project.InjectProfiles,
 	}
 }
 
@@ -51,7 +51,7 @@ type projectSteps struct {
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
-	InjectProfile           Step
+	InjectProfiles          Step
 
 	CommonSteps []Step
 }
@@ -62,7 +62,7 @@ var Project = projectSteps{
 	GenerateProjectSettings: NewStep(ProjectGenerationPhase+1, generateProjectSettings),
 	InjectDependencies:      NewStep(ProjectGenerationPhase+2, injectDependencies),
 	SanitizeDependencies:    NewStep(ProjectGenerationPhase+3, sanitizeDependencies),
-	InjectProfile:           NewStep(ProjectGenerationPhase+4, injectProfile),
+	InjectProfiles:          NewStep(ProjectGenerationPhase+4, injectProfiles),
 }
 
 func cleanUpBuildDir(ctx *builderContext) error {
@@ -195,13 +195,19 @@ func sanitizeDependencies(ctx *builderContext) error {
 	return camel.SanitizeIntegrationDependencies(ctx.Maven.Project.Dependencies)
 }
 
-func injectProfile(ctx *builderContext) error {
-	val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.Profile)
-	if err != nil {
-		return err
-	}
-	if val != "" {
-		ctx.Maven.Project.AddProfile(val)
+func injectProfiles(ctx *builderContext) error {
+	if ctx.Build.Maven.Profiles != nil {
+		profiles := ""
+		for _, profile := range ctx.Build.Maven.Profiles {
+			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &profile)
+			if err != nil {
+				return err
+			}
+			if val != "" {
+				profiles += val
+			}
+		}
+		ctx.Maven.Project.AddProfiles(profiles)
 	}
 	return nil
 }
