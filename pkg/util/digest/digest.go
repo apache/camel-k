@@ -40,7 +40,7 @@ import (
 )
 
 const (
-	// IntegrationDigestEnvVar --
+	// IntegrationDigestEnvVar -- .
 	IntegrationDigestEnvVar = "CAMEL_K_DIGEST"
 )
 

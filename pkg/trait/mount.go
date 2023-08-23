@@ -116,7 +116,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 		// Volumes declared in the Integration resources
 		e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
 		// Volumes declared in the trait config/resource options
-		err := t.configureVolumesAndMounts(e, volumes, &container.VolumeMounts)
+		err := t.configureVolumesAndMounts(volumes, &container.VolumeMounts)
 		if err != nil {
 			return err
 		}
@@ -125,7 +125,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
+func (t *mountTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
 	for _, c := range t.Configs {
 		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 			t.mountResource(vols, mnts, conf)
