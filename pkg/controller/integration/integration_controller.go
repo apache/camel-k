@@ -351,7 +351,7 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 
 				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
 			})).
-		// Watch for Configmaps or Secret used in the Integrations for updates.
+		// Watch for Configmaps or Secret used in the Integrations for updates
 		Watches(&source.Kind{Type: &corev1.ConfigMap{}},
 			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
 				cm, ok := a.(*corev1.ConfigMap)

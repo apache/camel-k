@@ -18,7 +18,6 @@ limitations under the License.
 package resource
 
 import (
-	"crypto/sha1" // nolint: gosec
 	"fmt"
 	"regexp"
 	"strings"
@@ -174,14 +173,4 @@ func parse(item string, contentType ContentType) (*Config, error) {
 	}
 
 	return newConfig(cot, contentType, value), nil
-}
-
-func hashFrom(contents ...[]byte) string {
-	// SHA1 because we need to limit the length to less than 64 chars
-	hash := sha1.New() // nolint: gosec
-	for _, c := range contents {
-		hash.Write(c)
-	}
-
-	return fmt.Sprintf("%x", hash.Sum(nil))
 }
