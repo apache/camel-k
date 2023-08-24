@@ -72,7 +72,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource Pipe
-	err = c.Watch(&source.Kind{Type: &v1.Pipe{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Pipe{}),
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -114,10 +114,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch Integration to propagate changes downstream
-	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &v1.Pipe{},
-		IsController: false,
-	})
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Integration{}),
+		handler.EnqueueRequestForOwner(
+			mgr.GetScheme(),
+			mgr.GetRESTMapper(),
+			&v1.Pipe{},
+			handler.OnlyControllerOwner(),
+		),
+	)
 	if err != nil {
 		return err
 	}

@@ -70,7 +70,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.IntegrationPlatform{}),
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
