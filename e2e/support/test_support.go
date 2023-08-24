@@ -58,6 +58,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -2704,9 +2705,13 @@ func NewTestNamespace(injectKnativeBroker bool) ctrl.Object {
 	if oc, err := openshift.IsOpenShift(TestClient()); err != nil {
 		failTest(err)
 	} else if oc {
+		httpCli, err := rest.HTTPClientFor(c.GetConfig())
+		if err != nil {
+			failTest(err)
+		}
 		rest, err := apiutil.RESTClientForGVK(
 			schema.GroupVersionKind{Group: projectv1.GroupName, Version: projectv1.GroupVersion.Version}, false,
-			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()))
+			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()), httpCli)
 		if err != nil {
 			failTest(err)
 		}

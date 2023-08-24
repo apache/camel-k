@@ -39,7 +39,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"knative.dev/serving/pkg/apis/serving"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -329,8 +328,8 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 		// Watch for IntegrationKit phase transitioning to ready or error, and
 		// enqueue requests for any integration that matches the kit, in building
 		// or running phase.
-		Watches(&source.Kind{Type: &v1.IntegrationKit{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&v1.IntegrationKit{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				kit, ok := a.(*v1.IntegrationKit)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
@@ -341,8 +340,8 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 			})).
 		// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 		// requests for any integrations that are in phase waiting for platform
-		Watches(&source.Kind{Type: &v1.IntegrationPlatform{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&v1.IntegrationPlatform{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				p, ok := a.(*v1.IntegrationPlatform)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integrations")
@@ -352,8 +351,8 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
 			})).
 		// Watch for Configmaps or Secret used in the Integrations for updates
-		Watches(&source.Kind{Type: &corev1.ConfigMap{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&corev1.ConfigMap{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				cm, ok := a.(*corev1.ConfigMap)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
@@ -362,8 +361,8 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 
 				return configmapEnqueueRequestsFromMapFunc(ctx, c, cm)
 			})).
-		Watches(&source.Kind{Type: &corev1.Secret{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&corev1.Secret{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				secret, ok := a.(*corev1.Secret)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
@@ -375,8 +374,8 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
 		// Watch for the Integration Pods
-		Watches(&source.Kind{Type: &corev1.Pod{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&corev1.Pod{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				pod, ok := a.(*corev1.Pod)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integration pods")

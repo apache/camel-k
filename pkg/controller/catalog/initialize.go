@@ -53,6 +53,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/rest"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -318,10 +319,13 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		if err != nil {
 			return err
 		}
-
+		httpCli, err := rest.HTTPClientFor(c.GetConfig())
+		if err != nil {
+			return err
+		}
 		restClient, err := apiutil.RESTClientForGVK(
 			schema.GroupVersionKind{Group: "build.openshift.io", Version: "v1"}, false,
-			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()))
+			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()), httpCli)
 		if err != nil {
 			return err
 		}

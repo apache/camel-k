@@ -72,7 +72,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource KameletBinding
-	err = c.Watch(&source.Kind{Type: &v1alpha1.KameletBinding{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1alpha1.KameletBinding{}),
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -114,10 +114,14 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch Integration to propagate changes downstream
-	err = c.Watch(&source.Kind{Type: &v1.Integration{}}, &handler.EnqueueRequestForOwner{
-		OwnerType:    &v1alpha1.KameletBinding{},
-		IsController: false,
-	})
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Integration{}),
+		handler.EnqueueRequestForOwner(
+			mgr.GetScheme(),
+			mgr.GetRESTMapper(),
+			&v1alpha1.KameletBinding{},
+			handler.OnlyControllerOwner(),
+		),
+	)
 	if err != nil {
 		return err
 	}
