@@ -40,7 +40,13 @@ func TestConfigmapHotReload(t *testing.T) {
 	cmData["my-configmap-key"] = "my configmap content"
 	CreatePlainTextConfigmap(ns, "my-hot-cm", cmData)
 
-	Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy", "--config", "configmap:my-hot-cm").Execute()).To(Succeed())
+	Expect(KamelRunWithID(operatorID, ns,
+		"./files/config-configmap-route.groovy",
+		"--config",
+		"configmap:my-hot-cm",
+		"-t",
+		"mount.hot-reload=true",
+	).Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, "config-configmap-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, "config-configmap-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, "config-configmap-route"), TestTimeoutShort).Should(ContainSubstring("my configmap content"))
@@ -52,7 +58,7 @@ func TestConfigmapHotReload(t *testing.T) {
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }
 
-func TestConfigmapHotReloadFalse(t *testing.T) {
+func TestConfigmapHotReloadDefault(t *testing.T) {
 	RegisterTestingT(t)
 
 	var cmData = make(map[string]string)
@@ -62,9 +68,6 @@ func TestConfigmapHotReloadFalse(t *testing.T) {
 	Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
 		"--config",
 		"configmap:my-hot-cm-2",
-		// DO NOT hot reload
-		"-t",
-		"mount.hot-reload=false",
 	).Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, "config-configmap-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, "config-configmap-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

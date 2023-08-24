@@ -187,7 +187,7 @@ func configmapEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, c
 
 	for _, integration := range list.Items {
 		found := false
-		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, true) {
+		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, false) {
 			continue
 		}
 		for _, c := range integration.Spec.Traits.Mount.Configs {
