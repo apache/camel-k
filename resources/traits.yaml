@@ -1135,7 +1135,7 @@ traits:
   - name: hot-reload
     type: bool
     description: Enable "hot reload" when a secret/configmap mounted is edited (default
-      true)
+      false)
 - name: openapi
   platform: true
   profiles:

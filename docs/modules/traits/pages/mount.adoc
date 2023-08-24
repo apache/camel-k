@@ -47,7 +47,7 @@ Syntax: [configmap\|secret]:name[/key][@path], where name represents the resourc
 
 | mount.hot-reload
 | bool
-| Enable "hot reload" when a secret/configmap mounted is edited (default true)
+| Enable "hot reload" when a secret/configmap mounted is edited (default false)
 
 |===
 

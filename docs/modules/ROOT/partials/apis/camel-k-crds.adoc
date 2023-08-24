@@ -6861,7 +6861,7 @@ bool
 |
 
 
-Enable "hot reload" when a secret/configmap mounted is edited (default true)
+Enable "hot reload" when a secret/configmap mounted is edited (default false)
 
 
 |===

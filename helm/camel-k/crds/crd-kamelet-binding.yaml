@@ -7357,7 +7357,7 @@ spec:
                             type: boolean
                           hotReload:
                             description: Enable "hot reload" when a secret/configmap
-                              mounted is edited (default true)
+                              mounted is edited (default false)
                             type: boolean
                           resources:
                             description: 'A list of resources (text or binary content)
