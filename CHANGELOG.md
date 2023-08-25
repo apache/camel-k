@@ -50,6 +50,7 @@
 
 - chore\(deps\): bump openshift api [\#4692](https://github.com/apache/camel-k/pull/4692) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump multierr [\#4691](https://github.com/apache/camel-k/pull/4691) ([squakez](https://github.com/squakez))
+- Add GH Issue Template [\#4689](https://github.com/apache/camel-k/pull/4689) ([anishrajan25](https://github.com/anishrajan25))
 - fix: lint errors and hot reloads [\#4688](https://github.com/apache/camel-k/pull/4688) ([squakez](https://github.com/squakez))
 - fix\(e2e\): helm install procedure  [\#4684](https://github.com/apache/camel-k/pull/4684) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/google/uuid from 1.3.0 to 1.3.1 [\#4681](https://github.com/apache/camel-k/pull/4681) ([dependabot[bot]](https://github.com/apps/dependabot))
