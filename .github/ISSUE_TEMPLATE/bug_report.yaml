@@ -1,0 +1,62 @@
+name: Bug Report
+description: Create a report to help us improve
+title: "[Bug]: "
+labels: ["kind/bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to Apache Camel K! 👋🎉 Thanks for taking the time to fill out this bug report.
+
+        Before you post:
+        - Please search for existing issues to avoid creating duplicate bugs/feature requests.
+        - Please be respectful and considerate of others (see [Apache Code of Conduct](https://www.apache.org/foundation/policies/conduct)).
+        - If you only have a question, you may get a faster response by asking in [our Zulip chat room](https://camel.zulipchat.com/login/) or [mailing list](https://camel.apache.org/community/mailing-list/).
+
+        Additional information helps us troubleshoot the issue faster.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: |
+        Please describe the problem you are experiencing. What is not working?
+        Try to focus on the functional aspect of the issue, rather than technical details.
+      placeholder: |
+        While [description of the action/steps taken]
+        I noticed [description of the issue/bug]
+        as a result of that [impact].
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1.
+        2.
+        3.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: |
+        Please copy and paste any relevant log output.
+        This will be automatically formatted into code, so no need for backticks.
+        Please indicate from which component the logs originate.
+        - _**How to get camel-k-operator log**: `kubectl logs -f $(k get pod -l app=camel-k -o name)`_
+        - _**Note:** Verify the namespace/platform where camel-k is installed. The builder pod name can vary by platform (e.g., in OpenShift, it's `camel-k-kit`)._
+      render: shell
+  - type: markdown
+    attributes:
+      value: |
+        ## Camel K setup
+        Please describe your Camel K setup.
+  - type: input
+    id: version
+    attributes:
+      label: Camel K version
+      description: |
+        Which version of the Camel K are you running?
+        _Verify if the Kamel CLI is the same version as the Camel-K-Operator with `kamel version -a`_
+      placeholder: "Ex: v1.12.1"
