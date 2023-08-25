@@ -10,7 +10,7 @@ body:
 
         Before you post:
         - Please search for existing issues to avoid creating duplicate bugs/feature requests.
-        - Please be respectful and considerate of others (see [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md)).
+        - Please be respectful and considerate of others (see [Apache Code of Conduct](https://www.apache.org/foundation/policies/conduct)).
         - If you only have a question, you may get a faster response by asking in [our Zulip chat room](https://camel.zulipchat.com/login/) or [mailing list](https://camel.apache.org/community/mailing-list/).
 
         Additional information helps us troubleshoot the issue faster.
@@ -36,15 +36,6 @@ body:
         1.
         2.
         3.
-    validations:
-      required: true
-  - type: textarea
-    id: expected_behavior
-    attributes:
-      label: Expected behavior
-      description: What do you expected to happen?
-    validations:
-      required: true
   - type: textarea
     id: logs
     attributes:
@@ -56,18 +47,6 @@ body:
         - _**How to get camel-k-operator log**: `kubectl logs -f $(k get pod -l app=camel-k -o name)`_
         - _**Note:** Verify the namespace/platform where camel-k is installed. The builder pod name can vary by platform (e.g., in OpenShift, it's `camel-k-kit`)._
       render: shell
-  - type: textarea
-    id: screenshot
-    attributes:
-      label: Screenshot
-      description: |
-        If applicable, add screenshots for the **visusal elements** to help explain your problem.
-        In case of any **text (code or logs)**, please share it in **text format**.
-  - type: textarea
-    id: additional_context
-    attributes:
-      label: Additional context
-      description: Add any other context about the problem.
   - type: markdown
     attributes:
       value: |
@@ -81,15 +60,3 @@ body:
         Which version of the Camel K are you running?
         _Verify if the Kamel CLI is the same version as the Camel-K-Operator with `kamel version -a`_
       placeholder: "Ex: v1.12.1"
-  - type: input
-    id: language
-    attributes:
-      label: Language
-      description: Which language are you using for writing integrations? [supported languages](https://camel.apache.org/camel-k/next/languages/languages.html)
-      placeholder: "Ex: Java, XML, or YAML"
-  - type: input
-    id: os
-    attributes:
-      label: Operating system
-      description: On which OS are you running Camel K?
-      placeholder: "Ex: Linux, Windows, etc."

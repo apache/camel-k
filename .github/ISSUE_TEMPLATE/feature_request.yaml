@@ -10,7 +10,7 @@ body:
 
         Before you post:
         - Please search for existing issues to avoid creating duplicate bugs/feature requests.
-        - Please be respectful and considerate of others (see [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md)).
+        - Please be respectful and considerate of others (see [Apache Code of Conduct](https://www.apache.org/foundation/policies/conduct)).
         - If you only have a question, you may get a faster response by asking in [our Zulip chat room](https://camel.zulipchat.com/login/) or [mailing list](https://camel.apache.org/community/mailing-list/).
 
         Additional information helps us troubleshoot the issue faster.
