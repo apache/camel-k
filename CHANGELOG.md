@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Validate regression and default value for hot reload [\#4685](https://github.com/apache/camel-k/issues/4685)
 - Update documentation and remove Tekton task from code [\#4678](https://github.com/apache/camel-k/issues/4678)
 - Camel-k 2.0 - helm change role bindings  from kameletbindings  [\#4676](https://github.com/apache/camel-k/issues/4676)
 - Setup of Camel-K:  [\#4671](https://github.com/apache/camel-k/issues/4671)
@@ -32,6 +33,7 @@
 - Upload local dependencies as maven artifact [\#4244](https://github.com/apache/camel-k/issues/4244)
 - enabling backlog tracing for routes [\#4240](https://github.com/apache/camel-k/issues/4240)
 - Failure to deploy as native [\#4200](https://github.com/apache/camel-k/issues/4200)
+- Multierr dependency upgrade [\#4197](https://github.com/apache/camel-k/issues/4197)
 - Camel K could go offline [\#4118](https://github.com/apache/camel-k/issues/4118)
 - Release script utils: Remove examples upload since they don't exist anymore [\#4069](https://github.com/apache/camel-k/issues/4069)
 - `kamel promote` with new tenancy model [\#3890](https://github.com/apache/camel-k/issues/3890)
