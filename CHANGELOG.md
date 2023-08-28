@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Rearrange Go modules [\#4686](https://github.com/apache/camel-k/issues/4686)
 - Validate regression and default value for hot reload [\#4685](https://github.com/apache/camel-k/issues/4685)
 - Update documentation and remove Tekton task from code [\#4678](https://github.com/apache/camel-k/issues/4678)
 - Camel-k 2.0 - helm change role bindings  from kameletbindings  [\#4676](https://github.com/apache/camel-k/issues/4676)
@@ -52,6 +53,7 @@
 
 - chore\(deps\): bump openshift api [\#4692](https://github.com/apache/camel-k/pull/4692) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump multierr [\#4691](https://github.com/apache/camel-k/pull/4691) ([squakez](https://github.com/squakez))
+- Reorganize project to have a single Go module [\#4690](https://github.com/apache/camel-k/pull/4690) ([claudio4j](https://github.com/claudio4j))
 - Add GH Issue Template [\#4689](https://github.com/apache/camel-k/pull/4689) ([anishrajan25](https://github.com/anishrajan25))
 - fix: lint errors and hot reloads [\#4688](https://github.com/apache/camel-k/pull/4688) ([squakez](https://github.com/squakez))
 - fix\(e2e\): helm install procedure  [\#4684](https://github.com/apache/camel-k/pull/4684) ([squakez](https://github.com/squakez))
