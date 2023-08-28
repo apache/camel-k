@@ -226,9 +226,9 @@ codegen-tools-install: controller-gen
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
 
-build: codegen build-resources test build-kamel build-compile-integration-tests build-submodules
+build: codegen build-resources test build-kamel build-compile-integration-tests
 
-ci-build: clean codegen set-module-version set-version check-licenses dir-licenses build-kamel cross-compile
+ci-build: clean codegen set-version check-licenses dir-licenses build-kamel cross-compile
 
 do-build: gotestfmt-install
 ifeq ($(DO_TEST_PREBUILD),true)
@@ -245,16 +245,10 @@ endif
 test: do-build
 	@echo "####### Running unit test..."
 	go test ./...
-	cd pkg/apis/camel && go test ./...
-	cd pkg/client/camel && go test ./...
-	cd pkg/kamelet/repository && go test ./...
 
 test-fmt: do-build
 	@echo "####### Running unit test..."
 	go test -v ./... -json 2>&1 | gotestfmt
-	cd pkg/apis/camel && go test -v ./... -json 2>&1 | gotestfmt
-	cd pkg/client/camel && go test -v ./... -json 2>&1 | gotestfmt
-	cd pkg/kamelet/repository && go test -v ./... -json 2>&1 | gotestfmt
 
 #
 # Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
@@ -384,9 +378,6 @@ endif
 endif
 	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_TAG)
 
-build-submodules:
-	./script/build_submodules.sh
-
 build-compile-integration-tests:
 	go test -run nope -tags="integration" ./e2e/...
 
@@ -410,9 +401,6 @@ clean:
 dep:
 	@echo "Cleaning dependencies..."
 	go mod tidy
-	cd pkg/apis/camel && go mod tidy
-	cd pkg/client/camel && go mod tidy
-	cd pkg/kamelet/repository && go mod tidy
 
 detect-os:
 ifeq '$(findstring ;,$(PATH))' ';'
@@ -517,9 +505,6 @@ get-bundle-image:
 set-version:
 	./script/set_version.sh $(CUSTOM_VERSION) $(CUSTOM_IMAGE)
 
-set-module-version:
-	./script/set_go_modules_version.sh $(CUSTOM_VERSION)
-
 git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
@@ -531,12 +516,12 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-release: clean codegen set-module-version set-version build-resources check-licenses images images-push cross-compile git-tag
+release: clean codegen set-version build-resources check-licenses images images-push cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses images-all images-push-staging cross-compile fabric8-crds git-tag
+release-staging: clean codegen set-version build-resources check-licenses images-all images-push-staging cross-compile fabric8-crds git-tag
 
 # Build images
-images-nightly: clean codegen set-module-version set-version build-resources images
+images-nightly: clean codegen set-version build-resources images
 
 # Release artifacts
 release-nightly: cross-compile images-push
@@ -552,7 +537,7 @@ release-kustomize:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets
+.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary
