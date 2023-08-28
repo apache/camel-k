@@ -83,8 +83,8 @@ This executes a full build of the Go code. If you need to build the components s
 
 Currently the build is not entirely supported on Windows. If you're building on a Windows system, here's a temporary workaround:
 
-    1. Copy the `script/Makefile` to the root of the project. 
-    2. Run `make -f script/Makefile`. 
+    1. Copy the `script/Makefile` to the root of the project.
+    2. Run `make -f script/Makefile`.
     3. If the above command fails, run `make build-kamel`.
     4. Rename the `kamel` binary in the root to `kamel.exe`.
 
@@ -135,9 +135,12 @@ The commands assume you have an already running CRC instance and logged in corre
 
 === For Minikube
 
-* Run `make install-minikube`: to build the project and install it in the current namespace on Minikube
+First remove any camel k operator you may have installed, otherwise it will conflict with the new one we will build and install.
 
-This command assumes you have an already running Minikube instance with registry enabled (can be enabled with `minikube addons enable registry`) and no previous Camel K instance installed.
+* Enable the `registry` minikube addon: `minikube addons enable registry`
+* Set the access to the internal minikube registry: `eval $(minikube docker-env)`
+* Run `make images`: to build the project and install the image in the internal minikube registry
+* Install camel-k-operator: `./kamel install`
 
 === For remote Kubernetes/OpenShift clusters
 
@@ -149,6 +152,20 @@ kamel install --operator-image=docker.io/myrepo/camel-k:1.5.0-SNAPSHOT --operato
 ----
 
 Note `--olm=false` is necessary as otherwise the OLM bundle version is preferred.
+
+=== Local Helm installation
+
+If you want to test Helm installation
+
+* Build the Helm chart `make release-helm`
+* Build the project and the image: `make images`
+* Set the internal registry `export REGISTRY_ADDRESS=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')`
+* Install with Helm (look at the latest version produced by `make release-helm`)
+```
+ helm install camel-k-dev docs/charts/camel-k-2.0.1-SNAPSHOT.tgz --set platform.build.registry.address=${REGISTRY_ADDRESS} --set platform.build.registry.insecure=true --set operator.image=apache/camel-k:2.0.1-SNAPSHOT
+```
+
+To uninstall: `helm uninstall camel-k-dev`
 
 === Use
 
