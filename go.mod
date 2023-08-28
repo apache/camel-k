@@ -4,9 +4,6 @@ go 1.18
 
 require (
 	github.com/Masterminds/semver v1.5.0
-	github.com/apache/camel-k/v2/pkg/apis/camel v0.0.0
-	github.com/apache/camel-k/v2/pkg/client/camel v0.0.0
-	github.com/apache/camel-k/v2/pkg/kamelet/repository v0.0.0
 	github.com/container-tools/spectrum v0.6.29
 	github.com/evanphx/json-patch v5.6.0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -14,6 +11,7 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/google/go-github/v52 v52.0.0
 	github.com/google/uuid v1.3.0
+	github.com/imdario/mergo v0.3.13
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.7
 	github.com/mattn/go-shellwords v1.0.12
@@ -57,6 +55,7 @@ require (
 	knative.dev/pkg v0.0.0-20230418073056-dfad48eaa5d0
 	knative.dev/serving v0.37.2
 	sigs.k8s.io/controller-runtime v0.13.1
+	sigs.k8s.io/structured-merge-diff/v4 v4.2.3
 )
 
 require (
@@ -106,7 +105,6 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -157,13 +155,5 @@ require (
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
 	knative.dev/networking v0.0.0-20230419144338-e5d04e805e50 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
-)
-
-// Local modules
-replace (
-	github.com/apache/camel-k/v2/pkg/apis/camel => ./pkg/apis/camel
-	github.com/apache/camel-k/v2/pkg/client/camel => ./pkg/client/camel
-	github.com/apache/camel-k/v2/pkg/kamelet/repository => ./pkg/kamelet/repository
 )
