@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Rearrange Go modules [\#4686](https://github.com/apache/camel-k/issues/4686)
 - Validate regression and default value for hot reload [\#4685](https://github.com/apache/camel-k/issues/4685)
 - Update documentation and remove Tekton task from code [\#4678](https://github.com/apache/camel-k/issues/4678)
 - Camel-k 2.0 - helm change role bindings  from kameletbindings  [\#4676](https://github.com/apache/camel-k/issues/4676)
