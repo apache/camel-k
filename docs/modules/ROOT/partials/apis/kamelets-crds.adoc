@@ -967,7 +967,7 @@ string
 A human readable message indicating details about the transition.
 
 |`pods` +
-[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.PodCondition
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_PodCondition[[\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.PodCondition]*
 |
 
 
@@ -1011,7 +1011,7 @@ KameletBindingSpec defines the binding between a source and a sink. It can inclu
 |Description
 
 |`integration` +
-github.com/apache/camel-k/v2/pkg/apis/camel/v1.IntegrationSpec
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_IntegrationSpec[github.com/apache/camel-k/v2/pkg/apis/camel/v1.IntegrationSpec]*
 |
 
 
@@ -1246,7 +1246,7 @@ KameletSpec specifies the configuration required to execute a Kamelet
 defines the formal configuration of the Kamelet
 
 |`sources` +
-[]github.com/apache/camel-k/v2/pkg/apis/camel/v1.SourceSpec
+*xref:apis/camel-k.adoc#_camel_apache_org_v1_SourceSpec[[\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.SourceSpec]*
 |
 
 
