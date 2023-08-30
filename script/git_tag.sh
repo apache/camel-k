@@ -31,7 +31,7 @@ target_remote=$2
 git branch -D ${target_staging} || true
 git checkout -b ${target_staging}
 git add * || true
-git commit -a -m "Release ${target_version}"
+git commit -a -m "Release ${target_version}" || true
 
 git tag --force ${target_tag} ${target_staging}
 git push --force ${target_remote} ${target_tag}
