@@ -14,20 +14,49 @@ If it's the first time you are releasing Camel K, you may be required to follow 
 
 === Docker Hub staging setting
 
-This project staging is hosted on https://hub.docker.com/orgs/camelk/repositories[CamelK Docker Hub organization]. Make sure one of the organization administrator grant your personal user the right priviledges to push an image to this org.
+This project staging is hosted on https://hub.docker.com/orgs/camelk/repositories[CamelK Docker Hub organization]. Make sure one of the organization administrator grant your personal user the right privileges to push an image to this org.
+
+[[releasing-software]]
+== Software required to release
+
+In order to release Camel K you may need certain software installed in the machine from where you're performing the release action. Most of the actions are scripted and may assume the presence of tools (in some case with specific version). Here a best effort list (may not be fully accurate):
+
+* `git` CLI
+* `mvn` CLI
+* Docker and DockerX tooling
+* https://www.qemu.org/[QEMU] - required to emulate ARM64 build
+
+[[arm64-verify]]
+=== Verify if your machine can build an ARM64 container image
+
+As suggested above, you may need to install some software to be able to build an ARM64 based image. You can verify that with:
+
+```
+docker buildx ls | grep arm
+```
+
+NOTE: if you don't list any available builder, if you're on Ubuntu, you can install quickly QEMU via `sudo apt-get install -y qemu qemu-user-static` and retry to list the ARM64 based builders afterward.
 
 [[releasing-camel-k]]
 == Release Camel K
 
-As the process will do git operations, it is advisable that you clone the Camel K repository to some new location (ie /tmp/) in order to avoid to conflict with any other development in progress. If you’re starting a major or a minor release version, you need to create the respective `release-a.b.x` branch. It’s highly advisable not to release directly from `main` branch.
-
-=== Create release branch from main branch
-
-We have a script that simplify this process. As we do not only want to create and push a new branch, we also need to provide the CI tasks required for all the supported releases.
+As the process will do Git operations, it is advisable that you clone the Camel K repository to some new location (ie /tmp/) in order to avoid to conflict with any other development in progress. If you’re starting a major or a minor release version, you need to create the respective `release-a.b.x` branch. It’s highly advisable not to release directly from `main` branch.
 
 ```
 git clone https://github.com/apache/camel-k.git /tmp/camel-k
 cd /tmp/camel-k
+
+# If you release a patch version, otherwise see next chapter
+git checkout release-2.0.x
+```
+
+=== Create release branch
+
+WARNING: Only run this when starting a new **major** or **minor** release.
+
+We have a script that simplify this process as we also need to provide the CI tasks required for all the supported releases.
+
+```
 ./script/release-branch.sh
 ```
 
@@ -36,7 +65,7 @@ NOTE: you can run the script with -d option to dry run and evaluate the changes 
 [[releasing-camel-k-crds]]
 === Release Camel K CRD dependency
 
-Camel K ships a Maven dependency containing the CRDs required in Kubernetes. This dependency is available in `/java/` directory and has to be released togheter with Camel K. The process below is the same used for Camel K Runtime.
+Camel K ships a Maven dependency containing the CRDs required in Kubernetes. This dependency is available in `/java/` directory and has to be released together with Camel K. The process below is the same used for Camel K Runtime.
 
 To prepare a release and check problems:
 ```
@@ -47,11 +76,10 @@ cd java
 Check the signatures of the files, then clean and prepare the actual release:
 
 ```
-./mvnw release:clean -Prelease
-./mvnw release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
+./mvnw release:clean release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
 ```
 
-Then perform the release:
+Then perform the release (use any settings holding your Apache credentials):
 
 ```
 ./mvnw release:perform -Prelease [-s path/to/your/settings.xml]
@@ -67,18 +95,14 @@ A URL will be generated for the repository, like: https://repository.apache.org/
 Releasing the Camel K main artifacts require some manual steps. The following tasks need to be done:
 
 - Align `KAMELET_CATALOG_REPO_TAG` in Makefile to latest released tag of the camel-kamelets repository
-- Align `RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
+- Align `DEFAULT_RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
 - Set the proper `VERSION`, likely just remove `-SNAPSHOT` suffix
 - Ensure `LAST_RELEASED_VERSION` points to latest released version of Camel K
 
 ```
-make clean codegen set-version build-resources check-licenses
-```
-
-Rebuild auto-generated data, including trait info:
-
-```
-make generate clean build-resources build
+# you probably were in /java/
+cd ..
+make clean codegen set-version generate check-licenses build-resources build
 ```
 
 Commit and push the changes done so far.
@@ -90,17 +114,17 @@ git commit -m "preparing for next release"
 git push
 ```
 
-Now the release on staging can be executed.
+Now you can execute the release on staging.
 
 ```
 make release-staging
 ```
-A docker image `camelk/camel-k:<version>` will be pushed to the staging organization (`camelk`, not `apache`). Binary files (CLIs) will be generated as well and put in the project root directory.
+A docker image `camelk/camel-k:<version>` will be pushed to the https://hub.docker.com/r/camelk/camel-k/tags[staging organization] (`camelk`, not `apache`). Binary files (CLIs) will be generated as well and put in the project root directory.
 
 [[testing]]
 === Do some testing
 
-Make sure to test the CLI you're about to publish. Expand and test the platform and archicture according to your local environment specifications:
+Make sure to test the CLI you're about to publish. Expand and test the platform and architecture according to your local environment specifications:
 
 ```
 $ tar -xvf camel-k-client-2.0.0-linux-amd64.tar.gz
@@ -127,7 +151,7 @@ Check that all resources have been correctly uploaded to https://dist.apache.org
 [[voting]]
 == Voting
 
-An email should be sent to dev@camel.apache.org asking to test the staged artifacts. Voting will be left open for at least 72 hours.
+An email should be sent to dev@camel.apache.org asking to test the staged artifacts. Voting will be left open for at least 72 hours. Use any previous voting email as a template.
 
 [[finalizing]]
 == Finalizing the release
