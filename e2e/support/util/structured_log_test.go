@@ -18,26 +18,17 @@ limitations under the License.
 package util
 
 import (
-	"time"
+	"encoding/json"
+	"testing"
 
-	"go.uber.org/zap/zapcore"
+	"github.com/stretchr/testify/assert"
 )
 
-type LogEntry struct {
-	// Zap
-	Level      zapcore.Level `json:"level,omitempty"`
-	Timestamp  time.Time     `json:"ts,omitempty"`
-	LoggerName string        `json:"logger,omitempty"`
-	Message    string        `json:"msg,omitempty"`
-	// Controller runtime
-	RequestNamespace string `json:"request-namespace,omitempty"`
-	RequestName      string `json:"request-name,omitempty"`
-	ApiVersion       string `json:"api-version,omitempty"`
-	Kind             string `json:"kind,omitempty"`
-	// Camel K
-	Namespace string `json:"ns,omitempty"`
-	Name      string `json:"name,omitempty"`
-	Phase     string `json:"phase,omitempty"`
-	PhaseFrom string `json:"phase-from,omitempty"`
-	PhaseTo   string `json:"phase-to,omitempty"`
+func TestJSONFormat(t *testing.T) {
+	logLine := `{"level":"info","ts":"2023-08-30T08:07:19Z","logger":"camel-k.cmd","msg":"maxprocs: Leaving GOMAXPROCS=[2]: CPU quota undefined"}`
+	entry := LogEntry{}
+	err := json.Unmarshal([]byte(logLine), &entry)
+	assert.Nil(t, err)
+	assert.Equal(t, "2023-08-30 08:07:19 +0000 UTC", entry.Timestamp.String())
+	assert.Equal(t, "maxprocs: Leaving GOMAXPROCS=[2]: CPU quota undefined", entry.Message)
 }
