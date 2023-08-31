@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - \[Bug\]: TEST [\#4702](https://github.com/apache/camel-k/issues/4702)
+- camel-k with spring config  [\#4376](https://github.com/apache/camel-k/issues/4376)
 - jib builder [\#1656](https://github.com/apache/camel-k/issues/1656)
 
 **Merged pull requests:**
