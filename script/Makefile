@@ -379,6 +379,7 @@ endif
 	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_TAG)
 
 build-compile-integration-tests:
+	@echo "####### Compiling integration tests..."
 	go test -run nope -tags="integration" ./e2e/...
 
 clean:

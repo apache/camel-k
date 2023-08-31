@@ -108,7 +108,7 @@ func TestMetrics(t *testing.T) {
 					"PhaseFrom":   Equal(string(v1.BuildPhaseScheduling)),
 					"PhaseTo":     Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
-				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
+				}), func(l *LogEntry) { ts1 = l.Timestamp }).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName": Equal("camel-k.controller.build"),
 					"Message":    HavePrefix("Build duration"),
@@ -119,7 +119,7 @@ func TestMetrics(t *testing.T) {
 					"PhaseFrom":   Equal(string(v1.BuildPhaseRunning)),
 					"PhaseTo":     Equal(string(v1.BuildPhaseSucceeded)),
 					"RequestName": Equal(build.Name),
-				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
+				}), func(l *LogEntry) { ts2 = l.Timestamp }).
 				Walk()
 			Expect(err).To(BeNil())
 			Expect(ts1).NotTo(BeZero())
@@ -426,7 +426,7 @@ func TestMetrics(t *testing.T) {
 					"PhaseFrom":   Equal(string(v1.BuildPhaseScheduling)),
 					"PhaseTo":     Equal(string(v1.BuildPhasePending)),
 					"RequestName": Equal(build.Name),
-				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
+				}), func(l *LogEntry) { ts2 = l.Timestamp }).
 				Walk()
 			Expect(err).To(BeNil())
 			Expect(ts1).NotTo(BeZero())
@@ -489,12 +489,12 @@ func TestMetrics(t *testing.T) {
 					"RequestName": Equal(it.Name),
 					"PhaseFrom":   Equal(string(v1.IntegrationPhaseInitialization)),
 					"PhaseTo":     Equal(string(v1.IntegrationPhaseBuildingKit)),
-				}), func(l *LogEntry) { ts1 = l.Timestamp.Time }).
+				}), func(l *LogEntry) { ts1 = l.Timestamp }).
 				AddStep(MatchFields(IgnoreExtras, Fields{
 					"LoggerName":  Equal("camel-k.controller.integration"),
 					"Message":     HavePrefix("First readiness"),
 					"RequestName": Equal(it.Name),
-				}), func(l *LogEntry) { ts2 = l.Timestamp.Time }).
+				}), func(l *LogEntry) { ts2 = l.Timestamp }).
 				Walk()
 			Expect(err).To(BeNil())
 			Expect(ts1).NotTo(BeZero())
