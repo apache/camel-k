@@ -153,7 +153,7 @@ func (k *Kamelet) SortedDefinitionPropertiesKeys() []string {
 	res := make([]string, len(props))
 	i := 0
 	for key := range props {
-		res[i] = string(key)
+		res[i] = key
 		i++
 	}
 	sort.Strings(res)

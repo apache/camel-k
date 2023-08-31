@@ -175,7 +175,7 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 
 // IsOptionEnabled tells if provided option key is present in PublishStrategyOptions and enabled
 func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
-	//Key defined in builder/kaniko.go
+	// Key defined in builder/kaniko.go
 	if enabled, ok := b.PublishStrategyOptions[option]; ok {
 		res, err := strconv.ParseBool(enabled)
 		if err != nil {

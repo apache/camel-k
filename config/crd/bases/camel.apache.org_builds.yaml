@@ -78,7 +78,8 @@ spec:
             type: object
           spec:
             description: BuildSpec defines the list of tasks to be execute for a Build.
-              From Camel K version 2, it would be more appropiate to think it as pipeline.
+              From Camel K version 2, it would be more appropriate to think it as
+              pipeline.
             properties:
               configuration:
                 description: 'The configuration that should be used to perform the

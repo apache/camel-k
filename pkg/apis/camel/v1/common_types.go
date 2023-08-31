@@ -348,7 +348,7 @@ const (
 	// CapabilityCron defines the cron execution capability
 	CapabilityCron = "cron"
 	// CapabilityGcpSecretManager defines the gcp secret manager capability
-	CapabilityGcpSecretManager = "gcp-secret-manager"
+	CapabilityGcpSecretManager = "gcp-secret-manager" // nolint: G101
 	// CapabilityHashicorpVault defines the Hashicorp Vault capability
 	CapabilityHashicorpVault = "hashicorp-vault"
 	// CapabilityHealth defines the health monitoring capability

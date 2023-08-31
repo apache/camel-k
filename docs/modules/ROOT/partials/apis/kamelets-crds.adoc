@@ -23,7 +23,7 @@ string
 string
 |`Kamelet`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -65,7 +65,7 @@ string
 string
 |`KameletBinding`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -262,7 +262,7 @@ Endpoint represents a source/sink external entity (could be any Kubernetes resou
 |Description
 
 |`ref` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
 
 
@@ -932,21 +932,21 @@ KameletBindingCondition describes the state of a resource at a certain point.
 Type of kameletBinding condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -1036,7 +1036,7 @@ Sink is the destination of the integration defined by this binding
 |
 
 
-ErrorHandler is an optional handler called upon an error occuring in the integration
+ErrorHandler is an optional handler called upon an error occurring in the integration
 
 |`steps` +
 *xref:#_camel_apache_org_v1alpha1_Endpoint[[\]Endpoint]*
@@ -1136,21 +1136,21 @@ KameletCondition describes the state of a resource at a certain point.
 Type of kamelet condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
