@@ -19,19 +19,19 @@ package knative
 
 import "fmt"
 
-// CamelEnvironment is the top level configuration object expected by the Camel Knative component
+// CamelEnvironment is the top level configuration object expected by the Camel Knative component.
 type CamelEnvironment struct {
 	Services []CamelServiceDefinition `json:"services"`
 }
 
-// NewCamelEnvironment creates a new env
+// NewCamelEnvironment creates a new env.
 func NewCamelEnvironment() CamelEnvironment {
 	return CamelEnvironment{
 		Services: make([]CamelServiceDefinition, 0),
 	}
 }
 
-// CamelServiceDefinition defines the parameters to connect to Knative service. It's also used for exposed services
+// CamelServiceDefinition defines the parameters to connect to Knative service. It's also used for exposed services.
 type CamelServiceDefinition struct {
 	ServiceType CamelServiceType  `json:"type"`
 	Name        string            `json:"name"`

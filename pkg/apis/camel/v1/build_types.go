@@ -25,7 +25,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropiate
+// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropriate
 // to think it as pipeline.
 type BuildSpec struct {
 	// The sequence of tasks (pipeline) to be performed.

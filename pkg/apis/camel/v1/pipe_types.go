@@ -51,7 +51,7 @@ type PipeSpec struct {
 	Source Endpoint `json:"source,omitempty"`
 	// Sink is the destination of the integration defined by this Pipe
 	Sink Endpoint `json:"sink,omitempty"`
-	// ErrorHandler is an optional handler called upon an error occuring in the integration
+	// ErrorHandler is an optional handler called upon an error occurring in the integration
 	ErrorHandler *ErrorHandlerSpec `json:"errorHandler,omitempty"`
 	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
 	Steps []Endpoint `json:"steps,omitempty"`
