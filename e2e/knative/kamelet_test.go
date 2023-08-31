@@ -48,6 +48,7 @@ func TestKameletChange(t *testing.T) {
 	Expect(CreateKnativeChannel(ns, knChannel)()).To(Succeed())
 	// Consumer route that will read from the KNative channel
 	Expect(KamelRunWithID(operatorID, ns, "files/test-kamelet-display.groovy", "-w").Execute()).To(Succeed())
+	Eventually(IntegrationPodPhase(ns, "test-kamelet-display")).Should(Equal(corev1.PodRunning))
 
 	// Create the Pipe
 	Expect(KamelBindWithID(operatorID, ns,
@@ -58,9 +59,9 @@ func TestKameletChange(t *testing.T) {
 		"--annotation", "trait.camel.apache.org/health.readiness-initial-delay=10",
 		"--name", timerPipe,
 	).Execute()).To(Succeed())
-
-	Eventually(IntegrationPodPhase(ns, timerPipe), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	Eventually(IntegrationPodPhase(ns, timerPipe)).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	// Consume the message
 	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("HelloKNative!"))
 
 	Eventually(PipeCondition(ns, timerPipe, v1.PipeConditionReady), TestTimeoutMedium).Should(And(
