@@ -36,8 +36,7 @@ type Interface interface {
 	CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface
 }
 
-// Clientset contains the clients for groups. Each group has exactly one
-// version included in a Clientset.
+// Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
 	camelV1       *camelv1.CamelV1Client

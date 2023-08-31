@@ -34,8 +34,7 @@ type Interface interface {
 	KafkaV1beta2() kafkav1beta2.KafkaV1beta2Interface
 }
 
-// Clientset contains the clients for groups. Each group has exactly one
-// version included in a Clientset.
+// Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
 	kafkaV1beta2 *kafkav1beta2.KafkaV1beta2Client

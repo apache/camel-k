@@ -24,11 +24,10 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	applyconfigurationcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -40,25 +39,25 @@ type FakeCamelCatalogs struct {
 	ns   string
 }
 
-var camelcatalogsResource = schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1", Resource: "camelcatalogs"}
+var camelcatalogsResource = v1.SchemeGroupVersion.WithResource("camelcatalogs")
 
-var camelcatalogsKind = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "CamelCatalog"}
+var camelcatalogsKind = v1.SchemeGroupVersion.WithKind("CamelCatalog")
 
 // Get takes name of the camelCatalog, and returns the corresponding camelCatalog object, and an error if there is any.
-func (c *FakeCamelCatalogs) Get(ctx context.Context, name string, options v1.GetOptions) (result *camelv1.CamelCatalog, err error) {
+func (c *FakeCamelCatalogs) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.CamelCatalog, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(camelcatalogsResource, c.ns, name), &camelv1.CamelCatalog{})
+		Invokes(testing.NewGetAction(camelcatalogsResource, c.ns, name), &v1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.CamelCatalog), err
+	return obj.(*v1.CamelCatalog), err
 }
 
 // List takes label and field selectors, and returns the list of CamelCatalogs that match those selectors.
-func (c *FakeCamelCatalogs) List(ctx context.Context, opts v1.ListOptions) (result *camelv1.CamelCatalogList, err error) {
+func (c *FakeCamelCatalogs) List(ctx context.Context, opts metav1.ListOptions) (result *v1.CamelCatalogList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(camelcatalogsResource, camelcatalogsKind, c.ns, opts), &camelv1.CamelCatalogList{})
+		Invokes(testing.NewListAction(camelcatalogsResource, camelcatalogsKind, c.ns, opts), &v1.CamelCatalogList{})
 
 	if obj == nil {
 		return nil, err
@@ -68,8 +67,8 @@ func (c *FakeCamelCatalogs) List(ctx context.Context, opts v1.ListOptions) (resu
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &camelv1.CamelCatalogList{ListMeta: obj.(*camelv1.CamelCatalogList).ListMeta}
-	for _, item := range obj.(*camelv1.CamelCatalogList).Items {
+	list := &v1.CamelCatalogList{ListMeta: obj.(*v1.CamelCatalogList).ListMeta}
+	for _, item := range obj.(*v1.CamelCatalogList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -78,75 +77,75 @@ func (c *FakeCamelCatalogs) List(ctx context.Context, opts v1.ListOptions) (resu
 }
 
 // Watch returns a watch.Interface that watches the requested camelCatalogs.
-func (c *FakeCamelCatalogs) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeCamelCatalogs) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(camelcatalogsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a camelCatalog and creates it.  Returns the server's representation of the camelCatalog, and an error, if there is any.
-func (c *FakeCamelCatalogs) Create(ctx context.Context, camelCatalog *camelv1.CamelCatalog, opts v1.CreateOptions) (result *camelv1.CamelCatalog, err error) {
+func (c *FakeCamelCatalogs) Create(ctx context.Context, camelCatalog *v1.CamelCatalog, opts metav1.CreateOptions) (result *v1.CamelCatalog, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(camelcatalogsResource, c.ns, camelCatalog), &camelv1.CamelCatalog{})
+		Invokes(testing.NewCreateAction(camelcatalogsResource, c.ns, camelCatalog), &v1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.CamelCatalog), err
+	return obj.(*v1.CamelCatalog), err
 }
 
 // Update takes the representation of a camelCatalog and updates it. Returns the server's representation of the camelCatalog, and an error, if there is any.
-func (c *FakeCamelCatalogs) Update(ctx context.Context, camelCatalog *camelv1.CamelCatalog, opts v1.UpdateOptions) (result *camelv1.CamelCatalog, err error) {
+func (c *FakeCamelCatalogs) Update(ctx context.Context, camelCatalog *v1.CamelCatalog, opts metav1.UpdateOptions) (result *v1.CamelCatalog, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(camelcatalogsResource, c.ns, camelCatalog), &camelv1.CamelCatalog{})
+		Invokes(testing.NewUpdateAction(camelcatalogsResource, c.ns, camelCatalog), &v1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.CamelCatalog), err
+	return obj.(*v1.CamelCatalog), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeCamelCatalogs) UpdateStatus(ctx context.Context, camelCatalog *camelv1.CamelCatalog, opts v1.UpdateOptions) (*camelv1.CamelCatalog, error) {
+func (c *FakeCamelCatalogs) UpdateStatus(ctx context.Context, camelCatalog *v1.CamelCatalog, opts metav1.UpdateOptions) (*v1.CamelCatalog, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(camelcatalogsResource, "status", c.ns, camelCatalog), &camelv1.CamelCatalog{})
+		Invokes(testing.NewUpdateSubresourceAction(camelcatalogsResource, "status", c.ns, camelCatalog), &v1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.CamelCatalog), err
+	return obj.(*v1.CamelCatalog), err
 }
 
 // Delete takes name of the camelCatalog and deletes it. Returns an error if one occurs.
-func (c *FakeCamelCatalogs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
+func (c *FakeCamelCatalogs) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(camelcatalogsResource, c.ns, name, opts), &camelv1.CamelCatalog{})
+		Invokes(testing.NewDeleteActionWithOptions(camelcatalogsResource, c.ns, name, opts), &v1.CamelCatalog{})
 
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeCamelCatalogs) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+func (c *FakeCamelCatalogs) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
 	action := testing.NewDeleteCollectionAction(camelcatalogsResource, c.ns, listOpts)
 
-	_, err := c.Fake.Invokes(action, &camelv1.CamelCatalogList{})
+	_, err := c.Fake.Invokes(action, &v1.CamelCatalogList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched camelCatalog.
-func (c *FakeCamelCatalogs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.CamelCatalog, err error) {
+func (c *FakeCamelCatalogs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.CamelCatalog, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, name, pt, data, subresources...), &camelv1.CamelCatalog{})
+		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, name, pt, data, subresources...), &v1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.CamelCatalog), err
+	return obj.(*v1.CamelCatalog), err
 }
 
 // Apply takes the given apply declarative configuration, applies it and returns the applied camelCatalog.
-func (c *FakeCamelCatalogs) Apply(ctx context.Context, camelCatalog *applyconfigurationcamelv1.CamelCatalogApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.CamelCatalog, err error) {
+func (c *FakeCamelCatalogs) Apply(ctx context.Context, camelCatalog *camelv1.CamelCatalogApplyConfiguration, opts metav1.ApplyOptions) (result *v1.CamelCatalog, err error) {
 	if camelCatalog == nil {
 		return nil, fmt.Errorf("camelCatalog provided to Apply must not be nil")
 	}
@@ -159,17 +158,17 @@ func (c *FakeCamelCatalogs) Apply(ctx context.Context, camelCatalog *applyconfig
 		return nil, fmt.Errorf("camelCatalog.Name must be provided to Apply")
 	}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, *name, types.ApplyPatchType, data), &camelv1.CamelCatalog{})
+		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, *name, types.ApplyPatchType, data), &v1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.CamelCatalog), err
+	return obj.(*v1.CamelCatalog), err
 }
 
 // ApplyStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *FakeCamelCatalogs) ApplyStatus(ctx context.Context, camelCatalog *applyconfigurationcamelv1.CamelCatalogApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.CamelCatalog, err error) {
+func (c *FakeCamelCatalogs) ApplyStatus(ctx context.Context, camelCatalog *camelv1.CamelCatalogApplyConfiguration, opts metav1.ApplyOptions) (result *v1.CamelCatalog, err error) {
 	if camelCatalog == nil {
 		return nil, fmt.Errorf("camelCatalog provided to Apply must not be nil")
 	}
@@ -182,10 +181,10 @@ func (c *FakeCamelCatalogs) ApplyStatus(ctx context.Context, camelCatalog *apply
 		return nil, fmt.Errorf("camelCatalog.Name must be provided to Apply")
 	}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &camelv1.CamelCatalog{})
+		Invokes(testing.NewPatchSubresourceAction(camelcatalogsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1.CamelCatalog{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.CamelCatalog), err
+	return obj.(*v1.CamelCatalog), err
 }
