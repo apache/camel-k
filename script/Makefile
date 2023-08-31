@@ -27,7 +27,7 @@ DEFAULT_RUNTIME_VERSION := 2.16.0
 BUILDAH_VERSION := 1.30.0
 KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
-CODEGEN_VERSION := v0.25.6
+CODEGEN_VERSION := v0.27.4
 OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
@@ -220,8 +220,7 @@ codegen-tools-install: controller-gen
 	@# We must force the installation to make sure we are using the correct version
 	@# Note: as there is no --version in the tools, we cannot rely on cached local versions
 	@echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
-	#go install k8s.io/code-generator/cmd/applyconfiguration-gen@$(CODEGEN_VERSION)
-	go install github.com/astefanutti/code-generator/cmd/applyconfiguration-gen@pr-144-install
+	go install k8s.io/code-generator/cmd/applyconfiguration-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/client-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)

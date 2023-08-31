@@ -29,7 +29,6 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -41,9 +40,9 @@ type FakeKameletBindings struct {
 	ns   string
 }
 
-var kameletbindingsResource = schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1alpha1", Resource: "kameletbindings"}
+var kameletbindingsResource = v1alpha1.SchemeGroupVersion.WithResource("kameletbindings")
 
-var kameletbindingsKind = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1alpha1", Kind: "KameletBinding"}
+var kameletbindingsKind = v1alpha1.SchemeGroupVersion.WithKind("KameletBinding")
 
 // Get takes name of the kameletBinding, and returns the corresponding kameletBinding object, and an error if there is any.
 func (c *FakeKameletBindings) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.KameletBinding, err error) {

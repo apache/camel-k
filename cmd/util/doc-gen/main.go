@@ -21,6 +21,8 @@ import (
 	"github.com/apache/camel-k/v2/cmd/util/doc-gen/generators"
 	"github.com/spf13/pflag"
 	"k8s.io/gengo/args"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	_ "github.com/apache/camel-k/v2/addons"
 )
@@ -36,6 +38,8 @@ func main() {
 	pflag.CommandLine.StringVar(&customArgs.NavPath, "nav-path", "modules/ROOT/nav.adoc", "Path to the navigation file.")
 	pflag.CommandLine.StringVar(&customArgs.ListPath, "list-path", "modules/traits/pages/traits.adoc", "Path to the trait list file.")
 	arguments.CustomArgs = customArgs
+
+	log.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	if err := arguments.Execute(
 		generators.NameSystems(),
