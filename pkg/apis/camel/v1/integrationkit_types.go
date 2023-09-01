@@ -52,7 +52,7 @@ type IntegrationKit struct {
 	Status IntegrationKitStatus `json:"status,omitempty"`
 }
 
-// IntegrationKitSpec defines a container image and additional configurations required to kick off an `Integration` with certain features
+// IntegrationKitSpec defines a container image and additional configurations required to kick off an `Integration` with certain features.
 type IntegrationKitSpec struct {
 	// the container image as identified in the container registry
 	Image string `json:"image,omitempty"`
@@ -75,7 +75,7 @@ type IntegrationKitSpec struct {
 	Sources []SourceSpec `json:"sources,omitempty"`
 }
 
-// IntegrationKitTraits defines traits assigned to an `IntegrationKit`
+// IntegrationKitTraits defines traits assigned to an `IntegrationKit`.
 type IntegrationKitTraits struct {
 	// The builder trait is internally used to determine the best strategy to build and configure IntegrationKits.
 	Builder *trait.BuilderTrait `property:"builder" json:"builder,omitempty"`
@@ -91,7 +91,7 @@ type IntegrationKitTraits struct {
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
 }
 
-// IntegrationKitStatus defines the observed state of IntegrationKit
+// IntegrationKitStatus defines the observed state of IntegrationKit.
 type IntegrationKitStatus struct {
 	// ObservedGeneration is the most recent generation observed for this IntegrationKit.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
@@ -121,66 +121,66 @@ type IntegrationKitStatus struct {
 
 // +kubebuilder:object:root=true
 
-// IntegrationKitList contains a list of IntegrationKit
+// IntegrationKitList contains a list of IntegrationKit.
 type IntegrationKitList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []IntegrationKit `json:"items"`
 }
 
-// IntegrationKitPhase --
+// IntegrationKitPhase --.
 type IntegrationKitPhase string
 
-// IntegrationKitConditionType --
+// IntegrationKitConditionType --.
 type IntegrationKitConditionType string
 
 const (
-	// IntegrationKitKind --
+	// IntegrationKitKind --.
 	IntegrationKitKind string = "IntegrationKit"
 
-	// IntegrationKitTypeLabel labels the kit type
+	// IntegrationKitTypeLabel labels the kit type.
 	IntegrationKitTypeLabel = "camel.apache.org/kit.type"
 
-	// IntegrationKitTypePlatform identifies a kit created by the platform
+	// IntegrationKitTypePlatform identifies a kit created by the platform.
 	IntegrationKitTypePlatform = "platform"
-	// IntegrationKitTypeUser identifies a kit created by the user
+	// IntegrationKitTypeUser identifies a kit created by the user.
 	IntegrationKitTypeUser = "user"
-	// IntegrationKitTypeExternal identifies a kit created by any third party
+	// IntegrationKitTypeExternal identifies a kit created by any third party.
 	IntegrationKitTypeExternal = "external"
 
-	// IntegrationKitLayoutLabel labels the kit layout
+	// IntegrationKitLayoutLabel labels the kit layout.
 	IntegrationKitLayoutLabel = "camel.apache.org/kit.layout"
 
-	// IntegrationKitLayoutFastJar labels a kit using the Quarkus fast-jar packaging
+	// IntegrationKitLayoutFastJar labels a kit using the Quarkus fast-jar packaging.
 	IntegrationKitLayoutFastJar = "fast-jar"
-	// IntegrationKitLayoutNative labels a kit using the Quarkus native packaging
+	// IntegrationKitLayoutNative labels a kit using the Quarkus native packaging.
 	IntegrationKitLayoutNative = "native"
 
-	// IntegrationKitPriorityLabel labels the kit priority
+	// IntegrationKitPriorityLabel labels the kit priority.
 	IntegrationKitPriorityLabel = "camel.apache.org/kit.priority"
 
-	// IntegrationKitPhaseNone --
+	// IntegrationKitPhaseNone --.
 	IntegrationKitPhaseNone IntegrationKitPhase = ""
-	// IntegrationKitPhaseInitialization --
+	// IntegrationKitPhaseInitialization --.
 	IntegrationKitPhaseInitialization IntegrationKitPhase = "Initialization"
-	// IntegrationKitPhaseWaitingForPlatform --
+	// IntegrationKitPhaseWaitingForPlatform --.
 	IntegrationKitPhaseWaitingForPlatform IntegrationKitPhase = "Waiting For Platform"
-	// IntegrationKitPhaseBuildSubmitted --
+	// IntegrationKitPhaseBuildSubmitted --.
 	IntegrationKitPhaseBuildSubmitted IntegrationKitPhase = "Build Submitted"
-	// IntegrationKitPhaseBuildRunning --
+	// IntegrationKitPhaseBuildRunning --.
 	IntegrationKitPhaseBuildRunning IntegrationKitPhase = "Build Running"
-	// IntegrationKitPhaseWaitingForCatalog --
+	// IntegrationKitPhaseWaitingForCatalog --.
 	IntegrationKitPhaseWaitingForCatalog IntegrationKitPhase = "Waiting For Catalog"
-	// IntegrationKitPhaseReady --
+	// IntegrationKitPhaseReady --.
 	IntegrationKitPhaseReady IntegrationKitPhase = "Ready"
-	// IntegrationKitPhaseError --
+	// IntegrationKitPhaseError --.
 	IntegrationKitPhaseError IntegrationKitPhase = "Error"
 
-	// IntegrationKitConditionPlatformAvailable --
+	// IntegrationKitConditionPlatformAvailable --.
 	IntegrationKitConditionPlatformAvailable IntegrationKitConditionType = "IntegrationPlatformAvailable"
-	// IntegrationKitConditionCatalogAvailable --
+	// IntegrationKitConditionCatalogAvailable --.
 	IntegrationKitConditionCatalogAvailable IntegrationKitConditionType = "CamelCatalogAvailable"
-	// IntegrationKitConditionPlatformAvailableReason --
+	// IntegrationKitConditionPlatformAvailableReason --.
 	IntegrationKitConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
 )
 

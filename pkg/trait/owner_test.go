@@ -85,6 +85,7 @@ func ValidateOwnerResources(t *testing.T, env *Environment, withOwnerRef bool) {
 	})
 
 	assert.Len(t, deployments, 1)
+	// nolint: gosec // deployments len asserted before
 	ValidateLabelsAndAnnotations(t, &deployments[0].Spec.Template)
 }
 

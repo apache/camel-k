@@ -39,7 +39,7 @@ import (
 // +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.integrationKit.name`,description="The integration kit"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
 
-// Integration is the Schema for the integrations API
+// Integration is the Schema for the integrations API.
 type Integration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -81,7 +81,7 @@ type IntegrationSpec struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
-// IntegrationStatus defines the observed state of Integration
+// IntegrationStatus defines the observed state of Integration.
 type IntegrationStatus struct {
 	// ObservedGeneration is the most recent generation observed for this Integration.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
@@ -124,131 +124,131 @@ type IntegrationStatus struct {
 
 // +kubebuilder:object:root=true
 
-// IntegrationList contains a list of Integration
+// IntegrationList contains a list of Integration.
 type IntegrationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Integration `json:"items"`
 }
 
-// IntegrationPhase --
+// IntegrationPhase --.
 type IntegrationPhase string
 
-// IntegrationConditionType --
+// IntegrationConditionType --.
 type IntegrationConditionType string
 
 const (
-	// IntegrationKind --
+	// IntegrationKind --.
 	IntegrationKind string = "Integration"
 
-	// IntegrationPhaseNone --
+	// IntegrationPhaseNone --.
 	IntegrationPhaseNone IntegrationPhase = ""
-	// IntegrationPhaseWaitingForPlatform --
+	// IntegrationPhaseWaitingForPlatform --.
 	IntegrationPhaseWaitingForPlatform IntegrationPhase = "Waiting For Platform"
-	// IntegrationPhaseInitialization --
+	// IntegrationPhaseInitialization --.
 	IntegrationPhaseInitialization IntegrationPhase = "Initialization"
-	// IntegrationPhaseBuildingKit --
+	// IntegrationPhaseBuildingKit --.
 	IntegrationPhaseBuildingKit IntegrationPhase = "Building Kit"
-	// IntegrationPhaseDeploying --
+	// IntegrationPhaseDeploying --.
 	IntegrationPhaseDeploying IntegrationPhase = "Deploying"
-	// IntegrationPhaseRunning --
+	// IntegrationPhaseRunning --.
 	IntegrationPhaseRunning IntegrationPhase = "Running"
-	// IntegrationPhaseError --
+	// IntegrationPhaseError --.
 	IntegrationPhaseError IntegrationPhase = "Error"
 
-	// IntegrationConditionKitAvailable --
+	// IntegrationConditionKitAvailable --.
 	IntegrationConditionKitAvailable IntegrationConditionType = "IntegrationKitAvailable"
-	// IntegrationConditionPlatformAvailable --
+	// IntegrationConditionPlatformAvailable --.
 	IntegrationConditionPlatformAvailable IntegrationConditionType = "IntegrationPlatformAvailable"
-	// IntegrationConditionDeploymentAvailable --
+	// IntegrationConditionDeploymentAvailable --.
 	IntegrationConditionDeploymentAvailable IntegrationConditionType = "DeploymentAvailable"
-	// IntegrationConditionServiceAvailable --
+	// IntegrationConditionServiceAvailable --.
 	IntegrationConditionServiceAvailable IntegrationConditionType = "ServiceAvailable"
-	// IntegrationConditionKnativeServiceAvailable --
+	// IntegrationConditionKnativeServiceAvailable --.
 	IntegrationConditionKnativeServiceAvailable IntegrationConditionType = "KnativeServiceAvailable"
-	// IntegrationConditionKnativeAvailable --
+	// IntegrationConditionKnativeAvailable --.
 	IntegrationConditionKnativeAvailable IntegrationConditionType = "KnativeAvailable"
-	// IntegrationConditionCronJobAvailable --
+	// IntegrationConditionCronJobAvailable --.
 	IntegrationConditionCronJobAvailable IntegrationConditionType = "CronJobAvailable"
-	// IntegrationConditionExposureAvailable --
+	// IntegrationConditionExposureAvailable --.
 	IntegrationConditionExposureAvailable IntegrationConditionType = "ExposureAvailable"
-	// IntegrationConditionPrometheusAvailable --
+	// IntegrationConditionPrometheusAvailable --.
 	IntegrationConditionPrometheusAvailable IntegrationConditionType = "PrometheusAvailable"
-	// IntegrationConditionJolokiaAvailable --
+	// IntegrationConditionJolokiaAvailable --.
 	IntegrationConditionJolokiaAvailable IntegrationConditionType = "JolokiaAvailable"
-	// IntegrationConditionProbesAvailable --
+	// IntegrationConditionProbesAvailable --.
 	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
-	// IntegrationConditionReady --
+	// IntegrationConditionReady --.
 	IntegrationConditionReady IntegrationConditionType = "Ready"
 
-	// IntegrationConditionKitAvailableReason --
+	// IntegrationConditionKitAvailableReason --.
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
-	// IntegrationConditionPlatformAvailableReason --
+	// IntegrationConditionPlatformAvailableReason --.
 	IntegrationConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
-	// IntegrationConditionDeploymentAvailableReason --
+	// IntegrationConditionDeploymentAvailableReason --.
 	IntegrationConditionDeploymentAvailableReason string = "DeploymentAvailable"
-	// IntegrationConditionDeploymentNotAvailableReason --
+	// IntegrationConditionDeploymentNotAvailableReason --.
 	IntegrationConditionDeploymentNotAvailableReason string = "DeploymentNotAvailable"
-	// IntegrationConditionServiceAvailableReason --
+	// IntegrationConditionServiceAvailableReason --.
 	IntegrationConditionServiceAvailableReason string = "ServiceAvailable"
-	// IntegrationConditionServiceNotAvailableReason --
+	// IntegrationConditionServiceNotAvailableReason --.
 	IntegrationConditionServiceNotAvailableReason string = "ServiceNotAvailable"
-	// IntegrationConditionContainerNotAvailableReason --
+	// IntegrationConditionContainerNotAvailableReason --.
 	IntegrationConditionContainerNotAvailableReason string = "ContainerNotAvailable"
-	// IntegrationConditionRouteAvailableReason --
+	// IntegrationConditionRouteAvailableReason --.
 	IntegrationConditionRouteAvailableReason string = "RouteAvailable"
-	// IntegrationConditionRouteNotAvailableReason --
+	// IntegrationConditionRouteNotAvailableReason --.
 	IntegrationConditionRouteNotAvailableReason string = "RouteNotAvailable"
-	// IntegrationConditionIngressAvailableReason --
+	// IntegrationConditionIngressAvailableReason --.
 	IntegrationConditionIngressAvailableReason string = "IngressAvailable"
-	// IntegrationConditionIngressNotAvailableReason --
+	// IntegrationConditionIngressNotAvailableReason --.
 	IntegrationConditionIngressNotAvailableReason string = "IngressNotAvailable"
-	// IntegrationConditionKnativeServiceAvailableReason --
+	// IntegrationConditionKnativeServiceAvailableReason --.
 	IntegrationConditionKnativeServiceAvailableReason string = "KnativeServiceAvailable"
-	// IntegrationConditionKnativeServiceNotAvailableReason --
+	// IntegrationConditionKnativeServiceNotAvailableReason --.
 	IntegrationConditionKnativeServiceNotAvailableReason string = "KnativeServiceNotAvailable"
-	// IntegrationConditionKnativeNotInstalledReason --
+	// IntegrationConditionKnativeNotInstalledReason --.
 	IntegrationConditionKnativeNotInstalledReason string = "KnativeNotInstalled"
-	// IntegrationConditionCronJobAvailableReason --
+	// IntegrationConditionCronJobAvailableReason --.
 	IntegrationConditionCronJobAvailableReason string = "CronJobAvailableReason"
-	// IntegrationConditionCronJobNotAvailableReason --
+	// IntegrationConditionCronJobNotAvailableReason --.
 	IntegrationConditionCronJobNotAvailableReason string = "CronJobNotAvailableReason"
-	// IntegrationConditionPrometheusAvailableReason --
+	// IntegrationConditionPrometheusAvailableReason --.
 	IntegrationConditionPrometheusAvailableReason string = "PrometheusAvailable"
-	// IntegrationConditionJolokiaAvailableReason --
+	// IntegrationConditionJolokiaAvailableReason --.
 	IntegrationConditionJolokiaAvailableReason string = "JolokiaAvailable"
-	// IntegrationConditionProbesAvailableReason --
+	// IntegrationConditionProbesAvailableReason --.
 	IntegrationConditionProbesAvailableReason string = "ProbesAvailable"
 
-	// IntegrationConditionKnativeServiceReadyReason --
+	// IntegrationConditionKnativeServiceReadyReason --.
 	IntegrationConditionKnativeServiceReadyReason string = "KnativeServiceReady"
-	// IntegrationConditionDeploymentReadyReason --
+	// IntegrationConditionDeploymentReadyReason --.
 	IntegrationConditionDeploymentReadyReason string = "DeploymentReady"
-	// IntegrationConditionDeploymentProgressingReason --
+	// IntegrationConditionDeploymentProgressingReason --.
 	IntegrationConditionDeploymentProgressingReason string = "DeploymentProgressing"
-	// IntegrationConditionCronJobCreatedReason --
+	// IntegrationConditionCronJobCreatedReason --.
 	IntegrationConditionCronJobCreatedReason string = "CronJobCreated"
-	// IntegrationConditionCronJobActiveReason --
+	// IntegrationConditionCronJobActiveReason --.
 	IntegrationConditionCronJobActiveReason string = "CronJobActive"
-	// IntegrationConditionLastJobSucceededReason --
+	// IntegrationConditionLastJobSucceededReason --.
 	IntegrationConditionLastJobSucceededReason string = "LastJobSucceeded"
-	// IntegrationConditionLastJobFailedReason --
+	// IntegrationConditionLastJobFailedReason --.
 	IntegrationConditionLastJobFailedReason string = "LastJobFailed"
-	// IntegrationConditionRuntimeNotReadyReason --
+	// IntegrationConditionRuntimeNotReadyReason --.
 	IntegrationConditionRuntimeNotReadyReason string = "RuntimeNotReady"
-	// IntegrationConditionErrorReason --
+	// IntegrationConditionErrorReason --.
 	IntegrationConditionErrorReason string = "Error"
 
-	// IntegrationConditionInitializationFailedReason --
+	// IntegrationConditionInitializationFailedReason --.
 	IntegrationConditionInitializationFailedReason string = "InitializationFailed"
-	// IntegrationConditionUnsupportedLanguageReason --
+	// IntegrationConditionUnsupportedLanguageReason --.
 	IntegrationConditionUnsupportedLanguageReason string = "UnsupportedLanguage"
 
-	// IntegrationConditionKameletsAvailable --
+	// IntegrationConditionKameletsAvailable --.
 	IntegrationConditionKameletsAvailable IntegrationConditionType = "KameletsAvailable"
-	// IntegrationConditionKameletsAvailableReason --
+	// IntegrationConditionKameletsAvailableReason --.
 	IntegrationConditionKameletsAvailableReason string = "KameletsAvailable"
-	// IntegrationConditionKameletsNotAvailableReason --
+	// IntegrationConditionKameletsNotAvailableReason --.
 	IntegrationConditionKameletsNotAvailableReason string = "KameletsNotAvailable"
 )
 
@@ -272,13 +272,13 @@ type IntegrationCondition struct {
 	Pods []PodCondition `json:"pods,omitempty"`
 }
 
-// PodSpecTemplate represent a template used to deploy an Integration `Pod`
+// PodSpecTemplate represent a template used to deploy an Integration `Pod`.
 type PodSpecTemplate struct {
 	// the specification
 	Spec PodSpec `json:"spec,omitempty"`
 }
 
-// PodSpec defines a group of Kubernetes resources
+// PodSpec defines a group of Kubernetes resources.
 type PodSpec struct {
 	// Volumes
 	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge,retainKeys" patchMergeKey:"name" protobuf:"bytes,1,rep,name=volumes"`

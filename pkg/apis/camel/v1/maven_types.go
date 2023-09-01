@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// MavenSpec --
+// MavenSpec --.
 type MavenSpec struct {
 	// The path of the local Maven repository.
 	LocalRepository string `json:"localRepository,omitempty"`
@@ -54,7 +54,7 @@ type MavenSpec struct {
 	CLIOptions []string `json:"cliOptions,omitempty"`
 }
 
-// Repository defines a Maven repository
+// Repository defines a Maven repository.
 type Repository struct {
 	// identifies the repository
 	ID string `xml:"id" json:"id"`
@@ -68,7 +68,7 @@ type Repository struct {
 	Releases RepositoryPolicy `xml:"releases,omitempty" json:"releases,omitempty"`
 }
 
-// RepositoryPolicy defines the policy associated to a Maven repository
+// RepositoryPolicy defines the policy associated to a Maven repository.
 type RepositoryPolicy struct {
 	// is the policy activated or not
 	Enabled bool `xml:"enabled" json:"enabled"`
@@ -81,7 +81,7 @@ type RepositoryPolicy struct {
 	ChecksumPolicy string `xml:"checksumPolicy,omitempty" json:"checksumPolicy,omitempty"`
 }
 
-// MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact
+// MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact.
 type MavenArtifact struct {
 	// Maven Group
 	GroupID string `json:"groupId" yaml:"groupId" xml:"groupId"`

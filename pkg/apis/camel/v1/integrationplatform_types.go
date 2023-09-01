@@ -25,7 +25,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// IntegrationPlatformSpec defines the desired state of IntegrationPlatform
+// IntegrationPlatformSpec defines the desired state of IntegrationPlatform.
 type IntegrationPlatformSpec struct {
 	// what kind of cluster you're running (ie, plain Kubernetes or OpenShift)
 	Cluster IntegrationPlatformCluster `json:"cluster,omitempty"`
@@ -47,7 +47,7 @@ type IntegrationPlatformSpec struct {
 	Kamelet IntegrationPlatformKameletSpec `json:"kamelet,omitempty"`
 }
 
-// IntegrationPlatformStatus defines the observed state of IntegrationPlatform
+// IntegrationPlatformStatus defines the observed state of IntegrationPlatform.
 type IntegrationPlatformStatus struct {
 	IntegrationPlatformSpec `json:",inline"`
 	// ObservedGeneration is the most recent generation observed for this IntegrationPlatform.
@@ -76,7 +76,7 @@ type IntegrationPlatformStatus struct {
 // IntegrationPlatform is the resource used to drive the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
 // When the Camel K operator is installed in `global` mode,
-// you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed
+// you will need to specify an `IntegrationPlatform` in each namespace where you want the Camel K operator to be executed.
 type IntegrationPlatform struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -87,24 +87,24 @@ type IntegrationPlatform struct {
 
 // +kubebuilder:object:root=true
 
-// IntegrationPlatformList contains a list of IntegrationPlatform
+// IntegrationPlatformList contains a list of IntegrationPlatform.
 type IntegrationPlatformList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []IntegrationPlatform `json:"items"`
 }
 
-// IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into
+// IntegrationPlatformCluster is the kind of orchestration cluster the platform is installed into.
 type IntegrationPlatformCluster string
 
 const (
-	// IntegrationPlatformClusterOpenShift is used when targeting an OpenShift cluster
+	// IntegrationPlatformClusterOpenShift is used when targeting an OpenShift cluster.
 	IntegrationPlatformClusterOpenShift IntegrationPlatformCluster = "OpenShift"
-	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster
+	// IntegrationPlatformClusterKubernetes is used when targeting a Kubernetes cluster.
 	IntegrationPlatformClusterKubernetes IntegrationPlatformCluster = "Kubernetes"
 )
 
-// AllIntegrationPlatformClusters --
+// AllIntegrationPlatformClusters --.
 var AllIntegrationPlatformClusters = []IntegrationPlatformCluster{IntegrationPlatformClusterOpenShift, IntegrationPlatformClusterKubernetes}
 
 // IntegrationPlatformBuildSpec contains platform related build information.
@@ -136,19 +136,19 @@ type IntegrationPlatformBuildSpec struct {
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
 }
 
-// IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform
+// IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
 type IntegrationPlatformKameletSpec struct {
 	// remote repository used to retrieve Kamelet catalog
 	Repositories []IntegrationPlatformKameletRepositorySpec `json:"repositories,omitempty"`
 }
 
-// IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use
+// IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use.
 type IntegrationPlatformKameletRepositorySpec struct {
 	// the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
 	URI string `json:"uri,omitempty"`
 }
 
-// IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image
+// IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image.
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
@@ -160,17 +160,17 @@ const (
 	IntegrationPlatformBuildPublishStrategyKaniko IntegrationPlatformBuildPublishStrategy = "Kaniko"
 	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
 	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
-	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster
+	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster.
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
-	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster
+	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster.
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
 	// in order to push the incremental images to the image repository.
 	IntegrationPlatformBuildPublishStrategyJib IntegrationPlatformBuildPublishStrategy = "Jib"
 )
 
-// IntegrationPlatformBuildPublishStrategies the list of all available publish strategies
+// IntegrationPlatformBuildPublishStrategies the list of all available publish strategies.
 var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublishStrategy{
 	IntegrationPlatformBuildPublishStrategyBuildah,
 	IntegrationPlatformBuildPublishStrategyKaniko,
@@ -179,27 +179,27 @@ var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublis
 	IntegrationPlatformBuildPublishStrategyJib,
 }
 
-// IntegrationPlatformPhase is the phase of an IntegrationPlatform
+// IntegrationPlatformPhase is the phase of an IntegrationPlatform.
 type IntegrationPlatformPhase string
 
-// IntegrationPlatformConditionType defines the type of condition
+// IntegrationPlatformConditionType defines the type of condition.
 type IntegrationPlatformConditionType string
 
 const (
-	// IntegrationPlatformKind is the Kind name of the IntegrationPlatform CR
+	// IntegrationPlatformKind is the Kind name of the IntegrationPlatform CR.
 	IntegrationPlatformKind string = "IntegrationPlatform"
 
-	// IntegrationPlatformPhaseNone when the IntegrationPlatform does not exist
+	// IntegrationPlatformPhaseNone when the IntegrationPlatform does not exist.
 	IntegrationPlatformPhaseNone IntegrationPlatformPhase = ""
-	// IntegrationPlatformPhaseCreating when the IntegrationPlatform is under creation process
+	// IntegrationPlatformPhaseCreating when the IntegrationPlatform is under creation process.
 	IntegrationPlatformPhaseCreating IntegrationPlatformPhase = "Creating"
-	// IntegrationPlatformPhaseWarming when the IntegrationPlatform is warming (ie, creating Kaniko cache)
+	// IntegrationPlatformPhaseWarming when the IntegrationPlatform is warming (ie, creating Kaniko cache).
 	IntegrationPlatformPhaseWarming IntegrationPlatformPhase = "Warming"
-	// IntegrationPlatformPhaseReady when the IntegrationPlatform is ready
+	// IntegrationPlatformPhaseReady when the IntegrationPlatform is ready.
 	IntegrationPlatformPhaseReady IntegrationPlatformPhase = "Ready"
-	// IntegrationPlatformPhaseError when the IntegrationPlatform had some error (see Conditions)
+	// IntegrationPlatformPhaseError when the IntegrationPlatform had some error (see Conditions).
 	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
-	// IntegrationPlatformPhaseDuplicate when the IntegrationPlatform is duplicated
+	// IntegrationPlatformPhaseDuplicate when the IntegrationPlatform is duplicated.
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 
 	// IntegrationPlatformConditionReady is the condition if the IntegrationPlatform is ready.

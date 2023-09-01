@@ -217,11 +217,8 @@ func TestTraitDecode(t *testing.T) {
 	trait := traitToMap(t, traitv1.ContainerTrait{
 		Trait: traitv1.Trait{
 			Enabled: pointer.Bool(false),
-			Configuration: configurationFromMap(t, map[string]interface{}{
-				"name": "test-container",
-				"port": 8081,
-			}),
 		},
+		Name: "test-container",
 		Port: 7071,
 		Auto: pointer.Bool(false),
 	})
@@ -233,7 +230,6 @@ func TestTraitDecode(t *testing.T) {
 
 	assert.Equal(t, false, pointer.BoolDeref(target.Enabled, true))
 	assert.Equal(t, "test-container", target.Name)
-	// legacy configuration should not override a value in new API field
 	assert.Equal(t, 7071, target.Port)
 	assert.Equal(t, false, pointer.BoolDeref(target.Auto, true))
 }

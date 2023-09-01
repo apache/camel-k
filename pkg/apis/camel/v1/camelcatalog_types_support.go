@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewCamelCatalog --
+// NewCamelCatalog --.
 func NewCamelCatalog(namespace string, name string) CamelCatalog {
 	return CamelCatalog{
 		TypeMeta: metav1.TypeMeta{
@@ -38,7 +38,7 @@ func NewCamelCatalog(namespace string, name string) CamelCatalog {
 	}
 }
 
-// NewCamelCatalogWithSpecs --
+// NewCamelCatalogWithSpecs --.
 func NewCamelCatalogWithSpecs(namespace string, name string, spec CamelCatalogSpec) CamelCatalog {
 	return CamelCatalog{
 		TypeMeta: metav1.TypeMeta{
@@ -53,7 +53,7 @@ func NewCamelCatalogWithSpecs(namespace string, name string, spec CamelCatalogSp
 	}
 }
 
-// NewCamelCatalogList --
+// NewCamelCatalogList --.
 func NewCamelCatalogList() CamelCatalogList {
 	return CamelCatalogList{
 		TypeMeta: metav1.TypeMeta{
@@ -63,37 +63,37 @@ func NewCamelCatalogList() CamelCatalogList {
 	}
 }
 
-// GetType --
+// GetType --.
 func (c CamelCatalogCondition) GetType() string {
 	return string(c.Type)
 }
 
-// GetStatus --
+// GetStatus --.
 func (c CamelCatalogCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-// GetLastUpdateTime --
+// GetLastUpdateTime --.
 func (c CamelCatalogCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-// GetLastTransitionTime --
+// GetLastTransitionTime --.
 func (c CamelCatalogCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-// GetReason --
+// GetReason --.
 func (c CamelCatalogCondition) GetReason() string {
 	return c.Reason
 }
 
-// GetMessage --
+// GetMessage --.
 func (c CamelCatalogCondition) GetMessage() string {
 	return c.Message
 }
 
-// GetConditions --
+// GetConditions --.
 func (in *CamelCatalogStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
@@ -113,7 +113,7 @@ func (in *CamelCatalogStatus) GetCondition(condType CamelCatalogConditionType) *
 	return nil
 }
 
-// SetCondition --
+// SetCondition --.
 func (in *CamelCatalogStatus) SetCondition(condType CamelCatalogConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(CamelCatalogCondition{
 		Type:               condType,
@@ -125,7 +125,7 @@ func (in *CamelCatalogStatus) SetCondition(condType CamelCatalogConditionType, s
 	})
 }
 
-// SetErrorCondition --
+// SetErrorCondition --.
 func (in *CamelCatalogStatus) SetErrorCondition(condType CamelCatalogConditionType, reason string, err error) {
 	in.SetConditions(CamelCatalogCondition{
 		Type:               condType,
@@ -209,7 +209,7 @@ func (c *CamelCatalogSpec) HasCapability(capability string) bool {
 	return ok
 }
 
-// GetDependencyID returns a Camel K recognizable maven dependency for the artifact
+// GetDependencyID returns a Camel K recognizable maven dependency for the artifact.
 func (in *CamelArtifact) GetDependencyID() string {
 	switch {
 	case in.GroupID == "org.apache.camel.quarkus" && strings.HasPrefix(in.ArtifactID, "camel-quarkus-"):

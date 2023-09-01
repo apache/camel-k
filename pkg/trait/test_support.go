@@ -29,7 +29,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	"github.com/stretchr/testify/assert"
@@ -121,18 +120,6 @@ func createNominalCronJobTraitTest() (*Environment, *batchv1.CronJob) {
 	}
 
 	return environment, cronJob
-}
-
-// nolint: staticcheck
-func configurationFromMap(t *testing.T, configMap map[string]interface{}) *traitv1.Configuration {
-	t.Helper()
-
-	data, err := json.Marshal(configMap)
-	require.NoError(t, err)
-
-	return &traitv1.Configuration{
-		RawMessage: data,
-	}
 }
 
 func traitToMap(t *testing.T, trait interface{}) map[string]interface{} {
