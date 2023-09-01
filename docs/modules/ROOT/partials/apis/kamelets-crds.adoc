@@ -8,7 +8,7 @@ Package v1alpha1 contains API Schema definitions for the camel v1alpha1 API grou
 [#_camel_apache_org_v1alpha1_Kamelet]
 === Kamelet
 
-Kamelet is the Schema for the kamelets API
+Kamelet is the Schema for the kamelets API.
 
 [cols="2,2a",options="header"]
 |===
@@ -35,14 +35,14 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 |
 
 
-the desired specification
+the desired specification.
 
 |`status` +
 *xref:#_camel_apache_org_v1alpha1_KameletStatus[KameletStatus]*
 |
 
 
-the actual status of the resource
+the actual status of the resource.
 
 
 |===
@@ -50,7 +50,7 @@ the actual status of the resource
 [#_camel_apache_org_v1alpha1_KameletBinding]
 === KameletBinding
 
-KameletBinding is the Schema for the kamelets binding API
+KameletBinding is the Schema for the kamelets binding API.
 
 [cols="2,2a",options="header"]
 |===
@@ -94,7 +94,7 @@ the status of a KameletBinding
 [#_camel_apache_org_v1alpha1_BeanProperties]
 === BeanProperties
 
-BeanProperties represent an unstructured object properties to be set on a bean
+BeanProperties represent an unstructured object properties to be set on a bean.
 
 [cols="2,2a",options="header"]
 |===
@@ -118,7 +118,7 @@ BeanProperties represent an unstructured object properties to be set on a bean
 
 * <<#_camel_apache_org_v1alpha1_Endpoint, Endpoint>>
 
-DataTypeReference references to the specification of a data type by its scheme and format name
+DataTypeReference references to the specification of a data type by its scheme and format name.
 
 [cols="2,2a",options="header"]
 |===
@@ -149,7 +149,7 @@ the data type format name
 
 * <<#_camel_apache_org_v1alpha1_DataTypesSpec, DataTypesSpec>>
 
-DataTypeSpec represents the specification for a data type
+DataTypeSpec represents the specification for a data type.
 
 [cols="2,2a",options="header"]
 |===
@@ -215,7 +215,7 @@ the expected schema for the data type
 
 * <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
 
-DataTypesSpec represents the specification for a set of data types
+DataTypesSpec represents the specification for a set of data types.
 
 [cols="2,2a",options="header"]
 |===
@@ -254,7 +254,7 @@ one to many header specifications
 * <<#_camel_apache_org_v1alpha1_ErrorHandlerSink, ErrorHandlerSink>>
 * <<#_camel_apache_org_v1alpha1_KameletBindingSpec, KameletBindingSpec>>
 
-Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI)
+Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI).
 
 [cols="2,2a",options="header"]
 |===
@@ -307,7 +307,7 @@ DataTypes defines the data type of the data produced/consumed by the endpoint an
 
 * <<#_camel_apache_org_v1alpha1_Endpoint, Endpoint>>
 
-EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
+EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values.
 
 [cols="2,2a",options="header"]
 |===
@@ -327,13 +327,13 @@ EndpointProperties is a key/value struct represented as JSON raw to allow numeri
 [#_camel_apache_org_v1alpha1_EndpointType]
 === EndpointType(`string` alias)
 
-EndpointType represents the type (ie, source or sink)
+EndpointType represents the type (ie, source or sink).
 
 
 [#_camel_apache_org_v1alpha1_ErrorHandler]
 === ErrorHandler
 
-ErrorHandler is a generic interface that represent any type of error handler specification
+ErrorHandler is a generic interface that represent any type of error handler specification.
 
 
 [#_camel_apache_org_v1alpha1_ErrorHandlerLog]
@@ -343,7 +343,7 @@ ErrorHandler is a generic interface that represent any type of error handler spe
 
 * <<#_camel_apache_org_v1alpha1_ErrorHandlerSink, ErrorHandlerSink>>
 
-ErrorHandlerLog represent a default (log) error handler type
+ErrorHandlerLog represent a default (log) error handler type.
 
 [cols="2,2a",options="header"]
 |===
@@ -374,7 +374,7 @@ ErrorHandlerLog represent a default (log) error handler type
 
 * <<#_camel_apache_org_v1alpha1_ErrorHandlerLog, ErrorHandlerLog>>
 
-ErrorHandlerNone --
+ErrorHandlerNone --.
 
 [cols="2,2a",options="header"]
 |===
@@ -391,7 +391,7 @@ ErrorHandlerNone --
 
 * <<#_camel_apache_org_v1alpha1_ErrorHandlerLog, ErrorHandlerLog>>
 
-ErrorHandlerParameters represent an unstructured object for error handler parameters
+ErrorHandlerParameters represent an unstructured object for error handler parameters.
 
 [cols="2,2a",options="header"]
 |===
@@ -411,7 +411,7 @@ ErrorHandlerParameters represent an unstructured object for error handler parame
 [#_camel_apache_org_v1alpha1_ErrorHandlerSink]
 === ErrorHandlerSink
 
-ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel
+ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel.
 
 [cols="2,2a",options="header"]
 |===
@@ -442,7 +442,7 @@ ErrorHandlerSink represents a sink error handler type which behave like a dead l
 
 * <<#_camel_apache_org_v1alpha1_KameletBindingSpec, KameletBindingSpec>>
 
-ErrorHandlerSpec represents an unstructured object for an error handler
+ErrorHandlerSpec represents an unstructured object for an error handler.
 
 [cols="2,2a",options="header"]
 |===
@@ -462,7 +462,7 @@ ErrorHandlerSpec represents an unstructured object for an error handler
 [#_camel_apache_org_v1alpha1_ErrorHandlerType]
 === ErrorHandlerType(`string` alias)
 
-ErrorHandlerType a type of error handler (ie, sink)
+ErrorHandlerType a type of error handler (ie, sink).
 
 
 [#_camel_apache_org_v1alpha1_EventTypeSpec]
@@ -473,8 +473,8 @@ ErrorHandlerType a type of error handler (ie, sink)
 * <<#_camel_apache_org_v1alpha1_Endpoint, Endpoint>>
 * <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
 
-EventTypeSpec represents a specification for an event type
-Deprecated: In favor of using DataTypeSpec
+EventTypeSpec represents a specification for an event type.
+Deprecated: In favor of using DataTypeSpec.
 
 [cols="2,2a",options="header"]
 |===
@@ -537,7 +537,7 @@ string
 * <<#_camel_apache_org_v1alpha1_DataTypeSpec, DataTypeSpec>>
 * <<#_camel_apache_org_v1alpha1_DataTypesSpec, DataTypesSpec>>
 
-HeaderSpec represents the specification for a header used in the Kamelet
+HeaderSpec represents the specification for a header used in the Kamelet.
 
 [cols="2,2a",options="header"]
 |===
@@ -983,7 +983,7 @@ Pods collect health and conditions information from the owned PODs
 
 * <<#_camel_apache_org_v1alpha1_KameletBindingCondition, KameletBindingCondition>>
 
-KameletBindingConditionType --
+KameletBindingConditionType --.
 
 
 [#_camel_apache_org_v1alpha1_KameletBindingPhase]
@@ -993,7 +993,7 @@ KameletBindingConditionType --
 
 * <<#_camel_apache_org_v1alpha1_KameletBindingStatus, KameletBindingStatus>>
 
-KameletBindingPhase --
+KameletBindingPhase --.
 
 
 [#_camel_apache_org_v1alpha1_KameletBindingSpec]
@@ -1069,7 +1069,7 @@ Custom SA to use for the binding
 
 * <<#_camel_apache_org_v1alpha1_KameletBinding, KameletBinding>>
 
-KameletBindingStatus specify the status of a binding
+KameletBindingStatus specify the status of a binding.
 
 [cols="2,2a",options="header"]
 |===
@@ -1180,7 +1180,7 @@ A human-readable message indicating details about the transition.
 
 * <<#_camel_apache_org_v1alpha1_KameletCondition, KameletCondition>>
 
-KameletConditionType --
+KameletConditionType --.
 
 
 [#_camel_apache_org_v1alpha1_KameletPhase]
@@ -1190,7 +1190,7 @@ KameletConditionType --
 
 * <<#_camel_apache_org_v1alpha1_KameletStatus, KameletStatus>>
 
-KameletPhase --
+KameletPhase --.
 
 
 [#_camel_apache_org_v1alpha1_KameletProperty]
@@ -1200,7 +1200,7 @@ KameletPhase --
 
 * <<#_camel_apache_org_v1alpha1_KameletStatus, KameletStatus>>
 
-KameletProperty specify the behavior of a property in a Kamelet
+KameletProperty specify the behavior of a property in a Kamelet.
 
 [cols="2,2a",options="header"]
 |===
@@ -1231,7 +1231,7 @@ the default value of the property (if any)
 
 * <<#_camel_apache_org_v1alpha1_Kamelet, Kamelet>>
 
-KameletSpec specifies the configuration required to execute a Kamelet
+KameletSpec specifies the configuration required to execute a Kamelet.
 
 [cols="2,2a",options="header"]
 |===
@@ -1291,7 +1291,7 @@ Camel dependencies needed by the Kamelet
 
 * <<#_camel_apache_org_v1alpha1_Kamelet, Kamelet>>
 
-KameletStatus defines the observed state of Kamelet
+KameletStatus defines the observed state of Kamelet.
 
 [cols="2,2a",options="header"]
 |===
@@ -1353,7 +1353,7 @@ be used to delay JSON decoding or precompute a JSON encoding.
 
 * <<#_camel_apache_org_v1alpha1_KameletSpec, KameletSpec>>
 
-Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
+Template is an unstructured object representing a Kamelet template in YAML/JSON DSL.
 
 [cols="2,2a",options="header"]
 |===
@@ -1373,4 +1373,4 @@ an unstructured raw message
 [#_camel_apache_org_v1alpha1_TypeSlot]
 === TypeSlot(`string` alias)
 
-TypeSlot represent a kind of data (ie, input, output, ...)
+TypeSlot represent a kind of data (ie, input, output, ...).

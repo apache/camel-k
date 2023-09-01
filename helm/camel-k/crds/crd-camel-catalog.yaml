@@ -80,7 +80,7 @@ spec:
               artifacts:
                 additionalProperties:
                   description: CamelArtifact represent the configuration for a feature
-                    offered by Camel
+                    offered by Camel.
                   properties:
                     artifactId:
                       description: Maven Artifact
@@ -93,7 +93,7 @@ spec:
                     dependencies:
                       description: required dependencies
                       items:
-                        description: CamelArtifactDependency represent a maven's dependency
+                        description: CamelArtifactDependency represent a maven's dependency.
                         properties:
                           artifactId:
                             description: Maven Artifact
@@ -103,7 +103,7 @@ spec:
                               this dependency
                             items:
                               description: CamelArtifactExclusion represents an exclusion
-                                clause
+                                clause.
                               properties:
                                 artifactId:
                                   description: Maven Artifact
@@ -132,7 +132,7 @@ spec:
                         dependency
                       items:
                         description: CamelArtifactExclusion represents an exclusion
-                          clause
+                          clause.
                         properties:
                           artifactId:
                             description: Maven Artifact
@@ -164,7 +164,7 @@ spec:
                       items:
                         description: CamelScheme represents the scheme used to identify
                           a component in a URI (ie, timer in a timer:xyz endpoint
-                          URI)
+                          URI).
                         properties:
                           consumer:
                             description: required scope for consumer
@@ -174,7 +174,7 @@ spec:
                                   scope
                                 items:
                                   description: CamelArtifactDependency represent a
-                                    maven's dependency
+                                    maven's dependency.
                                   properties:
                                     artifactId:
                                       description: Maven Artifact
@@ -184,7 +184,7 @@ spec:
                                         exclude for this dependency
                                       items:
                                         description: CamelArtifactExclusion represents
-                                          an exclusion clause
+                                          an exclusion clause.
                                         properties:
                                           artifactId:
                                             description: Maven Artifact
@@ -226,7 +226,7 @@ spec:
                                   scope
                                 items:
                                   description: CamelArtifactDependency represent a
-                                    maven's dependency
+                                    maven's dependency.
                                   properties:
                                     artifactId:
                                       description: Maven Artifact
@@ -236,7 +236,7 @@ spec:
                                         exclude for this dependency
                                       items:
                                         description: CamelArtifactExclusion represents
-                                          an exclusion clause
+                                          an exclusion clause.
                                         properties:
                                           artifactId:
                                             description: Maven Artifact
@@ -279,7 +279,7 @@ spec:
               loaders:
                 additionalProperties:
                   description: CamelLoader represents the configuration required to
-                    load a DSL
+                    load a DSL.
                   properties:
                     artifactId:
                       description: Maven Artifact
@@ -289,7 +289,7 @@ spec:
                         the base one
                       items:
                         description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                          Maven artifact
+                          Maven artifact.
                         properties:
                           artifactId:
                             description: Maven Artifact
@@ -337,12 +337,12 @@ spec:
                     additionalProperties:
                       description: Capability is a particular feature which requires
                         a well known set of dependencies which are specified in the
-                        runtime catalog
+                        runtime catalog.
                       properties:
                         dependencies:
                           items:
                             description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                              Maven artifact
+                              Maven artifact.
                             properties:
                               artifactId:
                                 description: Maven Artifact
@@ -367,7 +367,7 @@ spec:
                     description: list of dependencies needed to run the application
                     items:
                       description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                        Maven artifact
+                        Maven artifact.
                       properties:
                         artifactId:
                           description: Maven Artifact

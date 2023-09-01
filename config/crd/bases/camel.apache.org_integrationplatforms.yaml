@@ -66,7 +66,7 @@ spec:
           operator behavior. It defines the behavior of all Custom Resources (`IntegrationKit`,
           `Integration`, `Kamelet`) in the given namespace. When the Camel K operator
           is installed in `global` mode, you will need to specify an `IntegrationPlatform`
-          in each namespace where you want the Camel K operator to be executed
+          in each namespace where you want the Camel K operator to be executed.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -81,7 +81,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: IntegrationPlatformSpec defines the desired state of IntegrationPlatform
+            description: IntegrationPlatformSpec defines the desired state of IntegrationPlatform.
             properties:
               build:
                 description: specify how to build the Integration/IntegrationKits
@@ -183,7 +183,7 @@ spec:
                         description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                         items:
                           description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                            Maven artifact
+                            Maven artifact.
                           properties:
                             artifactId:
                               description: Maven Artifact
@@ -206,7 +206,7 @@ spec:
                         description: A reference to the ConfigMap or Secret key that
                           contains the Maven profile.
                         items:
-                          description: ValueSource --
+                          description: ValueSource --.
                           properties:
                             configMapKeyRef:
                               description: Selects a key of a ConfigMap.
@@ -393,7 +393,7 @@ spec:
                   this IntegrationPlatform'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -416,7 +416,7 @@ spec:
                     description: remote repository used to retrieve Kamelet catalog
                     items:
                       description: IntegrationPlatformKameletRepositorySpec defines
-                        the location of the Kamelet catalog to use
+                        the location of the Kamelet catalog to use.
                       properties:
                         uri:
                           description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
@@ -447,7 +447,7 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     description: The extension point with addon traits
@@ -1798,7 +1798,7 @@ spec:
                 type: object
             type: object
           status:
-            description: IntegrationPlatformStatus defines the observed state of IntegrationPlatform
+            description: IntegrationPlatformStatus defines the observed state of IntegrationPlatform.
             properties:
               build:
                 description: specify how to build the Integration/IntegrationKits
@@ -1900,7 +1900,7 @@ spec:
                         description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                         items:
                           description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                            Maven artifact
+                            Maven artifact.
                           properties:
                             artifactId:
                               description: Maven Artifact
@@ -1923,7 +1923,7 @@ spec:
                         description: A reference to the ConfigMap or Secret key that
                           contains the Maven profile.
                         items:
-                          description: ValueSource --
+                          description: ValueSource --.
                           properties:
                             configMapKeyRef:
                               description: Selects a key of a ConfigMap.
@@ -2144,7 +2144,7 @@ spec:
                   this IntegrationPlatform'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -2173,7 +2173,7 @@ spec:
                     description: remote repository used to retrieve Kamelet catalog
                     items:
                       description: IntegrationPlatformKameletRepositorySpec defines
-                        the location of the Kamelet catalog to use
+                        the location of the Kamelet catalog to use.
                       properties:
                         uri:
                           description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
@@ -2212,7 +2212,7 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     description: The extension point with addon traits

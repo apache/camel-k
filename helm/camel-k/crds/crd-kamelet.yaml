@@ -46,7 +46,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: Kamelet is the Schema for the kamelets API
+        description: Kamelet is the Schema for the kamelets API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -66,7 +66,7 @@ spec:
               dataTypes:
                 additionalProperties:
                   description: DataTypesSpec represents the specification for a set
-                    of data types
+                    of data types.
                   properties:
                     default:
                       description: the default data type for this Kamelet
@@ -74,7 +74,7 @@ spec:
                     headers:
                       additionalProperties:
                         description: HeaderSpec represents the specification for a
-                          header used in the Kamelet
+                          header used in the Kamelet.
                         properties:
                           default:
                             type: string
@@ -92,7 +92,7 @@ spec:
                     types:
                       additionalProperties:
                         description: DataTypeSpec represents the specification for
-                          a data type
+                          a data type.
                         properties:
                           dependencies:
                             description: the list of Camel or Maven dependencies required
@@ -109,7 +109,7 @@ spec:
                           headers:
                             additionalProperties:
                               description: HeaderSpec represents the specification
-                                for a header used in the Kamelet
+                                for a header used in the Kamelet.
                               properties:
                                 default:
                                   type: string
@@ -449,7 +449,7 @@ spec:
                 description: sources in any Camel DSL supported
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
                       description: if the content is compressed (base64 encrypted)
@@ -509,7 +509,7 @@ spec:
               types:
                 additionalProperties:
                   description: 'EventTypeSpec represents a specification for an event
-                    type Deprecated: In favor of using DataTypeSpec'
+                    type. Deprecated: In favor of using DataTypeSpec.'
                   properties:
                     mediaType:
                       description: media type as expected for HTTP media types (ie,
@@ -717,7 +717,7 @@ spec:
                 description: Properties --
                 items:
                   description: KameletProperty specify the behavior of a property
-                    in a Kamelet
+                    in a Kamelet.
                   properties:
                     default:
                       description: the default value of the property (if any)
@@ -743,7 +743,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Kamelet is the Schema for the kamelets API
+        description: Kamelet is the Schema for the kamelets API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -758,12 +758,12 @@ spec:
           metadata:
             type: object
           spec:
-            description: the desired specification
+            description: the desired specification.
             properties:
               dataTypes:
                 additionalProperties:
                   description: DataTypesSpec represents the specification for a set
-                    of data types
+                    of data types.
                   properties:
                     default:
                       description: the default data type for this Kamelet
@@ -771,7 +771,7 @@ spec:
                     headers:
                       additionalProperties:
                         description: HeaderSpec represents the specification for a
-                          header used in the Kamelet
+                          header used in the Kamelet.
                         properties:
                           default:
                             type: string
@@ -789,7 +789,7 @@ spec:
                     types:
                       additionalProperties:
                         description: DataTypeSpec represents the specification for
-                          a data type
+                          a data type.
                         properties:
                           dependencies:
                             description: the list of Camel or Maven dependencies required
@@ -806,7 +806,7 @@ spec:
                           headers:
                             additionalProperties:
                               description: HeaderSpec represents the specification
-                                for a header used in the Kamelet
+                                for a header used in the Kamelet.
                               properties:
                                 default:
                                   type: string
@@ -1146,7 +1146,7 @@ spec:
                 description: sources in any Camel DSL supported
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
                       description: if the content is compressed (base64 encrypted)
@@ -1206,7 +1206,7 @@ spec:
               types:
                 additionalProperties:
                   description: 'EventTypeSpec represents a specification for an event
-                    type Deprecated: In favor of using DataTypeSpec'
+                    type. Deprecated: In favor of using DataTypeSpec.'
                   properties:
                     mediaType:
                       description: media type as expected for HTTP media types (ie,
@@ -1367,7 +1367,7 @@ spec:
                 type: object
             type: object
           status:
-            description: the actual status of the resource
+            description: the actual status of the resource.
             properties:
               conditions:
                 description: Conditions --
@@ -1414,7 +1414,7 @@ spec:
                 description: Properties --
                 items:
                   description: KameletProperty specify the behavior of a property
-                    in a Kamelet
+                    in a Kamelet.
                   properties:
                     default:
                       description: the default value of the property (if any)

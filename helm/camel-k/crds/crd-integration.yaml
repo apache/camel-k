@@ -62,7 +62,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: Integration is the Schema for the integrations API
+        description: Integration is the Schema for the integrations API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -86,7 +86,7 @@ spec:
                   (mount.volumes) to manage volumes'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -112,7 +112,7 @@ spec:
                   to run
                 items:
                   description: Flow is an unstructured object representing a Camel
-                    Flow in YAML/JSON DSL
+                    Flow in YAML/JSON DSL.
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
@@ -172,7 +172,7 @@ spec:
                 description: the sources which contain the Camel routes to run
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
                       description: if the content is compressed (base64 encrypted)
@@ -6364,7 +6364,7 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     description: The extension point with addon traits
@@ -7823,7 +7823,7 @@ spec:
                 description: 'Deprecated: a list of configuration specification'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -7850,7 +7850,7 @@ spec:
                 description: a list of sources generated for this Integration
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
                       description: if the content is compressed (base64 encrypted)

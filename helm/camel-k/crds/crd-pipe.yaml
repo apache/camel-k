@@ -50,7 +50,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: Pipe is the Schema for the Pipe API
+        description: Pipe is the Schema for the Pipe API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -83,7 +83,7 @@ spec:
                       Use mount trait (mount.volumes) to manage volumes'
                     items:
                       description: ConfigurationSpec represents a generic configuration
-                        specification
+                        specification.
                       properties:
                         type:
                           description: 'represents the type of configuration, ie:
@@ -109,7 +109,7 @@ spec:
                       to run
                     items:
                       description: Flow is an unstructured object representing a Camel
-                        Flow in YAML/JSON DSL
+                        Flow in YAML/JSON DSL.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     type: array
@@ -169,7 +169,7 @@ spec:
                     description: the sources which contain the Camel routes to run
                     items:
                       description: SourceSpec defines the configuration for one or
-                        more routes to be executed in a certain Camel DSL language
+                        more routes to be executed in a certain Camel DSL language.
                       properties:
                         compression:
                           description: if the content is compressed (base64 encrypted)
@@ -6642,7 +6642,7 @@ spec:
                       addons:
                         additionalProperties:
                           description: AddonTrait represents the configuration of
-                            an addon trait
+                            an addon trait.
                           type: object
                           x-kubernetes-preserve-unknown-fields: true
                         description: The extension point with addon traits
@@ -8029,7 +8029,7 @@ spec:
                   dataTypes:
                     additionalProperties:
                       description: DataTypeReference references to the specification
-                        of a data type by its scheme and format name
+                        of a data type by its scheme and format name.
                       properties:
                         format:
                           description: the data type format name
@@ -8094,7 +8094,7 @@ spec:
                   dataTypes:
                     additionalProperties:
                       description: DataTypeReference references to the specification
-                        of a data type by its scheme and format name
+                        of a data type by its scheme and format name.
                       properties:
                         format:
                           description: the data type format name
@@ -8157,12 +8157,12 @@ spec:
                   that are executed between the Source and the Sink
                 items:
                   description: Endpoint represents a source/sink external entity (could
-                    be any Kubernetes resource or Camel URI)
+                    be any Kubernetes resource or Camel URI).
                   properties:
                     dataTypes:
                       additionalProperties:
                         description: DataTypeReference references to the specification
-                          of a data type by its scheme and format name
+                          of a data type by its scheme and format name.
                         properties:
                           format:
                             description: the data type format name

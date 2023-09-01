@@ -91,7 +91,7 @@ spec:
                   (mount.volumes) to manage volumes configuration used by the kit'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -126,7 +126,7 @@ spec:
                 description: the sources to add at build time
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
                       description: if the content is compressed (base64 encrypted)
@@ -185,7 +185,7 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     description: The collection of addon trait configurations
@@ -340,7 +340,7 @@ spec:
                 description: list of artifacts used by the kit
                 items:
                   description: Artifact represents a materialized artifact (a jar
-                    dependency or in general a file used by the build)
+                    dependency or in general a file used by the build).
                   properties:
                     checksum:
                       description: a checksum (SHA1) of the content
