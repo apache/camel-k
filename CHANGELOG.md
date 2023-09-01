@@ -7,13 +7,18 @@
 **Closed issues:**
 
 - \[Bug\]: TEST [\#4702](https://github.com/apache/camel-k/issues/4702)
+- Include CRD yaml files in camel-k-crds maven artifact [\#4655](https://github.com/apache/camel-k/issues/4655)
+- Bump Kubernetes API to 1.27 [\#4612](https://github.com/apache/camel-k/issues/4612)
 - camel-k with spring config  [\#4376](https://github.com/apache/camel-k/issues/4376)
+- Release script utils: Add a release utils script in Camel K CRD [\#4070](https://github.com/apache/camel-k/issues/4070)
 - jib builder [\#1656](https://github.com/apache/camel-k/issues/1656)
 
 **Merged pull requests:**
 
+- feat\(crds\): include sources in java dependency [\#4706](https://github.com/apache/camel-k/pull/4706) ([squakez](https://github.com/squakez))
 - fix\(doc\): multi arch build notice [\#4701](https://github.com/apache/camel-k/pull/4701) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump sigs.k8s.io/structured-merge-diff/v4 from 4.2.3 to 4.3.0 [\#4697](https://github.com/apache/camel-k/pull/4697) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump k8s api and friends [\#4693](https://github.com/apache/camel-k/pull/4693) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump openshift api [\#4692](https://github.com/apache/camel-k/pull/4692) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump multierr [\#4691](https://github.com/apache/camel-k/pull/4691) ([squakez](https://github.com/squakez))
 - Reorganize project to have a single Go module [\#4690](https://github.com/apache/camel-k/pull/4690) ([claudio4j](https://github.com/claudio4j))
