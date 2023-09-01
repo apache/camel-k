@@ -29,7 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// GetConditions --
+// GetConditions --.
 func (in *KameletBindingStatus) GetConditions() []v1.ResourceCondition {
 	res := make([]v1.ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
@@ -38,37 +38,37 @@ func (in *KameletBindingStatus) GetConditions() []v1.ResourceCondition {
 	return res
 }
 
-// GetType --
+// GetType --.
 func (c KameletBindingCondition) GetType() string {
 	return string(c.Type)
 }
 
-// GetStatus --
+// GetStatus --.
 func (c KameletBindingCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-// GetLastUpdateTime --
+// GetLastUpdateTime --.
 func (c KameletBindingCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-// GetLastTransitionTime --
+// GetLastTransitionTime --.
 func (c KameletBindingCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-// GetReason --
+// GetReason --.
 func (c KameletBindingCondition) GetReason() string {
 	return c.Reason
 }
 
-// GetMessage --
+// GetMessage --.
 func (c KameletBindingCondition) GetMessage() string {
 	return c.Message
 }
 
-// SetOperatorID sets the given operator id as an annotation
+// SetOperatorID sets the given operator id as an annotation.
 func (in *KameletBinding) SetOperatorID(operatorID string) {
 	v1.SetAnnotation(&in.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
 }
@@ -84,7 +84,7 @@ func (in *KameletBindingStatus) GetCondition(condType KameletBindingConditionTyp
 	return nil
 }
 
-// SetCondition --
+// SetCondition --.
 func (in *KameletBindingStatus) SetCondition(condType KameletBindingConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(KameletBindingCondition{
 		Type:               condType,
@@ -96,7 +96,7 @@ func (in *KameletBindingStatus) SetCondition(condType KameletBindingConditionTyp
 	})
 }
 
-// SetErrorCondition --
+// SetErrorCondition --.
 func (in *KameletBindingStatus) SetErrorCondition(condType KameletBindingConditionType, reason string, err error) {
 	in.SetConditions(KameletBindingCondition{
 		Type:               condType,
@@ -148,7 +148,7 @@ func (in *KameletBindingStatus) RemoveCondition(condType KameletBindingCondition
 	in.Conditions = newConditions
 }
 
-// GetPropertyMap returns the EndpointProperties as map
+// GetPropertyMap returns the EndpointProperties as map.
 func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 	if p == nil {
 		return nil, nil
@@ -171,7 +171,7 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 	return stringProps, nil
 }
 
-// NewKameletBinding --
+// NewKameletBinding --.
 func NewKameletBinding(namespace string, name string) KameletBinding {
 	return KameletBinding{
 		TypeMeta: metav1.TypeMeta{
@@ -185,7 +185,7 @@ func NewKameletBinding(namespace string, name string) KameletBinding {
 	}
 }
 
-// NewKameletBindingList --
+// NewKameletBindingList --.
 func NewKameletBindingList() KameletBindingList {
 	return KameletBindingList{
 		TypeMeta: metav1.TypeMeta{

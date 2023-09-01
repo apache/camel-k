@@ -32,7 +32,7 @@ func TestGithubRepository(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	repo := newGithubKameletRepository("apache", "camel-kamelets", "kamelets", "")
+	repo := newGithubKameletRepository(ctx, "apache", "camel-kamelets", "kamelets", "")
 	list, err := repo.List(ctx)
 	assert.NoError(t, err)
 	require.True(t, len(list) > 0)

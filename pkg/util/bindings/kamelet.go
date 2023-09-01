@@ -103,7 +103,8 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 						"steps": steps,
 					},
 				}
-			} else {
+			} else if len(steps) == 1 {
+				// nolint: gosec // steps[0] not out of bounds
 				binding.Step = steps[0]
 			}
 		case v1.EndpointTypeSource:
@@ -241,7 +242,8 @@ func (k V1alpha1BindingConverter) Translate(ctx V1alpha1BindingContext, endpoint
 						"steps": steps,
 					},
 				}
-			} else {
+			} else if len(steps) == 1 {
+				// nolint: gosec // steps[0] not out of bounds
 				binding.Step = steps[0]
 			}
 		case v1alpha1.EndpointTypeSource:

@@ -95,6 +95,7 @@ func (o *logCmdOptions) run(cmd *cobra.Command, args []string) error {
 	currLogMsg := ""
 	newLogMsg := ""
 
+	// nolint:staticcheck // wrong deprecation notice --> https://github.com/kubernetes/apimachinery/issues/153
 	err = wait.PollImmediate(pollInterval, pollTimeout, func() (bool, error) {
 		//
 		// Reduce repetition of messages by tracking the last message

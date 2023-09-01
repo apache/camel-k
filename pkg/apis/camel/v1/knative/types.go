@@ -40,25 +40,25 @@ type CamelServiceDefinition struct {
 	Metadata    map[string]string `json:"metadata,omitempty"`
 }
 
-// CamelEndpointKind --
+// CamelEndpointKind -- .
 type CamelEndpointKind string
 
 const (
-	// CamelEndpointKindSource is a service that can be used to consume events
+	// CamelEndpointKindSource is a service that can be used to consume events.
 	CamelEndpointKindSource CamelEndpointKind = "source"
-	// CamelEndpointKindSink is a service that can be used to send events to
+	// CamelEndpointKindSink is a service that can be used to send events to.
 	CamelEndpointKindSink CamelEndpointKind = "sink"
 )
 
-// CamelServiceType --
+// CamelServiceType -- .
 type CamelServiceType string
 
 const (
-	// CamelServiceTypeEndpoint is a callable endpoint
+	// CamelServiceTypeEndpoint is a callable endpoint.
 	CamelServiceTypeEndpoint CamelServiceType = "endpoint"
-	// CamelServiceTypeChannel is a callable endpoint that will be also associated to a subscription
+	// CamelServiceTypeChannel is a callable endpoint that will be also associated to a subscription.
 	CamelServiceTypeChannel CamelServiceType = "channel"
-	// CamelServiceTypeEvent is used when the target service is the Knative broker
+	// CamelServiceTypeEvent is used when the target service is the Knative broker.
 	CamelServiceTypeEvent CamelServiceType = "event"
 )
 
@@ -70,7 +70,7 @@ func (s CamelServiceType) ResourceDescription(subject string) string {
 	return fmt.Sprintf("%s%s %s", prefix, string(s), subject)
 }
 
-// Meta Options
+// Meta Options.
 const (
 	CamelMetaKnativeKind       = "knative.kind"
 	CamelMetaKnativeAPIVersion = "knative.apiVersion"

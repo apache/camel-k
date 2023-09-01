@@ -32,7 +32,7 @@ import (
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Pipe phase"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
 
-// Pipe is the Schema for the Pipe API
+// Pipe is the Schema for the Pipe API.
 type Pipe struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -61,7 +61,7 @@ type PipeSpec struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
-// Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI)
+// Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI).
 type Endpoint struct {
 	// Ref can be used to declare a Kubernetes resource as source/sink endpoint
 	Ref *corev1.ObjectReference `json:"ref,omitempty"`
@@ -73,26 +73,26 @@ type Endpoint struct {
 	DataTypes map[TypeSlot]DataTypeReference `json:"dataTypes,omitempty"`
 }
 
-// EndpointType represents the type (ie, source or sink)
+// EndpointType represents the type (ie, source or sink).
 type EndpointType string
 
 const (
-	// EndpointTypeSource source endpoint
+	// EndpointTypeSource source endpoint.
 	EndpointTypeSource EndpointType = "source"
-	// EndpointTypeAction action endpoint
+	// EndpointTypeAction action endpoint.
 	EndpointTypeAction EndpointType = "action"
-	// EndpointTypeSink sink endpoint
+	// EndpointTypeSink sink endpoint.
 	EndpointTypeSink EndpointType = "sink"
-	// EndpointTypeErrorHandler error handler endpoint
+	// EndpointTypeErrorHandler error handler endpoint.
 	EndpointTypeErrorHandler EndpointType = "errorHandler"
 )
 
-// EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
+// EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values.
 type EndpointProperties struct {
 	RawMessage `json:",inline"`
 }
 
-// PipeStatus specify the status of a Pipe
+// PipeStatus specify the status of a Pipe.
 type PipeStatus struct {
 	// ObservedGeneration is the most recent generation observed for this Pipe.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
@@ -124,36 +124,36 @@ type PipeCondition struct {
 	Pods []PodCondition `json:"pods,omitempty"`
 }
 
-// PipeConditionType --
+// PipeConditionType --.
 type PipeConditionType string
 
 const (
-	// PipeConditionReady --
+	// PipeConditionReady --.
 	PipeConditionReady PipeConditionType = "Ready"
-	// PipeIntegrationConditionError is used to report the error on the generated Integration
+	// PipeIntegrationConditionError is used to report the error on the generated Integration.
 	PipeIntegrationConditionError PipeConditionType = "IntegrationError"
 )
 
-// PipePhase --
+// PipePhase --.
 type PipePhase string
 
 const (
-	// PipeKind --
+	// PipeKind --.
 	PipeKind string = "Pipe"
 
-	// PipePhaseNone --
+	// PipePhaseNone --.
 	PipePhaseNone PipePhase = ""
-	// PipePhaseCreating --
+	// PipePhaseCreating --.
 	PipePhaseCreating PipePhase = "Creating"
-	// PipePhaseError --
+	// PipePhaseError --.
 	PipePhaseError PipePhase = "Error"
-	// PipePhaseReady --
+	// PipePhaseReady --.
 	PipePhaseReady PipePhase = "Ready"
 )
 
 // +kubebuilder:object:root=true
 
-// PipeList contains a list of Pipe
+// PipeList contains a list of Pipe.
 type PipeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

@@ -144,7 +144,7 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 			if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
 				list := &v1.IntegrationKitList{}
 
-				if err := mgr.GetClient().List(context.TODO(), list, ctrl.InNamespace(p.Namespace)); err != nil {
+				if err := mgr.GetClient().List(ctx, list, ctrl.InNamespace(p.Namespace)); err != nil {
 					log.Error(err, "Failed to list integration kits")
 					return requests
 				}

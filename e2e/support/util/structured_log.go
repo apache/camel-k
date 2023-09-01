@@ -32,7 +32,7 @@ type LogEntry struct {
 	// Controller runtime
 	RequestNamespace string `json:"request-namespace,omitempty"`
 	RequestName      string `json:"request-name,omitempty"`
-	ApiVersion       string `json:"api-version,omitempty"`
+	APIVersion       string `json:"api-version,omitempty"`
 	Kind             string `json:"kind,omitempty"`
 	// Camel K
 	Namespace string `json:"ns,omitempty"`
