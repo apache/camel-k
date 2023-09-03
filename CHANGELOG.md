@@ -9,6 +9,7 @@
 - \[Bug\]: TEST [\#4702](https://github.com/apache/camel-k/issues/4702)
 - Include CRD yaml files in camel-k-crds maven artifact [\#4655](https://github.com/apache/camel-k/issues/4655)
 - Bump Kubernetes API to 1.27 [\#4612](https://github.com/apache/camel-k/issues/4612)
+- Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
 - camel-k with spring config  [\#4376](https://github.com/apache/camel-k/issues/4376)
 - Release script utils: Add a release utils script in Camel K CRD [\#4070](https://github.com/apache/camel-k/issues/4070)
 - jib builder [\#1656](https://github.com/apache/camel-k/issues/1656)
