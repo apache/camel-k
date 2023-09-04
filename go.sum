@@ -91,8 +91,8 @@ github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGX
 github.com/cncf/udpa/go v0.0.0-20200629203442-efcf912fb354/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
 github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403/go.mod h1:WmhPx2Nbnhtbo57+VJT5O0JRkEi1Wbu0z5j0R8u5Hbk=
 github.com/cncf/xds/go v0.0.0-20210312221358-fbca930ec8ed/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
-github.com/container-tools/spectrum v0.6.34 h1:rt2rY2Ji9e87dj1ROC9j0dUzC7MUk9qB2emaYYdAfzg=
-github.com/container-tools/spectrum v0.6.34/go.mod h1:5eDIJMDl1ufAzLV/CFMPNRXBPULqPrZJ+OGMXdu1Nv8=
+github.com/container-tools/spectrum v0.6.35 h1:xCCkihqTVLMHoqWiJUxzahZa/0Yp4MhXEEmunTbyGfM=
+github.com/container-tools/spectrum v0.6.35/go.mod h1:2lB7tg3DQa7jqzSIiNLhjxbX72F4/sM/uiKzOI3ngHE=
 github.com/containerd/stargz-snapshotter/estargz v0.14.3 h1:OqlDCK3ZVUO6C3B/5FSkDwbkEETK84kQgEeFwDC+62k=
 github.com/containerd/stargz-snapshotter/estargz v0.14.3/go.mod h1:KY//uOCIkSuNAHhJogcZtrNHdKrA99/FCCRjE3HD36o=
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
