@@ -1,0 +1,90 @@
+= Dry Run an Integration
+
+The CLI is a very powerful facility which will do a lot of heavy lift for you, transforming a Camel route into an Integration specification which will be watched and reconciled by the operator. However, sometimes you don't want to apply the result of an execution on the cluster. You may want only to check how the route is transformed or you want to run the conversion and apply the result later.
+
+*Dry Run* is the mode you can find on several commands, above all on `kamel run` and `promote`. If you have familiarity with Kubernetes, you will see we use the same approach used by `kubectl`, exposing a `-o` parameter which accepts either `yaml` or `json`.
+
+The presence of this feature will let you simplify any deployment strategy (including GitOps) as you can just get the result of the Integration which will be eventually executed by the Camel K Operator.
+
+NOTE: we make use of `stderr` for many CLI warning and this is automatically redirected to `stdout` to show immediately the result of any error to the user. If you're running any automation, make sure to redirect the `stderr` to any channel to avoid altering the result of the dry run, Ie `kamel run /tmp/Test.java -o yaml 2>/dev/null`.
+
+[[run]]
+== Run subcommand
+
+As an example, take the option available on the `kamel run test.yaml -o yaml -t prometheus.enabled=true` command:
+```yaml
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: test
+spec:
+  flows:
+  - from:
+      parameters:
+        period: "1000"
+      steps:
+      - setBody:
+          constant: Hello Camel from yaml
+      - log: ${body}
+      uri: timer:yaml
+  traits:
+    prometheus:
+      enabled: true
+status: {}
+```
+This can be saved for future processing (ie, stored to a GIT repository and later deployed to a cluster via some GitOps deployment strategy). Consider that any **modeline** option will be translated accordingly.
+
+[[bind]]
+== Bind subcommand
+The same option can be used for `kamel bind timer:foo log:bar -t camel.runtime-version=1.17.0 -o yaml`:
+```yaml
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: timer-to-log
+spec:
+  integration:
+    traits:
+      camel:
+        runtimeVersion: 1.17.0
+  sink:
+    uri: log:bar
+  source:
+    uri: timer:foo
+status: {}
+```
+
+[[promote]]
+== Promote subcommand
+This one is very interesting as will give you the possibility to see how a running Integration can be promoted to a different environment (without being actually executed). For example `kamel promote test -o yaml --to prod-ns` will return:
+```yaml
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  creationTimestamp: null
+  name: test
+  namespace: prod-ns
+spec:
+  flows:
+  - from:
+      parameters:
+        period: "1000"
+      steps:
+      - setBody:
+          constant: Hello Camel from yaml
+      - log: ${body}
+      uri: timer:yaml
+  traits:
+    camel:
+      runtimeVersion: 1.17.0
+    container:
+      image: 10.110.251.124/default/camel-k-kit-cjquhq90gomc73bb5fkg@sha256:448b882537accac6a815404fbf2da3d52f3e2982756caf3adac16b824a1097b1
+status: {}
+```
+We can see it specify the image that was already used by the previous execution (which likely served as a test).
