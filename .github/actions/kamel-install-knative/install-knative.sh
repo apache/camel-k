@@ -34,6 +34,8 @@ export SERVING_VERSION=knative-v1.11.0
 export EVENTING_VERSION=knative-v1.11.0
 export KOURIER_VERSION=knative-v1.11.0
 
+TIMEOUT="150s"
+
 apply() {
   local file="${1:-}"
   if [ -z "${file}" ]; then
@@ -69,7 +71,7 @@ curl -L -s ${SERVING_CORE} | head -n -1 | yq e 'del(.spec.template.spec.containe
 if [ -s ${YAML} ]; then
   apply ${YAML}
   echo "Waiting for pods to be ready in knative-serving (dependency for kourier)"
-  kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=60s
+  kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=${TIMEOUT}
 else
   echo "Error: Failed to correctly download ${SERVING_CORE}"
   exit 1
@@ -135,8 +137,8 @@ kubectl patch configmap/config-sugar \
 
 # Wait for installation completed
 echo "Waiting for all pods to be ready in kourier-system"
-kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=60s
+kubectl wait --for=condition=Ready pod --all -n kourier-system --timeout=${TIMEOUT}
 echo "Waiting for all pods to be ready in knative-serving"
-kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=60s
+kubectl wait --for=condition=Ready pod --all -n knative-serving --timeout=${TIMEOUT}
 echo "Waiting for all pods to be ready in knative-eventing"
-kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=60s
+kubectl wait --for=condition=Ready pod --all -n knative-eventing --timeout=${TIMEOUT}
