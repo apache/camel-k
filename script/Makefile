@@ -503,7 +503,7 @@ images-nightly: clean codegen set-version build-resources images
 release-nightly: cross-compile images-push
 
 release-helm:
-	./script/release_helm.sh
+	./script/release_helm.sh ${VERSION}
 
 release-kustomize:
 	RELEASE_VERSION=$(CUSTOM_VERSION) \
