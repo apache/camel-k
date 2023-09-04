@@ -272,17 +272,16 @@ Wait for them to be available on https://hub.helm.sh/.
 
 The https://brew.sh/[HomeBrew] formula for _kamel_ must be synced to download and build the latest version of https://github.com/apache/camel-k[Camel K], so it can be easily installed on _macOs_ and _Linux_ platforms.
 
-To do so, the content of https://github.com/Homebrew/homebrew-core/blob/master/Formula/kamel.rb[homebrew-core/Formula/kamel.rb] _(the package definition)_ should be updated to point the latest release of https://github.com/apache/camel-k[Camel K].
-
-More importantly the _tag_ and _revision_ section configuration should change for a new release e.g
+To do so, the content of https://github.com/Homebrew/homebrew-core/blob/master/Formula/k/kamel.rb[kamel.rb] _(the package definition)_ should be updated to point the latest release of https://github.com/apache/camel-k[Camel K]. This is something done using `brew` CLI and providing a `HOMEBREW_GITHUB_API_TOKEN` env variable to contain `gists`, `repo` and `workflow` grants [1]. Once these are set, you need to run:
 ```
-  url "https://github.com/apache/camel-k.git",
-    :tag      => "0.3.4",
-    :revision => "c47fb2c85e89852f0fd111d1662f57917030ced5"
-  head "https://github.com/apache/camel-k.git"
+brew tap homebrew/core
+brew bump-formula-pr --strict kamel --version=<x.y.z>
 ```
+The previous script should create a PR on behalf of your Github account with the required changes to update the formula.
 
-_P.S please note that the bottles are created using the https://docs.brew.sh/Brew-Test-Bot[Brew Test Bot]   https://docs.brew.sh/Bottles[ [1] ]._
+NOTE: be patient, it can take a little time to update the formula.
+
+[1] https://github.com/settings/tokens/new?scopes=gist,repo,workflow&description=Homebrew
 
 === Bump to next version
 
