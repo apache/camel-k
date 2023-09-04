@@ -289,10 +289,7 @@ Once the release process is complete, we must prepare the configuration for next
 ```
 make bump VERSION=<new-version> LAST_RELEASED_VERSION=<replace-version>
 git commit -m "chore: bump next version to <new-version>"
-git push upstream release-a.b.x
+git push upstream HEAD:release-a.b.x
 ```
 Where <new-version> represents the new version you want to bump and <replace-version> the version that was previously released.
 
-NOTE: this action should also replace automatically the oldest nightly release Github Action with the newest one just created.
-
-You will also need to update the `docs/antora.yml` configuration in order to provide the proper versions for the upcoming release in `main` branch.
