@@ -3,11 +3,28 @@
 
 Camel K Operators offers several possibility of customization. The default installation could be good in the most of the cases, but, we have a series of configuration that can be applied when you want to fine tune your Camel K operator and get the very best of it. The following settings will work for an installation via `kamel` CLI, but the same configuration could be done with the other xref:installation/installation.adoc[installation procedures] by applying the required changes on the related configuration files.
 
+NOTE: changing some of the following configuration may affect the behavior of your Camel K Operator. Make sure to understand how to properly tune each configuration.
+
+[[operator-customization]]
+== Operator configuration
+The operator installation can be customized by using the following parameters:
+```
+--operator-env-vars stringArray               Add an environment variable to set in the operator Pod(s), as <name=value>
+-x, --operator-id string                      Set the operator id that is used to select the resources this operator should manage (default "camel-k")
+--operator-image string                       Set the operator Image used for the operator deployment
+--operator-image-pull-policy string           Set the operator ImagePullPolicy used for the operator deployment
+--skip-cluster-setup                          Skip the cluster-setup phase
+--skip-default-kamelets-setup                 Skip installation of the default Kamelets from catalog
+--skip-operator-setup                         Do not install the operator in the namespace (in case there's a global one)
+--skip-registry-setup                         Skip the registry-setup phase (may negatively impact building of integrations)
+```
+
+The above parameters are helpful to change the default Camel K operator configuration or to partially skip certain advanced configuration resources.
+
 [[resources]]
 == Resource management
 
 We provide certain configuration to better "operationalize" the Camel K Operator:
-
 ```
 --node-selector stringArray                   Add a NodeSelector to the operator Pod
 --operator-resources stringArray              Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)
@@ -28,6 +45,7 @@ We have several configuration used to influence the building of an integration:
 --build-strategy string                       Set the build strategy
 --build-order-strategy string                 Set the build order strategy
 --build-timeout string                        Set how long the build process can last
+--max-running-pipelines int                   Maximum number of parallel running pipelines
 ```
 A very important set of configuration you can provide is related to Maven:
 ```
@@ -70,6 +88,16 @@ Camel K Operator provides certain monitoring capabilities. You can change the de
 ```
 You can learn more about xref:observability/monitoring/operator.adoc[how to monitor Camel K Operator].
 
+== Debugging
+
+Camel K offers the possibility to execute debugging on the same operator program. Here is the list of settings available:
+
+```
+--debugging                                   To enable or disable the operator debugging
+--debugging-path string                       The path to the kamel executable file (default "/usr/local/bin/kamel")
+--debugging-port int                          The port of the debugger (default 4040)
+```
+
 == Installation topology
 
 We have also certain configuration that let you control how to deploy your Camel K Operator(s):
@@ -78,3 +106,20 @@ We have also certain configuration that let you control how to deploy your Camel
 --operator-id string                          Set the operator id that is used to select the resources this operator should manage (default "camel-k")
 ```
 Learn more about xref:installation/advanced/multi.adoc[Camel K multi-tenancy].
+
+== OLM Specific parameters
+
+OLM is one of the methodology and we have a few handy parameters to customize it:
+
+```
+--olm                                         Try to install everything via OLM (Operator Lifecycle Manager) if available (default true)
+--olm-channel string                          Name of the Camel K channel in the OLM source or marketplace
+--olm-global-namespace string                 A namespace containing an OperatorGroup that defines global scope for the operator (used in combination with the --global flag)
+--olm-operator-name string                    Name of the Camel K operator in the OLM source or marketplace
+--olm-package string                          Name of the Camel K package in the OLM source or marketplace
+--olm-source string                           Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)
+--olm-source-namespace string                 Namespace where the OLM source is available
+--olm-starting-csv string                     Allow to install a specific version from the operator source instead of latest available from the channel
+```
+
+Have a look at xref:installation/installation.adoc#olm[OLM installation procedure].
