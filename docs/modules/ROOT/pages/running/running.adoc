@@ -60,14 +60,14 @@ Camel K provide a very nice **dev mode** feature that will allow you to apply an
 [[running-integration-locally]]
 == Running an Integration locally
 
-During development, for most of the cases, if you are not using Camel K traits or specific camel quarkus configuration, you can use Camel JBang to run the integration.
+During development, for most of the cases, if you are not using Camel K traits or specific Camel Quarkus configuration, you can use Camel JBang to run the Integration.
 
 [[no-cli-integration]]
 == Running an Integration without CLI
 
 You can run your integration also if you have no CLI available. `kamel` CLI manages a lot of fancy features but you can create an xref:apis/camel-k.adoc#_camel_apache_org_v1_Integration[Integration Custom Resource] with all the configuration expected to run your application.
 
-As an example, let's get the result of a **dry run** for a sample route:
+As an example, let's get the result of a xref:running/dry-run.adoc[Dry Run] execution for a sample route:
 
 ```
 kamel run Sample.java -o yaml
