@@ -33,6 +33,13 @@ The following configuration options are available:
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
 
+| route.annotations
+| map[string]string
+| The annotations added to route.
+This can be used to set route specific annotations
+For annotations options see https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
+CLI usage example: -t "route.annotations.'haproxy.router.openshift.io/balance'=true"
+
 | route.host
 | string
 | To configure the host exposed by the route.

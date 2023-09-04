@@ -378,9 +378,9 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 	// Catalog tools build timeout
 	if p.Status.Build.GetBuildCatalogToolTimeout().Duration == 0 {
-		log.Debugf("Integration Platform %s [%s]: setting default build camel catalog tool timeout (1 minute)", p.Name, p.Namespace)
+		log.Debugf("Integration Platform %s [%s]: setting default build camel catalog tool timeout (2 minutes)", p.Name, p.Namespace)
 		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
-			Duration: 1 * time.Minute,
+			Duration: 2 * time.Minute,
 		}
 	} else {
 		d := p.Status.Build.GetBuildCatalogToolTimeout().Duration.Truncate(time.Second)

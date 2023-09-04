@@ -148,6 +148,13 @@ tasks:
 					break tasks
 				}
 				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
+
+			} else if t := task.Jib; t != nil && t.ContextDir == "" {
+				if buildDir == "" {
+					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
+					break tasks
+				}
+				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
 			}
 
 			// Execute the task
@@ -211,7 +218,7 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 		return err
 	}
 	if target.Status.Phase != build.Status.Phase {
-		action.L.Info("state transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
+		action.L.Info("State transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
 	}
 	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
 	build.Status = target.Status

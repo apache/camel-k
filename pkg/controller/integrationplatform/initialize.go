@@ -66,6 +66,7 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 		return nil, nil
 	}
 
+	action.L.Info("Initializing IntegrationPlatform")
 	if err = platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {
 		return nil, err
 	}

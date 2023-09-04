@@ -20,18 +20,18 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 2.0.0-SNAPSHOT
+VERSION ?= 2.1.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 1.12.1
+LAST_RELEASED_VERSION ?= 2.0.0
 DEFAULT_RUNTIME_VERSION := 2.16.0
 BUILDAH_VERSION := 1.30.0
 KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
-CODEGEN_VERSION := v0.25.6
+CODEGEN_VERSION := v0.27.4
 OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-BASE_IMAGE := eclipse-temurin:11
+BASE_IMAGE := eclipse-temurin:17
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 # Default value, change to your architecture accordingly
@@ -58,8 +58,8 @@ DEBUG_MODE ?= false
 # olm bundle vars
 MANAGER := config/manager
 MANIFESTS := config/manifests
-CHANNELS ?= $(shell v=$(OPERATOR_VERSION) && echo "stable-$${v%\.[0-9]}"),candidate,latest
-DEFAULT_CHANNEL ?= $(shell v=$(OPERATOR_VERSION) && echo "stable-$${v%\.[0-9]}")
+DEFAULT_CHANNEL ?= $(shell echo "stable-v$(word 1,$(subst ., ,$(lastword $(OPERATOR_VERSION))))")
+CHANNELS ?= $(DEFAULT_CHANNEL),latest
 PACKAGE := camel-k
 CSV_VERSION := $(OPERATOR_VERSION)
 CSV_NAME := $(PACKAGE).v$(CSV_VERSION)
@@ -159,7 +159,6 @@ bump-replace:
 	@sed -i 's/^KAMELET_CATALOG_REPO_TAG :=.*$//KAMELET_CATALOG_REPO_TAG := main/' ./script/Makefile
 
 bump: bump-replace codegen bundle
-	./script/bump_actions.sh $(LAST_RELEASED_VERSION)
 
 # Generates the version file
 codegen:
@@ -221,15 +220,14 @@ codegen-tools-install: controller-gen
 	@# We must force the installation to make sure we are using the correct version
 	@# Note: as there is no --version in the tools, we cannot rely on cached local versions
 	@echo "Installing k8s.io/code-generator tools with version $(CODEGEN_VERSION)"
-	#go install k8s.io/code-generator/cmd/applyconfiguration-gen@$(CODEGEN_VERSION)
-	go install github.com/astefanutti/code-generator/cmd/applyconfiguration-gen@pr-144-install
+	go install k8s.io/code-generator/cmd/applyconfiguration-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/client-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/lister-gen@$(CODEGEN_VERSION)
 	go install k8s.io/code-generator/cmd/informer-gen@$(CODEGEN_VERSION)
 
-build: codegen build-resources test build-kamel build-compile-integration-tests build-submodules
+build: codegen build-resources test build-kamel build-compile-integration-tests
 
-ci-build: clean codegen set-module-version set-version check-licenses dir-licenses build-kamel cross-compile
+ci-build: clean codegen set-version check-licenses dir-licenses build-kamel cross-compile
 
 do-build: gotestfmt-install
 ifeq ($(DO_TEST_PREBUILD),true)
@@ -246,16 +244,10 @@ endif
 test: do-build
 	@echo "####### Running unit test..."
 	go test ./...
-	cd pkg/apis/camel && go test ./...
-	cd pkg/client/camel && go test ./...
-	cd pkg/kamelet/repository && go test ./...
 
 test-fmt: do-build
 	@echo "####### Running unit test..."
 	go test -v ./... -json 2>&1 | gotestfmt
-	cd pkg/apis/camel && go test -v ./... -json 2>&1 | gotestfmt
-	cd pkg/client/camel && go test -v ./... -json 2>&1 | gotestfmt
-	cd pkg/kamelet/repository && go test -v ./... -json 2>&1 | gotestfmt
 
 #
 # Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
@@ -269,6 +261,29 @@ test-common: do-build
 	go test -timeout 30m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/misc -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 60m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 10m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	exit $${FAILED}
+
+#
+# Smoke tests are a subset of common tests used to quickly verify the operator
+#
+test-smoke: do-build
+	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	go test -timeout 10m -v ./e2e/common/support/startup_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v ./e2e/common/languages -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v \
+		./e2e/common/misc/default.go \
+		./e2e/common/misc/cron_test.go \
+		./e2e/common/misc/kamelet_test.go \
+		./e2e/common/misc/pipe_test.go \
+	 	-tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 30m -v \
+		./e2e/common/traits/default.go \
+		./e2e/common/traits/camel_test.go \
+		./e2e/common/traits/container_test.go \
+		./e2e/common/traits/openapi_test.go \
+		./e2e/common/traits/service_test.go \
+	 	-tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 10m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
@@ -287,6 +302,7 @@ test-install: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 40m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 40m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 40m -v ./e2e/install/helm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
@@ -361,10 +377,8 @@ endif
 endif
 	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_TAG)
 
-build-submodules:
-	./script/build_submodules.sh
-
 build-compile-integration-tests:
+	@echo "####### Compiling integration tests..."
 	go test -run nope -tags="integration" ./e2e/...
 
 clean:
@@ -387,9 +401,6 @@ clean:
 dep:
 	@echo "Cleaning dependencies..."
 	go mod tidy
-	cd pkg/apis/camel && go mod tidy
-	cd pkg/client/camel && go mod tidy
-	cd pkg/kamelet/repository && go mod tidy
 
 detect-os:
 ifeq '$(findstring ;,$(PATH))' ';'
@@ -455,6 +466,9 @@ endif
 image-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
+images-all: images
+	make IMAGE_ARCH=arm64 images
+
 images-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64
@@ -491,9 +505,6 @@ get-bundle-image:
 set-version:
 	./script/set_version.sh $(CUSTOM_VERSION) $(CUSTOM_IMAGE)
 
-set-module-version:
-	./script/set_go_modules_version.sh $(CUSTOM_VERSION)
-
 git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
@@ -505,18 +516,18 @@ cross-compile:
 	# be processed as a single argument by the cross compile script
 	./script/cross_compile.sh $(CUSTOM_VERSION) $(subst ","\",$(GOFLAGS))
 
-release: clean codegen set-module-version set-version build-resources check-licenses images images-push cross-compile git-tag
+release: clean codegen set-version build-resources check-licenses images images-push cross-compile git-tag
 
-release-staging: clean codegen set-module-version set-version build-resources check-licenses images images-push-staging cross-compile fabric8-crds git-tag
+release-staging: clean codegen set-version build-resources check-licenses images-all images-push-staging cross-compile fabric8-crds git-tag
 
 # Build images
-images-nightly: clean codegen set-module-version set-version build-resources images
+images-nightly: clean codegen set-version build-resources images
 
 # Release artifacts
 release-nightly: cross-compile images-push
 
 release-helm:
-	./script/release_helm.sh
+	./script/release_helm.sh ${VERSION}
 
 release-kustomize:
 	RELEASE_VERSION=$(CUSTOM_VERSION) \
@@ -526,7 +537,7 @@ release-kustomize:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version build-submodules set-module-version bundle-kamelets
+.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary
@@ -553,7 +564,6 @@ endif
 
 operator-sdk: detect-os
 	@echo "####### Installing operator-sdk version $(OPERATOR_SDK_VERSION)..."
-	set -e ;\
 	curl \
 		-s -L https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$(OS_LOWER)_amd64 \
 		-o operator-sdk ; \

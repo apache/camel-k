@@ -28,6 +28,7 @@ import (
 type MavenSpecApplyConfiguration struct {
 	LocalRepository  *string                           `json:"localRepository,omitempty"`
 	Properties       map[string]string                 `json:"properties,omitempty"`
+	Profiles         []ValueSourceApplyConfiguration   `json:"profiles,omitempty"`
 	Settings         *ValueSourceApplyConfiguration    `json:"settings,omitempty"`
 	SettingsSecurity *ValueSourceApplyConfiguration    `json:"settingsSecurity,omitempty"`
 	CASecrets        []corev1.SecretKeySelector        `json:"caSecrets,omitempty"`
@@ -59,6 +60,19 @@ func (b *MavenSpecApplyConfiguration) WithProperties(entries map[string]string) 
 	}
 	for k, v := range entries {
 		b.Properties[k] = v
+	}
+	return b
+}
+
+// WithProfiles adds the given value to the Profiles field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Profiles field.
+func (b *MavenSpecApplyConfiguration) WithProfiles(values ...*ValueSourceApplyConfiguration) *MavenSpecApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithProfiles")
+		}
+		b.Profiles = append(b.Profiles, *values[i])
 	}
 	return b
 }

@@ -32,7 +32,7 @@ asciidoc:
     prerelease: true
     camel-kamelets-version: '3.20.1.1'
     camel-kamelets-docs-version: 3.20.x
-    camel-k-runtime-version: 2.16.0-SNAPSHOT
+    camel-k-runtime-version: 2.16.0
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
     camel-version: 3.20.1
     camel-docs-version: 3.20.x
@@ -42,8 +42,8 @@ asciidoc:
     buildah-version: 1.30.0
     kaniko-version: 1.9.1
     kustomize-version: 4.5.4
-    kubernetes-api-version: 0.25.6
-    operator-fwk-api-version: 0.13.0
-    knative-api-version: 0.37.1
-    service-binding-op-version: 1.3.4
+    kubernetes-api-version: 0.27.4
+    operator-fwk-api-version: 0.17.7
+    knative-api-version: 0.37.2
+    service-binding-op-version: 1.4.0
     prometheus-op-version: 0.60.0

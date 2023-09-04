@@ -25,7 +25,7 @@
 
 set -e
 
-while getopts ":b:c:g:i:l:n:q:s:v:x:z:" opt; do
+while getopts ":b:c:g:i:l:n:q:s:v:x:y:z:" opt; do
   case "${opt}" in
     b)
       BUILD_CATALOG_SOURCE_NAME=${OPTARG}
@@ -56,6 +56,9 @@ while getopts ":b:c:g:i:l:n:q:s:v:x:z:" opt; do
       ;;
     x)
       SAVE_FAILED_TEST_NS=${OPTARG}
+      ;;
+    y)
+      SMOKE_TEST_ONLY=${OPTARG}
       ;;
     z)
       CUSTOM_INSTALL_TEST=${OPTARG}
@@ -137,7 +140,9 @@ fi
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0
-if [ "${CUSTOM_INSTALL_TEST}" == "true" ]; then
+if [ "${SMOKE_TEST_ONLY}" == "true" ]; then
+  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-smoke || exit_code=1
+elif [ "${CUSTOM_INSTALL_TEST}" == "true" ]; then
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common-with-custom-install || exit_code=1
 else
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common || exit_code=1

@@ -53,6 +53,7 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 		return nil, err
 	}
 
+	action.L.Info("Initializing IntegrationKit")
 	kit.Status.Version = defaults.Version
 
 	if kit.Spec.Image == "" {

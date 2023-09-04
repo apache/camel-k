@@ -117,7 +117,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 				return nil, err
 			}
 			// Send SIGTERM signal to running containers
-			if err = action.sigterm(pod); err != nil {
+			if err = action.sigterm(ctx, pod); err != nil {
 				// Requeue
 				return nil, err
 			}
@@ -204,7 +204,7 @@ func (action *monitorPodAction) isPodScheduled(pod *corev1.Pod) bool {
 	return false
 }
 
-func (action *monitorPodAction) sigterm(pod *corev1.Pod) error {
+func (action *monitorPodAction) sigterm(ctx context.Context, pod *corev1.Pod) error {
 	var containers []corev1.ContainerStatus
 	containers = append(containers, pod.Status.InitContainerStatuses...)
 	containers = append(containers, pod.Status.ContainerStatuses...)
@@ -234,7 +234,7 @@ func (action *monitorPodAction) sigterm(pod *corev1.Pod) error {
 			return err
 		}
 
-		err = exec.Stream(remotecommand.StreamOptions{
+		err = exec.StreamWithContext(ctx, remotecommand.StreamOptions{
 			Stdout: os.Stdout,
 			Stderr: os.Stderr,
 			Tty:    false,

@@ -1,0 +1,77 @@
+= Run your own container registry
+If you operate the container registry, the most important thing from Camel K and cluster perspective is that you need to make sure that both the operator and the cluster can reach the registry using the same address.
+
+WARNING: any cluster configuration must be performed by experienced users or platform administrators.
+
+Here we propose some possible options, each of them has its pros and cons.
+
+[[configuring-registry-run-infra]]
+== Run in the same infrastructure of the Cluster
+
+With this topology we may expect that the container registry is operated in the same infrastructure of the cluster and the cluster's components can reach it accordingly. As each registry and each cluster can have different configuration, we cannot give specific hints on how to deploy such configuration.
+
+[[configuring-registry-run-pod]]
+== Run as a Pod
+
+This is the approach used by Minikube. Basically it deploys a container registry as a Pod, and you can use the service cluster IP. We cannot use the service URL as it won't be available in the Kubernetes components which are in charge to run the Deployment (it does not use Service/Pod cluster DNS). However, it can use the Cluster IP which is available throughout all the cluster or any Ingress which would expose the service publicly.
+
+NOTE: if you make sure that the registry cluster IP does not change over time or you use a public address, the approach could be used for production use cases.
+
+The following example can be used as a base for your solution and should not be considered for production use cases as it does not configure any storage neither any security measure:
+
+```yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+spec:
+  selector:
+    app: registry
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry
+spec:
+  selector:
+    matchLabels:
+      app: registry
+  template:
+    metadata:
+      labels:
+        app: registry
+    spec:
+      containers:
+        - name: registry
+          image: registry:2
+          ports:
+            - containerPort: 5000
+              name: 5000-tcp
+          volumeMounts:
+            - name: registry-data
+              mountPath: /registry-data
+      volumes:
+        - name: registry-data
+          emptyDir: {}
+```
+If you apply this configuration, a registry Pod will be started and you can use it by checking the Service cluster IP:
+```
+NAME       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+registry   ClusterIP   10.96.112.40   <none>        80/TCP    23h
+
+$ kamel install --registry 10.96.112.40
+```
+
+The above installation should be able to push and pull Integration images correctly.
+
+[[configuring-registry-run-docker]]
+== Run as a Docker image
+
+This is the approach used by https://kind.sigs.k8s.io/docs/user/local-registry/[Kind in order to make a registry available]. You can follow the guidelines and it may work in particular situations in any cluster beside Kind. However, as it involves hacks in the cluster configuration, make sure to understand the effects of the changes you're going to perform.
+
+WARNING: not recommended for production use cases unless you know what you're doing.

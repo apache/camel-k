@@ -70,7 +70,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationPlatform
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.IntegrationPlatform{}),
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -121,7 +121,7 @@ type reconcileIntegrationPlatform struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling IntegrationPlatform")
+	rlog.Debug("Reconciling IntegrationPlatform")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -193,7 +193,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 
 				if targetPhase != phaseFrom {
 					targetLog.Info(
-						"state transition",
+						"State transition",
 						"phase-from", phaseFrom,
 						"phase-to", target.Status.Phase,
 					)

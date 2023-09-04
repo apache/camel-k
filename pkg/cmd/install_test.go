@@ -361,7 +361,8 @@ func TestDecodeMavenSettings(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Nil(t, val.SecretKeyRef)
 	assert.Equal(t, "maven-settings", val.ConfigMapKeyRef.Name)
-	assert.Empty(t, val.ConfigMapKeyRef.Key)
+	// Default name
+	assert.Equal(t, "settings.xml", val.ConfigMapKeyRef.Key)
 
 	// Secrets
 	val, err = decodeMavenSettings("secret:maven-settings-secret/s.xml")
@@ -374,7 +375,8 @@ func TestDecodeMavenSettings(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Nil(t, val.ConfigMapKeyRef)
 	assert.Equal(t, "maven-settings-secret", val.SecretKeyRef.Name)
-	assert.Empty(t, val.SecretKeyRef.Key)
+	// Default name
+	assert.Equal(t, "settings.xml", val.SecretKeyRef.Key)
 
 	// Errors
 	_, err = decodeMavenSettings("something:maven-settings-secret/s.xml")

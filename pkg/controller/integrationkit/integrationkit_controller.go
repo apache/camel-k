@@ -73,7 +73,7 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource IntegrationKit
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationKit{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.IntegrationKit{}),
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -102,11 +102,13 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to secondary resource Builds and requeue the owner IntegrationKit
-	err = c.Watch(&source.Kind{Type: &v1.Build{}},
-		&handler.EnqueueRequestForOwner{
-			IsController: true,
-			OwnerType:    &v1.IntegrationKit{},
-		},
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Build{}),
+		handler.EnqueueRequestForOwner(
+			mgr.GetScheme(),
+			mgr.GetRESTMapper(),
+			&v1.IntegrationKit{},
+			handler.OnlyControllerOwner(),
+		),
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
 				oldBuild, ok := e.ObjectOld.(*v1.Build)
@@ -130,8 +132,8 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 	// requests for any integration kits that are in phase waiting for platform
-	err = c.Watch(&source.Kind{Type: &v1.IntegrationPlatform{}},
-		handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+	err = c.Watch(source.Kind(mgr.GetCache(), &v1.IntegrationPlatform{}),
+		handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 			var requests []reconcile.Request
 			p, ok := a.(*v1.IntegrationPlatform)
 			if !ok {
@@ -142,7 +144,7 @@ func add(_ context.Context, mgr manager.Manager, r reconcile.Reconciler) error {
 			if p.Status.Phase == v1.IntegrationPlatformPhaseReady {
 				list := &v1.IntegrationKitList{}
 
-				if err := mgr.GetClient().List(context.TODO(), list, ctrl.InNamespace(p.Namespace)); err != nil {
+				if err := mgr.GetClient().List(ctx, list, ctrl.InNamespace(p.Namespace)); err != nil {
 					log.Error(err, "Failed to list integration kits")
 					return requests
 				}
@@ -193,7 +195,7 @@ type reconcileIntegrationKit struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling IntegrationKit")
+	rlog.Debug("Reconciling IntegrationKit")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -291,7 +293,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 				if targetPhase != instance.Status.Phase {
 					targetLog.Info(
-						"state transition",
+						"State transition",
 						"phase-from", instance.Status.Phase,
 						"phase-to", targetPhase,
 					)

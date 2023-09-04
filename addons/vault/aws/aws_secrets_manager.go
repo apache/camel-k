@@ -41,7 +41,6 @@ import (
 // the following trait options:
 // -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region" -t aws-secrets-manager.context-reload-enabled="true" -t aws-secrets-manager.refresh-enabled="true" -t aws-secrets-manager.refresh-period="30000" -t aws-secrets-manager.secrets="test*"
 //
-//
 // +camel-k:trait=aws-secrets-manager.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
@@ -101,7 +100,7 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAwsSecretsManager)
-		// Add the Camel Quarkus AWS Secrets Manager
+		// TODO remove dependencies after runtime > 2.16.0
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-aws-secrets-manager")
 	}
 

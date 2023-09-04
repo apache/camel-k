@@ -22,7 +22,7 @@ import (
 	"net/url"
 )
 
-// BuildCamelServiceDefinition creates a CamelServiceDefinition from a given URL
+// BuildCamelServiceDefinition creates a CamelServiceDefinition from a given URL.
 func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType,
 	serviceURL url.URL, apiVersion, kind string) (CamelServiceDefinition, error) {
 
@@ -41,7 +41,7 @@ func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, se
 	return definition, nil
 }
 
-// Serialize serializes a CamelEnvironment
+// Serialize serializes a CamelEnvironment.
 func (env *CamelEnvironment) Serialize() (string, error) {
 	res, err := json.Marshal(env)
 	if err != nil {
@@ -50,7 +50,7 @@ func (env *CamelEnvironment) Serialize() (string, error) {
 	return string(res), nil
 }
 
-// Deserialize deserializes a camel environment into this struct
+// Deserialize deserializes a camel environment into this struct.
 func (env *CamelEnvironment) Deserialize(str string) error {
 	if err := json.Unmarshal([]byte(str), env); err != nil {
 		return err
@@ -58,12 +58,12 @@ func (env *CamelEnvironment) Deserialize(str string) error {
 	return nil
 }
 
-// ContainsService tells if the environment contains a service with the given name and type
+// ContainsService tells if the environment contains a service with the given name and type.
 func (env *CamelEnvironment) ContainsService(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType, apiVersion, kind string) bool {
 	return env.FindService(name, endpointKind, serviceType, apiVersion, kind) != nil
 }
 
-// FindService --
+// FindService -- .
 func (env *CamelEnvironment) FindService(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType, apiVersion, kind string) *CamelServiceDefinition {
 	for _, svc := range env.Services {
 		svc := svc

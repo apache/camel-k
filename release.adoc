@@ -1,3 +1,4 @@
+
 = Releasing Apache Camel K
 
 This procedure describes all the steps required to release a new version of Apache Camel K.
@@ -13,17 +14,58 @@ If it's the first time you are releasing Camel K, you may be required to follow 
 
 === Docker Hub staging setting
 
-This project staging is hosted on https://hub.docker.com/orgs/camelk/repositories[CamelK Docker Hub organization]. Make sure one of the organization administrator grant your personal user the right priviledges to push an image to this org.
+This project staging is hosted on https://hub.docker.com/orgs/camelk/repositories[CamelK Docker Hub organization]. Make sure one of the organization administrator grant your personal user the right privileges to push an image to this org.
+
+[[releasing-software]]
+== Software required to release
+
+In order to release Camel K you may need certain software installed in the machine from where you're performing the release action. Most of the actions are scripted and may assume the presence of tools (in some case with specific version). Here a best effort list (may not be fully accurate):
+
+* `git` CLI
+* `mvn` CLI
+* Docker and DockerX tooling
+* https://www.qemu.org/[QEMU] - required to emulate ARM64 build
+
+[[arm64-verify]]
+=== Verify if your machine can build an ARM64 container image
+
+As suggested above, you may need to install some software to be able to build an ARM64 based image. You can verify that with:
+
+```
+docker buildx ls | grep arm
+```
+
+NOTE: if you don't list any available builder, if you're on Ubuntu, you can install quickly QEMU via `sudo apt-get install -y qemu qemu-user-static` and retry to list the ARM64 based builders afterward.
 
 [[releasing-camel-k]]
 == Release Camel K
 
-As the process will do `git` operations, it is advisable that you clone the Camel K repository to some new location (ie /tmp/) in order to avoid to conflict with any other development in progress. Consider if you're about to release from `main` branch (generally a new major or minor version) or from a `release` branch (when you're about to release a patch version). In the latter case, you need to checkout to the proper release branch, ie `git checkout release-1.12.x`.
+As the process will do Git operations, it is advisable that you clone the Camel K repository to some new location (ie /tmp/) in order to avoid to conflict with any other development in progress. If you’re starting a major or a minor release version, you need to create the respective `release-a.b.x` branch. It’s highly advisable not to release directly from `main` branch.
+
+```
+git clone https://github.com/apache/camel-k.git /tmp/camel-k
+cd /tmp/camel-k
+
+# If you release a patch version, otherwise see next chapter
+git checkout release-2.0.x
+```
+
+=== Create release branch
+
+WARNING: Only run this when starting a new **major** or **minor** release.
+
+We have a script that simplify this process as we also need to provide the CI tasks required for all the supported releases.
+
+```
+./script/release-branch.sh
+```
+
+NOTE: you can run the script with -d option to dry run and evaluate the changes before pushing them to the repo.
 
 [[releasing-camel-k-crds]]
 === Release Camel K CRD dependency
 
-Camel K ships a Maven dependency containing the CRDs required in Kubernetes. This dependency is available in `/java/` directory and has to be released togheter with Camel K. The process below is the same used for Camel K Runtime.
+Camel K ships a Maven dependency containing the CRDs required in Kubernetes. This dependency is available in `/java/` directory and has to be released together with Camel K. The process below is the same used for Camel K Runtime.
 
 To prepare a release and check problems:
 ```
@@ -34,11 +76,10 @@ cd java
 Check the signatures of the files, then clean and prepare the actual release:
 
 ```
-./mvnw release:clean -Prelease
-./mvnw release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
+./mvnw release:clean release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
 ```
 
-Then perform the release:
+Then perform the release (use any settings holding your Apache credentials):
 
 ```
 ./mvnw release:perform -Prelease [-s path/to/your/settings.xml]
@@ -51,27 +92,17 @@ A URL will be generated for the repository, like: https://repository.apache.org/
 [[release-camel-k-operator]]
 === Release Camel K Operator and CLI
 
-Releasing the Camel K main artifacts require some manual steps.
-
-First thing is to checkout main branch and sync with upstream.
-
-Next, the version of the runtime libraries to use need to be aligned in the Makefile.
-
-The following tasks need to be done:
+Releasing the Camel K main artifacts require some manual steps. The following tasks need to be done:
 
 - Align `KAMELET_CATALOG_REPO_TAG` in Makefile to latest released tag of the camel-kamelets repository
-- Align `RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
+- Align `DEFAULT_RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
 - Set the proper `VERSION`, likely just remove `-SNAPSHOT` suffix
 - Ensure `LAST_RELEASED_VERSION` points to latest released version of Camel K
 
 ```
-make clean codegen set-version build-resources check-licenses
-```
-
-Rebuild auto-generated data, including trait info:
-
-```
-make generate clean build-resources build
+# you probably were in /java/
+cd ..
+make clean codegen set-version generate check-licenses build-resources build
 ```
 
 Commit and push the changes done so far.
@@ -79,40 +110,79 @@ Commit and push the changes done so far.
 ```
 git add *
 git commit -m "preparing for next release"
-# assuming write permissions
-git push upstream <branch_name>
+# assuming you're on release branch and have write permissions
+git push
 ```
 
-Now the release on staging can be executed.
+Now you can execute the release on staging.
 
 ```
 make release-staging
 ```
+A docker image `camelk/camel-k:<version>` will be pushed to the https://hub.docker.com/r/camelk/camel-k/tags[staging organization] (`camelk`, not `apache`). Binary files (CLIs) will be generated as well and put in the project root directory.
 
-Binary files will be generated and put in the project root directory, including examples.
+[[testing]]
+=== Do some testing
 
-Now run:
+Make sure to test the CLI you're about to publish. Expand and test the platform and architecture according to your local environment specifications:
+
+```
+$ tar -xvf camel-k-client-2.0.0-linux-amd64.tar.gz
+...
+$ ./kamel version
+Camel K Client 2.0.0
+```
+
+If the version retrieved is the one expected you can run an installation procedure
+
+```
+$ ./kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION
+```
+
+Make some test and if all is in order, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
 
 ```
 cd release-utils/scripts/
-./upload-sources.sh <released_version> <released_version>
+./upload-source.sh <released_version> <released_version>
 ```
 
-This will upload the sources, client and examples to the dist/dev repository in ASF.
+Check that all resources have been correctly uploaded to https://dist.apache.org/repos/dist/dev/camel/camel-k/<released_version>/ directory.
 
-A docker image `camelk/camel-k:<version>` will be pushed to the staging organization (`camelk`, not `apache`).
+[[voting]]
+== Voting
 
-[[testing]]
-== Do some testing
+An email should be sent to dev@camel.apache.org asking to test the staged artifacts. Voting will be left open for at least 72 hours. Use any previous voting email as a template.
 
-A combined release can be immediately tested with the following install command:
+[[finalizing]]
+== Finalizing the release
+
+After the voting is complete with success, the artifacts can be released.
+
+Republish docker image in the Apache org on Docker Hub:
 
 ```
-kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION --maven-repository=https://repository.apache.org/content/repositories/orgapachecamel-$APACHE_NEXUS_RUNTIME_REPO_ID
+# assuming logged in to docker hub
+docker pull camelk/camel-k:$VERSION
+docker tag camelk/camel-k:$VERSION apache/camel-k:$VERSION
+docker push apache/camel-k:$VERSION
+# push any other supported architecture (ie, arm64)
+docker pull camelk/camel-k:$VERSION-arm64
+docker tag camelk/camel-k:$VERSION-arm64 apache/camel-k:$VERSION-arm64
+docker push apache/camel-k:$VERSION-arm64
 ```
+
+Release the staging repository at: https://repository.apache.org (Camel K CRD dependency).
+Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
+
+```
+cd release-utils/scripts/
+./promote-release.sh <released_version>
+```
+
+Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour sometimes.
 
 [[release-notes]]
-== Release notes
+=== Release notes
 
 Release notes can be generated with:
 
@@ -131,43 +201,8 @@ export GITHUB_TOKEN=token
 
 A `release-notes.md` file is generated and can be attached to the release github issue for reference.
 
-[[documentation]]
-== Documentation updates
-
-The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30)
-
-After the vote has passed, update the camel-website `antora-playbook.yml` `content.sources` section for camel-k and camel-k-runtime to use the newly released versions, replacing the previous released version.
-
-[[voting]]
-== Voting
-
-An email should be sent to dev@camel.apache.org asking to test the staged artifacts. Voting will be left open for at least 72 hours.
-
-[[finalizing]]
-== Finalizing the release
-
-After the voting is complete with success, the artifacts can be released.
-
-Republish docker image in the Apache org on Docker Hub:
-
-```
-# assuming logged in to docker hub
-docker pull camelk/camel-k:$VERSION
-docker tag camelk/camel-k:$VERSION apache/camel-k:$VERSION
-docker push apache/camel-k:$VERSION
-```
-
-Artifacts committed on https://dist.apache.org/repos/dist/dev/ before the voting process need to be copied to the Apache dist repository on: https://dist.apache.org/repos/dist/release/camel.
-
-```
-cd release-utils/scripts/
-./promote-release.sh <released_version>
-```
-
-Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour sometimes.
-
-Binary files can be now released on Github, together with release notes generated in previous step.
-Files need to be uploaded manually to a new Github release.
+=== Github release
+Binary files can be now released on Github, together with release notes generated in previous step. Files need to be uploaded manually to a new Github release.
 
 Before announcing the release, a simple test should be done to verify that everything is in place (running a "Hello World" integration
 after an installation done with a simple `kamel install`). Do a simple final test.
@@ -176,12 +211,19 @@ The release can be now announced to dev@camel.apache.org and users@camel.apache.
 
 A PMC member with access to the @ApacheCamel Twitter account should announce the release on Twitter as well.
 
-Download section on the website needs to be put in sync to display the new release.
-Checkout the website and put an entry under `content/releases/k` with the version of the new release (copy the last release as template).
-The milestone field in the release doc is the Github id for the milestone (e.g. for v1.4.1, the milestone is 22).
-
 [[post-release]]
 == Post Release
+
+[[documentation]]
+== Documentation updates
+
+The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30)
+
+After the vote has passed, update the camel-website `antora-playbook.yml` `content.sources` section for camel-k and camel-k-runtime to use the newly released versions, replacing the previous released version.
+
+You also need to create an entry in the release section of Camel website project: https://github.com/apache/camel-website/tree/main/content/releases/k - you can use any previous document as a reference.
+
+NOTE: the milestone is the github project milestone ID used to track the release.
 
 === Operator Hub
 
@@ -252,6 +294,6 @@ git push upstream main
 ```
 Where <new-version> represents the new version you want to bump and <replace-version> the version that was previously released.
 
-Note: this action should also replace automatically the oldest nightly release Github Action with the newest one just created.
+NOTE: this action should also replace automatically the oldest nightly release Github Action with the newest one just created.
 
 You will also need to update the `docs/antora.yml` configuration in order to provide the proper versions for the upcoming release in `main` branch.

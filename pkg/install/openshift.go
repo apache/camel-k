@@ -124,7 +124,7 @@ func OpenShiftConsoleDownloadLink(ctx context.Context, c client.Client) error {
 		Spec: console.ConsoleCLIDownloadSpec{
 			DisplayName: KamelCLIDownloadDisplayName,
 			Description: KamelCLIDownloadDescription,
-			Links: []console.Link{
+			Links: []console.CLIDownloadLink{
 				{
 					Text: "Download the kamel binary for Linux",
 					Href: fmt.Sprintf(KamelCLIDownloadURLTemplate, defaults.Version, defaults.Version, "linux"),

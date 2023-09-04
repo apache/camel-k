@@ -1,0 +1,37 @@
+= Network architecture
+
+Camel K operator requires certain side technologies in order to perform the build and the deployment of a Camel application into the cloud. The operator itself can take care to build an application or delegate to a builder Pod. However, nothing change for the sake of this document. The operator is very fast in performing its tasks and when you experience some slower operation is typically due to the needs to access to external components/resources. In this document we want to highlight which are those components in order to help you tune them properly.
+
+== Components topology
+
+One of Camel K capabilities is to build a Camel application. As a Camel application (regardless its runtime) is a Java application, then, we require the presence of Maven as a technology to compile and package a Java application.
+
+Once the application is built, it is "containerized" as an image that will be later used for deployment scopes. The operator therefore is in charge to push the application container image into a Container Registry.
+
+Finally, when the operator creates the application via a `Deployment` resource, it will use the image reference which was pushed before, letting the cluster to take care of pulling it accordingly.
+
+Most of these operations typically require the connection to the Internet as the dependencies or the base container images used may be stored publicly. The components which need to be connected are the ones provided in the diagram:
+
+image::architecture/camel-k-network.svg[Network architecture, width=800]
+
+[[build]]
+== Build application with Maven
+
+We always suggest the usage of a xref:installation/advanced/maven.adoc#maven-proxy[Maven repository manager] in order to have production-grade performances. This component acts as a proxy and improve certain aspects of the development. However this is not mandatory and you can connect directly to the Maven repository of your choice (by default, Maven central).
+
+As you can see in the diagram, either you're using a Maven proxy or you're running without it, when the operator (or the builder Pod) starts a build it may require to connect to the Internet (or any internal repository you may have configured). This is necessary to download locally the dependencies and perform the build.
+
+If the dependencies are stored in the local disk of the operator (or an IntegrationKit is already available to be used), then, no access to the Internet will be required. As a natural consequence, the longer the operator runs, the less it will need to access the Internet. A particular case is when you use the builder Pod strategy, in which case, it will require to download all dependencies from scratch. Similar situation when the operator Pod is restarted.
+
+We suggest you to check the xref:installation/advanced/maven.adoc[Maven configuration] page which contains all the details required to fine tune the build phase.
+
+[[registry]]
+== Container registry
+
+The other required component for Camel K to run properly is the availability of a container registry. This one may be a registry operated by the user in the same cluster, an external registry or the embedded registry which may be offered by certain Kubernetes distributions (ie, Openshift). Whichever is your configuration, it's important to know that when Camel K operator creates the container image, it may requires to access certain base images in public container registries such as docker.io or quay.io.
+
+In particular the access will be required when the operator build the builder container image (driven by the runtime catalog you'll be using) and when it builds the IntegrationKit container image from the base image.
+
+Also in this case, the longer the operator runs, the lower the need to access to the base images, since they will be already cached and the higher the possibility to use incremental image from other IntegrationKits created.
+
+NOTE: at the moment of writing, the default builder image we use is _quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.2.0.0-Final-java11_ and the default integration image is _eclipse-temurin:17_

@@ -25,9 +25,10 @@ import (
 )
 
 const (
-	envVarQuarkusLogLevel                  = "QUARKUS_LOG_LEVEL"
-	envVarQuarkusLogConsoleColor           = "QUARKUS_LOG_CONSOLE_COLOR"
-	envVarQuarkusLogConsoleFormat          = "QUARKUS_LOG_CONSOLE_FORMAT"
+	envVarQuarkusLogLevel         = "QUARKUS_LOG_LEVEL"
+	envVarQuarkusLogConsoleColor  = "QUARKUS_LOG_CONSOLE_COLOR"
+	envVarQuarkusLogConsoleFormat = "QUARKUS_LOG_CONSOLE_FORMAT"
+	// nolint: gosec // no sensitive credentials
 	envVarQuarkusLogConsoleJSON            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJSONPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
 	defaultLogLevel                        = "INFO"

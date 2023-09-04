@@ -75,7 +75,7 @@ func WaitForS2iBuildCompletion(ctx context.Context, c client.Client, build *buil
 	}
 }
 
-// Create the BuildConfig of the build with the right owner after having deleted it it already existed.
+// Create the BuildConfig of the build with the right owner after having deleted it already existed.
 func BuildConfig(ctx context.Context, c client.Client, bc *buildv1.BuildConfig, owner metav1.Object) error {
 	if err := c.Delete(ctx, bc); err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("cannot delete build config: %w", err)
@@ -91,7 +91,7 @@ func BuildConfig(ctx context.Context, c client.Client, bc *buildv1.BuildConfig, 
 	return nil
 }
 
-// Create the ImageStream for the builded image with the right owner after having deleted it it already existed.
+// Create the ImageStream for the builded image with the right owner after having deleted it already existed.
 func ImageStream(ctx context.Context, c client.Client, is *imagev1.ImageStream, owner metav1.Object) error {
 	if err := c.Delete(ctx, is); err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("cannot delete image stream: %w", err)

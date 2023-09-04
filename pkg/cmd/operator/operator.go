@@ -21,7 +21,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"reflect"
 	"runtime"
@@ -41,7 +40,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -85,7 +83,6 @@ func printVersion() {
 
 // Run starts the Camel K operator.
 func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID string) {
-	rand.Seed(time.Now().UTC().UnixNano())
 
 	flag.Parse()
 
@@ -190,7 +187,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(err, "cannot create Integration label selector")
 	selector := labels.NewSelector().Add(*hasIntegrationLabel)
 
-	selectors := cache.SelectorsByObject{
+	selectors := map[ctrl.Object]cache.ByObject{
 		&corev1.Pod{}:        {Label: selector},
 		&appsv1.Deployment{}: {Label: selector},
 		&batchv1.Job{}:       {Label: selector},
@@ -198,12 +195,13 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
-		selectors[&batchv1.CronJob{}] = struct {
-			Label labels.Selector
-			Field fields.Selector
-		}{
+		selectors[&batchv1.CronJob{}] = cache.ByObject{
 			Label: selector,
 		}
+	}
+
+	options := cache.Options{
+		ByObject: selectors,
 	}
 
 	mgr, err := manager.New(cfg, manager.Options{
@@ -216,11 +214,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
 		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
-		NewCache: cache.BuilderWithOptions(
-			cache.Options{
-				SelectorsByObject: selectors,
-			},
-		),
+		Cache:                         options,
 	})
 	exitOnError(err, "")
 

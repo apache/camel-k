@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/rs/xid"
@@ -537,4 +538,29 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 		trait.ServicePortName,
 		route.Spec.Port.TargetPort.StrVal,
 	)
+}
+
+func TestRouteAnnotation(t *testing.T) {
+	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": "true"}
+
+	name := xid.New().String()
+	environment := createTestRouteEnvironment(t, name)
+	environment.Integration.Spec.Traits = v1.Traits{
+		Route: &traitv1.RouteTrait{
+			Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
+		},
+	}
+
+	traitsCatalog := environment.Catalog
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+
+	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
+		return r.ObjectMeta.Name == name
+	})
+
+	assert.NotNil(t, route)
+	assert.True(t, reflect.DeepEqual(route.GetAnnotations(), annotationsTest))
+
 }

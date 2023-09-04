@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	// CamelCatalogKind --
+	// CamelCatalogKind -- .
 	CamelCatalogKind string = "CamelCatalog"
 )
 
@@ -50,14 +50,14 @@ type CamelCatalog struct {
 
 // +kubebuilder:object:root=true
 
-// CamelCatalogList contains a list of CamelCatalog
+// CamelCatalogList contains a list of CamelCatalog.
 type CamelCatalogList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []CamelCatalog `json:"items"`
 }
 
-// CamelCatalogSpec specify what features a Camel runtime provides
+// CamelCatalogSpec specify what features a Camel runtime provides.
 type CamelCatalogSpec struct {
 	// the runtime targeted for the catalog
 	Runtime RuntimeSpec `json:"runtime" yaml:"runtime"`
@@ -79,15 +79,15 @@ type CamelCatalogStatus struct {
 	Image string `json:"image,omitempty"`
 }
 
-// CamelCatalogPhase --
+// CamelCatalogPhase -- .
 type CamelCatalogPhase string
 
 const (
-	// CamelCatalogPhaseNone --
+	// CamelCatalogPhaseNone --.
 	CamelCatalogPhaseNone CamelCatalogPhase = ""
-	// CamelCatalogPhaseReady --
+	// CamelCatalogPhaseReady --.
 	CamelCatalogPhaseReady CamelCatalogPhase = "Ready"
-	// CamelCatalogPhaseError --
+	// CamelCatalogPhaseError --.
 	CamelCatalogPhaseError CamelCatalogPhase = "Error"
 )
 
@@ -107,15 +107,15 @@ type CamelCatalogCondition struct {
 	Message string `json:"message,omitempty"`
 }
 
-// CamelCatalogConditionType --
+// CamelCatalogConditionType --.
 type CamelCatalogConditionType string
 
 const (
-	// CamelCatalogConditionReady --
+	// CamelCatalogConditionReady --.
 	CamelCatalogConditionReady CamelCatalogConditionType = "Ready"
 )
 
-// CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI)
+// CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI).
 type CamelScheme struct {
 	// the ID (ie, timer in a timer:xyz URI)
 	ID string `json:"id" yaml:"id"`
@@ -129,13 +129,13 @@ type CamelScheme struct {
 	Producer CamelSchemeScope `json:"producer,omitempty" yaml:"producer,omitempty"`
 }
 
-// CamelSchemeScope contains scoped information about a scheme
+// CamelSchemeScope contains scoped information about a scheme.
 type CamelSchemeScope struct {
 	// list of dependencies needed for this scope
 	Dependencies []CamelArtifactDependency `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
 }
 
-// CamelArtifactExclusion represents an exclusion clause
+// CamelArtifactExclusion represents an exclusion clause.
 type CamelArtifactExclusion struct {
 	// Maven Group
 	GroupID string `json:"groupId" yaml:"groupId"`
@@ -143,7 +143,7 @@ type CamelArtifactExclusion struct {
 	ArtifactID string `json:"artifactId" yaml:"artifactId"`
 }
 
-// CamelArtifactDependency represent a maven's dependency
+// CamelArtifactDependency represent a maven's dependency.
 type CamelArtifactDependency struct {
 	// the maven dependency
 	MavenArtifact `json:",inline" yaml:",inline"`
@@ -151,7 +151,7 @@ type CamelArtifactDependency struct {
 	Exclusions []CamelArtifactExclusion `json:"exclusions,omitempty" yaml:"exclusions,omitempty"`
 }
 
-// CamelArtifact represent the configuration for a feature offered by Camel
+// CamelArtifact represent the configuration for a feature offered by Camel.
 type CamelArtifact struct {
 	// Base Camel Artifact dependency
 	CamelArtifactDependency `json:",inline" yaml:",inline"`
@@ -167,7 +167,7 @@ type CamelArtifact struct {
 	JavaTypes []string `json:"javaTypes,omitempty" yaml:"javaTypes,omitempty"`
 }
 
-// CamelLoader represents the configuration required to load a DSL
+// CamelLoader represents the configuration required to load a DSL.
 type CamelLoader struct {
 	// the base Maven artifact required
 	MavenArtifact `json:",inline" yaml:",inline"`

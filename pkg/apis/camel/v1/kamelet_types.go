@@ -23,29 +23,29 @@ import (
 )
 
 const (
-	// AnnotationIcon label used by icons
+	// AnnotationIcon label used by icons.
 	AnnotationIcon = "camel.apache.org/kamelet.icon"
-	// KameletBundledLabel label used by bundling
+	// KameletBundledLabel label used by bundling.
 	KameletBundledLabel = "camel.apache.org/kamelet.bundled"
-	// KameletReadOnlyLabel label used to identify readonly Kamelets
+	// KameletReadOnlyLabel label used to identify readonly Kamelets.
 	KameletReadOnlyLabel = "camel.apache.org/kamelet.readonly"
-	// KameletTypeLabel label used to identify Kamelet type
+	// KameletTypeLabel label used to identify Kamelet type.
 	KameletTypeLabel = "camel.apache.org/kamelet.type"
-	// KameletGroupLabel label used to group Kamelets
+	// KameletGroupLabel label used to group Kamelets.
 	KameletGroupLabel = "camel.apache.org/kamelet.group"
 
-	// KameletTypeSink type Sink
+	// KameletTypeSink type Sink.
 	KameletTypeSink = "sink"
-	// KameletTypeSource type Source
+	// KameletTypeSource type Source.
 	KameletTypeSource = "source"
-	// KameletTypeAction type Action
+	// KameletTypeAction type Action.
 	KameletTypeAction = "action"
 )
 
 var (
-	// reservedKameletNames used to mark reserved names
+	// reservedKameletNames used to mark reserved names.
 	reservedKameletNames = map[string]bool{"source": true, "sink": true}
-	// KameletIDProperty used to identify
+	// KameletIDProperty used to identify.
 	KameletIDProperty = "id"
 )
 
@@ -56,7 +56,7 @@ var (
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
 
-// Kamelet is the Schema for the kamelets API
+// Kamelet is the Schema for the kamelets API.
 type Kamelet struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -67,7 +67,7 @@ type Kamelet struct {
 	Status KameletStatus `json:"status,omitempty"`
 }
 
-// KameletSpec specifies the configuration required to execute a Kamelet
+// KameletSpec specifies the configuration required to execute a Kamelet.
 type KameletSpec struct {
 	// defines the formal configuration of the Kamelet
 	Definition *JSONSchemaProps `json:"definition,omitempty"`
@@ -84,26 +84,26 @@ type KameletSpec struct {
 	Dependencies []string `json:"dependencies,omitempty"`
 }
 
-// Template is an unstructured object representing a Kamelet template in YAML/JSON DSL
+// Template is an unstructured object representing a Kamelet template in YAML/JSON DSL.
 type Template struct {
 	// an unstructured raw message
 	RawMessage `json:",inline"`
 }
 
-// TypeSlot represent a kind of data (ie, input, output, ...)
+// TypeSlot represent a kind of data (ie, input, output, ...).
 type TypeSlot string
 
 const (
-	// TypeSlotIn is used for the input events
+	// TypeSlotIn is used for the input events.
 	TypeSlotIn TypeSlot = "in"
-	// TypeSlotOut is used for the output events
+	// TypeSlotOut is used for the output events.
 	TypeSlotOut TypeSlot = "out"
-	// TypeSlotError is used for the error events
+	// TypeSlotError is used for the error events.
 	TypeSlotError TypeSlot = "error"
 )
 
-// EventTypeSpec represents a specification for an event type
-// Deprecated: In favor of using DataTypeSpec
+// EventTypeSpec represents a specification for an event type.
+// Deprecated: In favor of using DataTypeSpec.
 type EventTypeSpec struct {
 	// media type as expected for HTTP media types (ie, application/json)
 	MediaType string `json:"mediaType,omitempty"`
@@ -111,7 +111,7 @@ type EventTypeSpec struct {
 	Schema *JSONSchemaProps `json:"schema,omitempty"`
 }
 
-// DataTypesSpec represents the specification for a set of data types
+// DataTypesSpec represents the specification for a set of data types.
 type DataTypesSpec struct {
 	// the default data type for this Kamelet
 	Default string `json:"default,omitempty"`
@@ -121,7 +121,7 @@ type DataTypesSpec struct {
 	Headers map[string]HeaderSpec `json:"headers,omitempty"`
 }
 
-// DataTypeSpec represents the specification for a data type
+// DataTypeSpec represents the specification for a data type.
 type DataTypeSpec struct {
 	// the data type component scheme
 	Scheme string `json:"scheme,omitempty"`
@@ -139,7 +139,7 @@ type DataTypeSpec struct {
 	Schema *JSONSchemaProps `json:"schema,omitempty"`
 }
 
-// DataTypeReference references to the specification of a data type by its scheme and format name
+// DataTypeReference references to the specification of a data type by its scheme and format name.
 type DataTypeReference struct {
 	// the data type component scheme
 	Scheme string `json:"scheme,omitempty"`
@@ -147,7 +147,7 @@ type DataTypeReference struct {
 	Format string `json:"format,omitempty"`
 }
 
-// HeaderSpec represents the specification for a header used in the Kamelet
+// HeaderSpec represents the specification for a header used in the Kamelet.
 type HeaderSpec struct {
 	Type        string `json:"type,omitempty"`
 	Title       string `json:"title,omitempty"`
@@ -156,7 +156,7 @@ type HeaderSpec struct {
 	Default     string `json:"default,omitempty"`
 }
 
-// KameletStatus defines the observed state of Kamelet
+// KameletStatus defines the observed state of Kamelet.
 type KameletStatus struct {
 	// ObservedGeneration is the most recent generation observed for this Kamelet.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
@@ -168,7 +168,7 @@ type KameletStatus struct {
 	Properties []KameletProperty `json:"properties,omitempty"`
 }
 
-// KameletProperty specify the behavior of a property in a Kamelet
+// KameletProperty specify the behavior of a property in a Kamelet.
 type KameletProperty struct {
 	// the name of the property
 	Name string `json:"name,omitempty"`
@@ -192,41 +192,41 @@ type KameletCondition struct {
 	Message string `json:"message,omitempty"`
 }
 
-// KameletConditionType --
+// KameletConditionType --.
 type KameletConditionType string
 
 const (
-	// KameletConditionReady --
+	// KameletConditionReady --.
 	KameletConditionReady KameletConditionType = "Ready"
 )
 
 const (
-	// KameletConditionReasonInvalidName --
+	// KameletConditionReasonInvalidName --.
 	KameletConditionReasonInvalidName string = "InvalidName"
-	// KameletConditionReasonInvalidProperty --
+	// KameletConditionReasonInvalidProperty --.
 	KameletConditionReasonInvalidProperty string = "InvalidProperty"
-	// KameletConditionReasonInvalidTemplate --
+	// KameletConditionReasonInvalidTemplate --.
 	KameletConditionReasonInvalidTemplate string = "InvalidTemplate"
 )
 
-// KameletPhase --
+// KameletPhase --.
 type KameletPhase string
 
 const (
-	// KameletKind --
+	// KameletKind --.
 	KameletKind string = "Kamelet"
 
-	// KameletPhaseNone --
+	// KameletPhaseNone --.
 	KameletPhaseNone KameletPhase = ""
-	// KameletPhaseReady --
+	// KameletPhaseReady --.
 	KameletPhaseReady KameletPhase = "Ready"
-	// KameletPhaseError --
+	// KameletPhaseError --.
 	KameletPhaseError KameletPhase = "Error"
 )
 
 // +kubebuilder:object:root=true
 
-// KameletList contains a list of Kamelet
+// KameletList contains a list of Kamelet.
 type KameletList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

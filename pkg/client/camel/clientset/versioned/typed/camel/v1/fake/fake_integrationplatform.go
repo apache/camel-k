@@ -24,11 +24,10 @@ import (
 	json "encoding/json"
 	"fmt"
 
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	applyconfigurationcamelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -40,25 +39,25 @@ type FakeIntegrationPlatforms struct {
 	ns   string
 }
 
-var integrationplatformsResource = schema.GroupVersionResource{Group: "camel.apache.org", Version: "v1", Resource: "integrationplatforms"}
+var integrationplatformsResource = v1.SchemeGroupVersion.WithResource("integrationplatforms")
 
-var integrationplatformsKind = schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "IntegrationPlatform"}
+var integrationplatformsKind = v1.SchemeGroupVersion.WithKind("IntegrationPlatform")
 
 // Get takes name of the integrationPlatform, and returns the corresponding integrationPlatform object, and an error if there is any.
-func (c *FakeIntegrationPlatforms) Get(ctx context.Context, name string, options v1.GetOptions) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Get(ctx context.Context, name string, options metav1.GetOptions) (result *v1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(integrationplatformsResource, c.ns, name), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewGetAction(integrationplatformsResource, c.ns, name), &v1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.IntegrationPlatform), err
+	return obj.(*v1.IntegrationPlatform), err
 }
 
 // List takes label and field selectors, and returns the list of IntegrationPlatforms that match those selectors.
-func (c *FakeIntegrationPlatforms) List(ctx context.Context, opts v1.ListOptions) (result *camelv1.IntegrationPlatformList, err error) {
+func (c *FakeIntegrationPlatforms) List(ctx context.Context, opts metav1.ListOptions) (result *v1.IntegrationPlatformList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(integrationplatformsResource, integrationplatformsKind, c.ns, opts), &camelv1.IntegrationPlatformList{})
+		Invokes(testing.NewListAction(integrationplatformsResource, integrationplatformsKind, c.ns, opts), &v1.IntegrationPlatformList{})
 
 	if obj == nil {
 		return nil, err
@@ -68,8 +67,8 @@ func (c *FakeIntegrationPlatforms) List(ctx context.Context, opts v1.ListOptions
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &camelv1.IntegrationPlatformList{ListMeta: obj.(*camelv1.IntegrationPlatformList).ListMeta}
-	for _, item := range obj.(*camelv1.IntegrationPlatformList).Items {
+	list := &v1.IntegrationPlatformList{ListMeta: obj.(*v1.IntegrationPlatformList).ListMeta}
+	for _, item := range obj.(*v1.IntegrationPlatformList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -78,75 +77,75 @@ func (c *FakeIntegrationPlatforms) List(ctx context.Context, opts v1.ListOptions
 }
 
 // Watch returns a watch.Interface that watches the requested integrationPlatforms.
-func (c *FakeIntegrationPlatforms) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeIntegrationPlatforms) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(integrationplatformsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a integrationPlatform and creates it.  Returns the server's representation of the integrationPlatform, and an error, if there is any.
-func (c *FakeIntegrationPlatforms) Create(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts v1.CreateOptions) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Create(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.CreateOptions) (result *v1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(integrationplatformsResource, c.ns, integrationPlatform), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewCreateAction(integrationplatformsResource, c.ns, integrationPlatform), &v1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.IntegrationPlatform), err
+	return obj.(*v1.IntegrationPlatform), err
 }
 
 // Update takes the representation of a integrationPlatform and updates it. Returns the server's representation of the integrationPlatform, and an error, if there is any.
-func (c *FakeIntegrationPlatforms) Update(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts v1.UpdateOptions) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Update(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.UpdateOptions) (result *v1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(integrationplatformsResource, c.ns, integrationPlatform), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewUpdateAction(integrationplatformsResource, c.ns, integrationPlatform), &v1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.IntegrationPlatform), err
+	return obj.(*v1.IntegrationPlatform), err
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeIntegrationPlatforms) UpdateStatus(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatform, opts v1.UpdateOptions) (*camelv1.IntegrationPlatform, error) {
+func (c *FakeIntegrationPlatforms) UpdateStatus(ctx context.Context, integrationPlatform *v1.IntegrationPlatform, opts metav1.UpdateOptions) (*v1.IntegrationPlatform, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(integrationplatformsResource, "status", c.ns, integrationPlatform), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewUpdateSubresourceAction(integrationplatformsResource, "status", c.ns, integrationPlatform), &v1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.IntegrationPlatform), err
+	return obj.(*v1.IntegrationPlatform), err
 }
 
 // Delete takes name of the integrationPlatform and deletes it. Returns an error if one occurs.
-func (c *FakeIntegrationPlatforms) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
+func (c *FakeIntegrationPlatforms) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(integrationplatformsResource, c.ns, name, opts), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewDeleteActionWithOptions(integrationplatformsResource, c.ns, name, opts), &v1.IntegrationPlatform{})
 
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeIntegrationPlatforms) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+func (c *FakeIntegrationPlatforms) DeleteCollection(ctx context.Context, opts metav1.DeleteOptions, listOpts metav1.ListOptions) error {
 	action := testing.NewDeleteCollectionAction(integrationplatformsResource, c.ns, listOpts)
 
-	_, err := c.Fake.Invokes(action, &camelv1.IntegrationPlatformList{})
+	_, err := c.Fake.Invokes(action, &v1.IntegrationPlatformList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched integrationPlatform.
-func (c *FakeIntegrationPlatforms) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts metav1.PatchOptions, subresources ...string) (result *v1.IntegrationPlatform, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, name, pt, data, subresources...), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, name, pt, data, subresources...), &v1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.IntegrationPlatform), err
+	return obj.(*v1.IntegrationPlatform), err
 }
 
 // Apply takes the given apply declarative configuration, applies it and returns the applied integrationPlatform.
-func (c *FakeIntegrationPlatforms) Apply(ctx context.Context, integrationPlatform *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) Apply(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationPlatform, err error) {
 	if integrationPlatform == nil {
 		return nil, fmt.Errorf("integrationPlatform provided to Apply must not be nil")
 	}
@@ -159,17 +158,17 @@ func (c *FakeIntegrationPlatforms) Apply(ctx context.Context, integrationPlatfor
 		return nil, fmt.Errorf("integrationPlatform.Name must be provided to Apply")
 	}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, *name, types.ApplyPatchType, data), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, *name, types.ApplyPatchType, data), &v1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.IntegrationPlatform), err
+	return obj.(*v1.IntegrationPlatform), err
 }
 
 // ApplyStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating ApplyStatus().
-func (c *FakeIntegrationPlatforms) ApplyStatus(ctx context.Context, integrationPlatform *applyconfigurationcamelv1.IntegrationPlatformApplyConfiguration, opts v1.ApplyOptions) (result *camelv1.IntegrationPlatform, err error) {
+func (c *FakeIntegrationPlatforms) ApplyStatus(ctx context.Context, integrationPlatform *camelv1.IntegrationPlatformApplyConfiguration, opts metav1.ApplyOptions) (result *v1.IntegrationPlatform, err error) {
 	if integrationPlatform == nil {
 		return nil, fmt.Errorf("integrationPlatform provided to Apply must not be nil")
 	}
@@ -182,10 +181,10 @@ func (c *FakeIntegrationPlatforms) ApplyStatus(ctx context.Context, integrationP
 		return nil, fmt.Errorf("integrationPlatform.Name must be provided to Apply")
 	}
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &camelv1.IntegrationPlatform{})
+		Invokes(testing.NewPatchSubresourceAction(integrationplatformsResource, c.ns, *name, types.ApplyPatchType, data, "status"), &v1.IntegrationPlatform{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*camelv1.IntegrationPlatform), err
+	return obj.(*v1.IntegrationPlatform), err
 }

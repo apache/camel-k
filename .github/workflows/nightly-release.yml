@@ -31,66 +31,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  main:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        ref-branch: [main, release-1.12.x, release-2.0.x]
+
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-latest
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v3
       with:
-        ref: main
+        ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
-    - name: Release main nightly
+    - name: Release nightly ${{ matrix.ref-branch }} branch
       uses: ./.github/actions/release-nightly
       with:
-        goVersion: "1.18.x"
-        javaVersion: "11"
+        goVersion: "1.20.x"
+        javaVersion: "17"
         secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
         secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
         secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
         secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
-
-  v1_12_x:
-    if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-latest
-    steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v2
-      with:
-        ref: release-1.12.x
-        persist-credentials: false
-        submodules: recursive
-    - name: release-1.12.x nightly
-      uses: ./.github/actions/release-nightly
-      with:
-        goVersion: "1.18.x"
-        javaVersion: "11"
-        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
-        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
-
-  v1_10_x:
-    if: github.repository == 'apache/camel-k'
-    runs-on: ubuntu-latest
-    steps:
-    - name: "Checkout code"
-      uses: actions/checkout@v3
-      with:
-        ref: release-1.10.x
-        persist-credentials: false
-        submodules: recursive
-    - name: release-1.10.x nightly
-      uses: ./.github/actions/release-nightly
-      with:
-        goVersion: "1.17.x"
-        javaVersion: "11"
-        secretE2ECluster: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        secretE2EKube: ${{ secrets.E2E_KUBE_CONFIG }}
-        secretDockerHubUser: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
-        secretDockerHubPassword: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
-        secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
-

@@ -25,7 +25,6 @@ import (
 	v1beta2 "github.com/apache/camel-k/v2/addons/strimzi/duck/v1beta2"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
 )
@@ -36,9 +35,9 @@ type FakeKafkaTopics struct {
 	ns   string
 }
 
-var kafkatopicsResource = schema.GroupVersionResource{Group: "kafka.strimzi.io", Version: "v1beta2", Resource: "kafkatopics"}
+var kafkatopicsResource = v1beta2.SchemeGroupVersion.WithResource("kafkatopics")
 
-var kafkatopicsKind = schema.GroupVersionKind{Group: "kafka.strimzi.io", Version: "v1beta2", Kind: "KafkaTopic"}
+var kafkatopicsKind = v1beta2.SchemeGroupVersion.WithKind("KafkaTopic")
 
 // Get takes name of the kafkaTopic, and returns the corresponding kafkaTopic object, and an error if there is any.
 func (c *FakeKafkaTopics) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.KafkaTopic, err error) {

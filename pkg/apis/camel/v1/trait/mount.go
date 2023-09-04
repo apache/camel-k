@@ -35,4 +35,6 @@ type MountTrait struct {
 	Resources []string `property:"resources" json:"resources,omitempty"`
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
+	// Enable "hot reload" when a secret/configmap mounted is edited (default false)
+	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
 }

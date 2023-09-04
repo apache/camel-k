@@ -52,9 +52,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/cli-runtime/pkg/printers"
+	"k8s.io/client-go/kubernetes/scheme"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -89,7 +89,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 		Long:              `Deploys and execute a integration pod on Kubernetes.`,
 		Args:              options.validateArgs,
 		PersistentPreRunE: options.decode,
-		PreRunE:           options.preRunE,
+		PreRunE:           options.preRun,
 		RunE:              options.run,
 		PostRunE:          options.postRun,
 		Annotations:       make(map[string]string),
@@ -166,14 +166,6 @@ type runCmdOptions struct {
 	Force           bool `mapstructure:"force" yaml:",omitempty"`
 }
 
-func (o *runCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
-	if o.OutputFormat != "" {
-		// let the command work in offline mode
-		cmd.Annotations[offlineCommandLabel] = "true"
-	}
-	return o.RootCmdOptions.preRun(cmd, args)
-}
-
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 	// *************************************************************************
 	//
@@ -187,7 +179,7 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 	// the values loaded from the second steps belong to a node for which there
 	// are no flags as it is a dynamic node not known when the command hierarchy
 	// is initialized and configured so any flag value is simple ignored and the
-	// struct field takes tha value of the the persisted configuration node.
+	// struct field takes the value of the persisted configuration node.
 	//
 	// *************************************************************************
 
@@ -197,7 +189,12 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if err := o.validate(); err != nil {
+	if o.OutputFormat != "" {
+		// let the command work in offline mode
+		cmd.Annotations[offlineCommandLabel] = "true"
+	}
+
+	if err := o.validate(cmd); err != nil {
 		return err
 	}
 
@@ -233,7 +230,7 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 		})
 	}
 
-	return o.validate()
+	return o.validate(cmd)
 }
 
 func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
@@ -248,7 +245,7 @@ func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *runCmdOptions) validate() error {
+func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 	if o.OperatorID == "" {
 		return fmt.Errorf("cannot use empty operator id")
 	}
@@ -292,9 +289,12 @@ func (o *runCmdOptions) validate() error {
 		}
 	}
 
-	client, err := o.GetCmdClient()
-	if err != nil {
-		return err
+	var client client.Client
+	if !isOfflineCommand(cmd) {
+		client, err = o.GetCmdClient()
+		if err != nil {
+			return err
+		}
 	}
 	catalog := trait.NewCatalog(client)
 
@@ -313,9 +313,13 @@ func filterBuildPropertyFiles(maybePropertyFiles []string) []string {
 }
 
 func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
-	c, err := o.GetCmdClient()
-	if err != nil {
-		return err
+	var c client.Client
+	var err error
+	if !isOfflineCommand(cmd) {
+		c, err = o.GetCmdClient()
+		if err != nil {
+			return err
+		}
 	}
 
 	integration, err := o.createOrUpdateIntegration(cmd, c, args)
@@ -557,7 +561,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	if o.OutputFormat != "" {
-		return nil, showIntegrationOutput(cmd, integration, o.OutputFormat, c.GetScheme())
+		return nil, showIntegrationOutput(cmd, integration, o.OutputFormat)
 	}
 
 	if existing == nil {
@@ -587,8 +591,8 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	return integration, nil
 }
 
-func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outputFormat string, scheme runtime.ObjectTyper) error {
-	printer := printers.NewTypeSetter(scheme)
+func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outputFormat string) error {
+	printer := printers.NewTypeSetter(scheme.Scheme)
 	printer.Delegate = &kubernetes.CLIPrinter{
 		Format: outputFormat,
 	}
@@ -736,14 +740,17 @@ func (o *runCmdOptions) parseAndConvertToTrait(cmd *cobra.Command,
 	c client.Client, integration *v1.Integration, params []string,
 	parse func(string) (*resource.Config, error),
 	convert func(*resource.Config) string,
-	traitParam string) error {
+	traitParam string,
+) error {
 	for _, param := range params {
 		config, err := parse(param)
 		if err != nil {
 			return err
 		}
-		if err := parseConfig(o.Context, cmd, c, config, integration); err != nil {
-			return err
+		if o.OutputFormat == "" {
+			if err := parseConfig(o.Context, cmd, c, config, integration); err != nil {
+				return err
+			}
 		}
 		o.Traits = append(o.Traits, convertToTrait(convert(config), traitParam))
 	}
@@ -1325,6 +1332,7 @@ func createDefaultGav(path string, dirName string, integrationName string) (mave
 func isPom(path string) bool {
 	return strings.HasSuffix(path, ".pom") || strings.HasSuffix(path, "pom.xml")
 }
+
 func isJar(path string) bool {
 	return strings.HasSuffix(path, ".jar")
 }

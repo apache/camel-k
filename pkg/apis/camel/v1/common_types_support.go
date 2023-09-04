@@ -21,8 +21,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/imdario/mergo"
@@ -116,7 +118,7 @@ func (m *RawMessage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// String returns a string representation of RawMessage
+// String returns a string representation of RawMessage.
 func (m *RawMessage) String() string {
 	if m == nil {
 		return ""
@@ -137,8 +139,8 @@ func GetOperatorIDAnnotation(obj metav1.Object) string {
 		return ""
 	}
 
-	if operatorId, ok := obj.GetAnnotations()[OperatorIDAnnotation]; ok {
-		return operatorId
+	if operatorID, ok := obj.GetAnnotations()[OperatorIDAnnotation]; ok {
+		return operatorID
 	}
 
 	return ""
@@ -164,4 +166,48 @@ func (bc *BuildConfiguration) IsEmpty() bool {
 		bc.RequestMemory == "" &&
 		bc.LimitCPU == "" &&
 		bc.LimitMemory == ""
+}
+
+// DecodeValueSource returns a ValueSource object from an input that respects the format configmap|secret:resource-name[/path].
+func DecodeValueSource(input string, defaultKey string, errorMessage string) (ValueSource, error) {
+	sub := make([]string, 0)
+	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
+	hits := rex.FindAllStringSubmatch(input, -1)
+
+	for _, hit := range hits {
+		if len(hit) > 1 {
+			sub = append(sub, hit[1:]...)
+		}
+	}
+
+	// nolint: gosec // sub[3] and sub[0] cannot be out of bounds
+	if len(sub) >= 2 {
+		key := defaultKey
+		if len(sub) == 4 && sub[3] != "" {
+			key = sub[3]
+		}
+
+		if sub[0] == "configmap" {
+			return ValueSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: sub[1],
+					},
+					Key: key,
+				},
+			}, nil
+		}
+		if sub[0] == "secret" {
+			return ValueSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: sub[1],
+					},
+					Key: key,
+				},
+			}, nil
+		}
+	}
+
+	return ValueSource{}, fmt.Errorf(errorMessage)
 }

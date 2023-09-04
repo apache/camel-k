@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/utils/pointer"
 
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -38,7 +39,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"knative.dev/serving/pkg/apis/serving"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -52,6 +52,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
+	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -168,6 +169,106 @@ func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Clie
 	return requests
 }
 
+func configmapEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, cm *corev1.ConfigMap) []reconcile.Request {
+	var requests []reconcile.Request
+
+	// Do global search in case of global operator (it may be using a global platform)
+	list := &v1.IntegrationList{}
+	var opts []ctrl.ListOption
+	if !platform.IsCurrentOperatorGlobal() {
+		opts = append(opts, ctrl.InNamespace(cm.Namespace))
+	}
+
+	if err := c.List(ctx, list, opts...); err != nil {
+		log.Error(err, "Failed to list integrations")
+		return requests
+	}
+
+	for _, integration := range list.Items {
+		found := false
+		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, false) {
+			continue
+		}
+		for _, c := range integration.Spec.Traits.Mount.Configs {
+			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
+				if conf.StorageType() == utilResource.StorageTypeConfigmap && conf.Name() == cm.Name {
+					found = true
+					break
+				}
+			}
+		}
+		for _, r := range integration.Spec.Traits.Mount.Resources {
+			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
+				if conf.StorageType() == utilResource.StorageTypeConfigmap && conf.Name() == cm.Name {
+					found = true
+					break
+				}
+			}
+		}
+		if found {
+			log.Infof("Configmap %s updated, wake-up integration: %s", cm.Name, integration.Name)
+			requests = append(requests, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Namespace: integration.Namespace,
+					Name:      integration.Name,
+				},
+			})
+		}
+	}
+
+	return requests
+}
+
+func secretEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, sec *corev1.Secret) []reconcile.Request {
+	var requests []reconcile.Request
+
+	// Do global search in case of global operator (it may be using a global platform)
+	list := &v1.IntegrationList{}
+	var opts []ctrl.ListOption
+	if !platform.IsCurrentOperatorGlobal() {
+		opts = append(opts, ctrl.InNamespace(sec.Namespace))
+	}
+
+	if err := c.List(ctx, list, opts...); err != nil {
+		log.Error(err, "Failed to list integrations")
+		return requests
+	}
+
+	for _, integration := range list.Items {
+		found := false
+		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, true) {
+			continue
+		}
+		for _, c := range integration.Spec.Traits.Mount.Configs {
+			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
+				if conf.StorageType() == utilResource.StorageTypeSecret && conf.Name() == sec.Name {
+					found = true
+					break
+				}
+			}
+		}
+		for _, r := range integration.Spec.Traits.Mount.Resources {
+			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
+				if conf.StorageType() == utilResource.StorageTypeSecret && conf.Name() == sec.Name {
+					found = true
+					break
+				}
+			}
+		}
+		if found {
+			log.Infof("Secret %s updated, wake-up integration: %s", sec.Name, integration.Name)
+			requests = append(requests, reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Namespace: integration.Namespace,
+					Name:      integration.Name,
+				},
+			})
+		}
+	}
+
+	return requests
+}
+
 func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
 	var requests []reconcile.Request
 
@@ -227,8 +328,8 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 		// Watch for IntegrationKit phase transitioning to ready or error, and
 		// enqueue requests for any integration that matches the kit, in building
 		// or running phase.
-		Watches(&source.Kind{Type: &v1.IntegrationKit{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&v1.IntegrationKit{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				kit, ok := a.(*v1.IntegrationKit)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
@@ -239,8 +340,8 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 			})).
 		// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 		// requests for any integrations that are in phase waiting for platform
-		Watches(&source.Kind{Type: &v1.IntegrationPlatform{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&v1.IntegrationPlatform{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				p, ok := a.(*v1.IntegrationPlatform)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integrations")
@@ -249,11 +350,32 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 
 				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
 			})).
+		// Watch for Configmaps or Secret used in the Integrations for updates
+		Watches(&corev1.ConfigMap{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+				cm, ok := a.(*corev1.ConfigMap)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
+					return []reconcile.Request{}
+				}
+
+				return configmapEnqueueRequestsFromMapFunc(ctx, c, cm)
+			})).
+		Watches(&corev1.Secret{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+				secret, ok := a.(*corev1.Secret)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
+					return []reconcile.Request{}
+				}
+
+				return secretEnqueueRequestsFromMapFunc(ctx, c, secret)
+			})).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
 		// Watch for the Integration Pods
-		Watches(&source.Kind{Type: &corev1.Pod{}},
-			handler.EnqueueRequestsFromMapFunc(func(a ctrl.Object) []reconcile.Request {
+		Watches(&corev1.Pod{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				pod, ok := a.(*corev1.Pod)
 				if !ok {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integration pods")
@@ -309,7 +431,7 @@ type reconcileIntegration struct {
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	rlog := Log.WithValues("request-namespace", request.Namespace, "request-name", request.Name)
-	rlog.Info("Reconciling Integration")
+	rlog.Debug("Reconciling Integration")
 
 	// Make sure the operator is allowed to act on namespace
 	if ok, err := platform.IsOperatorAllowedOnNamespace(ctx, r.client, request.Namespace); err != nil {
@@ -354,7 +476,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		a.InjectLogger(targetLog)
 
 		if a.CanHandle(target) {
-			targetLog.Infof("Invoking action %s", a.Name())
+			targetLog.Debugf("Invoking action %s", a.Name())
 
 			newTarget, err := a.Handle(ctx, target)
 			if err != nil {
@@ -384,7 +506,8 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 }
 
 func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration, log *log.Logger) error {
-	d, err := digest.ComputeForIntegration(target)
+	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, r.client, target)
+	d, err := digest.ComputeForIntegration(target, configmaps, secrets)
 	if err != nil {
 		return err
 	}
@@ -398,10 +521,19 @@ func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration,
 
 	if target.Status.Phase != base.Status.Phase {
 		log.Info(
-			"state transition",
+			"State transition",
 			"phase-from", base.Status.Phase,
 			"phase-to", target.Status.Phase,
 		)
+
+		if target.Status.Phase == v1.IntegrationPhaseError {
+			if cond := target.Status.GetCondition(v1.IntegrationConditionReady); cond != nil && cond.Status == corev1.ConditionFalse {
+				log.Info(
+					"Integration error",
+					"reason", cond.GetReason(),
+					"error-message", cond.GetMessage())
+			}
+		}
 	}
 
 	return nil

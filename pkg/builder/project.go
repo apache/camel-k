@@ -20,6 +20,7 @@ package builder
 import (
 	"bytes"
 	"encoding/xml"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -41,6 +42,7 @@ func init() {
 		Project.GenerateProjectSettings,
 		Project.InjectDependencies,
 		Project.SanitizeDependencies,
+		Project.InjectProfiles,
 	}
 }
 
@@ -50,6 +52,7 @@ type projectSteps struct {
 	GenerateProjectSettings Step
 	InjectDependencies      Step
 	SanitizeDependencies    Step
+	InjectProfiles          Step
 
 	CommonSteps []Step
 }
@@ -60,6 +63,7 @@ var Project = projectSteps{
 	GenerateProjectSettings: NewStep(ProjectGenerationPhase+1, generateProjectSettings),
 	InjectDependencies:      NewStep(ProjectGenerationPhase+2, injectDependencies),
 	SanitizeDependencies:    NewStep(ProjectGenerationPhase+3, sanitizeDependencies),
+	InjectProfiles:          NewStep(ProjectGenerationPhase+4, injectProfiles),
 }
 
 func cleanUpBuildDir(ctx *builderContext) error {
@@ -190,4 +194,21 @@ func injectDependencies(ctx *builderContext) error {
 
 func sanitizeDependencies(ctx *builderContext) error {
 	return camel.SanitizeIntegrationDependencies(ctx.Maven.Project.Dependencies)
+}
+
+func injectProfiles(ctx *builderContext) error {
+	if ctx.Build.Maven.Profiles != nil {
+		profiles := ""
+		for i := range ctx.Build.Maven.Profiles {
+			val, err := kubernetes.ResolveValueSource(ctx.C, ctx.Client, ctx.Namespace, &ctx.Build.Maven.Profiles[i])
+			if err != nil {
+				return fmt.Errorf("could not load profile : %s: %w. ", ctx.Build.Maven.Profiles[i].String(), err)
+			}
+			if val != "" {
+				profiles += val
+			}
+		}
+		ctx.Maven.Project.AddProfiles(profiles)
+	}
+	return nil
 }

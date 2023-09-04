@@ -568,7 +568,8 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 	}
 
 	if o.MavenSettings != "" {
-		mavenSettings, err := decodeMavenSettings(o.MavenSettings)
+		mavenSettings, err := v1.DecodeValueSource(o.MavenSettings, "settings.xml",
+			"illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
 		if err != nil {
 			return nil, err
 		}
@@ -823,46 +824,7 @@ func supportedOptionsAsString(strategy v1.IntegrationPlatformBuildPublishStrateg
 }
 
 func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
-	sub := make([]string, 0)
-	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
-	hits := rex.FindAllStringSubmatch(mavenSettings, -1)
-
-	for _, hit := range hits {
-		if len(hit) > 1 {
-			sub = append(sub, hit[1:]...)
-		}
-	}
-
-	if len(sub) >= 2 {
-		key := "settings.xml"
-
-		if len(sub) == 4 {
-			key = sub[3]
-		}
-
-		if sub[0] == "configmap" {
-			return v1.ValueSource{
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: sub[1],
-					},
-					Key: key,
-				},
-			}, nil
-		}
-		if sub[0] == "secret" {
-			return v1.ValueSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: sub[1],
-					},
-					Key: key,
-				},
-			}, nil
-		}
-	}
-
-	return v1.ValueSource{}, fmt.Errorf("illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
+	return v1.DecodeValueSource(mavenSettings, "settings.xml", "illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
 }
 
 func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error) {

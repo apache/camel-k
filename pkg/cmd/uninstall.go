@@ -30,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/rest"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -132,7 +133,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// nolint: ifshort
+	//nolint: ifshort
 	uninstallViaOLM := false
 	if o.OlmEnabled {
 		var err error
@@ -312,9 +313,13 @@ func (o *uninstallCmdOptions) uninstallNamespaceResources(ctx context.Context, c
 }
 
 func (o *uninstallCmdOptions) uninstallCrd(ctx context.Context, c client.Client) error {
+	httpCli, err := rest.HTTPClientFor(c.GetConfig())
+	if err != nil {
+		return err
+	}
 	restClient, err := apiutil.RESTClientForGVK(
 		schema.GroupVersionKind{Group: "apiextensions.k8s.io", Version: "v1"}, false,
-		c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()))
+		c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()), httpCli)
 	if err != nil {
 		return err
 	}

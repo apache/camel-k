@@ -32,7 +32,7 @@ func TestDependenciesJavaSource(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "Request.java",
 			Content: `
-			    import org.apache.camel.component.activemq.ActiveMQComponent;
+			    import org.apache.camel.component.kafka.KafkaComponent;
 
 			    from("telegram:bots/cippa").to("log:stash");
 			    from("timer:tick").to("amqp:queue");
@@ -52,7 +52,7 @@ func TestDependenciesJavaSource(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:activemq",
+			"camel:kafka",
 			"camel:amqp",
 			"camel:log",
 			"camel:telegram",
@@ -67,7 +67,7 @@ func TestDependenciesJavaScript(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "source.js",
 			Content: `
-			    var component = Java.type("org.apache.camel.component.activemq.ActiveMQComponent");
+			    var component = Java.type("org.apache.camel.component.kafka.KafkaComponent");
 
 			    from('telegram:bots/cippa').to("log:stash");
 			    from('timer:tick').to("amqp:queue");
@@ -86,7 +86,7 @@ func TestDependenciesJavaScript(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:activemq",
+			"camel:kafka",
 			"camel:amqp",
 			"camel:log",
 			"camel:telegram",
@@ -100,7 +100,7 @@ func TestDependenciesGroovy(t *testing.T) {
 		DataSpec: v1.DataSpec{
 			Name: "source.groovy",
 			Content: `
-			    import org.apache.camel.component.activemq.ActiveMQComponent;
+			    import org.apache.camel.component.kafka.KafkaComponent;
 
 			    from('telegram:bots/cippa').to("log:stash");
 			    from('timer:tick').to("amqp:queue");
@@ -121,7 +121,7 @@ func TestDependenciesGroovy(t *testing.T) {
 	assert.ElementsMatch(
 		t,
 		[]string{
-			"camel:activemq",
+			"camel:kafka",
 			"camel:amqp",
 			"camel:log",
 			"camel:telegram",
@@ -686,6 +686,7 @@ const yamlWithCircuitBreaker = `
             todo: "not implemented"
 `
 
+//nolint:dupword
 const yamlWithLanguages = `
 - from:
     uri: "direct:start"

@@ -32,6 +32,32 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+const (
+	// v1.Build,          v1.Integration
+	// v1.IntegrationKit, v1.IntegrationPlatform
+	// v1.Kamelet,  v1.Pipe,
+	// v1alpha1.Kamelet, v1alpha1.KameletBinding
+	ExpectedCRDs = 8
+
+	// camel-k-operator,             camel-k-operator-events,
+	// camel-k-operator-knative,     camel-k-operator-leases,
+	// camel-k-operator-podmonitors, camel-k-operator-strimzi,
+	// camel-k-operator-keda
+	ExpectedKubePromoteRoles = 7
+
+	// camel-k-edit
+	// camel-k-operator-custom-resource-definitions
+	// camel-k-operator-bind-addressable-resolver
+	// camel-k-operator-local-registry
+	ExpectedKubeClusterRoles = 4
+
+	// camel-k-operator-openshift
+	ExpectedOSPromoteRoles = 1
+
+	// camel-k-operator-console-openshift
+	ExpectedOSClusterRoles = 1
+)
+
 func TestSetupKustomizeBasic(t *testing.T) {
 	RegisterTestingT(t)
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")

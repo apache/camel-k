@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
+	cclient "github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/reference"
@@ -163,9 +164,13 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	client, err := o.GetCmdClient()
-	if err != nil {
-		return err
+	var client cclient.Client
+	var err error
+	if !isOfflineCommand(cmd) {
+		client, err = o.GetCmdClient()
+		if err != nil {
+			return err
+		}
 	}
 	catalog := trait.NewCatalog(client)
 

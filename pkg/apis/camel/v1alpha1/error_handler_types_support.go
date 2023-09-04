@@ -26,7 +26,7 @@ import (
 
 // +kubebuilder:object:generate=false
 
-// ErrorHandler is a generic interface that represent any type of error handler specification
+// ErrorHandler is a generic interface that represent any type of error handler specification.
 type ErrorHandler interface {
 	Type() ErrorHandlerType
 	Endpoint() *Endpoint
@@ -34,41 +34,41 @@ type ErrorHandler interface {
 	Validate() error
 }
 
-// baseErrorHandler is the base used for the Error Handler hierarchy
+// baseErrorHandler is the base used for the Error Handler hierarchy.
 type baseErrorHandler struct {
 }
 
-// Type --
+// Type --.
 func (e baseErrorHandler) Type() ErrorHandlerType {
 	return errorHandlerTypeBase
 }
 
-// Endpoint --
+// Endpoint --.
 func (e baseErrorHandler) Endpoint() *Endpoint {
 	return nil
 }
 
-// Configuration --
+// Configuration --.
 func (e baseErrorHandler) Configuration() (map[string]interface{}, error) {
 	return nil, nil
 }
 
-// Validate --
+// Validate --.
 func (e baseErrorHandler) Validate() error {
 	return nil
 }
 
-// ErrorHandlerNone --
+// ErrorHandlerNone --.
 type ErrorHandlerNone struct {
 	baseErrorHandler
 }
 
-// Type --
+// Type --.
 func (e ErrorHandlerNone) Type() ErrorHandlerType {
 	return ErrorHandlerTypeNone
 }
 
-// Configuration --
+// Configuration --.
 func (e ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
 	return map[string]interface{}{
 		ErrorHandlerAppPropertiesPrefix: "#class:org.apache.camel.builder.NoErrorHandlerBuilder",
@@ -76,18 +76,18 @@ func (e ErrorHandlerNone) Configuration() (map[string]interface{}, error) {
 	}, nil
 }
 
-// ErrorHandlerLog represent a default (log) error handler type
+// ErrorHandlerLog represent a default (log) error handler type.
 type ErrorHandlerLog struct {
 	ErrorHandlerNone
 	Parameters *ErrorHandlerParameters `json:"parameters,omitempty"`
 }
 
-// Type --
+// Type --.
 func (e ErrorHandlerLog) Type() ErrorHandlerType {
 	return ErrorHandlerTypeLog
 }
 
-// Configuration --
+// Configuration --.
 func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
 	properties, err := e.ErrorHandlerNone.Configuration()
 	if err != nil {
@@ -109,23 +109,23 @@ func (e ErrorHandlerLog) Configuration() (map[string]interface{}, error) {
 	return properties, nil
 }
 
-// ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel
+// ErrorHandlerSink represents a sink error handler type which behave like a dead letter channel.
 type ErrorHandlerSink struct {
 	ErrorHandlerLog
 	DLCEndpoint *Endpoint `json:"endpoint,omitempty"`
 }
 
-// Type --
+// Type --.
 func (e ErrorHandlerSink) Type() ErrorHandlerType {
 	return ErrorHandlerTypeSink
 }
 
-// Endpoint --
+// Endpoint --.
 func (e ErrorHandlerSink) Endpoint() *Endpoint {
 	return e.DLCEndpoint
 }
 
-// Configuration --
+// Configuration --.
 func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 	properties, err := e.ErrorHandlerLog.Configuration()
 	if err != nil {
@@ -136,10 +136,10 @@ func (e ErrorHandlerSink) Configuration() (map[string]interface{}, error) {
 	return properties, err
 }
 
-// Validate --
+// Validate --.
 func (e ErrorHandlerSink) Validate() error {
 	if e.DLCEndpoint == nil {
-		return fmt.Errorf("Missing endpoint in Error Handler Sink")
+		return fmt.Errorf("missing endpoint in Error Handler Sink")
 	}
 	return nil
 }

@@ -53,6 +53,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/rest"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -76,6 +77,8 @@ func (action *initializeAction) CanHandle(catalog *v1.CamelCatalog) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
+	action.L.Info("Initializing CamelCatalog")
+
 	platform, err := platformutil.GetOrFindLocal(ctx, action.client, catalog.Namespace)
 
 	if err != nil {
@@ -316,10 +319,13 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		if err != nil {
 			return err
 		}
-
+		httpCli, err := rest.HTTPClientFor(c.GetConfig())
+		if err != nil {
+			return err
+		}
 		restClient, err := apiutil.RESTClientForGVK(
 			schema.GroupVersionKind{Group: "build.openshift.io", Version: "v1"}, false,
-			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()))
+			c.GetConfig(), serializer.NewCodecFactory(c.GetScheme()), httpCli)
 		if err != nil {
 			return err
 		}
@@ -350,7 +356,7 @@ func initializeS2i(ctx context.Context, c client.Client, ip *v1.IntegrationPlatf
 		err = s2i.WaitForS2iBuildCompletion(ctx, c, &s2iBuild)
 		if err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-				// nolint: contextcheck
+				//nolint: contextcheck
 				if err := s2i.CancelBuild(context.Background(), c, &s2iBuild); err != nil {
 					return fmt.Errorf("cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
 				}
@@ -520,7 +526,7 @@ func tarEntries(writer io.Writer, files ...string) error {
 	tw := tar.NewWriter(gzw)
 	defer util.CloseQuietly(tw)
 
-	// Iterate over files and and add them to the tar archive
+	// Iterate over files and add them to the tar archive
 	for _, fileDetail := range files {
 		fileSource := strings.Split(fileDetail, ":")[0]
 		fileTarget := strings.Split(fileDetail, ":")[1]

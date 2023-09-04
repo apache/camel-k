@@ -62,7 +62,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: Build is the Schema for the builds API
+        description: Build is the Schema for the builds API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -78,7 +78,8 @@ spec:
             type: object
           spec:
             description: BuildSpec defines the list of tasks to be execute for a Build.
-              From Camel K version 2, it would be more appropiate to think it as pipeline.
+              From Camel K version 2, it would be more appropriate to think it as
+              pipeline.
             properties:
               configuration:
                 description: 'The configuration that should be used to perform the
@@ -291,7 +292,7 @@ spec:
                               description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                                  Maven artifact
+                                  Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
@@ -310,6 +311,53 @@ spec:
                             localRepository:
                               description: The path of the local Maven repository.
                               type: string
+                            profiles:
+                              description: A reference to the ConfigMap or Secret
+                                key that contains the Maven profile.
+                              items:
+                                description: ValueSource --.
+                                properties:
+                                  configMapKeyRef:
+                                    description: Selects a key of a ConfigMap.
+                                    properties:
+                                      key:
+                                        description: The key to select.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the ConfigMap
+                                          or its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                  secretKeyRef:
+                                    description: Selects a key of a secret.
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the Secret or
+                                          its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                type: object
+                              type: array
                             properties:
                               additionalProperties:
                                 type: string
@@ -318,7 +366,7 @@ spec:
                             repositories:
                               description: additional repositories
                               items:
-                                description: Repository defines a Maven repository
+                                description: Repository defines a Maven repository.
                                 properties:
                                   id:
                                     description: identifies the repository
@@ -502,12 +550,13 @@ spec:
                             capabilities:
                               additionalProperties:
                                 description: Capability is a particular feature which
-                                  requires a well known set of dependencies
+                                  requires a well known set of dependencies which
+                                  are specified in the runtime catalog.
                                 properties:
                                   dependencies:
                                     items:
                                       description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                                        Maven artifact
+                                        Maven artifact.
                                       properties:
                                         artifactId:
                                           description: Maven Artifact
@@ -533,7 +582,7 @@ spec:
                                 application
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                                  Maven artifact
+                                  Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
@@ -572,7 +621,7 @@ spec:
                           items:
                             description: SourceSpec defines the configuration for
                               one or more routes to be executed in a certain Camel
-                              DSL language
+                              DSL language.
                             properties:
                               compression:
                                 description: if the content is compressed (base64
@@ -636,7 +685,7 @@ spec:
                       type: object
                     custom:
                       description: UserTask is used to execute any generic custom
-                        operation
+                        operation.
                       properties:
                         command:
                           description: the command to execute
@@ -647,6 +696,43 @@ spec:
                         name:
                           description: name of the task
                           type: string
+                      type: object
+                    jib:
+                      description: a JibTask, for Jib strategy
+                      properties:
+                        baseImage:
+                          description: base image layer
+                          type: string
+                        contextDir:
+                          description: can be useful to share info with other tasks
+                          type: string
+                        image:
+                          description: final image name
+                          type: string
+                        name:
+                          description: name of the task
+                          type: string
+                        registry:
+                          description: where to publish the final image
+                          properties:
+                            address:
+                              description: the URI to access
+                              type: string
+                            ca:
+                              description: the configmap which stores the Certificate
+                                Authority
+                              type: string
+                            insecure:
+                              description: if the container registry is insecure (ie,
+                                http only)
+                              type: boolean
+                            organization:
+                              description: the registry organization
+                              type: string
+                            secret:
+                              description: the secret where credentials are stored
+                              type: string
+                          type: object
                       type: object
                     kaniko:
                       description: a KanikoTask, for Kaniko strategy
@@ -766,13 +852,13 @@ spec:
                 type: string
             type: object
           status:
-            description: BuildStatus defines the observed state of Build
+            description: BuildStatus defines the observed state of Build.
             properties:
               artifacts:
                 description: a list of artifacts contained in the build
                 items:
                   description: Artifact represents a materialized artifact (a jar
-                    dependency or in general a file used by the build)
+                    dependency or in general a file used by the build).
                   properties:
                     checksum:
                       description: a checksum (SHA1) of the content

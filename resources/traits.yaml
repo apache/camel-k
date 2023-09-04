@@ -232,6 +232,14 @@ traits:
     type: string
     description: When using `pod` strategy, the maximum amount of memory required
       by the pod builder.
+  - name: maven-profiles
+    type: '[]string'
+    description: 'A list of references pointing to configmaps/secrets that contains
+      a maven profile. The content of the maven profile is expected to be a text containing
+      a valid maven profile starting with `<profile>` and ending with `</profile>`
+      that will be integrated as an inline profile in the POM. Syntax: [configmap|secret]:name[/key],
+      where name represents the resource name, key optionally represents the resource
+      key to be filtered (default key value = profile.xml).'
   - name: tasks
     type: '[]string'
     description: A list of tasks to be executed (available only when using `pod` strategy)
@@ -326,10 +334,13 @@ traits:
     CronJob instead of a standard deployment, in order to save resources when the
     integration does not need to be executed. Integrations that start from the following
     components are evaluated by the cron trait: `timer`, `cron`, `quartz`. The rules
-    for using a Kubernetes CronJob are the following: - `timer`: when periods can
-    be written as cron expressions. E.g. `timer:tick?period=60000`. - `cron`, `quartz`:
-    when the cron expression does not contain seconds (or the "seconds" part is set
-    to 0). E.g. `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?` or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.'
+    for using a Kubernetes CronJob are the following: - `timer`: when period is set
+    in milliseconds with no remaining seconds, for example 120000. If there is any
+    second left as in 121000 (120s and 1s) or the presence of any of these parameters
+    (delay, repeatCount, time) then a CronJob  won''t be created, but a standard deployment.
+    - `cron`, `quartz`: when the cron expression does not contain seconds (or the
+    "seconds" part is set to 0). E.g. `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?`
+    or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.'
   properties:
   - name: enabled
     type: bool
@@ -1121,6 +1132,10 @@ traits:
   - name: volumes
     type: '[]string'
     description: 'A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]'
+  - name: hot-reload
+    type: bool
+    description: Enable "hot reload" when a secret/configmap mounted is edited (default
+      false)
 - name: openapi
   platform: true
   profiles:
@@ -1370,6 +1385,11 @@ traits:
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
+  - name: annotations
+    type: map[string]string
+    description: 'The annotations added to route. This can be used to set route specific
+      annotations For annotations options see https://docs.openshift.com/container-platform/3.11/architecture/networking/routes.html#route-specific-annotations
+      CLI usage example: -t "route.annotations.''haproxy.router.openshift.io/balance''=true"'
   - name: host
     type: string
     description: To configure the host exposed by the route.

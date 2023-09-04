@@ -55,6 +55,7 @@ runs:
       with:
         cluster-config-data: ${{ inputs.secretE2ECluster }}
         cluster-kube-config-data: ${{ inputs.secretE2EKube }}
+        smoke-test-only: true
     - name: Cache modules
       uses: actions/cache@v3
       with:

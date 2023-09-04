@@ -1,0 +1,149 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: Coverage report
+
+on:
+  pull_request_target:
+    paths:
+      - 'pkg/**'
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          check-latest: true
+
+      - name: Prepare repo configuration
+        shell: bash
+        env:
+          CI_USER: "github-actions[bot]"
+          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+        run: |
+          git clone ${{ github.event.pull_request.head.repo.clone_url }}
+          cd ${{ github.event.pull_request.head.repo.name }}
+          git checkout ${{ github.event.pull_request.head.ref }}
+
+          git config --local user.email "$CI_EMAIL"
+          git config --local user.name "$CI_USER"
+          git remote add upstream ${{ github.event.pull_request.base.repo.clone_url }}
+          git fetch upstream
+
+      - name: Rebase
+        shell: bash
+        working-directory: ./${{ github.event.pull_request.head.repo.name }}
+        env:
+          CI_USER: "github-actions[bot]"
+          CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+          CI_TOKEN: ${{ inputs.secretGithubToken }}
+        run: |
+          git pull --rebase upstream ${{ github.event.pull_request.base.ref }} && echo "rebaseAborted=0" >> $GITHUB_ENV || echo "rebaseAborted=1" >> $GITHUB_ENV
+
+      - name: Get New Coverage
+        shell: bash
+        working-directory: ./${{ github.event.pull_request.head.repo.name }}
+        if: env.rebaseAborted != 1
+        run: |
+          make build-resources
+          go test ./... -covermode=count -coverprofile=coverage.out
+          go tool cover -func=coverage.out -o=coverage.out
+
+          new_coverage="$(grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs)"
+          echo "NEW_COV=$new_coverage" >> $GITHUB_ENV
+
+      - name: Get Old Coverage
+        shell: bash
+        working-directory: ./${{ github.event.pull_request.head.repo.name }}
+        if: env.rebaseAborted != 1
+        run: |
+          git checkout upstream/${{ github.event.pull_request.base.ref }}
+          make build-resources
+          go test ./... -covermode=count -coverprofile=coverage_old.out
+          go tool cover -func=coverage_old.out -o=coverage_old.out
+
+          old_coverage="$(grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage_old.out | xargs)"
+          echo "OLD_COV=$old_coverage" >> $GITHUB_ENV
+
+      - name: Process results
+        shell: bash
+        working-directory: ./${{ github.event.pull_request.head.repo.name }}
+        if: env.rebaseAborted != 1
+        run: |
+          echo "OLD - $OLD_COV"
+          echo "NEW - $NEW_COV"
+          coverage_difference=$(bc <<< $NEW_COV-$OLD_COV)
+          if (( $(echo "$coverage_difference > 0" |bc -l) )); then
+            echo "POS_DIFF=POS" >> $GITHUB_ENV
+          elif (( $(echo "$coverage_difference < 0" |bc -l) )); then
+            echo "POS_DIFF=NEG" >> $GITHUB_ENV
+          else
+            echo "POS_DIFF=ZERO" >> $GITHUB_ENV
+          fi
+          echo "COV_DIFF=$coverage_difference" >> $GITHUB_ENV
+
+      - name: Comment Coverage
+        if: env.rebaseAborted != 1
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+
+            if(${{env.POS_DIFF  == 'POS'}}){
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: ':camel: **Thank you for contributing!**\n\nCode Coverage Report :heavy_check_mark: - Coverage changed: ${{env.OLD_COV}}% --> ${{env.NEW_COV}}% (Coverage difference: **+${{env.COV_DIFF}}%**)'
+              })
+            }else if(${{env.POS_DIFF == 'NEG'}}){
+              github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ':camel: **Thank you for contributing!**\n\nCode Coverage Report :warning: - Coverage changed: ${{env.OLD_COV}}% --> ${{env.NEW_COV}}% (Coverage difference: **${{env.COV_DIFF}}%**)'
+              })
+            }else{
+              github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ':camel: **Thank you for contributing!**\n\nCode Coverage Report :heavy_check_mark: - Coverage unchanged.'
+              })
+            }
+
+      - name: Comment Merge Conflicts
+        if: env.rebaseAborted == 1
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: ':camel: **Thank you for contributing!** :camel: \n\n  Unable to create **Coverage Report** :warning:. \n Merge conflicts found.'
+              })

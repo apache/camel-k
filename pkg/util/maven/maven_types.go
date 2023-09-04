@@ -37,11 +37,12 @@ type Build struct {
 }
 
 type Plugin struct {
-	GroupID      string       `xml:"groupId"`
-	ArtifactID   string       `xml:"artifactId"`
-	Version      string       `xml:"version,omitempty"`
-	Executions   []Execution  `xml:"executions>execution,omitempty"`
-	Dependencies []Dependency `xml:"dependencies>dependency,omitempty"`
+	GroupID       string                 `xml:"groupId"`
+	ArtifactID    string                 `xml:"artifactId"`
+	Version       string                 `xml:"version,omitempty"`
+	Executions    []Execution            `xml:"executions>execution,omitempty"`
+	Dependencies  []Dependency           `xml:"dependencies>dependency,omitempty"`
+	Configuration v1.PluginConfiguration `xml:"configuration,omitempty"`
 }
 
 type Execution struct {
@@ -66,7 +67,7 @@ type Settings struct {
 
 // Project models a Maven project.
 type Project struct {
-	XMLName              xml.Name
+	XMLName              xml.Name              `xml:"project"`
 	XMLNs                string                `xml:"xmlns,attr"`
 	XMLNsXsi             string                `xml:"xmlns:xsi,attr"`
 	XsiSchemaLocation    string                `xml:"xsi:schemaLocation,attr"`
@@ -80,6 +81,7 @@ type Project struct {
 	Repositories         []v1.Repository       `xml:"repositories>repository,omitempty"`
 	PluginRepositories   []v1.Repository       `xml:"pluginRepositories>pluginRepository,omitempty"`
 	Build                *Build                `xml:"build,omitempty"`
+	Profiles             ProfilesContent       `xml:"profiles,omitempty"`
 }
 
 // Exclusion models a dependency exclusion.
@@ -131,4 +133,8 @@ type Proxy struct {
 	Username      string `xml:"username,omitempty"`
 	Password      string `xml:"password,omitempty"`
 	NonProxyHosts string `xml:"nonProxyHosts,omitempty"`
+}
+
+type ProfilesContent struct {
+	InnerXML string `xml:",innerxml"`
 }

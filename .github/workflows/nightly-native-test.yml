@@ -27,14 +27,13 @@ on:
 
 jobs:
   native:
-    if: github.repository == 'apache/camel-k'
-    runs-on: macos-12
-
     strategy:
       fail-fast: false
       matrix:
-        ref-branch: [main, release-1.12.x]
+        ref-branch: [main, release-1.12.x, release-2.0.x]
 
+    if: github.repository == 'apache/camel-k'
+    runs-on: macos-12
     steps:
     - name: "Checkout code"
       uses: actions/checkout@v3

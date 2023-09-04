@@ -23,12 +23,15 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// MavenSpec --
+// MavenSpec --.
 type MavenSpec struct {
 	// The path of the local Maven repository.
 	LocalRepository string `json:"localRepository,omitempty"`
 	// The Maven properties.
 	Properties map[string]string `json:"properties,omitempty"`
+	// A reference to the ConfigMap or Secret key that contains
+	// the Maven profile.
+	Profiles []ValueSource `json:"profiles,omitempty"`
 	// A reference to the ConfigMap or Secret key that contains
 	// the Maven settings.
 	Settings ValueSource `json:"settings,omitempty"`
@@ -51,7 +54,7 @@ type MavenSpec struct {
 	CLIOptions []string `json:"cliOptions,omitempty"`
 }
 
-// Repository defines a Maven repository
+// Repository defines a Maven repository.
 type Repository struct {
 	// identifies the repository
 	ID string `xml:"id" json:"id"`
@@ -65,7 +68,7 @@ type Repository struct {
 	Releases RepositoryPolicy `xml:"releases,omitempty" json:"releases,omitempty"`
 }
 
-// RepositoryPolicy defines the policy associated to a Maven repository
+// RepositoryPolicy defines the policy associated to a Maven repository.
 type RepositoryPolicy struct {
 	// is the policy activated or not
 	Enabled bool `xml:"enabled" json:"enabled"`
@@ -78,7 +81,7 @@ type RepositoryPolicy struct {
 	ChecksumPolicy string `xml:"checksumPolicy,omitempty" json:"checksumPolicy,omitempty"`
 }
 
-// MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact
+// MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact.
 type MavenArtifact struct {
 	// Maven Group
 	GroupID string `json:"groupId" yaml:"groupId" xml:"groupId"`
@@ -103,3 +106,54 @@ type StringOrProperties struct {
 
 type Properties map[string]string
 type PluginProperties map[string]StringOrProperties
+
+type PluginConfiguration struct {
+	Container               Container        `xml:"container" json:"container"`
+	AllowInsecureRegistries string           `xml:"allowInsecureRegistries" json:"allowInsecureRegistries"`
+	ExtraDirectories        ExtraDirectories `xml:"extraDirectories" json:"extraDirectories"`
+	PluginExtensions        PluginExtensions `xml:"pluginExtensions" json:"pluginExtensions"`
+}
+
+type Container struct {
+	Entrypoint string `xml:"entrypoint" json:"entrypoint"`
+	Args       Args   `xml:"args" json:"args"`
+}
+
+type Args struct {
+	Arg string `xml:"arg" json:"arg"`
+}
+
+type ExtraDirectories struct {
+	Paths       []Path       `xml:"paths>path" json:"paths>path"`
+	Permissions []Permission `xml:"permissions>permission,omitempty" json:"permissions>permission,omitempty"`
+}
+
+type Path struct {
+	From     string   `xml:"from" json:"from"`
+	Into     string   `xml:"into" json:"into"`
+	Excludes []string `xml:"excludes>exclude,omitempty" json:"excludes>exclude,omitempty"`
+}
+
+type Permission struct {
+	File string `xml:"file" json:"file"`
+	Mode string `xml:"mode" json:"mode"`
+}
+
+type PluginExtensions struct {
+	PluginExtension PluginExtension `xml:"pluginExtension" json:"pluginExtension"`
+}
+
+type PluginExtension struct {
+	Implementation string                       `xml:"implementation" json:"implementation"`
+	Configuration  PluginExtensionConfiguration `xml:"configuration" json:"configuration"`
+}
+
+type PluginExtensionConfiguration struct {
+	Filters        []Filter `xml:"filters>Filter" json:"filters>Filter"`
+	Implementation string   `xml:"implementation,attr" json:"_implementation"`
+}
+
+type Filter struct {
+	Glob    string `xml:"glob" json:"glob"`
+	ToLayer string `xml:"toLayer,omitempty" json:"toLayer,omitempty"`
+}

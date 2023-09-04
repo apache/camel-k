@@ -49,15 +49,17 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     "promote my-it --to [namespace]",
+		Use:     "promote my-it [--to <namespace>] [-x <promoted-operator-id>]",
 		Short:   "Promote an Integration/Pipe from an environment to another",
 		Long:    "Promote an Integration/Pipe from an environment to another, for example from a Development environment to a Production environment",
 		PreRunE: decode(&options),
 		RunE:    options.run,
 	}
 
-	cmd.Flags().String("to", "", "The namespace where to promote the Integration")
+	cmd.Flags().String("to", "", "The namespace where to promote the Integration/Pipe")
+	cmd.Flags().StringP("to-operator", "x", "", "The operator id which will reconcile the promoted Integration/Pipe")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
+	cmd.Flags().BoolP("image", "i", false, "Output the container image only")
 
 	return &cmd, &options
 }
@@ -65,15 +67,20 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 type promoteCmdOptions struct {
 	*RootCmdOptions
 	To           string `mapstructure:"to" yaml:",omitempty"`
+	ToOperator   string `mapstructure:"to-operator" yaml:",omitempty"`
 	OutputFormat string `mapstructure:"output" yaml:",omitempty"`
+	Image        bool   `mapstructure:"image" yaml:",omitempty"`
 }
 
 func (o *promoteCmdOptions) validate(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return errors.New("promote expects an Integration/Pipe name argument")
+		return errors.New("promote requires an Integration/Pipe name argument")
 	}
 	if o.To == "" {
-		return errors.New("promote expects a destination namespace as --to argument")
+		return errors.New("promote requires a destination namespace as --to argument")
+	}
+	if o.To == o.Namespace {
+		return errors.New("source and destination namespaces must be different in order to avoid promoted Integration/Pipe clashes with the source Integration/Pipe")
 	}
 	return nil
 }
@@ -88,19 +95,23 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not retrieve cluster client: %w", err)
 	}
-	opSource, err := operatorInfo(o.Context, c, o.Namespace)
-	if err != nil {
-		return fmt.Errorf("could not retrieve info for Camel K operator source: %w", err)
-	}
-	opDest, err := operatorInfo(o.Context, c, o.To)
-	if err != nil {
-		return fmt.Errorf("could not retrieve info for Camel K operator destination: %w", err)
+	if !o.isDryRun() {
+		// Skip these checks if in dry mode
+		opSource, err := operatorInfo(o.Context, c, o.Namespace)
+		if err != nil {
+			return fmt.Errorf("could not retrieve info for Camel K operator source: %w", err)
+		}
+		opDest, err := operatorInfo(o.Context, c, o.To)
+		if err != nil {
+			return fmt.Errorf("could not retrieve info for Camel K operator destination: %w", err)
+		}
+
+		err = checkOpsCompatibility(cmd, opSource, opDest)
+		if err != nil {
+			return fmt.Errorf("could not verify operators compatibility: %w", err)
+		}
 	}
 
-	err = checkOpsCompatibility(cmd, opSource, opDest)
-	if err != nil {
-		return fmt.Errorf("could not verify operators compatibility: %w", err)
-	}
 	promotePipe := false
 	var sourceIntegration *v1.Integration
 	// We first look if a Pipe with the name exists
@@ -118,40 +129,50 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning {
 		return fmt.Errorf("could not promote an Integration in %s status", sourceIntegration.Status.Phase)
 	}
-	err = o.validateDestResources(c, sourceIntegration)
-	if err != nil {
-		return fmt.Errorf("could not validate destination resources: %w", err)
+
+	// Image only mode
+	if o.Image {
+		showImageOnly(cmd, sourceIntegration)
+		return nil
+	}
+
+	if !o.isDryRun() {
+		// Skip these checks if in dry mode
+		err = o.validateDestResources(c, sourceIntegration)
+		if err != nil {
+			return fmt.Errorf("could not validate destination resources: %w", err)
+		}
 	}
 
 	// Pipe promotion
 	if promotePipe {
 		destPipe := o.editPipe(sourcePipe, sourceIntegration)
+		if o.OutputFormat != "" {
+			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
+		}
 		// Ensure the destination namespace has access to the source namespace images
 		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destPipe.Namespace)
 		if err != nil {
 			return err
 		}
 		replaced, err := o.replaceResource(destPipe)
-		if o.OutputFormat != "" {
-			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
-		}
 		if !replaced {
-			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
+			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Pipe "`+name+`" created`)
 		} else {
-			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" updated`)
+			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Pipe "`+name+`" updated`)
 		}
 		return err
 	}
 
 	// Plain Integration promotion
 	destIntegration := o.editIntegration(sourceIntegration)
+	if o.OutputFormat != "" {
+		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
+	}
 	// Ensure the destination namespace has access to the source namespace images
 	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
 	if err != nil {
 		return err
-	}
-	if o.OutputFormat != "" {
-		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat, c.GetScheme())
 	}
 	replaced, err := o.replaceResource(destIntegration)
 	if !replaced {
@@ -441,7 +462,7 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	dst := v1.NewIntegration(o.To, it.Name)
 	contImage := it.Status.Image
 	dst.Spec = *it.Spec.DeepCopy()
-	dst.Annotations = cloneAnnotations(it.Annotations)
+	dst.Annotations = cloneAnnotations(it.Annotations, o.ToOperator)
 	dst.Labels = cloneLabels(it.Labels)
 	if dst.Spec.Traits.Container == nil {
 		dst.Spec.Traits.Container = &traitv1.ContainerTrait{}
@@ -450,13 +471,22 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 	return &dst
 }
 
-// Return all annotations but the ones specific to source (ie, the operator).
-func cloneAnnotations(ann map[string]string) map[string]string {
+// Return all annotations overriding the operator Id if provided.
+func cloneAnnotations(ann map[string]string, operatorID string) map[string]string {
+	operatorIDAnnotationSet := false
 	newMap := make(map[string]string)
 	for k, v := range ann {
-		if k != v1.OperatorIDAnnotation {
+		if k == v1.OperatorIDAnnotation {
+			if operatorID != "" {
+				newMap[v1.OperatorIDAnnotation] = operatorID
+				operatorIDAnnotationSet = true
+			}
+		} else {
 			newMap[k] = v
 		}
+	}
+	if !operatorIDAnnotationSet && operatorID != "" {
+		newMap[v1.OperatorIDAnnotation] = operatorID
 	}
 	return newMap
 }
@@ -473,7 +503,7 @@ func cloneLabels(lbs map[string]string) map[string]string {
 func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration) *v1.Pipe {
 	dst := v1.NewPipe(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
-	dst.Annotations = cloneAnnotations(kb.Annotations)
+	dst.Annotations = cloneAnnotations(kb.Annotations, o.ToOperator)
 	dst.Labels = cloneLabels(kb.Labels)
 	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {
@@ -503,11 +533,13 @@ func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) 
 	return kubernetes.ReplaceResource(o.Context, o._client, res)
 }
 
-//
+func (o *promoteCmdOptions) isDryRun() bool {
+	return o.OutputFormat != "" || o.Image
+}
+
 // RoleBinding is required to allow access to images in one namespace
 // by another namespace. Without this on rbac-enabled clusters, the
 // image cannot be pulled.
-//
 func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS string, destNS string) error {
 	rb := &rbacv1.RoleBinding{
 		TypeMeta: metav1.TypeMeta{
@@ -534,4 +566,8 @@ func addSystemPullerRoleBinding(ctx context.Context, c client.Client, sourceNS s
 	err := applier.Apply(ctx, rb)
 
 	return err
+}
+
+func showImageOnly(cmd *cobra.Command, integration *v1.Integration) {
+	fmt.Fprintln(cmd.OutOrStdout(), integration.Status.Image)
 }

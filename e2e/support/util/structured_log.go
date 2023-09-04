@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -21,39 +18,21 @@ limitations under the License.
 package util
 
 import (
-	"math"
-	"strconv"
 	"time"
 
 	"go.uber.org/zap/zapcore"
 )
 
-type Time struct {
-	time.Time
-}
-
-func (t *Time) UnmarshalJSON(s []byte) (err error) {
-	f, err := strconv.ParseFloat(string(s), 10)
-	if err != nil {
-		return err
-	}
-	ns := (f - math.Floor(f)) * 1000000000
-	*t = Time{
-		time.Unix(int64(f), int64(ns)),
-	}
-	return nil
-}
-
 type LogEntry struct {
 	// Zap
 	Level      zapcore.Level `json:"level,omitempty"`
-	Timestamp  Time          `json:"ts,omitempty"`
+	Timestamp  time.Time     `json:"ts,omitempty"`
 	LoggerName string        `json:"logger,omitempty"`
 	Message    string        `json:"msg,omitempty"`
 	// Controller runtime
 	RequestNamespace string `json:"request-namespace,omitempty"`
 	RequestName      string `json:"request-name,omitempty"`
-	ApiVersion       string `json:"api-version,omitempty"`
+	APIVersion       string `json:"api-version,omitempty"`
 	Kind             string `json:"kind,omitempty"`
 	// Camel K
 	Namespace string `json:"ns,omitempty"`

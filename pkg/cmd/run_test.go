@@ -34,6 +34,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/utils/pointer"
 )
 
@@ -813,5 +814,15 @@ func TestRunOutput(t *testing.T) {
 	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
 	assert.Nil(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
+}
 
+func TestRunOutputWithoutKubernetesCluster(t *testing.T) {
+	tmpFile, err := os.CreateTemp("", "camel-k-kubeconfig-*")
+	require.NoError(t, err)
+
+	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
+	runCmdOptions._client = nil // remove the default fake client which can bypass this test
+	runCmdOptions.KubeConfig = tmpFile.Name()
+	_, err = test.ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)
+	require.NoError(t, err)
 }

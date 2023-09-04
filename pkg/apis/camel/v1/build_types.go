@@ -25,7 +25,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropiate
+// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropriate
 // to think it as pipeline.
 type BuildSpec struct {
 	// The sequence of tasks (pipeline) to be performed.
@@ -67,19 +67,21 @@ type Task struct {
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
 	// a S2iTask, for S2I strategy
 	S2i *S2iTask `json:"s2i,omitempty"`
+	// a JibTask, for Jib strategy
+	Jib *JibTask `json:"jib,omitempty"`
 
 	// User customizable task execution
 
 	Custom *UserTask `json:"custom,omitempty"`
 }
 
-// BaseTask is a base for the struct hierarchy
+// BaseTask is a base for the struct hierarchy.
 type BaseTask struct {
 	// name of the task
 	Name string `json:"name,omitempty"`
 }
 
-// BuilderTask is the generic task in charge of building the application image
+// BuilderTask is the generic task in charge of building the application image.
 type BuilderTask struct {
 	BaseTask `json:",inline"`
 	// The configuration that should be used to perform the Build.
@@ -100,7 +102,7 @@ type BuilderTask struct {
 	Sources []SourceSpec `json:"sources,omitempty"`
 }
 
-// MavenBuildSpec defines the Maven configuration plus additional repositories to use
+// MavenBuildSpec defines the Maven configuration plus additional repositories to use.
 type MavenBuildSpec struct {
 	// base Maven specification
 	MavenSpec `json:",inline"`
@@ -110,7 +112,7 @@ type MavenBuildSpec struct {
 	Servers []Server `json:"servers,omitempty"`
 }
 
-// PublishTask image publish configuration
+// PublishTask image publish configuration.
 type PublishTask struct {
 	// can be useful to share info with other tasks
 	ContextDir string `json:"contextDir,omitempty"`
@@ -122,7 +124,7 @@ type PublishTask struct {
 	Registry RegistrySpec `json:"registry,omitempty"`
 }
 
-// BuildahTask is used to configure Buildah
+// BuildahTask is used to configure Buildah.
 type BuildahTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
@@ -134,7 +136,7 @@ type BuildahTask struct {
 	ExecutorImage string `json:"executorImage,omitempty"`
 }
 
-// KanikoTask is used to configure Kaniko
+// KanikoTask is used to configure Kaniko.
 type KanikoTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
@@ -146,7 +148,7 @@ type KanikoTask struct {
 	ExecutorImage string `json:"executorImage,omitempty"`
 }
 
-// KanikoTaskCache is used to configure Kaniko cache
+// KanikoTaskCache is used to configure Kaniko cache.
 type KanikoTaskCache struct {
 	// true if a cache is enabled
 	Enabled *bool `json:"enabled,omitempty"`
@@ -154,13 +156,19 @@ type KanikoTaskCache struct {
 	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
 }
 
-// SpectrumTask is used to configure Spectrum
+// JibTask is used to configure Jib.
+type JibTask struct {
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
+}
+
+// SpectrumTask is used to configure Spectrum.
 type SpectrumTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
 }
 
-// S2iTask is used to configure S2I
+// S2iTask is used to configure S2I.
 type S2iTask struct {
 	BaseTask `json:",inline"`
 	// can be useful to share info with other tasks
@@ -169,7 +177,7 @@ type S2iTask struct {
 	Tag string `json:"tag,omitempty"`
 }
 
-// UserTask is used to execute any generic custom operation
+// UserTask is used to execute any generic custom operation.
 type UserTask struct {
 	BaseTask `json:",inline"`
 	// the container image to use
@@ -178,7 +186,7 @@ type UserTask struct {
 	ContainerCommand string `json:"command,omitempty"`
 }
 
-// BuildStatus defines the observed state of Build
+// BuildStatus defines the observed state of Build.
 type BuildStatus struct {
 	// ObservedGeneration is the most recent generation observed for this Build.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
@@ -206,33 +214,33 @@ type BuildStatus struct {
 	Duration string `json:"duration,omitempty"`
 }
 
-// BuildPhase --
+// BuildPhase -- .
 type BuildPhase string
 
-// BuildConditionType --
+// BuildConditionType -- .
 type BuildConditionType string
 
 const (
-	// BuildKind --
+	// BuildKind -- .
 	BuildKind string = "Build"
 
-	// BuildPhaseNone --
+	// BuildPhaseNone -- .
 	BuildPhaseNone BuildPhase = ""
-	// BuildPhaseInitialization --
+	// BuildPhaseInitialization -- .
 	BuildPhaseInitialization BuildPhase = "Initialization"
-	// BuildPhaseScheduling --
+	// BuildPhaseScheduling -- .
 	BuildPhaseScheduling BuildPhase = "Scheduling"
-	// BuildPhasePending --
+	// BuildPhasePending -- .
 	BuildPhasePending BuildPhase = "Pending"
-	// BuildPhaseRunning --
+	// BuildPhaseRunning -- .
 	BuildPhaseRunning BuildPhase = "Running"
-	// BuildPhaseSucceeded --
+	// BuildPhaseSucceeded -- .
 	BuildPhaseSucceeded BuildPhase = "Succeeded"
-	// BuildPhaseFailed --
+	// BuildPhaseFailed -- .
 	BuildPhaseFailed BuildPhase = "Failed"
-	// BuildPhaseInterrupted --
+	// BuildPhaseInterrupted -- .
 	BuildPhaseInterrupted = "Interrupted"
-	// BuildPhaseError --
+	// BuildPhaseError -- .
 	BuildPhaseError BuildPhase = "Error"
 )
 
@@ -248,7 +256,7 @@ const (
 // +kubebuilder:printcolumn:name="Duration",type=string,JSONPath=`.status.duration`,description="The build last execution duration"
 // +kubebuilder:printcolumn:name="Attempts",type=integer,JSONPath=`.status.failure.recovery.attempt`,description="The number of execution attempts"
 
-// Build is the Schema for the builds API
+// Build is the Schema for the builds API.
 type Build struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -259,7 +267,7 @@ type Build struct {
 
 // +kubebuilder:object:root=true
 
-// BuildList contains a list of Build
+// BuildList contains a list of Build.
 type BuildList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

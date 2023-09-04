@@ -1,30 +1,36 @@
-[[configuring-registry]]
 = Configuring Registry
 
-Every Camel K installation needs a container registry that will be used to host integration container images.
+Every Camel K installation needs a container registry that will be used to host integration container images. This is required to host the images that will be used by Kubernetes to execute the Camel application you've built.
 
-A **default registry** is present in all the following supported installations:
+image::architecture/camel-k-registry.svg[Container registry in action, width=800]
 
-* **OpenShift**: all OpenShift installations (including CRC and real clusters) provide an internal container registry that is used for the S2I (source to image)
-  feature. Camel K is able to leverage that registry.
-* **Minikube**: Minikube comes with a "registry addon" that can be enabled upon installation (see xref:installation/platform/minikube.adoc[install guide for Minikube]). Camel K automatically detects the address of the registry and configures
-  it on the `IntegrationPlatform` when using the CLI (on `kamel install`).
-* **Docker Desktop**: Docker provides an https://github.com/distribution/distribution[open source Docker Registry] that can be started upon installation (see xref:installation/platform/docker-desktop.adoc[install guide for Docker Desktop]).
+The Camel K operator is in charge to build a Camel application and to "containerize" it, storing the result into a container registry. The same registry is used by the cluster to run the Camel application. Basically the operator push the image and the cluster pull it from the same source.
 
-Other platforms do not provide a default container registry and need to be configured accordingly.
+For the reason above it's important that you provide a container registry which is accessible from both the operator Pod and the cluster internal mechanisms. However, a **default registry** is present in certain platforms such as _Minikube_, _Openshift_ or _Docker Desktop_.
+
+For any other platform that do not provide a default container registry, then, a registry must be provided accordingly.
+
+[[configuring-registry-install-time]]
+== Configure the registry at installation time
 
 Registry configuration can be set upon installation using command:
 
 [source,bash]
 ----
-$ kamel install --registry registry-host.io --organization your-user-id-or-org --registry-secret the-push-kubernetes-secret-name
+$ kamel install --registry registry-host.io [--organization your-user-id-or-org] [--registry-secret my-secret-registry-conf]
 ----
 
-Alternatively, the same settings can be set in the `.spec.pipeline.registry` section of the `IntegrationPlatform` resource.
+Although optionals, the `organization` and `registry-secret` parameters are strongly suggested in order to secure the pull/push operations on a registry that is private, although accessible through the Internet. The secret is something that will https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret[included at deployment time] as `imagePullSecret` configuration.
+
+As each registry may have a slightly different way of securing the access you can use the guidelines provided in xref:installation/registry/dockerhub.adoc[Docker Hub] registry configuration and adjust accordingly.
+
+[[configuring-registry-after-install]]
+== Configure the registry after installation
+The settings you've provided in the chapter above are applied to the `IntegrationPlatform` custom resource. In particular you can find them in the `.spec.pipeline.registry`.
 
 [source,yaml]
 ----
-apiVersion: camel.apache.org/v1alpha1
+apiVersion: camel.apache.org/v1
 kind: IntegrationPlatform
 metadata:
   labels:
@@ -35,9 +41,22 @@ spec:
     registry:
       address: registry-host.io
       organization: your-user-id-or-org
-      secret: the-push-kubernetes-secret-name
+      secret: my-secret-registry-conf
 ----
 
-Additional information on setting up registries can be found in the registry specific sub-section.
+You can therefore update the values in the `IntegrationPlatform` in order to perform any change to the registry configuration after the Camel K operator is installed. The changes will be immediately reconciled and ready to use.
 
-NOTE: if your repository is not listed in any sub-section, you can try setting it up using the xref:installation/registry/dockerhub.adoc[instructions for Docker Hub].
+[[configuring-registry-list]]
+== Special container registry requirements
+Each platform may have its default registry of choice. And each container registry may have a slight different configuration. We have some hints that can help you configuring on the most common platforms:
+
+- xref:installation/registry/digitalocean.adoc[DigitalOcean]
+- xref:installation/registry/dockerhub.adoc[Docker Hub]
+- xref:installation/registry/github.adoc[Github Packages]
+- xref:installation/registry/gcr.adoc[Gcr.io]
+- xref:installation/registry/icr.adoc[IBM Container Registry]
+- xref:installation/registry/k3s.adoc[K3s]
+
+[[configuring-registry-run-it-yours]]
+== Run your own container registry
+You can also xref:installation/registry/own.adoc[run your own registry], but this option is recommended only for advanced use cases as it may requires certain changes in the cluster configuration, so, make sure to understand how each change may affect your cluster. As you've seen in the diagram above, the cluster has to be aware of the presence of the registry in order to pull the images pushed by the operator.

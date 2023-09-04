@@ -170,6 +170,8 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build
 			addBuildTaskToPod(ctx, client, build, task.S2i.Name, pod)
 		case task.Spectrum != nil:
 			addBuildTaskToPod(ctx, client, build, task.Spectrum.Name, pod)
+		case task.Jib != nil:
+			addBuildTaskToPod(ctx, client, build, task.Jib.Name, pod)
 		case task.Custom != nil:
 			addCustomTaskToPod(build, task.Custom, pod)
 		}

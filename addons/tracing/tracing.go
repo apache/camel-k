@@ -27,7 +27,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
-//
 // WARNING: The Tracing trait has been **deprecated** in favor of the xref:traits:telemetry.adoc[Telemetry] trait.
 //
 // The Tracing trait can be used to automatically publish tracing information to an OpenTracing compatible collector.

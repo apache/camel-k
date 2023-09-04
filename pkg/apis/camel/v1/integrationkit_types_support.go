@@ -24,6 +24,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const IntegrationKitLabel = "camel.apache.org/integrationkit"
+
 func NewIntegrationKit(namespace string, name string) *IntegrationKit {
 	return &IntegrationKit{
 		TypeMeta: metav1.TypeMeta{
@@ -54,7 +56,7 @@ func (in *IntegrationKitSpec) Configurations() []ConfigurationSpec {
 	return in.Configuration
 }
 
-// SetOperatorID sets the given operator id as an annotation
+// SetOperatorID sets the given operator id as an annotation.
 func (in *IntegrationKit) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }

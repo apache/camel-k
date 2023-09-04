@@ -23,7 +23,7 @@ package defaults
 
 const (
 	// Version --
-	Version = "2.0.0-SNAPSHOT"
+	Version = "2.1.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
 	DefaultRuntimeVersion = "2.16.0"
@@ -35,7 +35,7 @@ const (
 	KanikoVersion = "1.9.1"
 
 	// baseImage --
-	baseImage = "eclipse-temurin:11"
+	baseImage = "eclipse-temurin:17"
 
 	// LocalRepository --
 	LocalRepository = "/etc/maven/m2"

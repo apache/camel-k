@@ -35,6 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/rest"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -153,9 +154,13 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 			return err
 		}
 
+		httpCli, err := rest.HTTPClientFor(t.c.GetConfig())
+		if err != nil {
+			return err
+		}
 		restClient, err := apiutil.RESTClientForGVK(
 			schema.GroupVersionKind{Group: "build.openshift.io", Version: "v1"}, false,
-			t.c.GetConfig(), serializer.NewCodecFactory(t.c.GetScheme()))
+			t.c.GetConfig(), serializer.NewCodecFactory(t.c.GetScheme()), httpCli)
 		if err != nil {
 			return err
 		}

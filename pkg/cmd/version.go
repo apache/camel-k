@@ -19,6 +19,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -153,7 +154,12 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 		return nil, err
 	}
 	if catalog == nil {
-		return nil, fmt.Errorf("CamelCatalog can't be found in %s namespace", platform.Namespace)
+		msg := fmt.Sprintf("CamelCatalog version: %s", platform.Status.Build.RuntimeVersion)
+		if platform.Status.Build.RuntimeProvider != "" {
+			msg += fmt.Sprintf(", provider: %s", platform.Status.Build.RuntimeProvider)
+		}
+		msg += fmt.Sprintf(" can't be found in %s namespace", platform.Namespace)
+		return nil, errors.New(msg)
 	}
 
 	infos["Camel Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"]

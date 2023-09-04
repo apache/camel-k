@@ -51,6 +51,8 @@ func (action *initializeAction) CanHandle(integration *v1.Integration) bool {
 
 // Handle handles the integrations.
 func (action *initializeAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
+	action.L.Info("Initializing Integration")
+
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse,

@@ -44,7 +44,7 @@ func TestPodTrait(t *testing.T) {
 		{
 			name:         "pod trait with env vars and volume mounts",
 			templateName: "files/template.yaml",
-			// nolint: thelper
+			//nolint: thelper
 			assertions: func(t *testing.T, ns string, name string) {
 				// check that integrations is working and reading data created by sidecar container
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
@@ -60,7 +60,7 @@ func TestPodTrait(t *testing.T) {
 		{
 			name:         "pod trait with supplemental groups",
 			templateName: "files/template-with-supplemental-groups.yaml",
-			// nolint: thelper
+			//nolint: thelper
 			assertions: func(t *testing.T, ns string, name string) {
 				Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
 					if pod.Spec.SecurityContext == nil {

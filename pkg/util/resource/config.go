@@ -18,18 +18,9 @@ limitations under the License.
 package resource
 
 import (
-	"context"
-	"crypto/sha1" // nolint: gosec
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // Config represents a config option.
@@ -182,48 +173,4 @@ func parse(item string, contentType ContentType) (*Config, error) {
 	}
 
 	return newConfig(cot, contentType, value), nil
-}
-
-// ConvertFileToConfigmap convert a local file resource type in a configmap type
-// taking care to create the Configmap on the cluster. The method will change the value of config parameter
-// to reflect the conversion applied transparently.
-func ConvertFileToConfigmap(ctx context.Context, c client.Client, config *Config, namespace string, integrationName string,
-	content string, rawContent []byte) (*corev1.ConfigMap, error) {
-	filename := filepath.Base(config.Name())
-	if config.DestinationPath() == "" {
-		config.resourceKey = filename
-		// As we are changing the resource to a configmap type
-		// we must declare the destination path
-		if config.ContentType() == ContentTypeData {
-			config.destinationPath = camel.ResourcesDefaultMountPath + "/" + filename
-		} else {
-			config.destinationPath = camel.ConfigResourcesMountPath + "/" + filename
-		}
-	} else {
-		config.resourceKey = filepath.Base(config.DestinationPath())
-	}
-	genCmName := fmt.Sprintf("cm-%s", hashFrom([]byte(filename), []byte(integrationName), []byte(content), rawContent))
-	cm := kubernetes.NewConfigMap(namespace, genCmName, filename, config.Key(), content, rawContent)
-	err := c.Create(ctx, cm)
-	if err != nil {
-		if k8serrors.IsAlreadyExists(err) {
-			// We'll reuse it, as is
-		} else {
-			return cm, err
-		}
-	}
-	config.storageType = StorageTypeConfigmap
-	config.resourceName = cm.Name
-
-	return cm, nil
-}
-
-func hashFrom(contents ...[]byte) string {
-	// SHA1 because we need to limit the length to less than 64 chars
-	hash := sha1.New() // nolint: gosec
-	for _, c := range contents {
-		hash.Write(c)
-	}
-
-	return fmt.Sprintf("%x", hash.Sum(nil))
 }

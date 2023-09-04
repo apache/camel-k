@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NewIntegrationPlatformList --
+// NewIntegrationPlatformList --.
 func NewIntegrationPlatformList() IntegrationPlatformList {
 	return IntegrationPlatformList{
 		TypeMeta: metav1.TypeMeta{
@@ -34,7 +34,7 @@ func NewIntegrationPlatformList() IntegrationPlatformList {
 	}
 }
 
-// NewIntegrationPlatform --
+// NewIntegrationPlatform --.
 func NewIntegrationPlatform(namespace string, name string) IntegrationPlatform {
 	return IntegrationPlatform{
 		TypeMeta: metav1.TypeMeta{
@@ -48,7 +48,7 @@ func NewIntegrationPlatform(namespace string, name string) IntegrationPlatform {
 	}
 }
 
-// Configurations --
+// Configurations --.
 func (in *IntegrationPlatformSpec) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}
@@ -57,12 +57,12 @@ func (in *IntegrationPlatformSpec) Configurations() []ConfigurationSpec {
 	return in.Configuration
 }
 
-// SetOperatorID sets the given operator id as an annotation
+// SetOperatorID sets the given operator id as an annotation.
 func (in *IntegrationPlatform) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
 
-// Configurations --
+// Configurations --.
 func (in *IntegrationPlatform) Configurations() []ConfigurationSpec {
 	if in == nil {
 		return []ConfigurationSpec{}
@@ -75,7 +75,7 @@ func (in *IntegrationPlatform) Configurations() []ConfigurationSpec {
 	return in.Spec.Configuration
 }
 
-// AddConfiguration --
+// AddConfiguration --.
 func (in *IntegrationPlatform) AddConfiguration(confType string, confValue string) {
 	in.Spec.Configuration = append(in.Spec.Configuration, ConfigurationSpec{
 		Type:  confType,
@@ -83,7 +83,7 @@ func (in *IntegrationPlatform) AddConfiguration(confType string, confValue strin
 	})
 }
 
-// GetActualValue can be used to extract information the platform spec or its derived config in the status
+// GetActualValue can be used to extract information the platform spec or its derived config in the status.
 func (in *IntegrationPlatform) GetActualValue(extractor func(spec IntegrationPlatformSpec) string) string {
 	res := extractor(in.Status.IntegrationPlatformSpec)
 	if res == "" {
@@ -173,9 +173,9 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 	in.Conditions = newConditions
 }
 
-// IsOptionEnabled tells if provided option key is present in PublishStrategyOptions and enabled
+// IsOptionEnabled tells if provided option key is present in PublishStrategyOptions and enabled.
 func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
-	//Key defined in builder/kaniko.go
+	// Key defined in builder/kaniko.go
 	if enabled, ok := b.PublishStrategyOptions[option]; ok {
 		res, err := strconv.ParseBool(enabled)
 		if err != nil {
@@ -186,7 +186,7 @@ func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
 	return false
 }
 
-// AddOption add a publish strategy option
+// AddOption add a publish strategy option.
 func (b *IntegrationPlatformBuildSpec) AddOption(option string, value string) {
 	options := b.PublishStrategyOptions
 	if options == nil {
@@ -196,7 +196,7 @@ func (b *IntegrationPlatformBuildSpec) AddOption(option string, value string) {
 	options[option] = value
 }
 
-// GetTimeout returns the specified duration or a default one
+// GetTimeout returns the specified duration or a default one.
 func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	if b.Timeout == nil {
 		return metav1.Duration{}
@@ -204,7 +204,7 @@ func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	return *b.Timeout
 }
 
-// GetBuildCatalogToolTimeout returns the specified duration or a default one
+// GetBuildCatalogToolTimeout returns the specified duration or a default one.
 func (b IntegrationPlatformBuildSpec) GetBuildCatalogToolTimeout() metav1.Duration {
 	if b.BuildCatalogToolTimeout == nil {
 		return metav1.Duration{}
@@ -214,7 +214,7 @@ func (b IntegrationPlatformBuildSpec) GetBuildCatalogToolTimeout() metav1.Durati
 
 var _ ResourceCondition = IntegrationPlatformCondition{}
 
-// GetConditions --
+// GetConditions --.
 func (in *IntegrationPlatformStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
@@ -223,32 +223,32 @@ func (in *IntegrationPlatformStatus) GetConditions() []ResourceCondition {
 	return res
 }
 
-// GetType --
+// GetType --.
 func (c IntegrationPlatformCondition) GetType() string {
 	return string(c.Type)
 }
 
-// GetStatus --
+// GetStatus --.
 func (c IntegrationPlatformCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-// GetLastUpdateTime --
+// GetLastUpdateTime --.
 func (c IntegrationPlatformCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-// GetLastTransitionTime --
+// GetLastTransitionTime --.
 func (c IntegrationPlatformCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-// GetReason --
+// GetReason --.
 func (c IntegrationPlatformCondition) GetReason() string {
 	return c.Reason
 }
 
-// GetMessage --
+// GetMessage --.
 func (c IntegrationPlatformCondition) GetMessage() string {
 	return c.Message
 }

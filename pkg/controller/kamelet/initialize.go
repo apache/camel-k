@@ -42,5 +42,7 @@ func (action *initializeAction) CanHandle(kamelet *v1.Kamelet) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kamelet *v1.Kamelet) (*v1.Kamelet, error) {
+	action.L.Info("Initializing Kamelet")
+
 	return kameletutils.Initialize(kamelet)
 }

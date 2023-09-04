@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "Question via Camel K Zulip Chat"
+    url: https://camel.zulipchat.com/login/
+    about: "Please ask and answer questions here for faster response. If you don't have an account, sign up at https://camel.zulipchat.com/register/"
+  - name: "Question via Mailing List"
+    url: https://camel.apache.org/community/mailing-list/
+    about: "Please subscribe to the mailing list of your choice."

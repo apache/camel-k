@@ -65,9 +65,8 @@ func TestIntegrationNotCompatible(t *testing.T) {
 	srcCatalog := createTestCamelCatalog(srcPlatform)
 	dstCatalog := createTestCamelCatalog(dstPlatform)
 
-	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
-	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
-	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
+	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-n", "default")
 	assert.NotNil(t, err)
 	assert.Equal(t,
 		fmt.Sprintf("could not verify operators compatibility: source (%s) and destination (0.0.1) Camel K operator versions are not compatible", defaults.Version),
@@ -137,7 +136,6 @@ metadata:
   creationTimestamp: null
   name: my-kb-test
   namespace: prod-namespace
-  resourceVersion: "1"
 spec:
   integration:
     traits:
@@ -238,7 +236,6 @@ metadata:
     my-label: my-value
   name: my-kb-test
   namespace: prod-namespace
-  resourceVersion: "1"
 spec:
   integration:
     traits:
@@ -246,6 +243,101 @@ spec:
         image: my-special-image
   sink: {}
   source: {}
+status: {}
+`, output)
+}
+
+func TestItImageOnly(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultIntegration := nominalIntegration("my-it-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-i", "-n", "default")
+	assert.Nil(t, err)
+	assert.Equal(t, "my-special-image\n", output)
+}
+
+func TestPipeImageOnly(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultKB := nominalPipe("my-kb-test")
+	defaultIntegration := nominalIntegration("my-kb-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-i", "-n", "default")
+	assert.Nil(t, err)
+	assert.Equal(t, "my-special-image\n", output)
+}
+
+func TestIntegrationToOperatorId(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultIntegration := nominalIntegration("my-it-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	// Verify default (missing) operator Id
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
+	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: my-prod-operator
+  creationTimestamp: null
+  name: my-it-test
+  namespace: prod
+spec:
+  traits:
+    container:
+      image: my-special-image
+status: {}
+`, output)
+	// Verify also when the operator Id is set in the integration
+	defaultIntegration.Annotations = map[string]string{
+		"camel.apache.org/operator.id": "camel-k",
+	}
+	promoteCmdOptions, promoteCmd, _ = initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
+	output, err = test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "-x", "my-prod-operator", "-o", "yaml", "--to", "prod")
+	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: my-prod-operator
+  creationTimestamp: null
+  name: my-it-test
+  namespace: prod
+spec:
+  traits:
+    container:
+      image: my-special-image
 status: {}
 `, output)
 }

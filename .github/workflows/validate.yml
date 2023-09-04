@@ -22,10 +22,14 @@ on:
     branches:
       - main
       - "release-*"
+    paths:
+      - 'pkg/**'
   push:
     branches:
       - main
       - "release-*"
+    paths:
+      - 'pkg/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -40,11 +44,11 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.18.x
+          go-version: 1.20.x
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         env:
           GOGC: 20
         with:
-          version: v1.47.3
+          version: v1.53.3
           args: --verbose --deadline 15m --config .golangci.yml

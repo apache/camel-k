@@ -20,12 +20,10 @@ package builder
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"os"
 	"os/signal"
 	"runtime"
 	"syscall"
-	"time"
 
 	"k8s.io/apimachinery/pkg/types"
 
@@ -57,7 +55,6 @@ func Run(namespace string, buildName string, taskName string) {
 		o.Development = false
 	}))
 
-	rand.Seed(time.Now().UTC().UnixNano())
 	printVersion()
 
 	c, err := client.NewClient(false)

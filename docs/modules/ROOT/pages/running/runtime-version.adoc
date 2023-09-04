@@ -1,0 +1,21 @@
+= Choose the runtime version
+
+Starting from Camel K version 2 you will be able to use any Camel K Runtime version available which version is above 1.17. In order to use the feature you need to use the xref:traits:camel.adoc[Camel trait].
+
+The `runtime-version` property is quite straightforward to use:
+
+```
+kamel run my-route.yaml -t camel.runtime-version=1.17.0
+```
+
+Having the ability to choose the runtime, gives you the ability to specify which Camel version you want to run. Each Camel K Runtime is bound to a well defined version of Camel (see the compatibility matrix).
+
+== How does it work
+
+This feature requires the dynamic generation of a builder that contains all the tooling expected by the build phase. In particular, this is a requirement for Quarkus native builds which, from now on, can be only done with builder `Pod` strategy.
+
+When you are creating a new runtime for which a [CamelCatalog](/camel-k/next/architecture/cr/camel-catalog.html) does not yest exist, Camel K Operator is in charge to create such a catalog. The creation of a new Catalog binds to the creation of a container image builder which will later be used by the builder `Pod` to build a Camel application which is specific to such a runtime.
+
+== Pin a runtime version
+
+By default each Camel K version uses a specific runtime version, ie, Camel K 2.0 uses Camel K Runtime 2.16.0. Using the trait will let you pin to a well defined version, avoiding to unintentionally upgrade the runtime of the integrations running when you perform an operator upgrade. See more info in the xref:contributing/upgrade.adoc#maintain-runtime-integrations[Camel K upgrade documentation].

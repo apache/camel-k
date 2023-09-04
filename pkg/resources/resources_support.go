@@ -31,7 +31,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
-//
 // ResourceAsString returns the named resource content as string.
 // Warning : do not remove the go:generate line as it is used to update the resources file in case of CRD changes.
 //

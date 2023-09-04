@@ -212,6 +212,7 @@ const (
 )
 
 var randomSource = rand.NewSource(time.Now().UnixNano())
+var randomSourceUTC = rand.NewSource(time.Now().UTC().UnixNano())
 
 func RandomString(n int) string {
 	sb := strings.Builder{}
@@ -231,9 +232,22 @@ func RandomString(n int) string {
 	return sb.String()
 }
 
+func RandomInt63() int64 {
+	return randomSourceUTC.Int63()
+}
+
+func EncodeXMLWithoutHeader(content interface{}) ([]byte, error) {
+	return encodeXML(content, "")
+}
+
 func EncodeXML(content interface{}) ([]byte, error) {
+
+	return encodeXML(content, xml.Header)
+}
+
+func encodeXML(content interface{}, xmlHeader string) ([]byte, error) {
 	w := &bytes.Buffer{}
-	w.WriteString(xml.Header)
+	w.WriteString(xmlHeader)
 
 	e := xml.NewEncoder(w)
 	e.Indent("", "  ")

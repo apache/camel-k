@@ -30,6 +30,7 @@ func (in *MavenArtifact) GetDependencyID() string {
 	}
 }
 
+// nolint: musttag // the name of the xml is dynamic
 type propertiesEntry struct {
 	XMLName xml.Name
 	Value   string `xml:",chardata"`

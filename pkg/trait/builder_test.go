@@ -36,8 +36,8 @@ import (
 
 func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, v1.BuildStrategyRoutine),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine),
 	}
 
 	for _, e := range environments {
@@ -57,8 +57,8 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 
 func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 	environments := []*Environment{
-		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I),
-		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, v1.BuildStrategyRoutine),
+		createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine),
 	}
 
 	for _, e := range environments {
@@ -77,7 +77,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 }
 
 func TestS2IBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, v1.BuildStrategyRoutine)
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -90,7 +90,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
 	err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
@@ -102,7 +102,7 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.NotNil(t, env.Pipeline[1].Kaniko)
 }
 
-func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy) *Environment {
+func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy, buildStrategy v1.BuildStrategy) *Environment {
 	c, err := camel.DefaultCatalog()
 	if err != nil {
 		panic(err)
@@ -126,6 +126,9 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseBuildSubmitted,
 			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "my-kit",
+			},
 		},
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
@@ -136,6 +139,9 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 					RuntimeVersion:         defaults.DefaultRuntimeVersion,
 					RuntimeProvider:        v1.RuntimeProviderQuarkus,
 					PublishStrategyOptions: map[string]string{},
+					BuildConfiguration: v1.BuildConfiguration{
+						Strategy: buildStrategy,
+					},
 				},
 			},
 			Status: v1.IntegrationPlatformStatus{
@@ -157,7 +163,7 @@ func NewBuilderTestCatalog() *Catalog {
 }
 
 func TestMavenPropertyBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Properties = append(builderTrait.Properties, "build-time-prop1=build-time-value1")
 
@@ -175,7 +181,7 @@ func createNominalBuilderTraitTest() *builderTrait {
 }
 
 func TestCustomTaskBuilderTrait(t *testing.T) {
-	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum)
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 
@@ -194,6 +200,55 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 	assert.Equal(t, "ls", customTask.Custom.ContainerCommand)
 }
 
+func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
+	builderTrait.Strategy = "pod"
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+
+	builderTask := findCustomTaskByName(env.Pipeline, "builder")
+	publisherTask := findCustomTaskByName(env.Pipeline, "spectrum")
+	customTask := findCustomTaskByName(env.Pipeline, "test")
+	assert.NotNil(t, customTask)
+	assert.NotNil(t, builderTask)
+	assert.NotNil(t, publisherTask)
+	assert.Equal(t, 3, len(env.Pipeline))
+	assert.Equal(t, "test", customTask.Custom.Name)
+	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
+	assert.Equal(t, "ls", customTask.Custom.ContainerCommand)
+}
+
+func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
+
+	err := builderTrait.Apply(env)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
+	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
+}
+
+func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategySpectrum, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
+	builderTrait.Strategy = "routine"
+
+	err := builderTrait.Apply(env)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
+	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
+}
+
 func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
 	for _, t := range tasks {
 		if t.Custom != nil && t.Custom.Name == name {
@@ -201,4 +256,62 @@ func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
 		}
 	}
 	return v1.Task{}
+}
+
+func TestMavenProfilesBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.MavenProfiles = []string{"configmap:maven-profile/owasp-profile.xml", "secret:maven-profile-secret"}
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+
+	assert.Equal(t, v1.ValueSource{
+		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "maven-profile",
+			},
+			Key: "owasp-profile.xml",
+		},
+	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[0])
+	assert.Equal(t, v1.ValueSource{
+		SecretKeyRef: &corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "maven-profile-secret",
+			},
+			Key: "profile.xml",
+		},
+	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[1])
+}
+
+func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.MavenProfiles = []string{"fakeprofile"}
+
+	err := builderTrait.Apply(env)
+
+	assert.NotNil(t, err)
+	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
+	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	assert.Contains(t, env.IntegrationKit.Status.Conditions[0].Message, "fakeprofile")
+}
+
+func TestMavenBuilderTraitJib(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+
+	err := builderTrait.Apply(env)
+
+	assert.Nil(t, err)
+
+	assert.Equal(t, v1.ValueSource{
+		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "my-kit-publish-jib-profile",
+			},
+			Key: "profile.xml",
+		},
+	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[0])
 }

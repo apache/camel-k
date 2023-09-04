@@ -19,9 +19,7 @@ package main
 
 import (
 	"context"
-	"math/rand"
 	"os"
-	"time"
 
 	_ "github.com/apache/camel-k/v2/addons"
 	_ "github.com/apache/camel-k/v2/pkg/builder"
@@ -33,8 +31,6 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// Cancel ctx as soon as main returns

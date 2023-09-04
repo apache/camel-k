@@ -105,5 +105,5 @@ func TestParseErrorHandlerSinkFail(t *testing.T) {
 		[]byte(`{"sink": {"ref": {"uri": "someUri"}}}`),
 	)
 	assert.NotNil(t, err)
-	assert.Equal(t, "Missing endpoint in Error Handler Sink", err.Error())
+	assert.Equal(t, "missing endpoint in Error Handler Sink", err.Error())
 }

@@ -35,7 +35,9 @@ rules:
   - integrationkits
   - integrationplatforms
   - integrations
-  - bindings
+  - pipes
+  # Deprecated: kameletbindings CR
+  - kameletbindings
   - kamelets
   verbs:
   - create
@@ -55,8 +57,11 @@ rules:
   - integrationplatforms/status
   - integrations/scale
   - integrations/status
-  - bindings/scale
-  - bindings/status
+  - pipes/status
+  - pipes/scale
+  # Deprecated: kameletbindings CR
+  - kameletbindings/status
+  - kameletbindings/scale
   - kamelets/status
   verbs:
   - get
@@ -81,7 +86,9 @@ rules:
   - integrationkits
   - integrationplatforms
   - integrations
-  - bindings
+  - pipes
+  # Deprecated: kameletbindings CR
+  - kameletbindings
   - kamelets
   verbs:
   - create
@@ -105,8 +112,11 @@ rules:
   - integrationplatforms/status
   - integrations/scale
   - integrations/status
-  - bindings/status
-  - bindings/scale
+  - pipes/status
+  - pipes/scale
+  # Deprecated: kameletbindings CR
+  - kameletbindings/status
+  - kameletbindings/scale
   - kamelets/status
   verbs:
   - get
@@ -403,7 +413,8 @@ rules:
   - integrationkits/finalizers
   - integrationplatforms/finalizers
   - integrations/finalizers
-  - bindings/finalizers
+  - pipes/finalizers
+  - kameletbindings/finalizers
   verbs:
   - update
 - apiGroups:
