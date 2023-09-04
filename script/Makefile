@@ -86,7 +86,7 @@ STAGING_RUNTIME_REPO :=
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := main
+KAMELET_CATALOG_REPO_TAG := v3.20.1.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
@@ -156,7 +156,6 @@ bump-replace:
 	@mvn -f java/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
 	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
-	@sed -i 's/^KAMELET_CATALOG_REPO_TAG :=.*$//KAMELET_CATALOG_REPO_TAG := main/' ./script/Makefile
 
 bump: bump-replace codegen bundle
 
