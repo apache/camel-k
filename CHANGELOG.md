@@ -7,12 +7,27 @@
 **Closed issues:**
 
 - \[Bug\]: TEST [\#4702](https://github.com/apache/camel-k/issues/4702)
+- Release 2.0.1 [\#4698](https://github.com/apache/camel-k/issues/4698)
+- Update to Knative v1.11 [\#4687](https://github.com/apache/camel-k/issues/4687)
 - Include CRD yaml files in camel-k-crds maven artifact [\#4655](https://github.com/apache/camel-k/issues/4655)
+- Nightly check against latest runtime - failure [\#4626](https://github.com/apache/camel-k/issues/4626)
 - Bump Kubernetes API to 1.27 [\#4612](https://github.com/apache/camel-k/issues/4612)
+- Unable to update the secret when the integration is running. [\#4508](https://github.com/apache/camel-k/issues/4508)
+- Disclose CLI stderr usage [\#4406](https://github.com/apache/camel-k/issues/4406)
 - Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
 - camel-k with spring config  [\#4376](https://github.com/apache/camel-k/issues/4376)
+- \[E2E\] Upgrade OLM check failing [\#4312](https://github.com/apache/camel-k/issues/4312)
+- Non-existent make command listed in the docs [\#4212](https://github.com/apache/camel-k/issues/4212)
+- Introduce and document support for AWS Elastic Container Registry \(ECR\) [\#4107](https://github.com/apache/camel-k/issues/4107)
 - Release script utils: Add a release utils script in Camel K CRD [\#4070](https://github.com/apache/camel-k/issues/4070)
+- missing Operator env vars usage in the docs [\#4000](https://github.com/apache/camel-k/issues/4000)
+- Staging of Camel-K Integration  across multiple cluster [\#3551](https://github.com/apache/camel-k/issues/3551)
+- Migrate to recommended OLM channel naming best practices [\#3017](https://github.com/apache/camel-k/issues/3017)
+- Trait to override integration image name and version generated [\#2872](https://github.com/apache/camel-k/issues/2872)
+- Add official documentation on Quarkus Native introduced in 1.7 [\#2752](https://github.com/apache/camel-k/issues/2752)
 - jib builder [\#1656](https://github.com/apache/camel-k/issues/1656)
+- Add upgrade instructions [\#1063](https://github.com/apache/camel-k/issues/1063)
+- Consistent Labelling [\#505](https://github.com/apache/camel-k/issues/505)
 
 ## [v2.0.1](https://github.com/apache/camel-k/tree/v2.0.1) (2023-08-30)
 
