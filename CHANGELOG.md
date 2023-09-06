@@ -31,6 +31,9 @@
 
 **Merged pull requests:**
 
+- Add Pipe test to olm\_upgrade\_test [\#4719](https://github.com/apache/camel-k/pull/4719) ([lfabriko](https://github.com/lfabriko))
+- chore\(deps\): bump knative.dev/eventing from 0.38.1 to 0.38.2 [\#4718](https://github.com/apache/camel-k/pull/4718) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.11.0 to 0.12.0 [\#4717](https://github.com/apache/camel-k/pull/4717) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(docs\): various updates [\#4714](https://github.com/apache/camel-k/pull/4714) ([squakez](https://github.com/squakez))
 - chore\(install\): helm 2.0.1 [\#4712](https://github.com/apache/camel-k/pull/4712) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.34 to 0.6.35 [\#4710](https://github.com/apache/camel-k/pull/4710) ([dependabot[bot]](https://github.com/apps/dependabot))
