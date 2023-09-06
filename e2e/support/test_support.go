@@ -1225,6 +1225,14 @@ func KitWithVersion(version string) KitFilter {
 	}
 }
 
+func KitWithVersionPrefix(versionPrefix string) KitFilter {
+	return &kitFilter{
+		filter: func(kit *v1.IntegrationKit) bool {
+			return strings.HasPrefix(kit.Status.Version, versionPrefix)
+		},
+	}
+}
+
 func KitWithLabels(kitLabels map[string]string) ctrl.ListOption {
 	return ctrl.MatchingLabelsSelector{
 		Selector: labels.Set(kitLabels).AsSelector(),
