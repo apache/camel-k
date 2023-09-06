@@ -116,8 +116,8 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 		var newIPVersionMajorMinorPatch string
 
 		prevCSVVersion = ClusterServiceVersion(noAdditionalConditions, ns)().Spec.Version
-		prevIPVersionPrefix = fmt.Sprintf("%d.%d", prevCSVVersion.Version.Major, prevCSVVersion.Version.Minor) //1.10
-		t.Logf("Using Previous CSV Version: %s", prevCSVVersion.Version.String())                              //Using Previous CSV Version: 1.10.1+0.1693789561.p
+		prevIPVersionPrefix = fmt.Sprintf("%d.%d", prevCSVVersion.Version.Major, prevCSVVersion.Version.Minor)
+		t.Logf("Using Previous CSV Version: %s", prevCSVVersion.Version.String())
 
 		// Check the operator pod is running
 		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
