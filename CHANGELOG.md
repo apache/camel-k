@@ -18,6 +18,7 @@
 - camel-k with spring config  [\#4376](https://github.com/apache/camel-k/issues/4376)
 - \[E2E\] Upgrade OLM check failing [\#4312](https://github.com/apache/camel-k/issues/4312)
 - Non-existent make command listed in the docs [\#4212](https://github.com/apache/camel-k/issues/4212)
+- Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
 - Introduce and document support for AWS Elastic Container Registry \(ECR\) [\#4107](https://github.com/apache/camel-k/issues/4107)
 - Release script utils: Add a release utils script in Camel K CRD [\#4070](https://github.com/apache/camel-k/issues/4070)
 - missing Operator env vars usage in the docs [\#4000](https://github.com/apache/camel-k/issues/4000)
