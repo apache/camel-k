@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
 
 ## [2.0.2-nightly](https://github.com/apache/camel-k/tree/2.0.2-nightly) (2023-09-06)
