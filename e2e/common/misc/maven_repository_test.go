@@ -45,6 +45,10 @@ func TestRunExtraRepository(t *testing.T) {
 	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	Eventually(Integration(ns, name)).Should(WithTransform(IntegrationSpec, And(
+		HaveExistingField("Repositories"),
+		HaveField("Repositories", ContainElements("https://maven.repository.redhat.com/ga@id=redhat")),
+	)))
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

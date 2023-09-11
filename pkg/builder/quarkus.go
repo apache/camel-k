@@ -136,6 +136,7 @@ func generateQuarkusProject(ctx *builderContext) error {
 
 	// Add Maven repositories
 	p.Repositories = append(p.Repositories, ctx.Build.Maven.Repositories...)
+	p.PluginRepositories = append(p.PluginRepositories, ctx.Build.Maven.Repositories...)
 
 	ctx.Maven.Project = p
 
