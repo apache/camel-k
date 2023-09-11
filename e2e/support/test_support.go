@@ -764,6 +764,10 @@ func Annotations(object metav1.Object) map[string]string {
 	return object.GetAnnotations()
 }
 
+func IntegrationSpec(it *v1.Integration) *v1.IntegrationSpec {
+	return &it.Spec
+}
+
 func Lease(ns string, name string) func() *coordination.Lease {
 	return func() *coordination.Lease {
 		lease := coordination.Lease{}
