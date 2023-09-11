@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -27,7 +26,7 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/Masterminds/semver"
+	semver "github.com/Masterminds/semver/v3"
 	"github.com/spf13/cobra"
 
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -153,18 +152,11 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 	if err != nil {
 		return nil, err
 	}
-	if catalog == nil {
-		msg := fmt.Sprintf("CamelCatalog version: %s", platform.Status.Build.RuntimeVersion)
-		if platform.Status.Build.RuntimeProvider != "" {
-			msg += fmt.Sprintf(", provider: %s", platform.Status.Build.RuntimeProvider)
-		}
-		msg += fmt.Sprintf(" can't be found in %s namespace", platform.Namespace)
-		return nil, errors.New(msg)
+	if catalog != nil {
+		infos["Camel Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"]
+		infos["Camel version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"]
+		infos["Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"]
 	}
-
-	infos["Camel Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"]
-	infos["Camel version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"]
-	infos["Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"]
 
 	return infos, nil
 }

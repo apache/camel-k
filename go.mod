@@ -3,7 +3,7 @@ module github.com/apache/camel-k/v2
 go 1.20
 
 require (
-	github.com/Masterminds/semver v1.5.0
+	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/container-tools/spectrum v0.6.35
 	github.com/evanphx/json-patch v5.6.0+incompatible
 	github.com/fsnotify/fsnotify v1.6.0

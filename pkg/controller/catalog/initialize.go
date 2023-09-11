@@ -467,7 +467,7 @@ func buildRuntimeBuilderImageSpectrum(options spectrum.Options) error {
 	if options.Base == "" {
 		return fmt.Errorf("missing base image, likely catalog is not compatible with this Camel K version")
 	}
-	Log.Infof("Making up Camel K builder container %s", options.Target)
+	Log.Infof("Making up Camel K builder container %s - base image: %s", options.Target, options.Base)
 
 	if jobs := runtime.GOMAXPROCS(0); jobs > 1 {
 		options.Jobs = jobs
@@ -483,6 +483,7 @@ func buildRuntimeBuilderImageSpectrum(options spectrum.Options) error {
 
 	_, err := spectrum.Build(options, directories...)
 	if err != nil {
+		Log.Error(err, "Error trying to build Camel K builder container")
 		return err
 	}
 

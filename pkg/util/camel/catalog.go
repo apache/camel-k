@@ -65,7 +65,7 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 		catalogs = append(catalogs, c)
 	}
 
-	return findBestMatch(catalogs, v1.RuntimeSpec{
+	return findCatalog(catalogs, v1.RuntimeSpec{
 		Version:  defaults.DefaultRuntimeVersion,
 		Provider: provider,
 		Metadata: make(map[string]string),

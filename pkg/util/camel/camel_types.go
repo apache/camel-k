@@ -18,13 +18,12 @@ limitations under the License.
 package camel
 
 import (
-	"github.com/Masterminds/semver"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // CatalogVersion --.
 type CatalogVersion struct {
-	RuntimeVersion *semver.Version
+	RuntimeVersion string
 	Catalog        *v1.CamelCatalog
 }
 
@@ -40,7 +39,7 @@ func (c CatalogVersionCollection) Len() int {
 // Less is needed for the sort interface to compare two CatalogVersion objects on the
 // slice. If checks if one is less than the other.
 func (c CatalogVersionCollection) Less(i, j int) bool {
-	return c[i].RuntimeVersion.LessThan(c[j].RuntimeVersion)
+	return c[i].RuntimeVersion < c[j].RuntimeVersion
 }
 
 // Swap is needed for the sort interface to replace the CatalogVersion objects

@@ -19,13 +19,9 @@ package camel
 
 import (
 	"path/filepath"
-	"sort"
 	"strings"
 
-	"github.com/Masterminds/semver"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 var (
@@ -39,66 +35,13 @@ var (
 	ServiceBindingsMountPath  = filepath.Join(ConfDPath, "_servicebindings")
 )
 
-func findBestMatch(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
+func findCatalog(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
 	for _, catalog := range catalogs {
 		if catalog.Spec.Runtime.Version == runtime.Version && catalog.Spec.Runtime.Provider == runtime.Provider {
 			return NewRuntimeCatalog(catalog), nil
 		}
 	}
-
-	rc := newSemVerConstraint(runtime.Version)
-	if rc == nil {
-		return nil, nil
-	}
-
-	cc := newCatalogVersionCollection(catalogs)
-	for _, c := range cc {
-		if rc.Check(c.RuntimeVersion) {
-			return NewRuntimeCatalog(*c.Catalog), nil
-		}
-	}
-
 	return nil, nil
-}
-
-func newSemVerConstraint(versionConstraint string) *semver.Constraints {
-	constraint, err := semver.NewConstraint(versionConstraint)
-	if err != nil || constraint == nil {
-		if err != nil {
-			log.Debugf("Unable to parse version constraint: %s, error: %s", versionConstraint, err.Error())
-		}
-		if constraint == nil {
-			log.Debugf("Unable to parse version constraint: %s", versionConstraint)
-		}
-	}
-
-	return constraint
-}
-
-func newCatalogVersionCollection(catalogs []v1.CamelCatalog) CatalogVersionCollection {
-	versions := make([]CatalogVersion, 0, len(catalogs))
-
-	for i := range catalogs {
-		rv, err := semver.NewVersion(catalogs[i].Spec.Runtime.Version)
-		if err != nil {
-			log.Debugf("Invalid semver version (runtime) %s", rv)
-
-			continue
-		}
-
-		versions = append(versions, CatalogVersion{
-			RuntimeVersion: rv,
-			Catalog:        &catalogs[i],
-		})
-	}
-
-	answer := CatalogVersionCollection(versions)
-
-	sort.Sort(
-		sort.Reverse(answer),
-	)
-
-	return answer
 }
 
 func getDependency(artifact v1.CamelArtifact, runtimeProvider v1.RuntimeProvider) string {
