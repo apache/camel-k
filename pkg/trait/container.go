@@ -39,6 +39,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const (
@@ -200,6 +201,8 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}
 	t.configureCapabilities(e)
 
+	t.configureSecurityContext(e, &container)
+
 	var containers *[]corev1.Container
 	visited := false
 
@@ -337,5 +340,16 @@ func (t *containerTrait) configureResources(container *corev1.Container) {
 func (t *containerTrait) configureCapabilities(e *Environment) {
 	if util.StringSliceExists(e.Integration.Status.Capabilities, v1.CapabilityRest) {
 		e.ApplicationProperties["camel.context.rest-configuration.component"] = "platform-http"
+	}
+}
+
+func (t *containerTrait) configureSecurityContext(e *Environment, container *corev1.Container) {
+	// get security context from security context constraint configuration in namespace
+	isOpenShift, _ := openshift.IsOpenShift(e.Client)
+	if isOpenShift {
+		securityContext, _ := openshift.GetOpenshiftSecurityContextRestricted(e.Ctx, e.Client, e.Platform.Namespace)
+		if securityContext != nil {
+			container.SecurityContext = securityContext
+		}
 	}
 }

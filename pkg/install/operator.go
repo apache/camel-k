@@ -44,6 +44,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/minikube"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
 	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
@@ -243,6 +244,16 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 			// Remove Ingress permissions as it's not needed on OpenShift
 			// This should ideally be removed from the common RBAC manifest.
 			RemoveIngressRoleCustomizer(o)
+
+			if d, ok := o.(*appsv1.Deployment); ok {
+				securityContext, _ := openshift.GetOpenshiftSecurityContextRestricted(ctx, c, cfg.Namespace)
+				if securityContext != nil {
+					d.Spec.Template.Spec.Containers[0].SecurityContext = securityContext
+
+				} else {
+					d.Spec.Template.Spec.Containers[0].SecurityContext = kubernetes.DefaultOperatorSecurityContext()
+				}
+			}
 		}
 
 		return o
