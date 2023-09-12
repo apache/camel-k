@@ -25,8 +25,8 @@ import (
 )
 
 const (
+	envVarQuarkusConsoleColor     = "QUARKUS_CONSOLE_COLOR"
 	envVarQuarkusLogLevel         = "QUARKUS_LOG_LEVEL"
-	envVarQuarkusLogConsoleColor  = "QUARKUS_LOG_CONSOLE_COLOR"
 	envVarQuarkusLogConsoleFormat = "QUARKUS_LOG_CONSOLE_FORMAT"
 	// nolint: gosec // no sensitive credentials
 	envVarQuarkusLogConsoleJSON            = "QUARKUS_LOG_CONSOLE_JSON"
@@ -73,7 +73,7 @@ func (l loggingTrait) Apply(e *Environment) error {
 		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, False)
 
 		if pointer.BoolDeref(l.Color, true) {
-			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleColor, True)
+			envvar.SetVal(&e.EnvVars, envVarQuarkusConsoleColor, True)
 		}
 	}
 
