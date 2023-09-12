@@ -6,7 +6,16 @@
 
 **Closed issues:**
 
+- Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
+- Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
+
+**Merged pull requests:**
+
+- chore\(doc\): registry requirements [\#4735](https://github.com/apache/camel-k/pull/4735) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/evanphx/json-patch from 5.6.0+incompatible to 5.7.0+incompatible [\#4732](https://github.com/apache/camel-k/pull/4732) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(cli\): Use maven repository CLI flag for plugins [\#4730](https://github.com/apache/camel-k/pull/4730) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.35 to 0.6.36 [\#4722](https://github.com/apache/camel-k/pull/4722) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [2.0.2-nightly](https://github.com/apache/camel-k/tree/2.0.2-nightly) (2023-09-06)
 
