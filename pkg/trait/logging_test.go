@@ -122,7 +122,7 @@ func TestEmptyLoggingTrait(t *testing.T) {
 	logFormatIsNotDefault := false
 
 	for _, e := range env.EnvVars {
-		if e.Name == envVarQuarkusLogConsoleColor {
+		if e.Name == envVarQuarkusConsoleColor {
 			if e.Value == "true" {
 				quarkusConsoleColor = true
 			}
@@ -174,7 +174,7 @@ func TestJsonLoggingTrait(t *testing.T) {
 	logFormatIsNotDefault := false
 
 	for _, e := range env.EnvVars {
-		if e.Name == envVarQuarkusLogConsoleColor {
+		if e.Name == envVarQuarkusConsoleColor {
 			if e.Value == "true" {
 				quarkusConsoleColor = true
 			}
