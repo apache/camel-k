@@ -106,7 +106,7 @@ spec:
             name: "Content-Type"
             constant: "{{contentType}}"
         - to: kamelet:sink
-	`
+`
 	CreatePlainTextConfigmap(ns, "my-kamelet-cm", cmData)
 
 	// Basic
