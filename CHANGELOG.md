@@ -6,7 +6,9 @@
 
 **Closed issues:**
 
+- Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
+- Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
 
 ## [2.0.2-nightly](https://github.com/apache/camel-k/tree/2.0.2-nightly) (2023-09-06)
 
