@@ -152,6 +152,7 @@ func initializeSpectrum(options spectrum.Options, ip *v1.IntegrationPlatform, ca
 	err := buildRuntimeBuilderWithTimeoutSpectrum(options, ip.Status.Build.GetBuildCatalogToolTimeout().Duration)
 
 	if err != nil {
+		Log.Error(err, "Error trying to build Camel K builder container")
 		target.Status.Phase = v1.CamelCatalogPhaseError
 		target.Status.SetErrorCondition(
 			v1.CamelCatalogConditionReady,
