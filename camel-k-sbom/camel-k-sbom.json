@@ -2,35 +2,35 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:e95b36da-c300-41af-87c6-78ab3e5a0957",
+  "serialNumber": "urn:uuid:7fc4d337-06db-43b8-b2ab-a171c34df0c9",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-09-12T00:46:39Z",
+    "timestamp": "2023-09-13T00:48:07Z",
     "tools": [
       {
         "vendor": "CycloneDX",
         "name": "cyclonedx-gomod",
-        "version": "v1.4.0",
+        "version": "v1.4.1",
         "hashes": [
           {
             "alg": "MD5",
-            "content": "f37a3d3473b89e4ad73e84547e0f40ac"
+            "content": "049ae93583f1c5128e978f112e7650e5"
           },
           {
             "alg": "SHA-1",
-            "content": "a984dfd1da110417ac1d961111113a565db172b5"
+            "content": "28fa6252376d43c1aeee404e1ea0a7a3c92c4563"
           },
           {
             "alg": "SHA-256",
-            "content": "3eae94260619fa7a79c64bb0549f7005c9b422306d88251cbcb43f095d978a46"
+            "content": "89079d0b374cb6e1b77b23d5a7c890087d0a7622f1c7d14625a2d3ef11b2f3b3"
           },
           {
             "alg": "SHA-384",
-            "content": "eab77f9e180c7846293c859e7ba4779cbd1c41f9414ab7759bb1a59aa2e98957a88f2f58ff74528467e17533b92f759e"
+            "content": "69b169f4b4fec874f29fca1d6d0819b5cbeb6edd7ea4910add849f08f5c24fae1da8d9e89a942f74c9749105cdb26a56"
           },
           {
             "alg": "SHA-512",
-            "content": "b1385b31ac001811370f2a2a45c3b5cd3bda9e523c00cc33b55192068bf03b75624d9e86740bf167d9ddd3e7f895913876b8e01221d5a35f9f59913b63cef925"
+            "content": "9a07c7d2b35f9184ec2f0ec171d36ff2a5912ede2e7bd41c9f13f9aa34a86ea08279a33af82f79c2735362a293f766f2a0a20c79b9523e00f9f7b40df2edd2b8"
           }
         ],
         "externalReferences": [
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230912004242-2203fe0315a9?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230913004333-416561f962ab?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20230912004242-2203fe0315a9",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230912004242-2203fe0315a9?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20230913004333-416561f962ab",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230913004333-416561f962ab?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -4021,7 +4021,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230912004242-2203fe0315a9?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230913004333-416561f962ab?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
         "pkg:golang/github.com/container-tools/spectrum@v0.6.29?type=module",
