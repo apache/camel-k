@@ -22,7 +22,6 @@ import (
 	"reflect"
 	"testing"
 
-	routev1 "github.com/openshift/api/route/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -517,23 +516,20 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 func TestServiceAnnotation(t *testing.T) {
 	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": "true"}
 
-	environment := createTestRouteEnvironment(t, KnativeServiceTestName)
-	environment.Integration.Spec.Traits = v1.Traits{
-		Route: &traitv1.RouteTrait{
-			Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
-		},
-	}
+	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
+		Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
+	})
 
 	traitsCatalog := environment.Catalog
 	err := traitsCatalog.apply(environment)
 
 	assert.Nil(t, err)
 
-	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
-		return r.ObjectMeta.Name == KnativeServiceTestName
+	service := environment.Resources.GetKnativeService(func(s *serving.Service) bool {
+		return s.Name == KnativeServiceTestName
 	})
 
-	assert.NotNil(t, route)
-	assert.True(t, reflect.DeepEqual(route.GetAnnotations(), annotationsTest))
+	assert.NotNil(t, service)
+	assert.True(t, reflect.DeepEqual(service.GetAnnotations(), annotationsTest))
 
 }

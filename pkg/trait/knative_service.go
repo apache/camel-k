@@ -178,12 +178,15 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		for k, v := range e.Integration.Annotations {
 			serviceAnnotations[k] = v
 		}
-	} else {
-		serviceAnnotations = t.Annotations
 	}
 	// Set Knative rollout
 	if t.RolloutDuration != "" {
 		serviceAnnotations[knativeServingRolloutDurationAnnotation] = t.RolloutDuration
+	}
+	if t.Annotations != nil {
+		for k, v := range t.Annotations {
+			serviceAnnotations[k] = v
+		}
 	}
 
 	revisionAnnotations := make(map[string]string)
