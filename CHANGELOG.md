@@ -6,15 +6,23 @@
 
 **Closed issues:**
 
+- Regression: upgrade check failing after 2.0.1 [\#4721](https://github.com/apache/camel-k/issues/4721)
 - Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
+- Camel Quarkus 3.2.0 errors [\#4709](https://github.com/apache/camel-k/issues/4709)
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
+- Camel K 1.12.1 : XSLT/XSLT-saxon: javax.xml.transform.TransformerConfigurationException: Could not compile stylesheet [\#4677](https://github.com/apache/camel-k/issues/4677)
 - Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
 
 **Merged pull requests:**
 
+- fix\(doc\): catalog link [\#4737](https://github.com/apache/camel-k/pull/4737) ([squakez](https://github.com/squakez))
+- doc: Add the remote debug operator link to the navigation [\#4736](https://github.com/apache/camel-k/pull/4736) ([claudio4j](https://github.com/claudio4j))
 - chore\(doc\): registry requirements [\#4735](https://github.com/apache/camel-k/pull/4735) ([squakez](https://github.com/squakez))
+- fix\(ci\): latest released is 2.0.1 [\#4734](https://github.com/apache/camel-k/pull/4734) ([squakez](https://github.com/squakez))
+- fix: runtime 3.2.0 errors [\#4733](https://github.com/apache/camel-k/pull/4733) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/evanphx/json-patch from 5.6.0+incompatible to 5.7.0+incompatible [\#4732](https://github.com/apache/camel-k/pull/4732) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(cli\): Use maven repository CLI flag for plugins [\#4730](https://github.com/apache/camel-k/pull/4730) ([gansheer](https://github.com/gansheer))
+- feat: knative service trait annotation support [\#4729](https://github.com/apache/camel-k/pull/4729) ([realMartinez](https://github.com/realMartinez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.35 to 0.6.36 [\#4722](https://github.com/apache/camel-k/pull/4722) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [2.0.2-nightly](https://github.com/apache/camel-k/tree/2.0.2-nightly) (2023-09-06)
