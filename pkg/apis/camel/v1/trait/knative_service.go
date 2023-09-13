@@ -26,6 +26,10 @@ package trait
 // +camel-k:trait=knative-service.
 type KnativeServiceTrait struct {
 	Trait `property:",squash" json:",inline"`
+	// The annotations added to route.
+	// This can be used to set knative service specific annotations
+	// CLI usage example: -t "knative-service.annotations.'haproxy.router.openshift.io/balance'=true"
+	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 	// Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev` or `kpa.autoscaling.knative.dev` autoscaling).
 	//
 	// Refer to the Knative documentation for more information.

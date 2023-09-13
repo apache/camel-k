@@ -7175,6 +7175,13 @@ spec:
                   knative-service:
                     description: The configuration of Knative Service trait
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: 'The annotations added to route. This can be
+                          used to set knative service specific annotations CLI usage
+                          example: -t "knative-service.annotations.''haproxy.router.openshift.io/balance''=true"'
+                        type: object
                       auto:
                         description: "Automatically deploy the integration as Knative
                           service when all conditions hold: \n * Integration is using

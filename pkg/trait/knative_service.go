@@ -58,6 +58,9 @@ var _ ControllerStrategySelector = &knativeServiceTrait{}
 func newKnativeServiceTrait() Trait {
 	return &knativeServiceTrait{
 		BaseTrait: NewBaseTrait(knativeServiceTraitID, 1400),
+		KnativeServiceTrait: traitv1.KnativeServiceTrait{
+			Annotations: map[string]string{},
+		},
 	}
 }
 
@@ -179,6 +182,11 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	// Set Knative rollout
 	if t.RolloutDuration != "" {
 		serviceAnnotations[knativeServingRolloutDurationAnnotation] = t.RolloutDuration
+	}
+	if t.Annotations != nil {
+		for k, v := range t.Annotations {
+			serviceAnnotations[k] = v
+		}
 	}
 
 	revisionAnnotations := make(map[string]string)

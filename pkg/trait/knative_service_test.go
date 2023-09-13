@@ -19,6 +19,7 @@ package trait
 
 import (
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -511,4 +512,24 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 	require.NoError(t, err)
 
 	return environment
+}
+func TestServiceAnnotation(t *testing.T) {
+	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": "true"}
+
+	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
+		Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
+	})
+
+	traitsCatalog := environment.Catalog
+	err := traitsCatalog.apply(environment)
+
+	assert.Nil(t, err)
+
+	service := environment.Resources.GetKnativeService(func(s *serving.Service) bool {
+		return s.Name == KnativeServiceTestName
+	})
+
+	assert.NotNil(t, service)
+	assert.True(t, reflect.DeepEqual(service.GetAnnotations(), annotationsTest))
+
 }
