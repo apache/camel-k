@@ -217,7 +217,7 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 			// Check a new kit is created with the current version
 			Eventually(Kits(ns, KitWithVersionPrefix(newIPVersionMajorMinorPatch))).Should(HaveLen(2))
 			// Check the new kit is ready
-			Eventually(Kits(ns, KitWithVersion(newIPVersionMajorMinorPatch), KitWithPhase(v1.IntegrationKitPhaseReady)),
+			Eventually(Kits(ns, KitWithVersionPrefix(newIPVersionMajorMinorPatch), KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutMedium).Should(HaveLen(2))
 
 			kit := Kits(ns, KitWithVersionPrefix(newIPVersionMajorMinorPatch), KitWithLabels(map[string]string{"camel.apache.org/created.by.name": name}))()[0]
