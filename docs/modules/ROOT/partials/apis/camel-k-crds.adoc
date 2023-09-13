@@ -6900,6 +6900,15 @@ are only relevant when the Camel route(s) use(s) an HTTP endpoint consumer.
 
 
 
+|`annotations` +
+map[string]string
+|
+
+
+The annotations added to route.
+This can be used to set knative service specific annotations
+CLI usage example: -t "knative-service.annotations.'haproxy.router.openshift.io/balance'=true"
+
 |`class` +
 string
 |

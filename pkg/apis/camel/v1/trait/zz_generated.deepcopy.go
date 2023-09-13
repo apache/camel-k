@@ -542,6 +542,13 @@ func (in *KameletsTrait) DeepCopy() *KameletsTrait {
 func (in *KnativeServiceTrait) DeepCopyInto(out *KnativeServiceTrait) {
 	*out = *in
 	in.Trait.DeepCopyInto(&out.Trait)
+	if in.Annotations != nil {
+		in, out := &in.Annotations, &out.Annotations
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.Target != nil {
 		in, out := &in.Target, &out.Target
 		*out = new(int)

@@ -985,6 +985,10 @@ traits:
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
+  - name: annotations
+    type: map[string]string
+    description: 'The annotations added to route. This can be used to set knative
+      service specific annotations CLI usage example: -t "knative-service.annotations.''haproxy.router.openshift.io/balance''=true"'
   - name: autoscaling-class
     type: string
     description: Configures the Knative autoscaling class property (e.g. to set `hpa.autoscaling.knative.dev`
