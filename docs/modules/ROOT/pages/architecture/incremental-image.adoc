@@ -1,0 +1,9 @@
+= Incremental image
+
+One of the goal of Camel K is to provide a Cloud Native experience for Camel developers. It means basically to have a quick build of the application based on the Camel route you provide and an execution that should be as fast as possible.
+
+In order to reduce the time to build and execute an application we adopt various strategies. If an application has a container with all the dependencies required, then, we just reuse such container, having an immediate start of your application. And then we have the concept of **incremental image**.
+
+If you're familiar with Camel K architecture, you know that an Integration uses an IntegrationKit, which is, a reusable resource containing all the dependencies and capabilities required to run a certain "class" of Camel applications. The IntegrationKit is bound to a container image stored in a registry.
+
+When the IntegrationKit is created, it uses as a base image a JDK based container and add certain applications layers on top of it. However, instead of using always the same root base image, we check if an IntegrationKit with a subset of dependencies already exists, sparing quite some time on the generation of the new container image.

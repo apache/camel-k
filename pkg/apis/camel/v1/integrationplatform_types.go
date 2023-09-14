@@ -154,11 +154,11 @@ type IntegrationPlatformBuildPublishStrategy string
 const (
 	// IntegrationPlatformBuildPublishStrategyBuildah uses Buildah project (https://buildah.io/)
 	// in order to push the incremental images to the image repository. It can be used with `pod` BuildStrategy.
-	// Deprecated: use Spectrum, Jib or S2I instead
+	// Deprecated: use Spectrum, Jib or S2I instead.
 	IntegrationPlatformBuildPublishStrategyBuildah IntegrationPlatformBuildPublishStrategy = "Buildah"
 	// IntegrationPlatformBuildPublishStrategyKaniko uses Kaniko project (https://github.com/GoogleContainerTools/kaniko)
 	// in order to push the incremental images to the image repository. It can be used with `pod` BuildStrategy.
-	// Deprecated: use Spectrum, Jib or S2I instead
+	// Deprecated: use Spectrum, Jib or S2I instead.
 	IntegrationPlatformBuildPublishStrategyKaniko IntegrationPlatformBuildPublishStrategy = "Kaniko"
 	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
 	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
