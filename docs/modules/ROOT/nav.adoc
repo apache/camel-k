@@ -1,7 +1,10 @@
 * xref:installation/installation.adoc[Installation]
 ** xref:installation/advanced/maven.adoc[Configuring Maven]
 ** xref:installation/registry/registry.adoc[Configuring Registry]
+** xref:contributing/upgrade.adoc[Upgrade]
+** xref:contributing/uninstalling.adoc[Uninstalling]
 ** xref:installation/advanced/advanced.adoc[Advanced]
+*** xref:installation/advanced/build-config.adoc[Build tuning]
 *** xref:installation/advanced/kustomize.adoc[Install Using Kustomize]
 *** xref:installation/advanced/network.adoc[Network architecture]
 *** xref:installation/advanced/resources.adoc[Resource management]
@@ -9,10 +12,7 @@
 *** xref:installation/advanced/http-proxy.adoc[HTTP Proxy]
 *** xref:installation/advanced/multi-architecture.adoc[Multi Architecture]
 *** xref:installation/advanced/offline.adoc[Offline]
-** xref:contributing/upgrade.adoc[Upgrade]
-** xref:contributing/uninstalling.adoc[Uninstalling]
-* Command Line Interface
-** xref:cli/cli.adoc[Kamel CLI]
+* xref:cli/cli.adoc[Command Line Interface]
 ** xref:cli/file-based-config.adoc[File-based Config]
 ** xref:cli/modeline.adoc[Modeline]
 * xref:running/running.adoc[Run an Integration]
@@ -23,4 +23,3 @@
 ** xref:running/run-from-github.adoc[Run from GitHub]
 ** xref:running/promoting.adoc[Promote an Integration]
 ** xref:running/knative-sink.adoc[Knative Sinks]
-

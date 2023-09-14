@@ -1,0 +1,33 @@
+= Build configuration
+
+The default installation provides some default configuration in order to perform a build and the publishing of the application in the container registry. In order to provide a more customized user experience, we provide two build configuration which you can use: **Build Strategy** and **Publish Strategy**.
+
+[[build-strategy]]
+== Build strategy
+
+The build strategy is used to control the behavior of the application build from the Integration source. This is equivalent to the Maven process building a Java application. You can configure the operator to run this operation either as a routine (or thread) in the same operator application, or to spin off a Kubernetes Pod and execute the build in a new separate application.
+
+The `routine` strategy (default) is in general faster as it does not require Kubernetes to create any new resource, however it consumes a high amount of memory and may slow down any other process run in the same Camel K operator Pod. In general is a good strategy, but you need to consider the trade off if you have multiple concurrent builds at the same time.
+
+The `pod` strategy is **always** used when running a Quarkus native build (as it requires certain tools not available in the operator container). You can also use this strategy when you want to have a higher level of concurrency. Although a bit slower (it requires Kubernetes to spin off a new Pod), this strategy will guarantee the execution of each parallel build in a timely manner.
+
+NOTE: the `pod` strategy was also required when using the now deprecated Buildah or Kaniko publishing strategy.
+
+Beside the build strategy, there are other configuration you can fine tune for each single build (via builder trait) or in the `.spec.build.buildConfiguration` of the IntegrationPlatform if you want to apply such configuration to all your builds. See the Builder trait page for more information.
+
+The most relevant are the `resource` and `limit` parameters which can be used to control how much resources to give to builder Pods. Then you can configure the `orderStrategy`, setting a `sequential` (single build), `fifo` (parallel build started in FIFO order) or `dependencies` (parallel build holding those applications which may depends on other because of ** xref:architecture/incremental-image.adoc[incremental image]). Finally you can include any `mavenProfile` to the build in order to influence the behavior of the build (ie, adding any plugin or configuration you can use when xref:pipeline/pipeline.adoc[running a pipeline]).
+
+[[publish-strategy]]
+== Publish strategy
+
+The publish strategy is used to control the behavior of the creation of the container after a build. Basically it create a container image from the application built in the previous step and store as a container in the xref:installation/registry/registry.adoc[registry] configured.
+
+The operator has 3 different strategy which you can adopt: Spectrum (default in plain Kubernetes profile), S2I (default in Openshift profile) and Jib.
+
+Each configuration provides a set of technologies which are supporting the creation of a container image and the storage into a container registry. https://github.com/container-tools/spectrum[Spectrum] is a lightweight technology based on https://github.com/google/go-containerregistry[go-containerregistry]. It creates a raw image on top of a base image and push very quickly to a registry.
+
+https://access.redhat.com/documentation/es-es/openshift_container_platform/4.2/html/builds/understanding-image-builds#build-strategy-s2i_understanding-image-builds[S2I] is an efficient technology integrated in Openshift, reason why it is enabled by default in such a profile.
+
+https://cloud.google.com/java/getting-started/jib[Jib] is a technology that transform a Java project into a container image and is configurable directly in Maven.
+
+NOTE: you may define your own publishing technology by using xref:pipeline/pipeline.adoc[pipelines].
