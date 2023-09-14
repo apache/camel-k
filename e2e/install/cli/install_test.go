@@ -55,6 +55,16 @@ func TestBasicInstallation(t *testing.T) {
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 
+			// Check if default security context has been applyed
+		Eventually(OperatorPodHas(ns, func(pod *corev1.Pod) bool {
+			if pod.Spec.Containers == nil || len(pod.Spec.Containers) == 0 {
+				return false
+			}
+			// exclude user for openshift
+			pod.Spec.Containers[0].SecurityContext.RunAsUser = nil
+			return reflect.DeepEqual(pod.Spec.Containers[0].SecurityContext, kubernetes.DefaultOperatorSecurityContext())
+		}), TestTimeoutShort).Should(BeTrue())
+
 		t.Run("run yaml", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

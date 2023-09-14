@@ -1344,6 +1344,16 @@ func OperatorImage(ns string) func() string {
 	}
 }
 
+func OperatorPodHas(ns string, predicate func(pod *corev1.Pod) bool) func() bool {
+	return func() bool {
+		pod := OperatorPod(ns)()
+		if pod == nil {
+			return false
+		}
+		return predicate(pod)
+	}
+}
+
 func OperatorPodPhase(ns string) func() corev1.PodPhase {
 	return func() corev1.PodPhase {
 		pod := OperatorPod(ns)()
