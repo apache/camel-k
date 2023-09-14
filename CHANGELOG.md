@@ -6,8 +6,11 @@
 
 **Closed issues:**
 
+- Regression: upgrade check failing after 2.0.1 [\#4721](https://github.com/apache/camel-k/issues/4721)
 - Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
+- Camel Quarkus 3.2.0 errors [\#4709](https://github.com/apache/camel-k/issues/4709)
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
+- Camel K 1.12.1 : XSLT/XSLT-saxon: javax.xml.transform.TransformerConfigurationException: Could not compile stylesheet [\#4677](https://github.com/apache/camel-k/issues/4677)
 - Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
 
 ## [2.0.2-nightly](https://github.com/apache/camel-k/tree/2.0.2-nightly) (2023-09-06)
