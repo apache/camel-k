@@ -5160,6 +5160,7 @@ a BuilderTask, used to generate and package the project
 
 
 a BuildahTask, for Buildah strategy
+Deprecated: use spectrum, jib or s2i instead
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
@@ -5167,6 +5168,7 @@ a BuildahTask, for Buildah strategy
 
 
 a KanikoTask, for Kaniko strategy
+Deprecated: use spectrum, jib or s2i instead
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
