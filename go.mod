@@ -56,7 +56,7 @@ require (
 	knative.dev/pkg v0.0.0-20230718152110-aef227e72ead
 	knative.dev/serving v0.38.0
 	sigs.k8s.io/controller-runtime v0.15.2
-	sigs.k8s.io/structured-merge-diff/v4 v4.3.0
+	sigs.k8s.io/structured-merge-diff/v4 v4.2.3
 )
 
 require (
