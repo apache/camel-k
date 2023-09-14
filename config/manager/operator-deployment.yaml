@@ -78,4 +78,12 @@ spec:
               port: 8081
             initialDelaySeconds: 20
             periodSeconds: 10
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
 
