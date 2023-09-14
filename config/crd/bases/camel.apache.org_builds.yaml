@@ -142,7 +142,8 @@ spec:
                     task should be configured to represent the specific task chosen.
                   properties:
                     buildah:
-                      description: a BuildahTask, for Buildah strategy
+                      description: 'a BuildahTask, for Buildah strategy Deprecated:
+                        use spectrum, jib or s2i instead'
                       properties:
                         baseImage:
                           description: base image layer
@@ -738,7 +739,8 @@ spec:
                           type: object
                       type: object
                     kaniko:
-                      description: a KanikoTask, for Kaniko strategy
+                      description: 'a KanikoTask, for Kaniko strategy Deprecated:
+                        use spectrum, jib or s2i instead'
                       properties:
                         baseImage:
                           description: base image layer

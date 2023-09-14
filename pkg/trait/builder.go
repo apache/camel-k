@@ -142,6 +142,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
+		t.L.Infof("Warning: Buildah publishing strategy is deprecated and may be removed in future releases. Use any alternative publishing strategy.")
 		var platform string
 		var found bool
 		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
@@ -169,6 +170,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 	//nolint: staticcheck,nolintlint
 	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
+		t.L.Infof("Warning: Kaniko publishing strategy is deprecated and may be removed in future releases. Use any alternative publishing strategy.")
 		persistentVolumeClaim := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]
 		cacheEnabled := e.Platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
 
