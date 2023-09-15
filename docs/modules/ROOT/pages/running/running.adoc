@@ -28,7 +28,7 @@ You can run it on the cluster by executing:
 kamel run hello.groovy
 ```
 
-Integrations can be written in multiple languages. We are collecting examples in our https://github.com/apache/camel-k/[GitHub repository].
+Integrations can be written in any supported xref:languages:languages.adoc[Camel DSL]. We are collecting examples in our https://github.com/apache/camel-k/[Camel K GitHub repository].
 
 [[monitoring-integration]]
 == Monitoring the application status
@@ -53,17 +53,22 @@ kamel logs hello
 ```
 
 [[dev-mode-integration]]
-== Running an Integration in Development mode
+== Running in dev mode
 
 Camel K provide a very nice **dev mode** feature that will allow you to apply any change to your Integration code reactively. Check out the xref:running/dev-mode.adoc[Camel K dev mode]
 
-[[running-integration-locally]]
-== Running an Integration locally
+[[running-model]]
+== Camel K development model
 
-During development, for most of the cases, if you are not using Camel K traits or specific Camel Quarkus configuration, you can use Camel JBang to run the Integration.
+The idea of Camel K is to simplify the deployment of your Integration to the cloud. For this reason, there are certain limitations you need to take into account, depending on the xref:languages:languages.adoc[Camel DSL] you're using. For instance, taking Java DSL as reference, you are generally requested to maintain your route development within a single class. As soon as your development gain complexity, the suggestion is to keep the business logic in an external dependency and use such dependency from your class containing the route definition. See more about xref:configuration/dependencies.adoc[how to use a dependency].
+
+[[running-integration-dsl]]
+== Running locally
+
+During development, for most of the cases, if you are not using Camel K traits or specific Camel Quarkus configuration, you can use Camel JBang to run the Integration. This is a quick way to start testing your Integration, adding only at a later stage of the developments any configuration related to the cluster where you're going to run the Integration. See link:/blog/2022/11/camel-k-jbang/[how to test Camel K with Camel JBang] blog.
 
 [[no-cli-integration]]
-== Running an Integration without CLI
+== Running without CLI
 
 You can run your integration also if you have no CLI available. `kamel` CLI manages a lot of fancy features but you can create an xref:apis/camel-k.adoc#_camel_apache_org_v1_Integration[Integration Custom Resource] with all the configuration expected to run your application.
 
