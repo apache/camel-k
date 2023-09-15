@@ -22,7 +22,7 @@ import org.apache.camel.builder.RouteBuilder;
 public class TimerKameletIntegrationNamedConfiguration extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("kamelet:my-own-timer-source/mynamedconfig")
+        from("kamelet:iconfig-test-timer-source/mynamedconfig")
             .to("log:info");
     }
 }
