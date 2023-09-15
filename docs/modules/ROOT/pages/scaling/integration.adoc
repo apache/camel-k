@@ -115,6 +115,8 @@ spec:
         averageValue: 1k
 ----
 
+WARNING: the HPA can work when the Integration replica field needs to be specified. You need to scale the Integration via `kubectl scale it my-it --replicas 1` or edit the `.spec.replicas` field of your Integration to 1. This is due to a link:https://github.com/kubernetes/kubernetes/issues/111781[Kubernetes behavior which does not allow an empty value on the resource to scale].
+
 More information can be found in https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[Horizontal Pod Autoscaler] from the Kubernetes documentation.
 
 NOTE: HPA can also be used with Knative, by installing the https://knative.dev/docs/install/install-extensions/#install-optional-serving-extensions[HPA autoscaling Serving extension].
