@@ -17,7 +17,11 @@
 
 - route:
     from:
-      uri: "kamelet:my-own-timer-source?message=important%20message"
+      uri: "kamelet:config02-timer-source"
+      parameters:
+        message: "{{my-message}}"
       steps:
         - to:
-            uri: "kamelet:my-own-log-sink?loggerName=integrationLogger"
+            uri: "kamelet:config02-log-sink"
+            parameters:
+              loggerName: "{{my-logger}}"

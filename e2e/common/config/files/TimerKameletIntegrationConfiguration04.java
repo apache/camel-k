@@ -19,10 +19,10 @@ import java.lang.Exception;
 import java.lang.Override;
 import org.apache.camel.builder.RouteBuilder;
 
-public class TimerKameletIntegrationConfiguration extends RouteBuilder {
+public class TimerKameletIntegrationConfiguration04 extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("kamelet:iconfig-test-timer-source")
+        from("kamelet:iconfig04-timer-source")
             .to("log:info");
     }
 }
