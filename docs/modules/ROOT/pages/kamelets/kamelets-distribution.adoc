@@ -1,0 +1,21 @@
+[[kamelets-distribution]]
+= Kamelets Distribution
+
+When you install Camel K, you typically got bundled a series of Kamelets which are coming from the xref:camel-kamelets::index.adoc[Apache Kamelet Catalog]. This is a facility that will let you immediately use a wide set of connector-style resources to interact with any event source and sink.
+
+NOTE: the version we bundle depends directly on the default Camel version used. For instance, in Camel K version 2, the default runtime we use is Camel K Runtime 2.16.0 which depends on Camel version 3.20.1. The Kamelet version we use is the one distributed as link:https://github.com/apache/camel-kamelets/releases/tag/v3.20.1.1[v3.20.1].
+
+As development of Kamelet is very fast, make sure to use some version which is compatible with the Camel runtime you're going to use.
+
+[[kamelets-own-catalog]]
+== Provide your own catalog
+
+An alternative to the catalog we bundle is to include a repository containing your own catalog. You need to specify it in the IntegrationPlatform `.spec.kamelet.repository`.
+
+However, we have a simple command in our CLI which takes care of it:
+```
+kamel kamelet add-repo <git-platform>:<owner>/<repo>[/path_to_kamelets_folder][@version]
+```
+Mind that `<git-platform>` is the repository of your choice, for instance `github` and `[@version]` is the tag to use (by default it will use `main` branch).
+
+With this approach you can dynamically include any repository where your Kamelets are hosted. They will be lazily initialized as soon as they are required by any of the Integration or Pipes which will make use of them.
