@@ -1,8 +1,32 @@
 [[kamelets]]
 = Kamelets
 
-This section of the documentation contains information about Kamelets from both a user and a developer point of view:
+Kamelets (**Kamel** route snipp**ets**) are a concept originally introduced in Camel K and later moved into Camel core. It allows users to connect to external systems via a simplified interface, hiding all the low level details about how those connections are implemented.
 
-- The xref:kamelets/kamelets-user.adoc[Kamelets User Guide] is for users that want to use Kamelets for connecting systems with their applications
-- The xref:kamelets/kameletbindings-error-handler.adoc[Pipes Error Handler User Guide] explains how to configure an error handler on a `Pipe`
-- The xref:kamelets/kamelets-dev.adoc[Kamelets Developer Guide] is a reference for developers that want to create new Kamelets and share them with users
+A Kamelet can act as *"source"* of data or alternatively as *"sink"*: a source allows to consume data from an external system, while a sink can let you send data to an external system or execute a particular action and get a result.
+
+For example, a "twitter-stream" Kamelet may allow a user to consume all tweets containing a specified keyword.
+Another Kamelet "twitter-post" may allow the user to publish some data as a tweet.
+Those are simple examples: experienced Camel developers know how to map those Kamelets into Camel endpoint URIs directly.
+But, in general, a Kamelet is not expected to map 1:1 a Camel component. Kamelets are **route templates**, so they can be much more complex.
+
+Being made of **pure Camel DSL**, Kamelets can embody all the logic that allows to consume or produce data from public SaaS or
+enterprise systems and only expose to the final users a clean interface that describes **the expected parameters, input and output**: just like an OpenAPI spec.
+
+For example, a "store-orders" Kamelet may be used to consume all events related to orders created in a customer enterprise system.
+The **Kamelet's interface** will define what parameters should be provided (e.g. filters on the type of order) and what's the expected datashape of the produced events.
+**Internally**, the Kamelet defines how such events will be generated: it may involve connections to multiple systems using different protocols, transformations and so on.
+But everything will be **hidden to the end user**.
+
+Kamelets are the fundamental **unit of abstraction** in the next-gen architecture of Apache Camel K.
+A system as a whole can be technically described as the set of operations that you can do with it:
+if you use the language of Kamelets to describe a specific system, then other users can have access to all those operations with ease,
+no matter how complicated is the internal logic underlying all those operations.
+Comparing it to the classical way of using Apache Camel, where developers used to write complex routes (containing both high-level and low-level details)
+to integrate systems, the Kamelet model tends to reduce the complexity by encapsulating low-level details into reusable components.
+
+Kamelets are also expected to be **rendered on visual tools** that will provide additional value to the end users.
+They are generic connectors that can be used in multiples ways, depending on the context, so each UIs can use them
+for its own purpose.
+
+Have a look at the xref:kamelets/kamelets-user.adoc[Kamelets User Guide] to learn how to immediately use Kamelets in Camel K or check xref:kamelets/kamelets-distribution.adoc[Distribution][how to use your own Kamelet catalog].
