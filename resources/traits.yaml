@@ -1338,14 +1338,14 @@ traits:
   - OpenShift
   description: 'The Resume trait can be used to manage and configure resume strategies.
     This feature is meant to allow quick resume of processing by Camel K instances
-    after they have been restarted. This is an experimental implementation based on
-    the support available on Camel Core resume strategies. The Resume trait is disabled
-    by default. The main different from the implementation on Core is that it''s not
-    necessary to bind the strategies to the registry. This step will be done automatically
-    by Camel K, after resolving the options passed to the trait. A sample execution
-    of this trait, using the Kafka backend (the only one supported at the moment),
-    would require the following trait options: -t resume.enabled=true -t resume.resume-path=camel-file-sets
-    -t resume.resume-server="address-of-your-kafka:9092"'
+    after they have been restarted. WARNING: this is an experimental implementation
+    based on the support available on link:/components/next/eips/resume-strategies.html[Camel
+    Core resume strategies]. The Resume trait is disabled by default. The main different
+    from the implementation on Core is that it''s not necessary to bind the strategies
+    to the registry. This step will be done automatically by Camel K, after resolving
+    the options passed to the trait. A sample execution of this trait, using the Kafka
+    backend (the only one supported at the moment), would require the following trait
+    options: -t resume.enabled=true -t resume.resume-path=camel-file-sets -t resume.resume-server="address-of-your-kafka:9092"'
   properties:
   - name: enabled
     type: bool
