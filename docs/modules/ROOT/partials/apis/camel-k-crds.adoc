@@ -339,7 +339,7 @@ Generic raw message, typically a map containing the keys (trait parameters) and 
 
 * <<#_camel_apache_org_v1_Container, Container>>
 
-Args --
+Args -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -1400,7 +1400,7 @@ the value to assign to the configuration (syntax may vary depending on the `Type
 
 * <<#_camel_apache_org_v1_PluginConfiguration, PluginConfiguration>>
 
-Container --
+Container -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -1913,7 +1913,7 @@ string
 
 * <<#_camel_apache_org_v1_PluginConfiguration, PluginConfiguration>>
 
-ExtraDirectories --
+ExtraDirectories -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -2021,7 +2021,7 @@ time of the attempt execution
 
 * <<#_camel_apache_org_v1_PluginExtensionConfiguration, PluginExtensionConfiguration>>
 
-Filter --
+Filter -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -4049,7 +4049,7 @@ See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
 
 * <<#_camel_apache_org_v1_ExtraDirectories, ExtraDirectories>>
 
-Path --
+Path -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -4087,7 +4087,7 @@ string
 
 * <<#_camel_apache_org_v1_ExtraDirectories, ExtraDirectories>>
 
-Permission --
+Permission -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -4318,7 +4318,7 @@ Selector allows to identify pods belonging to the pipe
 [#_camel_apache_org_v1_PluginConfiguration]
 === PluginConfiguration
 
-PluginConfiguration see link:https://maven.apache.org/settings.html[Maven settings]
+PluginConfiguration see link:https://maven.apache.org/settings.html[Maven settings].
 
 [cols="2,2a",options="header"]
 |===
@@ -4363,7 +4363,7 @@ string
 
 * <<#_camel_apache_org_v1_PluginExtensions, PluginExtensions>>
 
-PluginExtension --
+PluginExtension -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -4394,7 +4394,7 @@ string
 
 * <<#_camel_apache_org_v1_PluginExtension, PluginExtension>>
 
-PluginExtensionConfiguration --
+PluginExtensionConfiguration -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -4425,7 +4425,7 @@ string
 
 * <<#_camel_apache_org_v1_PluginConfiguration, PluginConfiguration>>
 
-PluginExtensions --
+PluginExtensions -- .
 
 [cols="2,2a",options="header"]
 |===
@@ -4445,7 +4445,7 @@ PluginExtensions --
 [#_camel_apache_org_v1_PluginProperties]
 === PluginProperties(`map[string]github.com/apache/camel-k/v2/pkg/apis/camel/v1.StringOrProperties` alias)
 
-PluginProperties --
+PluginProperties -- .
 
 
 [#_camel_apache_org_v1_PodCondition]
@@ -4613,7 +4613,7 @@ the specification
 * <<#_camel_apache_org_v1_Server, Server>>
 * <<#_camel_apache_org_v1_StringOrProperties, StringOrProperties>>
 
-Properties --
+Properties -- .
 
 
 [#_camel_apache_org_v1_PublishTask]
@@ -4955,7 +4955,7 @@ used by the ImageStream
 
 * <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
 
-Server see link:https://maven.apache.org/settings.html[Maven settings]
+Server see link:https://maven.apache.org/settings.html[Maven settings].
 
 [cols="2,2a",options="header"]
 |===
@@ -5109,7 +5109,7 @@ SpectrumTask is used to configure Spectrum.
 [#_camel_apache_org_v1_StringOrProperties]
 === StringOrProperties
 
-StringOrProperties --
+StringOrProperties -- .
 
 [cols="2,2a",options="header"]
 |===

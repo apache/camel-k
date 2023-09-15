@@ -436,12 +436,12 @@ spec:
                               description: Servers (auth)
                               items:
                                 description: Server see link:https://maven.apache.org/settings.html[Maven
-                                  settings]
+                                  settings].
                                 properties:
                                   configuration:
                                     additionalProperties:
                                       type: string
-                                    description: Properties --
+                                    description: Properties -- .
                                     type: object
                                   id:
                                     type: string
