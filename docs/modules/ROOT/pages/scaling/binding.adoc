@@ -99,6 +99,8 @@ A Pipe can automatically scale based on its CPU utilization and custom metrics u
 
 For example, executing the following command creates an _autoscaler_ for the Pipe, with target CPU utilization set to 80%, and the number of replicas between 2 and 5:
 
+WARNING: the HPA can work when the Pipe replica field needs to be specified. You need to scale the Pipe via `kubectl scale pipe my-pipe --replicas 1` or edit the `.spec.replicas` field of your Pipe to 1. This is due to a link:https://github.com/kubernetes/kubernetes/issues/111781[Kubernetes behavior which does not allow an empty value on the resource to scale].
+
 [source,console]
 ----
 $ kubectl autoscale klb <kamelet_binding_name> --min=2 --max=5 --cpu-percent=80
