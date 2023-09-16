@@ -6,13 +6,26 @@
 
 **Closed issues:**
 
+- Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
 - Regression: upgrade check failing after 2.0.1 [\#4721](https://github.com/apache/camel-k/issues/4721)
 - Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
+- kamel reports error when trying to use a camel-k-runtime version not following the sematic version [\#4715](https://github.com/apache/camel-k/issues/4715)
 - Camel Quarkus 3.2.0 errors [\#4709](https://github.com/apache/camel-k/issues/4709)
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
 - Camel K 1.12.1 : XSLT/XSLT-saxon: javax.xml.transform.TransformerConfigurationException: Could not compile stylesheet [\#4677](https://github.com/apache/camel-k/issues/4677)
 - Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
 - Language page for documentation of camel-k 1.12.x missing [\#4176](https://github.com/apache/camel-k/issues/4176)
+- Error creating Integration with Kaniko build strategy and Docker Desktop [\#4158](https://github.com/apache/camel-k/issues/4158)
+- provide link to resume strategy documentation from resume trait documentation [\#3643](https://github.com/apache/camel-k/issues/3643)
+- Buildah pods will wait for Istio container to finish then timeout [\#3408](https://github.com/apache/camel-k/issues/3408)
+- How Camel K build container images [\#3336](https://github.com/apache/camel-k/issues/3336)
+- Missing Maven Server API description [\#3332](https://github.com/apache/camel-k/issues/3332)
+- Create proper Camel event source page on Knative website [\#3262](https://github.com/apache/camel-k/issues/3262)
+- Local dependencies examples [\#3167](https://github.com/apache/camel-k/issues/3167)
+- `make build-resources` does not work on Windows [\#3134](https://github.com/apache/camel-k/issues/3134)
+- Invalid replica state for HPA [\#3132](https://github.com/apache/camel-k/issues/3132)
+- Java DSL - Add notes in documentation about its limitations [\#2374](https://github.com/apache/camel-k/issues/2374)
+- kamelets: distribution model documentation [\#1576](https://github.com/apache/camel-k/issues/1576)
 
 ## [2.0.2-nightly](https://github.com/apache/camel-k/tree/2.0.2-nightly) (2023-09-06)
 
