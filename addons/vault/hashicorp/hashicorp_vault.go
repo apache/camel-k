@@ -78,7 +78,8 @@ func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, e
 func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityHashicorpVault)
-		// TODO remove dependencies after runtime > 2.16.0
+		// Deprecated
+		// remove dependencies after Camel K Runtime > 2.16.0 and no longer supported or LTS
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-hashicorp-vault")
 	}
 

@@ -183,7 +183,8 @@ func (t *knativeTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityKnative)
 	}
-	// TODO remove dependencies after runtime > 2.16.0
+	// Deprecated
+	// remove dependencies after Camel K Runtime > 2.16.0 and no longer supported or LTS
 	if pointer.BoolDeref(t.SinkBinding, false) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:knative")
 		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-knative-impl")

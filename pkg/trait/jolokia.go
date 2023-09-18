@@ -56,7 +56,8 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityJolokia)
 
-		// TODO remove dependencies after runtime > 2.16.0
+		// Deprecated
+		// remove dependencies after Camel K Runtime > 2.16.0 and no longer supported or LTS
 		if e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel-quarkus:management")
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
