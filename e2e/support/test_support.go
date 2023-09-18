@@ -63,6 +63,8 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
@@ -214,7 +216,6 @@ func init() {
 	gomega.SetDefaultEventuallyTimeout(TestTimeoutShort)
 	// Disable object truncation on test results
 	format.MaxLength = 0
-
 }
 
 func NewTestClient() (client.Client, error) {
@@ -321,6 +322,8 @@ func KamelBindWithContext(ctx context.Context, operatorID string, namespace stri
 }
 
 func KamelCommandWithContext(ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	var cmdArgs []string
 
 	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
