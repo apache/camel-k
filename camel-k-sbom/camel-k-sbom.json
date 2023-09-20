@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:e62f815a-fb6c-4d3b-a490-5b8b8dac77bd",
+  "serialNumber": "urn:uuid:ad46b355-16b4-4471-96a0-ec822190f0c8",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-09-19T23:48:55Z",
+    "timestamp": "2023-09-20T23:48:08Z",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230918234655-8a40d0bdbdaa?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230920234742-a3a4f46d884b?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20230918234655-8a40d0bdbdaa",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230918234655-8a40d0bdbdaa?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20230920234742-a3a4f46d884b",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230920234742-a3a4f46d884b?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -3595,18 +3595,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/knative.dev/eventing@v0.38.2?type=module",
+      "bom-ref": "pkg:golang/knative.dev/eventing@v0.38.3?type=module",
       "type": "library",
       "name": "knative.dev/eventing",
-      "version": "v0.38.2",
+      "version": "v0.38.3",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "c08dfb735cbf937e103480269bfbda00bf7b875dd0525a84a7368cf7952607ba"
+          "content": "60149faab3414d2f65d8ca74aa9b970ae8502d9ae9f9edeea25238dada130a3f"
         }
       ],
-      "purl": "pkg:golang/knative.dev/eventing@v0.38.2?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/knative.dev/eventing@v0.38.3?type=module\u0026goos=linux\u0026goarch=amd64",
       "evidence": {
         "licenses": [
           {
@@ -3664,18 +3664,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/knative.dev/serving@v0.38.0?type=module",
+      "bom-ref": "pkg:golang/knative.dev/serving@v0.38.1?type=module",
       "type": "library",
       "name": "knative.dev/serving",
-      "version": "v0.38.0",
+      "version": "v0.38.1",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "8763cb19b857984d4fda3079a338e75d3e826a069d33291a256e10fdd86fd28b"
+          "content": "00b2b2c8a0355dfd3cdc4b3648e13c1de0b2fef16115613a4dc1cdc6eac37f99"
         }
       ],
-      "purl": "pkg:golang/knative.dev/serving@v0.38.0?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/knative.dev/serving@v0.38.1?type=module\u0026goos=linux\u0026goarch=amd64",
       "evidence": {
         "licenses": [
           {
@@ -3772,7 +3772,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230918234655-8a40d0bdbdaa?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230920234742-a3a4f46d884b?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
         "pkg:golang/github.com/container-tools/spectrum@v0.6.36?type=module",
@@ -3820,9 +3820,9 @@
         "pkg:golang/k8s.io/klog/v2@v2.100.1?type=module",
         "pkg:golang/k8s.io/kubectl@v0.27.4?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
-        "pkg:golang/knative.dev/eventing@v0.38.2?type=module",
+        "pkg:golang/knative.dev/eventing@v0.38.3?type=module",
         "pkg:golang/knative.dev/pkg@v0.0.0-20230718152110-aef227e72ead?type=module",
-        "pkg:golang/knative.dev/serving@v0.38.0?type=module",
+        "pkg:golang/knative.dev/serving@v0.38.1?type=module",
         "pkg:golang/sigs.k8s.io/controller-runtime@v0.15.2?type=module",
         "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module"
       ]
@@ -5317,7 +5317,7 @@
       ]
     },
     {
-      "ref": "pkg:golang/knative.dev/eventing@v0.38.2?type=module",
+      "ref": "pkg:golang/knative.dev/eventing@v0.38.3?type=module",
       "dependsOn": [
         "pkg:golang/contrib.go.opencensus.io/exporter/ocagent@v0.7.1-0.20200907061046-05415f1de66d?type=module",
         "pkg:golang/contrib.go.opencensus.io/exporter/prometheus@v0.4.0?type=module",
@@ -5568,7 +5568,7 @@
       ]
     },
     {
-      "ref": "pkg:golang/knative.dev/serving@v0.38.0?type=module",
+      "ref": "pkg:golang/knative.dev/serving@v0.38.1?type=module",
       "dependsOn": [
         "pkg:golang/contrib.go.opencensus.io/exporter/ocagent@v0.7.1-0.20200907061046-05415f1de66d?type=module",
         "pkg:golang/contrib.go.opencensus.io/exporter/prometheus@v0.4.0?type=module",
