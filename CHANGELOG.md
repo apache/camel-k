@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
 - Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
 - Regression: upgrade check failing after 2.0.1 [\#4721](https://github.com/apache/camel-k/issues/4721)
 - Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
@@ -30,7 +31,11 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump knative.dev/serving from 0.38.0 to 0.38.1 [\#4761](https://github.com/apache/camel-k/pull/4761) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump knative.dev/eventing from 0.38.2 to 0.38.3 [\#4760](https://github.com/apache/camel-k/pull/4760) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): init controller-runtime log.SetLogger\(\) [\#4757](https://github.com/apache/camel-k/pull/4757) ([gansheer](https://github.com/gansheer))
 - chore\(trait\): deprecation notice [\#4755](https://github.com/apache/camel-k/pull/4755) ([squakez](https://github.com/squakez))
+- fix\(e2e\): Fix E2E test using kamelet my-own-timer-source [\#4753](https://github.com/apache/camel-k/pull/4753) ([gansheer](https://github.com/gansheer))
 - fix\(lint\): adding dot [\#4751](https://github.com/apache/camel-k/pull/4751) ([squakez](https://github.com/squakez))
 - chore\(docs\): address old requests [\#4749](https://github.com/apache/camel-k/pull/4749) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump go.uber.org/zap from 1.25.0 to 1.26.0 [\#4748](https://github.com/apache/camel-k/pull/4748) ([dependabot[bot]](https://github.com/apps/dependabot))
