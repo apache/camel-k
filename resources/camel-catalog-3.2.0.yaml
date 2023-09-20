@@ -18,26 +18,34 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-2.16.0
+  name: camel-catalog-3.2.0
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 3.20.1
-    camel.apache.org/catalog.version: 3.20.1
-    camel.apache.org/runtime.version: 2.16.0
+    camel.apache.org/catalog.loader.version: 4.0.0
+    camel.apache.org/catalog.version: 4.0.0
+    camel.apache.org/runtime.version: 3.2.0
 spec:
   runtime:
-    version: 2.16.0
+    version: 3.2.0
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 2.16.0
-      camel.version: 3.20.1
-      quarkus.native-builder-image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.2.0.0-Final-java11
-      quarkus.version: 2.16.0.Final
+      camel-quarkus.version: 3.2.0
+      camel.version: 4.0.0
+      quarkus.native-builder-image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-jdk-17
+      quarkus.version: 3.2.6.Final
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
     capabilities:
+      aws-secrets-manager:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-aws-secrets-manager
+      azure-key-vault:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-azure-key-vault
       circuit-breaker:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -46,10 +54,32 @@ spec:
         dependencies:
         - groupId: org.apache.camel.k
           artifactId: camel-k-cron
+      gcp-secret-manager:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-google-secret-manager
+      hashicorp-vault:
+        dependencies:
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-hashicorp-vault
       health:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-microprofile-health
+      jolokia:
+        dependencies:
+        - groupId: org.apache.camel
+          artifactId: camel-jaxb
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-management
+        - groupId: org.jolokia
+          artifactId: jolokia-jvm
+      knative:
+        dependencies:
+        - groupId: org.apache.camel.k
+          artifactId: camel-k-knative-impl
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-knative
       master:
         dependencies:
         - groupId: org.apache.camel.k
@@ -58,6 +88,12 @@ spec:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-platform-http
+      prometheus:
+        dependencies:
+        - groupId: io.micrometer
+          artifactId: micrometer-registry-prometheus
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-micrometer
       rest:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -138,24 +174,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.asterisk.AsteriskComponent
-    camel-quarkus-atlasmap:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-atlasmap
-      schemes:
-      - id: atlasmap
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.atlasmap.AtlasMapComponent
-    camel-quarkus-atmos:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-atmos
-      schemes:
-      - id: atmos
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.atmos.AtmosComponent
     camel-quarkus-atom:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-atom
@@ -175,15 +193,6 @@ spec:
       - avro
       javaTypes:
       - org.apache.camel.dataformat.avro.AvroDataFormat
-    camel-quarkus-avro-rpc:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-avro-rpc
-      schemes:
-      - id: avro
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.avro.AvroComponent
     camel-quarkus-aws-secrets-manager:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-aws-secrets-manager
@@ -537,9 +546,6 @@ spec:
       javaTypes:
       - org.apache.camel.component.caffeine.cache.CaffeineCacheComponent
       - org.apache.camel.component.caffeine.load.CaffeineLoadCacheComponent
-    camel-quarkus-caffeine-lrucache:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-caffeine-lrucache
     camel-quarkus-cassandraql:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-cassandraql
@@ -574,6 +580,9 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.chunk.ChunkComponent
+    camel-quarkus-cli-connector:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-cli-connector
     camel-quarkus-cloudevents:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-cloudevents
@@ -586,15 +595,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.cm.CMComponent
-    camel-quarkus-cmis:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-cmis
-      schemes:
-      - id: cmis
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.cmis.CMISComponent
     camel-quarkus-coap:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-coap
@@ -646,15 +646,6 @@ spec:
         passive: true
       javaTypes:
       - org.apache.camel.component.controlbus.ControlBusComponent
-    camel-quarkus-corda:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-corda
-      schemes:
-      - id: corda
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.corda.CordaComponent
     camel-quarkus-core:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-core
@@ -858,15 +849,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.dns.DnsComponent
-    camel-quarkus-dozer:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-dozer
-      schemes:
-      - id: dozer
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.dozer.DozerComponent
     camel-quarkus-drill:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-drill
@@ -897,15 +879,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.ehcache.EhcacheComponent
-    camel-quarkus-elasticsearch-rest:
+    camel-quarkus-elasticsearch:
       groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-elasticsearch-rest
+      artifactId: camel-quarkus-elasticsearch
       schemes:
-      - id: elasticsearch-rest
+      - id: elasticsearch
         http: false
         passive: false
       javaTypes:
-      - org.apache.camel.component.elasticsearch.ElasticsearchComponent
+      - org.apache.camel.component.es.ElasticsearchComponent
     camel-quarkus-etcd3:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-etcd3
@@ -1261,15 +1243,6 @@ spec:
       - org.apache.camel.component.hazelcast.seda.HazelcastSedaComponent
       - org.apache.camel.component.hazelcast.set.HazelcastSetComponent
       - org.apache.camel.component.hazelcast.topic.HazelcastTopicComponent
-    camel-quarkus-hbase:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-hbase
-      schemes:
-      - id: hbase
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.hbase.HBaseComponent
     camel-quarkus-hdfs:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-hdfs
@@ -1384,15 +1357,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.influxdb.InfluxDbComponent
-    camel-quarkus-iota:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-iota
-      schemes:
-      - id: iota
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.iota.IOTAComponent
     camel-quarkus-irc:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-irc
@@ -1443,15 +1407,6 @@ spec:
       - jaxb
       javaTypes:
       - org.apache.camel.converter.jaxb.JaxbDataFormat
-    camel-quarkus-jbpm:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-jbpm
-      schemes:
-      - id: jbpm
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.jbpm.JBPMComponent
     camel-quarkus-jcache:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jcache
@@ -1461,15 +1416,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.jcache.JCacheComponent
-    camel-quarkus-jclouds:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-jclouds
-      schemes:
-      - id: jclouds
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.jclouds.JcloudsComponent
     camel-quarkus-jcr:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jcr
@@ -1527,13 +1473,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.jms.JmsComponent
-    camel-quarkus-johnzon:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-johnzon
-      dataformats:
-      - johnzon
-      javaTypes:
-      - org.apache.camel.component.johnzon.JohnzonDataFormat
     camel-quarkus-jolt:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jolt
@@ -1885,6 +1824,15 @@ spec:
     camel-quarkus-management:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-management
+    camel-quarkus-mapstruct:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mapstruct
+      schemes:
+      - id: mapstruct
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.mapstruct.MapstructComponent
     camel-quarkus-master:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-master
@@ -1909,32 +1857,6 @@ spec:
     camel-quarkus-microprofile-health:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-microprofile-health
-    camel-quarkus-microprofile-metrics:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-microprofile-metrics
-      schemes:
-      - id: microprofile-metrics
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.microprofile.metrics.MicroProfileMetricsComponent
-    camel-quarkus-milo:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-milo
-      schemes:
-      - id: milo-browse
-        http: false
-        passive: false
-      - id: milo-client
-        http: false
-        passive: false
-      - id: milo-server
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.milo.browse.MiloBrowseComponent
-      - org.apache.camel.component.milo.client.MiloClientComponent
-      - org.apache.camel.component.milo.server.MiloServerComponent
     camel-quarkus-minio:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-minio
@@ -2110,9 +2032,6 @@ spec:
     camel-quarkus-opentelemetry:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-opentelemetry
-    camel-quarkus-opentracing:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-opentracing
     camel-quarkus-optaplanner:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-optaplanner
@@ -2237,15 +2156,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.qute.QuteComponent
-    camel-quarkus-rabbitmq:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-rabbitmq
-      schemes:
-      - id: rabbitmq
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.rabbitmq.RabbitMQComponent
     camel-quarkus-reactive-executor:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-reactive-executor
@@ -2465,21 +2375,6 @@ spec:
       - soap
       javaTypes:
       - org.apache.camel.dataformat.soap.SoapDataFormat
-    camel-quarkus-solr:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-solr
-      schemes:
-      - id: solr
-        http: false
-        passive: false
-      - id: solrCloud
-        http: false
-        passive: false
-      - id: solrs
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.solr.SolrComponent
     camel-quarkus-splunk:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-splunk
@@ -2586,6 +2481,15 @@ spec:
         passive: true
       javaTypes:
       - org.apache.camel.component.stub.StubComponent
+    camel-quarkus-swift:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-swift
+      dataformats:
+      - swiftMt
+      - swiftMx
+      javaTypes:
+      - org.apache.camel.dataformat.swift.mt.SwiftMtDataFormat
+      - org.apache.camel.dataformat.swift.mx.SwiftMxDataFormat
     camel-quarkus-syslog:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-syslog
@@ -2724,15 +2628,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.vertx.websocket.VertxWebsocketComponent
-    camel-quarkus-vm:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-vm
-      schemes:
-      - id: vm
-        http: false
-        passive: true
-      javaTypes:
-      - org.apache.camel.component.vm.VmComponent
     camel-quarkus-weather:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-weather
@@ -2846,18 +2741,12 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.xslt.saxon.XsltSaxonComponent
-    camel-quarkus-xstream:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-xstream
-      dataformats:
-      - xstream
-      - xstreamJson
-      javaTypes:
-      - org.apache.camel.dataformat.xstream.JsonDataFormat
-      - org.apache.camel.dataformat.xstream.XStreamDataFormat
     camel-quarkus-yaml-dsl:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-yaml-dsl
+    camel-quarkus-yaml-io:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-yaml-io
     camel-quarkus-zendesk:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-zendesk
