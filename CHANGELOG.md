@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
 - Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
 - Regression: upgrade check failing after 2.0.1 [\#4721](https://github.com/apache/camel-k/issues/4721)
 - Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
