@@ -6,15 +6,18 @@
 
 **Closed issues:**
 
+- Unable to work under azure k8s at latest version with a minimal example [\#4758](https://github.com/apache/camel-k/issues/4758)
 - E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
 - Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
 - Regression: upgrade check failing after 2.0.1 [\#4721](https://github.com/apache/camel-k/issues/4721)
 - Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
 - kamel reports error when trying to use a camel-k-runtime version not following the sematic version [\#4715](https://github.com/apache/camel-k/issues/4715)
 - Camel Quarkus 3.2.0 errors [\#4709](https://github.com/apache/camel-k/issues/4709)
+- Missing license [\#4700](https://github.com/apache/camel-k/issues/4700)
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
 - Camel K 1.12.1 : XSLT/XSLT-saxon: javax.xml.transform.TransformerConfigurationException: Could not compile stylesheet [\#4677](https://github.com/apache/camel-k/issues/4677)
 - Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
+- Security warning messages from the operator pod on Openshift  [\#4424](https://github.com/apache/camel-k/issues/4424)
 - Language page for documentation of camel-k 1.12.x missing [\#4176](https://github.com/apache/camel-k/issues/4176)
 - Redesign traits that have runtime dependencies [\#4166](https://github.com/apache/camel-k/issues/4166)
 - Error creating Integration with Kaniko build strategy and Docker Desktop [\#4158](https://github.com/apache/camel-k/issues/4158)
@@ -31,6 +34,8 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): license check [\#4763](https://github.com/apache/camel-k/pull/4763) ([squakez](https://github.com/squakez))
+- feat\(runtime\): default version 3.2.0 [\#4762](https://github.com/apache/camel-k/pull/4762) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/serving from 0.38.0 to 0.38.1 [\#4761](https://github.com/apache/camel-k/pull/4761) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/eventing from 0.38.2 to 0.38.3 [\#4760](https://github.com/apache/camel-k/pull/4760) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): init controller-runtime log.SetLogger\(\) [\#4757](https://github.com/apache/camel-k/pull/4757) ([gansheer](https://github.com/gansheer))
@@ -41,6 +46,7 @@
 - chore\(deps\): bump go.uber.org/zap from 1.25.0 to 1.26.0 [\#4748](https://github.com/apache/camel-k/pull/4748) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(api\): deprecate Buildah and Kaniko [\#4746](https://github.com/apache/camel-k/pull/4746) ([squakez](https://github.com/squakez))
 - Fix operator check of the catalog [\#4741](https://github.com/apache/camel-k/pull/4741) ([claudio4j](https://github.com/claudio4j))
+- feat\(core\): Remove Openshift security warning message [\#4740](https://github.com/apache/camel-k/pull/4740) ([gansheer](https://github.com/gansheer))
 - fix\(doc\): catalog link [\#4737](https://github.com/apache/camel-k/pull/4737) ([squakez](https://github.com/squakez))
 - doc: Add the remote debug operator link to the navigation [\#4736](https://github.com/apache/camel-k/pull/4736) ([claudio4j](https://github.com/claudio4j))
 - chore\(doc\): registry requirements [\#4735](https://github.com/apache/camel-k/pull/4735) ([squakez](https://github.com/squakez))
