@@ -23,8 +23,9 @@ package v1
 // with apply.
 type UserTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
-	ContainerImage             *string `json:"image,omitempty"`
-	ContainerCommand           *string `json:"command,omitempty"`
+	ContainerImage             *string  `json:"image,omitempty"`
+	ContainerCommand           *string  `json:"command,omitempty"`
+	ContainerCommands          []string `json:"commands,omitempty"`
 }
 
 // UserTaskApplyConfiguration constructs an declarative configuration of the UserTask type for use with
@@ -54,5 +55,15 @@ func (b *UserTaskApplyConfiguration) WithContainerImage(value string) *UserTaskA
 // If called multiple times, the ContainerCommand field is set to the value of the last call.
 func (b *UserTaskApplyConfiguration) WithContainerCommand(value string) *UserTaskApplyConfiguration {
 	b.ContainerCommand = &value
+	return b
+}
+
+// WithContainerCommands adds the given value to the ContainerCommands field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the ContainerCommands field.
+func (b *UserTaskApplyConfiguration) WithContainerCommands(values ...string) *UserTaskApplyConfiguration {
+	for i := range values {
+		b.ContainerCommands = append(b.ContainerCommands, values[i])
+	}
 	return b
 }

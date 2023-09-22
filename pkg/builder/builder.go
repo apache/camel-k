@@ -63,6 +63,7 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		Build:     *t.task,
 		BaseImage: t.task.BaseImage,
 	}
+	t.log.Infof("running builder task %s in context directory: %s", c.Build.Name, c.Path)
 
 	steps, err := StepsFrom(t.task.Steps...)
 	if err != nil {
@@ -75,7 +76,7 @@ func (t *builderTask) Do(ctx context.Context) v1.BuildStatus {
 		return steps[i].Phase() < steps[j].Phase()
 	})
 
-	t.log.Infof("steps: %v", steps)
+	t.log.Debugf("steps: %v", steps)
 
 steps:
 	for _, step := range steps {
@@ -94,7 +95,7 @@ steps:
 
 		default:
 			l := t.log.WithValues("step", step.ID(), "phase", strconv.FormatInt(int64(step.Phase()), 10), "task", t.task.Name)
-			l.Infof("executing step")
+			l.Debugf("executing step")
 
 			start := time.Now()
 			err := step.execute(&c)
@@ -104,7 +105,7 @@ steps:
 				break steps
 			}
 
-			l.Infof("step done in %f seconds", time.Since(start).Seconds())
+			l.Debugf("step done in %f seconds", time.Since(start).Seconds())
 		}
 	}
 
@@ -117,11 +118,11 @@ steps:
 	result.Artifacts = make([]v1.Artifact, 0, len(c.Artifacts))
 	result.Artifacts = append(result.Artifacts, c.Artifacts...)
 
-	t.log.Infof("dependencies: %s", t.task.Dependencies)
-	t.log.Infof("artifacts: %s", artifactIDs(c.Artifacts))
-	t.log.Infof("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
-	t.log.Infof("base image: %s", t.task.BaseImage)
-	t.log.Infof("resolved base image: %s", c.BaseImage)
+	t.log.Debugf("dependencies: %s", t.task.Dependencies)
+	t.log.Debugf("artifacts: %s", artifactIDs(c.Artifacts))
+	t.log.Debugf("artifacts selected: %s", artifactIDs(c.SelectedArtifacts))
+	t.log.Debugf("base image: %s", t.task.BaseImage)
+	t.log.Debugf("resolved base image: %s", c.BaseImage)
 
 	return result
 }

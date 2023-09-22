@@ -23,12 +23,13 @@ package v1
 // with apply.
 type TaskApplyConfiguration struct {
 	Builder  *BuilderTaskApplyConfiguration  `json:"builder,omitempty"`
+	Custom   *UserTaskApplyConfiguration     `json:"custom,omitempty"`
+	Package  *BuilderTaskApplyConfiguration  `json:"package,omitempty"`
 	Buildah  *BuildahTaskApplyConfiguration  `json:"buildah,omitempty"`
 	Kaniko   *KanikoTaskApplyConfiguration   `json:"kaniko,omitempty"`
 	Spectrum *SpectrumTaskApplyConfiguration `json:"spectrum,omitempty"`
 	S2i      *S2iTaskApplyConfiguration      `json:"s2i,omitempty"`
 	Jib      *JibTaskApplyConfiguration      `json:"jib,omitempty"`
-	Custom   *UserTaskApplyConfiguration     `json:"custom,omitempty"`
 }
 
 // TaskApplyConfiguration constructs an declarative configuration of the Task type for use with
@@ -42,6 +43,22 @@ func Task() *TaskApplyConfiguration {
 // If called multiple times, the Builder field is set to the value of the last call.
 func (b *TaskApplyConfiguration) WithBuilder(value *BuilderTaskApplyConfiguration) *TaskApplyConfiguration {
 	b.Builder = value
+	return b
+}
+
+// WithCustom sets the Custom field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Custom field is set to the value of the last call.
+func (b *TaskApplyConfiguration) WithCustom(value *UserTaskApplyConfiguration) *TaskApplyConfiguration {
+	b.Custom = value
+	return b
+}
+
+// WithPackage sets the Package field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Package field is set to the value of the last call.
+func (b *TaskApplyConfiguration) WithPackage(value *BuilderTaskApplyConfiguration) *TaskApplyConfiguration {
+	b.Package = value
 	return b
 }
 
@@ -82,13 +99,5 @@ func (b *TaskApplyConfiguration) WithS2i(value *S2iTaskApplyConfiguration) *Task
 // If called multiple times, the Jib field is set to the value of the last call.
 func (b *TaskApplyConfiguration) WithJib(value *JibTaskApplyConfiguration) *TaskApplyConfiguration {
 	b.Jib = value
-	return b
-}
-
-// WithCustom sets the Custom field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Custom field is set to the value of the last call.
-func (b *TaskApplyConfiguration) WithCustom(value *UserTaskApplyConfiguration) *TaskApplyConfiguration {
-	b.Custom = value
 	return b
 }

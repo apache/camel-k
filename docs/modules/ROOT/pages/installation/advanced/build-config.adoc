@@ -15,7 +15,7 @@ NOTE: the `pod` strategy was also required when using the now deprecated Buildah
 
 Beside the build strategy, there are other configuration you can fine tune for each single build (via builder trait) or in the `.spec.build.buildConfiguration` of the IntegrationPlatform if you want to apply such configuration to all your builds. See the Builder trait page for more information.
 
-The most relevant are the `resource` and `limit` parameters which can be used to control how much resources to give to builder Pods. Then you can configure the `orderStrategy`, setting a `sequential` (single build), `fifo` (parallel build started in FIFO order) or `dependencies` (parallel build holding those applications which may depends on other because of ** xref:architecture/incremental-image.adoc[incremental image]). Finally you can include any `mavenProfile` to the build in order to influence the behavior of the build (ie, adding any plugin or configuration you can use when xref:pipeline/pipeline.adoc[running a pipeline]).
+The most relevant are the `resource` and `limit` parameters which can be used to control how much resources to give to builder Pods. Then you can configure the `orderStrategy`, setting a `sequential` (single build), `fifo` (parallel build started in FIFO order) or `dependencies` (parallel build holding those applications which may depends on other because of xref:architecture/incremental-image.adoc[incremental image]). Finally you can include any `mavenProfile` to the build in order to influence the behavior of the build (ie, adding any plugin or configuration you can use when xref:pipeline/pipeline.adoc[running a pipeline]).
 
 [[publish-strategy]]
 == Publish strategy

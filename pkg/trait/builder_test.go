@@ -84,9 +84,10 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.Pipeline)
-	assert.Len(t, env.Pipeline, 2)
+	assert.Len(t, env.Pipeline, 3)
 	assert.NotNil(t, env.Pipeline[0].Builder)
-	assert.NotNil(t, env.Pipeline[1].S2i)
+	assert.NotNil(t, env.Pipeline[1].Package)
+	assert.NotNil(t, env.Pipeline[2].S2i)
 }
 
 func TestKanikoBuilderTrait(t *testing.T) {
@@ -97,9 +98,10 @@ func TestKanikoBuilderTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.Pipeline)
-	assert.Len(t, env.Pipeline, 2)
+	assert.Len(t, env.Pipeline, 3)
 	assert.NotNil(t, env.Pipeline[0].Builder)
-	assert.NotNil(t, env.Pipeline[1].Kaniko)
+	assert.NotNil(t, env.Pipeline[1].Package)
+	assert.NotNil(t, env.Pipeline[2].Kaniko)
 }
 
 func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy, buildStrategy v1.BuildStrategy) *Environment {
@@ -189,15 +191,18 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 
 	assert.Nil(t, err)
 	builderTask := findCustomTaskByName(env.Pipeline, "builder")
-	publisherTask := findCustomTaskByName(env.Pipeline, "spectrum")
 	customTask := findCustomTaskByName(env.Pipeline, "test")
-	assert.NotNil(t, customTask)
+	packageTask := findCustomTaskByName(env.Pipeline, "package")
+	publisherTask := findCustomTaskByName(env.Pipeline, "spectrum")
+
 	assert.NotNil(t, builderTask)
+	assert.NotNil(t, customTask)
+	assert.NotNil(t, packageTask)
 	assert.NotNil(t, publisherTask)
-	assert.Equal(t, 3, len(env.Pipeline))
+	assert.Equal(t, 4, len(env.Pipeline))
 	assert.Equal(t, "test", customTask.Custom.Name)
 	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
-	assert.Equal(t, "ls", customTask.Custom.ContainerCommand)
+	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
 }
 
 func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
@@ -210,16 +215,12 @@ func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	builderTask := findCustomTaskByName(env.Pipeline, "builder")
-	publisherTask := findCustomTaskByName(env.Pipeline, "spectrum")
 	customTask := findCustomTaskByName(env.Pipeline, "test")
-	assert.NotNil(t, customTask)
-	assert.NotNil(t, builderTask)
-	assert.NotNil(t, publisherTask)
-	assert.Equal(t, 3, len(env.Pipeline))
+
+	assert.Equal(t, 4, len(env.Pipeline))
 	assert.Equal(t, "test", customTask.Custom.Name)
 	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
-	assert.Equal(t, "ls", customTask.Custom.ContainerCommand)
+	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
 }
 
 func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
@@ -314,4 +315,64 @@ func TestMavenBuilderTraitJib(t *testing.T) {
 			Key: "profile.xml",
 		},
 	}, env.Pipeline[0].Builder.Maven.MavenSpec.Profiles[0])
+}
+
+func TestBuilderCustomTasks(t *testing.T) {
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
+	builderTrait.Tasks = append(builderTrait.Tasks, `test;alpine;"mvn test"`)
+
+	tasks, err := builderTrait.customTasks()
+
+	assert.Nil(t, err)
+	assert.Equal(t, 2, len(tasks))
+	assert.Equal(t, "test", tasks[0].Custom.Name)
+	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
+	assert.Equal(t, "ls", tasks[0].Custom.ContainerCommands[0])
+	assert.Equal(t, "test", tasks[1].Custom.Name)
+	assert.Equal(t, "alpine", tasks[1].Custom.ContainerImage)
+	assert.Equal(t, "mvn test", tasks[1].Custom.ContainerCommands[0])
+}
+
+func TestBuilderCustomTasksFailure(t *testing.T) {
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine")
+
+	_, err := builderTrait.customTasks()
+
+	assert.NotNil(t, err)
+}
+
+func TestBuilderCustomTasksScript(t *testing.T) {
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && ls; echo 'helooo'\"")
+
+	tasks, err := builderTrait.customTasks()
+
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(tasks))
+	assert.Equal(t, "test", tasks[0].Custom.Name)
+	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
+	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
+	assert.Equal(t, "-c", tasks[0].Custom.ContainerCommands[1])
+	assert.Equal(t, "cd test && ls; echo 'helooo'", tasks[0].Custom.ContainerCommands[2])
+}
+
+func TestUserTaskCommands(t *testing.T) {
+	command := `/bin/bash -c "ls && echo 'hello' && $(cat /path/to/a/resource)"`
+	podCommands := splitContainerCommand(command)
+
+	assert.Len(t, podCommands, 3)
+	assert.Equal(t, "/bin/bash", podCommands[0])
+	assert.Equal(t, "-c", podCommands[1])
+	assert.Equal(t, "ls && echo 'hello' && $(cat /path/to/a/resource)", podCommands[2])
+}
+
+func TestUserTaskSingleCommand(t *testing.T) {
+	command := `cat /path/to/a/resource`
+	podCommands := splitContainerCommand(command)
+
+	assert.Len(t, podCommands, 2)
+	assert.Equal(t, "cat", podCommands[0])
+	assert.Equal(t, "/path/to/a/resource", podCommands[1])
 }

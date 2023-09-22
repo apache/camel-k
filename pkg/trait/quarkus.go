@@ -40,8 +40,9 @@ const (
 )
 
 var kitPriority = map[traitv1.QuarkusPackageType]string{
-	traitv1.FastJarPackageType: "1000",
-	traitv1.NativePackageType:  "2000",
+	traitv1.FastJarPackageType:       "1000",
+	traitv1.NativeSourcesPackageType: "2000",
+	traitv1.NativePackageType:        "2100",
 }
 
 type quarkusTrait struct {
@@ -261,7 +262,7 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.Qua
 		Traits:       propagateKitTraits(e),
 	}
 
-	if packageType == traitv1.NativePackageType {
+	if packageType == traitv1.NativePackageType || packageType == traitv1.NativeSourcesPackageType {
 		kit.Spec.Sources = propagateSourcesRequiredAtBuildTime(e)
 	}
 	return kit
@@ -290,21 +291,29 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 }
 
 func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
-	build := getBuilderTask(e.Pipeline)
-	if build == nil {
+	buildTask := getBuilderTask(e.Pipeline)
+	if buildTask == nil {
 		return fmt.Errorf("unable to find builder task: %s", e.Integration.Name)
 	}
-
-	if build.Maven.Properties == nil {
-		build.Maven.Properties = make(map[string]string)
+	packageTask := getPackageTask(e.Pipeline)
+	if packageTask == nil {
+		return fmt.Errorf("unable to find package task: %s", e.Integration.Name)
 	}
 
-	steps, err := builder.StepsFrom(build.Steps...)
+	buildSteps, err := builder.StepsFrom(buildTask.Steps...)
+	if err != nil {
+		return err
+	}
+	buildSteps = append(buildSteps, builder.Quarkus.CommonSteps...)
+
+	packageSteps, err := builder.StepsFrom(packageTask.Steps...)
 	if err != nil {
 		return err
 	}
 
-	steps = append(steps, builder.Quarkus.CommonSteps...)
+	if buildTask.Maven.Properties == nil {
+		buildTask.Maven.Properties = make(map[string]string)
+	}
 
 	native, err := t.isNativeKit(e)
 	if err != nil {
@@ -312,31 +321,35 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	}
 
 	if native {
-		build.Maven.Properties["quarkus.package.type"] = string(traitv1.NativePackageType)
+		buildTask.Maven.Properties["quarkus.package.type"] = string(traitv1.NativeSourcesPackageType)
 		if len(e.IntegrationKit.Spec.Sources) > 0 {
-			build.Sources = e.IntegrationKit.Spec.Sources
-			steps = append(steps, builder.Quarkus.PrepareProjectWithSources)
+			buildTask.Sources = e.IntegrationKit.Spec.Sources
+			buildSteps = append(buildSteps, builder.Quarkus.PrepareProjectWithSources)
 		}
-		steps = append(steps, builder.Image.NativeImageContext)
-		// Spectrum does not rely on Dockerfile to assemble the image
-		if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum && e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyJib {
-			steps = append(steps, builder.Image.ExecutableDockerfile)
-		}
+		packageSteps = append(packageSteps, builder.Image.NativeImageContext)
+		// Create the dockerfile, regardless it's later used or not by the publish strategy
+		packageSteps = append(packageSteps, builder.Image.ExecutableDockerfile)
 	} else {
-		build.Maven.Properties["quarkus.package.type"] = string(traitv1.FastJarPackageType)
-		steps = append(steps, builder.Quarkus.ComputeQuarkusDependencies, builder.Image.IncrementalImageContext)
-		// Spectrum does not rely on Dockerfile to assemble the image
-		if e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategySpectrum && e.Platform.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyJib {
-			steps = append(steps, builder.Image.JvmDockerfile)
-		}
+		// Default, if nothing is specified
+		buildTask.Maven.Properties["quarkus.package.type"] = string(traitv1.FastJarPackageType)
+		packageSteps = append(packageSteps, builder.Quarkus.ComputeQuarkusDependencies)
+		// The LoadCamelQuarkusCatalog is required to have catalog information available by the builder
+		packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
+		packageSteps = append(packageSteps, builder.Image.IncrementalImageContext)
+		// Create the dockerfile, regardless it's later used or not by the publish strategy
+		packageSteps = append(packageSteps, builder.Image.JvmDockerfile)
 	}
 
 	// Sort steps by phase
-	sort.SliceStable(steps, func(i, j int) bool {
-		return steps[i].Phase() < steps[j].Phase()
+	sort.SliceStable(buildSteps, func(i, j int) bool {
+		return buildSteps[i].Phase() < buildSteps[j].Phase()
+	})
+	sort.SliceStable(packageSteps, func(i, j int) bool {
+		return packageSteps[i].Phase() < packageSteps[j].Phase()
 	})
 
-	build.Steps = builder.StepIDsFor(steps...)
+	buildTask.Steps = builder.StepIDsFor(buildSteps...)
+	packageTask.Steps = builder.StepIDsFor(packageSteps...)
 
 	return nil
 }
@@ -346,7 +359,7 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	case 0:
 		return false, nil
 	case 1:
-		return types[0] == traitv1.NativePackageType, nil
+		return types[0] == traitv1.NativePackageType || types[0] == traitv1.NativeSourcesPackageType, nil
 	default:
 		return false, fmt.Errorf("kit %q has more than one package type", e.IntegrationKit.Name)
 	}

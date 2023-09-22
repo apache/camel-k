@@ -7798,19 +7798,22 @@ spec:
                               All traits share this common property.
                             type: boolean
                           packageTypes:
-                            description: The Quarkus package types, either `fast-jar`
-                              or `native` (default `fast-jar`). In case both `fast-jar`
-                              and `native` are specified, two `IntegrationKit` resources
-                              are created, with the `native` kit having precedence
-                              over the `fast-jar` one once ready. The order influences
-                              the resolution of the current kit for the integration.
-                              The kit corresponding to the first package type will
-                              be assigned to the integration in case no existing kit
-                              that matches the integration exists.
+                            description: The Quarkus package types, `fast-jar`, `native-sources`
+                              or `native` (default `fast-jar`). `native` is deprecated.
+                              In case both `fast-jar` and `native` or `native-sources`
+                              are specified, two `IntegrationKit` resources are created,
+                              with the native kit having precedence over the `fast-jar`
+                              one once ready. The order influences the resolution
+                              of the current kit for the integration. The kit corresponding
+                              to the first package type will be assigned to the integration
+                              in case no existing kit that matches the integration
+                              exists.
                             items:
-                              description: Quarkus package type.
+                              description: QuarkusPackageType is the type of Quarkus
+                                build packaging.
                               enum:
                               - fast-jar
+                              - native-sources
                               - native
                               type: string
                             type: array

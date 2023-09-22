@@ -54,8 +54,15 @@ type BuildSpec struct {
 type Task struct {
 	// Application building
 
-	// a BuilderTask, used to generate and package the project
+	// a BuilderTask, used to generate and build the project
 	Builder *BuilderTask `json:"builder,omitempty"`
+
+	// User customizable task execution. These are executed after the build and before the package task.
+	Custom *UserTask `json:"custom,omitempty"`
+
+	// Application pre publishing
+	// a PackageTask, used to package the project
+	Package *BuilderTask `json:"package,omitempty"`
 
 	// Application Publishing
 
@@ -71,10 +78,6 @@ type Task struct {
 	S2i *S2iTask `json:"s2i,omitempty"`
 	// a JibTask, for Jib strategy
 	Jib *JibTask `json:"jib,omitempty"`
-
-	// User customizable task execution
-
-	Custom *UserTask `json:"custom,omitempty"`
 }
 
 // BaseTask is a base for the struct hierarchy.
@@ -185,7 +188,10 @@ type UserTask struct {
 	// the container image to use
 	ContainerImage string `json:"image,omitempty"`
 	// the command to execute
+	// Deprecated: use ContainerCommands
 	ContainerCommand string `json:"command,omitempty"`
+	// the command to execute
+	ContainerCommands []string `json:"commands,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build.
