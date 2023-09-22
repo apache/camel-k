@@ -189,8 +189,7 @@ spec:
                           type: boolean
                       type: object
                     builder:
-                      description: a BuilderTask, used to generate and package the
-                        project
+                      description: a BuilderTask, used to generate and build the project
                       properties:
                         baseImage:
                           description: the base image layer
@@ -688,12 +687,17 @@ spec:
                           type: array
                       type: object
                     custom:
-                      description: UserTask is used to execute any generic custom
-                        operation.
+                      description: User customizable task execution. These are executed
+                        after the build and before the package task.
                       properties:
                         command:
-                          description: the command to execute
+                          description: 'the command to execute Deprecated: use ContainerCommands'
                           type: string
+                        commands:
+                          description: the command to execute
+                          items:
+                            type: string
+                          type: array
                         image:
                           description: the container image to use
                           type: string
@@ -791,6 +795,505 @@ spec:
                         verbose:
                           description: log more information
                           type: boolean
+                      type: object
+                    package:
+                      description: Application pre publishing a PackageTask, used
+                        to package the project
+                      properties:
+                        baseImage:
+                          description: the base image layer
+                          type: string
+                        buildDir:
+                          description: workspace directory to use
+                          type: string
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - dependencies
+                              - fifo
+                              - sequential
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
+                              type: string
+                          type: object
+                        dependencies:
+                          description: the list of dependencies to use for this build
+                          items:
+                            type: string
+                          type: array
+                        maven:
+                          description: the configuration required by Maven for the
+                            application build phase
+                          properties:
+                            caSecrets:
+                              description: The Secrets name and key, containing the
+                                CA certificate(s) used to connect to remote Maven
+                                repositories. It can contain X.509 certificates, and
+                                PKCS#7 formatted certificate chains. A JKS formatted
+                                keystore is automatically created to store the CA
+                                certificate(s), and configured to be used as a trusted
+                                certificate(s) by the Maven commands. Note that the
+                                root CA certificates are also imported into the created
+                                keystore.
+                              items:
+                                description: SecretKeySelector selects a key of a
+                                  Secret.
+                                properties:
+                                  key:
+                                    description: The key of the secret to select from.  Must
+                                      be a valid secret key.
+                                    type: string
+                                  name:
+                                    description: 'Name of the referent. More info:
+                                      https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                      TODO: Add other useful fields. apiVersion, kind,
+                                      uid?'
+                                    type: string
+                                  optional:
+                                    description: Specify whether the Secret or its
+                                      key must be defined
+                                    type: boolean
+                                required:
+                                - key
+                                type: object
+                              type: array
+                            cliOptions:
+                              description: The CLI options that are appended to the
+                                list of arguments for Maven commands, e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
+                                See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
+                              items:
+                                type: string
+                              type: array
+                            extension:
+                              description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+                              items:
+                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                  Maven artifact.
+                                properties:
+                                  artifactId:
+                                    description: Maven Artifact
+                                    type: string
+                                  groupId:
+                                    description: Maven Group
+                                    type: string
+                                  version:
+                                    description: Maven Version
+                                    type: string
+                                required:
+                                - artifactId
+                                - groupId
+                                type: object
+                              type: array
+                            localRepository:
+                              description: The path of the local Maven repository.
+                              type: string
+                            profiles:
+                              description: A reference to the ConfigMap or Secret
+                                key that contains the Maven profile.
+                              items:
+                                description: ValueSource --.
+                                properties:
+                                  configMapKeyRef:
+                                    description: Selects a key of a ConfigMap.
+                                    properties:
+                                      key:
+                                        description: The key to select.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the ConfigMap
+                                          or its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                  secretKeyRef:
+                                    description: Selects a key of a secret.
+                                    properties:
+                                      key:
+                                        description: The key of the secret to select
+                                          from.  Must be a valid secret key.
+                                        type: string
+                                      name:
+                                        description: 'Name of the referent. More info:
+                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion,
+                                          kind, uid?'
+                                        type: string
+                                      optional:
+                                        description: Specify whether the Secret or
+                                          its key must be defined
+                                        type: boolean
+                                    required:
+                                    - key
+                                    type: object
+                                type: object
+                              type: array
+                            properties:
+                              additionalProperties:
+                                type: string
+                              description: The Maven properties.
+                              type: object
+                            repositories:
+                              description: additional repositories
+                              items:
+                                description: Repository defines a Maven repository.
+                                properties:
+                                  id:
+                                    description: identifies the repository
+                                    type: string
+                                  name:
+                                    description: name of the repository
+                                    type: string
+                                  releases:
+                                    description: can use stable releases
+                                    properties:
+                                      checksumPolicy:
+                                        description: When Maven deploys files to the
+                                          repository, it also deploys corresponding
+                                          checksum files. Your options are to `ignore`,
+                                          `fail`, or `warn` on missing or incorrect
+                                          checksums.
+                                        type: string
+                                      enabled:
+                                        description: is the policy activated or not
+                                        type: boolean
+                                      updatePolicy:
+                                        description: 'This element specifies how often
+                                          updates should attempt to occur. Maven will
+                                          compare the local POM''s timestamp (stored
+                                          in a repository''s maven-metadata file)
+                                          to the remote. The choices are: `always`,
+                                          `daily` (default), `interval:X` (where X
+                                          is an integer in minutes) or `never`'
+                                        type: string
+                                    required:
+                                    - enabled
+                                    type: object
+                                  snapshots:
+                                    description: can use snapshot
+                                    properties:
+                                      checksumPolicy:
+                                        description: When Maven deploys files to the
+                                          repository, it also deploys corresponding
+                                          checksum files. Your options are to `ignore`,
+                                          `fail`, or `warn` on missing or incorrect
+                                          checksums.
+                                        type: string
+                                      enabled:
+                                        description: is the policy activated or not
+                                        type: boolean
+                                      updatePolicy:
+                                        description: 'This element specifies how often
+                                          updates should attempt to occur. Maven will
+                                          compare the local POM''s timestamp (stored
+                                          in a repository''s maven-metadata file)
+                                          to the remote. The choices are: `always`,
+                                          `daily` (default), `interval:X` (where X
+                                          is an integer in minutes) or `never`'
+                                        type: string
+                                    required:
+                                    - enabled
+                                    type: object
+                                  url:
+                                    description: location of the repository
+                                    type: string
+                                required:
+                                - id
+                                - url
+                                type: object
+                              type: array
+                            servers:
+                              description: Servers (auth)
+                              items:
+                                description: Server see link:https://maven.apache.org/settings.html[Maven
+                                  settings].
+                                properties:
+                                  configuration:
+                                    additionalProperties:
+                                      type: string
+                                    description: Properties -- .
+                                    type: object
+                                  id:
+                                    type: string
+                                  password:
+                                    type: string
+                                  username:
+                                    type: string
+                                type: object
+                              type: array
+                            settings:
+                              description: A reference to the ConfigMap or Secret
+                                key that contains the Maven settings.
+                              properties:
+                                configMapKeyRef:
+                                  description: Selects a key of a ConfigMap.
+                                  properties:
+                                    key:
+                                      description: The key to select.
+                                      type: string
+                                    name:
+                                      description: 'Name of the referent. More info:
+                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion,
+                                        kind, uid?'
+                                      type: string
+                                    optional:
+                                      description: Specify whether the ConfigMap or
+                                        its key must be defined
+                                      type: boolean
+                                  required:
+                                  - key
+                                  type: object
+                                secretKeyRef:
+                                  description: Selects a key of a secret.
+                                  properties:
+                                    key:
+                                      description: The key of the secret to select
+                                        from.  Must be a valid secret key.
+                                      type: string
+                                    name:
+                                      description: 'Name of the referent. More info:
+                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion,
+                                        kind, uid?'
+                                      type: string
+                                    optional:
+                                      description: Specify whether the Secret or its
+                                        key must be defined
+                                      type: boolean
+                                  required:
+                                  - key
+                                  type: object
+                              type: object
+                            settingsSecurity:
+                              description: A reference to the ConfigMap or Secret
+                                key that contains the security of the Maven settings.
+                              properties:
+                                configMapKeyRef:
+                                  description: Selects a key of a ConfigMap.
+                                  properties:
+                                    key:
+                                      description: The key to select.
+                                      type: string
+                                    name:
+                                      description: 'Name of the referent. More info:
+                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion,
+                                        kind, uid?'
+                                      type: string
+                                    optional:
+                                      description: Specify whether the ConfigMap or
+                                        its key must be defined
+                                      type: boolean
+                                  required:
+                                  - key
+                                  type: object
+                                secretKeyRef:
+                                  description: Selects a key of a secret.
+                                  properties:
+                                    key:
+                                      description: The key of the secret to select
+                                        from.  Must be a valid secret key.
+                                      type: string
+                                    name:
+                                      description: 'Name of the referent. More info:
+                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion,
+                                        kind, uid?'
+                                      type: string
+                                    optional:
+                                      description: Specify whether the Secret or its
+                                        key must be defined
+                                      type: boolean
+                                  required:
+                                  - key
+                                  type: object
+                              type: object
+                          type: object
+                        name:
+                          description: name of the task
+                          type: string
+                        runtime:
+                          description: the configuration required for the runtime
+                            application
+                          properties:
+                            applicationClass:
+                              description: application entry point (main) to be executed
+                              type: string
+                            capabilities:
+                              additionalProperties:
+                                description: Capability is a particular feature which
+                                  requires a well known set of dependencies which
+                                  are specified in the runtime catalog.
+                                properties:
+                                  dependencies:
+                                    items:
+                                      description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                        Maven artifact.
+                                      properties:
+                                        artifactId:
+                                          description: Maven Artifact
+                                          type: string
+                                        groupId:
+                                          description: Maven Group
+                                          type: string
+                                        version:
+                                          description: Maven Version
+                                          type: string
+                                      required:
+                                      - artifactId
+                                      - groupId
+                                      type: object
+                                    type: array
+                                required:
+                                - dependencies
+                                type: object
+                              description: features offered by this runtime
+                              type: object
+                            dependencies:
+                              description: list of dependencies needed to run the
+                                application
+                              items:
+                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                  Maven artifact.
+                                properties:
+                                  artifactId:
+                                    description: Maven Artifact
+                                    type: string
+                                  groupId:
+                                    description: Maven Group
+                                    type: string
+                                  version:
+                                    description: Maven Version
+                                    type: string
+                                required:
+                                - artifactId
+                                - groupId
+                                type: object
+                              type: array
+                            metadata:
+                              additionalProperties:
+                                type: string
+                              description: set of metadata
+                              type: object
+                            provider:
+                              description: Camel main application provider, ie, Camel
+                                Quarkus
+                              type: string
+                            version:
+                              description: Camel K Runtime version
+                              type: string
+                          required:
+                          - applicationClass
+                          - dependencies
+                          - provider
+                          - version
+                          type: object
+                        sources:
+                          description: the sources to add at build time
+                          items:
+                            description: SourceSpec defines the configuration for
+                              one or more routes to be executed in a certain Camel
+                              DSL language.
+                            properties:
+                              compression:
+                                description: if the content is compressed (base64
+                                  encrypted)
+                                type: boolean
+                              content:
+                                description: the source code (plain text)
+                                type: string
+                              contentKey:
+                                description: the confimap key holding the source content
+                                type: string
+                              contentRef:
+                                description: the confimap reference holding the source
+                                  content
+                                type: string
+                              contentType:
+                                description: the content type (tipically text or binary)
+                                type: string
+                              interceptors:
+                                description: Interceptors are optional identifiers
+                                  the org.apache.camel.k.RoutesLoader uses to pre/post
+                                  process sources
+                                items:
+                                  type: string
+                                type: array
+                              language:
+                                description: specify which is the language (Camel
+                                  DSL) used to interpret this source code
+                                type: string
+                              loader:
+                                description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                                  that will interpret this source at runtime
+                                type: string
+                              name:
+                                description: the name of the specification
+                                type: string
+                              path:
+                                description: the path where the file is stored
+                                type: string
+                              property-names:
+                                description: List of property names defined in the
+                                  source (e.g. if type is "template")
+                                items:
+                                  type: string
+                                type: array
+                              rawContent:
+                                description: the source code (binary)
+                                format: byte
+                                type: string
+                              type:
+                                description: Type defines the kind of source described
+                                  by this object
+                                type: string
+                            type: object
+                          type: array
+                        steps:
+                          description: the list of steps to execute (see pkg/builder/)
+                          items:
+                            type: string
+                          type: array
                       type: object
                     s2i:
                       description: a S2iTask, for S2I strategy

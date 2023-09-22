@@ -154,8 +154,17 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build
 
 	for _, task := range build.Spec.Tasks {
 		switch {
+		// Builder task
 		case task.Builder != nil:
 			addBuildTaskToPod(ctx, client, build, task.Builder.Name, pod)
+		// Custom task
+		case task.Custom != nil:
+			addCustomTaskToPod(build, task.Custom, pod)
+		// Package task
+		// It's a type of builder task, we can reuse the same type
+		case task.Package != nil:
+			addBuildTaskToPod(ctx, client, build, task.Package.Name, pod)
+		// Publish task
 		case task.Buildah != nil:
 			err := addBuildahTaskToPod(ctx, c, build, task.Buildah, pod)
 			if err != nil {
@@ -172,8 +181,6 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build
 			addBuildTaskToPod(ctx, client, build, task.Spectrum.Name, pod)
 		case task.Jib != nil:
 			addBuildTaskToPod(ctx, client, build, task.Jib.Name, pod)
-		case task.Custom != nil:
-			addCustomTaskToPod(build, task.Custom, pod)
 		}
 	}
 
@@ -558,7 +565,7 @@ func addCustomTaskToPod(build *v1.Build, task *v1.UserTask, pod *corev1.Pod) {
 		Name:            task.Name,
 		Image:           task.ContainerImage,
 		ImagePullPolicy: corev1.PullIfNotPresent,
-		Command:         strings.Split(task.ContainerCommand, " "),
+		Command:         task.ContainerCommands,
 		WorkingDir:      filepath.Join(builderDir, build.Name),
 		Env:             proxyFromEnvironment(),
 	}

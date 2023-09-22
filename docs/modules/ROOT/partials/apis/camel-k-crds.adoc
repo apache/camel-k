@@ -5152,7 +5152,22 @@ Task represents the abstract task. Only one of the task should be configured to 
 |
 
 
-a BuilderTask, used to generate and package the project
+a BuilderTask, used to generate and build the project
+
+|`custom` +
+*xref:#_camel_apache_org_v1_UserTask[UserTask]*
+|
+
+
+User customizable task execution. These are executed after the build and before the package task.
+
+|`package` +
+*xref:#_camel_apache_org_v1_BuilderTask[BuilderTask]*
+|
+
+
+Application pre publishing
+a PackageTask, used to package the project
 
 |`buildah` +
 *xref:#_camel_apache_org_v1_BuildahTask[BuildahTask]*
@@ -5190,13 +5205,6 @@ a S2iTask, for S2I strategy
 
 
 a JibTask, for Jib strategy
-
-|`custom` +
-*xref:#_camel_apache_org_v1_UserTask[UserTask]*
-|
-
-
-
 
 
 |===
@@ -5622,6 +5630,14 @@ the container image to use
 
 |`command` +
 string
+|
+
+
+the command to execute
+Deprecated: use ContainerCommands
+
+|`commands` +
+[]string
 |
 
 
@@ -7537,7 +7553,7 @@ Automatically configures the platform registry secret on the pod if it is of typ
 
 * <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
 
-Quarkus package type.
+QuarkusPackageType is the type of Quarkus build packaging.
 
 
 [#_camel_apache_org_v1_trait_QuarkusTrait]
@@ -7552,9 +7568,9 @@ The Quarkus trait configures the Quarkus runtime.
 
 It's enabled by default.
 
-NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least
-4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build
-Pod (depending on the build strategy configured for the platform), must have enough memory available.
+NOTE: A native based compilation will be forced to use a `pod` build strategy.
+Compiling to a native executable, i.e. when using `package-type=native`, requires at least
+4GiB of memory, so the Pod running the native build, must have enough memory available.
 
 
 [cols="2,2a",options="header"]
@@ -7574,9 +7590,9 @@ Pod (depending on the build strategy configured for the platform), must have eno
 |
 
 
-The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
-In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-with the `native` kit having precedence over the `fast-jar` one once ready.
+The Quarkus package types, `fast-jar`, `native-sources` or `native` (default `fast-jar`). `native` is deprecated.
+In case both `fast-jar` and `native` or `native-sources` are specified, two `IntegrationKit` resources are created,
+with the native kit having precedence over the `fast-jar` one once ready.
 The order influences the resolution of the current kit for the integration.
 The kit corresponding to the first package type will be assigned to the
 integration in case no existing kit that matches the integration exists.

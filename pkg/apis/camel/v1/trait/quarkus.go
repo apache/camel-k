@@ -21,29 +21,32 @@ package trait
 //
 // It's enabled by default.
 //
-// NOTE: Compiling to a native executable, i.e. when using `package-type=native`, requires at least
-// 4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build
-// Pod (depending on the build strategy configured for the platform), must have enough memory available.
+// NOTE: A native based compilation will be forced to use a `pod` build strategy.
+// Compiling to a native executable, i.e. when using `package-type=native`, requires at least
+// 4GiB of memory, so the Pod running the native build, must have enough memory available.
 //
 // +camel-k:trait=quarkus.
 type QuarkusTrait struct {
 	Trait `property:",squash" json:",inline"`
-	// The Quarkus package types, either `fast-jar` or `native` (default `fast-jar`).
-	// In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
-	// with the `native` kit having precedence over the `fast-jar` one once ready.
+	// The Quarkus package types, `fast-jar`, `native-sources` or `native` (default `fast-jar`). `native` is deprecated.
+	// In case both `fast-jar` and `native` or `native-sources` are specified, two `IntegrationKit` resources are created,
+	// with the native kit having precedence over the `fast-jar` one once ready.
 	// The order influences the resolution of the current kit for the integration.
 	// The kit corresponding to the first package type will be assigned to the
 	// integration in case no existing kit that matches the integration exists.
 	PackageTypes []QuarkusPackageType `property:"package-type" json:"packageTypes,omitempty"`
 }
 
-// Quarkus package type.
-// +kubebuilder:validation:Enum=fast-jar;native
+// QuarkusPackageType is the type of Quarkus build packaging.
+// +kubebuilder:validation:Enum=fast-jar;native-sources;native
 type QuarkusPackageType string
 
 const (
-	// Quarkus package type representing "fast jar" packaging.
+	// FastJarPackageType represents "fast jar" Quarkus packaging.
 	FastJarPackageType QuarkusPackageType = "fast-jar"
-	// Quarkus package type representing "native" packaging.
+	// NativePackageType represents "native" Quarkus packaging.
+	// Deprecated: use native-sources instead.
 	NativePackageType QuarkusPackageType = "native"
+	// NativeSourcesPackageType represents "native-sources" Quarkus packaging.
+	NativeSourcesPackageType QuarkusPackageType = "native-sources"
 )

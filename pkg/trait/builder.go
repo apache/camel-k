@@ -19,6 +19,8 @@ package trait
 
 import (
 	"fmt"
+	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -32,6 +34,8 @@ import (
 	mvn "github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
+
+var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
 
 type builderTrait struct {
 	BaseTrait
@@ -64,12 +68,28 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
+		quarkus, ok := trait.(*quarkusTrait)
+		isNativeIntegration := quarkus.isNativeIntegration(e)
+		isNativeKit, err := quarkus.isNativeKit(e)
+		if err != nil {
+			return false, err
+		}
+		if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
+			nativeArgsCd := filepath.Join("maven", "target", "native-sources")
+			command := "cd " + nativeArgsCd + " && echo NativeImage version is $(native-image --version) && echo GraalVM expected version is $(cat graalvm.version) && echo WARN: Make sure they are compatible, otherwise the native compilation may results in error && native-image $(cat native-image.args)"
+			// it should be performed as the last custom task
+			t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, e.CamelCatalog.GetQuarkusToolingImage(), command))
+		}
+	}
+
 	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted), nil
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
 	// local pipeline tasks
 	var pipelineTasks []v1.Task
+
 	// Building task
 	builderTask, err := t.builderTask(e)
 	if err != nil {
@@ -81,7 +101,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}
 		return nil
 	}
-
 	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
 	// Custom tasks
@@ -104,8 +123,21 @@ func (t *builderTrait) Apply(e *Environment) error {
 			}
 			return nil
 		}
-		pipelineTasks = append(pipelineTasks, t.customTasks()...)
+
+		customTasks, err := t.customTasks()
+		if err != nil {
+			return err
+		}
+
+		pipelineTasks = append(pipelineTasks, customTasks...)
 	}
+
+	// Packaging task
+	// It's the same builder configuration, but with different steps
+	packageTask := builderTask.DeepCopy()
+	packageTask.Name = "package"
+	packageTask.Steps = make([]string, 0)
+	pipelineTasks = append(pipelineTasks, v1.Task{Package: packageTask})
 
 	// Publishing task
 	switch e.Platform.Status.Build.PublishStrategy {
@@ -344,20 +376,42 @@ func getImageName(e *Environment) string {
 	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
 }
 
-func (t *builderTrait) customTasks() []v1.Task {
-	customTasks := make([]v1.Task, len(t.Tasks))
+func (t *builderTrait) customTasks() ([]v1.Task, error) {
+	customTasks := make([]v1.Task, len(t.Tasks), len(t.Tasks))
 	for i, t := range t.Tasks {
-		// TODO, better strategy than a simple split!
 		splitted := strings.Split(t, ";")
+		if len(splitted) < 3 {
+			return nil, fmt.Errorf(`You need to provide a custom task with at least 3 arguments, ie "my-task-name;my-image;echo 'hello', was %v"`, t)
+		}
+		var containerCommand string
+		if len(splitted) > 3 {
+			//recompose in case of usage of separator char in the script
+			containerCommand = strings.Join(splitted[2:], ";")
+		} else {
+			containerCommand = splitted[2]
+		}
+		containerCommands := splitContainerCommand(containerCommand)
 		customTasks[i] = v1.Task{
 			Custom: &v1.UserTask{
 				BaseTask: v1.BaseTask{
 					Name: splitted[0],
 				},
-				ContainerImage:   splitted[1],
-				ContainerCommand: splitted[2],
+				ContainerImage:    splitted[1],
+				ContainerCommands: containerCommands,
 			},
 		}
 	}
-	return customTasks
+	return customTasks, nil
+}
+
+// we may get a command in the following format `/bin/bash -c "ls && echo 'hello'`
+// which should provide a string with {"/bin/bash", "-c", "ls && echo 'hello'"}
+func splitContainerCommand(command string) []string {
+	matches := commandsRegexp.FindAllString(command, -1)
+	removeQuotes := make([]string, 0, len(matches))
+	for _, m := range matches {
+		removeQuotes = append(removeQuotes, strings.Replace(m, "\"", "", -1))
+	}
+
+	return removeQuotes
 }

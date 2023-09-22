@@ -68,6 +68,8 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		contextDir = filepath.Join(pwd, ContextDir)
 	}
 
+	log.Infof("Running spectrum task in context directory: %s", contextDir)
+
 	exists, err := util.DirectoryExists(contextDir)
 	if err != nil {
 		return status.Failed(err)

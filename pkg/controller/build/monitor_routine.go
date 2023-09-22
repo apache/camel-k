@@ -122,6 +122,7 @@ tasks:
 			break tasks
 
 		default:
+			// TODO apply code refactoring to the below conditions
 			// Coordinate the build and context directories across the sequence of tasks
 			if t := task.Builder; t != nil {
 				if t.BuildDir == "" {
@@ -136,6 +137,12 @@ tasks:
 					defer os.RemoveAll(tmpDir)
 				}
 				buildDir = t.BuildDir
+			} else if t := task.Package; t != nil {
+				if buildDir == "" {
+					status.Failed(fmt.Errorf("cannot determine builder directory for task %s", t.Name))
+					break tasks
+				}
+				t.BuildDir = buildDir
 			} else if t := task.Spectrum; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
@@ -148,7 +155,6 @@ tasks:
 					break tasks
 				}
 				t.ContextDir = filepath.Join(buildDir, builder.ContextDir)
-
 			} else if t := task.Jib; t != nil && t.ContextDir == "" {
 				if buildDir == "" {
 					status.Failed(fmt.Errorf("cannot determine context directory for task %s", t.Name))
@@ -211,16 +217,21 @@ func (action *monitorRoutineAction) updateBuildStatus(ctx context.Context, build
 	} else if target.Status.Phase == v1.BuildPhaseError {
 		action.L.Errorf(nil, "Build %s errored: %s", build.Name, target.Status.Error)
 	}
-	err = action.client.Status().Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
-	if err != nil {
-		action.L.Errorf(err, "Cannot update build status: %s", build.Name)
-		event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
-		return err
+
+	if len(p) > 0 {
+		err = action.client.Status().Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
+		if err != nil {
+			action.L.Errorf(err, "Cannot update build status: %s", build.Name)
+			event.NotifyBuildError(ctx, action.client, action.recorder, build, target, err)
+			return err
+		}
+
+		if target.Status.Phase != build.Status.Phase {
+			action.L.Info("State transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
+		}
+		event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
+		build.Status = target.Status
 	}
-	if target.Status.Phase != build.Status.Phase {
-		action.L.Info("State transition", "phase-from", build.Status.Phase, "phase-to", target.Status.Phase)
-	}
-	event.NotifyBuildUpdated(ctx, action.client, action.recorder, build, target)
-	build.Status = target.Status
+
 	return nil
 }

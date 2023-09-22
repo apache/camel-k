@@ -50,6 +50,7 @@ type imageSteps struct {
 	JvmDockerfile           Step
 }
 
+// Image used to export the steps available on an Image building process
 var Image = imageSteps{
 	IncrementalImageContext: NewStep(ApplicationPackagePhase, incrementalImageContext),
 	NativeImageContext:      NewStep(ApplicationPackagePhase, nativeImageContext),
@@ -68,7 +69,7 @@ func nativeImageContext(ctx *builderContext) error {
 		ctx.Artifacts = []v1.Artifact{
 			{
 				ID:       runner,
-				Location: filepath.Join(ctx.Path, "maven", "target", runner),
+				Location: filepath.Join(ctx.Path, "maven", "target", "native-sources", runner),
 				Target:   runner,
 			},
 		}

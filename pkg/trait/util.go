@@ -340,6 +340,15 @@ func getBuilderTask(tasks []v1.Task) *v1.BuilderTask {
 	return nil
 }
 
+func getPackageTask(tasks []v1.Task) *v1.BuilderTask {
+	for i, task := range tasks {
+		if task.Package != nil {
+			return tasks[i].Package
+		}
+	}
+	return nil
+}
+
 // Equals return if traits are the same.
 func Equals(i1 Options, i2 Options) bool {
 	return reflect.DeepEqual(i1, i2)
