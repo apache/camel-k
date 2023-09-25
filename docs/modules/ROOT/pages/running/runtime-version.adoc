@@ -14,7 +14,7 @@ Having the ability to choose the runtime, gives you the ability to specify which
 
 This feature requires the dynamic generation of a builder that contains all the tooling expected by the build phase. In particular, this is a requirement for Quarkus native builds which, from now on, can be only done with builder `Pod` strategy.
 
-When you are creating a new runtime for which a xref:architecture/cr/camel-catalog.adoc[CamelCatalog] does not yest exist, Camel K Operator is in charge to create such a catalog. The creation of a new Catalog binds to the creation of a container image builder which will later be used by the builder `Pod` to build a Camel application which is specific to such a runtime.
+When you are creating a new runtime for which a xref:architecture/cr/camel-catalog.adoc[CamelCatalog] does not yest exist, Camel K Operator is in charge to create such a catalog. Every CamelCatalog may carry the definition of a container image builder which may later be used by the builder `Pod` to build a Camel application which is specific to such a runtime (for instance, when running a Quarkus Native build).
 
 == Pin a runtime version
 

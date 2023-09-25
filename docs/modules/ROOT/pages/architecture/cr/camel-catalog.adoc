@@ -3,9 +3,7 @@
 
 The *CamelCatalog* is a resource that provides metadata related to what is included in the xref:architecture/runtime.adoc[Runtime] in term of Camel components, languages, dataformats and capabilities provided.
 
-Starting from Camel K version 2, it is a dynamic resource which is reconciled and produces as an output a container image required to build the Camel application when using the builder `Pod` strategy. This container image contains all the toolings which will build the artifacts, above all the Quarkus tools required to compile natively.
-
-NOTE: each catalog generates a different builder image starting from Camel K runtime version 1.17. You cannot run a Camel K runtime < 1.17 with Camel K version 2.
+NOTE: each catalog may require to specify a container tool image eventually used by the build process starting from Camel K runtime version 1.17. You cannot run a Camel K runtime < 1.17 with Camel K version 2.
 
 [NOTE]
 ====
