@@ -1,9 +1,24 @@
 [[build-pipeline]]
 = Build Pipeline
-
 Since version 2.0, we've introduced the concept of `Pipeline` in order to provide a degree of flexibility for those user that want to customize the entire building process. We can think of a pipeline as a series of tasks that can be executed after the project generation and before the artifact publishing into the container registry.
 
-In Camel K version 1 we used to have 2 static tasks: `builder` and `publisher` (named after the strategy adopted, ie, `spectrum`). Now you can include any futher task in the middle by opportunely configuring the Build. Let's see an example:
+In Camel K version 1 we used to have 2 static tasks: `builder` and `publisher` (named after the strategy adopted, ie, `spectrum`). Now you can include any further task in the middle by opportunely configuring the Build. Here a diagram illustrating the pipeline:
+
+image::camel_k_pipeline..png[Camel K Pipeline, width=1024]
+
+We have 3 tasks which are required by Camel K to perform a build and provide a container image which will be used to start a Camel application. The **build** is a Maven process which is in charge to create a maven project based on the Integration sources provided. Then, after the Maven project is created and compiled, you can add any custom task (see section below). With this part we are introducing that level of flexibility required to accommodate any company build process. This part is optional, by default, Camel K does not need any **custom task**.
+
+In reality we do make use of the custom task in one particular situation. In order to build a Quarkus Native image, the quarkus trait influences the builder in order to include a custom task which takes care of executing the native image compilation. But this is completely hidden to the final user.
+
+Once the build and any customization are over, the **package** task takes care to prepare the context later required by the publishing operations. Basically this task is in charge to copy all artifacts and also prepare a Dockerfile which could be used eventually by the rest of the process. Finally, the **publish** task is in charge to generate and push the container to the registry using all the artifacts generated in the package task.
+
+[[add-custom-tasks]]
+== Add custom user tasks
+As you have seen, the final user can include any optional task after a build operation is performed. We think this is the best moment when any custom operation can be performed as it is the immediate step after the Maven project is generated. And ideally, the context of any custom operation is the project.
+
+NOTE: Please, notice that, since the customization may require any tool not available in the operator container, you will need to run any additional task using builder `pod` strategy.
+
+Let's see an example:
 
 ```yaml
 spec:
@@ -25,11 +40,8 @@ The custom tasks will be executed in the directory where the Camel K runtime Mav
 
 The goal is to let the user perform custom tasks which may result in a success or a failure. If the task executed results in a failure, then, the entire build is stopped and fails accordingly.
 
-WARNING: The custom tasks are only available only when using pod strategy.
-
 [[build-pipeline-trait]]
-== Configuring via builder trait
-
+=== Configuring via builder trait
 We are aware that configuring the `Build` type directly is something that the majority of users won't do. For this reason we're enabling the same feature in the xref:traits:builder.adoc[Builder trait].
 
 Maintaining the example above as a reference, configuring a custom task will be as easy as adding a trait property when running your Integration, for instance, via CLI:
