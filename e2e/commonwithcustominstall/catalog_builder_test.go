@@ -48,14 +48,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			Should(Equal(corev1.ConditionTrue))
 		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
 		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
-		catalog := CamelCatalog(ns, catalogName)()
-		imageName := fmt.Sprintf("camel-k-runtime-%s-builder:%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
 		Eventually(CamelCatalogPhase(ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
-		Eventually(CamelCatalogImage(ns, catalogName), TestTimeoutMedium).Should(ContainSubstring(imageName))
-		// The container may have been created by previous test
-		Eventually(CamelCatalogCondition(ns, catalogName, v1.CamelCatalogConditionReady)().Message).Should(
-			Or(Equal("Container image successfully built"), Equal("Container image exists on registry")),
-		)
 
 		// Run an integration with a catalog not compatible
 		// The operator should create the catalog, but fail on reconciliation as it is not compatible

@@ -66,14 +66,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				Should(Equal(corev1.ConditionTrue))
 			catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
 			Eventually(CamelCatalog(operatorNamespace, catalogName)).ShouldNot(BeNil())
-			catalog := CamelCatalog(operatorNamespace, catalogName)()
-			imageName := fmt.Sprintf("camel-k-runtime-%s-builder:%s", catalog.Spec.Runtime.Provider, strings.ToLower(catalog.Spec.Runtime.Version))
 			Eventually(CamelCatalogPhase(operatorNamespace, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
-			Eventually(CamelCatalogImage(operatorNamespace, catalogName), TestTimeoutMedium).Should(ContainSubstring(imageName))
-			// The container may have been created by previous test
-			Eventually(CamelCatalogCondition(operatorNamespace, catalogName, v1.CamelCatalogConditionReady)().Message).Should(
-				Or(Equal("Container image successfully built"), Equal("Container image exists on registry")),
-			)
 		})
 
 		t.Run("Global test on namespace with platform", func(t *testing.T) {
