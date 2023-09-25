@@ -26,8 +26,8 @@ runs:
       uses: container-tools/kind-action@v2.0.1
       if: ${{ env.CLUSTER_KIND_CONFIGURED != 'true' }}
       with:
-        version: v0.20.0
-        node_image: kindest/node:v1.26.6@sha256:6e2d8b28a5b601defe327b98bd1c2d1930b49e5d8c512e1895099e4504007adb
+        version: v0.19.0
+        node_image: kindest/node:v1.26.4@sha256:f4c0d87be03d6bea69f5e5dc0adb678bb498a190ee5c38422bf751541cebe92e
         cpu: 3
 
     - id: info
