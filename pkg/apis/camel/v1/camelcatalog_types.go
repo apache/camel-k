@@ -67,7 +67,7 @@ type CamelCatalogSpec struct {
 	Loaders map[string]CamelLoader `json:"loaders" yaml:"loaders"`
 }
 
-// CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
+// CamelCatalogStatus defines the observed state of CamelCatalog.
 type CamelCatalogStatus struct {
 	// ObservedGeneration is the most recent generation observed for this Catalog.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`

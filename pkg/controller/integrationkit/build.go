@@ -132,7 +132,9 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				return nil, fmt.Errorf("error while creating Camel K Builder service account: %w", err)
 			}
 		}
-		buildConfig.ToolImage = env.CamelCatalog.Image
+		// The build operation, when executed as a Pod, should be executed by a container image containing the
+		// `kamel builder` command. Likely the same image running the operator should be fine.
+		buildConfig.ToolImage = defaults.OperatorImage()
 		buildConfig.BuilderPodNamespace = operatorNamespace
 		v1.SetBuilderConfigurationTasks(env.Pipeline, buildConfig)
 
