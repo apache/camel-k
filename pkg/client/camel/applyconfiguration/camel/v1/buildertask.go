@@ -23,14 +23,13 @@ package v1
 // with apply.
 type BuilderTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
-	Configuration              *BuildConfigurationApplyConfiguration `json:"configuration,omitempty"`
-	BaseImage                  *string                               `json:"baseImage,omitempty"`
-	Runtime                    *RuntimeSpecApplyConfiguration        `json:"runtime,omitempty"`
-	Dependencies               []string                              `json:"dependencies,omitempty"`
-	Steps                      []string                              `json:"steps,omitempty"`
-	Maven                      *MavenBuildSpecApplyConfiguration     `json:"maven,omitempty"`
-	BuildDir                   *string                               `json:"buildDir,omitempty"`
-	Sources                    []SourceSpecApplyConfiguration        `json:"sources,omitempty"`
+	BaseImage                  *string                           `json:"baseImage,omitempty"`
+	Runtime                    *RuntimeSpecApplyConfiguration    `json:"runtime,omitempty"`
+	Dependencies               []string                          `json:"dependencies,omitempty"`
+	Steps                      []string                          `json:"steps,omitempty"`
+	Maven                      *MavenBuildSpecApplyConfiguration `json:"maven,omitempty"`
+	BuildDir                   *string                           `json:"buildDir,omitempty"`
+	Sources                    []SourceSpecApplyConfiguration    `json:"sources,omitempty"`
 }
 
 // BuilderTaskApplyConfiguration constructs an declarative configuration of the BuilderTask type for use with

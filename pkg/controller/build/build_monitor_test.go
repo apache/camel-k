@@ -606,11 +606,13 @@ func newBuildWithLayoutInPhase(namespace string, name string, layout string, pha
 			Tasks: []v1.Task{
 				{
 					Builder: &v1.BuilderTask{
-						Configuration: v1.BuildConfiguration{
-							Strategy:            v1.BuildStrategyRoutine,
-							OrderStrategy:       v1.BuildOrderStrategySequential,
-							ToolImage:           "camel:latest",
-							BuilderPodNamespace: "ns",
+						BaseTask: v1.BaseTask{
+							Configuration: v1.BuildConfiguration{
+								Strategy:            v1.BuildStrategyRoutine,
+								OrderStrategy:       v1.BuildOrderStrategySequential,
+								ToolImage:           "camel:latest",
+								BuilderPodNamespace: "ns",
+							},
 						},
 						Dependencies: dependencies,
 					},

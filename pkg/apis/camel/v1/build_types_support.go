@@ -56,8 +56,12 @@ func (build *Build) BuilderPodNamespace() string {
 
 // BuilderConfiguration returns the builder configuration for this Build.
 func (build *Build) BuilderConfiguration() *BuildConfiguration {
-	return BuilderConfigurationTasks(build.Spec.Tasks)
+	return build.TaskConfiguration("builder")
+}
 
+// TaskConfiguration returns the task configuration of this Build.
+func (build *Build) TaskConfiguration(name string) *BuildConfiguration {
+	return ConfigurationTasksByName(build.Spec.Tasks, name)
 }
 
 // BuilderDependencies returns the list of dependencies configured on by the builder task for this Build.
@@ -79,11 +83,32 @@ func FindBuilderTask(tasks []Task) (*BuilderTask, bool) {
 	return nil, false
 }
 
-// BuilderConfigurationTasks returns the builder configuration from the task list.
-func BuilderConfigurationTasks(tasks []Task) *BuildConfiguration {
+// ConfigurationTasksByName returns the container configuration from the task list.
+func ConfigurationTasksByName(tasks []Task, name string) *BuildConfiguration {
 	for _, t := range tasks {
-		if t.Builder != nil {
+		if t.Builder != nil && t.Builder.Name == name {
 			return &t.Builder.Configuration
+		}
+		if t.Custom != nil && t.Custom.Name == name {
+			return &t.Custom.Configuration
+		}
+		if t.Package != nil && t.Package.Name == name {
+			return &t.Package.Configuration
+		}
+		if t.Spectrum != nil && t.Spectrum.Name == name {
+			return &t.Spectrum.Configuration
+		}
+		if t.S2i != nil && t.S2i.Name == name {
+			return &t.S2i.Configuration
+		}
+		if t.Jib != nil && t.Jib.Name == name {
+			return &t.Jib.Configuration
+		}
+		if t.Buildah != nil && t.Buildah.Name == name {
+			return &t.Buildah.Configuration
+		}
+		if t.Kaniko != nil && t.Kaniko.Name == name {
+			return &t.Kaniko.Configuration
 		}
 	}
 	return &BuildConfiguration{}

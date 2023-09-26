@@ -43,6 +43,14 @@ func (b *KanikoTaskApplyConfiguration) WithName(value string) *KanikoTaskApplyCo
 	return b
 }
 
+// WithConfiguration sets the Configuration field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Configuration field is set to the value of the last call.
+func (b *KanikoTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *KanikoTaskApplyConfiguration {
+	b.Configuration = value
+	return b
+}
+
 // WithContextDir sets the ContextDir field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContextDir field is set to the value of the last call.

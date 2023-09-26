@@ -507,12 +507,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       limitCPU:
-                        description: When using `pod` strategy, the maximum amount
-                          of CPU required by the pod builder.
+                        description: 'When using `pod` strategy, the maximum amount
+                          of CPU required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       limitMemory:
-                        description: When using `pod` strategy, the maximum amount
-                          of memory required by the pod builder.
+                        description: 'When using `pod` strategy, the maximum amount
+                          of memory required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'A list of references pointing to configmaps/secrets
@@ -537,12 +539,14 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: When using `pod` strategy, the minimum amount
-                          of CPU required by the pod builder.
+                        description: 'When using `pod` strategy, the minimum amount
+                          of CPU required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       requestMemory:
-                        description: When using `pod` strategy, the minimum amount
-                          of memory required by the pod builder.
+                        description: 'When using `pod` strategy, the minimum amount
+                          of memory required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       strategy:
                         description: The strategy to use, either `pod` or `routine`
@@ -550,7 +554,31 @@ spec:
                         type: string
                       tasks:
                         description: A list of tasks to be executed (available only
-                          when using `pod` strategy) with format <name>;<container-image>;<container-command>
+                          when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksLimitCPU:
+                        description: A list of limit cpu configuration for the specific
+                          task with format `<task-name>:<limit-cpu-conf>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksLimitMemory:
+                        description: A list of limit memory configuration for the
+                          specific task with format `<task-name>:<limit-memory-conf>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksRequestCPU:
+                        description: A list of request cpu configuration for the specific
+                          task with format `<task-name>:<request-cpu-conf>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksRequestMemory:
+                        description: A list of request memory configuration for the
+                          specific task with format `<task-name>:<request-memory-conf>`.
                         items:
                           type: string
                         type: array
@@ -2281,12 +2309,14 @@ spec:
                           traits share this common property.
                         type: boolean
                       limitCPU:
-                        description: When using `pod` strategy, the maximum amount
-                          of CPU required by the pod builder.
+                        description: 'When using `pod` strategy, the maximum amount
+                          of CPU required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       limitMemory:
-                        description: When using `pod` strategy, the maximum amount
-                          of memory required by the pod builder.
+                        description: 'When using `pod` strategy, the maximum amount
+                          of memory required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       mavenProfiles:
                         description: 'A list of references pointing to configmaps/secrets
@@ -2311,12 +2341,14 @@ spec:
                           type: string
                         type: array
                       requestCPU:
-                        description: When using `pod` strategy, the minimum amount
-                          of CPU required by the pod builder.
+                        description: 'When using `pod` strategy, the minimum amount
+                          of CPU required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       requestMemory:
-                        description: When using `pod` strategy, the minimum amount
-                          of memory required by the pod builder.
+                        description: 'When using `pod` strategy, the minimum amount
+                          of memory required by the pod builder. Deprecated: use TasksRequestCPU
+                          instead with task name `builder`.'
                         type: string
                       strategy:
                         description: The strategy to use, either `pod` or `routine`
@@ -2324,7 +2356,31 @@ spec:
                         type: string
                       tasks:
                         description: A list of tasks to be executed (available only
-                          when using `pod` strategy) with format <name>;<container-image>;<container-command>
+                          when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksLimitCPU:
+                        description: A list of limit cpu configuration for the specific
+                          task with format `<task-name>:<limit-cpu-conf>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksLimitMemory:
+                        description: A list of limit memory configuration for the
+                          specific task with format `<task-name>:<limit-memory-conf>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksRequestCPU:
+                        description: A list of request cpu configuration for the specific
+                          task with format `<task-name>:<request-cpu-conf>`.
+                        items:
+                          type: string
+                        type: array
+                      tasksRequestMemory:
+                        description: A list of request memory configuration for the
+                          specific task with format `<task-name>:<request-memory-conf>`.
                         items:
                           type: string
                         type: array

@@ -322,7 +322,7 @@ func TestBuilderCustomTasks(t *testing.T) {
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 	builderTrait.Tasks = append(builderTrait.Tasks, `test;alpine;mvn test`)
 
-	tasks, err := builderTrait.customTasks()
+	tasks, err := builderTrait.customTasks(nil)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(tasks))
@@ -338,7 +338,7 @@ func TestBuilderCustomTasksFailure(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine")
 
-	_, err := builderTrait.customTasks()
+	_, err := builderTrait.customTasks(nil)
 
 	assert.NotNil(t, err)
 }
@@ -347,7 +347,7 @@ func TestBuilderCustomTasksScript(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && ls; echo 'helooo'\"")
 
-	tasks, err := builderTrait.customTasks()
+	tasks, err := builderTrait.customTasks(nil)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(tasks))
@@ -356,6 +356,33 @@ func TestBuilderCustomTasksScript(t *testing.T) {
 	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
 	assert.Equal(t, "-c", tasks[0].Custom.ContainerCommands[1])
 	assert.Equal(t, "cd test && ls; echo 'helooo'", tasks[0].Custom.ContainerCommands[2])
+}
+
+func TestBuilderCustomTasksConfiguration(t *testing.T) {
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.TasksRequestCPU = append(builderTrait.TasksLimitCPU, "builder:1000m")
+	builderTrait.TasksLimitCPU = append(builderTrait.TasksLimitCPU, "custom1:500m")
+	builderTrait.TasksRequestMemory = append(builderTrait.TasksLimitCPU, "package:8Gi")
+	builderTrait.TasksLimitMemory = append(builderTrait.TasksLimitCPU, "spectrum:4Gi")
+
+	tasksConf, err := builderTrait.parseTasksConf()
+
+	assert.Nil(t, err)
+	assert.Equal(t, 4, len(tasksConf))
+	assert.Equal(t, "1000m", tasksConf["builder"].RequestCPU)
+	assert.Equal(t, "500m", tasksConf["custom1"].LimitCPU)
+	assert.Equal(t, "8Gi", tasksConf["package"].RequestMemory)
+	assert.Equal(t, "4Gi", tasksConf["spectrum"].LimitMemory)
+}
+
+func TestBuilderCustomTasksConfigurationError(t *testing.T) {
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.TasksLimitCPU = append(builderTrait.TasksLimitCPU, "syntax error")
+
+	_, err := builderTrait.parseTasksConf()
+
+	assert.NotNil(t, err)
+	assert.Equal(t, "could not parse syntax error, expected format <task-name>:<task-resource>", err.Error())
 }
 
 func TestUserTaskCommands(t *testing.T) {

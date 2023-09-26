@@ -109,7 +109,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 
 		// We may need to change certain builder configuration values
 		operatorNamespace := platform.GetOperatorNamespace()
-		buildConfig := v1.BuilderConfigurationTasks(env.Pipeline)
+		buildConfig := v1.ConfigurationTasksByName(env.Pipeline, "builder")
 		if buildConfig.IsEmpty() {
 			// default to IntegrationPlatform configuration
 			buildConfig = &env.Platform.Status.Build.BuildConfiguration

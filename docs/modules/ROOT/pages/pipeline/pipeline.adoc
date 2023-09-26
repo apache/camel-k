@@ -50,6 +50,8 @@ Maintaining the example above as a reference, configuring a custom task will be 
 kamel run Test.java -t builder.tasks=custom1;alpine;tree -t builder.tasks="custom2;alpine;cat maven/pom.xml"
 ```
 
+Another interesting configuration you can provide via Builder trait is the (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)[Kubernetes requests and limits]. Each of the task you are providing in the pipeline, can be configured with the proper resource settings. You can use, for instance the `-t builder.request-cpu <task-name>:1000m` to configure the container executed by the `task-name`. This configuration works for all the tasks including `builder`, `package` and the publishing ones.
+
 [[build-pipeline-result]]
 == Getting task execution status
 
