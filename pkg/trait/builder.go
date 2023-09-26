@@ -68,22 +68,26 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
-	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
-		quarkus, ok := trait.(*quarkusTrait)
-		isNativeIntegration := quarkus.isNativeIntegration(e)
-		isNativeKit, err := quarkus.isNativeKit(e)
-		if err != nil {
-			return false, err
+	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
+		if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
+			quarkus, ok := trait.(*quarkusTrait)
+			isNativeIntegration := quarkus.isNativeIntegration(e)
+			isNativeKit, err := quarkus.isNativeKit(e)
+			if err != nil {
+				return false, err
+			}
+			if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
+				nativeArgsCd := filepath.Join("maven", "target", "native-sources")
+				command := "cd " + nativeArgsCd + " && echo NativeImage version is $(native-image --version) && echo GraalVM expected version is $(cat graalvm.version) && echo WARN: Make sure they are compatible, otherwise the native compilation may results in error && native-image $(cat native-image.args)"
+				// it should be performed as the last custom task
+				t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, e.CamelCatalog.GetQuarkusToolingImage(), command))
+			}
 		}
-		if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
-			nativeArgsCd := filepath.Join("maven", "target", "native-sources")
-			command := "cd " + nativeArgsCd + " && echo NativeImage version is $(native-image --version) && echo GraalVM expected version is $(cat graalvm.version) && echo WARN: Make sure they are compatible, otherwise the native compilation may results in error && native-image $(cat native-image.args)"
-			// it should be performed as the last custom task
-			t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, e.CamelCatalog.GetQuarkusToolingImage(), command))
-		}
+
+		return true, nil
 	}
 
-	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted), nil
+	return false, nil
 }
 
 func (t *builderTrait) Apply(e *Environment) error {
@@ -406,7 +410,12 @@ func (t *builderTrait) customTasks() ([]v1.Task, error) {
 
 // we may get a command in the following format `/bin/bash -c "ls && echo 'hello'`
 // which should provide a string with {"/bin/bash", "-c", "ls && echo 'hello'"}.
+// if however we have a command which is not quoted, then we leave it the way it is.
 func splitContainerCommand(command string) []string {
+	if !strings.Contains(command, "\"") {
+		// No quotes, just return
+		return []string{command}
+	}
 	matches := commandsRegexp.FindAllString(command, -1)
 	removeQuotes := make([]string, 0, len(matches))
 	for _, m := range matches {
