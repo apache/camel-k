@@ -24,7 +24,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// Build convert the Build CR in a struct that can be executable as an operator routing
+// Build convert the Build CR in a struct that can be executable as an operator routine.
 func (b *Builder) Build(build *v1.Build) *Build {
 	return &Build{
 		builder: *b,
@@ -32,7 +32,7 @@ func (b *Builder) Build(build *v1.Build) *Build {
 	}
 }
 
-// Task convert the task in a routine task which can be executed inside operator
+// Task convert the task in a routine task which can be executed inside operator.
 func (b *Build) Task(task v1.Task) Task {
 	switch {
 	case task.Builder != nil:
@@ -129,7 +129,7 @@ func (t *unsupportedTask) Do(_ context.Context) v1.BuildStatus {
 
 var _ Task = &missingTask{}
 
-// TaskByName return the task identified by the name parameter
+// TaskByName return the task identified by the name parameter.
 func (b *Build) TaskByName(name string) Task {
 	for _, task := range b.build.Spec.Tasks {
 		switch {
