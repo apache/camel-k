@@ -377,15 +377,15 @@ func getImageName(e *Environment) string {
 }
 
 func (t *builderTrait) customTasks() ([]v1.Task, error) {
-	customTasks := make([]v1.Task, len(t.Tasks), len(t.Tasks))
+	customTasks := make([]v1.Task, len(t.Tasks))
 	for i, t := range t.Tasks {
 		splitted := strings.Split(t, ";")
 		if len(splitted) < 3 {
-			return nil, fmt.Errorf(`You need to provide a custom task with at least 3 arguments, ie "my-task-name;my-image;echo 'hello', was %v"`, t)
+			return nil, fmt.Errorf(`provide a custom task with at least 3 arguments, ie "my-task-name;my-image;echo 'hello', was %v"`, t)
 		}
 		var containerCommand string
 		if len(splitted) > 3 {
-			//recompose in case of usage of separator char in the script
+			// recompose in case of usage of separator char in the script
 			containerCommand = strings.Join(splitted[2:], ";")
 		} else {
 			containerCommand = splitted[2]
@@ -405,12 +405,12 @@ func (t *builderTrait) customTasks() ([]v1.Task, error) {
 }
 
 // we may get a command in the following format `/bin/bash -c "ls && echo 'hello'`
-// which should provide a string with {"/bin/bash", "-c", "ls && echo 'hello'"}
+// which should provide a string with {"/bin/bash", "-c", "ls && echo 'hello'"}.
 func splitContainerCommand(command string) []string {
 	matches := commandsRegexp.FindAllString(command, -1)
 	removeQuotes := make([]string, 0, len(matches))
 	for _, m := range matches {
-		removeQuotes = append(removeQuotes, strings.Replace(m, "\"", "", -1))
+		removeQuotes = append(removeQuotes, strings.ReplaceAll(m, "\"", ""))
 	}
 
 	return removeQuotes

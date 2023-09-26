@@ -50,7 +50,7 @@ type imageSteps struct {
 	JvmDockerfile           Step
 }
 
-// Image used to export the steps available on an Image building process
+// Image used to export the steps available on an Image building process.
 var Image = imageSteps{
 	IncrementalImageContext: NewStep(ApplicationPackagePhase, incrementalImageContext),
 	NativeImageContext:      NewStep(ApplicationPackagePhase, nativeImageContext),
