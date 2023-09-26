@@ -233,41 +233,37 @@ func TestKameletImplicitConfigNamedMountedConfigmap(t *testing.T) {
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }
 
-// Comenting test as it is failing on a non documented behavior.
-// See https://github.com/apache/camel-k/issues/4750
-/*
-func TestKameletImplicitConfig(t *testing.T) {
+func TestKameletImplicitConfigDefaultLabeledSecret(t *testing.T) {
 	RegisterTestingT(t)
-	t.Run("test custom timer source", func(t *testing.T) {
-		Expect(CreateTimerKamelet(ns, "iconfig-test-timer-source")()).To(Succeed())
 
-			t.Run("run test default config using labeled secret", func(t *testing.T) {
-				name := "iconfig-test-timer-source-int2"
-				secretName := "my-labeled-iconfig-test-timer-source-default-secret"
+	t.Run("run test default config using labeled secret", func(t *testing.T) {
 
-				var secData = make(map[string]string)
-				secData["camel.kamelet.iconfig-test-timer-source.message"] = "very top secret message"
-				var labels = make(map[string]string)
-				labels["camel.apache.org/kamelet"] = "iconfig-test-timer-source"
-				Expect(CreatePlainTextSecretWithLabels(ns, secretName, secData, labels)).To(Succeed())
-				Eventually(SecretByName(ns, secretName), TestTimeoutLong).Should(Not(BeNil()))
+		Expect(CreateTimerKamelet(ns, "iconfig09-timer-source")()).To(Succeed())
 
-				Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegrationConfiguration.java",
-					"-p", "camel.kamelet.iconfig-test-timer-source.message='Default message 02'",
-					"--name", name).Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("very top secret message"))
+		name := "iconfig-test-timer-source-int9"
+		secretName := "my-iconfig-int9-secret"
 
-				Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-				Expect(DeleteSecret(ns, secretName)).To(Succeed())
-			})
+		var secData = make(map[string]string)
+		secData["camel.kamelet.iconfig09-timer-source.message"] = "very top labeled secret message"
+		var labels = make(map[string]string)
+		labels["camel.apache.org/kamelet"] = "iconfig09-timer-source"
+		Expect(CreatePlainTextSecretWithLabels(ns, secretName, secData, labels)).To(Succeed())
+		Eventually(SecretByName(ns, secretName), TestTimeoutLong).Should(Not(BeNil()))
 
+		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegrationConfiguration09.java",
+			"--name", name).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("very top labeled secret message"))
+
+		Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+		Eventually(Integration(ns, name), TestTimeoutLong).Should(BeNil())
+		Expect(DeleteSecret(ns, secretName)).To(Succeed())
+		Eventually(SecretByName(ns, secretName), TestTimeoutLong).Should(BeNil())
+		Expect(DeleteKamelet(ns, "iconfig09-timer-source")).To(Succeed())
 	})
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	Expect(DeleteKamelet(ns, "iconfig-test-timer-source")).To(Succeed())
 }
-*/
 
 // Tests on integration with kamelets containing configuration from properties and secrets with parameters inside the integration.
 
