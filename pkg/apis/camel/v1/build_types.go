@@ -84,13 +84,13 @@ type Task struct {
 type BaseTask struct {
 	// name of the task
 	Name string `json:"name,omitempty"`
+	// The configuration that should be used to perform the Build.
+	Configuration BuildConfiguration `json:"configuration,omitempty"`
 }
 
 // BuilderTask is the generic task in charge of building the application image.
 type BuilderTask struct {
 	BaseTask `json:",inline"`
-	// The configuration that should be used to perform the Build.
-	Configuration BuildConfiguration `json:"configuration,omitempty"`
 	// the base image layer
 	BaseImage string `json:"baseImage,omitempty"`
 	// the configuration required for the runtime application

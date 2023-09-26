@@ -218,20 +218,20 @@ traits:
       `sequential` (default sequential)
   - name: request-cpu
     type: string
-    description: When using `pod` strategy, the minimum amount of CPU required by
-      the pod builder.
+    description: 'When using `pod` strategy, the minimum amount of CPU required by
+      the pod builder. Deprecated: use TasksRequestCPU instead with task name `builder`.'
   - name: request-memory
     type: string
-    description: When using `pod` strategy, the minimum amount of memory required
-      by the pod builder.
+    description: 'When using `pod` strategy, the minimum amount of memory required
+      by the pod builder. Deprecated: use TasksRequestCPU instead with task name `builder`.'
   - name: limit-cpu
     type: string
-    description: When using `pod` strategy, the maximum amount of CPU required by
-      the pod builder.
+    description: 'When using `pod` strategy, the maximum amount of CPU required by
+      the pod builder. Deprecated: use TasksRequestCPU instead with task name `builder`.'
   - name: limit-memory
     type: string
-    description: When using `pod` strategy, the maximum amount of memory required
-      by the pod builder.
+    description: 'When using `pod` strategy, the maximum amount of memory required
+      by the pod builder. Deprecated: use TasksRequestCPU instead with task name `builder`.'
   - name: maven-profiles
     type: '[]string'
     description: 'A list of references pointing to configmaps/secrets that contains
@@ -243,7 +243,23 @@ traits:
   - name: tasks
     type: '[]string'
     description: A list of tasks to be executed (available only when using `pod` strategy)
-      with format <name>;<container-image>;<container-command>
+      with format `<name>;<container-image>;<container-command>`.
+  - name: tasks-request-cpu
+    type: '[]string'
+    description: A list of request cpu configuration for the specific task with format
+      `<task-name>:<request-cpu-conf>`.
+  - name: tasks-request-memory
+    type: '[]string'
+    description: A list of request memory configuration for the specific task with
+      format `<task-name>:<request-memory-conf>`.
+  - name: tasks-limit-cpu
+    type: '[]string'
+    description: A list of limit cpu configuration for the specific task with format
+      `<task-name>:<limit-cpu-conf>`.
+  - name: tasks-limit-memory
+    type: '[]string'
+    description: A list of limit memory configuration for the specific task with format
+      `<task-name>:<limit-memory-conf>`.
 - name: camel
   platform: true
   profiles:

@@ -40,6 +40,14 @@ func (b *JibTaskApplyConfiguration) WithName(value string) *JibTaskApplyConfigur
 	return b
 }
 
+// WithConfiguration sets the Configuration field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Configuration field is set to the value of the last call.
+func (b *JibTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *JibTaskApplyConfiguration {
+	b.Configuration = value
+	return b
+}
+
 // WithContextDir sets the ContextDir field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the ContextDir field is set to the value of the last call.

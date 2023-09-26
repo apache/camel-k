@@ -22,7 +22,8 @@ package v1
 // BaseTaskApplyConfiguration represents an declarative configuration of the BaseTask type for use
 // with apply.
 type BaseTaskApplyConfiguration struct {
-	Name *string `json:"name,omitempty"`
+	Name          *string                               `json:"name,omitempty"`
+	Configuration *BuildConfigurationApplyConfiguration `json:"configuration,omitempty"`
 }
 
 // BaseTaskApplyConfiguration constructs an declarative configuration of the BaseTask type for use with
@@ -36,5 +37,13 @@ func BaseTask() *BaseTaskApplyConfiguration {
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *BaseTaskApplyConfiguration) WithName(value string) *BaseTaskApplyConfiguration {
 	b.Name = &value
+	return b
+}
+
+// WithConfiguration sets the Configuration field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Configuration field is set to the value of the last call.
+func (b *BaseTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationApplyConfiguration) *BaseTaskApplyConfiguration {
+	b.Configuration = value
 	return b
 }

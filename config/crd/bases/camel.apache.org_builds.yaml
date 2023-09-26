@@ -148,6 +148,49 @@ spec:
                         baseImage:
                           description: base image layer
                           type: string
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - dependencies
+                              - fifo
+                              - sequential
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
+                              type: string
+                          type: object
                         contextDir:
                           description: can be useful to share info with other tasks
                           type: string
@@ -698,6 +741,49 @@ spec:
                           items:
                             type: string
                           type: array
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - dependencies
+                              - fifo
+                              - sequential
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
+                              type: string
+                          type: object
                         image:
                           description: the container image to use
                           type: string
@@ -711,6 +797,49 @@ spec:
                         baseImage:
                           description: base image layer
                           type: string
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - dependencies
+                              - fifo
+                              - sequential
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
+                              type: string
+                          type: object
                         contextDir:
                           description: can be useful to share info with other tasks
                           type: string
@@ -757,6 +886,49 @@ spec:
                               type: boolean
                             persistentVolumeClaim:
                               description: the PVC used to store the cache
+                              type: string
+                          type: object
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - dependencies
+                              - fifo
+                              - sequential
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
                               type: string
                           type: object
                         contextDir:
@@ -1298,6 +1470,49 @@ spec:
                     s2i:
                       description: a S2iTask, for S2I strategy
                       properties:
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - dependencies
+                              - fifo
+                              - sequential
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
+                              type: string
+                          type: object
                         contextDir:
                           description: can be useful to share info with other tasks
                           type: string
@@ -1314,6 +1529,49 @@ spec:
                         baseImage:
                           description: base image layer
                           type: string
+                        configuration:
+                          description: The configuration that should be used to perform
+                            the Build.
+                          properties:
+                            limitCPU:
+                              description: The maximum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            limitMemory:
+                              description: The maximum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            operatorNamespace:
+                              description: The namespace where to run the builder
+                                Pod (must be the same of the operator in charge of
+                                this Build reconciliation).
+                              type: string
+                            orderStrategy:
+                              description: the build order strategy to adopt
+                              enum:
+                              - dependencies
+                              - fifo
+                              - sequential
+                              type: string
+                            requestCPU:
+                              description: The minimum amount of CPU required. Only
+                                used for `pod` strategy
+                              type: string
+                            requestMemory:
+                              description: The minimum amount of memory required.
+                                Only used for `pod` strategy
+                              type: string
+                            strategy:
+                              description: the strategy to adopt
+                              enum:
+                              - routine
+                              - pod
+                              type: string
+                            toolImage:
+                              description: The container image to be used to run the
+                                build.
+                              type: string
+                          type: object
                         contextDir:
                           description: can be useful to share info with other tasks
                           type: string

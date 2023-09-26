@@ -77,6 +77,13 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 				return false, err
 			}
 			if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
+				// Force the build to run in a separate Pod and strictly sequential
+				t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, and native container with 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
+				t.Strategy = string(v1.BuildStrategyPod)
+				t.OrderStrategy = string(v1.BuildOrderStrategySequential)
+				t.TasksRequestCPU = append(t.TasksRequestCPU, "quarkus-native:1000m")
+				t.TasksRequestMemory = append(t.TasksRequestMemory, "quarkus-native:4Gi")
+
 				nativeArgsCd := filepath.Join("maven", "target", "native-sources")
 				command := "cd " + nativeArgsCd + " && echo NativeImage version is $(native-image --version) && echo GraalVM expected version is $(cat graalvm.version) && echo WARN: Make sure they are compatible, otherwise the native compilation may results in error && native-image $(cat native-image.args)"
 				// it should be performed as the last custom task
@@ -94,8 +101,13 @@ func (t *builderTrait) Apply(e *Environment) error {
 	// local pipeline tasks
 	var pipelineTasks []v1.Task
 
+	// task configuration resources
+	tasksConf, err := t.parseTasksConf()
+	if err != nil {
+		return err
+	}
 	// Building task
-	builderTask, err := t.builderTask(e)
+	builderTask, err := t.builderTask(e, taskConfOrDefault(tasksConf, "builder"))
 	if err != nil {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
 		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
@@ -128,7 +140,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			return nil
 		}
 
-		customTasks, err := t.customTasks()
+		customTasks, err := t.customTasks(tasksConf)
 		if err != nil {
 			return err
 		}
@@ -137,9 +149,10 @@ func (t *builderTrait) Apply(e *Environment) error {
 	}
 
 	// Packaging task
-	// It's the same builder configuration, but with different steps
+	// It's the same builder configuration, but with different steps and conf
 	packageTask := builderTask.DeepCopy()
 	packageTask.Name = "package"
+	packageTask.Configuration = *taskConfOrDefault(tasksConf, "package")
 	packageTask.Steps = make([]string, 0)
 	pipelineTasks = append(pipelineTasks, v1.Task{Package: packageTask})
 
@@ -148,7 +161,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 	case v1.IntegrationPlatformBuildPublishStrategySpectrum:
 		pipelineTasks = append(pipelineTasks, v1.Task{Spectrum: &v1.SpectrumTask{
 			BaseTask: v1.BaseTask{
-				Name: "spectrum",
+				Name:          "spectrum",
+				Configuration: *taskConfOrDefault(tasksConf, "spectrum"),
 			},
 			PublishTask: v1.PublishTask{
 				BaseImage: e.Platform.Status.Build.BaseImage,
@@ -160,7 +174,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
 		pipelineTasks = append(pipelineTasks, v1.Task{Jib: &v1.JibTask{
 			BaseTask: v1.BaseTask{
-				Name: "jib",
+				Name:          "jib",
+				Configuration: *taskConfOrDefault(tasksConf, "jib"),
 			},
 			PublishTask: v1.PublishTask{
 				BaseImage: e.Platform.Status.Build.BaseImage,
@@ -172,7 +187,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
 			BaseTask: v1.BaseTask{
-				Name: "s2i",
+				Name:          "s2i",
+				Configuration: *taskConfOrDefault(tasksConf, "s2i"),
 			},
 			Tag: e.IntegrationKit.ResourceVersion,
 		}})
@@ -195,7 +211,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 		pipelineTasks = append(pipelineTasks, v1.Task{Buildah: &v1.BuildahTask{
 			Platform: platform,
 			BaseTask: v1.BaseTask{
-				Name: "buildah",
+				Name:          "buildah",
+				Configuration: *taskConfOrDefault(tasksConf, "buildah"),
 			},
 			PublishTask: v1.PublishTask{
 				Image:    getImageName(e),
@@ -218,7 +235,8 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 		pipelineTasks = append(pipelineTasks, v1.Task{Kaniko: &v1.KanikoTask{
 			BaseTask: v1.BaseTask{
-				Name: "kaniko",
+				Name:          "kaniko",
+				Configuration: *taskConfOrDefault(tasksConf, "kaniko"),
 			},
 			PublishTask: v1.PublishTask{
 				Image:    getImageName(e),
@@ -238,7 +256,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
+func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfiguration) (*v1.BuilderTask, error) {
 	maven := v1.MavenBuildSpec{
 		MavenSpec: e.Platform.Status.Build.Maven,
 	}
@@ -247,38 +265,13 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
 
-	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
-		quarkus, ok := trait.(*quarkusTrait)
-		isNativeIntegration := quarkus.isNativeIntegration(e)
-		isNativeKit, err := quarkus.isNativeKit(e)
-		if err != nil {
-			return nil, err
-		}
-		// The builder trait must define certain resources requirements when we have a native build
-		if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
-			// Force the build to run in a separate Pod and strictly sequential
-			t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
-			t.Strategy = string(v1.BuildStrategyPod)
-			t.OrderStrategy = string(v1.BuildOrderStrategySequential)
-			t.RequestCPU = "1000m"
-			t.RequestMemory = "4Gi"
-		}
-	}
-
-	buildConfig := v1.BuildConfiguration{
-		RequestCPU:    t.RequestCPU,
-		RequestMemory: t.RequestMemory,
-		LimitCPU:      t.LimitCPU,
-		LimitMemory:   t.LimitMemory,
-	}
-
 	if t.Strategy != "" {
 		t.L.Infof("User defined build strategy %s", t.Strategy)
 		found := false
 		for _, s := range v1.BuildStrategies {
 			if string(s) == t.Strategy {
 				found = true
-				buildConfig.Strategy = s
+				taskConf.Strategy = s
 				break
 			}
 		}
@@ -297,7 +290,7 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 		for _, s := range v1.BuildOrderStrategies {
 			if string(s) == t.OrderStrategy {
 				found = true
-				buildConfig.OrderStrategy = s
+				taskConf.OrderStrategy = s
 				break
 			}
 		}
@@ -312,13 +305,13 @@ func (t *builderTrait) builderTask(e *Environment) (*v1.BuilderTask, error) {
 
 	task := &v1.BuilderTask{
 		BaseTask: v1.BaseTask{
-			Name: "builder",
+			Name:          "builder",
+			Configuration: *taskConf,
 		},
-		Configuration: buildConfig,
-		BaseImage:     e.Platform.Status.Build.BaseImage,
-		Runtime:       e.CamelCatalog.Runtime,
-		Dependencies:  e.IntegrationKit.Spec.Dependencies,
-		Maven:         maven,
+		BaseImage:    e.Platform.Status.Build.BaseImage,
+		Runtime:      e.CamelCatalog.Runtime,
+		Dependencies: e.IntegrationKit.Spec.Dependencies,
+		Maven:        maven,
 	}
 
 	if task.Maven.Properties == nil {
@@ -380,8 +373,9 @@ func getImageName(e *Environment) string {
 	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
 }
 
-func (t *builderTrait) customTasks() ([]v1.Task, error) {
+func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
 	customTasks := make([]v1.Task, len(t.Tasks))
+
 	for i, t := range t.Tasks {
 		splitted := strings.Split(t, ";")
 		if len(splitted) < 3 {
@@ -398,7 +392,8 @@ func (t *builderTrait) customTasks() ([]v1.Task, error) {
 		customTasks[i] = v1.Task{
 			Custom: &v1.UserTask{
 				BaseTask: v1.BaseTask{
-					Name: splitted[0],
+					Name:          splitted[0],
+					Configuration: *taskConfOrDefault(tasksConf, splitted[0]),
 				},
 				ContainerImage:    splitted[1],
 				ContainerCommands: containerCommands,
@@ -406,6 +401,72 @@ func (t *builderTrait) customTasks() ([]v1.Task, error) {
 		}
 	}
 	return customTasks, nil
+}
+
+func taskConfOrDefault(tasksConf map[string]*v1.BuildConfiguration, taskName string) *v1.BuildConfiguration {
+	if tasksConf == nil || tasksConf[taskName] == nil {
+		return &v1.BuildConfiguration{}
+	}
+
+	return tasksConf[taskName]
+}
+
+func (t *builderTrait) parseTasksConf() (map[string]*v1.BuildConfiguration, error) {
+	tasksConf := make(map[string]*v1.BuildConfiguration)
+
+	for _, t := range t.TasksRequestCPU {
+		splits := strings.Split(t, ":")
+		if len(splits) != 2 {
+			return nil, fmt.Errorf("could not parse %s, expected format <task-name>:<task-resource>", t)
+		}
+		taskName := splits[0]
+		taskResource := splits[1]
+		if tasksConf[taskName] == nil {
+			tasksConf[taskName] = &v1.BuildConfiguration{}
+		}
+		tasksConf[taskName].RequestCPU = taskResource
+	}
+
+	for _, t := range t.TasksRequestMemory {
+		splits := strings.Split(t, ":")
+		if len(splits) != 2 {
+			return nil, fmt.Errorf("could not parse %s, expected format <task-name>:<task-resource>", t)
+		}
+		taskName := splits[0]
+		taskResource := splits[1]
+		if tasksConf[taskName] == nil {
+			tasksConf[taskName] = &v1.BuildConfiguration{}
+		}
+		tasksConf[taskName].RequestMemory = taskResource
+	}
+
+	for _, t := range t.TasksLimitCPU {
+		splits := strings.Split(t, ":")
+		if len(splits) != 2 {
+			return nil, fmt.Errorf("could not parse %s, expected format <task-name>:<task-resource>", t)
+		}
+		taskName := splits[0]
+		taskResource := splits[1]
+		if tasksConf[taskName] == nil {
+			tasksConf[taskName] = &v1.BuildConfiguration{}
+		}
+		tasksConf[taskName].LimitCPU = taskResource
+	}
+
+	for _, t := range t.TasksLimitMemory {
+		splits := strings.Split(t, ":")
+		if len(splits) != 2 {
+			return nil, fmt.Errorf("could not parse %s, expected format <task-name>:<task-resource>", t)
+		}
+		taskName := splits[0]
+		taskResource := splits[1]
+		if tasksConf[taskName] == nil {
+			tasksConf[taskName] = &v1.BuildConfiguration{}
+		}
+		tasksConf[taskName].LimitMemory = taskResource
+	}
+
+	return tasksConf, nil
 }
 
 // we may get a command in the following format `/bin/bash -c "ls && echo 'hello'`

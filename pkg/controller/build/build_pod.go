@@ -191,8 +191,8 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build
 	return pod, nil
 }
 
-func configureResources(build *v1.Build, container *corev1.Container) {
-	conf := *build.BuilderConfiguration()
+func configureResources(taskName string, build *v1.Build, container *corev1.Container) {
+	conf := build.TaskConfiguration(taskName)
 	requestsList := container.Resources.Requests
 	limitsList := container.Resources.Limits
 	var err error
@@ -312,7 +312,7 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 		}
 	}
 
-	configureResources(build, &container)
+	configureResources(taskName, build, &container)
 	addContainerToPod(build, container, pod)
 }
 
@@ -427,6 +427,7 @@ func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, ta
 
 	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
 
+	configureResources(task.Name, build, &container)
 	addContainerToPod(build, container, pod)
 
 	return nil
@@ -555,6 +556,7 @@ func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, tas
 		FSGroup:    &ugfid,
 	}
 
+	configureResources(task.Name, build, &container)
 	addContainerToPod(build, container, pod)
 
 	return nil
@@ -570,6 +572,7 @@ func addCustomTaskToPod(build *v1.Build, task *v1.UserTask, pod *corev1.Pod) {
 		Env:             proxyFromEnvironment(),
 	}
 
+	configureResources(task.Name, build, &container)
 	addContainerToPod(build, container, pod)
 }
 

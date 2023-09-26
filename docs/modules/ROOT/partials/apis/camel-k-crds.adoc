@@ -429,6 +429,13 @@ string
 
 name of the task
 
+|`configuration` +
+*xref:#_camel_apache_org_v1_BuildConfiguration[BuildConfiguration]*
+|
+
+
+The configuration that should be used to perform the Build.
+
 
 |===
 
@@ -526,8 +533,8 @@ BuildConditionType -- .
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1_BaseTask, BaseTask>>
 * <<#_camel_apache_org_v1_BuildSpec, BuildSpec>>
-* <<#_camel_apache_org_v1_BuilderTask, BuilderTask>>
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
 
 BuildConfiguration represent the configuration required to build the runtime.
@@ -864,13 +871,6 @@ BuilderTask is the generic task in charge of building the application image.
 
 
 
-|`configuration` +
-*xref:#_camel_apache_org_v1_BuildConfiguration[BuildConfiguration]*
-|
-
-
-The configuration that should be used to perform the Build.
-
 |`baseImage` +
 string
 |
@@ -1169,7 +1169,7 @@ loaders required by this catalog
 
 * <<#_camel_apache_org_v1_CamelCatalog, CamelCatalog>>
 
-CamelCatalogStatus defines the observed state of CamelCatalog. As the catalog is a static resource, we expect it to be empty.
+CamelCatalogStatus defines the observed state of CamelCatalog.
 
 [cols="2,2a",options="header"]
 |===
@@ -5800,6 +5800,7 @@ string
 
 
 When using `pod` strategy, the minimum amount of CPU required by the pod builder.
+Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 |`requestMemory` +
 string
@@ -5807,6 +5808,7 @@ string
 
 
 When using `pod` strategy, the minimum amount of memory required by the pod builder.
+Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 |`limitCPU` +
 string
@@ -5814,6 +5816,7 @@ string
 
 
 When using `pod` strategy, the maximum amount of CPU required by the pod builder.
+Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 |`limitMemory` +
 string
@@ -5821,6 +5824,7 @@ string
 
 
 When using `pod` strategy, the maximum amount of memory required by the pod builder.
+Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 |`mavenProfiles` +
 []string
@@ -5836,7 +5840,35 @@ Syntax: [configmap{vbar}secret]:name[/key], where name represents the resource n
 |
 
 
-A list of tasks to be executed (available only when using `pod` strategy) with format <name>;<container-image>;<container-command>
+A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
+
+|`tasksRequestCPU` +
+[]string
+|
+
+
+A list of request cpu configuration for the specific task with format `<task-name>:<request-cpu-conf>`.
+
+|`tasksRequestMemory` +
+[]string
+|
+
+
+A list of request memory configuration for the specific task with format `<task-name>:<request-memory-conf>`.
+
+|`tasksLimitCPU` +
+[]string
+|
+
+
+A list of limit cpu configuration for the specific task with format `<task-name>:<limit-cpu-conf>`.
+
+|`tasksLimitMemory` +
+[]string
+|
+
+
+A list of limit memory configuration for the specific task with format `<task-name>:<limit-memory-conf>`.
 
 
 |===
