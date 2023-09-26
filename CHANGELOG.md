@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
 - Unable to work under azure k8s at latest version with a minimal example [\#4758](https://github.com/apache/camel-k/issues/4758)
 - E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
 - Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
@@ -34,6 +35,8 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): Update prometheus e2e test to camel 4 metrics [\#4767](https://github.com/apache/camel-k/pull/4767) ([gansheer](https://github.com/gansheer))
+- fix\(ci\): downgrade to Kind 0.19 [\#4766](https://github.com/apache/camel-k/pull/4766) ([squakez](https://github.com/squakez))
 - fix\(ci\): license check [\#4763](https://github.com/apache/camel-k/pull/4763) ([squakez](https://github.com/squakez))
 - feat\(runtime\): default version 3.2.0 [\#4762](https://github.com/apache/camel-k/pull/4762) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/serving from 0.38.0 to 0.38.1 [\#4761](https://github.com/apache/camel-k/pull/4761) ([dependabot[bot]](https://github.com/apps/dependabot))
