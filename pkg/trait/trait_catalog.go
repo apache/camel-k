@@ -102,13 +102,13 @@ func (c *Catalog) apply(environment *Environment) error {
 		applicable = true
 		enabled, err := trait.Configure(environment)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s trait configuration failed: %w", trait.ID(), err)
 		}
 
 		if enabled {
 			err = trait.Apply(environment)
 			if err != nil {
-				return err
+				return fmt.Errorf("%s trait execution failed: %w", trait.ID(), err)
 			}
 
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
@@ -117,7 +117,7 @@ func (c *Catalog) apply(environment *Environment) error {
 			for _, processor := range environment.PostStepProcessors {
 				err := processor(environment)
 				if err != nil {
-					return fmt.Errorf("error executing post step action: %w", err)
+					return fmt.Errorf("%s trait executing post step action failed: %w", trait.ID(), err)
 				}
 			}
 		}

@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // NewInitializeAction returns a action that initializes the catalog configuration when not provided by the user.
@@ -61,9 +62,24 @@ func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCat
 
 func initialize(catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	target := catalog.DeepCopy()
-	// TODO - we may verify the existence of the catalog image (required by native build)
-	// or any other condition that may make a CamelCatalog to fail.
-	target.Status.Phase = v1.CamelCatalogPhaseReady
+
+	if catalog.Spec.GetQuarkusToolingImage() == "" {
+		target.Status.Phase = v1.CamelCatalogPhaseError
+		target.Status.SetCondition(
+			v1.CamelCatalogConditionReady,
+			corev1.ConditionTrue,
+			"Container image tool",
+			"Container image tool missing in catalog. This catalog is not compatible with Camel K version above 2.0",
+		)
+	} else {
+		target.Status.Phase = v1.CamelCatalogPhaseReady
+		target.Status.SetCondition(
+			v1.CamelCatalogConditionReady,
+			corev1.ConditionTrue,
+			"Container image tool",
+			"Container image tool found in catalog",
+		)
+	}
 
 	return target, nil
 }

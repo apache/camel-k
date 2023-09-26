@@ -320,7 +320,7 @@ func TestMavenBuilderTraitJib(t *testing.T) {
 func TestBuilderCustomTasks(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
-	builderTrait.Tasks = append(builderTrait.Tasks, `test;alpine;"mvn test"`)
+	builderTrait.Tasks = append(builderTrait.Tasks, `test;alpine;mvn test`)
 
 	tasks, err := builderTrait.customTasks()
 
@@ -372,7 +372,15 @@ func TestUserTaskSingleCommand(t *testing.T) {
 	command := `cat /path/to/a/resource`
 	podCommands := splitContainerCommand(command)
 
+	assert.Len(t, podCommands, 1)
+	assert.Equal(t, "cat /path/to/a/resource", podCommands[0])
+}
+
+func TestUserTaskMultiCommands(t *testing.T) {
+	command := `"cat /path/to/a/resource" "echo ciao"`
+	podCommands := splitContainerCommand(command)
+
 	assert.Len(t, podCommands, 2)
-	assert.Equal(t, "cat", podCommands[0])
-	assert.Equal(t, "/path/to/a/resource", podCommands[1])
+	assert.Equal(t, "cat /path/to/a/resource", podCommands[0])
+	assert.Equal(t, "echo ciao", podCommands[1])
 }
