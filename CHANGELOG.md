@@ -35,6 +35,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump knative.dev/eventing from 0.38.3 to 0.38.4 [\#4769](https://github.com/apache/camel-k/pull/4769) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): Kamelets Default config as a labeled secret [\#4768](https://github.com/apache/camel-k/pull/4768) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Update prometheus e2e test to camel 4 metrics [\#4767](https://github.com/apache/camel-k/pull/4767) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): downgrade to Kind 0.19 [\#4766](https://github.com/apache/camel-k/pull/4766) ([squakez](https://github.com/squakez))
 - fix\(ci\): license check [\#4763](https://github.com/apache/camel-k/pull/4763) ([squakez](https://github.com/squakez))
