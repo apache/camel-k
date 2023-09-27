@@ -45,8 +45,8 @@ func TestNativeIntegrations(t *testing.T) {
 		t.Run("unsupported integration source language", func(t *testing.T) {
 			name := "unsupported-js"
 			Expect(KamelRunWithID(operatorID, ns, "files/JavaScript.js", "--name", name,
-				"-t", "quarkus.package-type=native",
-				"-t", "builder.limit-memory=6.5Gi",
+				"-t", "quarkus.mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:=6.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
@@ -60,8 +60,8 @@ func TestNativeIntegrations(t *testing.T) {
 		t.Run("xml native support", func(t *testing.T) {
 			name := "xml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Xml.xml", "--name", name,
-				"-t", "quarkus.package-type=native",
-				"-t", "builder.limit-memory=6.5Gi",
+				"-t", "quarkus.mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:=6.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
@@ -81,9 +81,9 @@ func TestNativeIntegrations(t *testing.T) {
 			Expect(DeleteKits(ns)).To(Succeed())
 			name := "yaml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name,
-				"-t", "quarkus.package-type=fast-jar",
-				"-t", "quarkus.package-type=native",
-				"-t", "builder.limit-memory=6.5Gi",
+				"-t", "quarkus.mode=fast-jar",
+				"-t", "quarkus.mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:=6.5Gi",
 			).Execute()).To(Succeed())
 
 			// Check that two Kits are created with distinct layout
@@ -134,8 +134,8 @@ func TestNativeIntegrations(t *testing.T) {
 			t.Run("yaml native should not rebuild", func(t *testing.T) {
 				name := "yaml-native-2"
 				Expect(KamelRunWithID(operatorID, ns, "files/yaml2.yaml", "--name", name,
-					"-t", "quarkus.package-type=native",
-					"-t", "builder.limit-memory=6.5Gi",
+					"-t", "quarkus.mode=native",
+					"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 				).Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit

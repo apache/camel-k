@@ -123,10 +123,10 @@ func TestBuilderTrait(t *testing.T) {
 		name := "java-resource-config"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
-			"-t", "builder.request-cpu=500m",
-			"-t", "builder.limit-cpu=1000m",
-			"-t", "builder.request-memory=2Gi",
-			"-t", "builder.limit-memory=3Gi",
+			"-t", "builder.tasks-request-cpu=builder:500m",
+			"-t", "builder.tasks-limit-cpu=builder:1000m",
+			"-t", "builder.tasks-request-memory=builder:2Gi",
+			"-t", "builder.tasks-limit-memory=builder:3Gi",
 			"-t", "builder.strategy=pod",
 		).Execute()).To(Succeed())
 

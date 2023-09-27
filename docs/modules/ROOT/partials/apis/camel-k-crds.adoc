@@ -2568,7 +2568,7 @@ The Camel trait sets up Camel configuration.
 
 The Quarkus trait configures the Quarkus runtime.
 It's enabled by default.
-NOTE: Compiling to a native executable, i.e. when using `package-type=native`, is only supported for kamelets, as well as YAML and XML integrations. It also requires at least 4GiB of memory, so the Pod running the native build, that is either the operator Pod, or the build Pod (depending on the build strategy configured for the platform), must have enough memory available.
+NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the Pod running the native build must have enough memory available.
 
 |`registry` +
 *xref:#_camel_apache_org_v1_trait_RegistryTrait[RegistryTrait]*
@@ -2672,6 +2672,7 @@ the image registry used to push/pull Integration images
 
 
 the timeout (in seconds) to use when creating the build tools container image
+Deprecated: no longer in use
 
 |`timeout` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#duration-v1-meta[Kubernetes meta/v1.Duration]*
@@ -7578,6 +7579,16 @@ Automatically configures the platform registry secret on the pod if it is of typ
 
 |===
 
+[#_camel_apache_org_v1_trait_QuarkusMode]
+=== QuarkusMode(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
+
+QuarkusMode is the type of Quarkus build packaging.
+
+
 [#_camel_apache_org_v1_trait_QuarkusPackageType]
 === QuarkusPackageType(`string` alias)
 
@@ -7586,6 +7597,7 @@ Automatically configures the platform registry secret on the pod if it is of typ
 * <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
 
 QuarkusPackageType is the type of Quarkus build packaging.
+Deprecated: use `QuarkusMode` instead.
 
 
 [#_camel_apache_org_v1_trait_QuarkusTrait]
@@ -7622,12 +7634,22 @@ Compiling to a native executable, i.e. when using `package-type=native`, require
 |
 
 
-The Quarkus package types, `fast-jar`, `native-sources` or `native` (default `fast-jar`). `native` is deprecated.
-In case both `fast-jar` and `native` or `native-sources` are specified, two `IntegrationKit` resources are created,
+The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
+In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
 with the native kit having precedence over the `fast-jar` one once ready.
 The order influences the resolution of the current kit for the integration.
 The kit corresponding to the first package type will be assigned to the
 integration in case no existing kit that matches the integration exists.
+Deprecated: use `mode` instead.
+
+|`mode` +
+*xref:#_camel_apache_org_v1_trait_QuarkusMode[[\]QuarkusMode]*
+|
+
+
+The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
+In case both `jvm` and `native` are specified, two `IntegrationKit` resources are created,
+with the `native` kit having precedence over the `jvm` one once ready.
 
 
 |===

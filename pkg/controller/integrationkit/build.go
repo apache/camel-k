@@ -100,7 +100,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		}
 
 		timeout := env.Platform.Status.Build.GetTimeout()
-		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNative {
+		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNativeSources {
 			// Increase the timeout to a sensible default
 			timeout = metav1.Duration{
 				Duration: 10 * time.Minute,

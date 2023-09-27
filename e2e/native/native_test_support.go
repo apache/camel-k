@@ -33,7 +33,7 @@ import (
 
 var (
 	withFastJarLayout = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutFastJar})
-	withNativeLayout  = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNative})
+	withNativeLayout  = KitWithLabels(map[string]string{v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNativeSources})
 )
 
 func getContainerCommand() func(pod *corev1.Pod) string {

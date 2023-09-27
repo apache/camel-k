@@ -154,7 +154,7 @@ func createNominalCamelTest(withSources bool) (*camelTrait, *Environment) {
 		IntegrationKit: &v1.IntegrationKit{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: map[string]string{
-					v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNative,
+					v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNativeSources,
 				},
 				Namespace: "namespace",
 			},

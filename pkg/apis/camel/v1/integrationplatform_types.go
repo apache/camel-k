@@ -125,6 +125,7 @@ type IntegrationPlatformBuildSpec struct {
 	// the image registry used to push/pull Integration images
 	Registry RegistrySpec `json:"registry,omitempty"`
 	// the timeout (in seconds) to use when creating the build tools container image
+	// Deprecated: no longer in use
 	BuildCatalogToolTimeout *metav1.Duration `json:"buildCatalogToolTimeout,omitempty"`
 	// how much time to wait before time out the pipeline process
 	Timeout *metav1.Duration `json:"timeout,omitempty"`

@@ -64,7 +64,7 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 	layout := build.Labels[v1.IntegrationKitLayoutLabel]
 
 	// Native builds can be run in parallel, as incremental images is not applicable.
-	if layout == v1.IntegrationKitLayoutNative {
+	if layout == v1.IntegrationKitLayoutNativeSources {
 		return true, nil
 	}
 

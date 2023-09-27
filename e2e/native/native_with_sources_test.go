@@ -43,24 +43,11 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		pl := Platform(ns)()
-		// set a longer timeout than default as for some reason the builder hit the timeout
-		pl.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
-			Duration: 5 * time.Minute,
-		}
-		TestClient().Update(TestContext, pl)
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformBuildCatalogToolTimeout(ns)).Should(Equal(
-			&metav1.Duration{
-				Duration: 5 * time.Minute,
-			},
-		))
-
 		t.Run("java native support", func(t *testing.T) {
 			name := "java-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-				"-t", "quarkus.package-type=native",
-				"-t", "builder.limit-memory=9.5Gi",
+				"-t", "quarkus.mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:=9.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
@@ -73,8 +60,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			t.Run("java native same should not rebuild", func(t *testing.T) {
 				name := "java-native-clone"
 				Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-					"-t", "quarkus.package-type=native",
-					"-t", "builder.limit-memory=9.5Gi",
+					"-t", "quarkus.mode=native",
+					"-t", "builder.tasks-limit-memory=quarkus-native:=9.5Gi",
 				).Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
@@ -90,8 +77,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			t.Run("java native should rebuild", func(t *testing.T) {
 				name := "java-native-2"
 				Expect(KamelRunWithID(operatorID, ns, "files/Java2.java", "--name", name,
-					"-t", "quarkus.package-type=native",
-					"-t", "builder.limit-memory=9.5Gi",
+					"-t", "quarkus.mode=native",
+					"-t", "builder.tasks-limit-memory=quarkus-native:=9.5Gi",
 				).Execute()).To(Succeed())
 
 				Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
@@ -110,8 +97,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		t.Run("groovy native support", func(t *testing.T) {
 			name := "groovy-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Groovy.groovy", "--name", name,
-				"-t", "quarkus.package-type=native",
-				"-t", "builder.limit-memory=9.5Gi",
+				"-t", "quarkus.mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:=9.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
@@ -129,8 +116,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		t.Run("kotlin native support", func(t *testing.T) {
 			name := "kotlin-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Kotlin.kts", "--name", name,
-				"-t", "quarkus.package-type=native",
-				"-t", "builder.limit-memory=9.5Gi",
+				"-t", "quarkus.mode=native",
+				"-t", "builder.tasks-limit-memory=quarkus-native:=9.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))

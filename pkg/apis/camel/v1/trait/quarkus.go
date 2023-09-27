@@ -28,16 +28,33 @@ package trait
 // +camel-k:trait=quarkus.
 type QuarkusTrait struct {
 	Trait `property:",squash" json:",inline"`
-	// The Quarkus package types, `fast-jar`, `native-sources` or `native` (default `fast-jar`). `native` is deprecated.
-	// In case both `fast-jar` and `native` or `native-sources` are specified, two `IntegrationKit` resources are created,
+	// The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
+	// In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
 	// with the native kit having precedence over the `fast-jar` one once ready.
 	// The order influences the resolution of the current kit for the integration.
 	// The kit corresponding to the first package type will be assigned to the
 	// integration in case no existing kit that matches the integration exists.
+	// Deprecated: use `mode` instead.
 	PackageTypes []QuarkusPackageType `property:"package-type" json:"packageTypes,omitempty"`
+	// The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
+	// In case both `jvm` and `native` are specified, two `IntegrationKit` resources are created,
+	// with the `native` kit having precedence over the `jvm` one once ready.
+	Modes []QuarkusMode `property:"mode" json:"mode,omitempty"`
 }
 
+// QuarkusMode is the type of Quarkus build packaging.
+// +kubebuilder:validation:Enum=jvm;native
+type QuarkusMode string
+
+const (
+	// JvmQuarkusMode represents "JVM mode" Quarkus execution.
+	JvmQuarkusMode QuarkusMode = "jvm"
+	// NativeQuarkusMode represents "Native mode" Quarkus execution.
+	NativeQuarkusMode QuarkusMode = "native"
+)
+
 // QuarkusPackageType is the type of Quarkus build packaging.
+// Deprecated: use `QuarkusMode` instead.
 // +kubebuilder:validation:Enum=fast-jar;native-sources;native
 type QuarkusPackageType string
 
@@ -45,8 +62,5 @@ const (
 	// FastJarPackageType represents "fast jar" Quarkus packaging.
 	FastJarPackageType QuarkusPackageType = "fast-jar"
 	// NativePackageType represents "native" Quarkus packaging.
-	// Deprecated: use native-sources instead.
 	NativePackageType QuarkusPackageType = "native"
-	// NativeSourcesPackageType represents "native-sources" Quarkus packaging.
-	NativeSourcesPackageType QuarkusPackageType = "native-sources"
 )

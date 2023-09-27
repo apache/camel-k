@@ -360,10 +360,10 @@ func TestBuilderCustomTasksScript(t *testing.T) {
 
 func TestBuilderCustomTasksConfiguration(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksRequestCPU = append(builderTrait.TasksLimitCPU, "builder:1000m")
+	builderTrait.TasksRequestCPU = append(builderTrait.TasksRequestCPU, "builder:1000m")
 	builderTrait.TasksLimitCPU = append(builderTrait.TasksLimitCPU, "custom1:500m")
-	builderTrait.TasksRequestMemory = append(builderTrait.TasksLimitCPU, "package:8Gi")
-	builderTrait.TasksLimitMemory = append(builderTrait.TasksLimitCPU, "spectrum:4Gi")
+	builderTrait.TasksRequestMemory = append(builderTrait.TasksRequestMemory, "package:8Gi")
+	builderTrait.TasksLimitMemory = append(builderTrait.TasksLimitMemory, "spectrum:4Gi")
 
 	tasksConf, err := builderTrait.parseTasksConf()
 
@@ -410,4 +410,26 @@ func TestUserTaskMultiCommands(t *testing.T) {
 	assert.Len(t, podCommands, 2)
 	assert.Equal(t, "cat /path/to/a/resource", podCommands[0])
 	assert.Equal(t, "echo ciao", podCommands[1])
+}
+
+func TestBuilderDeprecatedParams(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.LimitCPU = "100m"
+	builderTrait.RequestCPU = "100m"
+	builderTrait.LimitMemory = "100Mi"
+	builderTrait.RequestMemory = "100Mi"
+
+	active, err := builderTrait.Configure(env)
+
+	assert.Nil(t, err)
+	assert.True(t, active)
+	assert.Len(t, builderTrait.TasksLimitCPU, 1)
+	assert.Len(t, builderTrait.TasksRequestCPU, 1)
+	assert.Len(t, builderTrait.TasksLimitMemory, 1)
+	assert.Len(t, builderTrait.TasksRequestMemory, 1)
+	assert.Equal(t, "builder:100m", builderTrait.TasksLimitCPU[0])
+	assert.Equal(t, "builder:100m", builderTrait.TasksRequestCPU[0])
+	assert.Equal(t, "builder:100Mi", builderTrait.TasksLimitMemory[0])
+	assert.Equal(t, "builder:100Mi", builderTrait.TasksRequestMemory[0])
 }

@@ -27,9 +27,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
-	"time"
 )
 
 func TestNativeBinding(t *testing.T) {
@@ -40,30 +38,15 @@ func TestNativeBinding(t *testing.T) {
 			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
-		pl := Platform(ns)()
-		// set a longer timeout than default as for some reason the builder hit the timeout
-		pl.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
-			Duration: 5 * time.Minute,
-		}
-		TestClient().Update(TestContext, pl)
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformBuildCatalogToolTimeout(ns)).Should(Equal(
-			&metav1.Duration{
-				Duration: 5 * time.Minute,
-			},
-		))
-
 		message := "Magicstring!"
-
 		t.Run("binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
 			Expect(KamelBindWithID(operatorID, ns,
 				"timer-source",
 				"log-sink",
 				"-p", "source.message="+message,
-				"--annotation", "trait.camel.apache.org/quarkus.package-type=native",
-				"--annotation", "trait.camel.apache.org/builder.limit-memory=6.5Gi",
+				"--annotation", "trait.camel.apache.org/quarkus.mode=native",
+				"--annotation", "trait.camel.apache.org/builder.tasks-limit-memory=quarkus-native:6.5Gi",
 				"--name", bindingName,
 			).Execute()).To(Succeed())
 

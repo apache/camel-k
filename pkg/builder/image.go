@@ -181,7 +181,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 
 func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, error) {
 	excludeNativeImages, err := labels.NewRequirement(v1.IntegrationKitLayoutLabel, selection.NotEquals, []string{
-		v1.IntegrationKitLayoutNative,
+		v1.IntegrationKitLayoutNativeSources,
 	})
 	if err != nil {
 		return nil, err
