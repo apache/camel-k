@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
 - Unable to work under azure k8s at latest version with a minimal example [\#4758](https://github.com/apache/camel-k/issues/4758)
 - E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
 - Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
