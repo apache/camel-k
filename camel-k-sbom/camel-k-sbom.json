@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:77e4d5bf-3957-47c5-85c5-097f3fe5a357",
+  "serialNumber": "urn:uuid:5e5b60d2-9c44-4e61-ac06-50b033339627",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-09-26T23:46:50Z",
+    "timestamp": "2023-09-27T23:49:09Z",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230926234246-a051f471be39?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230927234838-c659b03a92be?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20230926234246-a051f471be39",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230926234246-a051f471be39?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20230927234838-c659b03a92be",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230927234838-c659b03a92be?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -3595,18 +3595,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/knative.dev/eventing@v0.38.3?type=module",
+      "bom-ref": "pkg:golang/knative.dev/eventing@v0.38.4?type=module",
       "type": "library",
       "name": "knative.dev/eventing",
-      "version": "v0.38.3",
+      "version": "v0.38.4",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "60149faab3414d2f65d8ca74aa9b970ae8502d9ae9f9edeea25238dada130a3f"
+          "content": "787d39f5b7de2e2963db100de95ed75ce877c2acf3e6cb28312fc2209a497e69"
         }
       ],
-      "purl": "pkg:golang/knative.dev/eventing@v0.38.3?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/knative.dev/eventing@v0.38.4?type=module\u0026goos=linux\u0026goarch=amd64",
       "evidence": {
         "licenses": [
           {
@@ -3772,7 +3772,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230926234246-a051f471be39?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20230927234838-c659b03a92be?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
         "pkg:golang/github.com/container-tools/spectrum@v0.6.36?type=module",
@@ -3820,7 +3820,7 @@
         "pkg:golang/k8s.io/klog/v2@v2.100.1?type=module",
         "pkg:golang/k8s.io/kubectl@v0.27.4?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
-        "pkg:golang/knative.dev/eventing@v0.38.3?type=module",
+        "pkg:golang/knative.dev/eventing@v0.38.4?type=module",
         "pkg:golang/knative.dev/pkg@v0.0.0-20230718152110-aef227e72ead?type=module",
         "pkg:golang/knative.dev/serving@v0.38.1?type=module",
         "pkg:golang/sigs.k8s.io/controller-runtime@v0.15.2?type=module",
@@ -5317,7 +5317,7 @@
       ]
     },
     {
-      "ref": "pkg:golang/knative.dev/eventing@v0.38.3?type=module",
+      "ref": "pkg:golang/knative.dev/eventing@v0.38.4?type=module",
       "dependsOn": [
         "pkg:golang/contrib.go.opencensus.io/exporter/ocagent@v0.7.1-0.20200907061046-05415f1de66d?type=module",
         "pkg:golang/contrib.go.opencensus.io/exporter/prometheus@v0.4.0?type=module",
