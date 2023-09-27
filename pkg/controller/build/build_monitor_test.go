@@ -577,7 +577,7 @@ func newBuild(namespace string, name string, dependencies ...string) *v1.Build {
 }
 
 func newNativeBuild(namespace string, name string, dependencies ...string) *v1.Build {
-	return newBuildWithLayoutInPhase(namespace, name, v1.IntegrationKitLayoutNative, v1.BuildPhasePending, dependencies...)
+	return newBuildWithLayoutInPhase(namespace, name, v1.IntegrationKitLayoutNativeSources, v1.BuildPhasePending, dependencies...)
 }
 
 func newBuildInPhase(namespace string, name string, phase v1.BuildPhase, dependencies ...string) *v1.Build {
@@ -585,7 +585,7 @@ func newBuildInPhase(namespace string, name string, phase v1.BuildPhase, depende
 }
 
 func newNativeBuildInPhase(namespace string, name string, phase v1.BuildPhase, dependencies ...string) *v1.Build {
-	return newBuildWithLayoutInPhase(namespace, name, v1.IntegrationKitLayoutNative, phase, dependencies...)
+	return newBuildWithLayoutInPhase(namespace, name, v1.IntegrationKitLayoutNativeSources, phase, dependencies...)
 }
 
 func newBuildWithLayoutInPhase(namespace string, name string, layout string, phase v1.BuildPhase, dependencies ...string) *v1.Build {

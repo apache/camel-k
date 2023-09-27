@@ -39,10 +39,16 @@ const (
 	quarkusTraitID = "quarkus"
 )
 
-var kitPriority = map[traitv1.QuarkusPackageType]string{
-	traitv1.FastJarPackageType:       "1000",
-	traitv1.NativeSourcesPackageType: "2000",
-	traitv1.NativePackageType:        "2100",
+type quarkusPackageType string
+
+const (
+	fastJarPackageType       quarkusPackageType = "fast-jar"
+	nativeSourcesPackageType quarkusPackageType = "native-sources"
+)
+
+var kitPriority = map[quarkusPackageType]string{
+	fastJarPackageType:       "1000",
+	nativeSourcesPackageType: "2000",
 }
 
 type quarkusTrait struct {
@@ -124,15 +130,15 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		return false
 	}
 
-	if len(t.PackageTypes) == 0 && len(qt.PackageTypes) != 0 && !containsPackageType(qt.PackageTypes, traitv1.FastJarPackageType) {
+	if len(t.Modes) == 0 && len(qt.Modes) != 0 && !qt.containsMode(traitv1.JvmQuarkusMode) {
 		return false
 	}
 
-	for _, pt := range t.PackageTypes {
-		if pt == traitv1.FastJarPackageType && len(qt.PackageTypes) == 0 {
+	for _, md := range t.Modes {
+		if md == traitv1.JvmQuarkusMode && len(qt.Modes) == 0 {
 			continue
 		}
-		if containsPackageType(qt.PackageTypes, pt) {
+		if qt.containsMode(md) {
 			continue
 		}
 		return false
@@ -146,10 +152,27 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
 		return false, nil
 	}
 
+	t.adaptDeprecatedFields()
+
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases(),
 		nil
+}
+
+func (t *quarkusTrait) adaptDeprecatedFields() {
+	if t.PackageTypes != nil {
+		t.L.Info("The package-type parameter is deprecated and may be removed in future releases. Make sure to use mode parameter instead.")
+		for _, pt := range t.PackageTypes {
+			if pt == traitv1.NativePackageType {
+				t.Modes = append(t.Modes, traitv1.NativeQuarkusMode)
+				continue
+			}
+			if pt == traitv1.FastJarPackageType {
+				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
+			}
+		}
+	}
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {
@@ -175,7 +198,7 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 }
 
 func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
-	if containsPackageType(t.PackageTypes, traitv1.NativePackageType) {
+	if t.containsMode(traitv1.NativeQuarkusMode) {
 		// Native compilation is only supported for a subset of languages,
 		// so let's check for compatibility, and fail-fast the Integration,
 		// to save compute resources and user time.
@@ -185,23 +208,21 @@ func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
 		}
 	}
 
-	switch len(t.PackageTypes) {
+	switch len(t.Modes) {
 	case 0:
-		kit := t.newIntegrationKit(e, traitv1.FastJarPackageType)
+		// Default behavior
+		kit := t.newIntegrationKit(e, fastJarPackageType)
 		e.IntegrationKits = append(e.IntegrationKits, *kit)
-
 	case 1:
-		kit := t.newIntegrationKit(e, t.PackageTypes[0])
+		kit := t.newIntegrationKit(e, packageType(t.Modes[0]))
 		e.IntegrationKits = append(e.IntegrationKits, *kit)
-
 	default:
-		for _, pt := range t.PackageTypes {
-			packageType := pt
-			kit := t.newIntegrationKit(e, packageType)
+		for _, md := range t.Modes {
+			kit := t.newIntegrationKit(e, packageType(md))
 			if kit.Spec.Traits.Quarkus == nil {
 				kit.Spec.Traits.Quarkus = &traitv1.QuarkusTrait{}
 			}
-			kit.Spec.Traits.Quarkus.PackageTypes = []traitv1.QuarkusPackageType{packageType}
+			kit.Spec.Traits.Quarkus.Modes = []traitv1.QuarkusMode{md}
 			e.IntegrationKits = append(e.IntegrationKits, *kit)
 		}
 	}
@@ -225,7 +246,7 @@ func (t *quarkusTrait) validateNativeSupport(e *Environment) bool {
 	return true
 }
 
-func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.QuarkusPackageType) *v1.IntegrationKit {
+func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPackageType) *v1.IntegrationKit {
 	integration := e.Integration
 	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform), fmt.Sprintf("kit-%s", xid.New()))
 
@@ -262,7 +283,7 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType traitv1.Qua
 		Traits:       propagateKitTraits(e),
 	}
 
-	if packageType == traitv1.NativePackageType || packageType == traitv1.NativeSourcesPackageType {
+	if packageType == nativeSourcesPackageType {
 		kit.Spec.Sources = propagateSourcesRequiredAtBuildTime(e)
 	}
 	return kit
@@ -321,7 +342,7 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	}
 
 	if native {
-		buildTask.Maven.Properties["quarkus.package.type"] = string(traitv1.NativeSourcesPackageType)
+		buildTask.Maven.Properties["quarkus.package.type"] = string(nativeSourcesPackageType)
 		if len(e.IntegrationKit.Spec.Sources) > 0 {
 			buildTask.Sources = e.IntegrationKit.Spec.Sources
 			buildSteps = append(buildSteps, builder.Quarkus.PrepareProjectWithSources)
@@ -331,7 +352,7 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 		packageSteps = append(packageSteps, builder.Image.ExecutableDockerfile)
 	} else {
 		// Default, if nothing is specified
-		buildTask.Maven.Properties["quarkus.package.type"] = string(traitv1.FastJarPackageType)
+		buildTask.Maven.Properties["quarkus.package.type"] = string(fastJarPackageType)
 		packageSteps = append(packageSteps, builder.Quarkus.ComputeQuarkusDependencies)
 		// The LoadCamelQuarkusCatalog is required to have catalog information available by the builder
 		packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
@@ -355,11 +376,11 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 }
 
 func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
-	switch types := t.PackageTypes; len(types) {
+	switch modes := t.Modes; len(modes) {
 	case 0:
 		return false, nil
 	case 1:
-		return types[0] == traitv1.NativePackageType || types[0] == traitv1.NativeSourcesPackageType, nil
+		return modes[0] == traitv1.NativeQuarkusMode, nil
 	default:
 		return false, fmt.Errorf("kit %q has more than one package type", e.IntegrationKit.Name)
 	}
@@ -381,7 +402,7 @@ func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
 
 func (t *quarkusTrait) isNativeIntegration(e *Environment) bool {
 	// The current IntegrationKit determines the Integration runtime type
-	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNative
+	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNativeSources
 }
 
 // Indicates whether the given source code is embedded into the final binary.
@@ -395,13 +416,24 @@ func (t *quarkusTrait) isEmbedded(e *Environment, source v1.SourceSpec) bool {
 	return false
 }
 
-func containsPackageType(types []traitv1.QuarkusPackageType, t traitv1.QuarkusPackageType) bool {
-	for _, ti := range types {
-		if t == ti {
+func (t *quarkusTrait) containsMode(m traitv1.QuarkusMode) bool {
+	for _, mode := range t.Modes {
+		if mode == m {
 			return true
 		}
 	}
 	return false
+}
+
+func packageType(mode traitv1.QuarkusMode) quarkusPackageType {
+	if mode == traitv1.NativeQuarkusMode {
+		return nativeSourcesPackageType
+	}
+	if mode == traitv1.JvmQuarkusMode {
+		return fastJarPackageType
+	}
+
+	return ""
 }
 
 // Indicates whether the given source file is required at build time for native compilation.

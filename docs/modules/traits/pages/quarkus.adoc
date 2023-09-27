@@ -35,12 +35,19 @@ The following configuration options are available:
 
 | quarkus.package-type
 | []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusPackageType
-| The Quarkus package types, `fast-jar`, `native-sources` or `native` (default `fast-jar`). `native` is deprecated.
-In case both `fast-jar` and `native` or `native-sources` are specified, two `IntegrationKit` resources are created,
+| The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
+In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
 with the native kit having precedence over the `fast-jar` one once ready.
 The order influences the resolution of the current kit for the integration.
 The kit corresponding to the first package type will be assigned to the
 integration in case no existing kit that matches the integration exists.
+Deprecated: use `mode` instead.
+
+| quarkus.mode
+| []github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusMode
+| The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
+In case both `jvm` and `native` are specified, two `IntegrationKit` resources are created,
+with the `native` kit having precedence over the `jvm` one once ready.
 
 |===
 
@@ -59,6 +66,6 @@ While the compilation to native executables produces integrations that start fas
 In order to combine the best of both worlds, it's possible to configure the Quarkus trait to run both traditional and native builds in parallel when running an integration, e.g.:
 
 [source,console]
-$ kamel run -t quarkus.package-type=fast-jar -t quarkus.package-type=native ...
+$ kamel run -t quarkus.mode=jvm -t quarkus.mode=native ...
 
-The integration pod will run as soon as the `fast-jar` build completes, and a rollout deployment to the `native` image will be triggered, as soon as the `native` build completes, with no service interruption.
+The Integration pod will run as soon as the `hvm` build completes, and a rollout deployment to the `native` image will be triggered, as soon as the `native` build completes, with no service interruption.

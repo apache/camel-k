@@ -26,11 +26,9 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -63,7 +61,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 
 			Eventually(CamelCatalog(ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
 			Eventually(CamelCatalogPhase(ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
-			Eventually(CamelCatalogCondition(ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("missing base image"))
+			Eventually(CamelCatalogCondition(ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("Container image tool missing in catalog"))
 
 			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))
 			kitName := IntegrationKit(ns, name)()
@@ -139,33 +137,5 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		})
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-
-		pl := Platform(ns)()
-		// set a very short timeout to simulate the timeout
-		pl.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
-			Duration: 1 * time.Second,
-		}
-		TestClient().Update(TestContext, pl)
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformBuildCatalogToolTimeout(ns)).Should(Equal(
-			&metav1.Duration{
-				Duration: 1 * time.Second,
-			},
-		))
-
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
-
-		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
-		Eventually(CamelCatalogPhase(ns, catalogName)).Should(Equal(v1.CamelCatalogPhaseError))
-		Eventually(CamelCatalogCondition(ns, catalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("build timeout"))
 	})
 }

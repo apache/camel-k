@@ -204,14 +204,6 @@ func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	return *b.Timeout
 }
 
-// GetBuildCatalogToolTimeout returns the specified duration or a default one.
-func (b IntegrationPlatformBuildSpec) GetBuildCatalogToolTimeout() metav1.Duration {
-	if b.BuildCatalogToolTimeout == nil {
-		return metav1.Duration{}
-	}
-	return *b.BuildCatalogToolTimeout
-}
-
 var _ ResourceCondition = IntegrationPlatformCondition{}
 
 // GetConditions --.

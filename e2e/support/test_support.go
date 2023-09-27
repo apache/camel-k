@@ -2019,16 +2019,6 @@ func PlatformProfile(ns string) func() v1.TraitProfile {
 	}
 }
 
-func PlatformBuildCatalogToolTimeout(ns string) func() *metav1.Duration {
-	return func() *metav1.Duration {
-		p := Platform(ns)()
-		if p == nil {
-			return &metav1.Duration{}
-		}
-		return p.Status.Build.BuildCatalogToolTimeout
-	}
-}
-
 func PlatformTimeout(ns string) func() *metav1.Duration {
 	return func() *metav1.Duration {
 		p := Platform(ns)()

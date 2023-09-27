@@ -307,12 +307,6 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 		target.Status.Build.Timeout = source.Status.Build.Timeout
 	}
 
-	// Catalog tools build timeout
-	if target.Status.Build.BuildCatalogToolTimeout == nil {
-		log.Debugf("Integration Platform %s [%s]: setting build camel catalog tool timeout", target.Name, target.Namespace)
-		target.Status.Build.BuildCatalogToolTimeout = source.Status.Build.BuildCatalogToolTimeout
-	}
-
 	if target.Status.Build.MaxRunningBuilds <= 0 {
 		log.Debugf("Integration Platform %s [%s]: setting max running builds", target.Name, target.Namespace)
 		target.Status.Build.MaxRunningBuilds = source.Status.Build.MaxRunningBuilds
@@ -372,25 +366,6 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 		log.Debugf("Integration Platform %s [%s]: setting build timeout", p.Name, p.Namespace)
 		p.Status.Build.Timeout = &metav1.Duration{
-			Duration: d,
-		}
-	}
-
-	// Catalog tools build timeout
-	if p.Status.Build.GetBuildCatalogToolTimeout().Duration == 0 {
-		log.Debugf("Integration Platform %s [%s]: setting default build camel catalog tool timeout (2 minutes)", p.Name, p.Namespace)
-		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
-			Duration: 2 * time.Minute,
-		}
-	} else {
-		d := p.Status.Build.GetBuildCatalogToolTimeout().Duration.Truncate(time.Second)
-
-		if verbose && p.Status.Build.GetBuildCatalogToolTimeout().Duration != d {
-			log.Log.Infof("Build catalog tools timeout minimum unit is sec (configured: %s, truncated: %s)", p.Status.Build.GetBuildCatalogToolTimeout().Duration, d)
-		}
-
-		log.Debugf("Integration Platform %s [%s]: setting build catalog tools timeout", p.Name, p.Namespace)
-		p.Status.Build.BuildCatalogToolTimeout = &metav1.Duration{
 			Duration: d,
 		}
 	}

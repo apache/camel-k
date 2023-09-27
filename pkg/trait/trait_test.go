@@ -318,7 +318,7 @@ func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
 	traitList := make([]Trait, 0, len(FactoryList))
 	trait, ok := newQuarkusTrait().(*quarkusTrait)
 	assert.True(t, ok, "A Quarkus trait was expected")
-	trait.PackageTypes = []traitv1.QuarkusPackageType{traitv1.NativePackageType}
+	trait.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
 	traitList = append(traitList, trait)
 	env := Environment{
 		Resources: kubernetes.NewCollection(),
@@ -368,7 +368,7 @@ func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
 		IntegrationKit: &v1.IntegrationKit{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: map[string]string{
-					v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNative,
+					v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNativeSources,
 				},
 				Namespace: "ns",
 			},
