@@ -55,8 +55,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/cli-runtime/pkg/printers"
 	"k8s.io/client-go/kubernetes/scheme"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -332,6 +334,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		signal.Notify(cs, os.Interrupt, syscall.SIGTERM)
 		go func() {
 			<-cs
+			logf.SetLogger(zap.New(zap.UseDevMode(true)))
 			if o.Context.Err() != nil {
 				// Context canceled
 				return
