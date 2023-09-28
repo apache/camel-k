@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
 - Unable to work under azure k8s at latest version with a minimal example [\#4758](https://github.com/apache/camel-k/issues/4758)
 - E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
@@ -35,6 +36,8 @@
 
 **Merged pull requests:**
 
+- fix\(cli\): dev mode init controller-runtime log.SetLogger\(\) [\#4773](https://github.com/apache/camel-k/pull/4773) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.16.0 to 1.17.0 [\#4772](https://github.com/apache/camel-k/pull/4772) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/eventing from 0.38.3 to 0.38.4 [\#4769](https://github.com/apache/camel-k/pull/4769) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): Kamelets Default config as a labeled secret [\#4768](https://github.com/apache/camel-k/pull/4768) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Update prometheus e2e test to camel 4 metrics [\#4767](https://github.com/apache/camel-k/pull/4767) ([gansheer](https://github.com/gansheer))
