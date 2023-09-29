@@ -46,6 +46,6 @@ func TestCommonCamelKInstallStartup(t *testing.T) {
 	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName()).Execute()).To(Succeed())
 	Eventually(OperatorPod(ns.GetName())).ShouldNot(BeNil())
 	Eventually(Platform(ns.GetName())).ShouldNot(BeNil())
-	Eventually(PlatformConditionStatus(ns.GetName(), v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+	Eventually(PlatformConditionStatus(ns.GetName(), v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 		Should(Equal(corev1.ConditionTrue))
 }

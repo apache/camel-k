@@ -70,7 +70,7 @@
 ** xref:observability/monitoring.adoc[Monitoring]
 *** xref:observability/monitoring/operator.adoc[Operator]
 *** xref:observability/monitoring/integration.adoc[Integration]
-* Troubleshooting
+* xref:troubleshooting/troubleshooting.adoc[Troubleshooting]
 ** xref:troubleshooting/debugging.adoc[Debugging]
 ** xref:troubleshooting/operating.adoc[Operating]
 ** xref:troubleshooting/known-issues.adoc[Known Issues]
