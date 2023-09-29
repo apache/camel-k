@@ -74,12 +74,12 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		}
 	}
 
-	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	platform.Status.SetCondition(
-		v1.IntegrationPlatformConditionReady,
+		v1.IntegrationPlatformConditionTypeCreated,
 		corev1.ConditionTrue,
 		v1.IntegrationPlatformConditionCreatedReason,
 		"integration platform created")
 
+	platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 	return platform, nil
 }

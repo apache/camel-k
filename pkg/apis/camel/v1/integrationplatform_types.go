@@ -205,7 +205,13 @@ const (
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 
 	// IntegrationPlatformConditionReady is the condition if the IntegrationPlatform is ready.
+	// Deprecated: use IntegrationPlatformConditionTypeCreated
 	IntegrationPlatformConditionReady = "Ready"
+	// IntegrationPlatformConditionTypeCreated is the condition if the IntegrationPlatform has been created.
+	IntegrationPlatformConditionTypeCreated IntegrationPlatformConditionType = "Created"
+
+	// IntegrationPlatformConditionTypeRegistryAvailable is the condition for the availability of a container registry.
+	IntegrationPlatformConditionTypeRegistryAvailable IntegrationPlatformConditionType = "RegistryAvailable"
 
 	// IntegrationPlatformConditionCreatedReason represents the reason that the IntegrationPlatform is created.
 	IntegrationPlatformConditionCreatedReason = "IntegrationPlatformCreated"
