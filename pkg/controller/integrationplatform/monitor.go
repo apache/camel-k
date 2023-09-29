@@ -19,10 +19,13 @@ package integrationplatform
 
 import (
 	"context"
+	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // NewMonitorAction returns an action that monitors the integration platform after it's fully initialized.
@@ -39,7 +42,7 @@ func (action *monitorAction) Name() string {
 }
 
 func (action *monitorAction) CanHandle(platform *v1.IntegrationPlatform) bool {
-	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady
+	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady || platform.Status.Phase == v1.IntegrationPlatformPhaseError
 }
 
 func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
@@ -52,6 +55,36 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	// Refresh applied configuration
 	if err := platformutil.ConfigureDefaults(ctx, action.client, platform, false); err != nil {
 		return nil, err
+	}
+
+	// Registry condition
+	isOpenshift, err := openshift.IsOpenShift(action.client)
+	if err != nil {
+		return platform, err
+	}
+	if isOpenshift {
+		platform.Status.SetCondition(
+			v1.IntegrationPlatformConditionTypeRegistryAvailable,
+			corev1.ConditionFalse,
+			"IntegrationPlatformRegistryAvailable",
+			"registry not available because provided by Openshift")
+	} else {
+		if &platform.Status.Build.Registry == nil || platform.Status.Build.Registry.Address == "" {
+			// error, we need a registry if we're not on Openshift
+			platform.Status.Phase = v1.IntegrationPlatformPhaseError
+			platform.Status.SetCondition(
+				v1.IntegrationPlatformConditionTypeRegistryAvailable,
+				corev1.ConditionFalse,
+				"IntegrationPlatformRegistryAvailable",
+				"registry not available")
+		} else {
+			platform.Status.Phase = v1.IntegrationPlatformPhaseReady
+			platform.Status.SetCondition(
+				v1.IntegrationPlatformConditionTypeRegistryAvailable,
+				corev1.ConditionTrue,
+				"IntegrationPlatformRegistryAvailable",
+				fmt.Sprintf("registry available at %s", platform.Status.Build.Registry.Address))
+		}
 	}
 
 	return platform, nil

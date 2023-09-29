@@ -46,7 +46,7 @@ func (action *initializeAction) Name() string {
 }
 
 func (action *initializeAction) CanHandle(platform *v1.IntegrationPlatform) bool {
-	return platform.Status.Phase == "" || platform.Status.Phase == v1.IntegrationPlatformPhaseDuplicate
+	return platform.Status.Phase == v1.IntegrationPlatformPhaseNone || platform.Status.Phase == v1.IntegrationPlatformPhaseDuplicate
 }
 
 func (action *initializeAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
