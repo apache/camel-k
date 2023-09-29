@@ -38,7 +38,7 @@ func TestRunExtraRepository(t *testing.T) {
 	name := "java"
 	Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 		"--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat",
-		"--dependency", "mvn:jakarta.annotation:jakarta.annotation-api:1.3.5.redhat-00002",
+		"--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001",
 		"--name", name,
 	).Execute()).To(Succeed())
 
