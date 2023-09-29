@@ -235,6 +235,10 @@ func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 			message = "creating a new integration kit"
 		} else {
 			message = fmt.Sprintf("integration kit %s/%s is in state %q", kit.Namespace, kit.Name, kit.Status.Phase)
+			if kit.Status.Phase == IntegrationKitPhaseError {
+				// Append specific reason for the failure
+				message = message + ". Failure: " + kit.Status.Failure.Reason
+			}
 		}
 	}
 
