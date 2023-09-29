@@ -1,0 +1,59 @@
+= Troubleshooting Camel K Integrations
+
+As soon as you start using Camel K in complex integration, you may have failures in the Integrations that you need to resolve. Most of the time, the first level of troubleshooting is to check the the log or the Custom Resources which are bound to a Camel application.
+
+In particular, after you run an application (ie, `kamel run test.yaml`), if this does not start up properly, you will need to verify the following resources.
+
+[[troubleshoot-integration-pod]]
+== Checking Integration pod
+
+Most of the time, your Integration build cycle runs fine. Then a Deployment and therefore a Pod are started. However, there could be "application" reason why the Pod is not starting.
+
+First of all, you need to try to check the log of the application. Try using `kamel logs test` or `kubectl logs test-7856cb497b-smfkq`. If there is some problem within your Camel application, you will typically discover it at runtime only. Checking the logs and understanding the reason of the failure there should be the easiest approach.
+
+NOTE: use logging trait to change the level of log, if needed.
+
+[[troubleshoot-integration-cr]]
+== Checking Integration custom resource
+
+The custom resource that triggers the creation of a Camel application is the Integration custom resource. If something wrong happens during the build, you can look at the `.status.phase` and `.status.conditions` to understand what's going on. For example `kubectl get it -o yaml`:
+```
+  status:
+    conditions:
+...
+    - lastTransitionTime: "2023-09-29T13:53:17Z"
+      lastUpdateTime: "2023-09-29T13:57:50Z"
+      message: 'integration kit default/kit-ckbddjd5rv6c73cr99fg is in state "Error".
+        Failure: Get "https://1.2.3.4/v2/": dial tcp 1.2.3.4:443: i/o timeout; Get
+        "http://1.2.3.4/v2/": dial tcp 1.2.3.4:80: i/o timeout'
+      reason: IntegrationKitAvailable
+      status: "False"
+      type: IntegrationKitAvailable
+...
+    phase: Error
+```
+This tells us that we were not able to correctly connect to the configured registry, reason why the build failed. This is the place that you want to monitor often, in order to understand the level of health of your Integration. We store more conditions related to the different services Camel K offers.
+
+[[troubleshoot-integration-kit]]
+== Checking IntegrationKit custom resource
+
+The IntegrationKit is the second custom resource you want to look at if your Integration failed. Most of the time, the errors happening here are bubbled up into the Integration, but the IntegrationKit analysis can give you more information (`kubectl get ik kit-ckbddjd5rv6c73cr99fg -o yaml`).
+
+[[troubleshoot-integration-build]]
+== Checking Build custom resource
+
+The Build is the another custom resource you want to look at if your Integration failed. This has even more level of details, giving a resume of each execution of the pipeline tasks used to build and publish the IntegrationKit. Run `kubectl get build kit-ckbddjd5rv6c73cr99fg -o yaml` and you will be able to see a higher level of details, above all if you're running with the builder `pod` strategy (which creates the build into a separate pod).
+
+[[troubleshoot-other-cr]]
+== Checking other custom resources
+
+If you're still in trouble, other resources that can help you understand a little better the situation of your configuration are `IntegrationPlatform` (`kubectl get IntegrationPlatform`) and `CamelCatalog` (`kubectl get CamelCatalog`). If they are in phase error, for any reason, you will discover that looking at their status.
+
+[[troubleshoot-operator-log]]
+== Checking Camel K operator or builder pod log
+
+Finally, after checking the status and conditions of all the custom resources, you can look at the health of the Camel K operator watching its log (ie, `kubectl logs camel-k-operator-7856cb497b-smfkq`).
+
+If you're running the build with `pod` strategy, then, it may be interesting for you looking at the execution of the builder pod: `kubectl logs camel-k-kit-ckbddjd5rv6c73cr99fg`. Make sure to look at all pipeline containers pods to have a complete view of where the error could be.
+
+NOTE: use `--log-level` parameter to change the level of operator log, if needed.

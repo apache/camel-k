@@ -69,14 +69,14 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 			"IntegrationPlatformRegistryAvailable",
 			"registry not available because provided by Openshift")
 	} else {
-		if &platform.Status.Build.Registry == nil || platform.Status.Build.Registry.Address == "" {
+		if platform.Status.Build.Registry.Address == "" {
 			// error, we need a registry if we're not on Openshift
 			platform.Status.Phase = v1.IntegrationPlatformPhaseError
 			platform.Status.SetCondition(
 				v1.IntegrationPlatformConditionTypeRegistryAvailable,
 				corev1.ConditionFalse,
 				"IntegrationPlatformRegistryAvailable",
-				"registry not available")
+				"registry address not available, you need to set one")
 		} else {
 			platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 			platform.Status.SetCondition(

@@ -205,7 +205,7 @@ const (
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 
 	// IntegrationPlatformConditionReady is the condition if the IntegrationPlatform is ready.
-	// Deprecated: use IntegrationPlatformConditionTypeCreated
+	// Deprecated: use IntegrationPlatformConditionTypeCreated.
 	IntegrationPlatformConditionReady = "Ready"
 	// IntegrationPlatformConditionTypeCreated is the condition if the IntegrationPlatform has been created.
 	IntegrationPlatformConditionTypeCreated IntegrationPlatformConditionType = "Created"

@@ -62,7 +62,7 @@ func TestRunGlobalInstall(t *testing.T) {
 
 		t.Run("Global CamelCatalog reconciliation", func(t *testing.T) {
 			Eventually(Platform(operatorNamespace)).ShouldNot(BeNil())
-			Eventually(PlatformConditionStatus(operatorNamespace, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
+			Eventually(PlatformConditionStatus(operatorNamespace, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 			catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
 			Eventually(CamelCatalog(operatorNamespace, catalogName)).ShouldNot(BeNil())
