@@ -69,7 +69,7 @@ func nativeImageContext(ctx *builderContext) error {
 		ctx.Artifacts = []v1.Artifact{
 			{
 				ID:       runner,
-				Location: filepath.Join(ctx.Path, "maven", "target", "native-sources", runner),
+				Location: QuarkusRuntimeSupport(ctx.Catalog.GetCamelQuarkusVersion()).TargetDirectory(ctx.Path, runner),
 				Target:   runner,
 			},
 		}

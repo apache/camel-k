@@ -341,8 +341,13 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 		return err
 	}
 
+	// The LoadCamelQuarkusCatalog is required to have catalog information available by the builder
+	packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
+
 	if native {
-		buildTask.Maven.Properties["quarkus.package.type"] = string(nativeSourcesPackageType)
+		if nativePackagetType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackagetType != "" {
+			buildTask.Maven.Properties["quarkus.package.type"] = nativePackagetType
+		}
 		if len(e.IntegrationKit.Spec.Sources) > 0 {
 			buildTask.Sources = e.IntegrationKit.Spec.Sources
 			buildSteps = append(buildSteps, builder.Quarkus.PrepareProjectWithSources)
@@ -354,8 +359,6 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 		// Default, if nothing is specified
 		buildTask.Maven.Properties["quarkus.package.type"] = string(fastJarPackageType)
 		packageSteps = append(packageSteps, builder.Quarkus.ComputeQuarkusDependencies)
-		// The LoadCamelQuarkusCatalog is required to have catalog information available by the builder
-		packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
 		packageSteps = append(packageSteps, builder.Image.IncrementalImageContext)
 		// Create the dockerfile, regardless it's later used or not by the publish strategy
 		packageSteps = append(packageSteps, builder.Image.JvmDockerfile)

@@ -19,7 +19,6 @@ package trait
 
 import (
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -79,8 +78,9 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 				return false, err
 			}
 			if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
-				nativeArgsCd := filepath.Join("maven", "target", "native-sources")
-				command := "cd " + nativeArgsCd + " && echo NativeImage version is $(native-image --version) && echo GraalVM expected version is $(cat graalvm.version) && echo WARN: Make sure they are compatible, otherwise the native compilation may results in error && native-image $(cat native-image.args)"
+				// TODO expect maven repository in local repo (need to change builder pod accordingly!)
+				command := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).BuildCommands()
+
 				// it should be performed as the last custom task
 				t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, e.CamelCatalog.GetQuarkusToolingImage(), command))
 				// Force the build to run in a separate Pod and strictly sequential
@@ -494,8 +494,8 @@ func (t *builderTrait) parseTasksConf() (map[string]*v1.BuildConfiguration, erro
 // if however we have a command which is not quoted, then we leave it the way it is.
 func splitContainerCommand(command string) []string {
 	if !strings.Contains(command, "\"") {
-		// No quotes, just return
-		return []string{command}
+		// No quotes, then, splits all commands found
+		return strings.Split(command, " ")
 	}
 	matches := commandsRegexp.FindAllString(command, -1)
 	removeQuotes := make([]string, 0, len(matches))

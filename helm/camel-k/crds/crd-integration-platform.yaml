@@ -1643,7 +1643,6 @@ spec:
                             build packaging. Deprecated: use `QuarkusMode` instead.'
                           enum:
                           - fast-jar
-                          - native-sources
                           - native
                           type: string
                         type: array
@@ -3457,7 +3456,6 @@ spec:
                             build packaging. Deprecated: use `QuarkusMode` instead.'
                           enum:
                           - fast-jar
-                          - native-sources
                           - native
                           type: string
                         type: array

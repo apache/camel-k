@@ -4,7 +4,7 @@ Since version 2.0, we've introduced the concept of `Pipeline` in order to provid
 
 In Camel K version 1 we used to have 2 static tasks: `builder` and `publisher` (named after the strategy adopted, ie, `spectrum`). Now you can include any further task in the middle by opportunely configuring the Build. Here a diagram illustrating the pipeline:
 
-image::camel_k_pipeline..png[Camel K Pipeline, width=1024]
+image::camel_k_pipeline.png[Camel K Pipeline, width=1024]
 
 We have 3 tasks which are required by Camel K to perform a build and provide a container image which will be used to start a Camel application. The **build** is a Maven process which is in charge to create a maven project based on the Integration sources provided. Then, after the Maven project is created and compiled, you can add any custom task (see section below). With this part we are introducing that level of flexibility required to accommodate any company build process. This part is optional, by default, Camel K does not need any **custom task**.
 
