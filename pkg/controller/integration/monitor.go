@@ -81,6 +81,12 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 			integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
 	}
 
+	// If integration is in error and its kit is also in error then integration does not change
+	if isInIntegrationKitFailed(integration.Status) &&
+		kit.Status.Phase == v1.IntegrationKitPhaseError {
+		return nil, nil
+	}
+
 	// Check if the Integration requires a rebuild
 	if changed, err := action.checkDigestAndRebuild(ctx, integration, kit); err != nil {
 		return nil, err
@@ -170,6 +176,17 @@ func isInInitializationFailed(status v1.IntegrationStatus) bool {
 	if cond := status.GetCondition(v1.IntegrationConditionReady); cond != nil {
 		if cond.Status == corev1.ConditionFalse &&
 			cond.Reason == v1.IntegrationConditionInitializationFailedReason {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isInIntegrationKitFailed(status v1.IntegrationStatus) bool {
+	if cond := status.GetCondition(v1.IntegrationConditionKitAvailable); cond != nil {
+		if cond.Status == corev1.ConditionFalse &&
+			status.Phase != v1.IntegrationPhaseError {
 			return true
 		}
 	}

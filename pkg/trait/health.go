@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"sort"
 
 	corev1 "k8s.io/api/core/v1"
@@ -81,6 +82,9 @@ func (t *healthTrait) Apply(e *Environment) error {
 	}
 
 	container := e.GetIntegrationContainer()
+	if container == nil {
+		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+	}
 	var port *intstr.IntOrString
 	// Use the default named HTTP container port if it exists.
 	// For Knative, the Serving webhook is responsible for setting the user-land port,
