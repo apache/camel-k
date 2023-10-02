@@ -92,9 +92,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 
 			Eventually(CamelCatalog(ns, compatibleCatalogName)).ShouldNot(BeNil())
 			Eventually(CamelCatalogPhase(ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
-			Eventually(CamelCatalogCondition(ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(
-				Or(Equal("Container image successfully built"), Equal("Container image exists on registry")),
-			)
+			Eventually(CamelCatalogCondition(ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(Equal("Container image tool found in catalog"))
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
@@ -121,7 +119,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			Eventually(CamelCatalog(ns, compatibleCatalogName)).ShouldNot(BeNil())
 			Eventually(CamelCatalogPhase(ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
 			Eventually(CamelCatalogCondition(ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(
-				Equal("Container image exists on registry"),
+				Equal("Container image tool found in catalog"),
 			)
 
 			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))

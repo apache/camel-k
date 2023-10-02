@@ -55,7 +55,7 @@ const (
 
 // QuarkusPackageType is the type of Quarkus build packaging.
 // Deprecated: use `QuarkusMode` instead.
-// +kubebuilder:validation:Enum=fast-jar;native-sources;native
+// +kubebuilder:validation:Enum=fast-jar;native
 type QuarkusPackageType string
 
 const (

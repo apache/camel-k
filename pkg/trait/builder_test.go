@@ -331,7 +331,9 @@ func TestBuilderCustomTasks(t *testing.T) {
 	assert.Equal(t, "ls", tasks[0].Custom.ContainerCommands[0])
 	assert.Equal(t, "test", tasks[1].Custom.Name)
 	assert.Equal(t, "alpine", tasks[1].Custom.ContainerImage)
-	assert.Equal(t, "mvn test", tasks[1].Custom.ContainerCommands[0])
+	assert.Equal(t, "mvn", tasks[1].Custom.ContainerCommands[0])
+	assert.Equal(t, "test", tasks[1].Custom.ContainerCommands[1])
+
 }
 
 func TestBuilderCustomTasksFailure(t *testing.T) {
@@ -399,8 +401,9 @@ func TestUserTaskSingleCommand(t *testing.T) {
 	command := `cat /path/to/a/resource`
 	podCommands := splitContainerCommand(command)
 
-	assert.Len(t, podCommands, 1)
-	assert.Equal(t, "cat /path/to/a/resource", podCommands[0])
+	assert.Len(t, podCommands, 2)
+	assert.Equal(t, "cat", podCommands[0])
+	assert.Equal(t, "/path/to/a/resource", podCommands[1])
 }
 
 func TestUserTaskMultiCommands(t *testing.T) {

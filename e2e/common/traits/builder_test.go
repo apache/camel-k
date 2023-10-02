@@ -173,7 +173,7 @@ func TestBuilderTrait(t *testing.T) {
 		integrationKitNamespace := IntegrationKitNamespace(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 		Eventually(BuilderPod(integrationKitNamespace, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
-		Eventually(len(BuilderPod(integrationKitNamespace, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(3))
+		Eventually(len(BuilderPod(integrationKitNamespace, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(4))
 		Eventually(BuilderPod(integrationKitNamespace, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
 		Eventually(BuilderPod(integrationKitNamespace, builderKitName)().Spec.InitContainers[1].Name, TestTimeoutShort).Should(Equal("custom1"))
 		Eventually(BuilderPod(integrationKitNamespace, builderKitName)().Spec.InitContainers[2].Name, TestTimeoutShort).Should(Equal("custom2"))
@@ -249,9 +249,10 @@ func TestBuilderTrait(t *testing.T) {
 		integrationKitName := IntegrationKit(ns, name)()
 		builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 		Eventually(BuilderPod(ns, builderKitName), TestTimeoutShort).ShouldNot(BeNil())
-		Eventually(len(BuilderPod(ns, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(2))
+		Eventually(len(BuilderPod(ns, builderKitName)().Spec.InitContainers), TestTimeoutShort).Should(Equal(3))
 		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name, TestTimeoutShort).Should(Equal("builder"))
 		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[1].Name, TestTimeoutShort).Should(Equal("custom1"))
+		Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[2].Name, TestTimeoutShort).Should(Equal("package"))
 
 		// Check containers conditions
 		Eventually(Build(ns, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())

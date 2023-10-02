@@ -46,7 +46,7 @@ func TestNativeIntegrations(t *testing.T) {
 			name := "unsupported-js"
 			Expect(KamelRunWithID(operatorID, ns, "files/JavaScript.js", "--name", name,
 				"-t", "quarkus.mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:=6.5Gi",
+				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
@@ -61,7 +61,7 @@ func TestNativeIntegrations(t *testing.T) {
 			name := "xml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Xml.xml", "--name", name,
 				"-t", "quarkus.mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:=6.5Gi",
+				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
@@ -76,14 +76,14 @@ func TestNativeIntegrations(t *testing.T) {
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
-		t.Run("automatic rollout deployment from fast-jar to native kit", func(t *testing.T) {
+		t.Run("automatic rollout deployment from jvm to native kit", func(t *testing.T) {
 			// Let's make sure we start from a clean state
 			Expect(DeleteKits(ns)).To(Succeed())
 			name := "yaml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name,
-				"-t", "quarkus.mode=fast-jar",
+				"-t", "quarkus.mode=jvm",
 				"-t", "quarkus.mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:=6.5Gi",
+				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 			).Execute()).To(Succeed())
 
 			// Check that two Kits are created with distinct layout
@@ -107,7 +107,7 @@ func TestNativeIntegrations(t *testing.T) {
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 
 			// ====================================
 			// !!! THE MOST TIME-CONSUMING PART !!!
