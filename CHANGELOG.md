@@ -39,6 +39,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.36 to 0.6.37 [\#4784](https://github.com/apache/camel-k/pull/4784) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): existing dependency [\#4778](https://github.com/apache/camel-k/pull/4778) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/onsi/gomega from 1.27.10 to 1.28.0 [\#4775](https://github.com/apache/camel-k/pull/4775) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(cli\): dev mode init controller-runtime log.SetLogger\(\) [\#4773](https://github.com/apache/camel-k/pull/4773) ([gansheer](https://github.com/gansheer))
@@ -59,7 +60,7 @@
 - chore\(deps\): bump go.uber.org/zap from 1.25.0 to 1.26.0 [\#4748](https://github.com/apache/camel-k/pull/4748) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(api\): deprecate Buildah and Kaniko [\#4746](https://github.com/apache/camel-k/pull/4746) ([squakez](https://github.com/squakez))
 - Fix operator check of the catalog [\#4741](https://github.com/apache/camel-k/pull/4741) ([claudio4j](https://github.com/claudio4j))
-- feat\(core\): Remove Openshift security warning message [\#4740](https://github.com/apache/camel-k/pull/4740) ([gansheer](https://github.com/gansheer))
+- feat\(core\): Remove Kubernetes/Openshift security warning message [\#4740](https://github.com/apache/camel-k/pull/4740) ([gansheer](https://github.com/gansheer))
 - fix\(doc\): catalog link [\#4737](https://github.com/apache/camel-k/pull/4737) ([squakez](https://github.com/squakez))
 - doc: Add the remote debug operator link to the navigation [\#4736](https://github.com/apache/camel-k/pull/4736) ([claudio4j](https://github.com/claudio4j))
 - chore\(doc\): registry requirements [\#4735](https://github.com/apache/camel-k/pull/4735) ([squakez](https://github.com/squakez))
