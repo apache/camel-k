@@ -32,6 +32,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	. "github.com/onsi/gomega"
 )
 
@@ -62,6 +63,13 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 		)
 
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+
+		// Check if restricted security context has been applyed
+		operatorPod := OperatorPod(ns)()
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		//Test a simple route
 		t.Run("simple route", func(t *testing.T) {
