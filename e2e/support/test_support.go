@@ -1344,6 +1344,16 @@ func OperatorImage(ns string) func() string {
 	}
 }
 
+func OperatorPodSecurityContext(ns string) func() *corev1.SecurityContext {
+	return func() *corev1.SecurityContext {
+		pod := OperatorPod(ns)()
+		if pod == nil || pod.Spec.Containers == nil || len(pod.Spec.Containers) == 0 {
+			return nil
+		}
+		return pod.Spec.Containers[0].SecurityContext
+	}
+}
+
 func OperatorPodHas(ns string, predicate func(pod *corev1.Pod) bool) func() bool {
 	return func() bool {
 		pod := OperatorPod(ns)()

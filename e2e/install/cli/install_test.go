@@ -55,15 +55,12 @@ func TestBasicInstallation(t *testing.T) {
 		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 
-			// Check if default security context has been applyed
-		Eventually(OperatorPodHas(ns, func(pod *corev1.Pod) bool {
-			if pod.Spec.Containers == nil || len(pod.Spec.Containers) == 0 {
-				return false
-			}
-			// exclude user for openshift
-			pod.Spec.Containers[0].SecurityContext.RunAsUser = nil
-			return reflect.DeepEqual(pod.Spec.Containers[0].SecurityContext, kubernetes.DefaultOperatorSecurityContext())
-		}), TestTimeoutShort).Should(BeTrue())
+		// Check if restricted security context has been applyed
+		operatorPod := OperatorPod(ns)()
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		t.Run("run yaml", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())

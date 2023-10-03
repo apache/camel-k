@@ -36,6 +36,7 @@ import (
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
@@ -95,6 +96,13 @@ func TestOLMInstallation(t *testing.T) {
 
 		// Check the IntegrationPlatform has been reconciled
 		Eventually(PlatformVersion(ns)).Should(ContainSubstring(ipVersionPrefix))
+
+		// Check if restricted security context has been applyed
+		operatorPod := OperatorPod(ns)()
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
+		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
