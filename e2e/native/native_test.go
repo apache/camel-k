@@ -45,7 +45,7 @@ func TestNativeIntegrations(t *testing.T) {
 		t.Run("unsupported integration source language", func(t *testing.T) {
 			name := "unsupported-js"
 			Expect(KamelRunWithID(operatorID, ns, "files/JavaScript.js", "--name", name,
-				"-t", "quarkus.mode=native",
+				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 			).Execute()).To(Succeed())
 
@@ -60,7 +60,7 @@ func TestNativeIntegrations(t *testing.T) {
 		t.Run("xml native support", func(t *testing.T) {
 			name := "xml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Xml.xml", "--name", name,
-				"-t", "quarkus.mode=native",
+				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 			).Execute()).To(Succeed())
 
@@ -81,8 +81,8 @@ func TestNativeIntegrations(t *testing.T) {
 			Expect(DeleteKits(ns)).To(Succeed())
 			name := "yaml-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name,
-				"-t", "quarkus.mode=jvm",
-				"-t", "quarkus.mode=native",
+				"-t", "quarkus.build-mode=jvm",
+				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 			).Execute()).To(Succeed())
 
@@ -134,7 +134,7 @@ func TestNativeIntegrations(t *testing.T) {
 			t.Run("yaml native should not rebuild", func(t *testing.T) {
 				name := "yaml-native-2"
 				Expect(KamelRunWithID(operatorID, ns, "files/yaml2.yaml", "--name", name,
-					"-t", "quarkus.mode=native",
+					"-t", "quarkus.build-mode=native",
 					"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 				).Execute()).To(Succeed())
 

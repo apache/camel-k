@@ -45,7 +45,7 @@ func TestNativeBinding(t *testing.T) {
 				"timer-source",
 				"log-sink",
 				"-p", "source.message="+message,
-				"--annotation", "trait.camel.apache.org/quarkus.mode=native",
+				"--annotation", "trait.camel.apache.org/quarkus.build-mode=native",
 				"--annotation", "trait.camel.apache.org/builder.tasks-limit-memory=quarkus-native:6.5Gi",
 				"--name", bindingName,
 			).Execute()).To(Succeed())

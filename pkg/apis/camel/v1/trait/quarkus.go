@@ -22,7 +22,7 @@ package trait
 // It's enabled by default.
 //
 // NOTE: A native based compilation will be forced to use a `pod` build strategy.
-// Compiling to a native executable, i.e. when using `package-type=native`, requires at least
+// Compiling to a native executable, i.e. when using `build-mode=native`, requires at least
 // 4GiB of memory, so the Pod running the native build, must have enough memory available.
 //
 // +camel-k:trait=quarkus.
@@ -34,12 +34,12 @@ type QuarkusTrait struct {
 	// The order influences the resolution of the current kit for the integration.
 	// The kit corresponding to the first package type will be assigned to the
 	// integration in case no existing kit that matches the integration exists.
-	// Deprecated: use `mode` instead.
+	// Deprecated: use `build-mode` instead.
 	PackageTypes []QuarkusPackageType `property:"package-type" json:"packageTypes,omitempty"`
 	// The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
 	// In case both `jvm` and `native` are specified, two `IntegrationKit` resources are created,
 	// with the `native` kit having precedence over the `jvm` one once ready.
-	Modes []QuarkusMode `property:"mode" json:"mode,omitempty"`
+	Modes []QuarkusMode `property:"build-mode" json:"buildMode,omitempty"`
 }
 
 // QuarkusMode is the type of Quarkus build packaging.

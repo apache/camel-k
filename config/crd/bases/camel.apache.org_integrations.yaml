@@ -7524,16 +7524,7 @@ spec:
                   quarkus:
                     description: The configuration of Quarkus trait
                     properties:
-                      configuration:
-                        description: 'Legacy trait configuration parameters. Deprecated:
-                          for backward compatibility.'
-                        type: object
-                        x-kubernetes-preserve-unknown-fields: true
-                      enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
-                        type: boolean
-                      mode:
+                      buildMode:
                         description: 'The Quarkus mode to run: either `jvm` or `native`
                           (default `jvm`). In case both `jvm` and `native` are specified,
                           two `IntegrationKit` resources are created, with the `native`
@@ -7545,6 +7536,15 @@ spec:
                           - native
                           type: string
                         type: array
+                      configuration:
+                        description: 'Legacy trait configuration parameters. Deprecated:
+                          for backward compatibility.'
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
                       packageTypes:
                         description: 'The Quarkus package types, `fast-jar` or `native`
                           (default `fast-jar`). In case both `fast-jar` and `native`
@@ -7554,7 +7554,7 @@ spec:
                           current kit for the integration. The kit corresponding to
                           the first package type will be assigned to the integration
                           in case no existing kit that matches the integration exists.
-                          Deprecated: use `mode` instead.'
+                          Deprecated: use `build-mode` instead.'
                         items:
                           description: 'QuarkusPackageType is the type of Quarkus
                             build packaging. Deprecated: use `QuarkusMode` instead.'
