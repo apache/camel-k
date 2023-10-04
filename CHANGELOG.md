@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Camel K doesn't install on a restricted namespace [\#4786](https://github.com/apache/camel-k/issues/4786)
+- Remove deprecated linters [\#4785](https://github.com/apache/camel-k/issues/4785)
 - E2E failure on common TestRunExtraRepository test [\#4774](https://github.com/apache/camel-k/issues/4774)
 - Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
@@ -21,8 +23,12 @@
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
 - Camel K 1.12.1 : XSLT/XSLT-saxon: javax.xml.transform.TransformerConfigurationException: Could not compile stylesheet [\#4677](https://github.com/apache/camel-k/issues/4677)
 - Add GH issue template [\#4675](https://github.com/apache/camel-k/issues/4675)
+- Separating Java and native image compilation [\#4648](https://github.com/apache/camel-k/issues/4648)
+- IntegrationPlatform reconciliation should warn or fail when missing registry [\#4647](https://github.com/apache/camel-k/issues/4647)
 - Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
 - Security warning messages from the operator pod on Openshift  [\#4424](https://github.com/apache/camel-k/issues/4424)
+- Report error when any registry problem happen [\#4272](https://github.com/apache/camel-k/issues/4272)
+- unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - Language page for documentation of camel-k 1.12.x missing [\#4176](https://github.com/apache/camel-k/issues/4176)
 - Redesign traits that have runtime dependencies [\#4166](https://github.com/apache/camel-k/issues/4166)
 - Error creating Integration with Kaniko build strategy and Docker Desktop [\#4158](https://github.com/apache/camel-k/issues/4158)
@@ -39,7 +45,13 @@
 
 **Merged pull requests:**
 
+- Added License headers to generated traits.yaml [\#4792](https://github.com/apache/camel-k/pull/4792) ([oscerd](https://github.com/oscerd))
+- Remove deprecated linters [\#4791](https://github.com/apache/camel-k/pull/4791) ([oscerd](https://github.com/oscerd))
+- Added Missing license headers and license headers to generation of tr… [\#4790](https://github.com/apache/camel-k/pull/4790) ([oscerd](https://github.com/oscerd))
+- chore\(deps\): bump github.com/prometheus/client\_model from 0.4.1-0.20230718164431-9a2bf3000d16 to 0.5.0 [\#4789](https://github.com/apache/camel-k/pull/4789) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): Add installation with helm,kustomize,olm securityContext re… [\#4787](https://github.com/apache/camel-k/pull/4787) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.36 to 0.6.37 [\#4784](https://github.com/apache/camel-k/pull/4784) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(ctrl\): verify existence of registry [\#4782](https://github.com/apache/camel-k/pull/4782) ([squakez](https://github.com/squakez))
 - fix\(e2e\): existing dependency [\#4778](https://github.com/apache/camel-k/pull/4778) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/onsi/gomega from 1.27.10 to 1.28.0 [\#4775](https://github.com/apache/camel-k/pull/4775) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(cli\): dev mode init controller-runtime log.SetLogger\(\) [\#4773](https://github.com/apache/camel-k/pull/4773) ([gansheer](https://github.com/gansheer))
@@ -48,6 +60,7 @@
 - fix\(e2e\): Kamelets Default config as a labeled secret [\#4768](https://github.com/apache/camel-k/pull/4768) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Update prometheus e2e test to camel 4 metrics [\#4767](https://github.com/apache/camel-k/pull/4767) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): downgrade to Kind 0.19 [\#4766](https://github.com/apache/camel-k/pull/4766) ([squakez](https://github.com/squakez))
+- feat: Quarkus native source [\#4764](https://github.com/apache/camel-k/pull/4764) ([squakez](https://github.com/squakez))
 - fix\(ci\): license check [\#4763](https://github.com/apache/camel-k/pull/4763) ([squakez](https://github.com/squakez))
 - feat\(runtime\): default version 3.2.0 [\#4762](https://github.com/apache/camel-k/pull/4762) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/serving from 0.38.0 to 0.38.1 [\#4761](https://github.com/apache/camel-k/pull/4761) ([dependabot[bot]](https://github.com/apps/dependabot))
