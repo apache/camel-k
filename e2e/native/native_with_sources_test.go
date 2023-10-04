@@ -44,7 +44,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		t.Run("java native support", func(t *testing.T) {
 			name := "java-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-				"-t", "quarkus.mode=native",
+				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
 			).Execute()).To(Succeed())
 
@@ -58,7 +58,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			t.Run("java native same should not rebuild", func(t *testing.T) {
 				name := "java-native-clone"
 				Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-					"-t", "quarkus.mode=native",
+					"-t", "quarkus.build-mode=native",
 					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
 				).Execute()).To(Succeed())
 
@@ -75,7 +75,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			t.Run("java native should rebuild", func(t *testing.T) {
 				name := "java-native-2"
 				Expect(KamelRunWithID(operatorID, ns, "files/Java2.java", "--name", name,
-					"-t", "quarkus.mode=native",
+					"-t", "quarkus.build-mode=native",
 					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
 				).Execute()).To(Succeed())
 
@@ -95,7 +95,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		t.Run("groovy native support", func(t *testing.T) {
 			name := "groovy-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Groovy.groovy", "--name", name,
-				"-t", "quarkus.mode=native",
+				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
 			).Execute()).To(Succeed())
 
@@ -114,7 +114,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		t.Run("kotlin native support", func(t *testing.T) {
 			name := "kotlin-native"
 			Expect(KamelRunWithID(operatorID, ns, "files/Kotlin.kts", "--name", name,
-				"-t", "quarkus.mode=native",
+				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
 			).Execute()).To(Succeed())
 

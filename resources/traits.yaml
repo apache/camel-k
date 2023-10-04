@@ -1321,7 +1321,7 @@ traits:
   - OpenShift
   description: 'The Quarkus trait configures the Quarkus runtime. It''s enabled by
     default. NOTE: A native based compilation will be forced to use a `pod` build
-    strategy. Compiling to a native executable, i.e. when using `package-type=native`,
+    strategy. Compiling to a native executable, i.e. when using `build-mode=native`,
     requires at least 4GiB of memory, so the Pod running the native build, must have
     enough memory available.'
   properties:
@@ -1337,8 +1337,8 @@ traits:
       ready. The order influences the resolution of the current kit for the integration.
       The kit corresponding to the first package type will be assigned to the integration
       in case no existing kit that matches the integration exists. Deprecated: use
-      `mode` instead.'
-  - name: mode
+      `build-mode` instead.'
+  - name: build-mode
     type: '[]github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusMode'
     description: 'The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
       In case both `jvm` and `native` are specified, two `IntegrationKit` resources

@@ -310,7 +310,7 @@ func TestKitTimerToLogFullNativeBuild(t *testing.T) {
 			"camel:timer", "camel:log",
 		},
 		traits: []string{
-			"quarkus.mode=native",
+			"quarkus.build-mode=native",
 		},
 	}, v1.BuildPhaseSucceeded, v1.IntegrationKitPhaseReady)
 }
