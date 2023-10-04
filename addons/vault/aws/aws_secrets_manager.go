@@ -18,7 +18,10 @@ limitations under the License.
 package aws
 
 import (
+	"regexp"
 	"strconv"
+
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -46,9 +49,13 @@ type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// The AWS Access Key to use
+	// The AWS Access Key to use. This could be a plain text or a configmap/secret
+	// The content of the aws access key is expected to be a text containing a valid AWS access key.
+	// Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = aws-access-key).
 	AccessKey string `property:"access-key" json:"accessKey,omitempty"`
-	// The AWS Secret Key to use
+	// The AWS Secret Key to use. This could be a plain text or a configmap/secret
+	// The content of the aws secret key is expected to be a text containing a valid AWS secret key.
+	// Syntax: [configmap|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = aws-secret-key).
 	SecretKey string `property:"secret-key" json:"secretKey,omitempty"`
 	// The AWS Region to use
 	Region string `property:"region" json:"region,omitempty"`
@@ -98,6 +105,7 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 }
 
 func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
+	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAwsSecretsManager)
 		// Deprecated
@@ -106,8 +114,28 @@ func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 	}
 
 	if environment.IntegrationInRunningPhases() {
-		environment.ApplicationProperties["camel.vault.aws.accessKey"] = t.AccessKey
-		environment.ApplicationProperties["camel.vault.aws.secretKey"] = t.SecretKey
+		hits := rex.FindAllStringSubmatch(t.AccessKey, -1)
+		if len(hits) >= 1 {
+			var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key", "The access Key provided is not valid")
+			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+				return err
+			} else if secretValue != "" {
+				environment.ApplicationProperties["camel.vault.aws.accessKey"] = string([]byte(secretValue))
+			}
+		} else {
+			environment.ApplicationProperties["camel.vault.aws.accessKey"] = t.AccessKey
+		}
+		hits = rex.FindAllStringSubmatch(t.SecretKey, -1)
+		if len(hits) >= 1 {
+			var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key", "The secret Key provided is not valid")
+			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+				return err
+			} else if secretValue != "" {
+				environment.ApplicationProperties["camel.vault.aws.secretKey"] = string([]byte(secretValue))
+			}
+		} else {
+			environment.ApplicationProperties["camel.vault.aws.secretKey"] = t.SecretKey
+		}
 		environment.ApplicationProperties["camel.vault.aws.region"] = t.Region
 		environment.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"] = strconv.FormatBool(*t.UseDefaultCredentialsProvider)
 		environment.ApplicationProperties["camel.vault.aws.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)

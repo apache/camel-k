@@ -109,10 +109,18 @@ traits:
     description: Enables automatic configuration of the trait.
   - name: access-key
     type: string
-    description: The AWS Access Key to use
+    description: 'The AWS Access Key to use. This could be a plain text or a configmap/secret
+      The content of the aws access key is expected to be a text containing a valid
+      AWS access key. Syntax: [configmap|secret]:name[/key], where name represents
+      the resource name, key optionally represents the resource key to be filtered
+      (default key value = aws-access-key).'
   - name: secret-key
     type: string
-    description: The AWS Secret Key to use
+    description: "The AWS Secret Key to use. This could be a plain text or a configmap/secret
+      \t// The content of the aws secret key is expected to be a text containing a
+      valid AWS secret key. \t// Syntax: [configmap|secret]:name[/key], where name
+      represents the resource name, key optionally represents the resource key to
+      be filtered (default key value = aws-secret-key)."
   - name: region
     type: string
     description: The AWS Region to use
