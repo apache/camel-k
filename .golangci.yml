@@ -24,6 +24,7 @@ linters:
   enable-all: true
   disable:
     - cyclop
+    - deadcode
     - depguard
     - dupl
     - exhaustive
@@ -43,6 +44,7 @@ linters:
     - golint
     - gomnd
     - gomoddirectives
+    - ifshort
     - interfacer
     - ireturn
     - lll
@@ -63,6 +65,7 @@ linters:
     - tagliatelle
     - tenv
     - testpackage
+    - varcheck
     - varnamelen
     - wastedassign
     - whitespace
