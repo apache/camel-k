@@ -27,6 +27,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NewInitializeAction creates a new initialization handling action for the kit.
@@ -76,12 +77,18 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 		}
 
 		if catalog.Status.Phase == v1.CamelCatalogPhaseError {
+			errorReason := fmt.Sprintf("Camel Catalog %s error", catalog.Spec.Runtime.Version)
 			kit.Status.Phase = v1.IntegrationKitPhaseError
 			kit.Status.SetErrorCondition(
 				v1.IntegrationKitConditionCatalogAvailable,
-				fmt.Sprintf("Camel Catalog %s error", catalog.Spec.Runtime.Version),
+				errorReason,
 				fmt.Errorf("%s", catalog.Status.GetCondition(v1.CamelCatalogConditionReady).Reason),
 			)
+			// Adding the failure in order to include this info in the Integration as well
+			kit.Status.Failure = &v1.Failure{
+				Reason: errorReason,
+				Time:   metav1.Now(),
+			}
 			return kit, nil
 		}
 
