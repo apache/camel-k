@@ -23,6 +23,7 @@
 - Add GH issue template [\#4675](https://github.com/apache/camel-k/issues/4675)
 - Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
 - Security warning messages from the operator pod on Openshift  [\#4424](https://github.com/apache/camel-k/issues/4424)
+- unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - Language page for documentation of camel-k 1.12.x missing [\#4176](https://github.com/apache/camel-k/issues/4176)
 - Redesign traits that have runtime dependencies [\#4166](https://github.com/apache/camel-k/issues/4166)
 - Error creating Integration with Kaniko build strategy and Docker Desktop [\#4158](https://github.com/apache/camel-k/issues/4158)
