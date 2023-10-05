@@ -350,8 +350,12 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	}
 
 	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {
-		if err := jib.CreateProfileConfigmap(e.Ctx, e.Client, e.IntegrationKit); err != nil {
-			return nil, fmt.Errorf("could not create default maven jib profile: %w. ", err)
+		profile, err := jib.JibMavenProfile(e.CamelCatalog.GetJibMavenPluginVersion(), e.CamelCatalog.GetJibLayerFilterExtensionMavenVersion())
+		if err != nil {
+			return nil, fmt.Errorf("error generating default maven jib profile: %w. ", err)
+		}
+		if err := jib.CreateProfileConfigmap(e.Ctx, e.Client, e.IntegrationKit, profile); err != nil {
+			return nil, fmt.Errorf("could not create default maven jib profile configmap: %w. ", err)
 		}
 		t.MavenProfiles = append(t.MavenProfiles, "configmap:"+e.IntegrationKit.Name+"-publish-jib-profile/profile.xml")
 	}
