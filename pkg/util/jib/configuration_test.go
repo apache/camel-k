@@ -32,11 +32,24 @@ import (
 )
 
 func TestJibMavenProfile(t *testing.T) {
-	profile, err := jibMavenProfile()
+	profile, err := JibMavenProfile("3.3.0", "0.2.0")
 
 	assert.NoError(t, err)
 	assert.True(t, strings.HasPrefix(profile, "<profile>"))
 	assert.True(t, strings.HasSuffix(profile, "</profile>"))
+	assert.True(t, strings.Contains(profile, "<version>3.3.0</version>"))
+	assert.True(t, strings.Contains(profile, "<version>0.2.0</version>"))
+
+}
+
+func TestJibMavenProfileDefaultValues(t *testing.T) {
+	profile, err := JibMavenProfile("", "")
+
+	assert.NoError(t, err)
+	assert.True(t, strings.HasPrefix(profile, "<profile>"))
+	assert.True(t, strings.HasSuffix(profile, "</profile>"))
+	assert.True(t, strings.Contains(profile, "<version>"+JibMavenPluginVersionDefault+"</version>"))
+	assert.True(t, strings.Contains(profile, "<version>"+JibLayerFilterExtensionMavenVersionDefault+"</version>"))
 
 }
 
@@ -58,7 +71,7 @@ func TestJibConfigMap(t *testing.T) {
 		},
 	}
 
-	err := CreateProfileConfigmap(ctx, c, kit)
+	err := CreateProfileConfigmap(ctx, c, kit, "<profile>awesomeprofile</profile>")
 	assert.NoError(t, err)
 
 	key := ctrl.ObjectKey{
@@ -71,5 +84,5 @@ func TestJibConfigMap(t *testing.T) {
 	assert.Equal(t, cm.OwnerReferences[0].Name, "test")
 	assert.Equal(t, cm.OwnerReferences[0].UID, types.UID("8dc44a2b-063c-490e-ae02-1fab285ac70a"))
 	assert.NotNil(t, cm.Data["profile.xml"])
-
+	assert.True(t, strings.Contains(cm.Data["profile.xml"], "awesome"))
 }

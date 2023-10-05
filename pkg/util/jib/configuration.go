@@ -38,6 +38,8 @@ const JibMavenToImageParam = "-Djib.to.image="
 const JibMavenFromImageParam = "-Djib.from.image="
 const JibMavenInsecureRegistries = "-Djib.allowInsecureRegistries="
 const JibDigestFile = "target/jib-image.digest"
+const JibMavenPluginVersionDefault = "3.3.2"
+const JibLayerFilterExtensionMavenVersionDefault = "0.3.0"
 
 type JibBuild struct {
 	Plugins []maven.Plugin `xml:"plugins>plugin,omitempty"`
@@ -50,12 +52,7 @@ type JibProfile struct {
 }
 
 // Create a Configmap containing the default jib profile.
-func CreateProfileConfigmap(ctx context.Context, c client.Client, kit *v1.IntegrationKit) error {
-	profile, err := jibMavenProfile()
-	if err != nil {
-		return fmt.Errorf("error generating default maven jib profile: %w. ", err)
-	}
-
+func CreateProfileConfigmap(ctx context.Context, c client.Client, kit *v1.IntegrationKit, profile string) error {
 	annotations := util.CopyMap(kit.Annotations)
 	controller := true
 	blockOwnerDeletion := true
@@ -86,23 +83,32 @@ func CreateProfileConfigmap(ctx context.Context, c client.Client, kit *v1.Integr
 		},
 	}
 
-	err = c.Create(ctx, jibProfileConfigMap)
+	err := c.Create(ctx, jibProfileConfigMap)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return fmt.Errorf("error creating the configmap containing the default maven jib profile: %s: %w. ", kit.Name+"-publish-jib-profile", err)
 	}
 	return nil
 }
 
-func jibMavenProfile() (string, error) {
+// Create a maven profile defining jib plugin build.
+func JibMavenProfile(jibMavenPluginVersion string, jibLayerFilterExtensionMavenVersion string) (string, error) {
+	jibVersion := JibMavenPluginVersionDefault
+	if jibMavenPluginVersion != "" {
+		jibVersion = jibMavenPluginVersion
+	}
+	layerVersion := JibLayerFilterExtensionMavenVersionDefault
+	if jibLayerFilterExtensionMavenVersion != "" {
+		layerVersion = jibLayerFilterExtensionMavenVersion
+	}
 	jibPlugin := maven.Plugin{
 		GroupID:    "com.google.cloud.tools",
 		ArtifactID: "jib-maven-plugin",
-		Version:    "3.3.2",
+		Version:    jibVersion,
 		Dependencies: []maven.Dependency{
 			{
 				GroupID:    "com.google.cloud.tools",
 				ArtifactID: "jib-layer-filter-extension-maven",
-				Version:    "0.3.0",
+				Version:    layerVersion,
 			},
 		},
 		Configuration: v1.PluginConfiguration{

@@ -202,6 +202,16 @@ func (c *CamelCatalogSpec) GetQuarkusToolingImage() string {
 	return c.Runtime.Metadata["quarkus.native-builder-image"]
 }
 
+// GetJibMavenPluginVersion returns the Jib plugin version required to publish an integration kit based on this catalog with jib strategy.
+func (c *CamelCatalogSpec) GetJibMavenPluginVersion() string {
+	return c.Runtime.Metadata["jib.maven-plugin.version"]
+}
+
+// GetJibLayerFilterExtensionMavenVersion returns the Jib layer filter plugin version required to publish an integration kit based on this catalog with jib strategy.
+func (c *CamelCatalogSpec) GetJibLayerFilterExtensionMavenVersion() string {
+	return c.Runtime.Metadata["jib.layer-filter-extension-maven.version"]
+}
+
 // HasCapability checks if the given capability is present in the catalog.
 func (c *CamelCatalogSpec) HasCapability(capability string) bool {
 	_, ok := c.Runtime.Capabilities[capability]
