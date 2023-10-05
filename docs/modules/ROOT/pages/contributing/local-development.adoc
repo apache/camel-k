@@ -3,10 +3,12 @@
 
 If you plan on contributing to Camel K, you will end up needing to run and troubleshoot your operator code locally. Here is a guideline that will help you configure your local operator running.
 
+NOTE: you can also run and debug the operator as a local process: see xref:contributing/local-execution.adoc[Operator - local execution]
+
 [[local-operator]]
 == Running a development operator
 
-As soon as you build your operator locally you will ask yourself how to test it. In the past, we used to have the possibility to run the operator on the same development machine and connect to Kubernetes cluster. However, that approach was quite cumbersome, so now we propose a way to locally install and run your development Camel K operator as it was a "normal" installation.
+As soon as you build your operator locally you will ask yourself how to test it. In this space we propose a way to locally install and run your development Camel K operator as it was a "normal" installation.
 
 Once you have done your development, you will need to build and push Camel K Operator container image to the container registry your Kubernetes is later going to use. If you're on a local machine, you are probably using Minikube or Kind. In such case you can make your Docker daemon to use the cluster container registry. In Minikube it would be like the following:
 
