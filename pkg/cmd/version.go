@@ -153,9 +153,9 @@ func operatorInfo(ctx context.Context, c client.Client, namespace string) (map[s
 		return nil, err
 	}
 	if catalog != nil {
-		infos["Camel Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel-quarkus.version"]
-		infos["Camel version"] = catalog.CamelCatalogSpec.Runtime.Metadata["camel.version"]
-		infos["Quarkus version"] = catalog.CamelCatalogSpec.Runtime.Metadata["quarkus.version"]
+		infos["Camel Quarkus version"] = catalog.CamelCatalogSpec.GetCamelQuarkusVersion()
+		infos["Camel version"] = catalog.CamelCatalogSpec.GetCamelVersion()
+		infos["Quarkus version"] = catalog.CamelCatalogSpec.GetQuarkusVersion()
 	}
 
 	return infos, nil
