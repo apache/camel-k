@@ -51,7 +51,9 @@ The following configuration options are available:
 
 | hashicorp-vault.token
 | string
-| The token to access Hashicorp Vault
+| The token to access Hashicorp Vault. This could be a plain text or a configmap/secret
+The content of the hashicorp vault token is expected to be a text containing a valid Hashicorp Vault Token.
+Syntax: [configmap\|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = hashicorp-vault-token).
 
 | hashicorp-vault.scheme
 | string

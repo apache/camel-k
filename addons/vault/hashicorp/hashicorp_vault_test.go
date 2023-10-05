@@ -20,6 +20,9 @@ package hashicorp
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/test"
+	corev1 "k8s.io/api/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
@@ -28,6 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestHashicorpVaultTraitApply(t *testing.T) {
@@ -55,25 +59,101 @@ func TestHashicorpVaultTraitApply(t *testing.T) {
 	assert.Equal(t, "http", e.ApplicationProperties["camel.vault.hashicorp.scheme"])
 }
 
-func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *trait.Environment {
+func TestHashicorpVaultTraitWithSecretApply(t *testing.T) {
+	e := createEnvironment(t, camel.QuarkusCatalog, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret1",
+		},
+		Data: map[string][]byte{
+			"hashicorp-vault-token": []byte("my-hashicorp-vault-token"),
+		},
+	})
+	hashicorp := NewHashicorpVaultTrait()
+	secrets, _ := hashicorp.(*hashicorpVaultTrait)
+	secrets.Enabled = pointer.Bool(true)
+	secrets.Engine = "test"
+	secrets.Token = "secret:my-secret1/hashicorp-vault-token"
+	secrets.Host = "localhost"
+	secrets.Port = "9091"
+	secrets.Scheme = "http"
+	ok, err := secrets.Configure(e)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+
+	err = secrets.Apply(e)
+	assert.Nil(t, err)
+
+	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
+	assert.Equal(t, "test", e.ApplicationProperties["camel.vault.hashicorp.engine"])
+	assert.Equal(t, "my-hashicorp-vault-token", e.ApplicationProperties["camel.vault.hashicorp.token"])
+	assert.Equal(t, "localhost", e.ApplicationProperties["camel.vault.hashicorp.host"])
+	assert.Equal(t, "9091", e.ApplicationProperties["camel.vault.hashicorp.port"])
+	assert.Equal(t, "http", e.ApplicationProperties["camel.vault.hashicorp.scheme"])
+}
+
+func TestHashicorpVaultTraitWithConfigMapApply(t *testing.T) {
+	e := createEnvironment(t, camel.QuarkusCatalog, &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-configmap1",
+		},
+		Data: map[string]string{
+			"hashicorp-vault-token": "my-hashicorp-vault-token",
+		},
+	})
+	hashicorp := NewHashicorpVaultTrait()
+	secrets, _ := hashicorp.(*hashicorpVaultTrait)
+	secrets.Enabled = pointer.Bool(true)
+	secrets.Engine = "test"
+	secrets.Token = "configmap:my-configmap1/hashicorp-vault-token"
+	secrets.Host = "localhost"
+	secrets.Port = "9091"
+	secrets.Scheme = "http"
+	ok, err := secrets.Configure(e)
+	assert.Nil(t, err)
+	assert.True(t, ok)
+
+	err = secrets.Apply(e)
+	assert.Nil(t, err)
+
+	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
+	assert.Equal(t, "test", e.ApplicationProperties["camel.vault.hashicorp.engine"])
+	assert.Equal(t, "my-hashicorp-vault-token", e.ApplicationProperties["camel.vault.hashicorp.token"])
+	assert.Equal(t, "localhost", e.ApplicationProperties["camel.vault.hashicorp.host"])
+	assert.Equal(t, "9091", e.ApplicationProperties["camel.vault.hashicorp.port"])
+	assert.Equal(t, "http", e.ApplicationProperties["camel.vault.hashicorp.scheme"])
+}
+
+func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error), objects ...runtime.Object) *trait.Environment {
 	t.Helper()
 
 	catalog, err := catalogGen()
+	client, _ := test.NewFakeClient(objects...)
 	assert.Nil(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,
 		ApplicationProperties: make(map[string]string),
+		Client:                client,
 	}
 
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test",
+			Namespace: "test",
+			Name:      "test",
 		},
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseDeploying,
 		},
 	}
+	platform := v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "test",
+		},
+	}
 	e.Integration = &it
+	e.Platform = &platform
 	return &e
 }
