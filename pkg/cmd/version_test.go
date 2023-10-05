@@ -101,9 +101,9 @@ func TestOperatorVersionVerbose(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, true, versionCmdOptions.Verbose)
 	assert.Contains(t, output, fmt.Sprintf("Camel K Operator %s\n", defaults.Version))
-	assert.Contains(t, output, fmt.Sprintf("Camel version: %s\n", catalog.Spec.Runtime.Metadata["camel.version"]))
-	assert.Contains(t, output, fmt.Sprintf("Camel Quarkus version: %s\n", catalog.Spec.Runtime.Metadata["camel-quarkus.version"]))
-	assert.Contains(t, output, fmt.Sprintf("Quarkus version: %s\n", catalog.Spec.Runtime.Metadata["quarkus.version"]))
+	assert.Contains(t, output, fmt.Sprintf("Camel version: %s\n", catalog.Spec.GetCamelVersion()))
+	assert.Contains(t, output, fmt.Sprintf("Camel Quarkus version: %s\n", catalog.Spec.GetCamelQuarkusVersion()))
+	assert.Contains(t, output, fmt.Sprintf("Quarkus version: %s\n", catalog.Spec.GetQuarkusVersion()))
 }
 
 func TestCompatibleVersions(t *testing.T) {
