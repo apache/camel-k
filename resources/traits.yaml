@@ -116,11 +116,11 @@ traits:
       (default key value = aws-access-key).'
   - name: secret-key
     type: string
-    description: "The AWS Secret Key to use. This could be a plain text or a configmap/secret
-      \t// The content of the aws secret key is expected to be a text containing a
-      valid AWS secret key. \t// Syntax: [configmap|secret]:name[/key], where name
-      represents the resource name, key optionally represents the resource key to
-      be filtered (default key value = aws-secret-key)."
+    description: 'The AWS Secret Key to use. This could be a plain text or a configmap/secret
+      The content of the aws secret key is expected to be a text containing a valid
+      AWS secret key. Syntax: [configmap|secret]:name[/key], where name represents
+      the resource name, key optionally represents the resource key to be filtered
+      (default key value = aws-secret-key).'
   - name: region
     type: string
     description: The AWS Region to use
@@ -179,7 +179,11 @@ traits:
     description: The Azure Client Id for accessing Key Vault
   - name: client-secret
     type: string
-    description: The Azure Client Secret for accessing Key Vault
+    description: 'The Azure Client Secret for accessing Key Vault. This could be a
+      plain text or a configmap/secret. The content of the azure key vault client
+      secret is expected to be a text containing a valid Client Secret. Syntax: [configmap|secret]:name[/key],
+      where name represents the resource name, key optionally represents the resource
+      key to be filtered (default key value = azure-key-vault-client-secret).'
   - name: vault-name
     type: string
     description: The Azure Vault Name for accessing Key Vault
@@ -207,8 +211,13 @@ traits:
       used to save checkpoint while consuming from Eventhub
   - name: blob-access-key
     type: string
-    description: If Refresh is enabled, the access key for Azure Storage Blob service
-      used to save checkpoint while consuming from Eventhub
+    description: 'If Refresh is enabled, the access key for Azure Storage Blob service
+      used to save checkpoint while consuming from Eventhub. This could be a plain
+      text or a configmap/secret. The content of the azure key vault blob access key
+      is expected to be a text containing a valid Access Key for Azure Storage Blob.
+      Syntax: [configmap|secret]:name[/key], where name represents the resource name,
+      key optionally represents the resource key to be filtered (default key value
+      = azure-storage-blob-access-key).'
   - name: blob-container-name
     type: string
     description: If Refresh is enabled, the container name for Azure Storage Blob

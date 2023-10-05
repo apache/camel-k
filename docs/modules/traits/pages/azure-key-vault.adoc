@@ -51,7 +51,9 @@ The following configuration options are available:
 
 | azure-key-vault.client-secret
 | string
-| The Azure Client Secret for accessing Key Vault
+| The Azure Client Secret for accessing Key Vault. This could be a plain text or a configmap/secret.
+The content of the azure key vault client secret is expected to be a text containing a valid Client Secret.
+Syntax: [configmap\|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = azure-key-vault-client-secret).
 
 | azure-key-vault.vault-name
 | string
@@ -83,7 +85,9 @@ The following configuration options are available:
 
 | azure-key-vault.blob-access-key
 | string
-| If Refresh is enabled, the access key for Azure Storage Blob service used to save checkpoint while consuming from Eventhub
+| If Refresh is enabled, the access key for Azure Storage Blob service used to save checkpoint while consuming from Eventhub. This could be a plain text or a configmap/secret.
+The content of the azure key vault blob access key is expected to be a text containing a valid Access Key for Azure Storage Blob.
+Syntax: [configmap\|secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = azure-storage-blob-access-key).
 
 | azure-key-vault.blob-container-name
 | string
