@@ -15,6 +15,7 @@
 - E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
 - E2E kamelets.camel.apache.org "my-own-timer-source" already exists failure [\#4750](https://github.com/apache/camel-k/issues/4750)
 - Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
+- Kamelet - Inject secret in Azure KeyVault Trait [\#4743](https://github.com/apache/camel-k/issues/4743)
 - Regression: upgrade check failing after 2.0.1 [\#4721](https://github.com/apache/camel-k/issues/4721)
 - Insecure internal registry fails while pulling the kit [\#4720](https://github.com/apache/camel-k/issues/4720)
 - kamel reports error when trying to use a camel-k-runtime version not following the sematic version [\#4715](https://github.com/apache/camel-k/issues/4715)
@@ -45,6 +46,10 @@
 
 **Merged pull requests:**
 
+- fix\(doc\): image location [\#4801](https://github.com/apache/camel-k/pull/4801) ([squakez](https://github.com/squakez))
+- Kamelet - Inject secret in Vaults - Hashicorp Vault [\#4799](https://github.com/apache/camel-k/pull/4799) ([oscerd](https://github.com/oscerd))
+- Kamelet - Inject secret in Vaults - Azure Key Vault [\#4798](https://github.com/apache/camel-k/pull/4798) ([oscerd](https://github.com/oscerd))
+- Kamelet - Inject secret in Vaults - AWS Secret Manager [\#4794](https://github.com/apache/camel-k/pull/4794) ([oscerd](https://github.com/oscerd))
 - Added License headers to generated traits.yaml [\#4792](https://github.com/apache/camel-k/pull/4792) ([oscerd](https://github.com/oscerd))
 - Remove deprecated linters [\#4791](https://github.com/apache/camel-k/pull/4791) ([oscerd](https://github.com/oscerd))
 - Added Missing license headers and license headers to generation of tr… [\#4790](https://github.com/apache/camel-k/pull/4790) ([oscerd](https://github.com/oscerd))
