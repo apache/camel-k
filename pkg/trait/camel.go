@@ -228,6 +228,7 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 					Namespace: e.Integration.Namespace,
 					Labels: map[string]string{
 						v1.IntegrationLabel:                e.Integration.Name,
+						"camel.apache.org/config.type":     "camel-properties",
 						"camel.apache.org/properties.type": "user",
 					},
 				},

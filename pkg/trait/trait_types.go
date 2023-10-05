@@ -398,6 +398,7 @@ func (e *Environment) computeApplicationProperties() (*corev1.ConfigMap, error) 
 				Namespace: e.Integration.Namespace,
 				Labels: map[string]string{
 					v1.IntegrationLabel:                e.Integration.Name,
+					"camel.apache.org/config.type":     "camel-properties",
 					"camel.apache.org/properties.type": "application",
 				},
 			},
@@ -490,21 +491,34 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
-			propertiesType := configMap.Labels["camel.apache.org/properties.type"]
-			resName := propertiesType + ".properties"
+			// Camel properties
+			if configMap.Labels["camel.apache.org/config.type"] == "camel-properties" {
+				propertiesType := configMap.Labels["camel.apache.org/properties.type"]
+				resName := propertiesType + ".properties"
 
-			var mountPath string
-			switch propertiesType {
-			case "application":
-				mountPath = filepath.Join(camel.BasePath, resName)
-			case "user":
-				mountPath = filepath.Join(camel.ConfDPath, resName)
-			}
+				var mountPath string
+				switch propertiesType {
+				case "application":
+					mountPath = filepath.Join(camel.BasePath, resName)
+				case "user":
+					mountPath = filepath.Join(camel.ConfDPath, resName)
+				}
 
-			if propertiesType != "" {
-				refName := propertiesType + "-properties"
-				vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
-				mnt := getMount(refName, mountPath, resName, true)
+				if propertiesType != "" {
+					refName := propertiesType + "-properties"
+					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
+					mnt := getMount(refName, mountPath, resName, true)
+
+					*vols = append(*vols, *vol)
+					*mnts = append(*mnts, *mnt)
+				} else {
+					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
+				}
+			} else if configMap.Labels["camel.apache.org/config.type"] == "kamelets-bundle" {
+				// Kamelets bundle configmap
+				refName := "kamelets-bundle"
+				vol := getVolume(refName, "configmap", configMap.Name, "", "")
+				mnt := getMount(refName, filepath.Join(camel.BasePath, "kamelets"), "", true)
 
 				*vols = append(*vols, *vol)
 				*mnts = append(*mnts, *mnt)

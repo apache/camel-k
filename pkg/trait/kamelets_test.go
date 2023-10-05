@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -109,13 +108,8 @@ func TestKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
-	assert.Equal(t, "it-kamelet-timer-template", cm.Name)
+	assert.Equal(t, "kamelets-bundle-it", cm.Name)
 	assert.Equal(t, "test", cm.Namespace)
-
-	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
-	source := environment.Integration.Status.GeneratedSources[0]
-	assert.Equal(t, "timer.yaml", source.Name)
-	assert.Equal(t, "", string(source.Type))
 
 	assert.Equal(t, []string{"camel:log", "camel:timer"}, environment.Integration.Status.Dependencies)
 }
@@ -156,24 +150,6 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)
-	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-template" })
-	assert.NotNil(t, cmFlow)
-	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-000" })
-	assert.NotNil(t, cmRes)
-
-	assert.Len(t, environment.Integration.Status.GeneratedSources, 2)
-
-	flowSource := environment.Integration.Status.GeneratedSources[0]
-	assert.Equal(t, "timer.yaml", flowSource.Name)
-	assert.Equal(t, "", string(flowSource.Type))
-	assert.Equal(t, "it-kamelet-timer-template", flowSource.ContentRef)
-	assert.Equal(t, "content", flowSource.ContentKey)
-
-	supportSource := environment.Integration.Status.GeneratedSources[1]
-	assert.Equal(t, "support.groovy", supportSource.Name)
-	assert.Equal(t, "", string(supportSource.Type))
-	assert.Equal(t, "it-kamelet-timer-000", supportSource.ContentRef)
-	assert.Equal(t, "content", supportSource.ContentKey)
 }
 
 func TestNonYAMLKameletLookup(t *testing.T) {
@@ -209,13 +185,8 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
-	assert.Equal(t, "it-kamelet-timer-000", cm.Name)
+	assert.Equal(t, "kamelets-bundle-it", cm.Name)
 	assert.Equal(t, "test", cm.Namespace)
-
-	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
-	source := environment.Integration.Status.GeneratedSources[0]
-	assert.Equal(t, "timer.groovy", source.Name)
-	assert.Equal(t, "template", string(source.Type))
 }
 
 func TestMultipleKamelets(t *testing.T) {
@@ -284,33 +255,9 @@ func TestMultipleKamelets(t *testing.T) {
 	err = trait.Apply(environment)
 	require.NoError(t, err)
 
-	cmFlow := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-template" })
-	assert.NotNil(t, cmFlow)
-	cmRes := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-timer-000" })
-	assert.NotNil(t, cmRes)
-	cmFlow2 := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "it-kamelet-logger-template" })
-	assert.NotNil(t, cmFlow2)
-
-	assert.Len(t, environment.Integration.Status.GeneratedSources, 3)
-
-	flowSource2 := environment.Integration.Status.GeneratedSources[0]
-	assert.Equal(t, "logger.yaml", flowSource2.Name)
-	assert.Equal(t, "", string(flowSource2.Type))
-	assert.Equal(t, "it-kamelet-logger-template", flowSource2.ContentRef)
-	assert.Equal(t, "content", flowSource2.ContentKey)
-
-	flowSource := environment.Integration.Status.GeneratedSources[1]
-	assert.Equal(t, "timer.yaml", flowSource.Name)
-	assert.Equal(t, "", string(flowSource.Type))
-	assert.Equal(t, "it-kamelet-timer-template", flowSource.ContentRef)
-	assert.Equal(t, "content", flowSource.ContentKey)
-
-	supportSource := environment.Integration.Status.GeneratedSources[2]
-	assert.Equal(t, "support.groovy", supportSource.Name)
-	assert.Equal(t, "", string(supportSource.Type))
-	assert.Equal(t, "it-kamelet-timer-000", supportSource.ContentRef)
-	assert.Equal(t, "content", supportSource.ContentKey)
-
+	cmBundle := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "kamelets-bundle-it" })
+	assert.NotNil(t, cmBundle)
+	assert.Len(t, environment.Integration.Status.GeneratedSources, 0)
 	assert.Equal(t, []string{"camel:log", "camel:tbd", "camel:timer", "camel:xxx"}, environment.Integration.Status.Dependencies)
 }
 
@@ -566,7 +513,8 @@ func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kam
 				Phase: v1.IntegrationPhaseInitialization,
 			},
 		},
-		Resources: kubernetes.NewCollection(),
+		Resources:             kubernetes.NewCollection(),
+		ApplicationProperties: make(map[string]string),
 	}
 
 	return trait, environment
