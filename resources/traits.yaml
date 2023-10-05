@@ -650,7 +650,11 @@ traits:
     description: The Hashicorp engine to use
   - name: token
     type: string
-    description: The token to access Hashicorp Vault
+    description: 'The token to access Hashicorp Vault. This could be a plain text
+      or a configmap/secret The content of the hashicorp vault token is expected to
+      be a text containing a valid Hashicorp Vault Token. Syntax: [configmap|secret]:name[/key],
+      where name represents the resource name, key optionally represents the resource
+      key to be filtered (default key value = hashicorp-vault-token).'
   - name: scheme
     type: string
     description: The scheme to access Hashicorp Vault
