@@ -192,19 +192,6 @@ func NewSourceSpec(name string, content string, language Language) SourceSpec {
 	}
 }
 
-// InferLanguage returns the language of the source or discovers it from file extension if not set.
-func (in *SourceSpec) InferLanguage() Language {
-	if in.Language != "" {
-		return in.Language
-	}
-	for _, l := range Languages {
-		if strings.HasSuffix(in.Name, "."+string(l)) {
-			return l
-		}
-	}
-	return ""
-}
-
 // SetOperatorID sets the given operator id as an annotation.
 func (in *Integration) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)

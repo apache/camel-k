@@ -212,7 +212,20 @@ func DecodeValueSource(input string, defaultKey string, errorMessage string) (Va
 	return ValueSource{}, fmt.Errorf(errorMessage)
 }
 
-// IsGeneratedFromKamelet determines is a source spec is derived from a Kamelet
+// IsGeneratedFromKamelet determines is a source spec is derived from a Kamelet.
 func (s *SourceSpec) IsGeneratedFromKamelet() bool {
 	return s.FromKamelet
+}
+
+// InferLanguage returns the language of the source or discovers it from file extension if not set.
+func (s *SourceSpec) InferLanguage() Language {
+	if s.Language != "" {
+		return s.Language
+	}
+	for _, l := range Languages {
+		if strings.HasSuffix(s.Name, "."+string(l)) {
+			return l
+		}
+	}
+	return ""
 }
