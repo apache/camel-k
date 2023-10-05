@@ -54,6 +54,15 @@ func (action *initializeAction) CanHandle(binding *v1.Pipe) bool {
 func (action *initializeAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.Pipe, error) {
 	action.L.Info("Initializing Pipe")
 
+	if binding.Spec.Integration != nil {
+		action.L.Infof("Pipe %s is using deprecated .spec.integration parameter. Please, update and use annotation traits instead", binding.Name)
+		binding.Status.SetCondition(
+			v1.PipeIntegrationDeprecationNotice,
+			corev1.ConditionTrue,
+			".spec.integration parameter is deprecated",
+			".spec.integration parameter is deprecated. Use annotation traits instead",
+		)
+	}
 	it, err := CreateIntegrationFor(ctx, action.client, binding)
 	if err != nil {
 		binding.Status.Phase = v1.PipePhaseError
@@ -63,7 +72,7 @@ func (action *initializeAction) Handle(ctx context.Context, binding *v1.Pipe) (*
 	}
 
 	if _, err := kubernetes.ReplaceResource(ctx, action.client, it); err != nil {
-		return nil, fmt.Errorf("could not create integration forPipe: %w", err)
+		return nil, fmt.Errorf("could not create integration for Pipe: %w", err)
 	}
 
 	// propagate Kamelet icon (best effort)
