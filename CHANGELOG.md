@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Camel K doesn't install on a restricted namespace [\#4786](https://github.com/apache/camel-k/issues/4786)
+- Remove deprecated linters [\#4785](https://github.com/apache/camel-k/issues/4785)
 - E2E failure on common TestRunExtraRepository test [\#4774](https://github.com/apache/camel-k/issues/4774)
 - Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
@@ -21,8 +23,11 @@
 - Camel K 2.0 go package is broken [\#4683](https://github.com/apache/camel-k/issues/4683)
 - Camel K 1.12.1 : XSLT/XSLT-saxon: javax.xml.transform.TransformerConfigurationException: Could not compile stylesheet [\#4677](https://github.com/apache/camel-k/issues/4677)
 - Add GH issue template [\#4675](https://github.com/apache/camel-k/issues/4675)
+- Separating Java and native image compilation [\#4648](https://github.com/apache/camel-k/issues/4648)
+- IntegrationPlatform reconciliation should warn or fail when missing registry [\#4647](https://github.com/apache/camel-k/issues/4647)
 - Add plugin repository when `kamel run --maven-repository` [\#4608](https://github.com/apache/camel-k/issues/4608)
 - Security warning messages from the operator pod on Openshift  [\#4424](https://github.com/apache/camel-k/issues/4424)
+- Report error when any registry problem happen [\#4272](https://github.com/apache/camel-k/issues/4272)
 - unable to access the URL and unable to expose port after the integration build is successfully deployed. [\#4256](https://github.com/apache/camel-k/issues/4256)
 - Language page for documentation of camel-k 1.12.x missing [\#4176](https://github.com/apache/camel-k/issues/4176)
 - Redesign traits that have runtime dependencies [\#4166](https://github.com/apache/camel-k/issues/4166)
