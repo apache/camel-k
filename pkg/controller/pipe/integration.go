@@ -75,6 +75,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	it.GetLabels()[kubernetes.CamelCreatorLabelKind] = binding.Kind
 	it.GetLabels()[kubernetes.CamelCreatorLabelName] = binding.Name
 
+	// Deprecated
 	// start from the integration spec defined in the binding
 	if binding.Spec.Integration != nil {
 		it.Spec = *binding.Spec.Integration.DeepCopy()

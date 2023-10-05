@@ -46,6 +46,7 @@ type Pipe struct {
 // PipeSpec defines the binding between a source and a sink. It can include custom parameters and additional intermediate steps and error handling.
 type PipeSpec struct {
 	// Integration is an optional integration used to specify custom parameters
+	// Deprecated don't use this. Use trait annotations if you need to change any cluster configuration.
 	Integration *IntegrationSpec `json:"integration,omitempty"`
 	// Source is the starting point of the integration defined by this Pipe
 	Source Endpoint `json:"source,omitempty"`
@@ -132,6 +133,8 @@ const (
 	PipeConditionReady PipeConditionType = "Ready"
 	// PipeIntegrationConditionError is used to report the error on the generated Integration.
 	PipeIntegrationConditionError PipeConditionType = "IntegrationError"
+	// PipeIntegrationDeprecationNotice is used to report the usage of a deprecated resource.
+	PipeIntegrationDeprecationNotice PipeConditionType = "DeprecationNotice"
 )
 
 // PipePhase --.
