@@ -19,3 +19,12 @@ kamel kamelet add-repo <git-platform>:<owner>/<repo>[/path_to_kamelets_folder][@
 Mind that `<git-platform>` is the repository of your choice, for instance `github` and `[@version]` is the tag to use (by default it will use `main` branch).
 
 With this approach you can dynamically include any repository where your Kamelets are hosted. They will be lazily initialized as soon as they are required by any of the Integration or Pipes which will make use of them.
+
+[[kamelets-as-dependency]]
+== Kamelets as a dependency
+
+The Camel K has an opinionated way to use Kamelets which is the one exposed above. Here the Kamelet spec resource is expected to be available in the cluster.
+
+However, you may find situations where you want to bundle a Kamelet in a dependency (ie, some external catalog containing all Kamelets spec). As Kamelets are a Camel thing, then, you can use such dependency and let the runtime use the Kamelets available in the classpath.
+
+If you're using such an approach, then, you will need to make sure to skip the Kamelet trait (which is in charge to discover them and get required dependencies), and provide all the dependencies which may be required by your Kamelet. Additionally, you may need to specify a Camel property to tell the runtime where to expect to find the Kamelets, `camel.component.kamelet.location` (default `classpath:/kamelets`).

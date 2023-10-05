@@ -83,6 +83,7 @@
 *** xref:architecture/cr/camel-catalog.adoc[CamelCatalog]
 ** xref:architecture/runtime.adoc[Runtime]
 ** xref:architecture/traits.adoc[Traits]
+** xref:architecture/kamelets.adoc[Kamelets]
 ** xref:architecture/incremental-image.adoc[Incremental Image]
 * API
 ** xref:apis/camel-k.adoc[Camel K API]

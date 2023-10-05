@@ -1,0 +1,13 @@
+= Kamelets architecture in Camel K
+
+xref:kamelets/kamelets.adoc[Kamelets] are a technology which were originally developed as a Camel K side resource but moved into Camel framework as Kamelet component. From an design point of view, a Kamelet is a specification that is provided into the cluster and which can be used at any point by an Integration or a Pipe, in order to reuse the connector style approach.
+
+In Camel framework, a Kamelet is nothing than a component which can be used as any other component with the `kamelet` uri scheme. This is translated to one or more Route Templates. What's important for Camel runtime is to have the Kamelet spec available somewhere when running the application making reference to it.
+
+== Deployment model
+
+In Camel K, it is worth to explain how the Kamelets are deployed in order to make Camel runtime application to correctly use the Kamelet referenced in the Integration. First of all, the operator uses a xref:traits:kamelets.adoc[Camel K trait] which is in charge to discover the Kamelets used in your route. This is due to get all the specification and dependencies required.
+
+image::architecture/kamelets_deployment.png[Kamelets deployment model]
+
+The operator creates a Configmap in order to bundle all the Kamelets which are eventually required by the application runtime. The Kamelets spec has to be available and in ready phase status. Once the application is created and ready to start, the operator mounts such a Configmap in a known location (default `/etc/camel/kamelets`) so that the Camel application will be able to read the definition from such location and run them according the logic expected in the same Camel framework.

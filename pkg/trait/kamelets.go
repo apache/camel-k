@@ -58,8 +58,6 @@ func newConfigurationKey(kamelet, configurationID string) configurationKey {
 }
 
 const (
-	contentKey = "content"
-
 	kameletLabel              = "camel.apache.org/kamelet"
 	kameletConfigurationLabel = "camel.apache.org/kamelet.configuration"
 )
@@ -177,7 +175,6 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 			return err
 		}
 
-		immutable := true
 		kameletConfigmap := &corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "ConfigMap",
@@ -194,8 +191,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 					"camel.apache.org/generated": "true",
 				},
 			},
-			Data:      map[string]string{},
-			Immutable: &immutable,
+			Data: map[string]string{},
 		}
 
 		for _, key := range t.getKameletKeys() {
@@ -240,7 +236,7 @@ func addKamelet(kamelet *v1.Kamelet, kameletBundle *corev1.ConfigMap) error {
 // kubectl create secret generic my-company-log-sink.mynamedconfig --from-file=mynamedconfig.properties
 // kubectl label secret my-company-log-sink.mynamedconfig camel.apache.org/kamelet=my-company-log-sink camel.apache.org/kamelet.configuration=mynamedconfig
 //
-// then, this func is in charge to add such a secret to the Integration
+// then, this func is in charge to add such a secret to the Integration.
 func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
 	for _, k := range t.getConfigurationKeys() {
 		options := metav1.ListOptions{
