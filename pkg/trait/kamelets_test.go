@@ -98,7 +98,6 @@ func TestKameletLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
-		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -147,7 +146,6 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 				},
 			},
 		},
-		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -198,7 +196,6 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 				},
 			},
 		},
-		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -250,7 +247,6 @@ func TestMultipleKamelets(t *testing.T) {
 				"camel:xxx",
 			},
 		},
-		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	}, &v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -274,7 +270,6 @@ func TestMultipleKamelets(t *testing.T) {
 				"camel:tbd",
 			},
 		},
-		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	})
 	enabled, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -336,7 +331,6 @@ func TestKameletConfigLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
-		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	}, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -399,7 +393,6 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 				"camel:log",
 			},
 		},
-		Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 	}, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
@@ -465,7 +458,6 @@ func TestKameletConditionFalse(t *testing.T) {
 					},
 				}),
 			},
-			Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 		})
 
 	enabled, err := trait.Configure(environment)
@@ -504,7 +496,6 @@ func TestKameletConditionTrue(t *testing.T) {
 					},
 				}),
 			},
-			Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 		},
 		&v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -518,7 +509,6 @@ func TestKameletConditionTrue(t *testing.T) {
 					},
 				}),
 			},
-			Status: v1.KameletStatus{Phase: v1.KameletPhaseReady},
 		})
 
 	enabled, err := trait.Configure(environment)

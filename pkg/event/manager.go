@@ -168,35 +168,6 @@ func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, record
 	recorder.Eventf(p, corev1.EventTypeWarning, ReasonIntegrationPlatformError, "Cannot reconcile Integration Platform %s: %v", p.Name, err)
 }
 
-// NotifyKameletUpdated automatically generates events when a Kamelet changes.
-func NotifyKameletUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Kamelet) {
-	if newResource == nil {
-		return
-	}
-	oldPhase := ""
-	var oldConditions []v1.ResourceCondition
-	if old != nil {
-		oldPhase = string(old.Status.Phase)
-		oldConditions = old.Status.GetConditions()
-	}
-	if newResource.Status.Phase != v1.KameletPhaseNone {
-		notifyIfConditionUpdated(recorder, newResource, oldConditions, newResource.Status.GetConditions(), "Kamelet", newResource.Name, ReasonKameletConditionChanged)
-	}
-	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Kamelet", newResource.Name, ReasonKameletPhaseUpdated, "")
-}
-
-// NotifyKameletError automatically generates error events when the kamelet reconcile cycle phase has an error.
-func NotifyKameletError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.Kamelet, err error) {
-	k := old
-	if newResource != nil {
-		k = newResource
-	}
-	if k == nil {
-		return
-	}
-	recorder.Eventf(k, corev1.EventTypeWarning, ReasonKameletError, "Cannot reconcile Kamelet %s: %v", k.Name, err)
-}
-
 // NotifyCamelCatalogUpdated automatically generates events when a CamelCatalog changes.
 func NotifyCamelCatalogUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.CamelCatalog) {
 	if newResource == nil {
