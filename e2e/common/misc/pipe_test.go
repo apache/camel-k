@@ -143,5 +143,5 @@ func createErrorProducerKamelet(ns string, name string) func() error {
 		},
 	}
 
-	return CreateKamelet(ns, name, flow, props, nil)
+	return CreateKamelet(ns, name, flow, props, nil, []string{"camel:core", "camel:timer", "camel:kamelet"})
 }

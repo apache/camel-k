@@ -59,7 +59,7 @@ func createBundleKamelet(ns string, name string) func() error {
 		customLabel:            "true",
 		v1.KameletBundledLabel: "true",
 	}
-	return CreateKamelet(ns, name, flow, nil, labels)
+	return CreateKamelet(ns, name, flow, nil, labels, nil)
 }
 
 func createUserKamelet(ns string, name string) func() error {
@@ -72,5 +72,5 @@ func createUserKamelet(ns string, name string) func() error {
 	labels := map[string]string{
 		customLabel: "true",
 	}
-	return CreateKamelet(ns, name, flow, nil, labels)
+	return CreateKamelet(ns, name, flow, nil, labels, nil)
 }

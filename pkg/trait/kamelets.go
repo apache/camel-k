@@ -207,7 +207,8 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 				return err
 			}
 		}
-		// resort dependencies
+		// required as at runtime, kamelets will be materialized as yaml dsl resources
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:yaml-dsl")
 		sort.Strings(e.Integration.Status.Dependencies)
 		// set kamelets expected directory
 		e.ApplicationProperties["camel.component.kamelet.location"] = fmt.Sprintf("file:%s", filepath.Join(camel.BasePath, "kamelets"))

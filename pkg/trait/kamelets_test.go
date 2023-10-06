@@ -111,7 +111,7 @@ func TestKameletLookup(t *testing.T) {
 	assert.Equal(t, "kamelets-bundle-it", cm.Name)
 	assert.Equal(t, "test", cm.Namespace)
 
-	assert.Equal(t, []string{"camel:log", "camel:timer"}, environment.Integration.Status.Dependencies)
+	assert.Equal(t, []string{"camel:log", "camel:timer", "camel:yaml-dsl"}, environment.Integration.Status.Dependencies)
 }
 
 func TestKameletSecondarySourcesLookup(t *testing.T) {
@@ -258,7 +258,7 @@ func TestMultipleKamelets(t *testing.T) {
 	cmBundle := environment.Resources.GetConfigMap(func(c *corev1.ConfigMap) bool { return c.Name == "kamelets-bundle-it" })
 	assert.NotNil(t, cmBundle)
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 0)
-	assert.Equal(t, []string{"camel:log", "camel:tbd", "camel:timer", "camel:xxx"}, environment.Integration.Status.Dependencies)
+	assert.Equal(t, []string{"camel:log", "camel:tbd", "camel:timer", "camel:xxx", "camel:yaml-dsl"}, environment.Integration.Status.Dependencies)
 }
 
 func TestKameletConfigLookup(t *testing.T) {

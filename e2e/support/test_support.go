@@ -2432,20 +2432,16 @@ func CreateKnativeBroker(ns string, name string) func() error {
 	Kamelets
 */
 
-func CreateKamelet(ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string, dependencies []string) func() error {
 	return func() error {
-		kamelet := v1.Kamelet{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      name,
-				Labels:    labels,
+		kamelet := v1.NewKamelet(ns, name)
+		kamelet.Labels = labels
+		kamelet.Spec = v1.KameletSpec{
+			Definition: &v1.JSONSchemaProps{
+				Properties: properties,
 			},
-			Spec: v1.KameletSpec{
-				Definition: &v1.JSONSchemaProps{
-					Properties: properties,
-				},
-				Template: asTemplate(template),
-			},
+			Template:     asTemplate(template),
+			Dependencies: dependencies,
 		}
 		return TestClient().Create(TestContext, &kamelet)
 	}
@@ -2474,7 +2470,7 @@ func CreateTimerKamelet(ns string, name string) func() error {
 		},
 	}
 
-	return CreateKamelet(ns, name, flow, props, nil)
+	return CreateKamelet(ns, name, flow, props, nil, []string{"camel:core", "camel:timer", "camel:kamelet"})
 }
 
 func DeleteKamelet(ns string, name string) error {
@@ -2843,7 +2839,7 @@ func CreateLogKamelet(ns string, name string) func() error {
 		},
 	}
 
-	return CreateKamelet(ns, name, flow, props, nil)
+	return CreateKamelet(ns, name, flow, props, nil, []string{"camel:core", "camel:timer", "camel:kamelet"})
 }
 
 func GetCIProcessID() string {
