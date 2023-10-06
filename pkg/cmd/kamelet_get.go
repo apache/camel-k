@@ -121,9 +121,8 @@ func (command *kameletGetCommandOptions) run(cmd *cobra.Command) error {
 			continue
 		}
 
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
 			kl.Name,
-			string(kl.Status.Phase),
 			klType,
 			group,
 			bundled,

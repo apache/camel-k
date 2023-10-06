@@ -99,9 +99,6 @@ func (command *describeKameletCommandOptions) describeKamelet(cmd *cobra.Command
 		w := indentedwriter.NewWriter(cmd.OutOrStdout())
 
 		describeObjectMeta(w, kamelet.ObjectMeta)
-
-		w.Writef(0, "Phase:\t%s\n", kamelet.Status.Phase)
-
 		// Definition
 		def := kamelet.Spec.Definition
 		if def != nil {

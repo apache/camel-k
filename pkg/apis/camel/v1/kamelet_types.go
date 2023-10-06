@@ -64,6 +64,7 @@ type Kamelet struct {
 	// the desired specification
 	Spec KameletSpec `json:"spec,omitempty"`
 	// the actual status of the resource
+	// Deprecated no longer in use
 	Status KameletStatus `json:"status,omitempty"`
 }
 
