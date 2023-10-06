@@ -31,8 +31,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-
-	kameletutils "github.com/apache/camel-k/v2/pkg/kamelet"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -134,11 +132,7 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 			missingKamelets = append(missingKamelets, key)
 		} else {
 			availableKamelets = append(availableKamelets, key)
-			// Initialize remote kamelets
-			kamelets[key], err = kameletutils.Initialize(kamelet)
-			if err != nil {
-				return nil, err
-			}
+			kamelets[key] = kamelet
 		}
 	}
 
@@ -180,14 +174,10 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		kb := newKameletBundle()
 		for _, key := range t.getKameletKeys() {
 			kamelet := kamelets[key]
-			if kamelet.Status.Phase != v1.KameletPhaseReady {
-				return fmt.Errorf("kamelet %q is not %s: %s", key, v1.KameletPhaseReady, kamelet.Status.Phase)
-			}
-			// Add source for parsing capabilities
 			if err := t.addKameletAsSource(e, kamelet); err != nil {
 				return err
 			}
-			// Adding explicit dependencies from Kamelets
+			// Adding dependencies from Kamelets
 			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
 			// Add to Kamelet bundle configmap
 			kb.add(kamelet)
