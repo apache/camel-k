@@ -8,6 +8,8 @@
 
 - Camel K doesn't install on a restricted namespace [\#4786](https://github.com/apache/camel-k/issues/4786)
 - Remove deprecated linters [\#4785](https://github.com/apache/camel-k/issues/4785)
+- Camel K on operatorhub.io [\#4783](https://github.com/apache/camel-k/issues/4783)
+- Consider adding `/PipeSpec/traits` [\#4780](https://github.com/apache/camel-k/issues/4780)
 - E2E failure on common TestRunExtraRepository test [\#4774](https://github.com/apache/camel-k/issues/4774)
 - Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
@@ -33,7 +35,9 @@
 - Language page for documentation of camel-k 1.12.x missing [\#4176](https://github.com/apache/camel-k/issues/4176)
 - Redesign traits that have runtime dependencies [\#4166](https://github.com/apache/camel-k/issues/4166)
 - Error creating Integration with Kaniko build strategy and Docker Desktop [\#4158](https://github.com/apache/camel-k/issues/4158)
+- camel-k 1.6.1 camel-xmljson dependency is failed to download [\#3971](https://github.com/apache/camel-k/issues/3971)
 - provide link to resume strategy documentation from resume trait documentation [\#3643](https://github.com/apache/camel-k/issues/3643)
+- Traits in kamel-config.yaml are ignored if a trait is present as a modeline or as a command parameter [\#3598](https://github.com/apache/camel-k/issues/3598)
 - Buildah pods will wait for Istio container to finish then timeout [\#3408](https://github.com/apache/camel-k/issues/3408)
 - How Camel K build container images [\#3336](https://github.com/apache/camel-k/issues/3336)
 - Missing Maven Server API description [\#3332](https://github.com/apache/camel-k/issues/3332)
@@ -46,7 +50,14 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): OLM resources display name [\#4810](https://github.com/apache/camel-k/pull/4810) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.12.0 to 0.13.0 [\#4807](https://github.com/apache/camel-k/pull/4807) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.37 to 0.6.38 [\#4806](https://github.com/apache/camel-k/pull/4806) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/term from 0.12.0 to 0.13.0 [\#4804](https://github.com/apache/camel-k/pull/4804) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/sync from 0.3.0 to 0.4.0 [\#4803](https://github.com/apache/camel-k/pull/4803) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(doc\): bring back support for local operator execution [\#4802](https://github.com/apache/camel-k/pull/4802) ([squakez](https://github.com/squakez))
 - fix\(doc\): image location [\#4801](https://github.com/apache/camel-k/pull/4801) ([squakez](https://github.com/squakez))
+- fix\(api\): deprecate .spec.integration Pipe [\#4800](https://github.com/apache/camel-k/pull/4800) ([squakez](https://github.com/squakez))
 - Kamelet - Inject secret in Vaults - Hashicorp Vault [\#4799](https://github.com/apache/camel-k/pull/4799) ([oscerd](https://github.com/oscerd))
 - Kamelet - Inject secret in Vaults - Azure Key Vault [\#4798](https://github.com/apache/camel-k/pull/4798) ([oscerd](https://github.com/oscerd))
 - Kamelet - Inject secret in Vaults - AWS Secret Manager [\#4794](https://github.com/apache/camel-k/pull/4794) ([oscerd](https://github.com/oscerd))
