@@ -18,33 +18,29 @@
 apiVersion: camel.apache.org/v1
 kind: Kamelet
 metadata:
-  name: logger-sink
+  name: no-props-source
   labels:
-    camel.apache.org/kamelet.type: "sink"
+    camel.apache.org/kamelet.type: "source"
 spec:
   definition:
-    title: "Logger"
-    description: "Logs the received payload of each incoming event"
+    title: "Timer"
+    description: "Produces periodic events with a custom payload"
     properties:
-      prefix:
-        title: Prefix
-        description: The prefix to prepend to the logged message
-        type: string
-        default: "message: "
-  dataTypes:
-    in:
-      types:
-        text:
-          mediaType: text/plain
-    out:
-      types:
-        text:
-          mediaType: text/plain
+      period:
+        title: Period
+        description: The time interval between two events
+        type: integer
+        default: 1000
   dependencies:
+    - camel:core
+    - camel:timer
     - camel:kamelet
-    - camel:log
   template:
     from:
-      uri: "kamelet:source"
+      uri: timer:tick
+      parameters:
+        period: "{{period}}"
       steps:
-        - log: "{{prefix}}${body}"
+        - set-body:
+            constant: "Hello World"
+        - to: "kamelet:sink"

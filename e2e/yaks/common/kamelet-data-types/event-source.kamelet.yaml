@@ -34,8 +34,9 @@ spec:
         binary:
           mediaType: application/octet-stream
   dependencies:
-    - "camel:core"
-    - "camel:kamelet"
+    - camel:core
+    - camel:timer
+    - camel:kamelet
   template:
     from:
       uri: timer:tick

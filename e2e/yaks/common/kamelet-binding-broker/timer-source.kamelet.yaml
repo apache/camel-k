@@ -45,6 +45,10 @@ spec:
           schema:
             id: text.camel.apache.org
             type: string
+  dependencies:
+    - camel:core
+    - camel:timer
+    - camel:kamelet
   template:
     from:
       uri: timer:tick

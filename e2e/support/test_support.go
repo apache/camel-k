@@ -2473,6 +2473,27 @@ func CreateTimerKamelet(ns string, name string) func() error {
 	return CreateKamelet(ns, name, flow, props, nil, []string{"camel:core", "camel:timer", "camel:kamelet"})
 }
 
+func CreateLogKamelet(ns string, name string) func() error {
+	flow := map[string]interface{}{
+		"from": map[string]interface{}{
+			"uri": "kamelet:source",
+			"steps": []map[string]interface{}{
+				{
+					"to": "log:{{loggerName}}",
+				},
+			},
+		},
+	}
+
+	props := map[string]v1.JSONSchemaProp{
+		"loggerName": {
+			Type: "string",
+		},
+	}
+
+	return CreateKamelet(ns, name, flow, props, nil, []string{"camel:log", "camel:kamelet"})
+}
+
 func DeleteKamelet(ns string, name string) error {
 	kamelet := v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -2819,27 +2840,6 @@ func GetOutputStringAsync(cmd *cobra.Command) func() string {
 	return func() string {
 		return buffer.String()
 	}
-}
-
-func CreateLogKamelet(ns string, name string) func() error {
-	flow := map[string]interface{}{
-		"from": map[string]interface{}{
-			"uri": "kamelet:source",
-			"steps": []map[string]interface{}{
-				{
-					"to": "log:{{loggerName}}",
-				},
-			},
-		},
-	}
-
-	props := map[string]v1.JSONSchemaProp{
-		"loggerName": {
-			Type: "string",
-		},
-	}
-
-	return CreateKamelet(ns, name, flow, props, nil, []string{"camel:core", "camel:timer", "camel:kamelet"})
 }
 
 func GetCIProcessID() string {

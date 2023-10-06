@@ -40,6 +40,9 @@ spec:
       types:
         text:
           mediaType: text/plain
+  dependencies:
+    - camel:kamelet
+    - camel:log
   template:
     from:
       uri: "kamelet:source"

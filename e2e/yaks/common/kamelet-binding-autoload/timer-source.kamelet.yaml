@@ -37,6 +37,10 @@ spec:
         title: Message
         description: The message to generate
         type: string
+  dependencies:
+    - camel:core
+    - camel:timer
+    - camel:kamelet
   template:
     from:
       uri: timer:tick

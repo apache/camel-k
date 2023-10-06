@@ -34,8 +34,8 @@ spec:
         binary:
           mediaType: application/octet-stream
   dependencies:
-    - "camel:core"
-    - "camel:kamelet"
+    - camel:kamelet
+    - camel:log
   template:
     from:
       uri: "kamelet:source"
