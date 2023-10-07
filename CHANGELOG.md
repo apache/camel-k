@@ -8,6 +8,8 @@
 
 - Camel K doesn't install on a restricted namespace [\#4786](https://github.com/apache/camel-k/issues/4786)
 - Remove deprecated linters [\#4785](https://github.com/apache/camel-k/issues/4785)
+- Camel K on operatorhub.io [\#4783](https://github.com/apache/camel-k/issues/4783)
+- Consider adding `/PipeSpec/traits` [\#4780](https://github.com/apache/camel-k/issues/4780)
 - E2E failure on common TestRunExtraRepository test [\#4774](https://github.com/apache/camel-k/issues/4774)
 - Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
@@ -35,6 +37,7 @@
 - Error creating Integration with Kaniko build strategy and Docker Desktop [\#4158](https://github.com/apache/camel-k/issues/4158)
 - camel-k 1.6.1 camel-xmljson dependency is failed to download [\#3971](https://github.com/apache/camel-k/issues/3971)
 - provide link to resume strategy documentation from resume trait documentation [\#3643](https://github.com/apache/camel-k/issues/3643)
+- Traits in kamel-config.yaml are ignored if a trait is present as a modeline or as a command parameter [\#3598](https://github.com/apache/camel-k/issues/3598)
 - Buildah pods will wait for Istio container to finish then timeout [\#3408](https://github.com/apache/camel-k/issues/3408)
 - How Camel K build container images [\#3336](https://github.com/apache/camel-k/issues/3336)
 - Missing Maven Server API description [\#3332](https://github.com/apache/camel-k/issues/3332)
