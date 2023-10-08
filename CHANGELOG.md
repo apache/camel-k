@@ -35,6 +35,7 @@
 - Language page for documentation of camel-k 1.12.x missing [\#4176](https://github.com/apache/camel-k/issues/4176)
 - Redesign traits that have runtime dependencies [\#4166](https://github.com/apache/camel-k/issues/4166)
 - Error creating Integration with Kaniko build strategy and Docker Desktop [\#4158](https://github.com/apache/camel-k/issues/4158)
+- Transition issue when native image takes over the non-native image [\#4125](https://github.com/apache/camel-k/issues/4125)
 - camel-k 1.6.1 camel-xmljson dependency is failed to download [\#3971](https://github.com/apache/camel-k/issues/3971)
 - provide link to resume strategy documentation from resume trait documentation [\#3643](https://github.com/apache/camel-k/issues/3643)
 - Traits in kamel-config.yaml are ignored if a trait is present as a modeline or as a command parameter [\#3598](https://github.com/apache/camel-k/issues/3598)
