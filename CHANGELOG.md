@@ -10,6 +10,7 @@
 - Remove deprecated linters [\#4785](https://github.com/apache/camel-k/issues/4785)
 - Camel K on operatorhub.io [\#4783](https://github.com/apache/camel-k/issues/4783)
 - Consider adding `/PipeSpec/traits` [\#4780](https://github.com/apache/camel-k/issues/4780)
+- 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
 - E2E failure on common TestRunExtraRepository test [\#4774](https://github.com/apache/camel-k/issues/4774)
 - Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
@@ -52,8 +53,10 @@
 **Merged pull requests:**
 
 - fix\(ci\): OLM resources display name [\#4810](https://github.com/apache/camel-k/pull/4810) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/spf13/viper from 1.16.0 to 1.17.0 [\#4809](https://github.com/apache/camel-k/pull/4809) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.12.0 to 0.13.0 [\#4807](https://github.com/apache/camel-k/pull/4807) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.37 to 0.6.38 [\#4806](https://github.com/apache/camel-k/pull/4806) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(core\): Move jib plugins versions to camelcatalog [\#4805](https://github.com/apache/camel-k/pull/4805) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump golang.org/x/term from 0.12.0 to 0.13.0 [\#4804](https://github.com/apache/camel-k/pull/4804) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/sync from 0.3.0 to 0.4.0 [\#4803](https://github.com/apache/camel-k/pull/4803) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(doc\): bring back support for local operator execution [\#4802](https://github.com/apache/camel-k/pull/4802) ([squakez](https://github.com/squakez))
