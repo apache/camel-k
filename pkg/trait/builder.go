@@ -80,9 +80,13 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 			if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
 				// TODO expect maven repository in local repo (need to change builder pod accordingly!)
 				command := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).BuildCommands()
-
+				nativeBuilderImage := quarkus.NativeBuilderImage
+				if nativeBuilderImage == "" {
+					// default from the catalog
+					nativeBuilderImage = e.CamelCatalog.GetQuarkusToolingImage()
+				}
 				// it should be performed as the last custom task
-				t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, e.CamelCatalog.GetQuarkusToolingImage(), command))
+				t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, nativeBuilderImage, command))
 				// Force the build to run in a separate Pod and strictly sequential
 				t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, and native container with 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
 				t.Strategy = string(v1.BuildStrategyPod)

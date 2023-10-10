@@ -347,6 +347,11 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	if native {
 		if nativePackagetType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackagetType != "" {
 			buildTask.Maven.Properties["quarkus.package.type"] = nativePackagetType
+			if t.NativeBaseImage == "" {
+				packageTask.BaseImage = "quay.io/quarkus/quarkus-micro-image:2.0"
+			} else {
+				packageTask.BaseImage = t.NativeBaseImage
+			}
 		}
 		if len(e.IntegrationKit.Spec.Sources) > 0 {
 			buildTask.Sources = e.IntegrationKit.Spec.Sources

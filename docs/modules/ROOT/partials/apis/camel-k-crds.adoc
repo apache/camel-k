@@ -7652,6 +7652,20 @@ The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
 In case both `jvm` and `native` are specified, two `IntegrationKit` resources are created,
 with the `native` kit having precedence over the `jvm` one once ready.
 
+|`nativeBaseImage` +
+string
+|
+
+
+The base image to use when running a native build (default `quay.io/quarkus/quarkus-micro-image:2.0`)
+
+|`nativeBuilderImage` +
+string
+|
+
+
+The image containing the tooling required for a native build (by default it will use the one provided in the runtime catalog)
+
 
 |===
 
