@@ -909,6 +909,10 @@ traits:
   - name: list
     type: string
     description: Comma separated list of Kamelet names to load into the current integration
+  - name: mount-point
+    type: string
+    description: The directory where the application mounts and reads Kamelet spec
+      (default `/etc/camel/kamelets`)
 - name: keda
   platform: false
   profiles:

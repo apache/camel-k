@@ -109,7 +109,7 @@ func TestKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
-	assert.Equal(t, "it-kamelet-timer-template", cm.Name)
+	assert.Equal(t, "kamelets-bundle-it", cm.Name)
 	assert.Equal(t, "test", cm.Namespace)
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
@@ -209,7 +209,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
-	assert.Equal(t, "it-kamelet-timer-000", cm.Name)
+	assert.Equal(t, "kamelets-bundle-it", cm.Name)
 	assert.Equal(t, "test", cm.Namespace)
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
@@ -480,7 +480,7 @@ func TestKameletConditionFalse(t *testing.T) {
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "[timer] found")
-	assert.Contains(t, cond.Message, "[none] not found")
+	assert.Contains(t, cond.Message, "kamelets [none] not found")
 }
 
 func TestKameletConditionTrue(t *testing.T) {

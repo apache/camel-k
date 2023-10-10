@@ -5064,6 +5064,13 @@ Type defines the kind of source described by this object
 
 List of property names defined in the source (e.g. if type is "template")
 
+|`from-kamelet` +
+bool
+|
+
+
+True if the spec is generated from a Kamelet
+
 
 |===
 
@@ -6931,6 +6938,13 @@ string
 
 
 Comma separated list of Kamelet names to load into the current integration
+
+|`mountPoint` +
+string
+|
+
+
+The directory where the application mounts and reads Kamelet spec (default `/etc/camel/kamelets`)
 
 
 |===

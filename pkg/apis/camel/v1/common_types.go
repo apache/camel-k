@@ -414,6 +414,8 @@ type SourceSpec struct {
 	Type SourceType `json:"type,omitempty"`
 	// List of property names defined in the source (e.g. if type is "template")
 	PropertyNames []string `json:"property-names,omitempty"`
+	// True if the spec is generated from a Kamelet
+	FromKamelet bool `json:"from-kamelet,omitempty"`
 }
 
 // SourceType represents an available source type.

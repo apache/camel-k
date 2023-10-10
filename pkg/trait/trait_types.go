@@ -419,6 +419,7 @@ func (e *Environment) computeApplicationProperties() (*corev1.ConfigMap, error) 
 				Labels: map[string]string{
 					v1.IntegrationLabel:                e.Integration.Name,
 					"camel.apache.org/properties.type": "application",
+					kubernetes.ConfigMapTypeLabel:      "camel-properties",
 				},
 			},
 			Data: map[string]string{
@@ -436,7 +437,8 @@ func (e *Environment) addSourcesProperties() {
 	}
 	idx := 0
 	for _, s := range e.Integration.Sources() {
-		if e.isEmbedded(s) {
+		// We don't process routes embedded (native) or Kamelets
+		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
 			continue
 		}
 		srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
@@ -481,14 +483,14 @@ func (e *Environment) addSourcesProperties() {
 }
 
 func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
-	//
-	// Volumes :: Sources
-	//
+	// Sources
 	idx := 0
 	for _, s := range e.Integration.Sources() {
-		if e.isEmbedded(s) {
+		// We don't process routes embedded (native) or Kamelets
+		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
 			continue
 		}
+		// Routes are copied under /etc/camel/sources and discovered by the runtime accordingly
 		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, idx)
 		if s.ContentRef != "" {
 			cmName = s.ContentRef
@@ -507,24 +509,38 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, *mnt)
 		idx++
 	}
-
+	// Resources (likely application properties or kamelets)
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
-			propertiesType := configMap.Labels["camel.apache.org/properties.type"]
-			resName := propertiesType + ".properties"
+			// Camel properties
+			if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "camel-properties" {
+				propertiesType := configMap.Labels["camel.apache.org/properties.type"]
+				resName := propertiesType + ".properties"
 
-			var mountPath string
-			switch propertiesType {
-			case "application":
-				mountPath = filepath.Join(camel.BasePath, resName)
-			case "user":
-				mountPath = filepath.Join(camel.ConfDPath, resName)
-			}
+				var mountPath string
+				switch propertiesType {
+				case "application":
+					mountPath = filepath.Join(camel.BasePath, resName)
+				case "user":
+					mountPath = filepath.Join(camel.ConfDPath, resName)
+				}
 
-			if propertiesType != "" {
-				refName := propertiesType + "-properties"
-				vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
-				mnt := getMount(refName, mountPath, resName, true)
+				if propertiesType != "" {
+					refName := propertiesType + "-properties"
+					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
+					mnt := getMount(refName, mountPath, resName, true)
+
+					*vols = append(*vols, *vol)
+					*mnts = append(*mnts, *mnt)
+				} else {
+					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
+				}
+			} else if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "kamelets-bundle" {
+				// Kamelets bundle configmap
+				kameletMountPoint := strings.ReplaceAll(e.ApplicationProperties[KameletLocationProperty], "file:", "")
+				refName := "kamelets-bundle"
+				vol := getVolume(refName, "configmap", configMap.Name, "", "")
+				mnt := getMount(refName, kameletMountPoint, "", true)
 
 				*vols = append(*vols, *vol)
 				*mnts = append(*mnts, *mnt)
@@ -532,9 +548,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		})
 	}
 
-	//
-	// Volumes :: Additional ConfigMaps
-	//
+	// Deprecated - should use mount trait
+	// User provided configmaps
 	for _, configmaps := range e.collectConfigurations("configmap") {
 		refName := kubernetes.SanitizeLabel(configmaps["value"])
 		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], "configmap", configmaps["resourceType"])
@@ -545,9 +560,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*mnts = append(*mnts, *mnt)
 	}
 
-	//
-	// Volumes :: Additional Secrets
-	//
+	// Deprecated - should use mount trait
+	// User provided secrets
 	for _, secret := range e.collectConfigurations("secret") {
 		refName := kubernetes.SanitizeLabel(secret["value"])
 		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], "secret", secret["resourceType"])
@@ -568,10 +582,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
 	}
-
-	//
-	// Volumes :: Additional user provided volumes
-	//
+	// Deprecated - should use mount trait
+	// User provided volumes
 	for _, volumeConfig := range e.collectConfigurationValues("volume") {
 		configParts := strings.Split(volumeConfig, ":")
 
