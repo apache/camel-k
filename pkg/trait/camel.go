@@ -229,8 +229,9 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 		)
 	}
 
-	for i, s := range sources {
-		if s.ContentRef != "" || e.isEmbedded(s) {
+	i := 0
+	for _, s := range sources {
+		if s.ContentRef != "" || e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
 			continue
 		}
 
@@ -258,6 +259,7 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 		}
 
 		maps = append(maps, &cm)
+		i++
 	}
 
 	return maps

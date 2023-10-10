@@ -195,7 +195,7 @@ func TestApplyCamelTraitWithSources(t *testing.T) {
 
 	assert.Equal(t, 1, environment.Resources.Size())
 	sourceCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "some-integration-source-001" && cm.Annotations["camel.apache.org/source.language"] == "xml" && cm.Annotations["camel.apache.org/source.name"] == "source2.xml"
+		return cm.Name == "some-integration-source-000" && cm.Annotations["camel.apache.org/source.language"] == "xml" && cm.Annotations["camel.apache.org/source.name"] == "source2.xml"
 	})
 	assert.NotNil(t, sourceCm)
 	assert.Equal(t, map[string]string{
