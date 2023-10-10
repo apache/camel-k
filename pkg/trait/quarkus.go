@@ -37,6 +37,8 @@ import (
 
 const (
 	quarkusTraitID = "quarkus"
+
+	QuarkusNativeDefaultBaseImageName = "quay.io/quarkus/quarkus-micro-image:2.0"
 )
 
 type quarkusPackageType string
@@ -345,10 +347,10 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
 
 	if native {
-		if nativePackagetType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackagetType != "" {
-			buildTask.Maven.Properties["quarkus.package.type"] = nativePackagetType
+		if nativePackageType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackageType != "" {
+			buildTask.Maven.Properties["quarkus.package.type"] = nativePackageType
 			if t.NativeBaseImage == "" {
-				packageTask.BaseImage = "quay.io/quarkus/quarkus-micro-image:2.0"
+				packageTask.BaseImage = QuarkusNativeDefaultBaseImageName
 			} else {
 				packageTask.BaseImage = t.NativeBaseImage
 			}
