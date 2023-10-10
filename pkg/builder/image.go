@@ -64,8 +64,6 @@ type artifactsSelector func(ctx *builderContext) error
 func nativeImageContext(ctx *builderContext) error {
 	return imageContext(ctx, func(ctx *builderContext) error {
 		runner := "camel-k-integration-" + defaults.Version + "-runner"
-
-		//ctx.BaseImage = "quay.io/quarkus/quarkus-distroless-image:1.0"
 		ctx.Artifacts = []v1.Artifact{
 			{
 				ID:       runner,
@@ -74,7 +72,6 @@ func nativeImageContext(ctx *builderContext) error {
 			},
 		}
 		ctx.SelectedArtifacts = ctx.Artifacts
-
 		return nil
 	})
 }

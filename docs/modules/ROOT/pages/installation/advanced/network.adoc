@@ -34,4 +34,4 @@ In particular the access will be required when the operator build the builder co
 
 Also in this case, the longer the operator runs, the lower the need to access to the base images, since they will be already cached and the higher the possibility to use incremental image from other IntegrationKits created.
 
-NOTE: at the moment of writing, the default builder image we use is _quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.2.0.0-Final-java11_ and the default integration image is _eclipse-temurin:17_
+NOTE: at the moment of writing, the default builder image we use is _quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-jdk-17_ and the default integration image is _eclipse-temurin:17_

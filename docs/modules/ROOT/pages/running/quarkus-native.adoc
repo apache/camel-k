@@ -1,7 +1,33 @@
 = Run Quarkus native applications
 
-The default Camel runtime used by Camel K is Camel Quarkus (via Camel K Runtime dependency). This is a great choice for cloud development and by default we use the JVM mode which provides already enough optimization which makes Camel applications, first class Cloud Native applications.
+The default Camel runtime used by Camel K is Camel Quarkus (via Camel K Runtime dependency). This is a great choice for **cloud native development** and by default we use the JVM mode which provides already enough optimization which makes Camel applications, first class cloud native applications.
 
 Quarkus (and Camel Quarkus) offers also the possibility to perform a build ahead of time (AOT) and have even further optimization, making your Camel application a native executable with very low footprint and immediate startup. This is known as Native mode and we can configure such behavior using the xref:traits:quarkus.adoc[Quarkus trait].
 
-See the examples provided in xref:traits:quarkus.adoc#_automatic_rollout_deployment_to_native_integration[Quarkus trait] documentation page to learn how to use the feature.
+== Quarkus JVM mode
+
+This is the default. As the default Camel K runtime is Quarkus, then, every Camel application you run in Kubernetes are already optimized with Quarkus JVM mode.
+
+== Quarkus native
+
+If you want to go Quarkus native, then you need to familiarize with the xref:traits:quarkus.adoc[Quarkus trait]. This trait is used to configure any aspect related to Quarkus build. The most straightforward way is to use `quarkus.build-mode=native` parameter:
+
+[source,console]
+$ kamel run quarkus.build-mode=native ...
+
+This one will trigger a native compilation on your cluster. Mind that a native compilation require quite certain amount of memory and specific tooling (GraalVM). For this reason, any native build will be forced to execute with `pod` build strategy, meaning that a new Kubernetes Pod is scheduled to perform such operation. We calculate certain sensible values for Kubernetes resource such as memory and CPU (4Gi and 1000 millicores). However, depending on the complexity of your Camel application, then, you may require to adjust them. For this reason you may need to configure your xref:pipeline/pipeline.adoc#build-pipeline-trait[build pipeline resources].
+
+=== Automatic Rollout Deployment to Native Integration
+
+Compilation to native executables produces integrations that start faster and consume less memory at runtime. However the build process is resources intensive and takes a longer time than the packaging of a JVM mode application.
+
+In order to combine the best of both worlds, it's possible to configure the Quarkus trait to run both traditional and native builds in parallel when running an integration, e.g.:
+
+[source,console]
+$ kamel run -t quarkus.build-mode=jvm -t quarkus.build-mode=native ...
+
+The Integration pod will run as soon as the `jvm` build completes (within seconds), and a rollout deployment to the `native` image will be triggered, as soon as the `native` build completes (within minutes), with no service interruption.
+
+== Supported Camel Components
+
+Camel K only supports the Camel components that are available as Camel Quarkus Extensions out-of-the-box. These extensions are listed in the xref:camel-quarkus::reference/index.adoc[Camel Quarkus documentation].

@@ -17,9 +17,9 @@ As we're in a disconnected environment, we assume this component to be accessibl
 
 We cannot provide any specific guideline on how to preload images in the cluster registry (as it vary on your infrastructure). However we expect this to be part of the documentation of the cluster in a disconnected mode. At the same manner, you'll need to make sure to include the following images which will be required by Camel K during its operations:
 
-* `quay.io/quarkus/quarkus-distroless-image:1.0`
+* `quay.io/quarkus/quarkus-micro-image:2.0`
 * `eclipse-temurin:17` (or any other base image you want to use)
-* `quay.io/quarkus/ubi-quarkus-mandrel-builder-image:22.2.0.0-Final-java11`
+* `quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-jdk-17`
 
 The last one is the image used in the Camel K Runtime 2.16.0 version (the default one at the time of writing). Make sure to identify in the catalog (`.spec.runtime.metadata.quarkus.native-builder-image`) the one required in your installation.
 
