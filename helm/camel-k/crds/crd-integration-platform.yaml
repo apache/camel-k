@@ -1628,6 +1628,15 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      nativeBaseImage:
+                        description: The base image to use when running a native build
+                          (default `quay.io/quarkus/quarkus-micro-image:2.0`)
+                        type: string
+                      nativeBuilderImage:
+                        description: The image containing the tooling required for
+                          a native build (by default it will use the one provided
+                          in the runtime catalog)
+                        type: string
                       packageTypes:
                         description: 'The Quarkus package types, `fast-jar` or `native`
                           (default `fast-jar`). In case both `fast-jar` and `native`
@@ -3441,6 +3450,15 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      nativeBaseImage:
+                        description: The base image to use when running a native build
+                          (default `quay.io/quarkus/quarkus-micro-image:2.0`)
+                        type: string
+                      nativeBuilderImage:
+                        description: The image containing the tooling required for
+                          a native build (by default it will use the one provided
+                          in the runtime catalog)
+                        type: string
                       packageTypes:
                         description: 'The Quarkus package types, `fast-jar` or `native`
                           (default `fast-jar`). In case both `fast-jar` and `native`
