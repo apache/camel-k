@@ -189,6 +189,9 @@ spec:
                         contentType:
                           description: the content type (tipically text or binary)
                           type: string
+                        from-kamelet:
+                          description: True if the spec is generated from a Kamelet
+                          type: boolean
                         interceptors:
                           description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
                             uses to pre/post process sources
@@ -7392,6 +7395,10 @@ spec:
                           list:
                             description: Comma separated list of Kamelet names to
                               load into the current integration
+                            type: string
+                          mountPoint:
+                            description: The directory where the application mounts
+                              and reads Kamelet spec (default `/etc/camel/kamelets`)
                             type: string
                         type: object
                       keda:

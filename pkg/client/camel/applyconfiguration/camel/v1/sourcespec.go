@@ -32,6 +32,7 @@ type SourceSpecApplyConfiguration struct {
 	Interceptors               []string            `json:"interceptors,omitempty"`
 	Type                       *camelv1.SourceType `json:"type,omitempty"`
 	PropertyNames              []string            `json:"property-names,omitempty"`
+	FromKamelet                *bool               `json:"from-kamelet,omitempty"`
 }
 
 // SourceSpecApplyConfiguration constructs an declarative configuration of the SourceSpec type for use with
@@ -147,5 +148,13 @@ func (b *SourceSpecApplyConfiguration) WithPropertyNames(values ...string) *Sour
 	for i := range values {
 		b.PropertyNames = append(b.PropertyNames, values[i])
 	}
+	return b
+}
+
+// WithFromKamelet sets the FromKamelet field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the FromKamelet field is set to the value of the last call.
+func (b *SourceSpecApplyConfiguration) WithFromKamelet(value bool) *SourceSpecApplyConfiguration {
+	b.FromKamelet = &value
 	return b
 }

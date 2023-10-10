@@ -686,6 +686,10 @@ spec:
                               contentType:
                                 description: the content type (tipically text or binary)
                                 type: string
+                              from-kamelet:
+                                description: True if the spec is generated from a
+                                  Kamelet
+                                type: boolean
                               interceptors:
                                 description: Interceptors are optional identifiers
                                   the org.apache.camel.k.RoutesLoader uses to pre/post
@@ -1424,6 +1428,10 @@ spec:
                               contentType:
                                 description: the content type (tipically text or binary)
                                 type: string
+                              from-kamelet:
+                                description: True if the spec is generated from a
+                                  Kamelet
+                                type: boolean
                               interceptors:
                                 description: Interceptors are optional identifiers
                                   the org.apache.camel.k.RoutesLoader uses to pre/post

@@ -26,4 +26,6 @@ type KameletsTrait struct {
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Comma separated list of Kamelet names to load into the current integration
 	List string `property:"list" json:"list,omitempty"`
+	// The directory where the application mounts and reads Kamelet spec (default `/etc/camel/kamelets`)
+	MountPoint string `property:"mount-point" json:"mountPoint,omitempty"`
 }

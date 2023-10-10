@@ -211,3 +211,8 @@ func DecodeValueSource(input string, defaultKey string, errorMessage string) (Va
 
 	return ValueSource{}, fmt.Errorf(errorMessage)
 }
+
+// IsGeneratedFromKamelet determines is a source spec is derived from a Kamelet
+func (s *SourceSpec) IsGeneratedFromKamelet() bool {
+	return s.FromKamelet
+}

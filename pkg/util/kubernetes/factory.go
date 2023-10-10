@@ -39,6 +39,9 @@ const ConfigMapAutogenLabel = "camel.apache.org/generated"
 // ConfigMapOriginalFileNameLabel -- .
 const ConfigMapOriginalFileNameLabel = "camel.apache.org/filename"
 
+// ConfigMapTypeLabel -- .
+const ConfigMapTypeLabel = "camel.apache.org/config.type"
+
 // NewTolerations build an array of Tolerations from an array of string.
 func NewTolerations(taints []string) ([]corev1.Toleration, error) {
 	tolerations := make([]corev1.Toleration, 0)

@@ -219,6 +219,7 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 					Labels: map[string]string{
 						v1.IntegrationLabel:                e.Integration.Name,
 						"camel.apache.org/properties.type": "user",
+						kubernetes.ConfigMapTypeLabel:      "camel-properties",
 					},
 				},
 				Data: map[string]string{
