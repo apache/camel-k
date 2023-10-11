@@ -4619,13 +4619,13 @@
         "service-call": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.ServiceCallStepParser$Definition"
         },
-        "set-body": {
+        "setBody": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.SetBodyStepParser$Definition"
         },
         "set-exchange-pattern": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.SetExchangePatternStepParser$Definition"
         },
-        "set-header": {
+        "setHeader": {
           "$ref": "#/definitions/org.apache.camel.k.loader.yaml.parser.SetHeaderStepParser$Definition"
         },
         "set-property": {

@@ -691,7 +691,7 @@ const yamlWithLanguages = `
 - from:
     uri: "direct:start"
     steps:
-        - set-body:
+        - setBody:
             constant: "Hello Camel K"
         - transform:
             language:

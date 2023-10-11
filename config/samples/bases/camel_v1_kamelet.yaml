@@ -40,7 +40,7 @@ spec:
       parameters:
         period: "#property:period"
       steps:
-      - set-body:
+      - setBody:
           constant: "#property:message"
       - to: kamelet:sink
       uri: timer:tick

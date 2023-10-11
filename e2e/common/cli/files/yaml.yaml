@@ -20,9 +20,9 @@
     parameters:
       period: "5000"
     steps:
-      - set-header:
+      - setHeader:
           name: "m"
           constant: "string!"
-      - set-body:
+      - setBody:
           simple: "Magic${header.m}"
       - to: "log:info"

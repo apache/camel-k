@@ -40,6 +40,6 @@ spec:
     from:
       uri: timer:tick
       steps:
-        - set-body:
+        - setBody:
             constant: "Hello from Camel K!"
         - to: "kamelet:sink"

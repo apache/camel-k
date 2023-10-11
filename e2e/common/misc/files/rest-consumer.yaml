@@ -25,5 +25,5 @@
     steps:
       - log:
           message: "get ${header.name}"
-      - set-body:
+      - setBody:
           simple: "${header.name} Doe"

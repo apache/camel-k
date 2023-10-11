@@ -84,7 +84,7 @@ spec:
       parameters:
         period: "{{period}}"
       steps:
-        - set-body:
+        - setBody:
             constant: "{{message}}"
         - to: "kamelet:sink"
 ----
@@ -734,7 +734,7 @@ If we managed to reduce our integration to contain only a Camel route, convertin
     parameters:
       period: "{{period}}"
     steps:
-    - set-header:
+    - setHeader:
         name: CamelCaffeineAction
         constant: GET
     - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
@@ -750,7 +750,7 @@ If we managed to reduce our integration to contain only a Camel route, convertin
           - set-property:
               name: lastUpdate
               simple: "${date-with-timezone:now-{{lookAhead}}m:UTC:yyyy-MM-dd'T'HH:mm:ss.SSS}"
-    - set-header:
+    - setHeader:
         name: CamelHttpMethod
         constant: GET
     - toD: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
@@ -764,9 +764,9 @@ If we managed to reduce our integration to contain only a Camel route, convertin
         simple: "${date-with-timezone:exchangeProperty.generated:UTC:yyyy-MM-dd'T'HH:mm:ss.SSS}"
     - claim-check:
         operation: Push
-    - set-body:
+    - setBody:
         exchange-property: lastUpdate
-    - set-header:
+    - setHeader:
         name: CamelCaffeineAction
         constant: PUT
     - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
@@ -815,7 +815,7 @@ spec:
       parameters:
         period: "{{period}}"
       steps:
-      - set-header:
+      - setHeader:
           name: CamelCaffeineAction
           constant: GET
       - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
@@ -831,7 +831,7 @@ spec:
             - set-property:
                 name: lastUpdate
                 simple: "${date-with-timezone:now-{{lookAhead}}m:UTC:yyyy-MM-dd'T'HH:mm:ss.SSS}"
-      - set-header:
+      - setHeader:
           name: CamelHttpMethod
           constant: GET
       - toD: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
@@ -845,9 +845,9 @@ spec:
           simple: "${date-with-timezone:exchangeProperty.generated:UTC:yyyy-MM-dd'T'HH:mm:ss.SSS}"
       - claim-check:
           operation: Push
-      - set-body:
+      - setBody:
           exchange-property: lastUpdate
-      - set-header:
+      - setHeader:
           name: CamelCaffeineAction
           constant: PUT
       - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
@@ -957,7 +957,7 @@ spec:
       parameters:
         period: "{{period}}"
       steps:
-      - set-header:
+      - setHeader:
           name: CamelCaffeineAction
           constant: GET
       - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
@@ -973,7 +973,7 @@ spec:
             - set-property:
                 name: lastUpdate
                 simple: "${date-with-timezone:now-{{lookAhead}}m:UTC:yyyy-MM-dd'T'HH:mm:ss.SSS}"
-      - set-header:
+      - setHeader:
           name: CamelHttpMethod
           constant: GET
       - toD: "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&updatedafter=${exchangeProperty.lastUpdate}&orderby=time-asc"
@@ -987,9 +987,9 @@ spec:
           simple: "${date-with-timezone:exchangeProperty.generated:UTC:yyyy-MM-dd'T'HH:mm:ss.SSS}"
       - claim-check:
           operation: Push
-      - set-body:
+      - setBody:
           exchange-property: lastUpdate
-      - set-header:
+      - setHeader:
           name: CamelCaffeineAction
           constant: PUT
       - toD: "caffeine-cache:cache-${routeId}?key=lastUpdate"
@@ -1113,7 +1113,7 @@ Let's start with a simple integration:
     parameters:
       period: 5000
     steps:
-    - set-body:
+    - setBody:
         constant: Hello
     - to: direct:endpoint
 ----
@@ -1144,7 +1144,7 @@ Now, let's check if we can also send an image, by changing the second route:
     parameters:
       period: 5000
     steps:
-    - set-header:
+    - setHeader:
         name: CamelHttpMethod
         constant: GET
     - to: https://github.com/apache/camel/raw/7204aa132662ab6cb8e3c5afea8b9b0859eff0e8/docs/img/logo.png
@@ -1178,14 +1178,14 @@ When applied to the current use case, the main route can be changed into somethi
           steps:
           - convert-body-to:
               type: "byte[]"
-          - set-header:
+          - setHeader:
               name: CamelTelegramMediaType
               constant: PHOTO_PNG
         - simple: "${header[Content-Type]} == 'image/jpeg'"
           steps:
           - convert-body-to:
               type: "byte[]"
-          - set-header:
+          - setHeader:
               name: CamelTelegramMediaType
               constant: PHOTO_JPG
         otherwise:
@@ -1196,24 +1196,24 @@ When applied to the current use case, the main route can be changed into somethi
         when:
         - simple: "${header[text]}"
           steps:
-          - set-header:
+          - setHeader:
               name: CamelTelegramMediaTitleCaption
               simple: "${header[text]}"
         - simple: "${header[ce-text]}"
           steps:
-          - set-header:
+          - setHeader:
               name: CamelTelegramMediaTitleCaption
               simple: "${header[ce-text]}"
     - choice: # <3>
         when:
         - simple: "${header[chat-id]}"
           steps:
-          - set-header:
+          - setHeader:
               name: CamelTelegramChatId
               simple: "${header[chat-id]}"
         - simple: "${header[ce-chat-id]}"
           steps:
-          - set-header:
+          - setHeader:
               name: CamelTelegramChatId
               simple: "${header[ce-chat-id]}"
     - to:
@@ -1294,14 +1294,14 @@ spec:
             - log: h1
             - convert-body-to:
                 type: "byte[]"
-            - set-header:
+            - setHeader:
                 name: CamelTelegramMediaType
                 constant: PHOTO_PNG
           - simple: "${header[Content-Type]} == 'image/jpeg'"
             steps:
             - convert-body-to:
                 type: "byte[]"
-            - set-header:
+            - setHeader:
                 name: CamelTelegramMediaType
                 constant: PHOTO_JPG
           otherwise:
@@ -1312,24 +1312,24 @@ spec:
           when:
           - simple: "${header[text]}"
             steps:
-            - set-header:
+            - setHeader:
                 name: CamelTelegramMediaTitleCaption
                 simple: "${header[text]}"
           - simple: "${header[ce-text]}"
             steps:
-            - set-header:
+            - setHeader:
                 name: CamelTelegramMediaTitleCaption
                 simple: "${header[ce-text]}"
       - choice:
           when:
           - simple: "${header[chat-id]}"
             steps:
-            - set-header:
+            - setHeader:
                 name: CamelTelegramChatId
                 simple: "${header[chat-id]}"
           - simple: "${header[ce-chat-id]}"
             steps:
-            - set-header:
+            - setHeader:
                 name: CamelTelegramChatId
                 simple: "${header[ce-chat-id]}"
       - to:

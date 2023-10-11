@@ -43,6 +43,6 @@ spec:
       parameters:
         period: "{{period}}"
       steps:
-        - set-body:
+        - setBody:
             constant: "{{message}}"
         - to: "kamelet:sink"

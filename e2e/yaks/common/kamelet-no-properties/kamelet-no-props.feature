@@ -13,7 +13,7 @@ Feature: Kamelet may have no properties
 from:
   uri: timer:tick
   steps:
-  - set-body:
+  - setBody:
       constant: "Hello World"
   - to: "kamelet:sink"
 """
