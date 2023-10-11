@@ -352,6 +352,76 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 	}
 }
 
+func TestKnativeConfigurationSorting(t *testing.T) {
+	// unsorted on purpose
+	sources := []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "s1.groovy",
+				Content: `from('knative:channel/channel-source-2').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "s2.groovy",
+				Content: `from('knative:channel/channel-source-4').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "s3.groovy",
+				Content: `from('knative:channel/channel-source-1').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+		{
+			DataSpec: v1.DataSpec{
+				Name:    "s4.groovy",
+				Content: `from('knative:channel/channel-source-3').log('${body}')`,
+			},
+			Language: v1.LanguageGroovy,
+		},
+	}
+
+	environment := NewFakeEnvironment(t, v1.SourceSpec{})
+	// disable traits which are not really needed in this test
+	enabled := false
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Trait: traitv1.Trait{
+			Enabled: &enabled,
+		},
+	}
+	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{
+		Trait: traitv1.Trait{
+			Enabled: &enabled,
+		},
+	}
+	environment.Integration.Spec.Traits.JVM = &traitv1.JVMTrait{
+		Trait: traitv1.Trait{
+			Enabled: &enabled,
+		},
+	}
+	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
+	environment.Integration.Spec.Sources = sources
+
+	c, err := SortChannelFakeClient("ns")
+	assert.Nil(t, err)
+	tc := NewCatalog(c)
+	err = tc.Configure(&environment)
+	assert.Nil(t, err)
+	err = tc.apply(&environment)
+	assert.Nil(t, err)
+	camelEnv := knativeapi.NewCamelEnvironment()
+	err = camelEnv.Deserialize(envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION").Value)
+	assert.Nil(t, err)
+	assert.Equal(t, "channel-source-1", camelEnv.Services[0].Name)
+	assert.Equal(t, "channel-source-2", camelEnv.Services[1].Name)
+	assert.Equal(t, "channel-source-3", camelEnv.Services[2].Name)
+	assert.Equal(t, "channel-source-4", camelEnv.Services[3].Name)
+}
+
 func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	t.Helper()
 
@@ -549,6 +619,105 @@ func NewFakeClient(namespace string) (client.Client, error) {
 						APIVersion: serving.SchemeGroupVersion.String(),
 						Kind:       "Service",
 						Name:       "event-source-1",
+					},
+				},
+			},
+		},
+	)
+}
+
+func SortChannelFakeClient(namespace string) (client.Client, error) {
+	channelSourceURL1, err := apis.ParseURL("http://channel-source-1.host/")
+	if err != nil {
+		return nil, err
+	}
+	channelSourceURL2, err := apis.ParseURL("http://channel-source-2.host/")
+	if err != nil {
+		return nil, err
+	}
+	channelSourceURL3, err := apis.ParseURL("http://channel-source-3.host/")
+	if err != nil {
+		return nil, err
+	}
+	channelSourceURL4, err := apis.ParseURL("http://channel-source-4.host/")
+	if err != nil {
+		return nil, err
+	}
+
+	return test.NewFakeClient(
+		// Channels unsorted on purpose
+		&messaging.Channel{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Channel",
+				APIVersion: messaging.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      "channel-source-2",
+			},
+			Status: messaging.ChannelStatus{
+				ChannelableStatus: eventingduckv1.ChannelableStatus{
+					AddressStatus: duckv1.AddressStatus{
+						Address: &duckv1.Addressable{
+							URL: channelSourceURL2,
+						},
+					},
+				},
+			},
+		},
+		&messaging.Channel{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Channel",
+				APIVersion: messaging.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      "channel-source-4",
+			},
+			Status: messaging.ChannelStatus{
+				ChannelableStatus: eventingduckv1.ChannelableStatus{
+					AddressStatus: duckv1.AddressStatus{
+						Address: &duckv1.Addressable{
+							URL: channelSourceURL4,
+						},
+					},
+				},
+			},
+		},
+		&messaging.Channel{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Channel",
+				APIVersion: messaging.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      "channel-source-1",
+			},
+			Status: messaging.ChannelStatus{
+				ChannelableStatus: eventingduckv1.ChannelableStatus{
+					AddressStatus: duckv1.AddressStatus{
+						Address: &duckv1.Addressable{
+							URL: channelSourceURL1,
+						},
+					},
+				},
+			},
+		},
+		&messaging.Channel{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Channel",
+				APIVersion: messaging.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: namespace,
+				Name:      "channel-source-3",
+			},
+			Status: messaging.ChannelStatus{
+				ChannelableStatus: eventingduckv1.ChannelableStatus{
+					AddressStatus: duckv1.AddressStatus{
+						Address: &duckv1.Addressable{
+							URL: channelSourceURL3,
+						},
 					},
 				},
 			},

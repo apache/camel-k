@@ -90,6 +90,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			}
 
 			t.ChannelSources = items
+			sort.Strings(t.ChannelSources)
 		}
 		if len(t.ChannelSinks) == 0 {
 			items := make([]string, 0)
@@ -105,6 +106,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			}
 
 			t.ChannelSinks = items
+			sort.Strings(t.ChannelSinks)
 		}
 		if len(t.EndpointSources) == 0 {
 			items := make([]string, 0)
@@ -120,6 +122,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			}
 
 			t.EndpointSources = items
+			sort.Strings(t.EndpointSources)
 		}
 		if len(t.EndpointSinks) == 0 {
 			items := make([]string, 0)
@@ -135,6 +138,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			}
 
 			t.EndpointSinks = items
+			sort.Strings(t.EndpointSinks)
 		}
 		if len(t.EventSources) == 0 {
 			items := make([]string, 0)
@@ -150,6 +154,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			}
 
 			t.EventSources = items
+			sort.Strings(t.EventSources)
 		}
 		if len(t.EventSinks) == 0 {
 			items := make([]string, 0)
@@ -165,6 +170,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			}
 
 			t.EventSinks = items
+			sort.Strings(t.EventSinks)
 		}
 		if t.FilterSourceChannels == nil {
 			// Filtering is no longer used by default
