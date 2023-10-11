@@ -17,18 +17,17 @@
 
 - route:
     id: "yaml"
-    from: 
+    from:
       uri: "timer:tick"
       parameters:
         period: "60000"
       steps:
-        - set-header:
+        - setHeader:
             name: "m"
             constant: "string!"
-        - set-body:
+        - setBody:
             simple: "Magic${header.m}"
-        - to: 
+        - to:
             uri: "log:info"
             parameters:
               show-all: "false"
-            

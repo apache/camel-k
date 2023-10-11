@@ -20,10 +20,10 @@
     parameters:
       schedule: "* * * * ?"
     steps:
-      - set-header:
+      - setHeader:
           name: "m"
           constant: "string!"
-      - set-body:
+      - setBody:
           simple: "Magic${header.m}"
       - to:
           uri: "log:info"

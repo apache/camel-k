@@ -191,7 +191,7 @@ const yamlRestDSL = `
           simple: "${body.contains(\",\")}"
       - split:
           tokenize: ";"
-      - set-body:
+      - setBody:
           simple: "${body.toLowerCase()}"
       - to:
           uri: "log:out"
@@ -215,7 +215,7 @@ const yamlRestDSLWithRoute = `
             simple: "${body.contains(\",\")}"
         - split:
             tokenize: ";"
-        - set-body:
+        - setBody:
             simple: "${body.toLowerCase()}"
         - to:
             uri: "log:out"
@@ -244,7 +244,7 @@ const yamlFromDSL = `
     parameters:
       period: "5000"
     steps:
-      - set-body:
+      - setBody:
           constant: "Hello Yaml !!!"
       - transform:
           simple: "${body.toUpperCase()}"
@@ -259,7 +259,7 @@ const yamlFromDSLWithRoute = `
       parameters:
         period: "5000"
     steps:
-      - set-body:
+      - setBody:
           constant: "Hello Yaml !!!"
       - transform:
           simple: "${body.toUpperCase()}"
@@ -555,7 +555,7 @@ const yamlFromDSLWithPropertyPlaceholder = `
       parameters:
         period: "5000"
     steps:
-      - set-body:
+      - setBody:
           constant: "Hello Yaml !!!"
       - transform:
           simple: "${body.toUpperCase()}"
@@ -570,7 +570,7 @@ const yamlFromDSLWithPropertyPlaceholderScheme = `
       parameters:
         period: "5000"
     steps:
-      - set-body:
+      - setBody:
           constant: "Hello Yaml !!!"
       - transform:
           simple: "${body.toUpperCase()}"

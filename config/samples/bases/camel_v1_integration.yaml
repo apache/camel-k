@@ -26,6 +26,6 @@ spec:
       parameters:
         period: '1000'
       steps:
-      - set-body:
+      - setBody:
           constant: Hello from Camel K
       - to: log:info

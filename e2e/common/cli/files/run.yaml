@@ -20,6 +20,6 @@
     parameters:
       period: "5000"
     steps:
-      - set-body:
+      - setBody:
           simple: "Magic {{property:default}}"
       - to: "log:info"

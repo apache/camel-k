@@ -127,12 +127,12 @@ func createErrorProducerKamelet(ns string, name string) func() error {
 			"uri": "timer:tick",
 			"steps": []map[string]interface{}{
 				{
-					"set-body": map[string]interface{}{
+					"setBody": map[string]interface{}{
 						"constant": "{{message}}",
 					},
 				},
 				{
-					"set-body": map[string]interface{}{
+					"setBody": map[string]interface{}{
 						"simple": "${mandatoryBodyAs(Boolean)}",
 					},
 				},

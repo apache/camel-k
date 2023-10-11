@@ -15,17 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-- from: 
+- from:
     uri: "cron:tab"
     parameters:
       schedule: "0/1 * * * * ?"
     steps:
-      - set-header:
+      - setHeader:
           name: "m"
           constant: "string!"
-      - set-body:
+      - setBody:
           simple: "Magic${header.m}"
-      - to: 
+      - to:
           uri: "log:info"
           parameters:
             show-all: "false"

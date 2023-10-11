@@ -25,7 +25,7 @@ import (
 
 func TestParseGroovyFile(t *testing.T) {
 	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1   
+		//     camel-k: pippo=pluto     paperino ciao=1
 		// camel-k : ciao
 
 		from("timer:tick").log("Ciao")
@@ -41,7 +41,7 @@ func TestParseGroovyFile(t *testing.T) {
 
 func TestParseKotlinFile(t *testing.T) {
 	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1   
+		//     camel-k: pippo=pluto     paperino ciao=1
 		// camel-k : ciao
 
 		from("timer:tick").log("Ciao")
@@ -57,22 +57,22 @@ func TestParseKotlinFile(t *testing.T) {
 
 func TestParseJavaFile(t *testing.T) {
 	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1   
+		//     camel-k: pippo=pluto     paperino ciao=1
 		// camel-k : ciao
 
 		import org.apache.camel.builder.RouteBuilder;
-		
+
 		public class {{ .Name }} extends RouteBuilder {
 		  @Override
 		  public void configure() throws Exception {
-		
+
 			  // Write your routes here, for example:
 			  from("timer:java?period=1000")
 				.routeId("java")
 				.setBody()
 				  .simple("Hello Camel K from ${routeId}")
 				.to("log:info");
-		
+
 		  }
 		}
     `
@@ -87,8 +87,8 @@ func TestParseJavaFile(t *testing.T) {
 
 func TestParseJSFile(t *testing.T) {
 	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1   
-		// camel-k : ciao 
+		//     camel-k: pippo=pluto     paperino ciao=1
+		// camel-k : ciao
 		// Write your routes here, for example:
 		from('timer:js?period=1000')
 			.routeId('js')
@@ -107,8 +107,8 @@ func TestParseJSFile(t *testing.T) {
 
 func TestParseYAMLFile(t *testing.T) {
 	it := `
-		#     camel-k: pippo=pluto     paperino ciao=1   
-		### camel-k : ciao 
+		#     camel-k: pippo=pluto     paperino ciao=1
+		### camel-k : ciao
 
 		# Write your routes here, for example:
 		- from:
@@ -116,7 +116,7 @@ func TestParseYAMLFile(t *testing.T) {
 			parameters:
 			  period: "1000"
 			steps:
-			  - set-body:
+			  - setBody:
 				  constant: "Hello Camel K from yaml"
 			  - to: "log:info"
 
@@ -132,8 +132,8 @@ func TestParseYAMLFile(t *testing.T) {
 
 func TestParseXMLFile(t *testing.T) {
 	it := `
-		#     camel-k: pippo=pluto     paperino ciao=1   
-		### camel-k : ciao 
+		#     camel-k: pippo=pluto     paperino ciao=1
+		### camel-k : ciao
 
 		<?xml version="1.0" encoding="UTF-8"?>
 		<!--     camel-k: pippo=pluto     paperino ciao=1-->
@@ -145,7 +145,7 @@ func TestParseXMLFile(t *testing.T) {
 				xsi:schemaLocation="
 					http://camel.apache.org/schema/spring
 					https://camel.apache.org/schema/spring/camel-spring.xsd">
-		
+
 			<!-- Write your routes here, for example: -->
 			<route id="xml">
 				<from uri="timer:xml?period=1000"/>
@@ -154,7 +154,7 @@ func TestParseXMLFile(t *testing.T) {
 				</setBody>
 				<to uri="log:info"/>
 			</route>
-		
+
 		</routes>
 
 

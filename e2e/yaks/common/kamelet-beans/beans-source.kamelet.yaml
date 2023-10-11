@@ -32,6 +32,6 @@ spec:
     from:
       uri: timer:tick
       steps:
-        - set-body:
+        - setBody:
             simple: "Bean time is ${bean:{{myBean}}?method=getTime}!"
         - to: "kamelet:sink"
