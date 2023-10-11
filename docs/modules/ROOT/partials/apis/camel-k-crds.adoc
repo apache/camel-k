@@ -5789,6 +5789,13 @@ string
 
 The strategy to use, either `pod` or `routine` (default routine)
 
+|`incrementalImageBuild` +
+bool
+|
+
+
+Use the incremental image build option, to reuse existing containers (default `true`)
+
 |`orderStrategy` +
 string
 |

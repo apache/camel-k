@@ -6703,6 +6703,10 @@ spec:
                             description: Can be used to enable or disable a trait.
                               All traits share this common property.
                             type: boolean
+                          incrementalImageBuild:
+                            description: Use the incremental image build option, to
+                              reuse existing containers (default `true`)
+                            type: boolean
                           limitCPU:
                             description: 'When using `pod` strategy, the maximum amount
                               of CPU required by the pod builder. Deprecated: use

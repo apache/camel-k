@@ -245,6 +245,10 @@ traits:
   - name: strategy
     type: string
     description: The strategy to use, either `pod` or `routine` (default routine)
+  - name: incremental-image-build
+    type: bool
+    description: Use the incremental image build option, to reuse existing containers
+      (default `true`)
   - name: order-strategy
     type: string
     description: The build order strategy to use, either `dependencies`, `fifo` or

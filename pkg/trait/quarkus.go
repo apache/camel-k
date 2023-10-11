@@ -366,7 +366,11 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 		// Default, if nothing is specified
 		buildTask.Maven.Properties["quarkus.package.type"] = string(fastJarPackageType)
 		packageSteps = append(packageSteps, builder.Quarkus.ComputeQuarkusDependencies)
-		packageSteps = append(packageSteps, builder.Image.IncrementalImageContext)
+		if t.isIncrementalImageBuild(e) {
+			packageSteps = append(packageSteps, builder.Image.IncrementalImageContext)
+		} else {
+			packageSteps = append(packageSteps, builder.Image.StandardImageContext)
+		}
 		// Create the dockerfile, regardless it's later used or not by the publish strategy
 		packageSteps = append(packageSteps, builder.Image.JvmDockerfile)
 	}
@@ -394,6 +398,17 @@ func (t *quarkusTrait) isNativeKit(e *Environment) (bool, error) {
 	default:
 		return false, fmt.Errorf("kit %q has more than one package type", e.IntegrationKit.Name)
 	}
+}
+
+func (t *quarkusTrait) isIncrementalImageBuild(e *Environment) bool {
+	// We need to get this information from the builder trait
+	if trait := e.Catalog.GetTrait(builderTraitID); trait != nil {
+		builder, ok := trait.(*builderTrait)
+		return ok && pointer.BoolDeref(builder.IncrementalImageBuild, true)
+	}
+
+	// Default always to true for performance reasons
+	return true
 }
 
 func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {

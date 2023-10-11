@@ -7,3 +7,5 @@ In order to reduce the time to build and execute an application we adopt various
 If you're familiar with Camel K architecture, you know that an Integration uses an IntegrationKit, which is, a reusable resource containing all the dependencies and capabilities required to run a certain "class" of Camel applications. The IntegrationKit is bound to a container image stored in a registry.
 
 When the IntegrationKit is created, it uses as a base image a JDK based container and add certain applications layers on top of it. However, instead of using always the same root base image, we check if an IntegrationKit with a subset of dependencies already exists, sparing quite some time on the generation of the new container image.
+
+NOTE: you may disable the incremental image feature and always build and package your Camel application from scratch using builder trait option `-t builder.incremental-image-build=false`.

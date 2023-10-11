@@ -27,6 +27,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
@@ -95,8 +96,9 @@ func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 	trait, _ := newQuarkusTrait().(*quarkusTrait)
 	trait.Enabled = pointer.Bool(true)
-
+	client, _ := test.NewFakeClient()
 	environment := &Environment{
+		Catalog:      NewCatalog(client),
 		CamelCatalog: &camel.RuntimeCatalog{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
