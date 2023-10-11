@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -157,9 +156,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				},
 				Traits: v1.IntegrationKitTraits{
 					Builder: &traitv1.BuilderTrait{
-						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(false),
-						},
+						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 					},
 				},
 			},
@@ -188,9 +185,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				},
 				Traits: v1.IntegrationKitTraits{
 					Builder: &traitv1.BuilderTrait{
-						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
-						},
+						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 						Properties: []string{
 							"build-key1=build-value1",
 						},
@@ -221,9 +216,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
 				Builder: &traitv1.BuilderTrait{
-					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
-					},
+					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 					Properties: []string{
 						"build-key1=build-value1",
 					},
@@ -257,9 +250,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
 				Builder: &traitv1.BuilderTrait{
-					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
-					},
+					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 				},
 			},
 		},
@@ -297,9 +288,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 		Spec: v1.IntegrationSpec{
 			Traits: v1.Traits{
 				Builder: &traitv1.BuilderTrait{
-					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
-					},
+					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 					Properties: []string{
 						"build-key1=build-value1",
 					},
@@ -320,9 +309,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 		Spec: v1.IntegrationKitSpec{
 			Traits: v1.IntegrationKitTraits{
 				Builder: &traitv1.BuilderTrait{
-					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
-					},
+					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 					Properties: []string{
 						"build-key1=build-value1",
 					},

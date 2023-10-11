@@ -5752,7 +5752,7 @@ integration pod(s) should not be co-located with.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-BuilderTrait is internally used to determine the best strategy to
+The builder trait is internally used to determine the best strategy to
 build and configure IntegrationKits.
 
 
@@ -5761,9 +5761,9 @@ build and configure IntegrationKits.
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -5898,9 +5898,9 @@ The Camel trait can be used to configure versions of Apache Camel K runtime and 
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -5927,8 +5927,10 @@ A list of properties to be provided to the Integration runtime
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1_trait_PlatformBaseTrait, PlatformBaseTrait>>
 * <<#_camel_apache_org_v1_trait_Trait, Trait>>
 
+Configuration defines the trait structure
 Deprecated: for backward compatibility.
 
 [cols="2,2a",options="header"]
@@ -5964,9 +5966,9 @@ nolint: tagliatelle
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -6195,9 +6197,9 @@ integration that the user wants to run.
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -6221,9 +6223,9 @@ to explicitly select the underlying controller that will manage the integration 
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -6262,9 +6264,9 @@ the integration will run in the cluster.
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -6336,9 +6338,9 @@ such as `NAMESPACE`, `POD_NAME` and others.
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -6384,9 +6386,9 @@ The error-handler is a platform trait used to inject Error Handler source into t
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -6729,9 +6731,9 @@ The JVM trait is used to configure the JVM that runs the integration.
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -6909,9 +6911,9 @@ The kamelets trait is a platform trait used to inject Kamelets into the integrat
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -7243,9 +7245,9 @@ nolint: tagliatelle
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -7302,9 +7304,9 @@ The OpenAPI DSL trait is internally used to allow creating integrations from a O
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -7402,6 +7404,51 @@ Only one of `max-unavailable` and `min-available` can be specified.
 
 |===
 
+[#_camel_apache_org_v1_trait_PlatformBaseTrait]
+=== PlatformBaseTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_trait_BuilderTrait, BuilderTrait>>
+* <<#_camel_apache_org_v1_trait_CamelTrait, CamelTrait>>
+* <<#_camel_apache_org_v1_trait_ContainerTrait, ContainerTrait>>
+* <<#_camel_apache_org_v1_trait_DependenciesTrait, DependenciesTrait>>
+* <<#_camel_apache_org_v1_trait_DeployerTrait, DeployerTrait>>
+* <<#_camel_apache_org_v1_trait_DeploymentTrait, DeploymentTrait>>
+* <<#_camel_apache_org_v1_trait_EnvironmentTrait, EnvironmentTrait>>
+* <<#_camel_apache_org_v1_trait_ErrorHandlerTrait, ErrorHandlerTrait>>
+* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
+* <<#_camel_apache_org_v1_trait_KameletsTrait, KameletsTrait>>
+* <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
+* <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
+* <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
+* <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
+
+PlatformBaseTrait is the base type for platform traits. It cannot be disabled by the user.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`enabled` +
+bool
+|
+
+
+Deprecated: no longer in use.
+
+|`configuration` +
+*xref:#_camel_apache_org_v1_trait_Configuration[Configuration]*
+|
+
+
+Legacy trait configuration parameters.
+Deprecated: for backward compatibility.
+
+
+|===
+
 [#_camel_apache_org_v1_trait_PlatformTrait]
 === PlatformTrait
 
@@ -7421,9 +7468,9 @@ This feature is especially useful in contexts where there's no need to provide a
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -7630,9 +7677,9 @@ Compiling to a native executable, i.e. when using `build-mode=native`, requires 
 |Field
 |Description
 
-|`Trait` +
-*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
-|(Members of `Trait` are embedded into this type.)
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
 
 
 
@@ -7683,6 +7730,7 @@ The image containing the tooling required for a native build (by default it will
 
 * <<#_camel_apache_org_v1_trait_Configuration, Configuration>>
 
+RawMessage defines a binary type for configuration
 Deprecated: for backward compatibility.
 
 
@@ -8001,41 +8049,27 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 *Appears on:*
 
 * <<#_camel_apache_org_v1_trait_AffinityTrait, AffinityTrait>>
-* <<#_camel_apache_org_v1_trait_BuilderTrait, BuilderTrait>>
-* <<#_camel_apache_org_v1_trait_CamelTrait, CamelTrait>>
-* <<#_camel_apache_org_v1_trait_ContainerTrait, ContainerTrait>>
 * <<#_camel_apache_org_v1_trait_CronTrait, CronTrait>>
-* <<#_camel_apache_org_v1_trait_DependenciesTrait, DependenciesTrait>>
-* <<#_camel_apache_org_v1_trait_DeployerTrait, DeployerTrait>>
-* <<#_camel_apache_org_v1_trait_DeploymentTrait, DeploymentTrait>>
-* <<#_camel_apache_org_v1_trait_EnvironmentTrait, EnvironmentTrait>>
-* <<#_camel_apache_org_v1_trait_ErrorHandlerTrait, ErrorHandlerTrait>>
 * <<#_camel_apache_org_v1_trait_GCTrait, GCTrait>>
 * <<#_camel_apache_org_v1_trait_HealthTrait, HealthTrait>>
 * <<#_camel_apache_org_v1_trait_IngressTrait, IngressTrait>>
 * <<#_camel_apache_org_v1_trait_IstioTrait, IstioTrait>>
-* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
 * <<#_camel_apache_org_v1_trait_JolokiaTrait, JolokiaTrait>>
-* <<#_camel_apache_org_v1_trait_KameletsTrait, KameletsTrait>>
 * <<#_camel_apache_org_v1_trait_KnativeServiceTrait, KnativeServiceTrait>>
 * <<#_camel_apache_org_v1_trait_KnativeTrait, KnativeTrait>>
 * <<#_camel_apache_org_v1_trait_LoggingTrait, LoggingTrait>>
-* <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
-* <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
 * <<#_camel_apache_org_v1_trait_OwnerTrait, OwnerTrait>>
 * <<#_camel_apache_org_v1_trait_PDBTrait, PDBTrait>>
-* <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
 * <<#_camel_apache_org_v1_trait_PodTrait, PodTrait>>
 * <<#_camel_apache_org_v1_trait_PrometheusTrait, PrometheusTrait>>
 * <<#_camel_apache_org_v1_trait_PullSecretTrait, PullSecretTrait>>
-* <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
 * <<#_camel_apache_org_v1_trait_RegistryTrait, RegistryTrait>>
 * <<#_camel_apache_org_v1_trait_RouteTrait, RouteTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceBindingTrait, ServiceBindingTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
 * <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
 
-Base type for all traits.
+Trait is the base type for all traits. It could be disabled by the user
 
 [cols="2,2a",options="header"]
 |===

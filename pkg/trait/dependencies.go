@@ -18,8 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"k8s.io/utils/pointer"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
@@ -30,18 +28,18 @@ import (
 )
 
 type dependenciesTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.DependenciesTrait `property:",squash"`
 }
 
 func newDependenciesTrait() Trait {
 	return &dependenciesTrait{
-		BaseTrait: NewBaseTrait("dependencies", 500),
+		BasePlatformTrait: NewBasePlatformTrait("dependencies", 500),
 	}
 }
 
 func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil
 	}
 
@@ -96,9 +94,4 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	})
 
 	return nil
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *dependenciesTrait) IsPlatformTrait() bool {
-	return true
 }

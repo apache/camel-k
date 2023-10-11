@@ -30,7 +30,7 @@ import (
 )
 
 type environmentTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.EnvironmentTrait `property:",squash"`
 }
 
@@ -54,7 +54,7 @@ const (
 
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
-		BaseTrait: NewBaseTrait("environment", 800),
+		BasePlatformTrait: NewBasePlatformTrait("environment", 800),
 		EnvironmentTrait: traitv1.EnvironmentTrait{
 			ContainerMeta: pointer.Bool(true),
 		},
@@ -62,7 +62,7 @@ func newEnvironmentTrait() Trait {
 }
 
 func (t *environmentTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil
 	}
 
@@ -104,9 +104,4 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	}
 
 	return nil
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *environmentTrait) IsPlatformTrait() bool {
-	return true
 }

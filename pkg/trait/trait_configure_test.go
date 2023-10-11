@@ -215,12 +215,10 @@ func TestTraitSplitConfiguration(t *testing.T) {
 
 func TestTraitDecode(t *testing.T) {
 	trait := traitToMap(t, traitv1.ContainerTrait{
-		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(false),
-		},
-		Name: "test-container",
-		Port: 7071,
-		Auto: pointer.Bool(false),
+		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
+		Name:              "test-container",
+		Port:              7071,
+		Auto:              pointer.Bool(false),
 	})
 
 	target, ok := newContainerTrait().(*containerTrait)
@@ -228,7 +226,6 @@ func TestTraitDecode(t *testing.T) {
 	err := decodeTrait(trait, target)
 	require.NoError(t, err)
 
-	assert.Equal(t, false, pointer.BoolDeref(target.Enabled, true))
 	assert.Equal(t, "test-container", target.Name)
 	assert.Equal(t, 7071, target.Port)
 	assert.Equal(t, false, pointer.BoolDeref(target.Auto, true))

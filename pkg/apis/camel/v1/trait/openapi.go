@@ -21,7 +21,7 @@ package trait
 //
 // +camel-k:trait=openapi.
 type OpenAPITrait struct {
-	Trait `property:",squash" json:",inline"`
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// The configmaps holding the spec of the OpenAPI
 	Configmaps []string `property:"configmaps" json:"configmaps,omitempty"`
 }

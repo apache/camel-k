@@ -36,7 +36,7 @@ import (
 )
 
 type deployerTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.DeployerTrait `property:",squash"`
 }
 
@@ -46,12 +46,12 @@ var hasServerSideApply = true
 
 func newDeployerTrait() Trait {
 	return &deployerTrait{
-		BaseTrait: NewBaseTrait("deployer", 900),
+		BasePlatformTrait: NewBasePlatformTrait("deployer", 900),
 	}
 }
 
 func (t *deployerTrait) Configure(e *Environment) (bool, error) {
-	return e.Integration != nil && pointer.BoolDeref(t.Enabled, true), nil
+	return e.Integration != nil, nil
 }
 
 func (t *deployerTrait) Apply(e *Environment) error {
@@ -156,9 +156,6 @@ func isIncompatibleServerError(err error) bool {
 }
 
 func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return nil, nil
-	}
 	if t.Kind != "" {
 		strategy := ControllerStrategy(t.Kind)
 		return &strategy, nil
@@ -168,11 +165,6 @@ func (t *deployerTrait) SelectControllerStrategy(e *Environment) (*ControllerStr
 
 func (t *deployerTrait) ControllerStrategySelectorOrder() int {
 	return 0
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *deployerTrait) IsPlatformTrait() bool {
-	return true
 }
 
 // RequiresIntegrationPlatform overrides base class method.

@@ -51,13 +51,13 @@ const (
 )
 
 type containerTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.ContainerTrait `property:",squash"`
 }
 
 func newContainerTrait() Trait {
 	return &containerTrait{
-		BaseTrait: NewBaseTrait(containerTraitID, 1600),
+		BasePlatformTrait: NewBasePlatformTrait(containerTraitID, 1600),
 		ContainerTrait: traitv1.ContainerTrait{
 			Port:            defaultContainerPort,
 			ServicePort:     defaultServicePort,
@@ -68,7 +68,7 @@ func newContainerTrait() Trait {
 }
 
 func (t *containerTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil
 	}
 
@@ -120,11 +120,6 @@ func (t *containerTrait) Apply(e *Environment) error {
 		return err
 	}
 	return t.configureContainer(e)
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *containerTrait) IsPlatformTrait() bool {
-	return true
 }
 
 func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {

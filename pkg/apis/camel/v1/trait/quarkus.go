@@ -27,7 +27,7 @@ package trait
 //
 // +camel-k:trait=quarkus.
 type QuarkusTrait struct {
-	Trait `property:",squash" json:",inline"`
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).
 	// In case both `fast-jar` and `native` are specified, two `IntegrationKit` resources are created,
 	// with the native kit having precedence over the `fast-jar` one once ready.

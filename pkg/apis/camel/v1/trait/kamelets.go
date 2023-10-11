@@ -21,7 +21,7 @@ package trait
 //
 // +camel-k:trait=kamelets.
 type KameletsTrait struct {
-	Trait `property:",squash" json:",inline"`
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// Automatically inject all referenced Kamelets and their default configuration (enabled by default)
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// Comma separated list of Kamelet names to load into the current integration

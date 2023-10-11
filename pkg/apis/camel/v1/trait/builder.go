@@ -17,12 +17,12 @@ limitations under the License.
 
 package trait
 
-// BuilderTrait is internally used to determine the best strategy to
+// The builder trait is internally used to determine the best strategy to
 // build and configure IntegrationKits.
 //
 // +camel-k:trait=builder.
 type BuilderTrait struct {
-	Trait `property:",squash" json:",inline"`
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
 	Verbose *bool `property:"verbose" json:"verbose,omitempty"`
 	// A list of properties to be provided to the build task

@@ -228,13 +228,12 @@ traits:
   - Kubernetes
   - Knative
   - OpenShift
-  description: BuilderTrait is internally used to determine the best strategy to build
-    and configure IntegrationKits.
+  description: The builder trait is internally used to determine the best strategy
+    to build and configure IntegrationKits.
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: verbose
     type: bool
     description: Enable verbose logging on build components that support it (e.g.
@@ -308,8 +307,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: runtime-version
     type: string
     description: The camel-k-runtime version to use for the integration. It overrides
@@ -329,8 +327,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: auto
     type: bool
     description: To automatically enable the trait
@@ -463,8 +460,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: kind
     type: string
     description: Allows to explicitly select the desired deployment kind between `deployment`,
@@ -486,8 +482,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: progress-deadline-seconds
     type: int32
     description: The maximum time in seconds for the deployment to make progress before
@@ -519,8 +514,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: container-meta
     type: bool
     description: Enables injection of `NAMESPACE` and `POD_NAME` environment variables
@@ -545,8 +539,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: ref
     type: string
     description: The error handler ref name provided or found in application properties
@@ -873,8 +866,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: debug
     type: bool
     description: Activates remote debugging, so that a debugger can be attached to
@@ -907,8 +899,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: auto
     type: bool
     description: Automatically inject all referenced Kamelets and their default configuration
@@ -1172,8 +1163,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: configs
     type: '[]string'
     description: 'A list of configuration pointing to configmap/secret. The configuration
@@ -1208,8 +1198,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: configmaps
     type: '[]string'
     description: The configmaps holding the spec of the OpenAPI
@@ -1271,8 +1260,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: create-default
     type: bool
     description: To create a default (empty) platform when the platform is missing.
@@ -1368,8 +1356,7 @@ traits:
   properties:
   - name: enabled
     type: bool
-    description: Can be used to enable or disable a trait. All traits share this common
-      property.
+    description: 'Deprecated: no longer in use.'
   - name: package-type
     type: '[]github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait.QuarkusPackageType'
     description: 'The Quarkus package types, `fast-jar` or `native` (default `fast-jar`).

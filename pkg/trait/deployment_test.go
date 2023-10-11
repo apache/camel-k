@@ -25,26 +25,12 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
-
-func TestConfigureDisabledDeploymentTraitDoesNotSucceed(t *testing.T) {
-	deploymentTrait, environment := createNominalDeploymentTest()
-	deploymentTrait.Enabled = pointer.Bool(false)
-
-	configured, err := deploymentTrait.Configure(environment)
-
-	assert.Nil(t, err)
-	assert.False(t, configured)
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, "explicitly disabled", conditions[0].Message)
-}
 
 func TestConfigureDeploymentTraitWhileIntegrationIsRunningDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
@@ -238,7 +224,6 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
 	trait, _ := newDeploymentTrait().(*deploymentTrait)
-	trait.Enabled = pointer.Bool(true)
 	trait.Client, _ = test.NewFakeClient(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "integration-name",

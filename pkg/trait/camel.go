@@ -28,7 +28,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -40,19 +39,14 @@ import (
 )
 
 type camelTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.CamelTrait `property:",squash"`
 }
 
 func newCamelTrait() Trait {
 	return &camelTrait{
-		BaseTrait: NewBaseTrait("camel", 200),
+		BasePlatformTrait: NewBasePlatformTrait("camel", 200),
 	}
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *camelTrait) IsPlatformTrait() bool {
-	return true
 }
 
 // InfluencesKit overrides base class method.
@@ -66,10 +60,6 @@ func (t *camelTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, errors.New("trait camel cannot be disabled")
-	}
-
 	if t.RuntimeVersion == "" {
 		t.RuntimeVersion = determineRuntimeVersion(e)
 	}
