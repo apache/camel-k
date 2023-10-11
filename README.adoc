@@ -11,7 +11,7 @@ image:https://github.com/apache/camel-k/workflows/kubernetes/badge.svg["Kubernet
 image:https://github.com/apache/camel-k/workflows/knative/badge.svg["Knative", link="https://github.com/apache/camel-k/actions/workflows/knative.yml"]
 image:https://github.com/apache/camel-k/actions/workflows/nightly-release.yml/badge.svg["Nightly releases", link="https://github.com/apache/camel-k/actions/workflows/nightly-release.yml"]
 image:https://github.com/apache/camel-k/actions/workflows/nightly-native-test.yml/badge.svg["Quarkus native", link="https://github.com/apache/camel-k/actions/workflows/nightly-native-test.yml"]
-image:https://img.shields.io/badge/Coverage-33.5%25-yellow.svg["Go coverage", link="https://github.com/apache/camel-k/actions/workflows/nightly-coverage.yml"]
+image:https://img.shields.io/badge/Coverage-33.6%25-yellow.svg["Go coverage", link="https://github.com/apache/camel-k/actions/workflows/nightly-coverage.yml"]
 image:https://img.shields.io/badge/zulip-join_chat-brightgreen.svg["Chat on Zulip", link="https://camel.zulipchat.com"]
 
 Apache Camel K is a lightweight integration framework built from **Apache Camel** that runs natively on Kubernetes and is specifically designed for serverless and microservice architectures. Users of `Camel K` can instantly run integration code written in Camel DSL on their preferred **Cloud** provider.
