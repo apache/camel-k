@@ -33,8 +33,11 @@ import (
 )
 
 const (
-	ContextDir      = "context"
-	DeploymentDir   = "/deployments"
+	// ContextDir is the directory used to package the container.
+	ContextDir = "context"
+	// DeploymentDir is the directory used in the runtime application to deploy the artifacts.
+	DeploymentDir = "/deployments"
+	// DependenciesDir is the directory used to store required dependencies.
 	DependenciesDir = "dependencies"
 )
 
@@ -136,9 +139,6 @@ func incrementalImageContext(ctx *builderContext) error {
 					ctx.SelectedArtifacts = append(ctx.SelectedArtifacts, entry)
 				}
 			}
-		} else if ctx.BaseImage == "" {
-			// TODO: transient workaround to be removed in 1.8.x
-			ctx.BaseImage = defaults.BaseImage()
 		}
 
 		return nil
