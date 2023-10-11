@@ -137,3 +137,51 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
+
+func TestRunIncrementalBuildOff(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		operatorID := "camel-k-standard-build"
+		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+
+		name := "java"
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+		).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		integrationKitName := IntegrationKit(ns, name)()
+		Eventually(Kit(ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+
+		t.Run("Don't reuse previous kit", func(t *testing.T) {
+			nameClone := "java-clone"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+				"--name", nameClone,
+				"-t", "builder.incremental-image-build=false",
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, nameClone), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, nameClone, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, nameClone), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			integrationCloneKitName := IntegrationKit(ns, nameClone)()
+			Eventually(Kit(ns, integrationCloneKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		})
+
+		t.Run("Don't create incremental kit", func(t *testing.T) {
+			// Another integration that should be built on top of the previous IntegrationKit
+			// just add a new random dependency
+			nameIncremental := "java-incremental"
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+				"--name", nameIncremental,
+				"-d", "camel:zipfile",
+				"-t", "builder.incremental-image-build=false",
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, nameIncremental), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, nameIncremental, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, nameIncremental), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			integrationIncrementalKitName := IntegrationKit(ns, nameIncremental)()
+			Eventually(Kit(ns, integrationIncrementalKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}

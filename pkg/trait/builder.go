@@ -34,6 +34,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
 
+const (
+	builderTraitID = "builder"
+)
+
 var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
 
 type builderTrait struct {
@@ -43,7 +47,7 @@ type builderTrait struct {
 
 func newBuilderTrait() Trait {
 	return &builderTrait{
-		BaseTrait: NewBaseTrait("builder", 600),
+		BaseTrait: NewBaseTrait(builderTraitID, 600),
 	}
 }
 
