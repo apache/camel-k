@@ -41,13 +41,13 @@ import (
 )
 
 type jvmTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.JVMTrait `property:",squash"`
 }
 
 func newJvmTrait() Trait {
 	return &jvmTrait{
-		BaseTrait: NewBaseTrait("jvm", 2000),
+		BasePlatformTrait: NewBasePlatformTrait("jvm", 2000),
 		JVMTrait: traitv1.JVMTrait{
 			DebugAddress: "*:5005",
 			PrintCommand: pointer.Bool(true),
@@ -56,17 +56,13 @@ func newJvmTrait() Trait {
 }
 
 func (t *jvmTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
-	}
-
 	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) || !e.IntegrationInRunningPhases() {
 		return false, nil
 	}
 
 	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
 		// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
-		if quarkus, ok := trait.(*quarkusTrait); ok && pointer.BoolDeref(quarkus.Enabled, true) && quarkus.isNativeIntegration(e) {
+		if quarkus, ok := trait.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
 			return false, nil
 		}
 	}
@@ -250,9 +246,4 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	container.WorkingDir = builder.DeploymentDir
 
 	return nil
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *jvmTrait) IsPlatformTrait() bool {
-	return true
 }

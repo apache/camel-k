@@ -173,7 +173,7 @@ func writeDescription(t *types.Type, traitID string, content *[]string) {
 	profiles := strings.Join(determineProfiles(traitID), ", ")
 	res = append(res, "", fmt.Sprintf("This trait is available in the following profiles: **%s**.", profiles))
 	if isPlatformTrait(traitID) {
-		res = append(res, "", fmt.Sprintf("WARNING: The %s trait is a *platform trait*: disabling it may compromise the platform functionality.", traitID))
+		res = append(res, "", fmt.Sprintf("NOTE: The %s trait is a *platform trait* and cannot be disabled by the user.", traitID))
 	}
 	res = append(res, "", adocDescriptionMarkerEnd)
 	res = append(res, post...)

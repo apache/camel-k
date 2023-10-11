@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -32,7 +31,7 @@ import (
 )
 
 type deploymentTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.DeploymentTrait `property:",squash"`
 }
 
@@ -40,23 +39,12 @@ var _ ControllerStrategySelector = &deploymentTrait{}
 
 func newDeploymentTrait() Trait {
 	return &deploymentTrait{
-		BaseTrait: NewBaseTrait("deployment", 1100),
+		BasePlatformTrait: NewBasePlatformTrait("deployment", 1100),
 	}
 }
 
 func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
-
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
-	}
-
-	if !pointer.BoolDeref(t.Enabled, true) {
-		e.Integration.Status.SetCondition(
-			v1.IntegrationConditionDeploymentAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionDeploymentAvailableReason,
-			"explicitly disabled",
-		)
 		return false, nil
 	}
 
@@ -91,9 +79,6 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
 }
 
 func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return nil, nil
-	}
 	deploymentStrategy := ControllerStrategyDeployment
 	return &deploymentStrategy, nil
 }
@@ -114,11 +99,6 @@ func (t *deploymentTrait) Apply(e *Environment) error {
 	)
 
 	return nil
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *deploymentTrait) IsPlatformTrait() bool {
-	return true
 }
 
 func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {

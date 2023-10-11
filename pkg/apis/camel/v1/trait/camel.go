@@ -21,7 +21,7 @@ package trait
 //
 // +camel-k:trait=camel.
 type CamelTrait struct {
-	Trait `property:",squash" json:",inline"`
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
 	RuntimeVersion string `property:"runtime-version" json:"runtimeVersion,omitempty"`
 	// A list of properties to be provided to the Integration runtime

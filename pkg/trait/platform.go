@@ -33,18 +33,18 @@ import (
 )
 
 type platformTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.PlatformTrait `property:",squash"`
 }
 
 func newPlatformTrait() Trait {
 	return &platformTrait{
-		BaseTrait: NewBaseTrait("platform", 100),
+		BasePlatformTrait: NewBasePlatformTrait("platform", 100),
 	}
 }
 
 func (t *platformTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil
 	}
 
@@ -150,11 +150,6 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 	}
 
 	return pl, err
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *platformTrait) IsPlatformTrait() bool {
-	return true
 }
 
 // RequiresIntegrationPlatform overrides base class method.

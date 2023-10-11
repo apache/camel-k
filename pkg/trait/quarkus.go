@@ -54,7 +54,7 @@ var kitPriority = map[quarkusPackageType]string{
 }
 
 type quarkusTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.QuarkusTrait `property:",squash"`
 }
 type languageSettings struct {
@@ -101,13 +101,8 @@ func getLegacyLanguageSettings(language v1.Language) languageSettings {
 
 func newQuarkusTrait() Trait {
 	return &quarkusTrait{
-		BaseTrait: NewBaseTrait(quarkusTraitID, 1700),
+		BasePlatformTrait: NewBasePlatformTrait(quarkusTraitID, 1700),
 	}
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *quarkusTrait) IsPlatformTrait() bool {
-	return true
 }
 
 // InfluencesKit overrides base class method.
@@ -125,10 +120,6 @@ var _ ComparableTrait = &quarkusTrait{}
 func (t *quarkusTrait) Matches(trait Trait) bool {
 	qt, ok := trait.(*quarkusTrait)
 	if !ok {
-		return false
-	}
-
-	if pointer.BoolDeref(t.Enabled, true) && !pointer.BoolDeref(qt.Enabled, true) {
 		return false
 	}
 
@@ -150,10 +141,6 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
-	}
-
 	t.adaptDeprecatedFields()
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||

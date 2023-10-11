@@ -23,8 +23,6 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"k8s.io/utils/pointer"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
@@ -32,24 +30,19 @@ import (
 )
 
 type errorHandlerTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.ErrorHandlerTrait `property:",squash"`
 }
 
 func newErrorHandlerTrait() Trait {
 	return &errorHandlerTrait{
 		// NOTE: Must run before dependency trait
-		BaseTrait: NewBaseTrait("error-handler", 470),
+		BasePlatformTrait: NewBasePlatformTrait("error-handler", 470),
 	}
 }
 
-// IsPlatformTrait overrides base class method.
-func (t *errorHandlerTrait) IsPlatformTrait() bool {
-	return true
-}
-
 func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil
 	}
 

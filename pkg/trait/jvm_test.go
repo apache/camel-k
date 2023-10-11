@@ -72,15 +72,6 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T)
 	assert.False(t, configured)
 }
 
-func TestConfigureJvmDisabledTraitDoesNotSucceed(t *testing.T) {
-	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Enabled = pointer.Bool(false)
-
-	configured, err := trait.Configure(environment)
-	assert.Nil(t, err)
-	assert.False(t, configured)
-}
-
 func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 
@@ -262,11 +253,8 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 
 func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
-
 	client, _ := test.NewFakeClient()
-
 	trait, _ := newJvmTrait().(*jvmTrait)
-	trait.Enabled = pointer.Bool(true)
 	trait.PrintCommand = pointer.Bool(false)
 	trait.Client = client
 

@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -41,19 +40,14 @@ const (
 var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
 
 type builderTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.BuilderTrait `property:",squash"`
 }
 
 func newBuilderTrait() Trait {
 	return &builderTrait{
-		BaseTrait: NewBaseTrait(builderTraitID, 600),
+		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
 	}
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *builderTrait) IsPlatformTrait() bool {
-	return true
 }
 
 // InfluencesKit overrides base class method.
@@ -67,7 +61,7 @@ func (t *builderTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, error) {
-	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.IntegrationKit == nil {
 		return false, nil
 	}
 
@@ -81,7 +75,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 			if err != nil {
 				return false, err
 			}
-			if ok && pointer.BoolDeref(quarkus.Enabled, true) && (isNativeIntegration || isNativeKit) {
+			if ok && (isNativeIntegration || isNativeKit) {
 				// TODO expect maven repository in local repo (need to change builder pod accordingly!)
 				command := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).BuildCommands()
 				nativeBuilderImage := quarkus.NativeBuilderImage

@@ -30,7 +30,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -46,23 +45,18 @@ import (
 )
 
 type openAPITrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.OpenAPITrait `property:",squash"`
 }
 
 func newOpenAPITrait() Trait {
 	return &openAPITrait{
-		BaseTrait: NewBaseTrait("openapi", 300),
+		BasePlatformTrait: NewBasePlatformTrait("openapi", 300),
 	}
 }
 
-// IsPlatformTrait overrides base class method.
-func (t *openAPITrait) IsPlatformTrait() bool {
-	return true
-}
-
 func (t *openAPITrait) Configure(e *Environment) (bool, error) {
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || !pointer.BoolDeref(t.Enabled, true) {
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		return false, nil
 	}
 

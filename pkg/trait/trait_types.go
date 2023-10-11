@@ -117,6 +117,16 @@ func NewBaseTrait(id string, order int) BaseTrait {
 	}
 }
 
+func NewBasePlatformTrait(id string, order int) BasePlatformTrait {
+	return BasePlatformTrait{
+		BaseTrait{
+			TraitID:        ID(id),
+			ExecutionOrder: order,
+			L:              log.Log.WithName("traits").WithValues("trait", id),
+		},
+	}
+}
+
 // BaseTrait is the root trait with noop implementations for hooks.
 type BaseTrait struct {
 	TraitID        ID            `json:"-"`
@@ -165,6 +175,16 @@ func (trait *BaseTrait) IsAllowedInProfile(v1.TraitProfile) bool {
 // Order contains the order value provided during initialization.
 func (trait *BaseTrait) Order() int {
 	return trait.ExecutionOrder
+}
+
+// BasePlatformTrait is the root for platform traits with noop implementations for hooks.
+type BasePlatformTrait struct {
+	BaseTrait
+}
+
+// IsPlatformTrait marks all fundamental traits that allow the platform to work.
+func (trait *BasePlatformTrait) IsPlatformTrait() bool {
+	return true
 }
 
 // ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.

@@ -503,8 +503,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       incrementalImageBuild:
                         description: Use the incremental image build option, to reuse
@@ -600,8 +599,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       properties:
                         description: A list of properties to be provided to the Integration
@@ -627,8 +625,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       expose:
                         description: Can be used to enable/disable exposure via kubernetes
@@ -758,8 +755,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                     type: object
                   deployer:
@@ -771,8 +767,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       kind:
                         description: Allows to explicitly select the desired deployment
@@ -799,8 +794,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       progressDeadlineSeconds:
                         description: The maximum time in seconds for the deployment
@@ -844,8 +838,7 @@ spec:
                           environment variables (default `true`)
                         type: boolean
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       httpProxy:
                         description: Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and
@@ -869,8 +862,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       ref:
                         description: The error handler ref name provided or found
@@ -1165,8 +1157,7 @@ spec:
                           main class is loaded
                         type: boolean
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       options:
                         description: A list of JVM options
@@ -1191,8 +1182,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       list:
                         description: Comma separated list of Kamelet names to load
@@ -1425,8 +1415,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       hotReload:
                         description: Enable "hot reload" when a secret/configmap mounted
@@ -1465,8 +1454,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                     type: object
                   owner:
@@ -1536,8 +1524,7 @@ spec:
                           platform is missing.
                         type: boolean
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       global:
                         description: Indicates if the platform should be created globally
@@ -1629,8 +1616,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       nativeBaseImage:
                         description: The base image to use when running a native build
@@ -2329,8 +2315,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       incrementalImageBuild:
                         description: Use the incremental image build option, to reuse
@@ -2426,8 +2411,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       properties:
                         description: A list of properties to be provided to the Integration
@@ -2453,8 +2437,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       expose:
                         description: Can be used to enable/disable exposure via kubernetes
@@ -2584,8 +2567,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                     type: object
                   deployer:
@@ -2597,8 +2579,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       kind:
                         description: Allows to explicitly select the desired deployment
@@ -2625,8 +2606,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       progressDeadlineSeconds:
                         description: The maximum time in seconds for the deployment
@@ -2670,8 +2650,7 @@ spec:
                           environment variables (default `true`)
                         type: boolean
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       httpProxy:
                         description: Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and
@@ -2695,8 +2674,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       ref:
                         description: The error handler ref name provided or found
@@ -2991,8 +2969,7 @@ spec:
                           main class is loaded
                         type: boolean
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       options:
                         description: A list of JVM options
@@ -3017,8 +2994,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       list:
                         description: Comma separated list of Kamelet names to load
@@ -3251,8 +3227,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       hotReload:
                         description: Enable "hot reload" when a secret/configmap mounted
@@ -3291,8 +3266,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                     type: object
                   owner:
@@ -3362,8 +3336,7 @@ spec:
                           platform is missing.
                         type: boolean
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       global:
                         description: Indicates if the platform should be created globally
@@ -3455,8 +3428,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: Can be used to enable or disable a trait. All
-                          traits share this common property.
+                        description: 'Deprecated: no longer in use.'
                         type: boolean
                       nativeBaseImage:
                         description: The base image to use when running a native build

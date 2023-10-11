@@ -25,7 +25,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -36,19 +35,19 @@ import (
 )
 
 type mountTrait struct {
-	BaseTrait
+	BasePlatformTrait
 	traitv1.MountTrait `property:",squash"`
 }
 
 func newMountTrait() Trait {
 	return &mountTrait{
 		// Must follow immediately the container trait
-		BaseTrait: NewBaseTrait("mount", 1610),
+		BasePlatformTrait: NewBasePlatformTrait("mount", 1610),
 	}
 }
 
 func (t *mountTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil
 	}
 
@@ -172,9 +171,4 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 
 	*vols = append(*vols, *vol)
 	*mnts = append(*mnts, *mnt)
-}
-
-// IsPlatformTrait overrides base class method.
-func (t *mountTrait) IsPlatformTrait() bool {
-	return true
 }

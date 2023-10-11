@@ -40,10 +40,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kamelets"
 )
 
-type kameletsTrait struct {
-	BaseTrait
-	traitv1.KameletsTrait `property:",squash"`
-}
+const (
+	contentKey = "content"
+
+	kameletLabel              = "camel.apache.org/kamelet"
+	kameletConfigurationLabel = "camel.apache.org/kamelet.configuration"
+)
 
 type configurationKey struct {
 	kamelet         string
@@ -57,26 +59,19 @@ func newConfigurationKey(kamelet, configurationID string) configurationKey {
 	}
 }
 
-const (
-	contentKey = "content"
-
-	kameletLabel              = "camel.apache.org/kamelet"
-	kameletConfigurationLabel = "camel.apache.org/kamelet.configuration"
-)
+type kameletsTrait struct {
+	BasePlatformTrait
+	traitv1.KameletsTrait `property:",squash"`
+}
 
 func newKameletsTrait() Trait {
 	return &kameletsTrait{
-		BaseTrait: NewBaseTrait("kamelets", 450),
+		BasePlatformTrait: NewBasePlatformTrait("kamelets", 450),
 	}
 }
 
-// IsPlatformTrait overrides base class method.
-func (t *kameletsTrait) IsPlatformTrait() bool {
-	return true
-}
-
 func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil
 	}
 

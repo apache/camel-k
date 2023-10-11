@@ -27,7 +27,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -350,7 +349,6 @@ func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 	environment := createEnvironment()
 
 	trait, _ := newContainerTrait().(*containerTrait)
-	trait.Enabled = pointer.Bool(true)
 
 	environment.Integration.Spec.Sources = []v1.SourceSpec{
 		{
@@ -375,7 +373,6 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 
 	environment := createEnvironment()
 	trait, _ := newContainerTrait().(*containerTrait)
-	trait.Enabled = pointer.Bool(true)
 	environment.Integration.Spec.Sources = []v1.SourceSpec{
 		{
 			DataSpec: v1.DataSpec{

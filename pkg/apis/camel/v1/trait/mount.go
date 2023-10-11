@@ -22,7 +22,7 @@ package trait
 // +camel-k:trait=mount
 // nolint: tagliatelle
 type MountTrait struct {
-	Trait `property:",squash" json:",inline"`
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// A list of configuration pointing to configmap/secret.
 	// The configuration are expected to be UTF-8 resources as they are processed by runtime Camel Context and tried to be parsed as property files.
 	// They are also made available on the classpath in order to ease their usage directly from the Route.

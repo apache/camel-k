@@ -25,7 +25,7 @@ package trait
 //
 // +camel-k:trait=platform.
 type PlatformTrait struct {
-	Trait `property:",squash" json:",inline"`
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// To create a default (empty) platform when the platform is missing.
 	CreateDefault *bool `property:"create-default" json:"createDefault,omitempty"`
 	// Indicates if the platform should be created globally in the case of global operator (default true).

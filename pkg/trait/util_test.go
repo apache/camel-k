@@ -32,16 +32,14 @@ import (
 func TestToTraitMap(t *testing.T) {
 	traits := v1.Traits{
 		Container: &traitv1.ContainerTrait{
-			Trait: traitv1.Trait{
-				Enabled: pointer.Bool(true),
-			},
-			Name:            "test-container",
-			Auto:            pointer.Bool(false),
-			Expose:          pointer.Bool(true),
-			Port:            8081,
-			PortName:        "http-8081",
-			ServicePort:     81,
-			ServicePortName: "http-81",
+			PlatformBaseTrait: traitv1.PlatformBaseTrait{},
+			Name:              "test-container",
+			Auto:              pointer.Bool(false),
+			Expose:            pointer.Bool(true),
+			Port:              8081,
+			PortName:          "http-8081",
+			ServicePort:       81,
+			ServicePortName:   "http-81",
 		},
 		Service: &traitv1.ServiceTrait{
 			Trait: traitv1.Trait{
@@ -56,7 +54,6 @@ func TestToTraitMap(t *testing.T) {
 	}
 	expected := Options{
 		"container": {
-			"enabled":         true,
 			"auto":            false,
 			"expose":          true,
 			"port":            float64(8081),
@@ -83,19 +80,16 @@ func TestToTraitMap(t *testing.T) {
 
 func TestToPropertyMap(t *testing.T) {
 	trait := traitv1.ContainerTrait{
-		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(true),
-		},
-		Name:            "test-container",
-		Auto:            pointer.Bool(false),
-		Expose:          pointer.Bool(true),
-		Port:            8081,
-		PortName:        "http-8081",
-		ServicePort:     81,
-		ServicePortName: "http-81",
+		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
+		Name:              "test-container",
+		Auto:              pointer.Bool(false),
+		Expose:            pointer.Bool(true),
+		Port:              8081,
+		PortName:          "http-8081",
+		ServicePort:       81,
+		ServicePortName:   "http-81",
 	}
 	expected := map[string]interface{}{
-		"enabled":         true,
 		"auto":            false,
 		"expose":          true,
 		"port":            float64(8081),
@@ -152,7 +146,6 @@ func TestMigrateLegacyConfiguration_invalidConfiguration(t *testing.T) {
 
 func TestToTrait(t *testing.T) {
 	config := map[string]interface{}{
-		"enabled":         true,
 		"auto":            false,
 		"expose":          true,
 		"port":            8081,
@@ -162,16 +155,14 @@ func TestToTrait(t *testing.T) {
 		"name":            "test-container",
 	}
 	expected := traitv1.ContainerTrait{
-		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(true),
-		},
-		Name:            "test-container",
-		Auto:            pointer.Bool(false),
-		Expose:          pointer.Bool(true),
-		Port:            8081,
-		PortName:        "http-8081",
-		ServicePort:     81,
-		ServicePortName: "http-81",
+		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
+		Name:              "test-container",
+		Auto:              pointer.Bool(false),
+		Expose:            pointer.Bool(true),
+		Port:              8081,
+		PortName:          "http-8081",
+		ServicePort:       81,
+		ServicePortName:   "http-81",
 	}
 
 	trait := traitv1.ContainerTrait{}

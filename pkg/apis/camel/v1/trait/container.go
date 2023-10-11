@@ -26,11 +26,9 @@ import corev1 "k8s.io/api/core/v1"
 // +camel-k:trait=container
 // nolint: tagliatelle
 type ContainerTrait struct {
-	Trait `property:",squash" json:",inline"`
-
+	PlatformBaseTrait `property:",squash" json:",inline"`
 	// To automatically enable the trait
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-
 	// The minimum amount of CPU required.
 	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
 	// The minimum amount of memory required.
@@ -39,7 +37,6 @@ type ContainerTrait struct {
 	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
 	// The maximum amount of memory required.
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
-
 	// Can be used to enable/disable exposure via kubernetes Service.
 	Expose *bool `property:"expose" json:"expose,omitempty"`
 	// To configure a different port exposed by the container (default `8080`).
