@@ -293,6 +293,12 @@ func kamelInstallWithContext(ctx context.Context, operatorID string, namespace s
 		installArgs = append(installArgs, "--operator-image-pull-policy", opImagePullPolicy)
 	}
 
+	opBuildCatalogToolTimeout := os.Getenv("CAMEL_K_BUILD_CATALOG_TOOL_TIMEOUT")
+	if opImagePullPolicy != "" {
+		fmt.Printf("Setting build catalog tool timeout to %s\n", opBuildCatalogToolTimeout)
+		installArgs = append(installArgs, "--build-catalog-tool-timeout", opBuildCatalogToolTimeout)
+	}
+
 	installArgs = append(installArgs, args...)
 	return KamelWithContext(ctx, installArgs...)
 }

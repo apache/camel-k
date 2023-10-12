@@ -182,3 +182,5 @@ pkg/resources/resources.go
 # MAC OS files
 .DS_Store
 
+# Audit logs file
+logs.txt

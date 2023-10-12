@@ -111,6 +111,7 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 	cmd.Flags().String("build-publish-strategy", "", "Set the build publish strategy")
 	cmd.Flags().StringArray("build-publish-strategy-option", nil, "Add a build publish strategy option, as <name=value>")
 	cmd.Flags().String("build-timeout", "", "Set how long the build process can last")
+	cmd.Flags().String("build-catalog-tool-timeout", "", "Set how long the catalogtool image build can last")
 	cmd.Flags().String("trait-profile", "", "The profile to use for traits")
 
 	// OLM
@@ -186,6 +187,7 @@ type installCmdOptions struct {
 	BuildPublishStrategy        string   `mapstructure:"build-publish-strategy"`
 	BuildPublishStrategyOptions []string `mapstructure:"build-publish-strategy-options"`
 	BuildTimeout                string   `mapstructure:"build-timeout"`
+	BuildCatalogToolTimeout     string   `mapstructure:"build-catalog-tool-timeout"`
 	MavenExtensions             []string `mapstructure:"maven-extensions"`
 	MavenLocalRepository        string   `mapstructure:"maven-local-repository"`
 	MavenProperties             []string `mapstructure:"maven-properties"`
@@ -539,6 +541,16 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 		}
 
 		platform.Spec.Build.Timeout = &metav1.Duration{
+			Duration: d,
+		}
+	}
+	if o.BuildCatalogToolTimeout != "" {
+		d, err := time.ParseDuration(o.BuildCatalogToolTimeout)
+		if err != nil {
+			return nil, err
+		}
+
+		platform.Spec.Build.BuildCatalogToolTimeout = &metav1.Duration{
 			Duration: d,
 		}
 	}

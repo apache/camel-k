@@ -121,6 +121,13 @@ func TestInstallBuildTimeoutFlag(t *testing.T) {
 	assert.Equal(t, "10", installCmdOptions.BuildTimeout)
 }
 
+func TestInstallBuildCatalogToolTimeoutFlag(t *testing.T) {
+	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
+	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-catalog-tool-timeout", "600")
+	assert.Nil(t, err)
+	assert.Equal(t, "600", installCmdOptions.BuildCatalogToolTimeout)
+}
+
 func TestInstallClusterSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--cluster-setup")
