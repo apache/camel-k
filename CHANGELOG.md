@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Bump X/Net to version 0.17.0 [\#4819](https://github.com/apache/camel-k/issues/4819)
 - Camel K doesn't install on a restricted namespace [\#4786](https://github.com/apache/camel-k/issues/4786)
 - Remove deprecated linters [\#4785](https://github.com/apache/camel-k/issues/4785)
 - Camel K on operatorhub.io [\#4783](https://github.com/apache/camel-k/issues/4783)
@@ -15,6 +16,7 @@
 - Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
 - Unable to work under azure k8s at latest version with a minimal example [\#4758](https://github.com/apache/camel-k/issues/4758)
+- Quarkus image hardcoded [\#4756](https://github.com/apache/camel-k/issues/4756)
 - E2E - Recurrent golang stacktrace logs  [\#4754](https://github.com/apache/camel-k/issues/4754)
 - E2E kamelets.camel.apache.org "my-own-timer-source" already exists failure [\#4750](https://github.com/apache/camel-k/issues/4750)
 - Buildah check regression [\#4744](https://github.com/apache/camel-k/issues/4744)
@@ -47,8 +49,17 @@
 - Local dependencies examples [\#3167](https://github.com/apache/camel-k/issues/3167)
 - `make build-resources` does not work on Windows [\#3134](https://github.com/apache/camel-k/issues/3134)
 - Invalid replica state for HPA [\#3132](https://github.com/apache/camel-k/issues/3132)
+- Standard/Incremental build option [\#3011](https://github.com/apache/camel-k/issues/3011)
+- How to specify the BaseImage when creating an integration? [\#2844](https://github.com/apache/camel-k/issues/2844)
+- Reduce time for first Integration start [\#2520](https://github.com/apache/camel-k/issues/2520)
 - Java DSL - Add notes in documentation about its limitations [\#2374](https://github.com/apache/camel-k/issues/2374)
+- \[CLI\] Ask user confirmation for fallback regular installation [\#2119](https://github.com/apache/camel-k/issues/2119)
+-  revisit all these install options that are not symetrical between kamel install/kamel uninstall and OLM [\#2103](https://github.com/apache/camel-k/issues/2103)
+- Persist trait status [\#2024](https://github.com/apache/camel-k/issues/2024)
+- Multiple knative revisions created when integration references multiple Knative channels [\#1826](https://github.com/apache/camel-k/issues/1826)
 - kamelets: distribution model documentation [\#1576](https://github.com/apache/camel-k/issues/1576)
+- validate platform configurations [\#383](https://github.com/apache/camel-k/issues/383)
+- Rethink profiles [\#262](https://github.com/apache/camel-k/issues/262)
 
 ## [2.0.2-nightly](https://github.com/apache/camel-k/tree/2.0.2-nightly) (2023-09-06)
 
