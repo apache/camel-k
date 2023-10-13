@@ -537,9 +537,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 				}
 			} else if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "kamelets-bundle" {
 				// Kamelets bundle configmap
-				kameletMountPoint := strings.ReplaceAll(e.ApplicationProperties[KameletLocationProperty], "file:", "")
-				// We need also to remove the default location provided
-				kameletMountPoint = strings.ReplaceAll(kameletMountPoint, ",classpath:/kamelets", "")
+				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
 				refName := "kamelets-bundle"
 				vol := getVolume(refName, "configmap", configMap.Name, "", "")
 				mnt := getMount(refName, kameletMountPoint, "", true)

@@ -40,14 +40,14 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
 	"github.com/apache/camel-k/v2/pkg/util/kamelets"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
-	contentKey                = "content"
-	KameletLocationProperty   = "camel.component.kamelet.location"
-	kameletLabel              = "camel.apache.org/kamelet"
-	kameletConfigurationLabel = "camel.apache.org/kamelet.configuration"
+	contentKey                  = "content"
+	KameletLocationProperty     = "camel.component.kamelet.location"
+	kameletLabel                = "camel.apache.org/kamelet"
+	kameletConfigurationLabel   = "camel.apache.org/kamelet.configuration"
+	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
 
 type configurationKey struct {
@@ -177,7 +177,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		if err != nil {
 			return err
 		}
-		kameletsBundleConfigmap := initializeConfigmapBundle(e.Integration.Name, e.Integration.Namespace)
+		kb := newKameletBundle()
 		for _, key := range t.getKameletKeys() {
 			kamelet := kamelets[key]
 			if kamelet.Status.Phase != v1.KameletPhaseReady {
@@ -190,43 +190,31 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 			// Adding explicit dependencies from Kamelets
 			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
 			// Add to Kamelet bundle configmap
-			serialized, err := kubernetes.ToYAMLNoManagedFields(kamelet)
-			if err != nil {
-				return err
-			}
-			kameletsBundleConfigmap.Data[fmt.Sprintf("%s.kamelet.yaml", kamelet.Name)] = string(serialized)
+			kb.add(kamelet)
+		}
+		bundleConfigmaps, err := kb.toConfigmaps(e.Integration.Name, e.Integration.Namespace)
+		if err != nil {
+			return err
 		}
 		// set kamelets runtime location
 		if e.ApplicationProperties == nil {
 			e.ApplicationProperties = map[string]string{}
 		}
-		e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s,classpath:/kamelets", t.MountPoint)
-		e.Resources.Add(&kameletsBundleConfigmap)
+		for _, cm := range bundleConfigmaps {
+			kameletMountPoint := fmt.Sprintf("%s/%s", t.MountPoint, cm.Name)
+			cm.Annotations[kameletMountPointAnnotation] = kameletMountPoint
+			e.Resources.Add(cm)
+			if e.ApplicationProperties[KameletLocationProperty] == "" {
+				e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s", kameletMountPoint)
+			} else {
+				e.ApplicationProperties[KameletLocationProperty] += fmt.Sprintf(",file:%s", kameletMountPoint)
+			}
+		}
+		e.ApplicationProperties[KameletLocationProperty] += ",classpath:/kamelets"
 		// resort dependencies
 		sort.Strings(e.Integration.Status.Dependencies)
 	}
 	return nil
-}
-
-func initializeConfigmapBundle(name, namespace string) corev1.ConfigMap {
-	return corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("kamelets-bundle-%s", name),
-			Namespace: namespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel:           name,
-				kubernetes.ConfigMapTypeLabel: "kamelets-bundle",
-			},
-			Annotations: map[string]string{
-				kubernetes.ConfigMapAutogenLabel: "true",
-			},
-		},
-		Data: map[string]string{},
-	}
 }
 
 // This func will add a Kamelet as a generated Integration source. The source included here is going to be used in order to parse the Kamelet
