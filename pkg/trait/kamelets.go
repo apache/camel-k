@@ -200,7 +200,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		if e.ApplicationProperties == nil {
 			e.ApplicationProperties = map[string]string{}
 		}
-		e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s", t.MountPoint)
+		e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s,classpath:/kamelets", t.MountPoint)
 		e.Resources.Add(&kameletsBundleConfigmap)
 		// resort dependencies
 		sort.Strings(e.Integration.Status.Dependencies)
