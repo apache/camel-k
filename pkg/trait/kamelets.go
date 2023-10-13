@@ -60,18 +60,18 @@ func newConfigurationKey(kamelet, configurationID string) configurationKey {
 }
 
 type kameletsTrait struct {
-	BasePlatformTrait
+	BaseTrait
 	traitv1.KameletsTrait `property:",squash"`
 }
 
 func newKameletsTrait() Trait {
 	return &kameletsTrait{
-		BasePlatformTrait: NewBasePlatformTrait("kamelets", 450),
+		BaseTrait: NewBaseTrait("kamelets", 450),
 	}
 }
 
 func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil {
+	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil
 	}
 

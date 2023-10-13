@@ -7074,7 +7074,8 @@ spec:
                           main class is loaded
                         type: boolean
                       enabled:
-                        description: 'Deprecated: no longer in use.'
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
                         type: boolean
                       options:
                         description: A list of JVM options
@@ -7099,7 +7100,8 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       enabled:
-                        description: 'Deprecated: no longer in use.'
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
                         type: boolean
                       list:
                         description: Comma separated list of Kamelet names to load
