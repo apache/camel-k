@@ -21,7 +21,7 @@ package trait
 //
 // +camel-k:trait=jvm.
 type JVMTrait struct {
-	PlatformBaseTrait `property:",squash" json:",inline"`
+	Trait `property:",squash" json:",inline"`
 	// Activates remote debugging, so that a debugger can be attached to the JVM, e.g., using port-forwarding
 	Debug *bool `property:"debug" json:"debug,omitempty"`
 	// Suspends the target JVM immediately before the main class is loaded

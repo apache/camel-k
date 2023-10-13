@@ -41,13 +41,13 @@ import (
 )
 
 type jvmTrait struct {
-	BasePlatformTrait
+	BaseTrait
 	traitv1.JVMTrait `property:",squash"`
 }
 
 func newJvmTrait() Trait {
 	return &jvmTrait{
-		BasePlatformTrait: NewBasePlatformTrait("jvm", 2000),
+		BaseTrait: NewBaseTrait("jvm", 2000),
 		JVMTrait: traitv1.JVMTrait{
 			DebugAddress: "*:5005",
 			PrintCommand: pointer.Bool(true),
@@ -56,6 +56,10 @@ func newJvmTrait() Trait {
 }
 
 func (t *jvmTrait) Configure(e *Environment) (bool, error) {
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, nil
+	}
+
 	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) || !e.IntegrationInRunningPhases() {
 		return false, nil
 	}

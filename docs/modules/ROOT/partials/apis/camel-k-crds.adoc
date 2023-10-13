@@ -6731,9 +6731,9 @@ The JVM trait is used to configure the JVM that runs the integration.
 |Field
 |Description
 
-|`PlatformBaseTrait` +
-*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
-|(Members of `PlatformBaseTrait` are embedded into this type.)
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
 
 
 
@@ -6911,9 +6911,9 @@ The kamelets trait is a platform trait used to inject Kamelets into the integrat
 |Field
 |Description
 
-|`PlatformBaseTrait` +
-*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
-|(Members of `PlatformBaseTrait` are embedded into this type.)
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
 
 
 
@@ -7417,8 +7417,6 @@ Only one of `max-unavailable` and `min-available` can be specified.
 * <<#_camel_apache_org_v1_trait_DeploymentTrait, DeploymentTrait>>
 * <<#_camel_apache_org_v1_trait_EnvironmentTrait, EnvironmentTrait>>
 * <<#_camel_apache_org_v1_trait_ErrorHandlerTrait, ErrorHandlerTrait>>
-* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
-* <<#_camel_apache_org_v1_trait_KameletsTrait, KameletsTrait>>
 * <<#_camel_apache_org_v1_trait_MountTrait, MountTrait>>
 * <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
 * <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
@@ -8054,7 +8052,9 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_HealthTrait, HealthTrait>>
 * <<#_camel_apache_org_v1_trait_IngressTrait, IngressTrait>>
 * <<#_camel_apache_org_v1_trait_IstioTrait, IstioTrait>>
+* <<#_camel_apache_org_v1_trait_JVMTrait, JVMTrait>>
 * <<#_camel_apache_org_v1_trait_JolokiaTrait, JolokiaTrait>>
+* <<#_camel_apache_org_v1_trait_KameletsTrait, KameletsTrait>>
 * <<#_camel_apache_org_v1_trait_KnativeServiceTrait, KnativeServiceTrait>>
 * <<#_camel_apache_org_v1_trait_KnativeTrait, KnativeTrait>>
 * <<#_camel_apache_org_v1_trait_LoggingTrait, LoggingTrait>>
@@ -8069,7 +8069,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
 * <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
 
-Trait is the base type for all traits. It could be disabled by the user
+Trait is the base type for all traits. It could be disabled by the user.
 
 [cols="2,2a",options="header"]
 |===
