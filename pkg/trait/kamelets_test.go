@@ -109,7 +109,7 @@ func TestKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
-	assert.Equal(t, "kamelets-bundle-it", cm.Name)
+	assert.Equal(t, "kamelets-bundle-it-001", cm.Name)
 	assert.Equal(t, "test", cm.Namespace)
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
@@ -209,7 +209,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 	require.NoError(t, err)
 	cm := environment.Resources.GetConfigMap(func(_ *corev1.ConfigMap) bool { return true })
 	assert.NotNil(t, cm)
-	assert.Equal(t, "kamelets-bundle-it", cm.Name)
+	assert.Equal(t, "kamelets-bundle-it-001", cm.Name)
 	assert.Equal(t, "test", cm.Namespace)
 
 	assert.Len(t, environment.Integration.Status.GeneratedSources, 1)
