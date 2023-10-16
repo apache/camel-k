@@ -1,0 +1,15 @@
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  name: camel-k
+spec:
+  build:
+    buildConfiguration: {}
+    maven:
+      settings: {}
+      settingsSecurity: {}
+    registry: {}
+  kamelet: {}
+  traits: {}

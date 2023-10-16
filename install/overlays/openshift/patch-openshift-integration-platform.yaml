@@ -15,10 +15,13 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-deployment.yaml
-- operator-service-account.yaml
-
+- op: replace
+  path: /spec/profile
+  value: OpenShift
+- op: replace
+  path: /spec/build/registry
+  value:
+    insecure: true
+- op: replace
+  path: /spec/build/publishStrategy
+  value: S2I

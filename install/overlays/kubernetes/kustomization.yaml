@@ -14,11 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-- operator-deployment.yaml
-- operator-service-account.yaml
+# Labels to add to all resources and selectors.
+commonLabels:
+  app: camel-k
 
+sortOptions:
+  order: fifo
+
+resources:
+- ../../config/crd/
+- ../../config/rbac/
+- ../common
+- ../../config/manager/
+
+patches:
+- path: patch-kubernetes-integration-platform.yaml
+  target:
+    group: camel.apache.org
+    version: v1
+    kind: IntegrationPlatform

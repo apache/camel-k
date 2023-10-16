@@ -1,0 +1,73 @@
+
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+#
+# The base Image used to run integrations
+#
+#  value: base-image:1.0.0
+- op: replace
+  path: /spec/build/baseImage
+  value: <value>
+#
+# Build order strategy for integrations
+# ie. dependencies, fifo, sequential
+#
+#  value: sequential
+- op: replace
+  path: /spec/build/buildConfiguration/orderStrategy
+  value: <value>
+#
+# Build strategy to for integrations
+# ie. routine, pod
+#
+#  value: routine
+- op: replace
+  path: /spec/build/buildConfiguration/strategy
+  value: <value>
+#
+# The maximum amount of parallel pipeline running
+#
+#  value: 3
+- op: replace
+  path: /spec/build/maxRunningBuilds
+  value: <value>
+#
+# The time to wait before time out the pipeline process
+#
+#  value: 3000
+- op: replace
+  path: /spec/build/timeout
+  value: <value>
+#
+# Build publish strategy for integrations
+# ie. Buildah, Kaniko, S2I, Spectrum, Jib
+#
+#  value: Buildah | Kaniko | S2I | Spectrum | Jib
+- op: replace
+  path: /spec/build/publishStrategy
+  value: <value>
+#
+# Options that can be used by any publish strategy
+#
+#  value:
+#    KanikoPersistentVolumeClaim: camel-k
+- op: replace
+  path: /spec/build/PublishStrategyOptions
+  value:
+    <key>:<value>
+

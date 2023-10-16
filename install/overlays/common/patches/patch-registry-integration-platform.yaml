@@ -1,3 +1,4 @@
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,10 +16,35 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-deployment.yaml
-- operator-service-account.yaml
-
+#
+# Configures a custom registry
+# eg. DigitalOcean, Docker Hub, Github, Gcr.io, IBM Container Registry
+# Refer to https://camel.apache.org/camel-k/latest/installation/registry/registry.html
+# The address of the registry
+# eg. registry.digitalocean.com, docker.pkg.github.com
+#
+#  address: registry-host.io
+#
+#
+# The identifier of the organization
+# eg. github-user/repository
+#
+#  organization: your-user-id-or-org
+#
+#
+# As an alternative, a secret can be added to the namespace containing credentials,
+# eg. for use with connecting to Docker Hub
+#
+#  secret: the-push-kubernetes-secret-name
+#
+# Should connection to registry be secure
+#
+#  insecure: true | false
+- op: replace
+  path: /spec/build/registry
+  value:
+#    address: <value>
+#    ca: <value>
+#    insecure: <value>
+#    organization: <value>
+#    secret: <value>

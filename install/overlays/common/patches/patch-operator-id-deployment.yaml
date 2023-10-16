@@ -14,11 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-deployment.yaml
-- operator-service-account.yaml
-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-operator
+spec:
+  template:
+    spec:
+      containers:
+        - name: camel-k-operator
+          env:
+            - name: OPERATOR_ID
+              value: <value>
