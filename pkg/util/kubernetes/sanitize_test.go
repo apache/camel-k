@@ -36,6 +36,8 @@ func TestSanitizeName(t *testing.T) {
 		{"input": "-foo-bar-", "expect": "foo-bar"},
 		{"input": "1foo-bar2", "expect": "1foo-bar2"},
 		{"input": "foo-bar-1", "expect": "foo-bar-1"},
+		{"input": "docker.io/squakez/my-camel-sb:1.0.0", "expect": "my-camel-sb1"},
+		{"input": "docker.io/squakez/my-camel-sb:2.0.0", "expect": "my-camel-sb2"},
 	}
 
 	for _, c := range cases {
