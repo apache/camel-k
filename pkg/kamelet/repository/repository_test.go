@@ -100,7 +100,8 @@ func TestURIParse(t *testing.T) {
 	}
 	for i, test := range tests {
 		t.Run(fmt.Sprintf("%d-%s", i, test.uri), func(t *testing.T) {
-			catalog, err := newFromURI(test.uri)
+			ctx := context.Background()
+			catalog, err := newFromURI(ctx, test.uri)
 			if test.error {
 				assert.Error(t, err)
 			} else {

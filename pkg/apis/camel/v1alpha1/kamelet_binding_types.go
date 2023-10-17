@@ -37,7 +37,7 @@ import (
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet Binding phase"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
 
-// KameletBinding is the Schema for the kamelets binding API
+// KameletBinding is the Schema for the kamelets binding API.
 type KameletBinding struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -56,7 +56,7 @@ type KameletBindingSpec struct {
 	Source Endpoint `json:"source,omitempty"`
 	// Sink is the destination of the integration defined by this binding
 	Sink Endpoint `json:"sink,omitempty"`
-	// ErrorHandler is an optional handler called upon an error occuring in the integration
+	// ErrorHandler is an optional handler called upon an error occurring in the integration.
 	ErrorHandler *ErrorHandlerSpec `json:"errorHandler,omitempty"`
 	// Steps contains an optional list of intermediate steps that are executed between the Source and the Sink
 	Steps []Endpoint `json:"steps,omitempty"`
@@ -66,13 +66,13 @@ type KameletBindingSpec struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
-// Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI)
+// Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI).
 type Endpoint struct {
-	// Ref can be used to declare a Kubernetes resource as source/sink endpoint
+	// Ref can be used to declare a Kubernetes resource as source/sink endpoint.
 	Ref *corev1.ObjectReference `json:"ref,omitempty"`
-	// URI can be used to specify the (Camel) endpoint explicitly
+	// URI can be used to specify the (Camel) endpoint explicitly.
 	URI *string `json:"uri,omitempty"`
-	// Properties are a key value representation of endpoint properties
+	// Properties are a key value representation of endpoint properties.
 	Properties *EndpointProperties `json:"properties,omitempty"`
 	// Types defines the data type of the data produced/consumed by the endpoint and references a given data type specification.
 	// Deprecated: In favor of using DataTypes
@@ -81,36 +81,36 @@ type Endpoint struct {
 	DataTypes map[TypeSlot]DataTypeReference `json:"dataTypes,omitempty"`
 }
 
-// EndpointType represents the type (ie, source or sink)
+// EndpointType represents the type (ie, source or sink).
 type EndpointType string
 
 const (
-	// EndpointTypeSource source endpoint
+	// EndpointTypeSource source endpoint.
 	EndpointTypeSource EndpointType = "source"
-	// EndpointTypeAction action endpoint
+	// EndpointTypeAction action endpoint.
 	EndpointTypeAction EndpointType = "action"
-	// EndpointTypeSink sink endpoint
+	// EndpointTypeSink sink endpoint.
 	EndpointTypeSink EndpointType = "sink"
-	// EndpointTypeErrorHandler error handler endpoint
+	// EndpointTypeErrorHandler error handler endpoint.
 	EndpointTypeErrorHandler EndpointType = "errorHandler"
 )
 
-// EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values
+// EndpointProperties is a key/value struct represented as JSON raw to allow numeric/boolean values.
 type EndpointProperties struct {
 	RawMessage `json:",inline"`
 }
 
-// KameletBindingStatus specify the status of a binding
+// KameletBindingStatus specify the status of a binding.
 type KameletBindingStatus struct {
 	// ObservedGeneration is the most recent generation observed for this KameletBinding.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-	// Phase --
+	// Phase --.
 	Phase KameletBindingPhase `json:"phase,omitempty"`
-	// Conditions --
+	// Conditions --.
 	Conditions []KameletBindingCondition `json:"conditions,omitempty"`
-	// Replicas is the number of actual replicas of the binding
+	// Replicas is the number of actual replicas of the binding.
 	Replicas *int32 `json:"replicas,omitempty"`
-	// Selector allows to identify pods belonging to the binding
+	// Selector allows to identify pods belonging to the binding.
 	Selector string `json:"selector,omitempty"`
 }
 
@@ -128,40 +128,40 @@ type KameletBindingCondition struct {
 	Reason string `json:"reason,omitempty"`
 	// A human readable message indicating details about the transition.
 	Message string `json:"message,omitempty"`
-	// Pods collect health and conditions information from the owned PODs
+	// Pods collect health and conditions information from the owned PODs.
 	Pods []v1.PodCondition `json:"pods,omitempty"`
 }
 
-// KameletBindingConditionType --
+// KameletBindingConditionType --.
 type KameletBindingConditionType string
 
 const (
-	// KameletBindingConditionReady --
+	// KameletBindingConditionReady --.
 	KameletBindingConditionReady KameletBindingConditionType = "Ready"
-	// KameletBindingIntegrationConditionError is used to report the error on the generated Integration
+	// KameletBindingIntegrationConditionError is used to report the error on the generated Integration.
 	KameletBindingIntegrationConditionError KameletBindingConditionType = "IntegrationError"
 )
 
-// KameletBindingPhase --
+// KameletBindingPhase --.
 type KameletBindingPhase string
 
 const (
-	// KameletBindingKind --
+	// KameletBindingKind --.
 	KameletBindingKind string = "KameletBinding"
 
-	// KameletBindingPhaseNone --
+	// KameletBindingPhaseNone --.
 	KameletBindingPhaseNone KameletBindingPhase = ""
-	// KameletBindingPhaseCreating --
+	// KameletBindingPhaseCreating --.
 	KameletBindingPhaseCreating KameletBindingPhase = "Creating"
-	// KameletBindingPhaseError --
+	// KameletBindingPhaseError --.
 	KameletBindingPhaseError KameletBindingPhase = "Error"
-	// KameletBindingPhaseReady --
+	// KameletBindingPhaseReady --.
 	KameletBindingPhaseReady KameletBindingPhase = "Ready"
 )
 
 // +kubebuilder:object:root=true
 
-// KameletBindingList contains a list of KameletBinding
+// KameletBindingList contains a list of KameletBinding.
 type KameletBindingList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

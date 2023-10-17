@@ -54,7 +54,7 @@ func (in *IntegrationKitSpec) Configurations() []ConfigurationSpec {
 	return in.Configuration
 }
 
-// SetOperatorID sets the given operator id as an annotation
+// SetOperatorID sets the given operator id as an annotation.
 func (in *IntegrationKit) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }

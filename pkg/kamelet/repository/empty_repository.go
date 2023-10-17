@@ -30,7 +30,7 @@ func newEmptyKameletRepository() KameletRepository {
 	return &emptyKameletRepository{}
 }
 
-// Enforce type
+// Enforce type.
 var _ KameletRepository = &emptyKameletRepository{}
 
 func (e *emptyKameletRepository) List(_ context.Context) ([]string, error) {
@@ -41,6 +41,6 @@ func (e *emptyKameletRepository) Get(_ context.Context, _ string) (*v1.Kamelet, 
 	return nil, nil
 }
 
-func (c *emptyKameletRepository) String() string {
+func (e *emptyKameletRepository) String() string {
 	return "Empty[]"
 }

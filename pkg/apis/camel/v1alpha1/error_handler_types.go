@@ -20,37 +20,37 @@ limitations under the License.
 package v1alpha1
 
 const (
-	// ErrorHandlerRefName the reference name to use when looking for an error handler
+	// ErrorHandlerRefName the reference name to use when looking for an error handlerl.
 	ErrorHandlerRefName = "camel.k.errorHandler.ref"
-	// ErrorHandlerRefDefaultName the default name of the error handler
+	// ErrorHandlerRefDefaultName the default name of the error handler.
 	ErrorHandlerRefDefaultName = "defaultErrorHandler"
-	// ErrorHandlerAppPropertiesPrefix the prefix used for the error handler bean
+	// ErrorHandlerAppPropertiesPrefix the prefix used for the error handler bean.
 	ErrorHandlerAppPropertiesPrefix = "camel.beans.defaultErrorHandler"
 )
 
-// ErrorHandlerSpec represents an unstructured object for an error handler
+// ErrorHandlerSpec represents an unstructured object for an error handler.
 type ErrorHandlerSpec struct {
 	RawMessage `json:",inline,omitempty"`
 }
 
-// ErrorHandlerParameters represent an unstructured object for error handler parameters
+// ErrorHandlerParameters represent an unstructured object for error handler parameters.
 type ErrorHandlerParameters struct {
 	RawMessage `json:",inline,omitempty"`
 }
 
-// BeanProperties represent an unstructured object properties to be set on a bean
+// BeanProperties represent an unstructured object properties to be set on a bean.
 type BeanProperties struct {
 	RawMessage `json:",inline,omitempty"`
 }
 
-// ErrorHandlerType a type of error handler (ie, sink)
+// ErrorHandlerType a type of error handler (ie, sink).
 type ErrorHandlerType string
 
 const (
 	errorHandlerTypeBase ErrorHandlerType = ""
-	// ErrorHandlerTypeNone used to ignore any error event
+	// ErrorHandlerTypeNone used to ignore any error event.
 	ErrorHandlerTypeNone ErrorHandlerType = "none"
-	// ErrorHandlerTypeLog used to log the event producing the error
+	// ErrorHandlerTypeLog used to log the event producing the error.
 	ErrorHandlerTypeLog ErrorHandlerType = "log"
 	// ErrorHandlerTypeSink used to send the event to a further sink (for future processing). This was previously known as dead-letter-channel.
 	ErrorHandlerTypeSink ErrorHandlerType = "sink"
