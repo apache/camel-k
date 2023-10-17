@@ -28,6 +28,7 @@ We have several configuration used to influence the building of an integration:
 --build-strategy string                       Set the build strategy
 --build-order-strategy string                 Set the build order strategy
 --build-timeout string                        Set how long the build process can last
+--build-catalog-tool-timeout string          Set how long the catalogtool image build can last
 ```
 A very important set of configuration you can provide is related to Maven:
 ```
