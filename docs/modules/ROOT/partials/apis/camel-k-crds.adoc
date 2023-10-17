@@ -259,6 +259,7 @@ the desired specification
 
 
 the actual status of the resource
+Deprecated no longer in use
 
 
 |===
@@ -3748,6 +3749,7 @@ Camel dependencies needed by the Kamelet
 * <<#_camel_apache_org_v1_Kamelet, Kamelet>>
 
 KameletStatus defines the observed state of Kamelet.
+Required since we deprecated the parameter. Any external user can still expect a Ready status here.
 
 [cols="2,2a",options="header"]
 |===
