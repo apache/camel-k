@@ -4,8 +4,15 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.1.0...HEAD)
 
+**Closed issues:**
+
+- Error log traces after integration error [\#4781](https://github.com/apache/camel-k/issues/4781)
+- Projecting routes status to a Kubernetes Resource [\#2728](https://github.com/apache/camel-k/issues/2728)
+
 **Merged pull requests:**
 
+- chore\(ci\): no coverage message when coverage unchanged [\#4829](https://github.com/apache/camel-k/pull/4829) ([squakez](https://github.com/squakez))
+- fix\(ci\): fabric8 deps update [\#4828](https://github.com/apache/camel-k/pull/4828) ([squakez](https://github.com/squakez))
 - Bump X/Net to version 0.17.0 [\#4820](https://github.com/apache/camel-k/pull/4820) ([oscerd](https://github.com/oscerd))
 - chore: change deprecated yaml statements [\#4818](https://github.com/apache/camel-k/pull/4818) ([squakez](https://github.com/squakez))
 - chore\(trait\): user can't disable platform traits [\#4817](https://github.com/apache/camel-k/pull/4817) ([squakez](https://github.com/squakez))
@@ -27,6 +34,7 @@
 - Kamelet - Inject secret in Vaults - Hashicorp Vault [\#4799](https://github.com/apache/camel-k/pull/4799) ([oscerd](https://github.com/oscerd))
 - Kamelet - Inject secret in Vaults - Azure Key Vault [\#4798](https://github.com/apache/camel-k/pull/4798) ([oscerd](https://github.com/oscerd))
 - Kamelet - Inject secret in Vaults - AWS Secret Manager [\#4794](https://github.com/apache/camel-k/pull/4794) ([oscerd](https://github.com/oscerd))
+- fix\(ctrl\): Change reconciliation of int in error [\#4793](https://github.com/apache/camel-k/pull/4793) ([gansheer](https://github.com/gansheer))
 - Added License headers to generated traits.yaml [\#4792](https://github.com/apache/camel-k/pull/4792) ([oscerd](https://github.com/oscerd))
 - Remove deprecated linters [\#4791](https://github.com/apache/camel-k/pull/4791) ([oscerd](https://github.com/oscerd))
 - Added Missing license headers and license headers to generation of tr… [\#4790](https://github.com/apache/camel-k/pull/4790) ([oscerd](https://github.com/oscerd))
