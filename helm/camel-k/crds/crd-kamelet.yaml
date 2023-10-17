@@ -673,7 +673,10 @@ spec:
                 type: object
             type: object
           status:
-            description: the actual status of the resource
+            default:
+              phase: Ready
+            description: the actual status of the resource Deprecated no longer in
+              use
             properties:
               conditions:
                 description: Conditions --
