@@ -126,7 +126,7 @@ func (m *RawMessage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// String returns a string representation of RawMessage
+// String returns a string representation of RawMessage.
 func (m *RawMessage) String() string {
 	if m == nil {
 		return ""

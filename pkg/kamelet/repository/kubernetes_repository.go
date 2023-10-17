@@ -40,7 +40,7 @@ func newKubernetesKameletRepository(client versioned.Interface, namespace string
 	}
 }
 
-// Enforce type
+// Enforce type.
 var _ KameletRepository = &kubernetesKameletRepository{}
 
 func (c *kubernetesKameletRepository) List(ctx context.Context) ([]string, error) {

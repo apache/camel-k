@@ -42,12 +42,11 @@ type githubKameletRepository struct {
 	ref        string
 }
 
-func newGithubKameletRepository(owner, repo, path, ref string) KameletRepository {
+func newGithubKameletRepository(ctx context.Context, owner, repo, path, ref string) KameletRepository {
 	httpClient := &http.Client{}
 	if token, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
 		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
-		ctx := context.WithValue(context.Background(), oauth2.HTTPClient, httpClient)
-		httpClient = oauth2.NewClient(ctx, ts)
+		httpClient = oauth2.NewClient(context.WithValue(ctx, oauth2.HTTPClient, httpClient), ts)
 	}
 
 	return &githubKameletRepository{
@@ -59,7 +58,7 @@ func newGithubKameletRepository(owner, repo, path, ref string) KameletRepository
 	}
 }
 
-// Enforce type
+// Enforce type.
 var _ KameletRepository = &githubKameletRepository{}
 
 func (c *githubKameletRepository) List(ctx context.Context) ([]string, error) {
@@ -121,6 +120,8 @@ func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url strin
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("cannot download file %s: %d %s", url, resp.StatusCode, resp.Status)
 	}

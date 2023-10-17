@@ -25,7 +25,7 @@ import (
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 // Important: Run "make generate-deepcopy" to regenerate code after modifying this file
 
-// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropiate
+// BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropriate
 // to think it as pipeline.
 type BuildSpec struct {
 	// The sequence of tasks (pipeline) to be performed.
@@ -73,94 +73,94 @@ type Task struct {
 	Custom *UserTask `json:"custom,omitempty"`
 }
 
-// BaseTask is a base for the struct hierarchy
+// BaseTask is a base for the struct hierarchy.
 type BaseTask struct {
 	// name of the task
 	Name string `json:"name,omitempty"`
 }
 
-// BuilderTask is the generic task in charge of building the application image
+// BuilderTask is the generic task in charge of building the application image.
 type BuilderTask struct {
 	BaseTask `json:",inline"`
 	// The configuration that should be used to perform the Build.
 	Configuration BuildConfiguration `json:"configuration,omitempty"`
-	// the base image layer
+	// the base image layer.
 	BaseImage string `json:"baseImage,omitempty"`
-	// the configuration required for the runtime application
+	// the configuration required for the runtime application.
 	Runtime RuntimeSpec `json:"runtime,omitempty"`
-	// the list of dependencies to use for this build
+	// the list of dependencies to use for this build.
 	Dependencies []string `json:"dependencies,omitempty"`
-	// the list of steps to execute (see pkg/builder/)
+	// the list of steps to execute (see pkg/builder/).
 	Steps []string `json:"steps,omitempty"`
-	// the configuration required by Maven for the application build phase
+	// the configuration required by Maven for the application build phase.
 	Maven MavenBuildSpec `json:"maven,omitempty"`
-	// workspace directory to use
+	// workspace directory to use.
 	BuildDir string `json:"buildDir,omitempty"`
-	// the sources to add at build time
+	// the sources to add at build time.
 	Sources []SourceSpec `json:"sources,omitempty"`
 }
 
-// MavenBuildSpec defines the Maven configuration plus additional repositories to use
+// MavenBuildSpec defines the Maven configuration plus additional repositories to use.
 type MavenBuildSpec struct {
-	// base Maven specification
+	// base Maven specification.
 	MavenSpec `json:",inline"`
-	// additional repositories
+	// additional repositories.
 	Repositories []Repository `json:"repositories,omitempty"`
-	// Servers (auth)
+	// Servers (auth).
 	Servers []Server `json:"servers,omitempty"`
 }
 
-// PublishTask image publish configuration
+// PublishTask image publish configuration.
 type PublishTask struct {
-	// can be useful to share info with other tasks
+	// can be useful to share info with other tasks.
 	ContextDir string `json:"contextDir,omitempty"`
-	// base image layer
+	// base image layer.
 	BaseImage string `json:"baseImage,omitempty"`
-	// final image name
+	// final image name.
 	Image string `json:"image,omitempty"`
-	// where to publish the final image
+	// where to publish the final image.
 	Registry RegistrySpec `json:"registry,omitempty"`
 }
 
-// BuildahTask is used to configure Buildah
+// BuildahTask is used to configure Buildah.
 type BuildahTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
-	// The platform of build image
+	// The platform of build image.
 	Platform string `json:"platform,omitempty"`
-	// log more information
+	// log more information.
 	Verbose *bool `json:"verbose,omitempty"`
-	// docker image to use
+	// docker image to use.
 	ExecutorImage string `json:"executorImage,omitempty"`
 }
 
-// KanikoTask is used to configure Kaniko
+// KanikoTask is used to configure Kaniko.
 type KanikoTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
-	// log more information
+	// log more information.
 	Verbose *bool `json:"verbose,omitempty"`
-	// use a cache
+	// use a cache.
 	Cache KanikoTaskCache `json:"cache,omitempty"`
-	// docker image to use
+	// docker image to use.
 	ExecutorImage string `json:"executorImage,omitempty"`
 }
 
-// KanikoTaskCache is used to configure Kaniko cache
+// KanikoTaskCache is used to configure Kaniko cache.
 type KanikoTaskCache struct {
-	// true if a cache is enabled
+	// true if a cache is enabled.
 	Enabled *bool `json:"enabled,omitempty"`
-	// the PVC used to store the cache
+	// the PVC used to store the cache.
 	PersistentVolumeClaim string `json:"persistentVolumeClaim,omitempty"`
 }
 
-// SpectrumTask is used to configure Spectrum
+// SpectrumTask is used to configure Spectrum.
 type SpectrumTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
 }
 
-// S2iTask is used to configure S2I
+// S2iTask is used to configure S2I.
 type S2iTask struct {
 	BaseTask `json:",inline"`
 	// can be useful to share info with other tasks
@@ -169,7 +169,7 @@ type S2iTask struct {
 	Tag string `json:"tag,omitempty"`
 }
 
-// UserTask is used to execute any generic custom operation
+// UserTask is used to execute any generic custom operation.
 type UserTask struct {
 	BaseTask `json:",inline"`
 	// the container image to use
@@ -178,61 +178,61 @@ type UserTask struct {
 	ContainerCommand string `json:"command,omitempty"`
 }
 
-// BuildStatus defines the observed state of Build
+// BuildStatus defines the observed state of Build.
 type BuildStatus struct {
 	// ObservedGeneration is the most recent generation observed for this Build.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-	// describes the phase
+	// describes the phase.
 	Phase BuildPhase `json:"phase,omitempty"`
-	// the image name built
+	// the image name built.
 	Image string `json:"image,omitempty"`
-	// the digest from image
+	// the digest from image.
 	Digest string `json:"digest,omitempty"`
-	// the base image used for this build
+	// the base image used for this build.
 	BaseImage string `json:"baseImage,omitempty"`
-	// a list of artifacts contained in the build
+	// a list of artifacts contained in the build.
 	Artifacts []Artifact `json:"artifacts,omitempty"`
-	// the error description (if any)
+	// the error description (if any).
 	Error string `json:"error,omitempty"`
-	// the reason of the failure (if any)
+	// the reason of the failure (if any).
 	Failure *Failure `json:"failure,omitempty"`
-	// the time when it started
+	// the time when it started.
 	StartedAt *metav1.Time `json:"startedAt,omitempty"`
-	// a list of conditions occurred during the build
+	// a list of conditions occurred during the build.
 	Conditions []BuildCondition `json:"conditions,omitempty"`
 	// how long it took for the build
 	// Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
-	// https://github.com/OAI/OpenAPI-Specification/issues/845
+	// https://github.com/OAI/OpenAPI-Specification/issues/845 .
 	Duration string `json:"duration,omitempty"`
 }
 
-// BuildPhase --
+// BuildPhase --.
 type BuildPhase string
 
-// BuildConditionType --
+// BuildConditionType --.
 type BuildConditionType string
 
 const (
-	// BuildKind --
+	// BuildKind --.
 	BuildKind string = "Build"
 
-	// BuildPhaseNone --
+	// BuildPhaseNone --.
 	BuildPhaseNone BuildPhase = ""
-	// BuildPhaseInitialization --
+	// BuildPhaseInitialization --.
 	BuildPhaseInitialization BuildPhase = "Initialization"
-	// BuildPhaseScheduling --
+	// BuildPhaseScheduling --.
 	BuildPhaseScheduling BuildPhase = "Scheduling"
-	// BuildPhasePending --
+	// BuildPhasePending --.
 	BuildPhasePending BuildPhase = "Pending"
-	// BuildPhaseRunning --
+	// BuildPhaseRunning --.
 	BuildPhaseRunning BuildPhase = "Running"
-	// BuildPhaseSucceeded --
+	// BuildPhaseSucceeded --.
 	BuildPhaseSucceeded BuildPhase = "Succeeded"
-	// BuildPhaseFailed --
+	// BuildPhaseFailed --.
 	BuildPhaseFailed BuildPhase = "Failed"
-	// BuildPhaseInterrupted --
+	// BuildPhaseInterrupted --.
 	BuildPhaseInterrupted = "Interrupted"
-	// BuildPhaseError --
+	// BuildPhaseError --.
 	BuildPhaseError BuildPhase = "Error"
 )
 
@@ -248,7 +248,7 @@ const (
 // +kubebuilder:printcolumn:name="Duration",type=string,JSONPath=`.status.duration`,description="The build last execution duration"
 // +kubebuilder:printcolumn:name="Attempts",type=integer,JSONPath=`.status.failure.recovery.attempt`,description="The number of execution attempts"
 
-// Build is the Schema for the builds API
+// Build is the Schema for the builds API.
 type Build struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -259,7 +259,7 @@ type Build struct {
 
 // +kubebuilder:object:root=true
 
-// BuildList contains a list of Build
+// BuildList contains a list of Build.
 type BuildList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

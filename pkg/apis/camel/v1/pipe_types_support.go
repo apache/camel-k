@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// GetConditions --
+// GetConditions --.
 func (in *PipeStatus) GetConditions() []ResourceCondition {
 	res := make([]ResourceCondition, 0, len(in.Conditions))
 	for _, c := range in.Conditions {
@@ -35,37 +35,37 @@ func (in *PipeStatus) GetConditions() []ResourceCondition {
 	return res
 }
 
-// GetType --
+// GetType --.
 func (c PipeCondition) GetType() string {
 	return string(c.Type)
 }
 
-// GetStatus --
+// GetStatus --.
 func (c PipeCondition) GetStatus() corev1.ConditionStatus {
 	return c.Status
 }
 
-// GetLastUpdateTime --
+// GetLastUpdateTime --.
 func (c PipeCondition) GetLastUpdateTime() metav1.Time {
 	return c.LastUpdateTime
 }
 
-// GetLastTransitionTime --
+// GetLastTransitionTime --.
 func (c PipeCondition) GetLastTransitionTime() metav1.Time {
 	return c.LastTransitionTime
 }
 
-// GetReason --
+// GetReason --.
 func (c PipeCondition) GetReason() string {
 	return c.Reason
 }
 
-// GetMessage --
+// GetMessage --.
 func (c PipeCondition) GetMessage() string {
 	return c.Message
 }
 
-// SetOperatorID sets the given operator id as an annotation
+// SetOperatorID sets the given operator id as an annotation.
 func (in *Pipe) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
@@ -81,7 +81,7 @@ func (in *PipeStatus) GetCondition(condType PipeConditionType) *PipeCondition {
 	return nil
 }
 
-// SetCondition --
+// SetCondition --.
 func (in *PipeStatus) SetCondition(condType PipeConditionType, status corev1.ConditionStatus, reason string, message string) {
 	in.SetConditions(PipeCondition{
 		Type:               condType,
@@ -93,7 +93,7 @@ func (in *PipeStatus) SetCondition(condType PipeConditionType, status corev1.Con
 	})
 }
 
-// SetErrorCondition --
+// SetErrorCondition --.
 func (in *PipeStatus) SetErrorCondition(condType PipeConditionType, reason string, err error) {
 	in.SetConditions(PipeCondition{
 		Type:               condType,
@@ -145,7 +145,7 @@ func (in *PipeStatus) RemoveCondition(condType PipeConditionType) {
 	in.Conditions = newConditions
 }
 
-// GetPropertyMap returns the EndpointProperties as map
+// GetPropertyMap returns the EndpointProperties as map.
 func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 	if p == nil {
 		return nil, nil
@@ -154,7 +154,7 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 		return nil, nil
 	}
 
-	// Convert json property values to objects before getting their string representation
+	// Convert json property values to objects before getting their string representation.
 	var props map[string]interface{}
 	d := json.NewDecoder(bytes.NewReader(p.RawMessage))
 	d.UseNumber()
@@ -168,7 +168,7 @@ func (p *EndpointProperties) GetPropertyMap() (map[string]string, error) {
 	return stringProps, nil
 }
 
-// NewPipe --
+// NewPipe --.
 func NewPipe(namespace string, name string) Pipe {
 	return Pipe{
 		TypeMeta: metav1.TypeMeta{
@@ -182,7 +182,7 @@ func NewPipe(namespace string, name string) Pipe {
 	}
 }
 
-// NewPipeList --
+// NewPipeList --.
 func NewPipeList() PipeList {
 	return PipeList{
 		TypeMeta: metav1.TypeMeta{

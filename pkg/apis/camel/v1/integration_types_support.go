@@ -60,7 +60,7 @@ func (in *Integration) Initialize() {
 	}
 }
 
-// Sources return a new slice containing all the sources associated to the integration
+// Sources return a new slice containing all the sources associated to the integration.
 func (in *Integration) Sources() []SourceSpec {
 	sources := make([]SourceSpec, 0, len(in.Spec.Sources)+len(in.Status.GeneratedSources))
 	sources = append(sources, in.Spec.Sources...)
@@ -100,7 +100,7 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 	in.Dependencies = append(in.Dependencies, dependency)
 }
 
-// GetConfigurationProperty returns a configuration property
+// GetConfigurationProperty returns a configuration property.
 func (in *IntegrationSpec) GetConfigurationProperty(property string) string {
 	for _, confSpec := range in.Configuration {
 		if confSpec.Type == "property" && strings.HasPrefix(confSpec.Value, property) {
@@ -192,7 +192,7 @@ func NewSourceSpec(name string, content string, language Language) SourceSpec {
 	}
 }
 
-// InferLanguage returns the language of the source or discovers it from file extension if not set
+// InferLanguage returns the language of the source or discovers it from file extension if not set.
 func (in *SourceSpec) InferLanguage() Language {
 	if in.Language != "" {
 		return in.Language
@@ -205,7 +205,7 @@ func (in *SourceSpec) InferLanguage() Language {
 	return ""
 }
 
-// SetOperatorID sets the given operator id as an annotation
+// SetOperatorID sets the given operator id as an annotation.
 func (in *Integration) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
 }
@@ -232,7 +232,7 @@ func (in *Integration) SetIntegrationKit(kit *IntegrationKit) {
 	if kit.Status.Phase != IntegrationKitPhaseReady {
 		cs = corev1.ConditionFalse
 		if kit.Status.Phase == IntegrationKitPhaseNone {
-			message = fmt.Sprintf("creating a new integration kit")
+			message = "creating a new integration kit"
 		} else {
 			message = fmt.Sprintf("integration kit %s/%s is in state %q", kit.Namespace, kit.Name, kit.Status.Phase)
 		}

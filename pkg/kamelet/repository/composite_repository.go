@@ -39,18 +39,18 @@ func newCompositeKameletRepository(repositories ...KameletRepository) KameletRep
 }
 
 func (c compositeKameletRepository) List(ctx context.Context) ([]string, error) {
-	kSet := make(map[string]bool)
+	setOfKeys := make(map[string]bool)
 	for _, repo := range c.repositories {
 		lst, err := repo.List(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, kam := range lst {
-			kSet[kam] = true
+			setOfKeys[kam] = true
 		}
 	}
-	res := make([]string, 0, len(kSet))
-	for kam := range kSet {
+	res := make([]string, 0, len(setOfKeys))
+	for kam := range setOfKeys {
 		res = append(res, kam)
 	}
 	sort.Strings(res)

@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	// CamelCatalogKind --
+	// CamelCatalogKind --.
 	CamelCatalogKind string = "CamelCatalog"
 )
 
@@ -50,20 +50,20 @@ type CamelCatalog struct {
 
 // +kubebuilder:object:root=true
 
-// CamelCatalogList contains a list of CamelCatalog
+// CamelCatalogList contains a list of CamelCatalog.
 type CamelCatalogList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []CamelCatalog `json:"items"`
 }
 
-// CamelCatalogSpec specify what features a Camel runtime provides
+// CamelCatalogSpec specify what features a Camel runtime provides.
 type CamelCatalogSpec struct {
-	// the runtime targeted for the catalog
+	// the runtime targeted for the catalog.
 	Runtime RuntimeSpec `json:"runtime" yaml:"runtime"`
-	// artifacts required by this catalog
+	// artifacts required by this catalog.
 	Artifacts map[string]CamelArtifact `json:"artifacts" yaml:"artifacts"`
-	// loaders required by this catalog
+	// loaders required by this catalog.
 	Loaders map[string]CamelLoader `json:"loaders" yaml:"loaders"`
 }
 
@@ -71,23 +71,23 @@ type CamelCatalogSpec struct {
 type CamelCatalogStatus struct {
 	// ObservedGeneration is the most recent generation observed for this Catalog.
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-	// the actual phase
+	// the actual phase.
 	Phase CamelCatalogPhase `json:"phase,omitempty"`
 	// a list of events happened for the CamelCatalog
 	Conditions []CamelCatalogCondition `json:"conditions,omitempty"`
-	// the container image available for building an application with this catalog
+	// the container image available for building an application with this catalog.
 	Image string `json:"image,omitempty"`
 }
 
-// CamelCatalogPhase --
+// CamelCatalogPhase --.
 type CamelCatalogPhase string
 
 const (
-	// CamelCatalogPhaseNone --
+	// CamelCatalogPhaseNone --.
 	CamelCatalogPhaseNone CamelCatalogPhase = ""
-	// CamelCatalogPhaseReady --
+	// CamelCatalogPhaseReady --.
 	CamelCatalogPhaseReady CamelCatalogPhase = "Ready"
-	// CamelCatalogPhaseError --
+	// CamelCatalogPhaseError --.
 	CamelCatalogPhaseError CamelCatalogPhase = "Error"
 )
 
@@ -107,74 +107,74 @@ type CamelCatalogCondition struct {
 	Message string `json:"message,omitempty"`
 }
 
-// CamelCatalogConditionType --
+// CamelCatalogConditionType --.
 type CamelCatalogConditionType string
 
 const (
-	// CamelCatalogConditionReady --
+	// CamelCatalogConditionReady --.
 	CamelCatalogConditionReady CamelCatalogConditionType = "Ready"
 )
 
-// CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI)
+// CamelScheme represents the scheme used to identify a component in a URI (ie, timer in a timer:xyz endpoint URI).
 type CamelScheme struct {
-	// the ID (ie, timer in a timer:xyz URI)
+	// the ID (ie, timer in a timer:xyz URI).
 	ID string `json:"id" yaml:"id"`
-	// is a passive scheme
+	// is a passive scheme.
 	Passive bool `json:"passive" yaml:"passive"`
-	// is a HTTP based scheme
+	// is a HTTP based scheme.
 	HTTP bool `json:"http" yaml:"http"`
-	// required scope for consumer
+	// required scope for consumer.
 	Consumer CamelSchemeScope `json:"consumer,omitempty" yaml:"consumer,omitempty"`
-	// required scope for producers
+	// required scope for producers.
 	Producer CamelSchemeScope `json:"producer,omitempty" yaml:"producer,omitempty"`
 }
 
-// CamelSchemeScope contains scoped information about a scheme
+// CamelSchemeScope contains scoped information about a scheme.
 type CamelSchemeScope struct {
-	// list of dependencies needed for this scope
+	// list of dependencies needed for this scope.
 	Dependencies []CamelArtifactDependency `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
 }
 
-// CamelArtifactExclusion represents an exclusion clause
+// CamelArtifactExclusion represents an exclusion clause.
 type CamelArtifactExclusion struct {
-	// Maven Group
+	// Maven Group.
 	GroupID string `json:"groupId" yaml:"groupId"`
-	// Maven Artifact
+	// Maven Artifact.
 	ArtifactID string `json:"artifactId" yaml:"artifactId"`
 }
 
-// CamelArtifactDependency represent a maven's dependency
+// CamelArtifactDependency represent a maven's dependency.
 type CamelArtifactDependency struct {
-	// the maven dependency
+	// the maven dependency.
 	MavenArtifact `json:",inline" yaml:",inline"`
-	// provide a list of artifacts to exclude for this dependency
+	// provide a list of artifacts to exclude for this dependency.
 	Exclusions []CamelArtifactExclusion `json:"exclusions,omitempty" yaml:"exclusions,omitempty"`
 }
 
-// CamelArtifact represent the configuration for a feature offered by Camel
+// CamelArtifact represent the configuration for a feature offered by Camel.
 type CamelArtifact struct {
-	// Base Camel Artifact dependency
+	// Base Camel Artifact dependency.
 	CamelArtifactDependency `json:",inline" yaml:",inline"`
-	// accepted URI schemes
+	// accepted URI schemes.
 	Schemes []CamelScheme `json:"schemes,omitempty" yaml:"schemes,omitempty"`
-	// accepted languages
+	// accepted languages.
 	Languages []string `json:"languages,omitempty" yaml:"languages,omitempty"`
-	// accepted data formats
+	// accepted data formats.
 	DataFormats []string `json:"dataformats,omitempty" yaml:"dataformats,omitempty"`
-	// required dependencies
+	// required dependencies.
 	Dependencies []CamelArtifactDependency `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
-	// the Java types used by the artifact feature (ie, component, data format, ...)
+	// the Java types used by the artifact feature (ie, component, data format, ...).
 	JavaTypes []string `json:"javaTypes,omitempty" yaml:"javaTypes,omitempty"`
 }
 
-// CamelLoader represents the configuration required to load a DSL
+// CamelLoader represents the configuration required to load a DSL.
 type CamelLoader struct {
-	// the base Maven artifact required
+	// the base Maven artifact required.
 	MavenArtifact `json:",inline" yaml:",inline"`
-	// a list of DSLs supported
+	// a list of DSLs supported.
 	Languages []string `json:"languages,omitempty" yaml:"languages,omitempty"`
-	// a list of additional dependencies required beside the base one
+	// a list of additional dependencies required beside the base one.
 	Dependencies []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
-	// the metadata of the loader
+	// the metadata of the loader.
 	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 }

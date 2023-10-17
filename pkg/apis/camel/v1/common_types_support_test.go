@@ -31,11 +31,7 @@ import (
 func TestTraitsMerge(t *testing.T) {
 	t1 := Traits{
 		Container: &trait.ContainerTrait{
-			Trait: trait.Trait{
-				Configuration: configurationFromMap(t, map[string]interface{}{
-					"name": "test-container",
-				}),
-			},
+			Name:        "test-container",
 			Auto:        pointer.Bool(false),
 			ServicePort: 81,
 		},
@@ -54,11 +50,7 @@ func TestTraitsMerge(t *testing.T) {
 	}
 	t2 := Traits{
 		Container: &trait.ContainerTrait{
-			Trait: trait.Trait{
-				Configuration: configurationFromMap(t, map[string]interface{}{
-					"port": 8081,
-				}),
-			},
+			Port:     8081,
 			PortName: "http-8081",
 		},
 		Logging: &trait.LoggingTrait{
@@ -80,12 +72,6 @@ func TestTraitsMerge(t *testing.T) {
 	assert.False(t, pointer.BoolDeref(t1.Container.Auto, true))
 	assert.Equal(t, "http-8081", t1.Container.PortName)
 	assert.Equal(t, 81, t1.Container.ServicePort)
-	assert.Equal(t,
-		configurationFromMap(t, map[string]interface{}{
-			"name": "test-container",
-			"port": 8081,
-		}),
-		t1.Container.Configuration)
 
 	// values from merged trait take precedence over the original ones
 	assert.NotNil(t, t1.Logging)
@@ -104,17 +90,6 @@ func TestTraitsMerge(t *testing.T) {
 			"serviceName": "test-integration",
 		}),
 		t1.Addons["telemetry"])
-}
-
-func configurationFromMap(t *testing.T, configMap map[string]interface{}) *trait.Configuration {
-	t.Helper()
-
-	data, err := json.Marshal(configMap)
-	require.NoError(t, err)
-
-	return &trait.Configuration{
-		RawMessage: data,
-	}
 }
 
 func toAddonTrait(t *testing.T, config map[string]interface{}) AddonTrait {
