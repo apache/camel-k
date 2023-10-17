@@ -126,13 +126,6 @@ jobs:
               repo: context.repo.repo,
               body: ':camel: **Thank you for contributing!**\n\nCode Coverage Report :warning: - Coverage changed: ${{env.OLD_COV}}% --> ${{env.NEW_COV}}% (Coverage difference: **${{env.COV_DIFF}}%**)'
               })
-            }else{
-              github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: ':camel: **Thank you for contributing!**\n\nCode Coverage Report :heavy_check_mark: - Coverage unchanged.'
-              })
             }
 
       - name: Comment Merge Conflicts
