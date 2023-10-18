@@ -61,7 +61,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.GetTrait(knativeServiceTraitID) != nil {
 		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
 		if pointer.BoolDeref(knativeServiceTrait.Enabled, true) {
-			return false, newIntegrationConditionPlatformDisabledWithReason("knative-service trait has priority over this trait"), nil
+			return false, newIntegrationConditionPlatformDisabledWithMessage("knative-service trait has priority over this trait"), nil
 		}
 	}
 

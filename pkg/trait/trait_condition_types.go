@@ -26,9 +26,9 @@ import (
 )
 
 const (
-	traitConfigurationMessage = "Trait configuration"
-	userDisabledMessage       = "explicitly disabled by the user"
-	platformDisabledMessage   = "explicitly disabled by the platform"
+	traitConfigurationReason = "TraitConfiguration"
+	userDisabledMessage      = "explicitly disabled by the user"
+	platformDisabledMessage  = "explicitly disabled by the platform"
 )
 
 // TraitCondition is used to get all information/warning about a trait configuration.
@@ -41,27 +41,27 @@ type TraitCondition struct {
 	reason                      string
 }
 
-func NewIntegrationCondition(ict v1.IntegrationConditionType, cs corev1.ConditionStatus, message, reason string) *TraitCondition {
+func NewIntegrationCondition(ict v1.IntegrationConditionType, cs corev1.ConditionStatus, reason, message string) *TraitCondition {
 	return &TraitCondition{
 		integrationConditionType: ict,
 		conditionStatus:          cs,
-		message:                  message,
 		reason:                   reason,
+		message:                  message,
 	}
 }
 
 func NewIntegrationConditionUserDisabled() *TraitCondition {
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationMessage, userDisabledMessage)
+	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, userDisabledMessage)
 }
 
-func newIntegrationConditionPlatformDisabledWithReason(reason string) *TraitCondition {
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationMessage, fmt.Sprintf("%s: %s", platformDisabledMessage, reason))
+func newIntegrationConditionPlatformDisabledWithMessage(message string) *TraitCondition {
+	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", platformDisabledMessage, message))
 }
 
 func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, corev1.ConditionStatus, string, string) {
-	return tc.integrationConditionType, tc.conditionStatus, tc.message, tc.reason
+	return tc.integrationConditionType, tc.conditionStatus, tc.reason, tc.message
 }
 
 func (tc *TraitCondition) integrationKitCondition() (v1.IntegrationKitConditionType, corev1.ConditionStatus, string, string) {
-	return tc.integrationKitConditionType, tc.conditionStatus, tc.message, tc.reason
+	return tc.integrationKitConditionType, tc.conditionStatus, tc.reason, tc.message
 }

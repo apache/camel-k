@@ -103,7 +103,7 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
 		applicable = true
 		enabled, condition, err := trait.Configure(environment)
 		if condition != nil {
-			condition.message = fmt.Sprintf("%s trait configuration", trait.ID())
+			condition.reason = fmt.Sprintf("%sTraitConfiguration", trait.ID())
 			traitsConditions = append(traitsConditions, condition)
 		}
 		if err != nil {

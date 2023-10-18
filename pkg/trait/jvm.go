@@ -63,10 +63,16 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
-	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
-		// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
-		if quarkus, ok := trait.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
-			return false, newIntegrationConditionPlatformDisabledWithReason("Quarkus native build"), nil
+	// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
+	if qt := e.Catalog.GetTrait(quarkusTraitID); qt != nil {
+		if quarkus, ok := qt.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
+			return false, newIntegrationConditionPlatformDisabledWithMessage("quarkus native build"), nil
+		}
+	}
+	// The JVM trait must be disabled if it's a user based build (for which we do not control the way to handle JVM parameters)
+	if ct := e.Catalog.GetTrait(containerTraitID); ct != nil {
+		if ct, ok := ct.(*containerTrait); ok && ct.hasUserProvidedImage() {
+			return false, newIntegrationConditionPlatformDisabledWithMessage("container image was not built via Camel K operator"), nil
 		}
 	}
 

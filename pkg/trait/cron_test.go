@@ -443,7 +443,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	expectedCondition := NewIntegrationCondition(
 		v1.IntegrationConditionDeploymentAvailable,
 		corev1.ConditionFalse,
-		"deployment trait configuration",
+		"deploymentTraitConfiguration",
 		"controller strategy: cron-job",
 	)
 	conditions, err := tc.apply(&environment)
@@ -532,7 +532,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	expectedCondition := NewIntegrationCondition(
 		v1.IntegrationConditionDeploymentAvailable,
 		corev1.ConditionFalse,
-		"deployment trait configuration",
+		"deploymentTraitConfiguration",
 		"controller strategy: cron-job",
 	)
 	conditions, err := tc.apply(&environment)

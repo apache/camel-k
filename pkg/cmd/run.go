@@ -547,7 +547,6 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	} else {
 		// Source-less Integration as the user provided a container image built externally
 		o.Traits = append(o.Traits, fmt.Sprintf("container.image=%s", o.ContainerImage))
-		o.Traits = append(o.Traits, "jvm.enabled=false")
 	}
 
 	if err := resolvePodTemplate(context.Background(), cmd, o.PodTemplate, &integration.Spec); err != nil {

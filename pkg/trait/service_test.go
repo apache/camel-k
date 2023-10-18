@@ -494,13 +494,13 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	deploymentCondition := NewIntegrationCondition(
 		v1.IntegrationConditionDeploymentAvailable,
 		corev1.ConditionFalse,
-		"deployment trait configuration",
+		"deploymentTraitConfiguration",
 		"controller strategy: knative-service",
 	)
 	serviceCondition := NewIntegrationCondition(
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
-		"service trait configuration",
+		"serviceTraitConfiguration",
 		"explicitly disabled by the platform: knative-service trait has priority over this trait",
 	)
 	conditions, err := traitCatalog.apply(&environment)
@@ -572,13 +572,13 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	deploymentCondition := NewIntegrationCondition(
 		v1.IntegrationConditionDeploymentAvailable,
 		corev1.ConditionFalse,
-		"deployment trait configuration",
+		"deploymentTraitConfiguration",
 		"controller strategy: knative-service",
 	)
 	serviceCondition := NewIntegrationCondition(
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
-		"service trait configuration",
+		"serviceTraitConfiguration",
 		"explicitly disabled by the platform: knative-service trait has priority over this trait",
 	)
 	conditions, err := traitCatalog.apply(&environment)
@@ -658,7 +658,7 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	expectedCondition := NewIntegrationCondition(
 		v1.IntegrationConditionKnativeServiceAvailable,
 		corev1.ConditionFalse,
-		"knative-service trait configuration",
+		"knative-serviceTraitConfiguration",
 		"explicitly disabled",
 	)
 	conditions, err := traitCatalog.apply(&environment)

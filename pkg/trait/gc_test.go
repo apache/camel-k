@@ -45,7 +45,7 @@ func TestConfigureDisabledGCTraitDoesNotSucceed(t *testing.T) {
 	expectedCondition := NewIntegrationCondition(
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
-		"Trait configuration",
+		"TraitConfiguration",
 		"explicitly disabled by the user",
 	)
 	configured, condition, err := gcTrait.Configure(environment)

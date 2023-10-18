@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -346,4 +347,9 @@ func (t *containerTrait) configureSecurityContext(e *Environment, container *cor
 			container.SecurityContext = securityContext
 		}
 	}
+}
+
+// It's a user provided image if it does not match the naming convention used by Camel K Integration Kits.
+func (t *containerTrait) hasUserProvidedImage() bool {
+	return t.Image != "" && !strings.Contains(t.Image, "camel-k-kit-")
 }

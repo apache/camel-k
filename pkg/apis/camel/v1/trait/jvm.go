@@ -17,7 +17,11 @@ limitations under the License.
 
 package trait
 
-// The JVM trait is used to configure the JVM that runs the integration.
+// The JVM trait is used to configure the JVM that runs the Integration. This trait can be configured only for Integration and related IntegrationKits
+// (bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
+// trait is disabled by the platform.
+//
+// NOTE: the platform will skip the trait configuration for those container image matching `camel-k-kit-` name.
 //
 // +camel-k:trait=jvm.
 type JVMTrait struct {
