@@ -41,7 +41,7 @@ spec:
   - additionalPrinterColumns:
     - description: The Kamelet phase
       jsonPath: .status.phase
-      name: Phase
+      name: Type
       type: string
     name: v1
     schema:
