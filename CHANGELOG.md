@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.1.0...HEAD)
+
+**Closed issues:**
+
+- Error log traces after integration error [\#4781](https://github.com/apache/camel-k/issues/4781)
+- Projecting routes status to a Kubernetes Resource [\#2728](https://github.com/apache/camel-k/issues/2728)
+
 ## [v2.1.0](https://github.com/apache/camel-k/tree/v2.1.0) (2023-10-16)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.1.0...v2.1.0)
