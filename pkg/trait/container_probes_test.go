@@ -186,13 +186,13 @@ func TestProbesOnKnativeService(t *testing.T) {
 	serviceOverrideCondition := NewIntegrationCondition(
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
-		"service trait configuration",
+		"serviceTraitConfiguration",
 		"explicitly disabled by the platform: knative-service trait has priority over this trait",
 	)
 	ctrlStrategyCondition := NewIntegrationCondition(
 		v1.IntegrationConditionDeploymentAvailable,
 		corev1.ConditionFalse,
-		"deployment trait configuration",
+		"deploymentTraitConfiguration",
 		"controller strategy: knative-service",
 	)
 

@@ -35,7 +35,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-/*
 func TestRunIncrementalBuildRoutine(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-incremental-build"
@@ -191,7 +190,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
-*/
+
 func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-standard-build"

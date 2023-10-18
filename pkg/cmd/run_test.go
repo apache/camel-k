@@ -840,8 +840,6 @@ spec:
   traits:
     container:
       image: docker.io/my-org/my-app:1.0.0
-    jvm:
-      enabled: false
     mount:
       configs:
       - configmap:my-cm

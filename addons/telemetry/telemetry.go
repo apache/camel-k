@@ -105,7 +105,7 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 					condition = trait.NewIntegrationCondition(
 						v1.IntegrationConditionTraitInfo,
 						corev1.ConditionTrue,
-						"Tracing endpoint",
+						"TracingEndpoint",
 						endpoint,
 					)
 					t.Endpoint = endpoint

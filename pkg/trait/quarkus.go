@@ -162,7 +162,7 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
 			}
 		}
-		return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationMessage, message)
+		return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
 	}
 
 	return nil
