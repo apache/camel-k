@@ -91,7 +91,7 @@ spec:
                   (mount.volumes) to manage volumes configuration used by the kit'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -99,7 +99,7 @@ spec:
                       type: string
                     value:
                       description: the value to assign to the configuration (syntax
-                        may vary depending on the `Type`)
+                        may vary depending on the `Type`).
                       type: string
                   required:
                   - type
@@ -126,56 +126,56 @@ spec:
                 description: the sources to add at build time
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
-                      description: if the content is compressed (base64 encrypted)
+                      description: if the content is compressed (base64 encrypted).
                       type: boolean
                     content:
-                      description: the source code (plain text)
+                      description: the source code (plain text).
                       type: string
                     contentKey:
-                      description: the confimap key holding the source content
+                      description: the confimap key holding the source content.
                       type: string
                     contentRef:
-                      description: the confimap reference holding the source content
+                      description: the confimap reference holding the source content.
                       type: string
                     contentType:
-                      description: the content type (tipically text or binary)
+                      description: the content type (tipically text or binary).
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
+                        uses to pre/post process sources.
                       items:
                         type: string
                       type: array
                     language:
                       description: specify which is the language (Camel DSL) used
-                        to interpret this source code
+                        to interpret this source code.
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                        that will interpret this source at runtime
+                        that will interpret this source at runtime.
                       type: string
                     name:
-                      description: the name of the specification
+                      description: the name of the specification.
                       type: string
                     path:
-                      description: the path where the file is stored
+                      description: the path where the file is stored.
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
-                        if type is "template")
+                        if type is "template").
                       items:
                         type: string
                       type: array
                     rawContent:
-                      description: the source code (binary)
+                      description: the source code (binary).
                       format: byte
                       type: string
                     type:
                       description: Type defines the kind of source described by this
-                        object
+                        object.
                       type: string
                   type: object
                 type: array
@@ -185,7 +185,7 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
                     description: The collection of addon trait configurations
@@ -328,20 +328,20 @@ spec:
                 description: list of artifacts used by the kit
                 items:
                   description: Artifact represents a materialized artifact (a jar
-                    dependency or in general a file used by the build)
+                    dependency or in general a file used by the build).
                   properties:
                     checksum:
-                      description: a checksum (SHA1) of the content
+                      description: a checksum (SHA1) of the content.
                       type: string
                     id:
                       description: the identification (GAV for maven dependencies
-                        or file name for other file types)
+                        or file name for other file types).
                       type: string
                     location:
-                      description: where it is located in the builder `Pod`
+                      description: where it is located in the builder `Pod`.
                       type: string
                     target:
-                      description: the expected location in the runtime
+                      description: the expected location in the runtime.
                       type: string
                   required:
                   - id
@@ -391,19 +391,19 @@ spec:
                 description: failure reason (if any)
                 properties:
                   reason:
-                    description: a short text specifying the reason
+                    description: a short text specifying the reason.
                     type: string
                   recovery:
-                    description: the recovery attempted for this failure
+                    description: the recovery attempted for this failure.
                     properties:
                       attempt:
-                        description: attempt number
+                        description: attempt number.
                         type: integer
                       attemptMax:
-                        description: maximum number of attempts
+                        description: maximum number of attempts.
                         type: integer
                       attemptTime:
-                        description: time of the attempt execution
+                        description: time of the attempt execution.
                         format: date-time
                         type: string
                     required:
@@ -411,7 +411,7 @@ spec:
                     - attemptMax
                     type: object
                   time:
-                    description: the time when the failure has happened
+                    description: the time when the failure has happened.
                     format: date-time
                     type: string
                 required:

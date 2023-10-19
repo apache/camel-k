@@ -62,7 +62,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: Build is the Schema for the builds API
+        description: Build is the Schema for the builds API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -78,7 +78,8 @@ spec:
             type: object
           spec:
             description: BuildSpec defines the list of tasks to be execute for a Build.
-              From Camel K version 2, it would be more appropiate to think it as pipeline.
+              From Camel K version 2, it would be more appropriate to think it as
+              pipeline.
             properties:
               configuration:
                 description: 'The configuration that should be used to perform the
@@ -87,18 +88,18 @@ spec:
                 properties:
                   limitCPU:
                     description: The maximum amount of CPU required. Only used for
-                      `pod` strategy
+                      `pod` strategy.
                     type: string
                   limitMemory:
                     description: The maximum amount of memory required. Only used
-                      for `pod` strategy
+                      for `pod` strategy.
                     type: string
                   operatorNamespace:
                     description: The namespace where to run the builder Pod (must
                       be the same of the operator in charge of this Build reconciliation).
                     type: string
                   orderStrategy:
-                    description: the build order strategy to adopt
+                    description: the build order strategy to adopt.
                     enum:
                     - dependencies
                     - fifo
@@ -106,14 +107,14 @@ spec:
                     type: string
                   requestCPU:
                     description: The minimum amount of CPU required. Only used for
-                      `pod` strategy
+                      `pod` strategy.
                     type: string
                   requestMemory:
                     description: The minimum amount of memory required. Only used
-                      for `pod` strategy
+                      for `pod` strategy.
                     type: string
                   strategy:
-                    description: the strategy to adopt
+                    description: the strategy to adopt.
                     enum:
                     - routine
                     - pod
@@ -144,25 +145,25 @@ spec:
                       description: a BuildahTask, for Buildah strategy
                       properties:
                         baseImage:
-                          description: base image layer
+                          description: base image layer.
                           type: string
                         contextDir:
-                          description: can be useful to share info with other tasks
+                          description: can be useful to share info with other tasks.
                           type: string
                         executorImage:
-                          description: docker image to use
+                          description: docker image to use.
                           type: string
                         image:
-                          description: final image name
+                          description: final image name.
                           type: string
                         name:
                           description: name of the task
                           type: string
                         platform:
-                          description: The platform of build image
+                          description: The platform of build image.
                           type: string
                         registry:
-                          description: where to publish the final image
+                          description: where to publish the final image.
                           properties:
                             address:
                               description: the URI to access
@@ -183,7 +184,7 @@ spec:
                               type: string
                           type: object
                         verbose:
-                          description: log more information
+                          description: log more information.
                           type: boolean
                       type: object
                     builder:
@@ -191,10 +192,10 @@ spec:
                         project
                       properties:
                         baseImage:
-                          description: the base image layer
+                          description: the base image layer.
                           type: string
                         buildDir:
-                          description: workspace directory to use
+                          description: workspace directory to use.
                           type: string
                         configuration:
                           description: The configuration that should be used to perform
@@ -202,11 +203,11 @@ spec:
                           properties:
                             limitCPU:
                               description: The maximum amount of CPU required. Only
-                                used for `pod` strategy
+                                used for `pod` strategy.
                               type: string
                             limitMemory:
                               description: The maximum amount of memory required.
-                                Only used for `pod` strategy
+                                Only used for `pod` strategy.
                               type: string
                             operatorNamespace:
                               description: The namespace where to run the builder
@@ -214,7 +215,7 @@ spec:
                                 this Build reconciliation).
                               type: string
                             orderStrategy:
-                              description: the build order strategy to adopt
+                              description: the build order strategy to adopt.
                               enum:
                               - dependencies
                               - fifo
@@ -222,14 +223,14 @@ spec:
                               type: string
                             requestCPU:
                               description: The minimum amount of CPU required. Only
-                                used for `pod` strategy
+                                used for `pod` strategy.
                               type: string
                             requestMemory:
                               description: The minimum amount of memory required.
-                                Only used for `pod` strategy
+                                Only used for `pod` strategy.
                               type: string
                             strategy:
-                              description: the strategy to adopt
+                              description: the strategy to adopt.
                               enum:
                               - routine
                               - pod
@@ -240,13 +241,13 @@ spec:
                               type: string
                           type: object
                         dependencies:
-                          description: the list of dependencies to use for this build
+                          description: the list of dependencies to use for this build.
                           items:
                             type: string
                           type: array
                         maven:
                           description: the configuration required by Maven for the
-                            application build phase
+                            application build phase.
                           properties:
                             caSecrets:
                               description: The Secrets name and key, containing the
@@ -291,7 +292,7 @@ spec:
                               description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                                  Maven artifact
+                                  Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
@@ -316,9 +317,9 @@ spec:
                               description: The Maven properties.
                               type: object
                             repositories:
-                              description: additional repositories
+                              description: additional repositories.
                               items:
-                                description: Repository defines a Maven repository
+                                description: Repository defines a Maven repository.
                                 properties:
                                   id:
                                     description: identifies the repository
@@ -385,7 +386,7 @@ spec:
                                 type: object
                               type: array
                             servers:
-                              description: Servers (auth)
+                              description: Servers (auth).
                               items:
                                 properties:
                                   configuration:
@@ -494,20 +495,20 @@ spec:
                           type: string
                         runtime:
                           description: the configuration required for the runtime
-                            application
+                            application.
                           properties:
                             applicationClass:
-                              description: application entry point (main) to be executed
+                              description: application entry point (main) to be executed.
                               type: string
                             capabilities:
                               additionalProperties:
                                 description: Capability is a particular feature which
-                                  requires a well known set of dependencies
+                                  requires a well known set of dependencies.
                                 properties:
                                   dependencies:
                                     items:
                                       description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                                        Maven artifact
+                                        Maven artifact.
                                       properties:
                                         artifactId:
                                           description: Maven Artifact
@@ -530,10 +531,10 @@ spec:
                               type: object
                             dependencies:
                               description: list of dependencies needed to run the
-                                application
+                                application.
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                                  Maven artifact
+                                  Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
@@ -556,7 +557,7 @@ spec:
                               type: object
                             provider:
                               description: Camel main application provider, ie, Camel
-                                Quarkus
+                                Quarkus.
                               type: string
                             version:
                               description: Camel K Runtime version
@@ -568,75 +569,75 @@ spec:
                           - version
                           type: object
                         sources:
-                          description: the sources to add at build time
+                          description: the sources to add at build time.
                           items:
                             description: SourceSpec defines the configuration for
                               one or more routes to be executed in a certain Camel
-                              DSL language
+                              DSL language.
                             properties:
                               compression:
                                 description: if the content is compressed (base64
-                                  encrypted)
+                                  encrypted).
                                 type: boolean
                               content:
-                                description: the source code (plain text)
+                                description: the source code (plain text).
                                 type: string
                               contentKey:
-                                description: the confimap key holding the source content
+                                description: the confimap key holding the source content.
                                 type: string
                               contentRef:
                                 description: the confimap reference holding the source
-                                  content
+                                  content.
                                 type: string
                               contentType:
-                                description: the content type (tipically text or binary)
+                                description: the content type (tipically text or binary).
                                 type: string
                               interceptors:
                                 description: Interceptors are optional identifiers
                                   the org.apache.camel.k.RoutesLoader uses to pre/post
-                                  process sources
+                                  process sources.
                                 items:
                                   type: string
                                 type: array
                               language:
                                 description: specify which is the language (Camel
-                                  DSL) used to interpret this source code
+                                  DSL) used to interpret this source code.
                                 type: string
                               loader:
                                 description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                                  that will interpret this source at runtime
+                                  that will interpret this source at runtime.
                                 type: string
                               name:
-                                description: the name of the specification
+                                description: the name of the specification.
                                 type: string
                               path:
-                                description: the path where the file is stored
+                                description: the path where the file is stored.
                                 type: string
                               property-names:
                                 description: List of property names defined in the
-                                  source (e.g. if type is "template")
+                                  source (e.g. if type is "template").
                                 items:
                                   type: string
                                 type: array
                               rawContent:
-                                description: the source code (binary)
+                                description: the source code (binary).
                                 format: byte
                                 type: string
                               type:
                                 description: Type defines the kind of source described
-                                  by this object
+                                  by this object.
                                 type: string
                             type: object
                           type: array
                         steps:
-                          description: the list of steps to execute (see pkg/builder/)
+                          description: the list of steps to execute (see pkg/builder/).
                           items:
                             type: string
                           type: array
                       type: object
                     custom:
                       description: UserTask is used to execute any generic custom
-                        operation
+                        operation.
                       properties:
                         command:
                           description: the command to execute
@@ -652,32 +653,32 @@ spec:
                       description: a KanikoTask, for Kaniko strategy
                       properties:
                         baseImage:
-                          description: base image layer
+                          description: base image layer.
                           type: string
                         cache:
-                          description: use a cache
+                          description: use a cache.
                           properties:
                             enabled:
-                              description: true if a cache is enabled
+                              description: true if a cache is enabled.
                               type: boolean
                             persistentVolumeClaim:
-                              description: the PVC used to store the cache
+                              description: the PVC used to store the cache.
                               type: string
                           type: object
                         contextDir:
-                          description: can be useful to share info with other tasks
+                          description: can be useful to share info with other tasks.
                           type: string
                         executorImage:
-                          description: docker image to use
+                          description: docker image to use.
                           type: string
                         image:
-                          description: final image name
+                          description: final image name.
                           type: string
                         name:
                           description: name of the task
                           type: string
                         registry:
-                          description: where to publish the final image
+                          description: where to publish the final image.
                           properties:
                             address:
                               description: the URI to access
@@ -698,7 +699,7 @@ spec:
                               type: string
                           type: object
                         verbose:
-                          description: log more information
+                          description: log more information.
                           type: boolean
                       type: object
                     s2i:
@@ -718,19 +719,19 @@ spec:
                       description: a SpectrumTask, for Spectrum strategy
                       properties:
                         baseImage:
-                          description: base image layer
+                          description: base image layer.
                           type: string
                         contextDir:
-                          description: can be useful to share info with other tasks
+                          description: can be useful to share info with other tasks.
                           type: string
                         image:
-                          description: final image name
+                          description: final image name.
                           type: string
                         name:
                           description: name of the task
                           type: string
                         registry:
-                          description: where to publish the final image
+                          description: where to publish the final image.
                           properties:
                             address:
                               description: the URI to access
@@ -766,36 +767,36 @@ spec:
                 type: string
             type: object
           status:
-            description: BuildStatus defines the observed state of Build
+            description: BuildStatus defines the observed state of Build.
             properties:
               artifacts:
-                description: a list of artifacts contained in the build
+                description: a list of artifacts contained in the build.
                 items:
                   description: Artifact represents a materialized artifact (a jar
-                    dependency or in general a file used by the build)
+                    dependency or in general a file used by the build).
                   properties:
                     checksum:
-                      description: a checksum (SHA1) of the content
+                      description: a checksum (SHA1) of the content.
                       type: string
                     id:
                       description: the identification (GAV for maven dependencies
-                        or file name for other file types)
+                        or file name for other file types).
                       type: string
                     location:
-                      description: where it is located in the builder `Pod`
+                      description: where it is located in the builder `Pod`.
                       type: string
                     target:
-                      description: the expected location in the runtime
+                      description: the expected location in the runtime.
                       type: string
                   required:
                   - id
                   type: object
                 type: array
               baseImage:
-                description: the base image used for this build
+                description: the base image used for this build.
                 type: string
               conditions:
-                description: a list of conditions occurred during the build
+                description: a list of conditions occurred during the build.
                 items:
                   description: BuildCondition describes the state of a resource at
                     a certain point.
@@ -828,32 +829,33 @@ spec:
                   type: object
                 type: array
               digest:
-                description: the digest from image
+                description: the digest from image.
                 type: string
               duration:
                 description: how long it took for the build Change to Duration / ISO
                   8601 when CRD uses OpenAPI spec v3 https://github.com/OAI/OpenAPI-Specification/issues/845
+                  .
                 type: string
               error:
-                description: the error description (if any)
+                description: the error description (if any).
                 type: string
               failure:
-                description: the reason of the failure (if any)
+                description: the reason of the failure (if any).
                 properties:
                   reason:
-                    description: a short text specifying the reason
+                    description: a short text specifying the reason.
                     type: string
                   recovery:
-                    description: the recovery attempted for this failure
+                    description: the recovery attempted for this failure.
                     properties:
                       attempt:
-                        description: attempt number
+                        description: attempt number.
                         type: integer
                       attemptMax:
-                        description: maximum number of attempts
+                        description: maximum number of attempts.
                         type: integer
                       attemptTime:
-                        description: time of the attempt execution
+                        description: time of the attempt execution.
                         format: date-time
                         type: string
                     required:
@@ -861,7 +863,7 @@ spec:
                     - attemptMax
                     type: object
                   time:
-                    description: the time when the failure has happened
+                    description: the time when the failure has happened.
                     format: date-time
                     type: string
                 required:
@@ -870,7 +872,7 @@ spec:
                 - time
                 type: object
               image:
-                description: the image name built
+                description: the image name built.
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -878,10 +880,10 @@ spec:
                 format: int64
                 type: integer
               phase:
-                description: describes the phase
+                description: describes the phase.
                 type: string
               startedAt:
-                description: the time when it started
+                description: the time when it started.
                 format: date-time
                 type: string
             type: object

@@ -62,7 +62,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: Integration is the Schema for the integrations API
+        description: Integration is the Schema for the integrations API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -77,7 +77,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: the desired Integration specification
+            description: the desired Integration specification.
             properties:
               configuration:
                 description: 'Deprecated: Use camel trait (camel.properties) to manage
@@ -86,7 +86,7 @@ spec:
                   (mount.volumes) to manage volumes'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -94,7 +94,7 @@ spec:
                       type: string
                     value:
                       description: the value to assign to the configuration (syntax
-                        may vary depending on the `Type`)
+                        may vary depending on the `Type`).
                       type: string
                   required:
                   - type
@@ -109,16 +109,16 @@ spec:
                 type: array
               flows:
                 description: a source in YAML DSL language which contain the routes
-                  to run
+                  to run.
                 items:
                   description: Flow is an unstructured object representing a Camel
-                    Flow in YAML/JSON DSL
+                    Flow in YAML/JSON DSL.
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
               integrationKit:
                 description: the reference of the `IntegrationKit` which is used for
-                  this Integration
+                  this Integration.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -157,7 +157,7 @@ spec:
                 description: the profile needed to run this Integration
                 type: string
               replicas:
-                description: the number of `Pods` needed for the running Integration
+                description: the number of `Pods` needed for the running Integration.
                 format: int32
                 type: integer
               repositories:
@@ -169,59 +169,59 @@ spec:
                 description: custom SA to use for the Integration
                 type: string
               sources:
-                description: the sources which contain the Camel routes to run
+                description: the sources which contain the Camel routes to run.
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
-                      description: if the content is compressed (base64 encrypted)
+                      description: if the content is compressed (base64 encrypted).
                       type: boolean
                     content:
-                      description: the source code (plain text)
+                      description: the source code (plain text).
                       type: string
                     contentKey:
-                      description: the confimap key holding the source content
+                      description: the confimap key holding the source content.
                       type: string
                     contentRef:
-                      description: the confimap reference holding the source content
+                      description: the confimap reference holding the source content.
                       type: string
                     contentType:
-                      description: the content type (tipically text or binary)
+                      description: the content type (tipically text or binary).
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
+                        uses to pre/post process sources.
                       items:
                         type: string
                       type: array
                     language:
                       description: specify which is the language (Camel DSL) used
-                        to interpret this source code
+                        to interpret this source code.
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                        that will interpret this source at runtime
+                        that will interpret this source at runtime.
                       type: string
                     name:
-                      description: the name of the specification
+                      description: the name of the specification.
                       type: string
                     path:
-                      description: the path where the file is stored
+                      description: the path where the file is stored.
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
-                        if type is "template")
+                        if type is "template").
                       items:
                         type: string
                       type: array
                     rawContent:
-                      description: the source code (binary)
+                      description: the source code (binary).
                       format: byte
                       type: string
                     type:
                       description: Type defines the kind of source described by this
-                        object
+                        object.
                       type: string
                   type: object
                 type: array
@@ -229,14 +229,14 @@ spec:
                 description: Pod template customization
                 properties:
                   spec:
-                    description: the specification
+                    description: the specification.
                     properties:
                       activeDeadlineSeconds:
-                        description: ActiveDeadlineSeconds
+                        description: ActiveDeadlineSeconds.
                         format: int64
                         type: integer
                       containers:
-                        description: Containers
+                        description: Containers.
                         items:
                           description: A single application container that you want
                             to run within a pod.
@@ -1526,10 +1526,10 @@ spec:
                           type: object
                         type: array
                       dnsPolicy:
-                        description: DNSPolicy
+                        description: DNSPolicy.
                         type: string
                       ephemeralContainers:
-                        description: EphemeralContainers
+                        description: EphemeralContainers.
                         items:
                           description: "An EphemeralContainer is a temporary container
                             that you may add to an existing Pod for user-initiated
@@ -2817,7 +2817,7 @@ spec:
                           type: object
                         type: array
                       initContainers:
-                        description: InitContainers
+                        description: InitContainers.
                         items:
                           description: A single application container that you want
                             to run within a pod.
@@ -4109,13 +4109,13 @@ spec:
                       nodeSelector:
                         additionalProperties:
                           type: string
-                        description: NodeSelector
+                        description: NodeSelector.
                         type: object
                       restartPolicy:
-                        description: RestartPolicy
+                        description: RestartPolicy.
                         type: string
                       securityContext:
-                        description: PodSecurityContext
+                        description: PodSecurityContext.
                         properties:
                           fsGroup:
                             description: "A special supplemental group that applies
@@ -4292,11 +4292,11 @@ spec:
                             type: object
                         type: object
                       terminationGracePeriodSeconds:
-                        description: TerminationGracePeriodSeconds
+                        description: TerminationGracePeriodSeconds.
                         format: int64
                         type: integer
                       topologySpreadConstraints:
-                        description: TopologySpreadConstraints
+                        description: TopologySpreadConstraints.
                         items:
                           description: TopologySpreadConstraint specifies how to spread
                             matching pods among the given topology.
@@ -4478,7 +4478,7 @@ spec:
                           type: object
                         type: array
                       volumes:
-                        description: Volumes
+                        description: Volumes.
                         items:
                           description: Volume represents a named volume in a pod that
                             may be accessed by any container in the pod.
@@ -6127,13 +6127,13 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: The extension point with addon traits
+                    description: The extension point with addon traits.
                     type: object
                   affinity:
-                    description: The configuration of Affinity trait
+                    description: The configuration of Affinity trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6175,7 +6175,7 @@ spec:
                         type: array
                     type: object
                   builder:
-                    description: The configuration of Builder trait
+                    description: The configuration of Builder trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6228,7 +6228,7 @@ spec:
                         type: boolean
                     type: object
                   camel:
-                    description: The configuration of Camel trait
+                    description: The configuration of Camel trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6252,7 +6252,7 @@ spec:
                         type: string
                     type: object
                   container:
-                    description: The configuration of Container trait
+                    description: The configuration of Container trait.
                     properties:
                       auto:
                         description: To automatically enable the trait
@@ -6315,7 +6315,7 @@ spec:
                         type: string
                     type: object
                   cron:
-                    description: The configuration of Cron trait
+                    description: The configuration of Cron trait.
                     properties:
                       activeDeadlineSeconds:
                         description: Specifies the duration in seconds, relative to
@@ -6386,7 +6386,7 @@ spec:
                         type: integer
                     type: object
                   dependencies:
-                    description: The configuration of Dependencies trait
+                    description: The configuration of Dependencies trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6399,7 +6399,7 @@ spec:
                         type: boolean
                     type: object
                   deployer:
-                    description: The configuration of Deployer trait
+                    description: The configuration of Deployer trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6427,7 +6427,7 @@ spec:
                         type: boolean
                     type: object
                   deployment:
-                    description: The configuration of Deployment trait
+                    description: The configuration of Deployment trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6468,7 +6468,7 @@ spec:
                         type: string
                     type: object
                   environment:
-                    description: The configuration of Environment trait
+                    description: The configuration of Environment trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6497,7 +6497,7 @@ spec:
                         type: array
                     type: object
                   error-handler:
-                    description: The configuration of Error Handler trait
+                    description: The configuration of Error Handler trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6514,7 +6514,7 @@ spec:
                         type: string
                     type: object
                   gc:
-                    description: The configuration of GC trait
+                    description: The configuration of GC trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6536,7 +6536,7 @@ spec:
                         type: boolean
                     type: object
                   health:
-                    description: The configuration of Health trait
+                    description: The configuration of Health trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -6645,7 +6645,7 @@ spec:
                         type: integer
                     type: object
                   ingress:
-                    description: The configuration of Ingress trait
+                    description: The configuration of Ingress trait.
                     properties:
                       annotations:
                         additionalProperties:
@@ -6685,7 +6685,7 @@ spec:
                         type: string
                     type: object
                   istio:
-                    description: The configuration of Istio trait
+                    description: The configuration of Istio trait.
                     properties:
                       allow:
                         description: Configures a (comma-separated) list of CIDR subnets
@@ -6708,7 +6708,7 @@ spec:
                         type: boolean
                     type: object
                   jolokia:
-                    description: The configuration of Jolokia trait
+                    description: The configuration of Jolokia trait.
                     properties:
                       CACert:
                         description: The PEM encoded CA certification file path, used
@@ -6777,7 +6777,7 @@ spec:
                         type: string
                     type: object
                   jvm:
-                    description: The configuration of JVM trait
+                    description: The configuration of JVM trait.
                     properties:
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
@@ -6815,7 +6815,7 @@ spec:
                         type: boolean
                     type: object
                   kamelets:
-                    description: The configuration of Kamelets trait
+                    description: The configuration of Kamelets trait.
                     properties:
                       auto:
                         description: Automatically inject all referenced Kamelets
@@ -6846,7 +6846,7 @@ spec:
                     - configuration
                     type: object
                   knative:
-                    description: The configuration of Knative trait
+                    description: The configuration of Knative trait.
                     properties:
                       auto:
                         description: Enable automatic discovery of all trait properties.
@@ -6924,7 +6924,7 @@ spec:
                         type: boolean
                     type: object
                   knative-service:
-                    description: The configuration of Knative Service trait
+                    description: The configuration of Knative Service trait.
                     properties:
                       auto:
                         description: "Automatically deploy the integration as Knative
@@ -6990,7 +6990,7 @@ spec:
                         type: string
                     type: object
                   logging:
-                    description: The configuration of Logging trait
+                    description: The configuration of Logging trait.
                     properties:
                       color:
                         description: Colorize the log output
@@ -7034,7 +7034,7 @@ spec:
                     - configuration
                     type: object
                   mount:
-                    description: The configuration of Mount trait
+                    description: The configuration of Mount trait.
                     properties:
                       configs:
                         description: 'A list of configuration pointing to configmap/secret.
@@ -7077,7 +7077,7 @@ spec:
                         type: array
                     type: object
                   openapi:
-                    description: The configuration of OpenAPI trait
+                    description: The configuration of OpenAPI trait.
                     properties:
                       configmaps:
                         description: The configmaps holding the spec of the OpenAPI
@@ -7095,7 +7095,7 @@ spec:
                         type: boolean
                     type: object
                   owner:
-                    description: The configuration of Owner trait
+                    description: The configuration of Owner trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7118,7 +7118,7 @@ spec:
                         type: array
                     type: object
                   pdb:
-                    description: The configuration of PDB trait
+                    description: The configuration of PDB trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7144,7 +7144,7 @@ spec:
                         type: string
                     type: object
                   platform:
-                    description: The configuration of Platform trait
+                    description: The configuration of Platform trait.
                     properties:
                       auto:
                         description: To automatically detect from the environment
@@ -7170,7 +7170,7 @@ spec:
                         type: boolean
                     type: object
                   pod:
-                    description: The configuration of Pod trait
+                    description: The configuration of Pod trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7183,7 +7183,7 @@ spec:
                         type: boolean
                     type: object
                   prometheus:
-                    description: The configuration of Prometheus trait
+                    description: The configuration of Prometheus trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7206,7 +7206,7 @@ spec:
                         type: array
                     type: object
                   pull-secret:
-                    description: The configuration of Pull Secret trait
+                    description: The configuration of Pull Secret trait.
                     properties:
                       auto:
                         description: Automatically configures the platform registry
@@ -7234,7 +7234,7 @@ spec:
                         type: string
                     type: object
                   quarkus:
-                    description: The configuration of Quarkus trait
+                    description: The configuration of Quarkus trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7264,7 +7264,7 @@ spec:
                         type: array
                     type: object
                   registry:
-                    description: The configuration of Registry trait
+                    description: The configuration of Registry trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7277,7 +7277,7 @@ spec:
                         type: boolean
                     type: object
                   route:
-                    description: The configuration of Route trait
+                    description: The configuration of Route trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7367,7 +7367,7 @@ spec:
                         type: string
                     type: object
                   service:
-                    description: The configuration of Service trait
+                    description: The configuration of Service trait.
                     properties:
                       auto:
                         description: To automatically detect from the code if a Service
@@ -7396,7 +7396,7 @@ spec:
                         type: string
                     type: object
                   service-binding:
-                    description: The configuration of Service Binding trait
+                    description: The configuration of Service Binding trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7424,7 +7424,7 @@ spec:
                     - configuration
                     type: object
                   toleration:
-                    description: The configuration of Toleration trait
+                    description: The configuration of Toleration trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -7454,15 +7454,15 @@ spec:
                 type: object
             type: object
           status:
-            description: the status of the Integration
+            description: the status of the Integration.
             properties:
               capabilities:
-                description: features offered by the Integration
+                description: features offered by the Integration.
                 items:
                   type: string
                 type: array
               conditions:
-                description: a list of events happened for the Integration
+                description: a list of events happened for the Integration.
                 items:
                   description: IntegrationCondition describes the state of a resource
                     at a certain point.
@@ -7559,10 +7559,10 @@ spec:
                   type: object
                 type: array
               configuration:
-                description: 'Deprecated: a list of configuration specification'
+                description: 'Deprecated: a list of configuration specification.'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -7570,7 +7570,7 @@ spec:
                       type: string
                     value:
                       description: the value to assign to the configuration (syntax
-                        may vary depending on the `Type`)
+                        may vary depending on the `Type`).
                       type: string
                   required:
                   - type
@@ -7583,71 +7583,71 @@ spec:
                   type: string
                 type: array
               digest:
-                description: the digest calculated for this Integration
+                description: the digest calculated for this Integration.
                 type: string
               generatedSources:
-                description: a list of sources generated for this Integration
+                description: a list of sources generated for this Integration.
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
-                      description: if the content is compressed (base64 encrypted)
+                      description: if the content is compressed (base64 encrypted).
                       type: boolean
                     content:
-                      description: the source code (plain text)
+                      description: the source code (plain text).
                       type: string
                     contentKey:
-                      description: the confimap key holding the source content
+                      description: the confimap key holding the source content.
                       type: string
                     contentRef:
-                      description: the confimap reference holding the source content
+                      description: the confimap reference holding the source content.
                       type: string
                     contentType:
-                      description: the content type (tipically text or binary)
+                      description: the content type (tipically text or binary).
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
+                        uses to pre/post process sources.
                       items:
                         type: string
                       type: array
                     language:
                       description: specify which is the language (Camel DSL) used
-                        to interpret this source code
+                        to interpret this source code.
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                        that will interpret this source at runtime
+                        that will interpret this source at runtime.
                       type: string
                     name:
-                      description: the name of the specification
+                      description: the name of the specification.
                       type: string
                     path:
-                      description: the path where the file is stored
+                      description: the path where the file is stored.
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
-                        if type is "template")
+                        if type is "template").
                       items:
                         type: string
                       type: array
                     rawContent:
-                      description: the source code (binary)
+                      description: the source code (binary).
                       format: byte
                       type: string
                     type:
                       description: Type defines the kind of source described by this
-                        object
+                        object.
                       type: string
                   type: object
                 type: array
               image:
-                description: the container image used
+                description: the container image used.
                 type: string
               integrationKit:
                 description: the reference of the `IntegrationKit` which is used for
-                  this Integration
+                  this Integration.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -7693,29 +7693,29 @@ spec:
                 format: int64
                 type: integer
               phase:
-                description: the actual phase
+                description: the actual phase.
                 type: string
               platform:
-                description: The IntegrationPlatform watching this Integration
+                description: The IntegrationPlatform watching this Integration.
                 type: string
               profile:
                 description: the profile needed to run this Integration
                 type: string
               replicas:
-                description: the number of replicas
+                description: the number of replicas.
                 format: int32
                 type: integer
               runtimeProvider:
-                description: the runtime provider targeted for this Integration
+                description: the runtime provider targeted for this Integration.
                 type: string
               runtimeVersion:
-                description: the runtime version targeted for this Integration
+                description: the runtime version targeted for this Integration.
                 type: string
               selector:
-                description: label selector
+                description: label selector.
                 type: string
               version:
-                description: the operator version
+                description: the operator version.
                 type: string
             type: object
         type: object

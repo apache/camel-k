@@ -66,7 +66,7 @@ spec:
           operator behavior. It defines the behavior of all Custom Resources (`IntegrationKit`,
           `Integration`, `Kamelet`) in the given namespace. When the Camel K operator
           is installed in `global` mode, you will need to specify an `IntegrationPlatform`
-          in each namespace where you want the Camel K operator to be executed
+          in each namespace where you want the Camel K operator to be executed.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -81,10 +81,10 @@ spec:
           metadata:
             type: object
           spec:
-            description: IntegrationPlatformSpec defines the desired state of IntegrationPlatform
+            description: IntegrationPlatformSpec defines the desired state of IntegrationPlatform.
             properties:
               build:
-                description: specify how to build the Integration/IntegrationKits
+                description: specify how to build the Integration/IntegrationKits.
                 properties:
                   PublishStrategyOptions:
                     additionalProperties:
@@ -106,18 +106,18 @@ spec:
                     properties:
                       limitCPU:
                         description: The maximum amount of CPU required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       limitMemory:
                         description: The maximum amount of memory required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       operatorNamespace:
                         description: The namespace where to run the builder Pod (must
                           be the same of the operator in charge of this Build reconciliation).
                         type: string
                       orderStrategy:
-                        description: the build order strategy to adopt
+                        description: the build order strategy to adopt.
                         enum:
                         - dependencies
                         - fifo
@@ -125,14 +125,14 @@ spec:
                         type: string
                       requestCPU:
                         description: The minimum amount of CPU required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       requestMemory:
                         description: The minimum amount of memory required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       strategy:
-                        description: the strategy to adopt
+                        description: the strategy to adopt.
                         enum:
                         - routine
                         - pod
@@ -183,7 +183,7 @@ spec:
                         description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                         items:
                           description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                            Maven artifact
+                            Maven artifact.
                           properties:
                             artifactId:
                               description: Maven Artifact
@@ -337,7 +337,7 @@ spec:
                 type: object
               cluster:
                 description: what kind of cluster you're running (ie, plain Kubernetes
-                  or OpenShift)
+                  or OpenShift).
                 type: string
               configuration:
                 description: 'Deprecated: Use camel trait (camel.properties) to manage
@@ -348,7 +348,7 @@ spec:
                   this IntegrationPlatform'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -356,7 +356,7 @@ spec:
                       type: string
                     value:
                       description: the value to assign to the configuration (syntax
-                        may vary depending on the `Type`)
+                        may vary depending on the `Type`).
                       type: string
                   required:
                   - type
@@ -371,7 +371,7 @@ spec:
                     description: remote repository used to retrieve Kamelet catalog
                     items:
                       description: IntegrationPlatformKameletRepositorySpec defines
-                        the location of the Kamelet catalog to use
+                        the location of the Kamelet catalog to use.
                       properties:
                         uri:
                           description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
@@ -383,11 +383,11 @@ spec:
                 description: the profile you wish to use. It will apply certain traits
                   which are required by the specific profile chosen. It usually relates
                   the Cluster with the optional definition of special profiles (ie,
-                  Knative)
+                  Knative).
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
-                  built from this IntegrationPlatform
+                  built from this IntegrationPlatform.
                 properties:
                   3scale:
                     description: 'Deprecated: for backward compatibility.'
@@ -402,13 +402,13 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: The extension point with addon traits
+                    description: The extension point with addon traits.
                     type: object
                   affinity:
-                    description: The configuration of Affinity trait
+                    description: The configuration of Affinity trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -450,7 +450,7 @@ spec:
                         type: array
                     type: object
                   builder:
-                    description: The configuration of Builder trait
+                    description: The configuration of Builder trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -503,7 +503,7 @@ spec:
                         type: boolean
                     type: object
                   camel:
-                    description: The configuration of Camel trait
+                    description: The configuration of Camel trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -527,7 +527,7 @@ spec:
                         type: string
                     type: object
                   container:
-                    description: The configuration of Container trait
+                    description: The configuration of Container trait.
                     properties:
                       auto:
                         description: To automatically enable the trait
@@ -590,7 +590,7 @@ spec:
                         type: string
                     type: object
                   cron:
-                    description: The configuration of Cron trait
+                    description: The configuration of Cron trait.
                     properties:
                       activeDeadlineSeconds:
                         description: Specifies the duration in seconds, relative to
@@ -661,7 +661,7 @@ spec:
                         type: integer
                     type: object
                   dependencies:
-                    description: The configuration of Dependencies trait
+                    description: The configuration of Dependencies trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -674,7 +674,7 @@ spec:
                         type: boolean
                     type: object
                   deployer:
-                    description: The configuration of Deployer trait
+                    description: The configuration of Deployer trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -702,7 +702,7 @@ spec:
                         type: boolean
                     type: object
                   deployment:
-                    description: The configuration of Deployment trait
+                    description: The configuration of Deployment trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -743,7 +743,7 @@ spec:
                         type: string
                     type: object
                   environment:
-                    description: The configuration of Environment trait
+                    description: The configuration of Environment trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -772,7 +772,7 @@ spec:
                         type: array
                     type: object
                   error-handler:
-                    description: The configuration of Error Handler trait
+                    description: The configuration of Error Handler trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -789,7 +789,7 @@ spec:
                         type: string
                     type: object
                   gc:
-                    description: The configuration of GC trait
+                    description: The configuration of GC trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -811,7 +811,7 @@ spec:
                         type: boolean
                     type: object
                   health:
-                    description: The configuration of Health trait
+                    description: The configuration of Health trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -920,7 +920,7 @@ spec:
                         type: integer
                     type: object
                   ingress:
-                    description: The configuration of Ingress trait
+                    description: The configuration of Ingress trait.
                     properties:
                       annotations:
                         additionalProperties:
@@ -960,7 +960,7 @@ spec:
                         type: string
                     type: object
                   istio:
-                    description: The configuration of Istio trait
+                    description: The configuration of Istio trait.
                     properties:
                       allow:
                         description: Configures a (comma-separated) list of CIDR subnets
@@ -983,7 +983,7 @@ spec:
                         type: boolean
                     type: object
                   jolokia:
-                    description: The configuration of Jolokia trait
+                    description: The configuration of Jolokia trait.
                     properties:
                       CACert:
                         description: The PEM encoded CA certification file path, used
@@ -1052,7 +1052,7 @@ spec:
                         type: string
                     type: object
                   jvm:
-                    description: The configuration of JVM trait
+                    description: The configuration of JVM trait.
                     properties:
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
@@ -1090,7 +1090,7 @@ spec:
                         type: boolean
                     type: object
                   kamelets:
-                    description: The configuration of Kamelets trait
+                    description: The configuration of Kamelets trait.
                     properties:
                       auto:
                         description: Automatically inject all referenced Kamelets
@@ -1121,7 +1121,7 @@ spec:
                     - configuration
                     type: object
                   knative:
-                    description: The configuration of Knative trait
+                    description: The configuration of Knative trait.
                     properties:
                       auto:
                         description: Enable automatic discovery of all trait properties.
@@ -1199,7 +1199,7 @@ spec:
                         type: boolean
                     type: object
                   knative-service:
-                    description: The configuration of Knative Service trait
+                    description: The configuration of Knative Service trait.
                     properties:
                       auto:
                         description: "Automatically deploy the integration as Knative
@@ -1265,7 +1265,7 @@ spec:
                         type: string
                     type: object
                   logging:
-                    description: The configuration of Logging trait
+                    description: The configuration of Logging trait.
                     properties:
                       color:
                         description: Colorize the log output
@@ -1309,7 +1309,7 @@ spec:
                     - configuration
                     type: object
                   mount:
-                    description: The configuration of Mount trait
+                    description: The configuration of Mount trait.
                     properties:
                       configs:
                         description: 'A list of configuration pointing to configmap/secret.
@@ -1352,7 +1352,7 @@ spec:
                         type: array
                     type: object
                   openapi:
-                    description: The configuration of OpenAPI trait
+                    description: The configuration of OpenAPI trait.
                     properties:
                       configmaps:
                         description: The configmaps holding the spec of the OpenAPI
@@ -1370,7 +1370,7 @@ spec:
                         type: boolean
                     type: object
                   owner:
-                    description: The configuration of Owner trait
+                    description: The configuration of Owner trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1393,7 +1393,7 @@ spec:
                         type: array
                     type: object
                   pdb:
-                    description: The configuration of PDB trait
+                    description: The configuration of PDB trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1419,7 +1419,7 @@ spec:
                         type: string
                     type: object
                   platform:
-                    description: The configuration of Platform trait
+                    description: The configuration of Platform trait.
                     properties:
                       auto:
                         description: To automatically detect from the environment
@@ -1445,7 +1445,7 @@ spec:
                         type: boolean
                     type: object
                   pod:
-                    description: The configuration of Pod trait
+                    description: The configuration of Pod trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1458,7 +1458,7 @@ spec:
                         type: boolean
                     type: object
                   prometheus:
-                    description: The configuration of Prometheus trait
+                    description: The configuration of Prometheus trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1481,7 +1481,7 @@ spec:
                         type: array
                     type: object
                   pull-secret:
-                    description: The configuration of Pull Secret trait
+                    description: The configuration of Pull Secret trait.
                     properties:
                       auto:
                         description: Automatically configures the platform registry
@@ -1509,7 +1509,7 @@ spec:
                         type: string
                     type: object
                   quarkus:
-                    description: The configuration of Quarkus trait
+                    description: The configuration of Quarkus trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1539,7 +1539,7 @@ spec:
                         type: array
                     type: object
                   registry:
-                    description: The configuration of Registry trait
+                    description: The configuration of Registry trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1552,7 +1552,7 @@ spec:
                         type: boolean
                     type: object
                   route:
-                    description: The configuration of Route trait
+                    description: The configuration of Route trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1642,7 +1642,7 @@ spec:
                         type: string
                     type: object
                   service:
-                    description: The configuration of Service trait
+                    description: The configuration of Service trait.
                     properties:
                       auto:
                         description: To automatically detect from the code if a Service
@@ -1671,7 +1671,7 @@ spec:
                         type: string
                     type: object
                   service-binding:
-                    description: The configuration of Service Binding trait
+                    description: The configuration of Service Binding trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1699,7 +1699,7 @@ spec:
                     - configuration
                     type: object
                   toleration:
-                    description: The configuration of Toleration trait
+                    description: The configuration of Toleration trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1729,10 +1729,10 @@ spec:
                 type: object
             type: object
           status:
-            description: IntegrationPlatformStatus defines the observed state of IntegrationPlatform
+            description: IntegrationPlatformStatus defines the observed state of IntegrationPlatform.
             properties:
               build:
-                description: specify how to build the Integration/IntegrationKits
+                description: specify how to build the Integration/IntegrationKits.
                 properties:
                   PublishStrategyOptions:
                     additionalProperties:
@@ -1754,18 +1754,18 @@ spec:
                     properties:
                       limitCPU:
                         description: The maximum amount of CPU required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       limitMemory:
                         description: The maximum amount of memory required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       operatorNamespace:
                         description: The namespace where to run the builder Pod (must
                           be the same of the operator in charge of this Build reconciliation).
                         type: string
                       orderStrategy:
-                        description: the build order strategy to adopt
+                        description: the build order strategy to adopt.
                         enum:
                         - dependencies
                         - fifo
@@ -1773,14 +1773,14 @@ spec:
                         type: string
                       requestCPU:
                         description: The minimum amount of CPU required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       requestMemory:
                         description: The minimum amount of memory required. Only used
-                          for `pod` strategy
+                          for `pod` strategy.
                         type: string
                       strategy:
-                        description: the strategy to adopt
+                        description: the strategy to adopt.
                         enum:
                         - routine
                         - pod
@@ -1831,7 +1831,7 @@ spec:
                         description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                         items:
                           description: MavenArtifact defines a GAV (Group:Artifact:Version)
-                            Maven artifact
+                            Maven artifact.
                           properties:
                             artifactId:
                               description: Maven Artifact
@@ -1985,7 +1985,7 @@ spec:
                 type: object
               cluster:
                 description: what kind of cluster you're running (ie, plain Kubernetes
-                  or OpenShift)
+                  or OpenShift).
                 type: string
               conditions:
                 description: which are the conditions met (particularly useful when
@@ -2030,7 +2030,7 @@ spec:
                   this IntegrationPlatform'
                 items:
                   description: ConfigurationSpec represents a generic configuration
-                    specification
+                    specification.
                   properties:
                     type:
                       description: 'represents the type of configuration, ie: property,
@@ -2038,7 +2038,7 @@ spec:
                       type: string
                     value:
                       description: the value to assign to the configuration (syntax
-                        may vary depending on the `Type`)
+                        may vary depending on the `Type`).
                       type: string
                   required:
                   - type
@@ -2059,7 +2059,7 @@ spec:
                     description: remote repository used to retrieve Kamelet catalog
                     items:
                       description: IntegrationPlatformKameletRepositorySpec defines
-                        the location of the Kamelet catalog to use
+                        the location of the Kamelet catalog to use.
                       properties:
                         uri:
                           description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
@@ -2079,11 +2079,11 @@ spec:
                 description: the profile you wish to use. It will apply certain traits
                   which are required by the specific profile chosen. It usually relates
                   the Cluster with the optional definition of special profiles (ie,
-                  Knative)
+                  Knative).
                 type: string
               traits:
                 description: list of traits to be executed for all the Integration/IntegrationKits
-                  built from this IntegrationPlatform
+                  built from this IntegrationPlatform.
                 properties:
                   3scale:
                     description: 'Deprecated: for backward compatibility.'
@@ -2098,13 +2098,13 @@ spec:
                   addons:
                     additionalProperties:
                       description: AddonTrait represents the configuration of an addon
-                        trait
+                        trait.
                       type: object
                       x-kubernetes-preserve-unknown-fields: true
-                    description: The extension point with addon traits
+                    description: The extension point with addon traits.
                     type: object
                   affinity:
-                    description: The configuration of Affinity trait
+                    description: The configuration of Affinity trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2146,7 +2146,7 @@ spec:
                         type: array
                     type: object
                   builder:
-                    description: The configuration of Builder trait
+                    description: The configuration of Builder trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2199,7 +2199,7 @@ spec:
                         type: boolean
                     type: object
                   camel:
-                    description: The configuration of Camel trait
+                    description: The configuration of Camel trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2223,7 +2223,7 @@ spec:
                         type: string
                     type: object
                   container:
-                    description: The configuration of Container trait
+                    description: The configuration of Container trait.
                     properties:
                       auto:
                         description: To automatically enable the trait
@@ -2286,7 +2286,7 @@ spec:
                         type: string
                     type: object
                   cron:
-                    description: The configuration of Cron trait
+                    description: The configuration of Cron trait.
                     properties:
                       activeDeadlineSeconds:
                         description: Specifies the duration in seconds, relative to
@@ -2357,7 +2357,7 @@ spec:
                         type: integer
                     type: object
                   dependencies:
-                    description: The configuration of Dependencies trait
+                    description: The configuration of Dependencies trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2370,7 +2370,7 @@ spec:
                         type: boolean
                     type: object
                   deployer:
-                    description: The configuration of Deployer trait
+                    description: The configuration of Deployer trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2398,7 +2398,7 @@ spec:
                         type: boolean
                     type: object
                   deployment:
-                    description: The configuration of Deployment trait
+                    description: The configuration of Deployment trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2439,7 +2439,7 @@ spec:
                         type: string
                     type: object
                   environment:
-                    description: The configuration of Environment trait
+                    description: The configuration of Environment trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2468,7 +2468,7 @@ spec:
                         type: array
                     type: object
                   error-handler:
-                    description: The configuration of Error Handler trait
+                    description: The configuration of Error Handler trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2485,7 +2485,7 @@ spec:
                         type: string
                     type: object
                   gc:
-                    description: The configuration of GC trait
+                    description: The configuration of GC trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2507,7 +2507,7 @@ spec:
                         type: boolean
                     type: object
                   health:
-                    description: The configuration of Health trait
+                    description: The configuration of Health trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -2616,7 +2616,7 @@ spec:
                         type: integer
                     type: object
                   ingress:
-                    description: The configuration of Ingress trait
+                    description: The configuration of Ingress trait.
                     properties:
                       annotations:
                         additionalProperties:
@@ -2656,7 +2656,7 @@ spec:
                         type: string
                     type: object
                   istio:
-                    description: The configuration of Istio trait
+                    description: The configuration of Istio trait.
                     properties:
                       allow:
                         description: Configures a (comma-separated) list of CIDR subnets
@@ -2679,7 +2679,7 @@ spec:
                         type: boolean
                     type: object
                   jolokia:
-                    description: The configuration of Jolokia trait
+                    description: The configuration of Jolokia trait.
                     properties:
                       CACert:
                         description: The PEM encoded CA certification file path, used
@@ -2748,7 +2748,7 @@ spec:
                         type: string
                     type: object
                   jvm:
-                    description: The configuration of JVM trait
+                    description: The configuration of JVM trait.
                     properties:
                       classpath:
                         description: Additional JVM classpath (use `Linux` classpath
@@ -2786,7 +2786,7 @@ spec:
                         type: boolean
                     type: object
                   kamelets:
-                    description: The configuration of Kamelets trait
+                    description: The configuration of Kamelets trait.
                     properties:
                       auto:
                         description: Automatically inject all referenced Kamelets
@@ -2817,7 +2817,7 @@ spec:
                     - configuration
                     type: object
                   knative:
-                    description: The configuration of Knative trait
+                    description: The configuration of Knative trait.
                     properties:
                       auto:
                         description: Enable automatic discovery of all trait properties.
@@ -2895,7 +2895,7 @@ spec:
                         type: boolean
                     type: object
                   knative-service:
-                    description: The configuration of Knative Service trait
+                    description: The configuration of Knative Service trait.
                     properties:
                       auto:
                         description: "Automatically deploy the integration as Knative
@@ -2961,7 +2961,7 @@ spec:
                         type: string
                     type: object
                   logging:
-                    description: The configuration of Logging trait
+                    description: The configuration of Logging trait.
                     properties:
                       color:
                         description: Colorize the log output
@@ -3005,7 +3005,7 @@ spec:
                     - configuration
                     type: object
                   mount:
-                    description: The configuration of Mount trait
+                    description: The configuration of Mount trait.
                     properties:
                       configs:
                         description: 'A list of configuration pointing to configmap/secret.
@@ -3048,7 +3048,7 @@ spec:
                         type: array
                     type: object
                   openapi:
-                    description: The configuration of OpenAPI trait
+                    description: The configuration of OpenAPI trait.
                     properties:
                       configmaps:
                         description: The configmaps holding the spec of the OpenAPI
@@ -3066,7 +3066,7 @@ spec:
                         type: boolean
                     type: object
                   owner:
-                    description: The configuration of Owner trait
+                    description: The configuration of Owner trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3089,7 +3089,7 @@ spec:
                         type: array
                     type: object
                   pdb:
-                    description: The configuration of PDB trait
+                    description: The configuration of PDB trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3115,7 +3115,7 @@ spec:
                         type: string
                     type: object
                   platform:
-                    description: The configuration of Platform trait
+                    description: The configuration of Platform trait.
                     properties:
                       auto:
                         description: To automatically detect from the environment
@@ -3141,7 +3141,7 @@ spec:
                         type: boolean
                     type: object
                   pod:
-                    description: The configuration of Pod trait
+                    description: The configuration of Pod trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3154,7 +3154,7 @@ spec:
                         type: boolean
                     type: object
                   prometheus:
-                    description: The configuration of Prometheus trait
+                    description: The configuration of Prometheus trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3177,7 +3177,7 @@ spec:
                         type: array
                     type: object
                   pull-secret:
-                    description: The configuration of Pull Secret trait
+                    description: The configuration of Pull Secret trait.
                     properties:
                       auto:
                         description: Automatically configures the platform registry
@@ -3205,7 +3205,7 @@ spec:
                         type: string
                     type: object
                   quarkus:
-                    description: The configuration of Quarkus trait
+                    description: The configuration of Quarkus trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3235,7 +3235,7 @@ spec:
                         type: array
                     type: object
                   registry:
-                    description: The configuration of Registry trait
+                    description: The configuration of Registry trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3248,7 +3248,7 @@ spec:
                         type: boolean
                     type: object
                   route:
-                    description: The configuration of Route trait
+                    description: The configuration of Route trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3338,7 +3338,7 @@ spec:
                         type: string
                     type: object
                   service:
-                    description: The configuration of Service trait
+                    description: The configuration of Service trait.
                     properties:
                       auto:
                         description: To automatically detect from the code if a Service
@@ -3367,7 +3367,7 @@ spec:
                         type: string
                     type: object
                   service-binding:
-                    description: The configuration of Service Binding trait
+                    description: The configuration of Service Binding trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3395,7 +3395,7 @@ spec:
                     - configuration
                     type: object
                   toleration:
-                    description: The configuration of Toleration trait
+                    description: The configuration of Toleration trait.
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:

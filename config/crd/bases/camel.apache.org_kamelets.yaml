@@ -46,7 +46,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: Kamelet is the Schema for the kamelets API
+        description: Kamelet is the Schema for the kamelets API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -61,20 +61,20 @@ spec:
           metadata:
             type: object
           spec:
-            description: the desired specification
+            description: the desired specification.
             properties:
               dataTypes:
                 additionalProperties:
                   description: DataTypesSpec represents the specification for a set
-                    of data types
+                    of data types.
                   properties:
                     default:
-                      description: the default data type for this Kamelet
+                      description: the default data type for this Kamelet.
                       type: string
                     headers:
                       additionalProperties:
                         description: HeaderSpec represents the specification for a
-                          header used in the Kamelet
+                          header used in the Kamelet.
                         properties:
                           default:
                             type: string
@@ -87,29 +87,29 @@ spec:
                           type:
                             type: string
                         type: object
-                      description: one to many header specifications
+                      description: one to many header specifications.
                       type: object
                     types:
                       additionalProperties:
                         description: DataTypeSpec represents the specification for
-                          a data type
+                          a data type.
                         properties:
                           dependencies:
                             description: the list of Camel or Maven dependencies required
-                              by the data type
+                              by the data type.
                             items:
                               type: string
                             type: array
                           description:
-                            description: optional description
+                            description: optional description.
                             type: string
                           format:
-                            description: the data type format name
+                            description: the data type format name.
                             type: string
                           headers:
                             additionalProperties:
                               description: HeaderSpec represents the specification
-                                for a header used in the Kamelet
+                                for a header used in the Kamelet.
                               properties:
                                 default:
                                   type: string
@@ -122,14 +122,14 @@ spec:
                                 type:
                                   type: string
                               type: object
-                            description: one to many header specifications
+                            description: one to many header specifications.
                             type: object
                           mediaType:
                             description: media type as expected for HTTP media types
-                              (ie, application/json)
+                              (ie, application/json).
                             type: string
                           schema:
-                            description: the expected schema for the data type
+                            description: the expected schema for the data type.
                             properties:
                               $schema:
                                 description: JSONSchemaURL represents a schema url.
@@ -287,17 +287,17 @@ spec:
                                 type: string
                             type: object
                           scheme:
-                            description: the data type component scheme
+                            description: the data type component scheme.
                             type: string
                         type: object
-                      description: one to many data type specifications
+                      description: one to many data type specifications.
                       type: object
                   type: object
                 description: data specification types for the events consumed/produced
-                  by the Kamelet
+                  by the Kamelet.
                 type: object
               definition:
-                description: defines the formal configuration of the Kamelet
+                description: defines the formal configuration of the Kamelet.
                 properties:
                   $schema:
                     description: JSONSchemaURL represents a schema url.
@@ -441,82 +441,82 @@ spec:
                     type: string
                 type: object
               dependencies:
-                description: Camel dependencies needed by the Kamelet
+                description: Camel dependencies needed by the Kamelet.
                 items:
                   type: string
                 type: array
               sources:
-                description: sources in any Camel DSL supported
+                description: sources in any Camel DSL supported.
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
-                      description: if the content is compressed (base64 encrypted)
+                      description: if the content is compressed (base64 encrypted).
                       type: boolean
                     content:
-                      description: the source code (plain text)
+                      description: the source code (plain text).
                       type: string
                     contentKey:
-                      description: the confimap key holding the source content
+                      description: the confimap key holding the source content.
                       type: string
                     contentRef:
-                      description: the confimap reference holding the source content
+                      description: the confimap reference holding the source content.
                       type: string
                     contentType:
-                      description: the content type (tipically text or binary)
+                      description: the content type (tipically text or binary).
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
+                        uses to pre/post process sources.
                       items:
                         type: string
                       type: array
                     language:
                       description: specify which is the language (Camel DSL) used
-                        to interpret this source code
+                        to interpret this source code.
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                        that will interpret this source at runtime
+                        that will interpret this source at runtime.
                       type: string
                     name:
-                      description: the name of the specification
+                      description: the name of the specification.
                       type: string
                     path:
-                      description: the path where the file is stored
+                      description: the path where the file is stored.
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
-                        if type is "template")
+                        if type is "template").
                       items:
                         type: string
                       type: array
                     rawContent:
-                      description: the source code (binary)
+                      description: the source code (binary).
                       format: byte
                       type: string
                     type:
                       description: Type defines the kind of source described by this
-                        object
+                        object.
                       type: string
                   type: object
                 type: array
               template:
-                description: the main source in YAML DSL
+                description: the main source in YAML DSL.
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
               types:
                 additionalProperties:
                   description: 'EventTypeSpec represents a specification for an event
-                    type Deprecated: In favor of using DataTypeSpec'
+                    type Deprecated: In favor of using DataTypeSpec.'
                   properties:
                     mediaType:
                       description: media type as expected for HTTP media types (ie,
-                        application/json)
+                        application/json).
                       type: string
                     schema:
-                      description: the expected schema for the event
+                      description: the expected schema for the event.
                       properties:
                         $schema:
                           description: JSONSchemaURL represents a schema url.
@@ -666,11 +666,11 @@ spec:
                       type: object
                   type: object
                 description: 'data specification types for the events consumed/produced
-                  by the Kamelet Deprecated: In favor of using DataTypes'
+                  by the Kamelet Deprecated: In favor of using DataTypes.'
                 type: object
             type: object
           status:
-            description: the actual status of the resource
+            description: the actual status of the resource.
             properties:
               conditions:
                 description: Conditions --
@@ -717,13 +717,13 @@ spec:
                 description: Properties --
                 items:
                   description: KameletProperty specify the behavior of a property
-                    in a Kamelet
+                    in a Kamelet.
                   properties:
                     default:
-                      description: the default value of the property (if any)
+                      description: the default value of the property (if any).
                       type: string
                     name:
-                      description: the name of the property
+                      description: the name of the property.
                       type: string
                   type: object
                 type: array
@@ -743,7 +743,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Kamelet is the Schema for the kamelets API
+        description: Kamelet is the Schema for the kamelets API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -758,20 +758,20 @@ spec:
           metadata:
             type: object
           spec:
-            description: the desired specification
+            description: the desired specification.
             properties:
               dataTypes:
                 additionalProperties:
                   description: DataTypesSpec represents the specification for a set
-                    of data types
+                    of data types.
                   properties:
                     default:
-                      description: the default data type for this Kamelet
+                      description: the default data type for this Kamelet.
                       type: string
                     headers:
                       additionalProperties:
                         description: HeaderSpec represents the specification for a
-                          header used in the Kamelet
+                          header used in the Kamelet.
                         properties:
                           default:
                             type: string
@@ -784,29 +784,29 @@ spec:
                           type:
                             type: string
                         type: object
-                      description: one to many header specifications
+                      description: one to many header specifications.
                       type: object
                     types:
                       additionalProperties:
                         description: DataTypeSpec represents the specification for
-                          a data type
+                          a data type.
                         properties:
                           dependencies:
                             description: the list of Camel or Maven dependencies required
-                              by the data type
+                              by the data type.
                             items:
                               type: string
                             type: array
                           description:
-                            description: optional description
+                            description: optional description.
                             type: string
                           format:
-                            description: the data type format name
+                            description: the data type format name.
                             type: string
                           headers:
                             additionalProperties:
                               description: HeaderSpec represents the specification
-                                for a header used in the Kamelet
+                                for a header used in the Kamelet.
                               properties:
                                 default:
                                   type: string
@@ -819,14 +819,14 @@ spec:
                                 type:
                                   type: string
                               type: object
-                            description: one to many header specifications
+                            description: one to many header specifications.
                             type: object
                           mediaType:
                             description: media type as expected for HTTP media types
-                              (ie, application/json)
+                              (ie, application/json).
                             type: string
                           schema:
-                            description: the expected schema for the data type
+                            description: the expected schema for the data type.
                             properties:
                               $schema:
                                 description: JSONSchemaURL represents a schema url.
@@ -984,10 +984,10 @@ spec:
                                 type: string
                             type: object
                           scheme:
-                            description: the data type component scheme
+                            description: the data type component scheme.
                             type: string
                         type: object
-                      description: one to many data type specifications
+                      description: one to many data type specifications.
                       type: object
                   type: object
                 description: data specification types for the events consumed/produced
@@ -1146,56 +1146,56 @@ spec:
                 description: sources in any Camel DSL supported
                 items:
                   description: SourceSpec defines the configuration for one or more
-                    routes to be executed in a certain Camel DSL language
+                    routes to be executed in a certain Camel DSL language.
                   properties:
                     compression:
-                      description: if the content is compressed (base64 encrypted)
+                      description: if the content is compressed (base64 encrypted).
                       type: boolean
                     content:
-                      description: the source code (plain text)
+                      description: the source code (plain text).
                       type: string
                     contentKey:
-                      description: the confimap key holding the source content
+                      description: the confimap key holding the source content.
                       type: string
                     contentRef:
-                      description: the confimap reference holding the source content
+                      description: the confimap reference holding the source content.
                       type: string
                     contentType:
-                      description: the content type (tipically text or binary)
+                      description: the content type (tipically text or binary).
                       type: string
                     interceptors:
                       description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
+                        uses to pre/post process sources.
                       items:
                         type: string
                       type: array
                     language:
                       description: specify which is the language (Camel DSL) used
-                        to interpret this source code
+                        to interpret this source code.
                       type: string
                     loader:
                       description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                        that will interpret this source at runtime
+                        that will interpret this source at runtime.
                       type: string
                     name:
-                      description: the name of the specification
+                      description: the name of the specification.
                       type: string
                     path:
-                      description: the path where the file is stored
+                      description: the path where the file is stored.
                       type: string
                     property-names:
                       description: List of property names defined in the source (e.g.
-                        if type is "template")
+                        if type is "template").
                       items:
                         type: string
                       type: array
                     rawContent:
-                      description: the source code (binary)
+                      description: the source code (binary).
                       format: byte
                       type: string
                     type:
                       description: Type defines the kind of source described by this
-                        object
+                        object.
                       type: string
                   type: object
                 type: array
@@ -1206,14 +1206,14 @@ spec:
               types:
                 additionalProperties:
                   description: 'EventTypeSpec represents a specification for an event
-                    type Deprecated: In favor of using DataTypeSpec'
+                    type Deprecated: In favor of using DataTypeSpec.'
                   properties:
                     mediaType:
                       description: media type as expected for HTTP media types (ie,
-                        application/json)
+                        application/json).
                       type: string
                     schema:
-                      description: the expected schema for the event
+                      description: the expected schema for the event.
                       properties:
                         $schema:
                           description: JSONSchemaURL represents a schema url.
@@ -1367,10 +1367,10 @@ spec:
                 type: object
             type: object
           status:
-            description: the actual status of the resource
+            description: the actual status of the resource.
             properties:
               conditions:
-                description: Conditions --
+                description: Conditions --.
                 items:
                   description: KameletCondition describes the state of a resource
                     at a certain point.
@@ -1408,19 +1408,19 @@ spec:
                 format: int64
                 type: integer
               phase:
-                description: Phase --
+                description: Phase --.
                 type: string
               properties:
-                description: Properties --
+                description: Properties --.
                 items:
                   description: KameletProperty specify the behavior of a property
-                    in a Kamelet
+                    in a Kamelet.
                   properties:
                     default:
-                      description: the default value of the property (if any)
+                      description: the default value of the property (if any).
                       type: string
                     name:
-                      description: the name of the property
+                      description: the name of the property.
                       type: string
                   type: object
                 type: array
