@@ -11,6 +11,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/prometheus/common from 0.44.0 to 0.45.0 [\#4835](https://github.com/apache/camel-k/pull/4835) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/eventing from 0.38.4 to 0.38.5 [\#4834](https://github.com/apache/camel-k/pull/4834) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/serving from 0.38.1 to 0.38.2 [\#4833](https://github.com/apache/camel-k/pull/4833) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix: removed unnecessary defaul value in route trait [\#4830](https://github.com/apache/camel-k/pull/4830) ([realMartinez](https://github.com/realMartinez))
