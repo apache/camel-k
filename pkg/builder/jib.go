@@ -46,8 +46,13 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	baseImage := t.build.Status.BaseImage
 	if baseImage == "" {
 		baseImage = t.task.BaseImage
-		status.BaseImage = baseImage
 	}
+	status.BaseImage = baseImage
+	rootImage := t.build.Status.RootImage
+	if rootImage == "" {
+		rootImage = t.task.BaseImage
+	}
+	status.RootImage = rootImage
 
 	contextDir := t.task.ContextDir
 	if contextDir == "" {

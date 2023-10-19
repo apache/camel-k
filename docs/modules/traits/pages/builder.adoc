@@ -40,6 +40,10 @@ The following configuration options are available:
 | string
 | The strategy to use, either `pod` or `routine` (default routine)
 
+| builder.base-image
+| string
+| Specify a base image
+
 | builder.incremental-image-build
 | bool
 | Use the incremental image build option, to reuse existing containers (default `true`)

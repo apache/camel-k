@@ -733,6 +733,13 @@ string
 
 the digest from image
 
+|`rootImage` +
+string
+|
+
+
+root image (the first image from which the incremental image has started)
+
 |`baseImage` +
 string
 |
@@ -2461,12 +2468,19 @@ ObservedGeneration is the most recent generation observed for this IntegrationKi
 
 phase of the kit
 
+|`rootImage` +
+string
+|
+
+
+root image used by the kit (the first image from which the incremental image has started, typically a JDK/JRE base image)
+
 |`baseImage` +
 string
 |
 
 
-base image used by the kit
+base image used by the kit (could be another IntegrationKit)
 
 |`image` +
 string
@@ -5796,6 +5810,13 @@ string
 
 
 The strategy to use, either `pod` or `routine` (default routine)
+
+|`baseImage` +
+string
+|
+
+
+Specify a base image
 
 |`incrementalImageBuild` +
 bool

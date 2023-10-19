@@ -37,6 +37,7 @@ import (
 // +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.type`,description="The integration kit type"
 // +kubebuilder:printcolumn:name="Layout",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kit\.layout`,description="The integration kit layout"
 // +kubebuilder:printcolumn:name="Image",type=string,JSONPath=`.status.image`,description="The integration kit image"
+// +kubebuilder:printcolumn:name="Root",type=string,JSONPath=`.status.rootImage`,description="The integration kit root image"
 
 // IntegrationKit defines a container image and additional configuration needed to run an `Integration`.
 // An `IntegrationKit` is a generic image generally built from the requirements of an `Integration`, but agnostic to it,
@@ -97,7 +98,9 @@ type IntegrationKitStatus struct {
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
 	// phase of the kit
 	Phase IntegrationKitPhase `json:"phase,omitempty"`
-	// base image used by the kit
+	// root image used by the kit (the first image from which the incremental image has started, typically a JDK/JRE base image)
+	RootImage string `json:"rootImage,omitempty"`
+	// base image used by the kit (could be another IntegrationKit)
 	BaseImage string `json:"baseImage,omitempty"`
 	// actual image name of the kit
 	Image string `json:"image,omitempty"`
