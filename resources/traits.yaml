@@ -244,6 +244,9 @@ traits:
   - name: strategy
     type: string
     description: The strategy to use, either `pod` or `routine` (default routine)
+  - name: base-image
+    type: string
+    description: Specify a base image
   - name: incremental-image-build
     type: bool
     description: Use the incremental image build option, to reuse existing containers

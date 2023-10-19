@@ -131,6 +131,7 @@ func incrementalImageContext(ctx *builderContext) error {
 
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
+
 			ctx.BaseImage = bestImage.Image
 			ctx.SelectedArtifacts = make([]v1.Artifact, 0)
 
@@ -203,13 +204,16 @@ func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, er
 	}
 
 	images := make([]v1.IntegrationKitStatus, 0)
-	for _, item := range list.Items {
-		kit := item
-
+	for _, kit := range list.Items {
+		// Discard non ready kits
 		if kit.Status.Phase != v1.IntegrationKitPhaseReady {
 			continue
 		}
-
+		// Discard kits with a different root hierarchy
+		// context.BaseImage should still contain the root base image at this stage
+		if kit.Status.RootImage != context.BaseImage {
+			continue
+		}
 		images = append(images, kit.Status)
 	}
 	return images, nil

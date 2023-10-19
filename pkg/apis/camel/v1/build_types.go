@@ -204,6 +204,8 @@ type BuildStatus struct {
 	Image string `json:"image,omitempty"`
 	// the digest from image
 	Digest string `json:"digest,omitempty"`
+	// root image (the first image from which the incremental image has started)
+	RootImage string `json:"rootImage,omitempty"`
 	// the base image used for this build
 	BaseImage string `json:"baseImage,omitempty"`
 	// a list of artifacts contained in the build

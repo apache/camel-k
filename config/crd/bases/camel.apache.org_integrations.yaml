@@ -6417,6 +6417,9 @@ spec:
                   builder:
                     description: The configuration of Builder trait
                     properties:
+                      baseImage:
+                        description: Specify a base image
+                        type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
                           for backward compatibility.'

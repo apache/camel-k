@@ -1740,6 +1740,10 @@ spec:
               phase:
                 description: describes the phase
                 type: string
+              rootImage:
+                description: root image (the first image from which the incremental
+                  image has started)
+                type: string
               startedAt:
                 description: the time when it started
                 format: date-time

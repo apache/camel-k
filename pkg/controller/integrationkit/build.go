@@ -199,6 +199,7 @@ func (action *buildAction) handleBuildRunning(ctx context.Context, kit *v1.Integ
 			)
 		}
 
+		kit.Status.RootImage = build.Status.RootImage
 		kit.Status.BaseImage = build.Status.BaseImage
 		kit.Status.Image = build.Status.Image
 
