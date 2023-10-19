@@ -28,6 +28,7 @@ import (
 type IntegrationKitStatusApplyConfiguration struct {
 	ObservedGeneration *int64                                      `json:"observedGeneration,omitempty"`
 	Phase              *v1.IntegrationKitPhase                     `json:"phase,omitempty"`
+	RootImage          *string                                     `json:"rootImage,omitempty"`
 	BaseImage          *string                                     `json:"baseImage,omitempty"`
 	Image              *string                                     `json:"image,omitempty"`
 	Digest             *string                                     `json:"digest,omitempty"`
@@ -59,6 +60,14 @@ func (b *IntegrationKitStatusApplyConfiguration) WithObservedGeneration(value in
 // If called multiple times, the Phase field is set to the value of the last call.
 func (b *IntegrationKitStatusApplyConfiguration) WithPhase(value v1.IntegrationKitPhase) *IntegrationKitStatusApplyConfiguration {
 	b.Phase = &value
+	return b
+}
+
+// WithRootImage sets the RootImage field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the RootImage field is set to the value of the last call.
+func (b *IntegrationKitStatusApplyConfiguration) WithRootImage(value string) *IntegrationKitStatusApplyConfiguration {
+	b.RootImage = &value
 	return b
 }
 
