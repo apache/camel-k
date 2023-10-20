@@ -37,6 +37,8 @@
     <maven.compiler.target>11</maven.compiler.target>
 
     <fabric8-version>6.9.0</fabric8-version>
+    <lombok-version>1.18.30</lombok-version>
+    <sundrio-version>0.101.0</sundrio-version>
     <maven-surefire-plugin-version>3.0.0-M8</maven-surefire-plugin-version>
   </properties>
 
@@ -65,16 +67,38 @@
     <tag>camel-k-project-1.10.0</tag>
   </scm>
 
+  <dependencyManagement>
+    <dependencies>
+          <dependency>
+              <groupId>io.fabric8</groupId>
+              <artifactId>kubernetes-client-bom</artifactId>
+              <version>${fabric8-version}</version>
+              <type>pom</type>
+              <scope>import</scope>
+          </dependency>
+      </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>kubernetes-client</artifactId>
-      <version>${fabric8-version}</version>
     </dependency>
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>generator-annotations</artifactId>
-      <version>${fabric8-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.sundr</groupId>
+      <artifactId>builder-annotations</artifactId>
+      <version>${sundrio-version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok-version}</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -93,6 +117,7 @@
         </executions>
         <configuration>
           <source>../../config/crd/bases</source>
+          <extraAnnotations>true</extraAnnotations>
         </configuration>
       </plugin>
     </plugins>
