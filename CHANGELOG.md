@@ -6,11 +6,14 @@
 
 **Closed issues:**
 
+- nested Kamelets are not working [\#4837](https://github.com/apache/camel-k/issues/4837)
 - Error log traces after integration error [\#4781](https://github.com/apache/camel-k/issues/4781)
 - Projecting routes status to a Kubernetes Resource [\#2728](https://github.com/apache/camel-k/issues/2728)
 
 **Merged pull requests:**
 
+- chore: improved e2e tests documentation. [\#4838](https://github.com/apache/camel-k/pull/4838) ([valdar](https://github.com/valdar))
+- feat\(build\): add root image info [\#4836](https://github.com/apache/camel-k/pull/4836) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.44.0 to 0.45.0 [\#4835](https://github.com/apache/camel-k/pull/4835) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/eventing from 0.38.4 to 0.38.5 [\#4834](https://github.com/apache/camel-k/pull/4834) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/serving from 0.38.1 to 0.38.2 [\#4833](https://github.com/apache/camel-k/pull/4833) ([dependabot[bot]](https://github.com/apps/dependabot))
