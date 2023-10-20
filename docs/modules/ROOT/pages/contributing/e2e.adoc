@@ -16,7 +16,7 @@ Before running an integration test, you need to be connected to a Kubernetes/Ope
 
 [source]
 ----
-make test-common
+make test-smoke
 ----
 
 The test script will install the operators needed in a random namespace, execute all expected tests and clean themselves. Cleaning may not be performed if the execution of tests fails or the test process is interrupted. In that case you can look for any namespace similar to `test-29ed8147-c9fc-4c04-9c29-744eaf4750c6` and remove it manually.
@@ -31,15 +31,21 @@ This is the list of the groups we are using (please, notice that they can slight
     * builder (`make test-builder`)
     * common (`make test-common`)
     * commonwithcustominstall (`make test-common-with-custom-install`)
-    * install (`make test-install` and `make test-install-olm`)
+    * install (`make test-install`, `make test-install-olm` and `make test-install-upgrade`)
     * knative (`make test-knative`)
     * native (`make test-quarkus-native` and `make test-quarkus-native-high-memory`)
     * telemetry (`make test-telemetry`)
-    * yaks (run only in CI)
 
 Each group tests a specific feature of Camel K. Typically any new test should be falling under the `common` group, unless it belongs to any other category or it requires some particular customization. As an example, `telemetry` requires the configuration of an OTLP Collector, reason why it requires its own group. If the test still is a common one but needs to perform customization on the Camel K Operator, then, it should be developed under `commonwithcustominstall`: as an example, we have there tests which requires the configuration of a Maven proxy.
 
-It's important to know that `common` is used as smoke test in the nightly release process. We want to keep this group of test as fast as possible.
+It's important to know that a subset of `common` named `test-smoke` is used as smoke test in the nightly release process. We want to keep this group of test as fast as possible.
+
+=== Configure End To End tests runs with env vars
+Some e2e test runs parameters can be configured usually with env vars.
+Most of them are located at https://github.com/apache/camel-k/tree/main/e2e/support/test_support.go[e2e/support/test_support.go] in `init` and `kamelInstallWithContext` functions.
+A list of the most commonly used:
+
+* `CAMEL_K_TEST_SKIP_PROBLEMATIC`: set it to `true` to skip tests that might fail.
 
 [[testing-operator]]
 == Testing Operator under development
