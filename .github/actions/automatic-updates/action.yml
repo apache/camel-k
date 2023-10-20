@@ -35,6 +35,7 @@ runs:
       uses: actions/setup-go@v4
       with:
         go-version: ${{ inputs.goVersion }}
+        check-latest: true
     - name: Generate changelog
       uses: ./.github/actions/changelog
       with:
