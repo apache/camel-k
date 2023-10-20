@@ -75,6 +75,7 @@ runs:
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
         go-version: 1.20.x
+        check-latest: true
 
     - name: (Re-)install kustomize
       shell: bash
