@@ -24,7 +24,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: camel-k-operator
-  namespace: placeholder
+  namespace: default
 roleRef:
   kind: ClusterRole
   name: camel-k-operator-console-openshift
