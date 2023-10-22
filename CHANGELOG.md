@@ -8,6 +8,7 @@
 
 - nested Kamelets are not working [\#4837](https://github.com/apache/camel-k/issues/4837)
 - Error log traces after integration error [\#4781](https://github.com/apache/camel-k/issues/4781)
+- Using an XSLT as a local dependency results in "unknown dependency error" [\#4426](https://github.com/apache/camel-k/issues/4426)
 - Projecting routes status to a Kubernetes Resource [\#2728](https://github.com/apache/camel-k/issues/2728)
 
 ## [v2.1.0](https://github.com/apache/camel-k/tree/v2.1.0) (2023-10-16)
