@@ -23,6 +23,8 @@ package trait
 // +camel-k:trait=logging.
 type LoggingTrait struct {
 	Trait `property:",squash" json:",inline"`
+	// Log Level category of the trait
+	Category map[string]string `property:"category" json:"category,omitempty"`
 	// Colorize the log output
 	Color *bool `property:"color" json:"color,omitempty"`
 	// Logs message format
