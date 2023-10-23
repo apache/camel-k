@@ -34,7 +34,6 @@ resources:
 - operator-role-binding-keda.yaml
 - operator-role-binding-knative.yaml
 - operator-role-binding-leases.yaml
-- operator-role-binding-local-registry.yaml
 - operator-role-binding-podmonitors.yaml
 - operator-role-binding-strimzi.yaml
 - operator-role-binding.yaml
@@ -42,4 +41,3 @@ resources:
 - operator-cluster-role-binding-custom-resource-definitions.yaml
 - operator-cluster-role-addressable-resolver.yaml
 - operator-cluster-role-binding-addressable-resolver.yaml
-- operator-cluster-role-local-registry.yaml

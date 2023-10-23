@@ -32,7 +32,7 @@ metadata:
     repository: https://github.com/apache/camel-k
     support: Camel
   name: camel-k.v2.2.0
-  namespace: placeholder
+  namespace: default
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:

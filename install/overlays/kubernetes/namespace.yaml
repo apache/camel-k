@@ -1,0 +1,5 @@
+namespace:
+  - kind: RoleBinding
+    name: camel-k-operator-local-registry
+    path: /subjects/namespace
+    create: false

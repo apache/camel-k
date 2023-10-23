@@ -37,6 +37,7 @@ func GetRegistryAddress(ctx context.Context, c client.Client) (*string, error) {
 			return nil, nil
 		} else if k8serrors.IsNotFound(err) {
 			log.Debug("Cannot find registry configuration local-registry-hosting ConfigMap", "error", err)
+
 			return nil, nil
 		}
 		return nil, err

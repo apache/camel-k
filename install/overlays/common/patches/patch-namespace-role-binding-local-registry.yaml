@@ -15,6 +15,6 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#resources:
-#- resources/integration-platform.yaml
-
+- op: replace
+  path: /subjects/0/namespace
+  value: default

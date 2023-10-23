@@ -10,6 +10,5 @@ spec:
     maven:
       settings: {}
       settingsSecurity: {}
-    registry: {}
   kamelet: {}
   traits: {}

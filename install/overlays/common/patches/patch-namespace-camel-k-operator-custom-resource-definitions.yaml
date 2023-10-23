@@ -15,14 +15,6 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: camel-k-operator-local-registry
-  labels:
-    app: "camel-k"
-rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    resourceNames: ["local-registry-hosting"]
-    verbs: ["get"]
+- op: replace
+  path: /subjects/0/namespace
+  value: default
