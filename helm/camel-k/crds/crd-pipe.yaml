@@ -7578,7 +7578,9 @@ spec:
                           category:
                             additionalProperties:
                               type: string
-                            description: Log Level category of the trait
+                            description: 'Log Level category of the trait This can
+                              be used to set log levels of specific packages CLI usage
+                              example:  -t "logging.category.''org.test''=DEBUG"'
                             type: object
                           color:
                             description: Colorize the log output
