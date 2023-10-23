@@ -7233,6 +7233,8 @@ map[string]string
 
 
 Log Level category of the trait
+This can be used to set log levels of specific packages
+CLI usage example:  -t "logging.category.'org.test'=DEBUG"
 
 |`color` +
 bool

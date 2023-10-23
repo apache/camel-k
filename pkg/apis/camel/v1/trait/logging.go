@@ -24,6 +24,8 @@ package trait
 type LoggingTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// Log Level category of the trait
+	// This can be used to set log levels of specific packages
+	// CLI usage example:  -t "logging.category.'org.test'=DEBUG"
 	Category map[string]string `property:"category" json:"category,omitempty"`
 	// Colorize the log output
 	Color *bool `property:"color" json:"color,omitempty"`
