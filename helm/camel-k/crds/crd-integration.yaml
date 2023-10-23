@@ -7282,6 +7282,11 @@ spec:
                   logging:
                     description: The configuration of Logging trait
                     properties:
+                      category:
+                        additionalProperties:
+                          type: string
+                        description: Log Level category of the trait
+                        type: object
                       color:
                         description: Colorize the log output
                         type: boolean
