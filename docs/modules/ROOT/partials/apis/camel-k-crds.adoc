@@ -7227,6 +7227,13 @@ The logging backend is provided by Quarkus, whose configuration is documented at
 
 
 
+|`category` +
+map[string]string
+|
+
+
+Log Level category of the trait
+
 |`color` +
 bool
 |

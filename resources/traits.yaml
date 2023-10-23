@@ -1102,6 +1102,9 @@ traits:
     type: bool
     description: Can be used to enable or disable a trait. All traits share this common
       property.
+  - name: category
+    type: map[string]string
+    description: Log Level category of the trait
   - name: color
     type: bool
     description: Colorize the log output

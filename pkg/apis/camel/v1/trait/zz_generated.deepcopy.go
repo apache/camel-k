@@ -676,6 +676,13 @@ func (in *KnativeTrait) DeepCopy() *KnativeTrait {
 func (in *LoggingTrait) DeepCopyInto(out *LoggingTrait) {
 	*out = *in
 	in.Trait.DeepCopyInto(&out.Trait)
+	if in.Category != nil {
+		in, out := &in.Category, &out.Category
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.Color != nil {
 		in, out := &in.Color, &out.Color
 		*out = new(bool)

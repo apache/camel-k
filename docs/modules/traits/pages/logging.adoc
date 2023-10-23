@@ -26,6 +26,10 @@ The following configuration options are available:
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
 
+| logging.category
+| map[string]string
+| Log Level category of the trait
+
 | logging.color
 | bool
 | Colorize the log output
