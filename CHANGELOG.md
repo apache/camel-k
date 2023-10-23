@@ -8,11 +8,15 @@
 
 - nested Kamelets are not working [\#4837](https://github.com/apache/camel-k/issues/4837)
 - Error log traces after integration error [\#4781](https://github.com/apache/camel-k/issues/4781)
+- Set up same golang version for github actions [\#4641](https://github.com/apache/camel-k/issues/4641)
 - Using an XSLT as a local dependency results in "unknown dependency error" [\#4426](https://github.com/apache/camel-k/issues/4426)
 - Projecting routes status to a Kubernetes Resource [\#2728](https://github.com/apache/camel-k/issues/2728)
 
 **Merged pull requests:**
 
+- chore\(ci\): release notes procedure [\#4843](https://github.com/apache/camel-k/pull/4843) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/fsnotify/fsnotify from 1.6.0 to 1.7.0 [\#4842](https://github.com/apache/camel-k/pull/4842) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(ci\): Use latest minor version of golang in ci workflows [\#4840](https://github.com/apache/camel-k/pull/4840) ([gansheer](https://github.com/gansheer))
 - chore: improved e2e tests documentation. [\#4838](https://github.com/apache/camel-k/pull/4838) ([valdar](https://github.com/valdar))
 - feat\(build\): add root image info [\#4836](https://github.com/apache/camel-k/pull/4836) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.44.0 to 0.45.0 [\#4835](https://github.com/apache/camel-k/pull/4835) ([dependabot[bot]](https://github.com/apps/dependabot))
