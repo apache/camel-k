@@ -214,30 +214,37 @@ func TestJsonLoggingTrait(t *testing.T) {
 	assert.NotEmpty(t, env.ExecutedTraits)
 }
 
-func TestLoggingCategory(t *testing.T) {
+func TestSingleLoggingCategory(t *testing.T) {
 	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
 	env.Integration.Spec.Traits = v1.Traits{
 		Logging: &traitv1.LoggingTrait{
 			Category: map[string]string{"org.test": "debug"},
 		},
 	}
-
-	envVarQuarkusLogCategoryTestPackageName := "QUARKUS_LOG_CATEGORY_ORG_TEST_LEVEL"
-	envVarQuarkusLogCategoryTestPackageValue := "DEBUG"
-	quarkusOrgPackage := false
-
 	err := NewLoggingTestCatalog().apply(env)
-
 	assert.Nil(t, err)
 
-	for _, e := range env.EnvVars {
-		t.Log("Key:" + e.Name)
-		if e.Name == envVarQuarkusLogCategoryTestPackageName {
-			t.Log("Value: " + e.Value)
-			if e.Value == envVarQuarkusLogCategoryTestPackageValue {
-				quarkusOrgPackage = true
-			}
-		}
+	testEnvVar := corev1.EnvVar{"QUARKUS_LOG_CATEGORY_ORG_TEST_LEVEL", "DEBUG", nil}
+	assert.Contains(t, env.EnvVars, testEnvVar)
+}
+
+func TestLoggingCategories(t *testing.T) {
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
+	env.Integration.Spec.Traits = v1.Traits{
+		Logging: &traitv1.LoggingTrait{
+			Category: map[string]string{"org.test": "debug", "org.jboss.resteasy": "debug"},
+		},
 	}
-	assert.True(t, quarkusOrgPackage)
+	err := NewLoggingTestCatalog().apply(env)
+	assert.Nil(t, err)
+
+	testEnvVars := []corev1.EnvVar{
+		corev1.EnvVar{"QUARKUS_LOG_CATEGORY_ORG_TEST_LEVEL", "DEBUG", nil},
+		corev1.EnvVar{"QUARKUS_LOG_CATEGORY_ORG_JBOSS_RESTEASY_LEVEL", "DEBUG", nil},
+	}
+
+	for _, v := range testEnvVars {
+		assert.Contains(t, env.EnvVars, v)
+	}
+
 }
