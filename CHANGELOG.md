@@ -4,8 +4,23 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.1.0...HEAD)
 
+**Closed issues:**
+
+- nested Kamelets are not working [\#4837](https://github.com/apache/camel-k/issues/4837)
+- Error log traces after integration error [\#4781](https://github.com/apache/camel-k/issues/4781)
+- Using an XSLT as a local dependency results in "unknown dependency error" [\#4426](https://github.com/apache/camel-k/issues/4426)
+- Projecting routes status to a Kubernetes Resource [\#2728](https://github.com/apache/camel-k/issues/2728)
+
 **Merged pull requests:**
 
+- chore: improved e2e tests documentation. [\#4838](https://github.com/apache/camel-k/pull/4838) ([valdar](https://github.com/valdar))
+- feat\(build\): add root image info [\#4836](https://github.com/apache/camel-k/pull/4836) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/common from 0.44.0 to 0.45.0 [\#4835](https://github.com/apache/camel-k/pull/4835) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump knative.dev/eventing from 0.38.4 to 0.38.5 [\#4834](https://github.com/apache/camel-k/pull/4834) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump knative.dev/serving from 0.38.1 to 0.38.2 [\#4833](https://github.com/apache/camel-k/pull/4833) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix: removed unnecessary defaul value in route trait [\#4830](https://github.com/apache/camel-k/pull/4830) ([realMartinez](https://github.com/realMartinez))
+- chore\(ci\): no coverage message when coverage unchanged [\#4829](https://github.com/apache/camel-k/pull/4829) ([squakez](https://github.com/squakez))
+- fix\(ci\): fabric8 deps update [\#4828](https://github.com/apache/camel-k/pull/4828) ([squakez](https://github.com/squakez))
 - Bump X/Net to version 0.17.0 [\#4820](https://github.com/apache/camel-k/pull/4820) ([oscerd](https://github.com/oscerd))
 - chore: change deprecated yaml statements [\#4818](https://github.com/apache/camel-k/pull/4818) ([squakez](https://github.com/squakez))
 - chore\(trait\): user can't disable platform traits [\#4817](https://github.com/apache/camel-k/pull/4817) ([squakez](https://github.com/squakez))
@@ -16,6 +31,7 @@
 - feat\(trait\): let Camel runtime manages Kamelets [\#4812](https://github.com/apache/camel-k/pull/4812) ([squakez](https://github.com/squakez))
 - fix\(ci\): OLM resources display name [\#4810](https://github.com/apache/camel-k/pull/4810) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/spf13/viper from 1.16.0 to 1.17.0 [\#4809](https://github.com/apache/camel-k/pull/4809) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(api\): Kamelet as static resource [\#4808](https://github.com/apache/camel-k/pull/4808) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.12.0 to 0.13.0 [\#4807](https://github.com/apache/camel-k/pull/4807) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.37 to 0.6.38 [\#4806](https://github.com/apache/camel-k/pull/4806) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(core\): Move jib plugins versions to camelcatalog [\#4805](https://github.com/apache/camel-k/pull/4805) ([gansheer](https://github.com/gansheer))
@@ -27,6 +43,7 @@
 - Kamelet - Inject secret in Vaults - Hashicorp Vault [\#4799](https://github.com/apache/camel-k/pull/4799) ([oscerd](https://github.com/oscerd))
 - Kamelet - Inject secret in Vaults - Azure Key Vault [\#4798](https://github.com/apache/camel-k/pull/4798) ([oscerd](https://github.com/oscerd))
 - Kamelet - Inject secret in Vaults - AWS Secret Manager [\#4794](https://github.com/apache/camel-k/pull/4794) ([oscerd](https://github.com/oscerd))
+- fix\(ctrl\): Change reconciliation of int in error [\#4793](https://github.com/apache/camel-k/pull/4793) ([gansheer](https://github.com/gansheer))
 - Added License headers to generated traits.yaml [\#4792](https://github.com/apache/camel-k/pull/4792) ([oscerd](https://github.com/oscerd))
 - Remove deprecated linters [\#4791](https://github.com/apache/camel-k/pull/4791) ([oscerd](https://github.com/oscerd))
 - Added Missing license headers and license headers to generation of tr… [\#4790](https://github.com/apache/camel-k/pull/4790) ([oscerd](https://github.com/oscerd))

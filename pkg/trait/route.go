@@ -45,7 +45,6 @@ func newRouteTrait() Trait {
 		BaseTrait: NewBaseTrait("route", 2200),
 		RouteTrait: traitv1.RouteTrait{
 			Annotations: map[string]string{},
-			Host:        "",
 		},
 	}
 }

@@ -23,7 +23,7 @@ require (
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.67.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/client_model v0.5.0
-	github.com/prometheus/common v0.44.0
+	github.com/prometheus/common v0.45.0
 	github.com/redhat-developer/service-binding-operator v1.4.0
 	github.com/rs/xid v1.5.0
 	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
@@ -52,9 +52,9 @@ require (
 	k8s.io/klog/v2 v2.100.1
 	k8s.io/kubectl v0.27.4
 	k8s.io/utils v0.0.0-20230505201702-9f6742963106
-	knative.dev/eventing v0.38.4
-	knative.dev/pkg v0.0.0-20230718152110-aef227e72ead
-	knative.dev/serving v0.38.1
+	knative.dev/eventing v0.38.5
+	knative.dev/pkg v0.0.0-20231011193800-bd99f2f98be7
+	knative.dev/serving v0.38.2
 	sigs.k8s.io/controller-runtime v0.15.2
 	sigs.k8s.io/structured-merge-diff/v4 v4.3.0
 )
@@ -104,7 +104,7 @@ require (
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/liggitt/tabwriter v0.0.0-20181228230101-89fcab3d43de // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
+	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/moby/spdystream v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -148,7 +148,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/component-base v0.27.4 // indirect
 	k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f // indirect
-	knative.dev/networking v0.0.0-20230718160410-75dcd54d9510 // indirect
+	knative.dev/networking v0.0.0-20231012062757-a5958051caf8 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )

@@ -100,7 +100,7 @@ runs:
       uses: azure/setup-kubectl@v3
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
-        version: 'latest'
+        version: 'v1.27.4'
 
     - id: install-realpath
       shell: bash

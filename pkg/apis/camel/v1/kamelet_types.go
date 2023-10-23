@@ -54,7 +54,7 @@ var (
 // +kubebuilder:storageversion
 // +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
+// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
 
 // Kamelet is the Schema for the kamelets API.
 type Kamelet struct {
@@ -64,6 +64,8 @@ type Kamelet struct {
 	// the desired specification
 	Spec KameletSpec `json:"spec,omitempty"`
 	// the actual status of the resource
+	// +kubebuilder:default:={phase:"Ready"}
+	// Deprecated no longer in use
 	Status KameletStatus `json:"status,omitempty"`
 }
 

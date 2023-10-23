@@ -29,6 +29,8 @@ type BuilderTrait struct {
 	Properties []string `property:"properties" json:"properties,omitempty"`
 	// The strategy to use, either `pod` or `routine` (default routine)
 	Strategy string `property:"strategy" json:"strategy,omitempty"`
+	// Specify a base image
+	BaseImage string `property:"base-image" json:"baseImage,omitempty"`
 	// Use the incremental image build option, to reuse existing containers (default `true`)
 	IncrementalImageBuild *bool `property:"incremental-image-build" json:"incrementalImageBuild,omitempty"`
 	// The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default sequential)

@@ -25,8 +25,7 @@ pre:
     kubectl apply -f secret-specific.yaml -n $YAKS_NAMESPACE
 
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
-    
-    kubectl wait kamelet timer-source --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+
 post:
   - name: print dump
     if: env:CI=true && failure()

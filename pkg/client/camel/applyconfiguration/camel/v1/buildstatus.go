@@ -31,6 +31,7 @@ type BuildStatusApplyConfiguration struct {
 	Phase              *v1.BuildPhase                     `json:"phase,omitempty"`
 	Image              *string                            `json:"image,omitempty"`
 	Digest             *string                            `json:"digest,omitempty"`
+	RootImage          *string                            `json:"rootImage,omitempty"`
 	BaseImage          *string                            `json:"baseImage,omitempty"`
 	Artifacts          []ArtifactApplyConfiguration       `json:"artifacts,omitempty"`
 	Error              *string                            `json:"error,omitempty"`
@@ -75,6 +76,14 @@ func (b *BuildStatusApplyConfiguration) WithImage(value string) *BuildStatusAppl
 // If called multiple times, the Digest field is set to the value of the last call.
 func (b *BuildStatusApplyConfiguration) WithDigest(value string) *BuildStatusApplyConfiguration {
 	b.Digest = &value
+	return b
+}
+
+// WithRootImage sets the RootImage field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the RootImage field is set to the value of the last call.
+func (b *BuildStatusApplyConfiguration) WithRootImage(value string) *BuildStatusApplyConfiguration {
+	b.RootImage = &value
 	return b
 }
 

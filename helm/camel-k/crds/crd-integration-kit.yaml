@@ -59,6 +59,10 @@ spec:
       jsonPath: .status.image
       name: Image
       type: string
+    - description: The integration kit root image
+      jsonPath: .status.rootImage
+      name: Root
+      type: string
     name: v1
     schema:
       openAPIV3Schema:
@@ -197,6 +201,9 @@ spec:
                     description: The builder trait is internally used to determine
                       the best strategy to build and configure IntegrationKits.
                     properties:
+                      baseImage:
+                        description: Specify a base image
+                        type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
                           for backward compatibility.'
@@ -410,7 +417,7 @@ spec:
                   type: object
                 type: array
               baseImage:
-                description: base image used by the kit
+                description: base image used by the kit (could be another IntegrationKit)
                 type: string
               conditions:
                 description: a list of conditions which happened for the events related
@@ -494,6 +501,10 @@ spec:
                 type: string
               platform:
                 description: the platform for which this kit was configured
+                type: string
+              rootImage:
+                description: root image used by the kit (the first image from which
+                  the incremental image has started, typically a JDK/JRE base image)
                 type: string
               runtimeProvider:
                 description: the runtime provider for which this kit was configured

@@ -187,7 +187,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Configuration: *taskConfOrDefault(tasksConf, "spectrum"),
 			},
 			PublishTask: v1.PublishTask{
-				BaseImage: e.Platform.Status.Build.BaseImage,
+				BaseImage: t.getBaseImage(e),
 				Image:     getImageName(e),
 				Registry:  e.Platform.Status.Build.Registry,
 			},
@@ -200,7 +200,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Configuration: *taskConfOrDefault(tasksConf, "jib"),
 			},
 			PublishTask: v1.PublishTask{
-				BaseImage: e.Platform.Status.Build.BaseImage,
+				BaseImage: t.getBaseImage(e),
 				Image:     getImageName(e),
 				Registry:  e.Platform.Status.Build.Registry,
 			},
@@ -330,7 +330,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 			Name:          "builder",
 			Configuration: *taskConf,
 		},
-		BaseImage:    e.Platform.Status.Build.BaseImage,
+		BaseImage:    t.getBaseImage(e),
 		Runtime:      e.CamelCatalog.Runtime,
 		Dependencies: e.IntegrationKit.Spec.Dependencies,
 		Maven:        maven,
@@ -397,6 +397,14 @@ func getImageName(e *Environment) string {
 		organization = e.Platform.Namespace
 	}
 	return e.Platform.Status.Build.Registry.Address + "/" + organization + "/camel-k-" + e.IntegrationKit.Name + ":" + e.IntegrationKit.ResourceVersion
+}
+
+func (t *builderTrait) getBaseImage(e *Environment) string {
+	baseImage := t.BaseImage
+	if baseImage == "" {
+		baseImage = e.Platform.Status.Build.BaseImage
+	}
+	return baseImage
 }
 
 func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
