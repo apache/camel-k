@@ -79,7 +79,7 @@ spec:
             scheme: HTTP
           initialDelaySeconds: 180
         name: lra-coordinator
-        image: docker.io/jbosstm/lra-coordinator:5.9.8.Final
+        image: quay.io/jbosstm/lra-coordinator:latest
         ports:
         - containerPort: 8080
           protocol: TCP
