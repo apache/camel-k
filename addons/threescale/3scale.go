@@ -87,14 +87,12 @@ func NewThreeScaleTrait() trait.Trait {
 	}
 }
 
-func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		// disabled by default
-		return false, nil
+		return false, nil, nil
 	}
-
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
@@ -113,7 +111,7 @@ func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *threeScaleTrait) Apply(e *trait.Environment) error {

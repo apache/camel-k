@@ -46,16 +46,16 @@ func newAffinityTrait() Trait {
 	}
 }
 
-func (t *affinityTrait) Configure(e *Environment) (bool, error) {
+func (t *affinityTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.PodAffinity, false) && pointer.BoolDeref(t.PodAntiAffinity, false) {
-		return false, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
+		return false, nil, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
-	return e.IntegrationInRunningPhases(), nil
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *affinityTrait) Apply(e *Environment) error {

@@ -34,59 +34,55 @@ import (
 
 func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	configured, err := ingressTrait.Configure(environment)
+	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
+	assert.Nil(t, condition)
+
 }
 
 func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.Enabled = pointer.Bool(false)
 
-	configured, err := ingressTrait.Configure(environment)
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionExposureAvailable,
+		corev1.ConditionFalse,
+		v1.IntegrationConditionIngressNotAvailableReason,
+		"explicitly disabled",
+	)
+	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.False(t, configured)
 	assert.Nil(t, err)
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, "explicitly disabled", conditions[0].Message)
+	assert.NotNil(t, condition)
+	assert.Equal(t, expectedCondition, condition)
 }
 
 func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
-	configured, err := ingressTrait.Configure(environment)
+	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
-}
-
-func TestConfigureAutoIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
-	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Auto = pointer.Bool(true)
-	environment.Resources = kubernetes.NewCollection()
-
-	configured, err := ingressTrait.Configure(environment)
-
-	assert.False(t, configured)
-	assert.Nil(t, err)
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, "no service defined", conditions[0].Message)
 }
 
 func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
 	ingressTrait.Auto = nil
 
-	configured, err := ingressTrait.Configure(environment)
+	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
 }
 

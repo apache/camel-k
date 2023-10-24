@@ -61,7 +61,7 @@ type Trait interface {
 	client.Injectable
 
 	// Configure the trait
-	Configure(environment *Environment) (bool, error)
+	Configure(environment *Environment) (bool, *TraitCondition, error)
 
 	// Apply executes a customization of the Environment
 	Apply(environment *Environment) error

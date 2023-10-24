@@ -36,19 +36,23 @@ func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
 	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 
 	trait := newErrorHandlerTrait()
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 
 	e.Integration.Status.Phase = v1.IntegrationPhaseNone
-	enabled, err = trait.Configure(e)
+	enabled, condition, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-	enabled, err = trait.Configure(e)
+	enabled, condition, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
 }
 
 func TestErrorHandlerApplySource(t *testing.T) {
@@ -60,9 +64,11 @@ func TestErrorHandlerApplySource(t *testing.T) {
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	trait := newErrorHandlerTrait()
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
 	err = trait.Apply(e)
 	assert.Nil(t, err)
 	assert.Equal(t, `- error-handler:
@@ -84,9 +90,11 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	trait := newErrorHandlerTrait()
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
 	err = trait.Apply(e)
 	assert.Nil(t, err)
 	assert.Equal(t, "camel:log", e.Integration.Status.Dependencies[0])

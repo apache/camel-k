@@ -55,23 +55,22 @@ func newJvmTrait() Trait {
 	}
 }
 
-func (t *jvmTrait) Configure(e *Environment) (bool, error) {
+func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
+		return false, NewIntegrationConditionUserDisabled(), nil
 	}
-
 	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) || !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
 		// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
 		if quarkus, ok := trait.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
-			return false, nil
+			return false, newIntegrationConditionPlatformDisabledWithReason("Quarkus native build"), nil
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 // nolint: maintidx // TODO: refactor the code

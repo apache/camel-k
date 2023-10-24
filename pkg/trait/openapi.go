@@ -55,21 +55,21 @@ func newOpenAPITrait() Trait {
 	}
 }
 
-func (t *openAPITrait) Configure(e *Environment) (bool, error) {
+func (t *openAPITrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return false, nil
+		return false, nil, nil
 	}
 
 	// check if the runtime provides 'rest' capabilities
 	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityRest]; !ok {
-		return false, fmt.Errorf("the runtime provider %s does not declare 'rest' capability", e.CamelCatalog.Runtime.Provider)
+		return false, nil, fmt.Errorf("the runtime provider %s does not declare 'rest' capability", e.CamelCatalog.Runtime.Provider)
 	}
 
 	if t.Configmaps != nil {
-		return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
+		return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
 	}
 
-	return false, nil
+	return false, nil, nil
 }
 
 func (t *openAPITrait) Apply(e *Environment) error {

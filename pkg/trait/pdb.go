@@ -40,25 +40,25 @@ func newPdbTrait() Trait {
 	}
 }
 
-func (t *pdbTrait) Configure(e *Environment) (bool, error) {
+func (t *pdbTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
-		return false, fmt.Errorf("unable to determine the controller stratedy")
+		return false, nil, fmt.Errorf("unable to determine the controller strategy")
 	}
 
 	if strategy == ControllerStrategyCronJob {
-		return false, fmt.Errorf("poddisruptionbudget isn't supported with cron-job controller strategy")
+		return false, nil, fmt.Errorf("poddisruptionbudget isn't supported with cron-job controller strategy")
 	}
 
 	if t.MaxUnavailable != "" && t.MinAvailable != "" {
-		return false, fmt.Errorf("both minAvailable and maxUnavailable can't be set simultaneously")
+		return false, nil, fmt.Errorf("both minAvailable and maxUnavailable can't be set simultaneously")
 	}
 
-	return e.IntegrationInRunningPhases(), nil
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *pdbTrait) Apply(e *Environment) error {

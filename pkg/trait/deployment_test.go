@@ -42,29 +42,29 @@ func TestConfigureDeploymentTraitWhileIntegrationIsRunningDoesSucceed(t *testing
 	)
 	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
-	configured, err := deploymentTrait.Configure(environment)
-
-	assert.Nil(t, err)
+	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.True(t, configured)
+	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestConfigureDeploymentTraitDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
 
-	configured, err := deploymentTrait.Configure(environment)
-
-	assert.Nil(t, err)
+	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.True(t, configured)
+	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestConfigureDeploymentTraitWhileBuildingKitDoesNotSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
-	configured, err := deploymentTrait.Configure(environment)
-
-	assert.Nil(t, err)
+	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.False(t, configured)
+	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestConfigureDeploymentTraitWhileWaitingPlatformDoesNotSucceed(t *testing.T) {
@@ -72,20 +72,20 @@ func TestConfigureDeploymentTraitWhileWaitingPlatformDoesNotSucceed(t *testing.T
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 
-	configured, err := deploymentTrait.Configure(environment)
-
-	assert.Nil(t, err)
+	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.False(t, configured)
+	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestApplyDeploymentTraitWhileResolvingKitDoesNotSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
-	configured, err := deploymentTrait.Configure(environment)
-
-	assert.Nil(t, err)
+	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.False(t, configured)
+	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestApplyDeploymentTraitWhileDeployingIntegrationDoesSucceed(t *testing.T) {

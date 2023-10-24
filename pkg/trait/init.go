@@ -42,12 +42,12 @@ func NewInitTrait() Trait {
 	}
 }
 
-func (t *initTrait) Configure(e *Environment) (bool, error) {
+func (t *initTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, errors.New("trait init cannot be disabled")
+		return false, nil, errors.New("trait init cannot be disabled")
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
 }
 
 func (t *initTrait) Apply(e *Environment) error {

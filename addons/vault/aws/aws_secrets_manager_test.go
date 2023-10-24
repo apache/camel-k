@@ -43,9 +43,10 @@ func TestAwsSecretsManagerTraitApply(t *testing.T) {
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)
@@ -65,9 +66,10 @@ func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)
@@ -104,9 +106,10 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "secret:my-secret2/aws-access-key"
 	secrets.SecretKey = "secret:my-secret1/aws-secret-key"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)
@@ -143,9 +146,10 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "configmap:my-configmap2/aws-access-key"
 	secrets.SecretKey = "configmap:my-configmap1/aws-secret-key"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)

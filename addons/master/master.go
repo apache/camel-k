@@ -84,25 +84,27 @@ var (
 	configMapResourceType = "ConfigMap"
 )
 
-func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
+		return false, nil, nil
 	}
-
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
+	}
+	if !pointer.BoolDeref(t.Enabled, false) {
+		return false, trait.NewIntegrationConditionUserDisabled(), nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
 		// Check if the master component has been used
 		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		if t.Enabled == nil {
@@ -112,10 +114,6 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 					t.Enabled = &enabled
 				}
 			}
-		}
-
-		if !pointer.BoolDeref(t.Enabled, false) {
-			return false, nil
 		}
 
 		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
@@ -130,7 +128,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		if t.ResourceType == nil {
 			canUseLeases, err := t.canUseLeases(e)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if canUseLeases {
 				t.ResourceType = &leaseResourceType
@@ -149,7 +147,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return pointer.BoolDeref(t.Enabled, true), nil
+	return pointer.BoolDeref(t.Enabled, true), nil, nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {

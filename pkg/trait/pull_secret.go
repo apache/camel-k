@@ -44,13 +44,15 @@ func newPullSecretTrait() Trait {
 	}
 }
 
-func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
+func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
-
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled(), nil
+	}
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
@@ -60,7 +62,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 				key := ctrl.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
 				obj := corev1.Secret{}
 				if err := t.Client.Get(e.Ctx, key, &obj); err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if obj.Type == corev1.SecretTypeDockerConfigJson {
 					t.SecretName = secret
@@ -73,7 +75,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 				var err error
 				isOpenShift, err = openshift.IsOpenShift(t.Client)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 			}
 			isOperatorGlobal := platform.IsCurrentOperatorGlobal()
@@ -83,7 +85,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, error) {
 		}
 	}
 
-	return t.SecretName != "" || pointer.BoolDeref(t.ImagePullerDelegation, false), nil
+	return t.SecretName != "" || pointer.BoolDeref(t.ImagePullerDelegation, false), nil, nil
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {

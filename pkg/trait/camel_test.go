@@ -35,16 +35,18 @@ import (
 func TestConfigureEnabledCamelTraitSucceeds(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.True(t, configured)
 }
 
 func TestApplyCamelTraitSucceeds(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
@@ -65,8 +67,9 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 	environment.Integration.Status.RuntimeVersion = "Unmatchable version"
 	environment.Integration.Status.RuntimeProvider = v1.RuntimeProviderQuarkus
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
@@ -167,8 +170,9 @@ func TestApplyCamelTraitWithProperties(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 	trait.Properties = []string{"a=b", "c=d"}
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
@@ -186,8 +190,9 @@ func TestApplyCamelTraitWithProperties(t *testing.T) {
 func TestApplyCamelTraitWithSources(t *testing.T) {
 	trait, environment := createNominalCamelTest(true)
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)

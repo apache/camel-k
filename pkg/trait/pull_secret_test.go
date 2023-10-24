@@ -40,9 +40,10 @@ func TestPullSecret(t *testing.T) {
 
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.SecretName = "xxxy"
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 
 	err = trait.Apply(e)
 	assert.Nil(t, err)
@@ -54,9 +55,10 @@ func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 	e.Platform = &v1.IntegrationPlatform{}
 
 	trait := newPullSecretTrait()
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 }
 
 func TestPullSecretAuto(t *testing.T) {
@@ -64,9 +66,10 @@ func TestPullSecretAuto(t *testing.T) {
 
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = pointer.Bool(false)
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 }
 
 func TestPullSecretImagePullerDelegation(t *testing.T) {
@@ -75,9 +78,10 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = pointer.Bool(false)
 	trait.ImagePullerDelegation = pointer.Bool(true)
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.True(t, *trait.ImagePullerDelegation)
 
 	err = trait.Apply(e)

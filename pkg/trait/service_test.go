@@ -108,9 +108,10 @@ func TestServiceWithDefaults(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -215,9 +216,10 @@ func TestService(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -302,9 +304,10 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -393,9 +396,10 @@ func TestServiceWithNodePort(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -487,9 +491,24 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	deploymentCondition := NewIntegrationCondition(
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionFalse,
+		"deployment trait configuration",
+		"controller strategy: knative-service",
+	)
+	serviceCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"service trait configuration",
+		"explicitly disabled by the platform: knative-service trait has priority over this trait",
+	)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Len(t, conditions, 2)
+	assert.Contains(t, conditions, deploymentCondition)
+	assert.Contains(t, conditions, serviceCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait(serviceTraitID))
 	assert.NotNil(t, environment.GetTrait(knativeServiceTraitID))
@@ -550,9 +569,24 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	deploymentCondition := NewIntegrationCondition(
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionFalse,
+		"deployment trait configuration",
+		"controller strategy: knative-service",
+	)
+	serviceCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"service trait configuration",
+		"explicitly disabled by the platform: knative-service trait has priority over this trait",
+	)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Len(t, conditions, 2)
+	assert.Contains(t, conditions, deploymentCondition)
+	assert.Contains(t, conditions, serviceCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait(serviceTraitID))
 	assert.NotNil(t, environment.GetTrait(knativeServiceTraitID))
@@ -621,9 +655,17 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionKnativeServiceAvailable,
+		corev1.ConditionFalse,
+		"knative-service trait configuration",
+		"explicitly disabled",
+	)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Len(t, conditions, 1)
+	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait(serviceTraitID))
 	assert.Nil(t, environment.GetTrait(knativeServiceTraitID))

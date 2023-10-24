@@ -41,20 +41,20 @@ func newErrorHandlerTrait() Trait {
 	}
 }
 
-func (t *errorHandlerTrait) Configure(e *Environment) (bool, error) {
+func (t *errorHandlerTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if t.ErrorHandlerRef == "" {
 		t.ErrorHandlerRef = e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName)
 	}
 
-	return t.ErrorHandlerRef != "", nil
+	return t.ErrorHandlerRef != "", nil, nil
 }
 
 func (t *errorHandlerTrait) Apply(e *Environment) error {

@@ -52,9 +52,10 @@ func TestManualConfig(t *testing.T) {
 	})
 	env := createBasicTestEnvironment()
 
-	res, err := keda.Configure(env)
+	res, condition, err := keda.Configure(env)
 	assert.NoError(t, err)
 	assert.True(t, res)
+	assert.Nil(t, condition)
 	assert.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
@@ -90,9 +91,10 @@ func TestConfigFromSecret(t *testing.T) {
 		},
 	})
 
-	res, err := keda.Configure(env)
+	res, condition, err := keda.Configure(env)
 	assert.NoError(t, err)
 	assert.True(t, res)
+	assert.Nil(t, condition)
 	assert.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
@@ -177,9 +179,10 @@ func TestKameletAutoDetection(t *testing.T) {
 			},
 		})
 
-	res, err := keda.Configure(env)
+	res, condition, err := keda.Configure(env)
 	assert.NoError(t, err)
 	assert.True(t, res)
+	assert.Nil(t, condition)
 	assert.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
@@ -284,15 +287,17 @@ func TestPipeAutoDetection(t *testing.T) {
 
 	it.Status.Phase = camelv1.IntegrationPhaseInitialization
 	init := trait.NewInitTrait()
-	ok, err := init.Configure(env)
+	ok, condition, err := init.Configure(env)
 	assert.NoError(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 	assert.NoError(t, init.Apply(env))
 
 	it.Status.Phase = camelv1.IntegrationPhaseDeploying
-	res, err := keda.Configure(env)
+	res, condition, err := keda.Configure(env)
 	assert.NoError(t, err)
 	assert.True(t, res)
+	assert.Nil(t, condition)
 	assert.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
@@ -339,9 +344,10 @@ func TestHackReplicas(t *testing.T) {
 		},
 	)
 
-	res, err := keda.Configure(env)
+	res, condition, err := keda.Configure(env)
 	assert.NoError(t, err)
 	assert.True(t, res)
+	assert.Nil(t, condition)
 	assert.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
 	assert.NoError(t, err)
@@ -386,9 +392,10 @@ func TestHackKLBReplicas(t *testing.T) {
 		},
 	)
 
-	res, err := keda.Configure(env)
+	res, condition, err := keda.Configure(env)
 	assert.NoError(t, err)
 	assert.True(t, res)
+	assert.Nil(t, condition)
 	assert.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
 	assert.NoError(t, err)

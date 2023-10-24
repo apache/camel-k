@@ -58,13 +58,13 @@ func (t *registryTrait) InfluencesBuild(this, prev map[string]interface{}) bool 
 	return true
 }
 
-func (t *registryTrait) Configure(e *Environment) (bool, error) {
+func (t *registryTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// disabled by default
 	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted), nil
+	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted), nil, nil
 }
 
 func (t *registryTrait) Apply(e *Environment) error {

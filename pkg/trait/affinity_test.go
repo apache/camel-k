@@ -32,9 +32,10 @@ import (
 func TestConfigureAffinityTraitDoesSucceed(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
 	environment, _ := createNominalDeploymentTraitTest()
-	configured, err := affinityTrait.Configure(environment)
+	configured, condition, err := affinityTrait.Configure(environment)
 
 	assert.True(t, configured)
+	assert.Nil(t, condition)
 	assert.Nil(t, err)
 }
 
@@ -43,9 +44,10 @@ func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 	environment, _ := createNominalDeploymentTraitTest()
 	affinityTrait.PodAffinity = pointer.Bool(true)
 	affinityTrait.PodAntiAffinity = pointer.Bool(true)
-	configured, err := affinityTrait.Configure(environment)
+	configured, condition, err := affinityTrait.Configure(environment)
 
 	assert.False(t, configured)
+	assert.Nil(t, condition)
 	assert.NotNil(t, err)
 }
 
@@ -53,10 +55,11 @@ func TestConfigureDisabledAffinityTraitFails(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
 	affinityTrait.Enabled = pointer.Bool(false)
 	environment, _ := createNominalDeploymentTraitTest()
-	configured, err := affinityTrait.Configure(environment)
+	configured, condition, err := affinityTrait.Configure(environment)
 
 	assert.False(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestApplyAffinityMissingDeployment(t *testing.T) {

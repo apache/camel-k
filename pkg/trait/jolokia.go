@@ -44,12 +44,12 @@ func newJolokiaTrait() Trait {
 	}
 }
 
-func (t *jolokiaTrait) Configure(e *Environment) (bool, error) {
+func (t *jolokiaTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *jolokiaTrait) Apply(e *Environment) error {

@@ -118,7 +118,8 @@ func TestKnativeService(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -246,7 +247,8 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -330,7 +332,8 @@ func TestKnativeServiceWithRest(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -397,7 +400,8 @@ func TestKnativeServiceNotApplicable(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -507,8 +511,7 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(environment)
-
+	_, err = traitCatalog.apply(environment)
 	require.NoError(t, err)
 
 	return environment
@@ -521,7 +524,7 @@ func TestServiceAnnotation(t *testing.T) {
 	})
 
 	traitsCatalog := environment.Catalog
-	err := traitsCatalog.apply(environment)
+	_, err := traitsCatalog.apply(environment)
 
 	assert.Nil(t, err)
 

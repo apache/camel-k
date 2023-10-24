@@ -52,17 +52,16 @@ func newHealthTrait() Trait {
 	}
 }
 
-func (t *healthTrait) Configure(e *Environment) (bool, error) {
+func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil ||
 		!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
-
 	if !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *healthTrait) Apply(e *Environment) error {

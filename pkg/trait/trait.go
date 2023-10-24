@@ -55,7 +55,20 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 	environment.Catalog = catalog
 
 	// invoke the trait framework to determine the needed resources
-	if err := catalog.apply(environment); err != nil {
+	conditions, err := catalog.apply(environment)
+	// Conditions contains informative message coming from the trait execution and useful to be reported into it or ik CR
+	// they must be applied before returning after an error
+	for _, tc := range conditions {
+		switch {
+		case integration != nil:
+			// set an Integration condition
+			integration.Status.SetCondition(tc.integrationCondition())
+		case kit != nil:
+			// set an IntegrationKit condition
+			kit.Status.SetCondition(tc.integrationKitCondition())
+		}
+	}
+	if err != nil {
 		return nil, fmt.Errorf("error during trait customization: %w", err)
 	}
 

@@ -75,25 +75,24 @@ func NewResumeTrait() trait.Trait {
 	}
 }
 
-func (r *resumeTrait) Configure(environment *trait.Environment) (bool, error) {
+func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if !pointer.BoolDeref(r.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
-
 	if !environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !environment.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(r.Auto, true) {
 		// Check which components have been used
 		sources, err := kubernetes.ResolveIntegrationSources(environment.Ctx, r.Client, environment.Integration, environment.Resources)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		meta, err := metadata.ExtractAll(environment.CamelCatalog, sources)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		for _, endpoint := range meta.FromURIs {
@@ -109,7 +108,7 @@ func (r *resumeTrait) Configure(environment *trait.Environment) (bool, error) {
 		}
 	}
 
-	return r.Enabled != nil && *r.Enabled, nil
+	return r.Enabled != nil && *r.Enabled, nil, nil
 }
 
 func (r *resumeTrait) Apply(environment *trait.Environment) error {

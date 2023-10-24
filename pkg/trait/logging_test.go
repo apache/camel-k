@@ -110,9 +110,10 @@ func NewLoggingTestCatalog() *Catalog {
 
 func TestEmptyLoggingTrait(t *testing.T) {
 	env := createDefaultLoggingTestEnv(t)
-	err := NewLoggingTestCatalog().apply(env)
+	conditions, err := NewLoggingTestCatalog().apply(env)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false
@@ -162,9 +163,10 @@ func TestEmptyLoggingTrait(t *testing.T) {
 func TestJsonLoggingTrait(t *testing.T) {
 	// When running, this log should look like "09:07:00 INFO  (main) Profile prod activated."
 	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n")
-	err := NewLoggingTestCatalog().apply(env)
+	conditions, err := NewLoggingTestCatalog().apply(env)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false
