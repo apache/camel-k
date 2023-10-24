@@ -44,9 +44,10 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 		e.IntegrationKit = nil
 
 		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
-			err := NewBuilderTestCatalog().apply(e)
+			conditions, err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
+			assert.Empty(t, conditions)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Pipeline)
@@ -65,9 +66,10 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseInitialization
 
 		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
-			err := NewBuilderTestCatalog().apply(e)
+			conditions, err := NewBuilderTestCatalog().apply(e)
 
 			assert.Nil(t, err)
+			assert.Empty(t, conditions)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Pipeline)
@@ -77,9 +79,10 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 
 func TestS2IBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, v1.BuildStrategyRoutine)
-	err := NewBuilderTestCatalog().apply(env)
+	conditions, err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.Pipeline)
@@ -91,9 +94,10 @@ func TestS2IBuilderTrait(t *testing.T) {
 
 func TestKanikoBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
-	err := NewBuilderTestCatalog().apply(env)
+	conditions, err := NewBuilderTestCatalog().apply(env)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.Pipeline)
@@ -420,10 +424,15 @@ func TestBuilderDeprecatedParams(t *testing.T) {
 	builderTrait.LimitMemory = "100Mi"
 	builderTrait.RequestMemory = "100Mi"
 
-	active, err := builderTrait.Configure(env)
+	active, condition, err := builderTrait.Configure(env)
 
 	assert.Nil(t, err)
 	assert.True(t, active)
+	assert.NotNil(t, condition)
+	assert.Contains(t, condition.reason, "The request-cpu parameter is deprecated and may be removed in future releases")
+	assert.Contains(t, condition.reason, "The limit-cpu parameter is deprecated and may be removed in future releases")
+	assert.Contains(t, condition.reason, "The request-memory parameter is deprecated and may be removed in future releases")
+	assert.Contains(t, condition.reason, "The limit-memory parameter is deprecated and may be removed in future releases")
 	assert.Len(t, builderTrait.TasksLimitCPU, 1)
 	assert.Len(t, builderTrait.TasksRequestCPU, 1)
 	assert.Len(t, builderTrait.TasksLimitMemory, 1)

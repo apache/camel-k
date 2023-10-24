@@ -67,33 +67,32 @@ func newContainerTrait() Trait {
 	}
 }
 
-func (t *containerTrait) Configure(e *Environment) (bool, error) {
+func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	knativeInstalled, _ := knative.IsInstalled(e.Client)
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !knativeInstalled {
 		hasKnativeEndpoint, err := containsEndpoint("knative", e, t.Client)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		if hasKnativeEndpoint {
 			// fail fast the integration as there is no knative installed in the cluster
 			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains knative endpoint that cannot run, as knative is not installed in the cluster.", e.Integration.Namespace, e.Integration.Name)
 			err := errors.New("integration cannot run, as knative is not installed in the cluster")
-			e.Integration.Status.SetCondition(
+			return false, NewIntegrationCondition(
 				v1.IntegrationConditionKnativeAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionKnativeNotInstalledReason,
-				err.Error())
-			e.Integration.Status.Phase = v1.IntegrationPhaseError
-			return false, err
+				err.Error(),
+			), err
 		}
 	}
 
@@ -105,10 +104,10 @@ func (t *containerTrait) Configure(e *Environment) (bool, error) {
 	}
 
 	if !isValidPullPolicy(t.ImagePullPolicy) {
-		return false, fmt.Errorf("unsupported pull policy %s", t.ImagePullPolicy)
+		return false, nil, fmt.Errorf("unsupported pull policy %s", t.ImagePullPolicy)
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func isValidPullPolicy(policy corev1.PullPolicy) bool {

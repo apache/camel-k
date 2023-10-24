@@ -23,26 +23,36 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 )
 
 func TestConfigureGCTraitDoesSucceed(t *testing.T) {
 	gcTrait, environment := createNominalGCTest()
-	configured, err := gcTrait.Configure(environment)
+	configured, condition, err := gcTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
+
 }
 
 func TestConfigureDisabledGCTraitDoesNotSucceed(t *testing.T) {
 	gcTrait, environment := createNominalGCTest()
 	gcTrait.Enabled = pointer.Bool(false)
 
-	configured, err := gcTrait.Configure(environment)
-
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"Trait configuration",
+		"explicitly disabled by the user",
+	)
+	configured, condition, err := gcTrait.Configure(environment)
 	assert.False(t, configured)
 	assert.Nil(t, err)
+	assert.NotNil(t, condition)
+	assert.Equal(t, expectedCondition, condition)
 }
 
 func TestApplyGarbageCollectorTraitFirstGenerationDoesSucceed(t *testing.T) {

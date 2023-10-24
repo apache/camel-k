@@ -86,9 +86,9 @@ func NewTracingTrait() trait.Trait {
 	}
 }
 
-func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *tracingTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
@@ -96,7 +96,7 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 			for _, locator := range discovery.TracingLocators {
 				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if endpoint != "" {
 					t.L.Infof("Using tracing endpoint: %s", endpoint)
@@ -119,7 +119,7 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *tracingTrait) Apply(e *trait.Environment) error {

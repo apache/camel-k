@@ -187,6 +187,8 @@ const (
 	IntegrationKitConditionCatalogAvailable IntegrationKitConditionType = "CamelCatalogAvailable"
 	// IntegrationKitConditionPlatformAvailableReason --.
 	IntegrationKitConditionPlatformAvailableReason string = "IntegrationPlatformAvailable"
+	// IntegrationKitConditionTraitInfo --.
+	IntegrationKitConditionTraitInfo IntegrationKitConditionType = "TraitInfo"
 )
 
 // IntegrationKitCondition describes the state of a resource at a certain point.

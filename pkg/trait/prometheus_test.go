@@ -36,20 +36,22 @@ import (
 func TestConfigurePrometheusTraitInRightPhaseDoesSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 
 	assert.Nil(t, err)
 	assert.True(t, configured)
+	assert.Nil(t, condition)
 }
 
 func TestConfigurePrometheusTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalPrometheusTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 
 	assert.Nil(t, err)
 	assert.False(t, configured)
+	assert.Nil(t, condition)
 }
 
 func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {

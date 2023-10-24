@@ -24,6 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -51,34 +52,29 @@ func (t *ingressTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile.Equal(v1.TraitProfileKubernetes)
 }
 
-func (t *ingressTrait) Configure(e *Environment) (bool, error) {
-	if !e.IntegrationInRunningPhases() {
-		return false, nil
+func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
-
-	if !ptrDerefOr(t.Enabled, true) {
-		e.Integration.Status.SetCondition(
+	if !e.IntegrationInRunningPhases() {
+		return false, nil, nil
+	}
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionIngressNotAvailableReason,
 			"explicitly disabled",
-		)
-		return false, nil
+		), nil
 	}
 
-	if ptrDerefOr(t.Auto, true) {
+	if pointer.BoolDeref(t.Auto, true) {
 		if e.Resources.GetUserServiceForIntegration(e.Integration) == nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionExposureAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionIngressNotAvailableReason,
-				"no service defined",
-			)
-			return false, nil
+			return false, nil, nil
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *ingressTrait) Apply(e *Environment) error {

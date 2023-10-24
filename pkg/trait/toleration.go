@@ -38,16 +38,16 @@ func newTolerationTrait() Trait {
 	}
 }
 
-func (t *tolerationTrait) Configure(e *Environment) (bool, error) {
+func (t *tolerationTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if len(t.Taints) == 0 {
-		return false, fmt.Errorf("no taint was provided")
+		return false, nil, fmt.Errorf("no taint was provided")
 	}
 
-	return e.IntegrationInRunningPhases(), nil
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *tolerationTrait) Apply(e *Environment) error {

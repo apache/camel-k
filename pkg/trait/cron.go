@@ -73,44 +73,35 @@ func newCronTrait() Trait {
 	}
 }
 
-func (t *cronTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		if e.Integration != nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionCronJobAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionCronJobNotAvailableReason,
-				"explicitly disabled",
-			)
-		}
-
-		return false, nil
+func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
-
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled(), nil
+	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityCron]; !ok {
-		e.Integration.Status.SetCondition(
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionCronJobAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionCronJobNotAvailableReason,
 			"the runtime provider %s does not declare 'cron' capability",
-		)
-
-		return false, nil
+		), nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
 		globalCron, err := t.getGlobalCron(e)
 		if err != nil {
-			e.Integration.Status.SetErrorCondition(
+			return false, NewIntegrationCondition(
 				v1.IntegrationConditionCronJobAvailable,
+				corev1.ConditionFalse,
 				v1.IntegrationConditionCronJobNotAvailableReason,
-				err,
-			)
-			return false, err
+				err.Error(),
+			), err
 		}
 
 		if t.Schedule == "" && globalCron != nil {
@@ -133,7 +124,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 			// If there's at least a `cron` endpoint, add a fallback implementation
 			fromURIs, err := t.getSourcesFromURIs(e)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			for _, fromURI := range fromURIs {
 				if uri.GetComponent(fromURI) == genericCronComponent {
@@ -146,40 +137,33 @@ func (t *cronTrait) Configure(e *Environment) (bool, error) {
 
 	// Fallback strategy can be implemented in any other controller
 	if pointer.BoolDeref(t.Fallback, false) {
+		var condition *TraitCondition
 		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
-			e.Integration.Status.SetCondition(
+			condition = NewIntegrationCondition(
 				v1.IntegrationConditionCronJobAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionCronJobNotAvailableReason,
 				"fallback strategy selected",
 			)
 		}
-		return true, nil
+		return true, condition, nil
 	}
 
 	// CronJob strategy requires common schedule
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
-		e.Integration.Status.SetErrorCondition(
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionCronJobAvailable,
+			corev1.ConditionFalse,
 			v1.IntegrationConditionCronJobNotAvailableReason,
-			err,
-		)
-		return false, err
+			err.Error(),
+		), err
 	}
 	if strategy != ControllerStrategyCronJob {
-		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionCronJobAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionCronJobNotAvailableReason,
-				fmt.Sprintf("different controller strategy used (%s)", string(strategy)),
-			)
-		}
-		return false, nil
+		return false, nil, nil
 	}
 
-	return t.Schedule != "", nil
+	return t.Schedule != "", nil, nil
 }
 
 func (t *cronTrait) Apply(e *Environment) error {
@@ -280,9 +264,6 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 // SelectControllerStrategy can be used to check if a CronJob can be generated given the integration and trait settings.
 func (t *cronTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
 	cronStrategy := ControllerStrategyCronJob
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return nil, nil
-	}
 	if pointer.BoolDeref(t.Fallback, false) {
 		return nil, nil
 	}

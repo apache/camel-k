@@ -43,39 +43,37 @@ func newDeploymentTrait() Trait {
 	}
 }
 
-func (t *deploymentTrait) Configure(e *Environment) (bool, error) {
+func (t *deploymentTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionDeploymentAvailable)
-		return condition != nil && condition.Status == corev1.ConditionTrue, nil
+		return condition != nil && condition.Status == corev1.ConditionTrue, nil, nil
 	}
 
 	// Don't deploy when a different strategy is needed (e.g. Knative, Cron)
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
-		e.Integration.Status.SetErrorCondition(
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionDeploymentAvailable,
+			corev1.ConditionFalse,
 			v1.IntegrationConditionDeploymentAvailableReason,
-			err,
-		)
-
-		return false, err
+			err.Error(),
+		), err
 	}
 
 	if strategy != ControllerStrategyDeployment {
-		e.Integration.Status.SetCondition(
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionDeploymentAvailableReason,
 			"controller strategy: "+string(strategy),
-		)
-		return false, nil
+		), nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying), nil, nil
 }
 
 func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {

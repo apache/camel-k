@@ -116,22 +116,21 @@ func NewKedaTrait() trait.Trait {
 	}
 }
 
-func (t *kedaTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
-
 	if !e.IntegrationInPhase(camelv1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if t.Auto == nil || *t.Auto {
 		if err := t.populateTriggersFromKamelets(e); err != nil {
-			return false, err
+			return false, nil, err
 		}
 	}
 
-	return len(t.Triggers) > 0, nil
+	return len(t.Triggers) > 0, nil, nil
 }
 
 func (t *kedaTrait) Apply(e *trait.Environment) error {

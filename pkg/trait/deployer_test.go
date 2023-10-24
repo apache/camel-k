@@ -29,20 +29,20 @@ import (
 func TestConfigureDeployerTraitDoesSucceed(t *testing.T) {
 	deployerTrait, environment := createNominalDeployerTest()
 
-	configured, err := deployerTrait.Configure(environment)
-
+	configured, condition, err := deployerTrait.Configure(environment)
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestConfigureDeployerTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	deployerTrait, environment := createNominalDeployerTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
-	configured, err := deployerTrait.Configure(environment)
-
+	configured, condition, err := deployerTrait.Configure(environment)
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestApplyDeployerTraitDoesSucceed(t *testing.T) {

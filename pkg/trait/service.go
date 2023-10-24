@@ -43,18 +43,17 @@ func newServiceTrait() Trait {
 	}
 }
 
-func (t *serviceTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		if e.Integration != nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionServiceAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionServiceNotAvailableReason,
-				"explicitly disabled",
-			)
-		}
-
-		return false, nil
+func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
+	}
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationCondition(
+			v1.IntegrationConditionServiceAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionServiceNotAvailableReason,
+			"explicitly disabled",
+		), nil
 	}
 
 	// in case the knative-service and service trait are enabled, the knative-service has priority
@@ -62,43 +61,36 @@ func (t *serviceTrait) Configure(e *Environment) (bool, error) {
 	if e.GetTrait(knativeServiceTraitID) != nil {
 		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
 		if pointer.BoolDeref(knativeServiceTrait.Enabled, true) {
-			return false, nil
+			return false, newIntegrationConditionPlatformDisabledWithReason("knative-service trait has priority over this trait"), nil
 		}
 	}
 
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
 		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
+		var condition *TraitCondition
 		if err != nil {
-			e.Integration.Status.SetCondition(
+			condition = NewIntegrationCondition(
 				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionServiceNotAvailableReason,
 				err.Error(),
 			)
-
-			return false, err
+			return false, condition, err
 		}
 
 		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 		if !meta.ExposesHTTPServices {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionServiceAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionServiceNotAvailableReason,
-				"no http service required",
-			)
-
-			return false, nil
+			return false, nil, nil
 		}
 	}
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *serviceTrait) Apply(e *Environment) error {

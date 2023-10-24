@@ -71,19 +71,21 @@ func newKameletsTrait() Trait {
 	}
 }
 
-func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
+func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
-
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled(), nil
+	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
 		kamelets, err := kamelets.ExtractKameletFromSources(e.Ctx, e.Client, e.CamelCatalog, e.Resources, e.Integration)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		if len(kamelets) > 0 {
@@ -96,7 +98,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, error) {
 		}
 	}
 
-	return len(t.getKameletKeys()) > 0, nil
+	return len(t.getKameletKeys()) > 0, nil, nil
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {

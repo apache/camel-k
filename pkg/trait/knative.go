@@ -66,27 +66,28 @@ func (t *knativeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile.Equal(v1.TraitProfileKnative)
 }
 
-func (t *knativeTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
+func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
-
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled(), nil
+	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
-
 	if pointer.BoolDeref(t.Auto, true) {
 		if len(t.ChannelSources) == 0 {
 			items := make([]string, 0)
 			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeChannel)...)
 				return true
 			}); err != nil {
-				return false, err
+				return false, nil, err
 			}
 
 			t.ChannelSources = items
@@ -96,13 +97,13 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			items := make([]string, 0)
 			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeChannel)...)
 				return true
 			}); err != nil {
-				return false, err
+				return false, nil, err
 			}
 
 			t.ChannelSinks = items
@@ -112,13 +113,13 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			items := make([]string, 0)
 			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeEndpoint)...)
 				return true
 			}); err != nil {
-				return false, err
+				return false, nil, err
 			}
 
 			t.EndpointSources = items
@@ -128,13 +129,13 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			items := make([]string, 0)
 			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeEndpoint)...)
 				return true
 			}); err != nil {
-				return false, err
+				return false, nil, err
 			}
 
 			t.EndpointSinks = items
@@ -144,13 +145,13 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			items := make([]string, 0)
 			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.FromURIs, knativeapi.CamelServiceTypeEvent)...)
 				return true
 			}); err != nil {
-				return false, err
+				return false, nil, err
 			}
 
 			t.EventSources = items
@@ -160,13 +161,13 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 			items := make([]string, 0)
 			sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
 				items = append(items, knativeutil.FilterURIs(meta.ToURIs, knativeapi.CamelServiceTypeEvent)...)
 				return true
 			}); err != nil {
-				return false, err
+				return false, nil, err
 			}
 
 			t.EventSinks = items
@@ -182,7 +183,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, error) {
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {

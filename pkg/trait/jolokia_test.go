@@ -34,10 +34,11 @@ func TestConfigureJolokiaTraitInRunningPhaseDoesSucceed(t *testing.T) {
 	trait, environment := createNominalJolokiaTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 
 	assert.Nil(t, err)
 	assert.True(t, configured)
+	assert.Nil(t, condition)
 }
 
 func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {

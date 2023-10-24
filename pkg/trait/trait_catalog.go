@@ -85,9 +85,10 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 	return res
 }
 
-func (c *Catalog) apply(environment *Environment) error {
+func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
+	traitsConditions := []*TraitCondition{}
 	if err := c.Configure(environment); err != nil {
-		return err
+		return traitsConditions, err
 	}
 	traits := c.traitsFor(environment)
 	environment.ConfiguredTraits = traits
@@ -100,15 +101,19 @@ func (c *Catalog) apply(environment *Environment) error {
 			continue
 		}
 		applicable = true
-		enabled, err := trait.Configure(environment)
+		enabled, condition, err := trait.Configure(environment)
+		if condition != nil {
+			condition.message = fmt.Sprintf("%s trait configuration", trait.ID())
+			traitsConditions = append(traitsConditions, condition)
+		}
 		if err != nil {
-			return fmt.Errorf("%s trait configuration failed: %w", trait.ID(), err)
+			return traitsConditions, fmt.Errorf("%s trait configuration failed: %w", trait.ID(), err)
 		}
 
 		if enabled {
 			err = trait.Apply(environment)
 			if err != nil {
-				return fmt.Errorf("%s trait execution failed: %w", trait.ID(), err)
+				return traitsConditions, fmt.Errorf("%s trait execution failed: %w", trait.ID(), err)
 			}
 
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
@@ -117,7 +122,7 @@ func (c *Catalog) apply(environment *Environment) error {
 			for _, processor := range environment.PostStepProcessors {
 				err := processor(environment)
 				if err != nil {
-					return fmt.Errorf("%s trait executing post step action failed: %w", trait.ID(), err)
+					return traitsConditions, fmt.Errorf("%s trait executing post step action failed: %w", trait.ID(), err)
 				}
 			}
 		}
@@ -130,17 +135,17 @@ func (c *Catalog) apply(environment *Environment) error {
 	c.L.Debugf("Applied traits: %s", strings.Join(traitIds, ","))
 
 	if !applicable && environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) {
-		return errors.New("no trait can be executed because of no ready platform found")
+		return traitsConditions, errors.New("no trait can be executed because of no ready platform found")
 	}
 
 	for _, processor := range environment.PostProcessors {
 		err := processor(environment)
 		if err != nil {
-			return fmt.Errorf("error executing post processor: %w", err)
+			return traitsConditions, fmt.Errorf("error executing post processor: %w", err)
 		}
 	}
 
-	return nil
+	return traitsConditions, nil
 }
 
 // GetTrait returns the trait with the given ID.

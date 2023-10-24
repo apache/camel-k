@@ -50,8 +50,8 @@ func newDeployerTrait() Trait {
 	}
 }
 
-func (t *deployerTrait) Configure(e *Environment) (bool, error) {
-	return e.Integration != nil, nil
+func (t *deployerTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	return e.Integration != nil, nil, nil
 }
 
 func (t *deployerTrait) Apply(e *Environment) error {

@@ -38,12 +38,12 @@ func newDependenciesTrait() Trait {
 	}
 }
 
-func (t *dependenciesTrait) Configure(e *Environment) (bool, error) {
+func (t *dependenciesTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
 }
 
 func (t *dependenciesTrait) Apply(e *Environment) error {

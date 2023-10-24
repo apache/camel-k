@@ -44,16 +44,18 @@ func newPodTrait() Trait {
 	}
 }
 
-func (t *podTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
+func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
-
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled(), nil
+	}
 	if e.Integration.Spec.PodTemplate == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return e.IntegrationInRunningPhases(), nil
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *podTrait) Apply(e *Environment) error {

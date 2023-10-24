@@ -44,9 +44,10 @@ func TestHashicorpVaultTraitApply(t *testing.T) {
 	secrets.Host = "localhost"
 	secrets.Port = "9091"
 	secrets.Scheme = "http"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)
@@ -77,9 +78,10 @@ func TestHashicorpVaultTraitWithSecretApply(t *testing.T) {
 	secrets.Host = "localhost"
 	secrets.Port = "9091"
 	secrets.Scheme = "http"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)
@@ -110,9 +112,10 @@ func TestHashicorpVaultTraitWithConfigMapApply(t *testing.T) {
 	secrets.Host = "localhost"
 	secrets.Port = "9091"
 	secrets.Scheme = "http"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)

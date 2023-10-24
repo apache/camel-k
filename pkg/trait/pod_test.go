@@ -36,14 +36,16 @@ import (
 
 func TestConfigurePodTraitDoesSucceed(t *testing.T) {
 	trait, environment, _ := createPodTest("")
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 
 	assert.True(t, configured)
+	assert.Nil(t, condition)
 	assert.Nil(t, err)
 
-	configured, err = trait.Configure(environment)
+	configured, condition, err = trait.Configure(environment)
 
 	assert.True(t, configured)
+	assert.Nil(t, condition)
 	assert.Nil(t, err)
 }
 
@@ -203,8 +205,9 @@ func testPodTemplateSpec(t *testing.T, template string) corev1.PodTemplateSpec {
 
 	trait, environment, _ := createPodTest(template)
 
-	_, err := trait.Configure(environment)
+	_, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
 	assert.Nil(t, err)

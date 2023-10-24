@@ -54,39 +54,28 @@ func (t *routeTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile.Equal(v1.TraitProfileOpenShift)
 }
 
-func (t *routeTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		if e.Integration != nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionExposureAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionRouteNotAvailableReason,
-				"explicitly disabled",
-			)
-		}
-
-		return false, nil
+func (t *routeTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
-
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationCondition(
+			v1.IntegrationConditionExposureAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionRouteNotAvailableReason,
+			"explicitly disabled",
+		), nil
+	}
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	t.service = e.Resources.GetUserServiceForIntegration(e.Integration)
 	if t.service == nil {
-		if e.Integration != nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionExposureAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionRouteNotAvailableReason,
-				"no target service found",
-			)
-		}
-
-		return false, nil
+		return false, nil, nil
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *routeTrait) Apply(e *Environment) error {

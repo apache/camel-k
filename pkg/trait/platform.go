@@ -43,13 +43,13 @@ func newPlatformTrait() Trait {
 	}
 }
 
-func (t *platformTrait) Configure(e *Environment) (bool, error) {
+func (t *platformTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseNone, v1.IntegrationPhaseWaitingForPlatform) {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if !pointer.BoolDeref(t.Auto, false) {
@@ -57,11 +57,11 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 			if t.CreateDefault == nil {
 				// Calculate if the platform should be automatically created when missing.
 				if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
-					return false, err
+					return false, nil, err
 				} else if ocp {
 					t.CreateDefault = &ocp
 				} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
-					return false, err
+					return false, nil, err
 				} else if addr != nil {
 					t.CreateDefault = pointer.Bool(true)
 				}
@@ -73,7 +73,7 @@ func (t *platformTrait) Configure(e *Environment) (bool, error) {
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *platformTrait) Apply(e *Environment) error {

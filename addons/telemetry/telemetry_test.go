@@ -36,9 +36,10 @@ func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
 	tt, _ := telemetry.(*telemetryTrait)
 	tt.Enabled = pointer.Bool(true)
 	tt.Endpoint = "http://endpoint3"
-	ok, err := telemetry.Configure(e)
+	ok, condition, err := telemetry.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = telemetry.Apply(e)
 	assert.Nil(t, err)
@@ -61,9 +62,10 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	tt.Sampler = "ratio"
 	tt.SamplerRatio = "0.001"
 	tt.SamplerParentBased = pointer.Bool(false)
-	ok, err := telemetry.Configure(e)
+	ok, condition, err := telemetry.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = telemetry.Apply(e)
 	assert.Nil(t, err)

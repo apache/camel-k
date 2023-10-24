@@ -205,9 +205,9 @@ func TestRoute_Default(t *testing.T) {
 	environment := createTestRouteEnvironment(t, name)
 	traitsCatalog := environment.Catalog
 
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("container"))
 	assert.NotNil(t, environment.GetTrait("route"))
@@ -233,10 +233,17 @@ func TestRoute_Disabled(t *testing.T) {
 		},
 	}
 
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionExposureAvailable,
+		corev1.ConditionFalse,
+		"route trait configuration",
+		"explicitly disabled",
+	)
 	traitsCatalog := environment.Catalog
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
 	assert.Nil(t, err)
+	assert.Len(t, conditions, 1)
+	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("route"))
 
@@ -256,9 +263,10 @@ func TestRoute_Configure_IntegrationKitOnly(t *testing.T) {
 	enabled := false
 	routeTrait.Enabled = &enabled
 
-	result, err := routeTrait.Configure(environment)
+	result, condition, err := routeTrait.Configure(environment)
 	assert.False(t, result)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestRoute_Host(t *testing.T) {
@@ -272,9 +280,10 @@ func TestRoute_Host(t *testing.T) {
 		},
 	}
 
-	err := traitsCatalog.apply(environment)
+	conditions, err := traitsCatalog.apply(environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("route"))
 
@@ -302,9 +311,10 @@ func TestRoute_TLS_From_Secret_reencrypt(t *testing.T) {
 			TLSDestinationCACertificateSecret: tlsMultipleSecretsName + "/" + tlsMultipleSecretsCert3Key,
 		},
 	}
-	err := traitsCatalog.apply(environment)
+	conditions, err := traitsCatalog.apply(environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("route"))
 
@@ -337,8 +347,8 @@ func TestRoute_TLS_wrong_secret(t *testing.T) {
 			TLSDestinationCACertificateSecret: "404",
 		},
 	}
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
+	assert.Empty(t, conditions)
 	// there must be errors as the trait has wrong configuration
 	assert.NotNil(t, err)
 	assert.Nil(t, environment.GetTrait("route"))
@@ -365,8 +375,8 @@ func TestRoute_TLS_secret_wrong_key(t *testing.T) {
 			TLSCACertificateSecret: tlsMultipleSecretsName + "/foo",
 		},
 	}
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
+	assert.Empty(t, conditions)
 	// there must be errors as the trait has wrong configuration
 	assert.NotNil(t, err)
 	assert.Nil(t, environment.GetTrait("route"))
@@ -393,8 +403,8 @@ func TestRoute_TLS_secret_missing_key(t *testing.T) {
 			TLSCACertificateSecret: tlsMultipleSecretsName,
 		},
 	}
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
+	assert.Empty(t, conditions)
 	// there must be errors as the trait has wrong configuration
 	assert.NotNil(t, err)
 	assert.Nil(t, environment.GetTrait("route"))
@@ -422,9 +432,9 @@ func TestRoute_TLS_reencrypt(t *testing.T) {
 			TLSDestinationCACertificate: destinationCaCert,
 		},
 	}
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("route"))
 
@@ -456,9 +466,9 @@ func TestRoute_TLS_edge(t *testing.T) {
 			TLSCACertificate: caCert,
 		},
 	}
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("route"))
 
@@ -488,9 +498,9 @@ func TestRoute_TLS_passthrough(t *testing.T) {
 			TLSInsecureEdgeTerminationPolicy: string(routev1.InsecureEdgeTerminationPolicyAllow),
 		},
 	}
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("route"))
 
@@ -518,9 +528,9 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 	}
 
 	traitsCatalog := environment.Catalog
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("container"))
 	assert.NotNil(t, environment.GetTrait("route"))
@@ -552,9 +562,9 @@ func TestRouteAnnotation(t *testing.T) {
 	}
 
 	traitsCatalog := environment.Catalog
-	err := traitsCatalog.apply(environment)
-
+	conditions, err := traitsCatalog.apply(environment)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
 		return r.ObjectMeta.Name == name

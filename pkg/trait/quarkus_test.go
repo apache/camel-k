@@ -32,10 +32,11 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
 
-	configured, err := quarkusTrait.Configure(environment)
+	configured, condition, err := quarkusTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
 	assert.Nil(t, err)
@@ -53,9 +54,10 @@ func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
-	configured, err := quarkusTrait.Configure(environment)
+	configured, condition, err := quarkusTrait.Configure(environment)
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
 	assert.Nil(t, err)
@@ -69,9 +71,10 @@ func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
 
 	v1.SetAnnotation(&environment.Integration.ObjectMeta, v1.TraitAnnotationPrefix+"quarkus.foo", "camel-k")
 
-	configured, err := quarkusTrait.Configure(environment)
+	configured, condition, err := quarkusTrait.Configure(environment)
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
 	assert.Nil(t, err)
