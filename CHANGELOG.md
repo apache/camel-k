@@ -14,6 +14,9 @@
 
 **Merged pull requests:**
 
+- feat\(trait\): expose conditions [\#4852](https://github.com/apache/camel-k/pull/4852) ([squakez](https://github.com/squakez))
+- fix\(ci\): Fix golang setup error in coverage workflow [\#4851](https://github.com/apache/camel-k/pull/4851) ([gansheer](https://github.com/gansheer))
+- feat\(helm\): 2.1.0 release [\#4848](https://github.com/apache/camel-k/pull/4848) ([squakez](https://github.com/squakez))
 - chore\(ci\): release notes procedure [\#4843](https://github.com/apache/camel-k/pull/4843) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/fsnotify/fsnotify from 1.6.0 to 1.7.0 [\#4842](https://github.com/apache/camel-k/pull/4842) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): Use latest minor version of golang in ci workflows [\#4840](https://github.com/apache/camel-k/pull/4840) ([gansheer](https://github.com/gansheer))
