@@ -91,10 +91,6 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, false) {
-		return false, trait.NewIntegrationConditionUserDisabled(), nil
-	}
-
 	if pointer.BoolDeref(t.Auto, true) {
 		// Check if the master component has been used
 		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
@@ -115,7 +111,9 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 				}
 			}
 		}
-
+		if !pointer.BoolDeref(t.Enabled, false) {
+			return false, trait.NewIntegrationConditionUserDisabled(), nil
+		}
 		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
 			t.delegateDependencies = findAdditionalDependencies(e, meta)
 		}
