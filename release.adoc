@@ -271,11 +271,22 @@ NOTE: be patient, it can take a little time to update the formula.
 
 === Bump to next version
 
-Once the release process is complete, we must prepare the configuration for next version. In order to do so, please run the following:
+Once the release process is complete, we must prepare the configuration for next version. First of all, make sure you're on the `release` branch and everything is up to date. Then, use a new patch version, likely adding a unit to the patch semantic version.
 ```
-make bump VERSION=<new-version> LAST_RELEASED_VERSION=<replace-version>
-git commit -m "chore: bump next version to <new-version>"
-git push upstream HEAD:release-a.b.x
+git pull
+make bump VERSION=<new-version>-SNAPSHOT LAST_RELEASED_VERSION=<replace-version>
+git commit -a -m "chore: bump next version to <new-version>-SNAPSHOT"
+git push origin HEAD:release-a.b.x
 ```
 Where <new-version> represents the new version you want to bump and <replace-version> the version that was previously released.
 
+If you're releasing a minor or a major version, then, you need also to bump the `main` branch with the following version. It should be the same process as in the `release` branch, but, this time, on `main` and updating the minor or major semantic version.
+
+```
+git checkout main
+git pull
+make bump VERSION=<new-version>-SNAPSHOT LAST_RELEASED_VERSION=<replace-version>
+git commit -a -m "chore: bump next version to <new-version>-SNAPSHOT"
+git push origin HEAD:main
+```
+Now, the release process is completed. Thanks for taking care. Make sure to remove the local repository on your machine to avoid any further update on the project by mistake.
