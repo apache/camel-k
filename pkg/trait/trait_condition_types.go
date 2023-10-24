@@ -54,21 +54,8 @@ func NewIntegrationConditionUserDisabled() *TraitCondition {
 	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationMessage, userDisabledMessage)
 }
 
-func newIntegrationConditionPlatformDisabled() *TraitCondition {
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationMessage, platformDisabledMessage)
-}
-
 func newIntegrationConditionPlatformDisabledWithReason(reason string) *TraitCondition {
 	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationMessage, fmt.Sprintf("%s: %s", platformDisabledMessage, reason))
-}
-
-func newIntegrationKitCondition(ikct v1.IntegrationKitConditionType, cs corev1.ConditionStatus, message, reason string) *TraitCondition {
-	return &TraitCondition{
-		integrationKitConditionType: ikct,
-		conditionStatus:             cs,
-		message:                     message,
-		reason:                      reason,
-	}
 }
 
 func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, corev1.ConditionStatus, string, string) {
