@@ -23,5 +23,7 @@
 rest('/say/hello')
     .produces("text/plain")
     .get()
-        .route()
-        .transform().constant("Hello World");
+    .to('direct:sayHello')
+  
+from('direct:sayHello')
+    .transform().constant("Hello World");

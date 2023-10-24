@@ -31,7 +31,9 @@ public class Payment extends RouteBuilder {
 		rest("/api/").post("/pay")
                     .param().type(RestParamType.query).name("type").required(true).endParam()
                     .param().type(RestParamType.header).name("id").required(true).endParam()
-                    .route()
+                    .to("direct:pay");
+        
+        from("direct:pay")
                     .saga()
                         .propagation(SagaPropagation.MANDATORY)
                         .option("id", header("id"))
