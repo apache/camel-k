@@ -197,7 +197,7 @@ The release can be now announced to dev@camel.apache.org and users@camel.apache.
 [[documentation]]
 == Documentation updates
 
-The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30)
+The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30). You also need to make sure that the `antora.yml` file has correctly set the version (which may be still set as `main`) and the `prerelease` tag (which should be removed as we are officially releasing).
 
 After the vote has passed you should update camel-website project:
 
