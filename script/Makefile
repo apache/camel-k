@@ -58,6 +58,7 @@ DEBUG_MODE ?= false
 # olm bundle vars
 MANAGER := config/manager
 MANIFESTS := config/manifests
+# will provide something like "stable-v2" (only major)
 DEFAULT_CHANNEL ?= $(shell echo "stable-v$(word 1,$(subst ., ,$(lastword $(OPERATOR_VERSION))))")
 CHANNELS ?= $(DEFAULT_CHANNEL),latest
 PACKAGE := camel-k
