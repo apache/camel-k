@@ -18,9 +18,8 @@
 # Another part of this distributed component is in camel-k-runtime docs
 name: camel-k
 title: Camel K
-version: next
-prerelease: true
-display-version: Next (Pre-release)
+version: 2.1.x
+display-version: 2.1.x
 nav:
   - modules/ROOT/nav.adoc
   - modules/languages/nav-languages.adoc
