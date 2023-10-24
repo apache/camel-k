@@ -199,9 +199,11 @@ The release can be now announced to dev@camel.apache.org and users@camel.apache.
 
 The version of Camel K and the main related dependencies are scraped automatically in a Github Action. You only need to provide the LTS parameter in the related `release` branch, when the release is marked as LTS (such as in https://github.com/apache/camel-k/blob/f15124949e43bb859d07f555b9e510956d6ed823/docs/antora.yml#L30)
 
-After the vote has passed, update the camel-website `antora-playbook.yml` `content.sources` section for camel-k and camel-k-runtime to use the newly released versions, replacing the previous released version.
+After the vote has passed you should update camel-website project:
 
-You also need to create an entry in the release section of Camel website project: https://github.com/apache/camel-website/tree/main/content/releases/k - you can use any previous document as a reference.
+1. update the https://github.com/apache/camel-website/blob/main/antora-playbook-snippets/antora-playbook.yml[camel-website `antora-playbook.yml` `content.sources` section] for camel-k to use the newly released versions, replacing the previous released version or any unsupported version.
+1. create an entry in the release section of Camel website project: https://github.com/apache/camel-website/tree/main/content/releases/k - you can use any previous document as a reference.
+1. provide a blog post announcing the release
 
 NOTE: the milestone is the github project milestone ID used to track the release.
 
