@@ -21,6 +21,7 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"gopkg.in/yaml.v2"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +32,11 @@ import (
 func GetRegistryAddress(ctx context.Context, c client.Client) (*string, error) {
 	config, err := c.CoreV1().ConfigMaps("kube-public").Get(ctx, "local-registry-hosting", metav1.GetOptions{})
 	if err != nil {
-		if k8serrors.IsNotFound(err) {
+		if k8serrors.IsForbidden(err) {
+			log.Debug("Cannot access registry configuration local-registry-hosting ConfigMap", "error", err)
+			return nil, nil
+		} else if k8serrors.IsNotFound(err) {
+			log.Debug("Cannot find registry configuration local-registry-hosting ConfigMap", "error", err)
 			return nil, nil
 		}
 		return nil, err
