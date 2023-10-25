@@ -6752,7 +6752,11 @@ Forces the value for labels `sidecar.istio.io/inject`. By default the label is s
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The JVM trait is used to configure the JVM that runs the integration.
+The JVM trait is used to configure the JVM that runs the Integration. This trait can be configured only for Integration and related IntegrationKits
+(bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
+trait is disabled by the platform.
+
+NOTE: the platform will skip the trait configuration for those container image matching `camel-k-kit-` name.
 
 
 [cols="2,2a",options="header"]
