@@ -43,13 +43,14 @@ func TestHealthTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("Readiness condition with stopped route", func(t *testing.T) {
-		name := "java"
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"-t", "health.enabled=true",
 			// Enable Jolokia for the test to stop the Camel route
 			"-t", "jolokia.enabled=true",
 			"-t", "jolokia.use-ssl-client-authentication=false",
 			"-t", "jolokia.protocol=http",
+			"--name", name,
 		).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -136,7 +137,7 @@ func TestHealthTrait(t *testing.T) {
 	})
 
 	t.Run("Readiness condition with stopped binding", func(t *testing.T) {
-		name := "stopped-binding"
+		name := RandomizedSuffixName("stopped-binding")
 
 		Expect(CreateTimerKamelet(ns, "my-health-timer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "my-health-log-sink")()).To(Succeed())
@@ -257,9 +258,10 @@ func TestHealthTrait(t *testing.T) {
 	})
 
 	t.Run("Readiness condition with never ready route", func(t *testing.T) {
-		name := "never-ready"
+		name := RandomizedSuffixName("never-ready")
 
 		Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
+			"--name", name,
 			"-t", "health.enabled=true",
 		).Execute()).To(Succeed())
 
@@ -309,7 +311,7 @@ func TestHealthTrait(t *testing.T) {
 	})
 
 	t.Run("Startup condition with never ready route", func(t *testing.T) {
-		name := "startup-probe-never-ready-route"
+		name := RandomizedSuffixName("startup-probe-never-ready-route")
 
 		Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
 			"--name", name,
@@ -371,7 +373,7 @@ func TestHealthTrait(t *testing.T) {
 	})
 
 	t.Run("Startup condition with ready route", func(t *testing.T) {
-		name := "startup-probe-ready-route"
+		name := RandomizedSuffixName("startup-probe-ready-route")
 
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,

@@ -37,7 +37,7 @@ func TestKamelReset(t *testing.T) {
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		t.Run("Reset the whole platform", func(t *testing.T) {
-			name := "yaml1"
+			name := RandomizedSuffixName("yaml1")
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -52,7 +52,7 @@ func TestKamelReset(t *testing.T) {
 		})
 
 		t.Run("Reset skip-integrations", func(t *testing.T) {
-			name := "yaml2"
+			name := RandomizedSuffixName("yaml2")
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -67,7 +67,7 @@ func TestKamelReset(t *testing.T) {
 		})
 
 		t.Run("Reset skip-kits", func(t *testing.T) {
-			name := "yaml3"
+			name := RandomizedSuffixName("yaml3")
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

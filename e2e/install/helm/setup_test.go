@@ -73,7 +73,7 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 
 		//Test a simple route
 		t.Run("simple route", func(t *testing.T) {
-			name := "yaml"
+			name := RandomizedSuffixName("yaml")
 			Expect(KamelRun(ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

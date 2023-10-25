@@ -37,13 +37,15 @@ func TestIstioTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("Run Java with Istio", func(t *testing.T) {
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
 			"-t", "istio.enabled=true").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		pod := IntegrationPod(ns, "java")()
+		pod := IntegrationPod(ns, name)()
 		Expect(pod.ObjectMeta.Annotations).NotTo(BeNil())
 		annotations := pod.ObjectMeta.Annotations
 		Expect(annotations["sidecar.istio.io/inject"]).To(Equal("true"))

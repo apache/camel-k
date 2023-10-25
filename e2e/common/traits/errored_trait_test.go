@@ -37,7 +37,7 @@ func TestErroredTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("Integration trait should fail", func(t *testing.T) {
-		name := "it-errored"
+		name := RandomizedSuffixName("it-errored")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "kamelets.list=missing",
@@ -51,7 +51,7 @@ func TestErroredTrait(t *testing.T) {
 	})
 
 	t.Run("Pipe trait should fail", func(t *testing.T) {
-		name := "kb-errored"
+		name := RandomizedSuffixName("kb-errored")
 		Expect(KamelBindWithID(operatorID, ns, "timer:foo", "log:bar",
 			"--name", name,
 			"-t", "kamelets.list=missing",

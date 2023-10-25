@@ -40,7 +40,7 @@ func TestKameletImplicitConfigDefaultUserPropery(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig01-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int01"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int01")
 		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegrationConfiguration01.java",
 			"-p", "camel.kamelet.iconfig01-timer-source.message='Default message 01'",
 			"--name", name).Execute()).To(Succeed())
@@ -62,7 +62,7 @@ func TestKameletImplicitConfigDefaultMountedSecret(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig03-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int3"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int3")
 		secretName := "my-iconfig-int3-secret"
 
 		var secData = make(map[string]string)
@@ -93,7 +93,7 @@ func TestKameletImplicitConfigDefaultMountedConfigmap(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig04-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int4"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int4")
 		cmName := "my-iconfig-int4-configmap"
 
 		var cmData = make(map[string]string)
@@ -121,7 +121,7 @@ func TestKameletImplicitConfigNamedUserPropery(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig05-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int5"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int5")
 		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegrationNamedConfiguration05.java",
 			"-p", "camel.kamelet.iconfig05-timer-source.message='Default message 05'",
 			"-p", "camel.kamelet.iconfig05-timer-source.mynamedconfig.message='My Named Config message'",
@@ -144,7 +144,7 @@ func TestKameletImplicitConfigNamedLabeledSecret(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig06-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int6"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int6")
 		secretName := "my-iconfig-int6-secret"
 
 		var secData = make(map[string]string)
@@ -178,7 +178,7 @@ func TestKameletImplicitConfigNamedMountedSecret(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig07-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int7"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int7")
 		secretName := "my-iconfig-int7-secret"
 
 		var secData = make(map[string]string)
@@ -210,7 +210,7 @@ func TestKameletImplicitConfigNamedMountedConfigmap(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig08-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int8"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int8")
 		cmName := "my-iconfig-int8-configmap"
 
 		var cmData = make(map[string]string)
@@ -240,7 +240,7 @@ func TestKameletImplicitConfigDefaultLabeledSecret(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "iconfig09-timer-source")()).To(Succeed())
 
-		name := "iconfig-test-timer-source-int9"
+		name := RandomizedSuffixName("iconfig-test-timer-source-int9")
 		secretName := "my-iconfig-int9-secret"
 
 		var secData = make(map[string]string)
@@ -274,7 +274,7 @@ func TestKameletConfigInlinedUserPropery(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "config01-timer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "config01-log-sink")()).To(Succeed())
 
-		name := "config-test-timer-source-int1"
+		name := RandomizedSuffixName("config-test-timer-source-int1")
 
 		Expect(KamelRunWithID(operatorID, ns, "files/timer-kamelet-integration-inlined-configuration-01.yaml",
 			"--name", name).Execute()).To(Succeed())
@@ -298,7 +298,7 @@ func TestKameletConfigDefaultParamUserPropery(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "config02-timer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "config02-log-sink")()).To(Succeed())
 
-		name := "config-test-timer-source-int2"
+		name := RandomizedSuffixName("config-test-timer-source-int2")
 
 		Expect(KamelRunWithID(operatorID, ns, "files/timer-kamelet-integration-parameters-configuration-02.yaml",
 			"-p", "my-message='My parameter message 02'",
@@ -324,7 +324,7 @@ func TestKameletConfigDefaultParamMountedSecret(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "config03-timer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "config03-log-sink")()).To(Succeed())
 
-		name := "config-test-timer-source-int3"
+		name := RandomizedSuffixName("config-test-timer-source-int3")
 		secretName := "my-config-int3-secret"
 
 		var secData = make(map[string]string)
@@ -356,7 +356,7 @@ func TestKameletConfigDefaultParamMountedConfigmap(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "config04-timer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "config04-log-sink")()).To(Succeed())
 
-		name := "config-test-timer-source-int4"
+		name := RandomizedSuffixName("config-test-timer-source-int4")
 		cmName := "my-config-int4-configmap"
 
 		var cmData = make(map[string]string)

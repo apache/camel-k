@@ -24,15 +24,16 @@ package upgrade
 
 import (
 	"fmt"
+	"os"
+	"testing"
+	"time"
+
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/types"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	"testing"
-	"time"
 
 	"github.com/operator-framework/api/pkg/lib/version"
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"

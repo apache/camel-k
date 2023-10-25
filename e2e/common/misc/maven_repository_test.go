@@ -35,7 +35,7 @@ import (
 
 func TestRunExtraRepository(t *testing.T) {
 	RegisterTestingT(t)
-	name := "java"
+	name := RandomizedSuffixName("java")
 	Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 		"--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat",
 		"--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001",

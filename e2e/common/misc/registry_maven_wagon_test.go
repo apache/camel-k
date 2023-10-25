@@ -48,7 +48,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 
 	t.Run("image registry is a maven repository", func(t *testing.T) {
 		// Create integration that should decrypt an encrypted message to "foobar" and log it
-		name := "foobar-decryption"
+		name := RandomizedSuffixName("foobar-decryption")
 		jar, err := filepath.Abs("files/registry/sample-decryption-1.0.jar?skipPOM=true")
 		assert.Nil(t, err)
 		pom, err := filepath.Abs("files/registry/sample-decryption-1.0.pom")
@@ -66,7 +66,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 	})
 
 	t.Run("local files are mounted in the integration container at the default path", func(t *testing.T) {
-		name := "laughing-route-default-path"
+		name := RandomizedSuffixName("laughing-route-default-path")
 
 		Expect(KamelRunWithID(operatorID, ns, "files/registry/LaughingRoute.java",
 			"--name", name,
@@ -80,7 +80,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 	})
 
 	t.Run("local files are mounted in the integration container at a custom path", func(t *testing.T) {
-		name := "laughing-route-custom-path"
+		name := RandomizedSuffixName("laughing-route-custom-path")
 		customPath := "this/is/a/custom/path/"
 
 		Expect(KamelRunWithID(operatorID, ns, "files/registry/LaughingRoute.java",
@@ -95,7 +95,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 	})
 
 	t.Run("local directory is mounted in the integration container", func(t *testing.T) {
-		name := "laughing-route-directory"
+		name := RandomizedSuffixName("laughing-route-directory")
 
 		Expect(KamelRunWithID(operatorID, ns, "files/registry/LaughingRoute.java",
 			"--name", name,
@@ -111,7 +111,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 
 	t.Run("pom file is extracted from JAR", func(t *testing.T) {
 		// Create integration that should decrypt foobar and log it
-		name := "foobar-decryption-pom-extraction"
+		name := RandomizedSuffixName("foobar-decryption-pom-extraction")
 		jar, err := filepath.Abs("files/registry/sample-decryption-1.0.jar")
 		assert.Nil(t, err)
 
@@ -126,7 +126,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 	})
 	t.Run("dependency can be used at build time", func(t *testing.T) {
 		// Create integration that should run an Xslt transformation whose template needs to be present at build time
-		name := "xslt"
+		name := RandomizedSuffixName("xslt")
 		Expect(KamelRunWithID(operatorID, ns, "files/registry/classpath/Xslt.java", "--name", name,
 			"-d", "file://files/registry/classpath/cheese.xsl?targetPath=xslt/cheese.xsl&classpath=true",
 		).Execute()).To(Succeed())

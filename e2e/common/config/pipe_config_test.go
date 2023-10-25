@@ -38,7 +38,7 @@ func TestPipeConfig(t *testing.T) {
 		Expect(CreateTimerKamelet(ns, "my-pipe-timer-source")()).To(Succeed())
 		Expect(CreateLogKamelet(ns, "my-pipe-log-sink")()).To(Succeed())
 		t.Run("run test default config using properties", func(t *testing.T) {
-			name := "my-pipe-with-properties"
+			name := RandomizedSuffixName("my-pipe-with-properties")
 
 			Expect(KamelBindWithID(operatorID, ns,
 				"my-pipe-timer-source",
@@ -55,7 +55,7 @@ func TestPipeConfig(t *testing.T) {
 		})
 
 		t.Run("run test implicit default config using labeled secret", func(t *testing.T) {
-			name := "my-pipe-with-default-implicit-secret"
+			name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
 			secretName := "my-pipe-default-implicit-secret"
 
 			var secData = make(map[string]string)
@@ -79,7 +79,7 @@ func TestPipeConfig(t *testing.T) {
 		})
 
 		t.Run("run test implicit default config using mounted secret", func(t *testing.T) {
-			name := "my-pipe-with-default-implicit-secret"
+			name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
 			secretName := "my-pipe-default-implicit-secret"
 
 			var secData = make(map[string]string)
@@ -102,7 +102,7 @@ func TestPipeConfig(t *testing.T) {
 		})
 
 		t.Run("run test implicit default config using mounted configmap", func(t *testing.T) {
-			name := "my-pipe-with-default-implicit-configmap"
+			name := RandomizedSuffixName("my-pipe-with-default-implicit-configmap")
 			cmName := "my-pipe-default-implicit-configmap"
 
 			var cmData = make(map[string]string)
@@ -125,7 +125,7 @@ func TestPipeConfig(t *testing.T) {
 		})
 
 		t.Run("run test implicit named config using mounted secret", func(t *testing.T) {
-			name := "my-pipe-with-named-implicit-secret"
+			name := RandomizedSuffixName("my-pipe-with-named-implicit-secret")
 			secretName := "my-pipe-named-implicit-secret"
 
 			var secData = make(map[string]string)
@@ -151,7 +151,7 @@ func TestPipeConfig(t *testing.T) {
 		})
 
 		t.Run("run test implicit named config using mounted configmap", func(t *testing.T) {
-			name := "my-pipe-with-named-implicit-configmap"
+			name := RandomizedSuffixName("my-pipe-with-named-implicit-configmap")
 			cmName := "my-pipe-named-implicit-configmap"
 
 			var cmData = make(map[string]string)
@@ -176,7 +176,7 @@ func TestPipeConfig(t *testing.T) {
 			Expect(DeleteConfigmap(ns, cmName)).To(Succeed())
 		})
 		t.Run("run test implicit specific config using mounted secret", func(t *testing.T) {
-			name := "my-pipe-with-specific-secret"
+			name := RandomizedSuffixName("my-pipe-with-specific-secret")
 			secretName := "my-pipe-specific-secret"
 
 			var secData = make(map[string]string)
@@ -201,7 +201,7 @@ func TestPipeConfig(t *testing.T) {
 			Expect(DeleteSecret(ns, secretName)).To(Succeed())
 		})
 		t.Run("run test implicit specific config using mounted configmap", func(t *testing.T) {
-			name := "my-pipe-with-specific-configmap"
+			name := RandomizedSuffixName("my-pipe-with-specific-configmap")
 			cmName := "my-pipe-specific-configmap"
 
 			var cmData = make(map[string]string)

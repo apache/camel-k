@@ -39,7 +39,7 @@ func TestTolerationTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("Run Java with node toleration operation exists", func(t *testing.T) {
-		name := "java1"
+		name := RandomizedSuffixName("java1")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "toleration.enabled=true",
@@ -61,7 +61,7 @@ func TestTolerationTrait(t *testing.T) {
 	})
 
 	t.Run("Run Java with node toleration operation equals", func(t *testing.T) {
-		name := "java2"
+		name := RandomizedSuffixName("java2")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "toleration.enabled=true",
@@ -87,7 +87,7 @@ func TestTolerationTrait(t *testing.T) {
 			t.Skip("Skip master node toleration test on single-node cluster")
 		}
 
-		name := "java3"
+		name := RandomizedSuffixName("java3")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			// Use the affinity trait to force the scheduling of the Integration pod onto a master node

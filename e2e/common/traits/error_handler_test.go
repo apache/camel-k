@@ -37,7 +37,7 @@ func TestErrorHandlerTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("Run errored integration with error handler", func(t *testing.T) {
-		name := "error-handler"
+		name := RandomizedSuffixName("error-handler")
 		Expect(KamelRunWithID(operatorID, ns, "files/ErroredRoute.java",
 			"--name", name,
 			"-t", "error-handler.enabled=true",

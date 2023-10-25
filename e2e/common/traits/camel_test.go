@@ -37,10 +37,15 @@ func TestCamelTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("properties changes should not rebuild", func(t *testing.T) {
-		name := "javapropertiesnorebuild"
+
+		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
+
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 		).Execute()).To(Succeed())
+
+		// checking the integration status
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
