@@ -360,6 +360,8 @@ func verifyGlobalOperator() error {
 }
 
 func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	var c *cobra.Command
 	var err error
 
@@ -430,6 +432,8 @@ func Make(rule string, args ...string) *exec.Cmd {
 }
 
 func MakeWithContext(ctx context.Context, rule string, args ...string) *exec.Cmd {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	makeArgs := os.Getenv("CAMEL_K_TEST_MAKE_ARGS")
 	defaultArgs := strings.Fields(makeArgs)
 	args = append(defaultArgs, args...)
