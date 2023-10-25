@@ -9,6 +9,7 @@
 - nested Kamelets are not working [\#4837](https://github.com/apache/camel-k/issues/4837)
 - Error log traces after integration error [\#4781](https://github.com/apache/camel-k/issues/4781)
 - Set up same golang version for github actions [\#4641](https://github.com/apache/camel-k/issues/4641)
+- Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Using an XSLT as a local dependency results in "unknown dependency error" [\#4426](https://github.com/apache/camel-k/issues/4426)
 - Projecting routes status to a Kubernetes Resource [\#2728](https://github.com/apache/camel-k/issues/2728)
 
