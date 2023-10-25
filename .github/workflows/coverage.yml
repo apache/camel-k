@@ -60,7 +60,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v4
         with:
-          go-version-file: 'go.mod'
+          go-version-file: './${{ github.event.pull_request.head.repo.name }}/go.mod'
           check-latest: true
 
       - name: Get New Coverage
