@@ -82,6 +82,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	v2util "github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -2885,4 +2886,8 @@ func GetOperatorNamespace(testNamespace string) string {
 	} else {
 		return testNamespace
 	}
+}
+
+func RandomizedSuffixName(name string) string {
+	return name + strings.ToLower(v2util.RandomString(5))
 }

@@ -78,7 +78,7 @@ func TestKamelCLIRun(t *testing.T) {
 		os.Unsetenv("GITHUB_TOKEN")
 
 		t.Run("Gist (ID)", func(t *testing.T) {
-			name := "github-gist-id"
+			name := RandomizedSuffixName("github-gist-id")
 			Expect(KamelRunWithID(operatorID, ns, "--name", name,
 				"gist:e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -90,7 +90,7 @@ func TestKamelCLIRun(t *testing.T) {
 		})
 
 		t.Run("Gist (URL)", func(t *testing.T) {
-			name := "github-gist-url"
+			name := RandomizedSuffixName("github-gist-url")
 			Expect(KamelRunWithID(operatorID, ns, "--name", name,
 				"https://gist.github.com/lburgazzoli/e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -110,7 +110,7 @@ func TestKamelCLIRun(t *testing.T) {
 	})
 
 	t.Run("Run and update", func(t *testing.T) {
-		name := "run"
+		name := RandomizedSuffixName("run")
 		Expect(KamelRunWithID(operatorID, ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).

@@ -41,7 +41,7 @@ func TestPullSecretTrait(t *testing.T) {
 	Expect(err).To(BeNil())
 
 	t.Run("Image pull secret is set on pod", func(t *testing.T) {
-		name := "java1"
+		name := RandomizedSuffixName("java1")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 			"-t", "pull-secret.enabled=true",
 			"-t", "pull-secret.secret-name=dummy-secret").Execute()).To(Succeed())
@@ -54,7 +54,7 @@ func TestPullSecretTrait(t *testing.T) {
 	})
 
 	t.Run("Explicitly disable image pull secret", func(t *testing.T) {
-		name := "java2"
+		name := RandomizedSuffixName("java2")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 			"-t", "pull-secret.enabled=false").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -73,7 +73,7 @@ func TestPullSecretTrait(t *testing.T) {
 	if ocp {
 		// OpenShift always has an internal registry so image pull secret is set by default
 		t.Run("Image pull secret is automatically set by default", func(t *testing.T) {
-			name := "java3"
+			name := RandomizedSuffixName("java3")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

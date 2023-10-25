@@ -41,8 +41,12 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
+		javaNativeName := RandomizedSuffixName("java-native")
+		javaNativeCloneName := RandomizedSuffixName("java-native-clone")
+		javaNative2Name := RandomizedSuffixName("java-native-2")
+
 		t.Run("java native support", func(t *testing.T) {
-			name := "java-native"
+			name := javaNativeName
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
@@ -56,7 +60,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
 
 			t.Run("java native same should not rebuild", func(t *testing.T) {
-				name := "java-native-clone"
+				name := javaNativeCloneName
 				Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 					"-t", "quarkus.build-mode=native",
 					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
@@ -69,11 +73,11 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
-				Eventually(IntegrationKit(ns, "java-native-clone")).Should(Equal(IntegrationKit(ns, "java-native")()))
+				Eventually(IntegrationKit(ns, javaNativeCloneName)).Should(Equal(IntegrationKit(ns, javaNativeName)()))
 			})
 
 			t.Run("java native should rebuild", func(t *testing.T) {
-				name := "java-native-2"
+				name := javaNative2Name
 				Expect(KamelRunWithID(operatorID, ns, "files/Java2.java", "--name", name,
 					"-t", "quarkus.build-mode=native",
 					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
@@ -85,7 +89,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
 				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magic2string!"))
-				Eventually(IntegrationKit(ns, "java-native-2")).ShouldNot(Equal(IntegrationKit(ns, "java-native")()))
+				Eventually(IntegrationKit(ns, javaNative2Name)).ShouldNot(Equal(IntegrationKit(ns, javaNativeName)()))
 			})
 
 			// Clean up
@@ -93,7 +97,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		})
 
 		t.Run("groovy native support", func(t *testing.T) {
-			name := "groovy-native"
+			name := RandomizedSuffixName("groovy-native")
 			Expect(KamelRunWithID(operatorID, ns, "files/Groovy.groovy", "--name", name,
 				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
@@ -112,7 +116,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		})
 
 		t.Run("kotlin native support", func(t *testing.T) {
-			name := "kotlin-native"
+			name := RandomizedSuffixName("kotlin-native")
 			Expect(KamelRunWithID(operatorID, ns, "files/Kotlin.kts", "--name", name,
 				"-t", "quarkus.build-mode=native",
 				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",

@@ -48,7 +48,7 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 			t.Fatal("Can't create IntegrationPlatform", err)
 		}
 
-		name := "java"
+		name := RandomizedSuffixName("java")
 		t.Run("Run integration with platform traits", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
