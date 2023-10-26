@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
@@ -13,6 +14,9 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): OLM stable-vx channel [\#4867](https://github.com/apache/camel-k/pull/4867) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/onsi/gomega from 1.28.0 to 1.29.0 [\#4866](https://github.com/apache/camel-k/pull/4866) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump google.golang.org/grpc from 1.58.2 to 1.58.3 [\#4865](https://github.com/apache/camel-k/pull/4865) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ci\): Fix golang version file setup in coverage workflow [\#4862](https://github.com/apache/camel-k/pull/4862) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Fix TestCamelTrait [\#4857](https://github.com/apache/camel-k/pull/4857) ([gansheer](https://github.com/gansheer))
 - feat\(runtime\): enable source less integrations [\#4831](https://github.com/apache/camel-k/pull/4831) ([squakez](https://github.com/squakez))
