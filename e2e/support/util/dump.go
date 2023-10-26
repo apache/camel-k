@@ -193,14 +193,15 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	if err != nil {
 		return err
 	}
-	t.Logf("Found %d catalogs:\n", len(cats.Items))
+	t.Logf("Found %d catalogs (showing status only):\n", len(cats.Items))
 	for _, c := range cats.Items {
-		ref := c
+		t.Logf("%v:\n", c.Status)
+		/*ref := c
 		cdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
 		}
-		t.Logf("---\n%s\n---\n", string(cdata))
+		t.Logf("---\n%s\n---\n", string(cdata))*/
 	}
 
 	// Services
@@ -250,6 +251,21 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("\nFound %d OLM CSVs:\n", len(csvs.Items))
 	for _, csv := range csvs.Items {
 		ref := csv
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
+	}
+	// OLM Subscriptions
+	subs := olm.SubscriptionList{}
+	err = c.List(ctx, &subs, ctrl.InNamespace(ns))
+	if err != nil {
+		return err
+	}
+	t.Logf("\nFound %d OLM Subscriptions:\n", len(subs.Items))
+	for _, sub := range subs.Items {
+		ref := sub
 		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
 		if err != nil {
 			return err
