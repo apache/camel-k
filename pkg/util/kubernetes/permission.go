@@ -28,9 +28,7 @@ import (
 
 // CheckPermission can be used to check if the current user/service-account is allowed to execute a given operation
 // in the cluster.
-// E.g. checkPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, "camel-k", "get")
-//
-
+// E.g. checkPermission(client, olmv1alpha1.GroupName, "clusterserviceversions", namespace, "camel-k", "get").
 func CheckPermission(ctx context.Context, client kubernetes.Interface, group, resource, namespace, name, verb string) (bool, error) {
 	sarReview := &authorizationv1.SelfSubjectAccessReview{
 		Spec: authorizationv1.SelfSubjectAccessReviewSpec{

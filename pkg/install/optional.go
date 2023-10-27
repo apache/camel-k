@@ -62,10 +62,4 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 			}
 		}
 	}
-
-	// Try to bind the Knative Addressable resolver aggregated ClusterRole to the operator ServiceAccount
-	if err := BindKnativeAddressableResolverClusterRole(ctx, c, namespace, operatorNamespace); err != nil {
-		log.Info("Cannot bind the Knative addressable resolver aggregated ClusterRole: skipping.")
-		log.Debug("Error while binding the Knative Addressable resolver aggregated ClusterRole", "error", err)
-	}
 }

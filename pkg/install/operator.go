@@ -41,7 +41,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
-	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/minikube"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
@@ -272,29 +271,18 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		return err
 	}
 
-	// Additionally, install Knative resources (roles and bindings)
-	isKnative, err := knative.IsInstalled(c)
-	if err != nil {
-		return err
-	}
-	if isKnative {
-		if err := installKnative(ctx, c, cfg.Namespace, customizer, collection, force, cfg.Global); err != nil {
-			return err
-		}
-		if err := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-bind-addressable-resolver", "/rbac/operator-cluster-role-binding-addressable-resolver.yaml"); err != nil {
-			if k8serrors.IsForbidden(err) {
-				fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to bind Knative addressable-resolver ClusterRole. Try installing the operator as cluster-admin.")
-			} else {
-				return err
-			}
-		}
-	}
-
 	if err = installEvents(ctx, c, cfg.Namespace, customizer, collection, force, cfg.Global); err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return err
 		}
 		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to publish Kubernetes events. Try installing as cluster-admin to allow it to generate events.")
+	}
+
+	if err = installKnativeBindings(ctx, c, cfg.Namespace, customizer, collection, force, cfg.Global); err != nil {
+		if k8serrors.IsAlreadyExists(err) {
+			return err
+		}
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to create Knative resources. Try installing as cluster-admin.")
 	}
 
 	if err = installKedaBindings(ctx, c, cfg.Namespace, customizer, collection, force, cfg.Global); err != nil {
@@ -315,7 +303,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		if k8serrors.IsAlreadyExists(err) {
 			return err
 		}
-		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to lookup strimzi kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
+		fmt.Fprintln(cmd.ErrOrStderr(), "Warning: the operator will not be able to lookup Strimzi Kafka resources. Try installing as cluster-admin to allow the lookup of strimzi kafka resources.")
 	}
 
 	if err = installLeaseBindings(ctx, c, cfg.Namespace, customizer, collection, force, cfg.Global); err != nil {
@@ -509,6 +497,20 @@ func installOperator(ctx context.Context, c client.Client, namespace string, cus
 	)
 }
 
+func installKnativeBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {
+	if global {
+		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+			"/rbac/descoped/operator-cluster-role-knative.yaml",
+			"/rbac/descoped/operator-cluster-role-binding-knative.yaml",
+		)
+	} else {
+		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+			"/rbac/namespaced/operator-role-knative.yaml",
+			"/rbac/namespaced/operator-role-binding-knative.yaml",
+		)
+	}
+}
+
 func installKedaBindings(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {
 	if global {
 		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
@@ -519,20 +521,6 @@ func installKedaBindings(ctx context.Context, c client.Client, namespace string,
 		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 			"/rbac/namespaced/operator-role-keda.yaml",
 			"/rbac/namespaced/operator-role-binding-keda.yaml",
-		)
-	}
-}
-
-func installKnative(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {
-	if global {
-		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-			"/rbac/descoped/operator-cluster-role-knative.yaml",
-			"/rbac/descoped/operator-cluster-role-binding-knative.yaml",
-		)
-	} else {
-		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-			"/rbac/namespaced/operator-role-knative.yaml",
-			"/rbac/namespaced/operator-role-binding-knative.yaml",
 		)
 	}
 }

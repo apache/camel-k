@@ -102,10 +102,13 @@ const ciPID = "/tmp/ci-k8s-pid"
 // v1alpha1.Kamelet, v1alpha1.KameletBinding
 const ExpectedCRDs = 8
 
-// camel-k-operator,             camel-k-operator-events,
-// camel-k-operator-knative,     camel-k-operator-leases,
-// camel-k-operator-podmonitors, camel-k-operator-strimzi,
-// camel-k-operator-keda
+// camel-k-operator,
+// camel-k-operator-events,
+// camel-k-operator-leases,
+// camel-k-operator-podmonitors,
+// camel-k-operator-strimzi,
+// camel-k-operator-keda,
+// camel-k-operator-knative
 const ExpectedKubePromoteRoles = 7
 
 // camel-k-edit

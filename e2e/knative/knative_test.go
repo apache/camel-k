@@ -46,13 +46,13 @@ func TestKnative(t *testing.T) {
 	t.Run("Service combo", func(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/knative2.groovy").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "knative2", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, "knative2", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 		Expect(KamelRunWithID(operatorID, ns, "files/knative3.groovy").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "knative3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "knative3", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, "knative3", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 		Expect(KamelRunWithID(operatorID, ns, "files/knative1.groovy").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "knative1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "knative1", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+		Eventually(IntegrationConditionStatus(ns, "knative1", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 		// Correct logs
 		Eventually(IntegrationLogs(ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 2: Hello from knative2"))
 		Eventually(IntegrationLogs(ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 3: Hello from knative3"))
@@ -142,6 +142,7 @@ func TestRunBroker(t *testing.T) {
 	WithNewTestNamespaceWithKnativeBroker(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(KamelInstallWithID(operatorID, ns, "--trait-profile", "knative").Execute()).To(Succeed())
+
 		Expect(KamelRunWithID(operatorID, ns, "files/knativeevt1.groovy").Execute()).To(Succeed())
 		Expect(KamelRunWithID(operatorID, ns, "files/knativeevt2.groovy").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "knativeevt1"), TestTimeoutLong).Should(Equal(v1.PodRunning))

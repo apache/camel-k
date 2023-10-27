@@ -25,10 +25,10 @@ pre:
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f logger-sink.kamelet.yaml -n $YAKS_NAMESPACE
 
-    kubectl apply -f timer-source-binding.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f logger-sink-binding.yaml -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding timer-source-binding --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding logger-sink-binding --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
+    kubectl apply -f timer-source-binding-br.yaml -n $YAKS_NAMESPACE
+    kubectl apply -f logger-sink-binding-br.yaml -n $YAKS_NAMESPACE
+    kubectl wait kameletbinding timer-source-binding-br --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
+    kubectl wait kameletbinding logger-sink-binding-br --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

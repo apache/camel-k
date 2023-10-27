@@ -1,15 +1,13 @@
 # Camel K
 
-Apache Camel K is a lightweight integration platform, born on Kubernetes,
-with serverless superpowers.
+Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers: the easiest way to build and manage your Camel applications on Kubernetes.
 
-This chart deploys the Camel K operator and all resources needed to natively run
-Apache Camel integrations on any Kubernetes cluster.
+This chart deploys the Camel K operator and all resources needed to natively run Apache Camel integrations on any Kubernetes cluster.
 
 ## Prerequisites
 
 - Kubernetes 1.11+
-- Container Image Registry installed and configured for pull
+- Container Image Registry installed and configured for pull (optional in Openshift or Minikube)
 
 ## Installing the Chart
 
@@ -19,22 +17,33 @@ To install the chart, first add the Camel K repository:
 $ helm repo add camel-k https://apache.github.io/camel-k/charts
 ```
 
-If you are installing on OpenShift, Camel K can use the OpenShift internal registry to
-store and pull images.
+Depending on the cloud platform of choice, you will need to specify a container registry at installation time.
 
-Installation on OpenShift can be done with command:
+### Plain Kubernetes
+
+A regular installation requires you to provide a registry, used by Camel K to build application containers. See official [Camel K registry documentation](https://camel.apache.org/camel-k/next/installation/registry/registry.html).
 
 ```bash
-$ helm install \
-  --generate-name \
+$ helm install camel-k \
+  --set platform.build.registry.address=<my-registry> \
+  camel-k/camel-k
+```
+
+You may install Camel K and specify a container registry later.
+
+### Openshift
+
+If you are installing on OpenShift, Camel K can use the OpenShift internal registry to store and pull images:
+
+```bash
+$ helm install camel-k \
   --set platform.cluster=OpenShift \
   camel-k/camel-k
 ```
 
-When running on a cluster with no embedded internal registry, you need to specify the address
-and properties of an image registry that the cluster can use to store image.
+### Minikube
 
-For example, on Minikube you can enable the internal registry and get its address:
+Minikube offers a container registry addon, which it makes very well suited for local Camel K development and testing purposes. You can export the cluster IP registry addon using the following script:
 
 ```bash
 $ minikube addons enable registry
@@ -44,15 +53,21 @@ $ export REGISTRY_ADDRESS=$(kubectl -n kube-system get service registry -o jsonp
 Then you can install Camel K with:
 
 ```bash
-$ helm install \
-  --generate-name \
+$ helm install camel-k \
   --set platform.build.registry.address=${REGISTRY_ADDRESS} \
   --set platform.build.registry.insecure=true \
   camel-k/camel-k
 ```
 
-The [configuration](#configuration) section lists
-additional parameters that can be set during installation.
+### Knative configuration
+
+Camel K offers the possibility to run serverless Integrations in conjunction with [Knative operator](https://knative.dev). Once Knative and Camel K are installed on the same platform, you can configure Knative resources to be played by Camel K.
+
+See instructions [how to enable Knative on Camel K](https://camel.apache.org/camel-k/next/installation/knative.html).
+
+### Additional installation time configuration
+
+The [configuration](#configuration) section lists additional parameters that can be set during installation.
 
 > **Tip**: List all releases using `helm list`
 
@@ -91,8 +106,7 @@ $ kubectl delete -f camel-k/crds
 
 ## Configuration
 
-The following table lists the most commonly configured parameters of the
-Camel K chart and their default values. The chart allows configuration of an `IntegrationPlatform` resource, which among others includes build properties and traits configuration. A full list of parameters can be found [in the operator specification][1].
+The following table lists the most commonly configured parameters of the Camel K chart and their default values. The chart allows configuration of an `IntegrationPlatform` resource, which among others includes build properties and traits configuration. A full list of parameters can be found [in the operator specification][1].
 
 |           Parameter                    |             Description                                                   |            Default             |
 |----------------------------------------|---------------------------------------------------------------------------|--------------------------------|
@@ -111,9 +125,8 @@ Camel K chart and their default values. The chart allows configuration of an `In
 
 We'd like to hear your feedback and we love any kind of contribution!
 
-The main contact points for the Camel K project are the [GitHub repository][2]
-and the [Chat room][3].
+The main contact points for the Camel K project are the [GitHub repository][2] and the [Camel K chat room][3].
 
-[1]: https://camel.apache.org/camel-k/latest/architecture/cr/integration-platform.html
+[1]: https://camel.apache.org/camel-k/next/architecture/cr/integration-platform.html
 [2]: https://github.com/apache/camel-k
 [3]: https://camel.zulipchat.com
