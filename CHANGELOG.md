@@ -7,16 +7,20 @@
 **Closed issues:**
 
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
-- TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.39 to 0.6.40 [\#4872](https://github.com/apache/camel-k/pull/4872) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/go-logr/logr from 1.2.4 to 1.3.0 [\#4871](https://github.com/apache/camel-k/pull/4871) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.38 to 0.6.39 [\#4870](https://github.com/apache/camel-k/pull/4870) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/google/uuid from 1.3.1 to 1.4.0 [\#4869](https://github.com/apache/camel-k/pull/4869) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ci\): OLM stable-vx channel [\#4867](https://github.com/apache/camel-k/pull/4867) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/onsi/gomega from 1.28.0 to 1.29.0 [\#4866](https://github.com/apache/camel-k/pull/4866) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump google.golang.org/grpc from 1.58.2 to 1.58.3 [\#4865](https://github.com/apache/camel-k/pull/4865) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(e2e\): Randomize integration names in e2e tests [\#4863](https://github.com/apache/camel-k/pull/4863) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Fix golang version file setup in coverage workflow [\#4862](https://github.com/apache/camel-k/pull/4862) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Fix TestCamelTrait [\#4857](https://github.com/apache/camel-k/pull/4857) ([gansheer](https://github.com/gansheer))
 - feat\(runtime\): enable source less integrations [\#4831](https://github.com/apache/camel-k/pull/4831) ([squakez](https://github.com/squakez))
