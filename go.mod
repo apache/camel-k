@@ -10,7 +10,7 @@ require (
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.2.4
 	github.com/google/go-github/v52 v52.0.0
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	github.com/imdario/mergo v0.3.13
 	github.com/jpillora/backoff v1.0.0
 	github.com/magiconair/properties v1.8.7
