@@ -18,17 +18,20 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
-  name: logger-sink-binding
+  name: timer-source-binding-br
 spec:
   source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: timer-source
+    properties:
+      message: Hello Custom Event from sample-broker
+      period: 1000
+  sink:
     ref:
       kind: Broker
       apiVersion: eventing.knative.dev/v1
       name: sample-broker
     properties:
       type: custom-type
-  sink:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: logger-sink

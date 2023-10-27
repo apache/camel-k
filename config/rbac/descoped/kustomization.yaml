@@ -23,9 +23,9 @@ kind: Kustomization
 
 resources:
 - operator-cluster-role-events.yaml
-- operator-cluster-role-knative.yaml
 - operator-cluster-role.yaml
 - operator-cluster-role-keda.yaml
+- operator-cluster-role-knative.yaml
 - operator-cluster-role-leases.yaml
 - operator-cluster-role-podmonitors.yaml
 - operator-cluster-role-strimzi.yaml

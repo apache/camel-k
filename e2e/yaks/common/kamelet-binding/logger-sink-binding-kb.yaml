@@ -18,18 +18,15 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: KameletBinding
 metadata:
-  name: timer-source-binding
+  name: logger-sink-binding-kb
 spec:
   source:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: timer-source
-    properties:
-      message: Hello Kamelets
-      period: 1000
-  sink:
     ref:
       kind: InMemoryChannel
       apiVersion: messaging.knative.dev/v1
       name: messages
+  sink:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: logger-sink

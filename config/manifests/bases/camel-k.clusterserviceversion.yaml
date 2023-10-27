@@ -87,10 +87,12 @@ spec:
     Apache Camel K
     ==============
 
-    Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers.
+    Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless superpowers:
+    the easiest way to build and manage your Camel applications on Kubernetes.
 
     ## Installation
 
+    You may need to specify the container registry where to store the container images created for the Camel applications.
     To start using Camel K, install the operator and then create the following `IntegrationPlatform`:
     ```
     apiVersion: camel.apache.org/v1
@@ -99,34 +101,39 @@ spec:
       name: camel-k
       labels:
         app: "camel-k"
+    spec:
+      build:
+        registry:
+          address: docker.io/my-org
     ```
 
-    An `IntegrationPlatform` resource is automatically created by default on OpenShift, so you can skip this step.
-    Also, You can edit the `IntegrationPlatform`, to configure Camel K.
-    The configuration from the `IntegrationPlatform` will apply to the Camel integrations created in the same namespace/project.
+    An `IntegrationPlatform` resource is automatically created by default on OpenShift, so you can skip this step when using Openshift cluster.
 
     ## Running an Integration
 
-    After the initial setup, you can run a Camel integration on the cluster by creating an example `Integration`, e.g.:
+    Run a Camel application on the cluster by creating a sample `Integration`, e.g.:
     ```
     apiVersion: camel.apache.org/v1
     kind: Integration
     metadata:
-      name: example
+      annotations:
+        camel.apache.org/operator.id: camel-k
+      name: test
     spec:
-      sources:
-      - name: Example.java
-        content: |
-          import org.apache.camel.builder.RouteBuilder;
-
-          public class Example extends RouteBuilder {
-              @Override
-              public void configure() throws Exception {
-                  from("timer:tick")
-                      .setBody(constant("Hello World!"))
-                  .to("log:info?skipBodyLineSeparator=false");
-              }
-          }
+      flows:
+      - from:
+          parameters:
+            period: "1000"
+          steps:
+          - setBody:
+              simple: Hello Camel from ${routeId}
+          - log: ${body}
+          uri: timer:yaml
+    ```
+    Log the result of the running application:
+    ```
+    kubectl wait --for=condition=ready integration test --timeout=180s
+    kubectl logs deployment/test -f
     ```
   displayName: Camel K Operator
   icon:

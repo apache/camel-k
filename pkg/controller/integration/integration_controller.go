@@ -400,14 +400,22 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
 		return err
 	} else if ok {
-		// Check for permission to watch the ConsoleCLIDownload resource
+		// Check for permission to watch the Knative Service resource
 		checkCtx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
 		if ok, err = kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 			return err
 		} else if ok {
+			log.Info("KnativeService resources installed in the cluster. RBAC privileges assigned correctly, you can use Knative features.")
 			b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
+		} else {
+			log.Info(` KnativeService resources installed in the cluster. However Camel K operator has not the required RBAC privileges. You can't use Knative features.
+			Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for Camel K managed Knative Services.`)
 		}
+	} else {
+		log.Info(`KnativeService resources are not installed in the cluster. You can't use Knative features. If you install Knative Serving resources after the
+		Camel K operator, make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for
+		Camel K managed Knative Services.`)
 	}
 
 	return b.Complete(r)
