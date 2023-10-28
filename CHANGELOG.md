@@ -7,7 +7,6 @@
 **Closed issues:**
 
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
-- TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
