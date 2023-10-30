@@ -1,9 +1,9 @@
 [[runtime-resources]]
 = Runtime resources
 
-When you develop an integration with `Camel K` there are many ways you can provide a *resource* to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--resource` flag that help you setting any resource your `Integration` may need.
+When you develop an integration with `Camel K` there are many ways you can provide a *resource* to the runtime `Integration`. Since we are dealing with `Kubernetes` we use `Configmap` or `Secret`. The `kamel run` command is provided with a `--resource` flag that help you setting any resource your `Integration` may need.
 
-The *runtime resources* are expected to be any resource type (text or binary content). These resources are materialized as files in the `Integration` `Pod`. The destination path can be either a default location or any path specified by the user. Only default resource directory is available within the `Integration` classpath.
+The *runtime resources* are expected to be any resource type (text or binary content). These resources are materialized as files in the `Integration` `Pod`. The `mount` trait will be declared on the `Integration`. The destination path can be either a default location or any path specified by the user. Only default resource directory is available within the `Integration` classpath.
 
 NOTE: you'll find `--resource` is very similar to the `--config` run flag. The main difference is that a `resource` can have a binary content and it won't be parsed by the Camel Context.
 
@@ -72,19 +72,26 @@ NOTE: you can provide a `Secret` which is not yet available on the cluster. The 
 
 When you are programming an `Integration` you may find yourself in the situation to specify where exactly a resource has to be mounted. For such purpose you can specify the location where a file is expected with the `--resource` _@path_ syntax.
 
+As an example, let's create a `Configmap` named _my-cm_ containing certain information. You can alternatively use any `Configmap` you've already stored in your cluster:
+
+----
+kubectl create configmap my-cm-files --from-literal=input.txt="configmap input.txt content"
+----
+
+
 Let's see an example where your integration expect a text file to be consumed under a specific filesystem location:
 
 [source,groovy]
 .resource-file-location-route.groovy
 ----
-from('file:/tmp/?fileName=input.txt&noop=true&idempotent=false')
+from('file:/tmp/inputs/?fileName=input.txt&noop=true&idempotent=false')
     .log('resource file content is: ${body}')
 ----
 
 When running the `Integration`, you can specify where to mount the resource content (either a `File`, `Configmap` or `Secret`) with the _@path_ syntax:
 
 ----
-kamel run --resource configmap:my-cm@/tmp/input.txt resource-file-location-route.groovy
+kamel run --resource configmap:my-cm@/tmp/inputs resource-file-location-route.groovy
 ----
 
 You may check in the `Integration` `Pod` and verify that the file was mounted in the _tmp/input.txt_ destination.
