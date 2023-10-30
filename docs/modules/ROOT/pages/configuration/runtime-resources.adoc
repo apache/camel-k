@@ -91,10 +91,10 @@ from('file:/tmp/inputs/?fileName=input.txt&noop=true&idempotent=false')
 When running the `Integration`, you can specify where to mount the resource content (either a `File`, `Configmap` or `Secret`) with the _@path_ syntax:
 
 ----
-kamel run --resource configmap:my-cm@/tmp/inputs resource-file-location-route.groovy
+kamel run --resource configmap:my-cm-files@/tmp/inputs resource-file-location-route.groovy
 ----
 
-You may check in the `Integration` `Pod` and verify that the file was mounted in the _tmp/input.txt_ destination.
+You may check in the `Integration` `Pod` and verify that the file was mounted in the _tmp/inputs/input.txt_ destination.
 
 [[runtime-resource-keys]]
 == Configmap/Secret key filtering
