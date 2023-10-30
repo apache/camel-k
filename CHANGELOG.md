@@ -13,6 +13,9 @@
 
 **Merged pull requests:**
 
+- fix\(doc\): Runtime resources example fix [\#4878](https://github.com/apache/camel-k/pull/4878) ([gansheer](https://github.com/gansheer))
+- fix\(doc\): Remove ambiguous local files usage on config/resources [\#4876](https://github.com/apache/camel-k/pull/4876) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump sigs.k8s.io/structured-merge-diff/v4 from 4.3.0 to 4.4.0 [\#4874](https://github.com/apache/camel-k/pull/4874) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.39 to 0.6.40 [\#4872](https://github.com/apache/camel-k/pull/4872) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/go-logr/logr from 1.2.4 to 1.3.0 [\#4871](https://github.com/apache/camel-k/pull/4871) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.38 to 0.6.39 [\#4870](https://github.com/apache/camel-k/pull/4870) ([dependabot[bot]](https://github.com/apps/dependabot))
