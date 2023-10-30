@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:348c9859-e9df-4ed9-b982-605066820cf8",
+  "serialNumber": "urn:uuid:799df78f-fc4f-4799-970d-50fcfa32ac29",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-10-29T23:48:07Z",
+    "timestamp": "2023-10-30T23:48:00Z",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231028234646-b445dca9981e?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231030234345-62b7a7e860ac?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20231028234646-b445dca9981e",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231028234646-b445dca9981e?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20231030234345-62b7a7e860ac",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231030234345-62b7a7e860ac?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -3814,18 +3814,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+      "bom-ref": "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
       "type": "library",
       "name": "sigs.k8s.io/structured-merge-diff/v4",
-      "version": "v4.3.0",
+      "version": "v4.4.0",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "5196d90197d7d30576cebed8668ac3cfa19744e7c3163e8bbea0919b855454a9"
+          "content": "64d59c7bf83cb855b8d5c2bd5d80a3ed146debdd7d216ce73d9d95382b872e38"
         }
       ],
-      "purl": "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module\u0026goos=linux\u0026goarch=amd64",
       "evidence": {
         "licenses": [
           {
@@ -3853,7 +3853,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231028234646-b445dca9981e?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231030234345-62b7a7e860ac?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
         "pkg:golang/github.com/container-tools/spectrum@v0.6.40?type=module",
@@ -3905,7 +3905,7 @@
         "pkg:golang/knative.dev/pkg@v0.0.0-20231011193800-bd99f2f98be7?type=module",
         "pkg:golang/knative.dev/serving@v0.38.2?type=module",
         "pkg:golang/sigs.k8s.io/controller-runtime@v0.15.2?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module"
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module"
       ]
     },
     {
@@ -4390,7 +4390,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -4456,7 +4456,7 @@
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/controller-runtime@v0.15.2?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -4492,7 +4492,7 @@
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/controller-runtime@v0.15.2?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module"
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module"
       ]
     },
     {
@@ -4597,7 +4597,7 @@
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/controller-runtime@v0.15.2?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5032,7 +5032,7 @@
         "pkg:golang/k8s.io/klog/v2@v2.100.1?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5105,7 +5105,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5148,7 +5148,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5200,7 +5200,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5250,7 +5250,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5309,7 +5309,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5368,7 +5368,7 @@
         "pkg:golang/k8s.io/klog/v2@v2.100.1?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5427,7 +5427,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5527,7 +5527,7 @@
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/knative.dev/pkg@v0.0.0-20231011193800-bd99f2f98be7?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5607,7 +5607,7 @@
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/knative.dev/pkg@v0.0.0-20231011193800-bd99f2f98be7?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5686,7 +5686,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5781,7 +5781,7 @@
         "pkg:golang/knative.dev/networking@v0.0.0-20231012062757-a5958051caf8?type=module",
         "pkg:golang/knative.dev/pkg@v0.0.0-20231011193800-bd99f2f98be7?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5844,7 +5844,7 @@
         "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
         "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module",
-        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
         "pkg:golang/sigs.k8s.io/yaml@v1.3.0?type=module"
       ]
     },
@@ -5852,7 +5852,7 @@
       "ref": "pkg:golang/sigs.k8s.io/json@v0.0.0-20221116044647-bc3834ca7abd?type=module"
     },
     {
-      "ref": "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.3.0?type=module",
+      "ref": "pkg:golang/sigs.k8s.io/structured-merge-diff/v4@v4.4.0?type=module",
       "dependsOn": [
         "pkg:golang/github.com/google/go-cmp@v0.6.0?type=module",
         "pkg:golang/github.com/google/gofuzz@v1.2.0?type=module",
