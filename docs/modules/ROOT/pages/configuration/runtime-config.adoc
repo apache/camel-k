@@ -1,9 +1,9 @@
 [[runtime-config]]
 = Runtime configuration
 
-When you develop an integration with `Camel K` there are many ways you can provide a *configuration* resource to the runtime `Integration`. The most familiar way is to handle local file, but since we are dealing with `Kubernetes` you may need also to use `Configmap` or `Secret`. The `kamel run` command is provided with a `--config` flag that help you setting any configuration resource your `Integration` need.
+When you develop an integration with `Camel K` there are many ways you can provide a *configuration* resource to the runtime `Integration`. Since we are dealing with `Kubernetes` we use `Configmap` or `Secret`. The `kamel run` command is provided with a `--config` flag that help you setting any configuration resource your `Integration` need.
 
-The *runtime configuration* files are expected to be encoded in `UTF-8` as they are processed by runtime `Camel Context` and parsed as property files. These resources are materialized as files in a well known path in the `Integration` `Pod`. They are also made available on the classpath in order to ease their usage directly from the `Route`. If you need to provide a non `UTF-8` (ie, a binary resource) you may look for `--resource` flag instead.
+The *runtime configuration* are expected to be encoded in `UTF-8` as they are processed by runtime `Camel Context` and parsed as property files. These resources are materialized as files in a well known path in the `Integration` `Pod`. The `mount` trait will be declared on the `Integration`. They are also made available on the classpath in order to ease their usage directly from the `Route`. If you need to provide a non `UTF-8` (ie, a binary resource) you may look for `--resource` flag instead.
 
 NOTE: the scope of `--config` global option had different meaning prior Camel K version 1.5. The old global `--config` has been replaced with `--kube-config` since Camel K version 1.5.
 
@@ -130,7 +130,7 @@ Let's use the _key_ filtering:
 kamel run --config secret:my-sec-multi/my-secret-key-2 config-secret-key-route.groovy
 ----
 
-You may check in the `Integration` `Pod` that only the _my-secret-key-2_ file has been mounted.
+You may check in the `Integration` `Pod` that only the _my-secret-key-2_ data has been mounted.
 
 [[runtime-config-resources]]
 == Runtime resources
