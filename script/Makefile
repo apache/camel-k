@@ -430,7 +430,7 @@ check-licenses:
 maven-overlay:
 	@echo "####### Preparing maven dependencies bundle..."
 	mkdir -p build/_maven_overlay
-	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION) build/_maven_overlay
+	./script/maven_overlay.sh build/_maven_overlay
 
 kamel-overlay:
 	mkdir -p build/_output/bin
@@ -509,7 +509,7 @@ git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
 fabric8-crds:
-	./java/mvnw -f java/pom.xml clean package
+	@mvn -f java/crds/pom.xml clean package
 
 cross-compile:
 	# we must wrap the goldflags parameters with quotes as they will need to

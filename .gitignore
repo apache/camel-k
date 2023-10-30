@@ -176,7 +176,7 @@ config/**/*.gen.json
 *-installer*
 
 # Fabric8 CRDs
-java/target
+java/*/target
 pkg/resources/resources.go
 
 # MAC OS files
