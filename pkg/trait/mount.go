@@ -28,7 +28,6 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
@@ -47,12 +46,7 @@ func newMountTrait() Trait {
 }
 
 func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil {
-		return false, nil, nil
-	}
-
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) ||
-		(!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases()) {
+	if e.Integration == nil || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
 
@@ -68,14 +62,11 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
+	// mount trait needs always to be executed as it will process the sources
 	return true, nil, nil
 }
 
 func (t *mountTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return nil
-	}
-
 	container := e.GetIntegrationContainer()
 	if container == nil {
 		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
