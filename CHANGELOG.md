@@ -13,6 +13,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump sigs.k8s.io/structured-merge-diff/v4 from 4.4.0 to 4.4.1 [\#4884](https://github.com/apache/camel-k/pull/4884) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/docker/docker from 24.0.0+incompatible to 24.0.7+incompatible [\#4879](https://github.com/apache/camel-k/pull/4879) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(doc\): Runtime resources example fix [\#4878](https://github.com/apache/camel-k/pull/4878) ([gansheer](https://github.com/gansheer))
 - fix\(doc\): Remove ambiguous local files usage on config/resources [\#4876](https://github.com/apache/camel-k/pull/4876) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump sigs.k8s.io/structured-merge-diff/v4 from 4.3.0 to 4.4.0 [\#4874](https://github.com/apache/camel-k/pull/4874) ([dependabot[bot]](https://github.com/apps/dependabot))
