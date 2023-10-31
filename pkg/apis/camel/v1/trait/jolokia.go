@@ -34,6 +34,7 @@ type JolokiaTrait struct {
 	// (default `clientPrincipal=cn=system:master-proxy`, `cn=hawtio-online.hawtio.svc` and `cn=fuse-console.fuse.svc` for OpenShift).
 	ClientPrincipal []string `property:"client-principal" json:"clientPrincipal,omitempty"`
 	// Listen for multicast requests (default `false`)
+	// +kubebuilder:default=false
 	DiscoveryEnabled *bool `property:"discovery-enabled" json:"discoveryEnabled,omitempty"`
 	// Mandate the client certificate contains a client flag in the extended key usage section,
 	// applicable when `protocol` is `https` and `use-ssl-client-authentication` is `true`
@@ -41,10 +42,12 @@ type JolokiaTrait struct {
 	ExtendedClientCheck *bool `property:"extended-client-check" json:"extendedClientCheck,omitempty"`
 	// The Host address to which the Jolokia agent should bind to. If `"\*"` or `"0.0.0.0"` is given,
 	// the servers binds to every network interface (default `"*"`).
+	// +kubebuilder:default="*"
 	Host *string `property:"host" json:"host,omitempty"`
 	// The password used for authentication, applicable when the `user` option is set.
 	Password *string `property:"password" json:"password,omitempty"`
 	// The Jolokia endpoint port (default `8778`).
+	// +kubebuilder:default=8778
 	Port int `property:"port" json:"port,omitempty"`
 	// The protocol to use, either `http` or `https` (default `https` for OpenShift)
 	Protocol *string `property:"protocol" json:"protocol,omitempty"`

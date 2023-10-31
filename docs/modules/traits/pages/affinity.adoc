@@ -30,11 +30,11 @@ The following configuration options are available:
 
 | affinity.pod-affinity
 | bool
-| Always co-locates multiple replicas of the integration in the same node (default *false*).
+| Always co-locates multiple replicas of the integration in the same node (default `false`).
 
 | affinity.pod-anti-affinity
 | bool
-| Never co-locates multiple replicas of the integration in the same node (default *false*).
+| Never co-locates multiple replicas of the integration in the same node (default `false`).
 
 | affinity.node-affinity-labels
 | []string

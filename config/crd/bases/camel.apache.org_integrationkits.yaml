@@ -213,6 +213,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       incrementalImageBuild:
+                        default: true
                         description: Use the incremental image build option, to reuse
                           existing containers (default `true`)
                         type: boolean
@@ -239,8 +240,13 @@ spec:
                           type: string
                         type: array
                       orderStrategy:
+                        default: sequential
                         description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default sequential)
+                          `fifo` or `sequential` (default `sequential`)
+                        enum:
+                        - dependencies
+                        - fifo
+                        - sequential
                         type: string
                       properties:
                         description: A list of properties to be provided to the build
@@ -259,8 +265,12 @@ spec:
                           instead with task name `builder`.'
                         type: string
                       strategy:
+                        default: routine
                         description: The strategy to use, either `pod` or `routine`
-                          (default routine)
+                          (default `routine`)
+                        enum:
+                        - pod
+                        - routine
                         type: string
                       tasks:
                         description: A list of tasks to be executed (available only
@@ -327,6 +337,8 @@ spec:
                       build must have enough memory available.'
                     properties:
                       buildMode:
+                        default:
+                        - jvm
                         description: 'The Quarkus mode to run: either `jvm` or `native`
                           (default `jvm`). In case both `jvm` and `native` are specified,
                           two `IntegrationKit` resources are created, with the `native`
@@ -347,6 +359,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       nativeBaseImage:
+                        default: quay.io/quarkus/quarkus-micro-image:2.0
                         description: The base image to use when running a native build
                           (default `quay.io/quarkus/quarkus-micro-image:2.0`)
                         type: string
