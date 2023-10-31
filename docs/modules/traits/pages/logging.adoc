@@ -36,7 +36,7 @@ The following configuration options are available:
 
 | logging.level
 | string
-| Adjust the logging level (defaults to INFO)
+| Adjust the logging level (defaults to `INFO`)
 
 | logging.json
 | bool

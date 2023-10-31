@@ -50,13 +50,16 @@ type Trait struct {
 	// When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
 	// E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
 	// It's enabled by default.
+	// +kubebuilder:default=true
 	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies" json:"includeDelegateDependencies,omitempty"`
 	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
 	// Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
 	ResourceName *string `property:"resource-name" json:"resourceName,omitempty"`
 	// Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease"). Defaults to "Lease".
+	// +kubebuilder:default="Lease"
 	ResourceType *string `property:"resource-type" json:"resourceType,omitempty"`
 	// Label that will be used to identify all pods contending the lock. Defaults to "camel.apache.org/integration".
+	// +kubebuilder:default="camel.apache.org/integration"
 	LabelKey *string `property:"label-key" json:"labelKey,omitempty"`
 	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
 	LabelValue *string `property:"label-value" json:"labelValue,omitempty"`

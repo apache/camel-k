@@ -40,14 +40,18 @@ type ContainerTrait struct {
 	// Can be used to enable/disable exposure via kubernetes Service.
 	Expose *bool `property:"expose" json:"expose,omitempty"`
 	// To configure a different port exposed by the container (default `8080`).
+	// +kubebuilder:default=8080
 	Port int `property:"port" json:"port,omitempty"`
 	// To configure a different port name for the port exposed by the container. It defaults to `http` only when the `expose` parameter is true.
 	PortName string `property:"port-name" json:"portName,omitempty"`
 	// To configure under which service port the container port is to be exposed (default `80`).
+	// +kubebuilder:default=80
 	ServicePort int `property:"service-port" json:"servicePort,omitempty"`
 	// To configure under which service port name the container port is to be exposed (default `http`).
+	// +kubebuilder:default="http"
 	ServicePortName string `property:"service-port-name" json:"servicePortName,omitempty"`
 	// The main container name. It's named `integration` by default.
+	// +kubebuilder:default="integration"
 	Name string `property:"name" json:"name,omitempty"`
 	// The main container image
 	Image string `property:"image" json:"image,omitempty"`

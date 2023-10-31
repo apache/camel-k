@@ -28,5 +28,6 @@ type DeployerTrait struct {
 	Kind string `property:"kind" json:"kind,omitempty"`
 	// Use server-side apply to update the owned resources (default `true`).
 	// Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
+	// +kubebuilder:default=true
 	UseSSA *bool `property:"use-ssa" json:"useSSA,omitempty"`
 }

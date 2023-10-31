@@ -472,8 +472,9 @@ spec:
                           type: string
                         type: array
                       podAffinity:
+                        default: false
                         description: Always co-locates multiple replicas of the integration
-                          in the same node (default *false*).
+                          in the same node (default `false`).
                         type: boolean
                       podAffinityLabels:
                         description: Defines a set of pods (namely those matching
@@ -483,8 +484,9 @@ spec:
                           type: string
                         type: array
                       podAntiAffinity:
+                        default: false
                         description: Never co-locates multiple replicas of the integration
-                          in the same node (default *false*).
+                          in the same node (default `false`).
                         type: boolean
                       podAntiAffinityLabels:
                         description: Defines a set of pods (namely those matching
@@ -509,6 +511,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       incrementalImageBuild:
+                        default: true
                         description: Use the incremental image build option, to reuse
                           existing containers (default `true`)
                         type: boolean
@@ -535,8 +538,13 @@ spec:
                           type: string
                         type: array
                       orderStrategy:
+                        default: sequential
                         description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default sequential)
+                          `fifo` or `sequential` (default `sequential`)
+                        enum:
+                        - dependencies
+                        - fifo
+                        - sequential
                         type: string
                       properties:
                         description: A list of properties to be provided to the build
@@ -555,8 +563,12 @@ spec:
                           instead with task name `builder`.'
                         type: string
                       strategy:
+                        default: routine
                         description: The strategy to use, either `pod` or `routine`
-                          (default routine)
+                          (default `routine`)
+                        enum:
+                        - pod
+                        - routine
                         type: string
                       tasks:
                         description: A list of tasks to be executed (available only
@@ -651,10 +663,12 @@ spec:
                         description: The maximum amount of memory required.
                         type: string
                       name:
+                        default: integration
                         description: The main container name. It's named `integration`
                           by default.
                         type: string
                       port:
+                        default: 8080
                         description: To configure a different port exposed by the
                           container (default `8080`).
                         type: integer
@@ -670,10 +684,12 @@ spec:
                         description: The minimum amount of memory required.
                         type: string
                       servicePort:
+                        default: 80
                         description: To configure under which service port the container
                           port is to be exposed (default `80`).
                         type: integer
                       servicePortName:
+                        default: http
                         description: To configure under which service port name the
                           container port is to be exposed (default `http`).
                         type: string
@@ -682,6 +698,7 @@ spec:
                     description: The configuration of Cron trait
                     properties:
                       activeDeadlineSeconds:
+                        default: 60
                         description: Specifies the duration in seconds, relative to
                           the start time, that the job may be continuously active
                           before it is considered to be failed. It defaults to 60s.
@@ -697,6 +714,7 @@ spec:
                           be expressed as `0/1 * * * *`, while `35m` or `50s` cannot)."
                         type: boolean
                       backoffLimit:
+                        default: 2
                         description: Specifies the number of retries before marking
                           the job failed. It defaults to 2.
                         format: int32
@@ -782,6 +800,7 @@ spec:
                         - knative-service
                         type: string
                       useSSA:
+                        default: true
                         description: Use server-side apply to update the owned resources
                           (default `true`). Note that it automatically falls back
                           to client-side patching, if SSA is not available, e.g.,
@@ -800,25 +819,28 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       progressDeadlineSeconds:
+                        default: 60
                         description: The maximum time in seconds for the deployment
                           to make progress before it is considered to be failed. It
-                          defaults to 60s.
+                          defaults to `60s`.
                         format: int32
                         type: integer
                       rollingUpdateMaxSurge:
+                        default: 25
                         description: 'The maximum number of pods that can be scheduled
                           above the desired number of pods. Value can be an absolute
                           number (ex: 5) or a percentage of desired pods (ex: 10%).
                           This can not be 0 if MaxUnavailable is 0. Absolute number
                           is calculated from percentage by rounding up. Defaults to
-                          25%.'
+                          `25%`.'
                         type: integer
                       rollingUpdateMaxUnavailable:
+                        default: 25
                         description: 'The maximum number of pods that can be unavailable
                           during the update. Value can be an absolute number (ex:
                           5) or a percentage of desired pods (ex: 10%). Absolute number
                           is calculated from percentage by rounding down. This can
-                          not be 0 if MaxSurge is 0. Defaults to 25%.'
+                          not be 0 if MaxSurge is 0. Defaults to `25%`.'
                         type: integer
                       strategy:
                         description: The deployment strategy to use to replace existing
@@ -837,6 +859,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       containerMeta:
+                        default: true
                         description: Enables injection of `NAMESPACE` and `POD_NAME`
                           environment variables (default `true`)
                         type: boolean
@@ -844,6 +867,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       httpProxy:
+                        default: true
                         description: Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and
                           `NO_PROXY` environment variables (default `true`)
                         type: boolean
@@ -881,6 +905,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryCache:
+                        default: memory
                         description: 'Discovery client cache to be used, either `disabled`,
                           `disk` or `memory` (default `memory`). Deprecated: to be
                           removed from trait configuration.'
@@ -921,10 +946,12 @@ spec:
                         format: int32
                         type: integer
                       livenessProbeEnabled:
+                        default: false
                         description: Configures the liveness probe for the integration
                           container (default `false`).
                         type: boolean
                       livenessScheme:
+                        default: HTTP
                         description: Scheme to use when connecting to the liveness
                           probe (default `HTTP`).
                         type: string
@@ -953,10 +980,12 @@ spec:
                         format: int32
                         type: integer
                       readinessProbeEnabled:
+                        default: true
                         description: Configures the readiness probe for the integration
                           container (default `true`).
                         type: boolean
                       readinessScheme:
+                        default: HTTP
                         description: Scheme to use when connecting to the readiness
                           probe (default `HTTP`).
                         type: string
@@ -985,10 +1014,12 @@ spec:
                         format: int32
                         type: integer
                       startupProbeEnabled:
+                        default: false
                         description: Configures the startup probe for the integration
                           container (default `false`).
                         type: boolean
                       startupScheme:
+                        default: HTTP
                         description: Scheme to use when connecting to the startup
                           probe (default `HTTP`).
                         type: string
@@ -1030,10 +1061,12 @@ spec:
                         description: To configure the host exposed by the ingress.
                         type: string
                       path:
+                        default: /
                         description: To configure the path exposed by the ingress
                           (default `/`).
                         type: string
                       pathType:
+                        default: Prefix
                         description: To configure the path type exposed by the ingress.
                           One of `Exact`, `Prefix`, `ImplementationSpecific` (default
                           to `Prefix`).
@@ -1047,6 +1080,7 @@ spec:
                     description: The configuration of Istio trait
                     properties:
                       allow:
+                        default: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
                         description: Configures a (comma-separated) list of CIDR subnets
                           that should not be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`
                           by default).
@@ -1092,6 +1126,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryEnabled:
+                        default: false
                         description: Listen for multicast requests (default `false`)
                         type: boolean
                       enabled:
@@ -1105,6 +1140,7 @@ spec:
                           is `true` (default `true` for OpenShift).
                         type: boolean
                       host:
+                        default: '*'
                         description: The Host address to which the Jolokia agent should
                           bind to. If `"\*"` or `"0.0.0.0"` is given, the servers
                           binds to every network interface (default `"*"`).
@@ -1121,6 +1157,7 @@ spec:
                           when the `user` option is set.
                         type: string
                       port:
+                        default: 8778
                         description: The Jolokia endpoint port (default `8778`).
                         type: integer
                       protocol:
@@ -1152,6 +1189,7 @@ spec:
                           can be attached to the JVM, e.g., using port-forwarding
                         type: boolean
                       debugAddress:
+                        default: '*:5005'
                         description: Transport address at which to listen for the
                           newly launched JVM (default `*:5005`)
                         type: string
@@ -1169,6 +1207,7 @@ spec:
                           type: string
                         type: array
                       printCommand:
+                        default: true
                         description: Prints the command used the start the JVM in
                           the container logs (default `true`)
                         type: boolean
@@ -1177,6 +1216,7 @@ spec:
                     description: The configuration of Kamelets trait
                     properties:
                       auto:
+                        default: true
                         description: Automatically inject all referenced Kamelets
                           and their default configuration (enabled by default)
                         type: boolean
@@ -1194,6 +1234,7 @@ spec:
                           into the current integration
                         type: string
                       mountPoint:
+                        default: /etc/camel/kamelets
                         description: The directory where the application mounts and
                           reads Kamelet spec (default `/etc/camel/kamelets`)
                         type: string
@@ -1272,6 +1313,7 @@ spec:
                           in newer versions of Knative, filtering is disabled by default.
                         type: boolean
                       namespaceLabel:
+                        default: true
                         description: 'Enables the camel-k-operator to set the "bindings.knative.dev/include=true"
                           label to the namespace As Knative requires this label to
                           perform injection of K_SINK URL into the service. If this
@@ -1384,7 +1426,8 @@ spec:
                         description: Enable "pretty printing" of the JSON logs
                         type: boolean
                       level:
-                        description: Adjust the logging level (defaults to INFO)
+                        default: INFO
+                        description: Adjust the logging level (defaults to `INFO`)
                         enum:
                         - FATAL
                         - WARN
@@ -1427,8 +1470,9 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       hotReload:
+                        default: false
                         description: Enable "hot reload" when a secret/configmap mounted
-                          is edited (default false)
+                          is edited (default `false`)
                         type: boolean
                       resources:
                         description: 'A list of resources (text or binary content)
@@ -1536,6 +1580,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       global:
+                        default: true
                         description: Indicates if the platform should be created globally
                           in the case of global operator (default true).
                         type: boolean
@@ -1566,6 +1611,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       podMonitor:
+                        default: true
                         description: Whether a `PodMonitor` resource is created (default
                           `true`).
                         type: boolean
@@ -1608,6 +1654,8 @@ spec:
                     description: The configuration of Quarkus trait
                     properties:
                       buildMode:
+                        default:
+                        - jvm
                         description: 'The Quarkus mode to run: either `jvm` or `native`
                           (default `jvm`). In case both `jvm` and `native` are specified,
                           two `IntegrationKit` resources are created, with the `native`
@@ -1628,6 +1676,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       nativeBaseImage:
+                        default: quay.io/quarkus/quarkus-micro-image:2.0
                         description: The base image to use when running a native build
                           (default `quay.io/quarkus/quarkus-micro-image:2.0`)
                         type: string
@@ -1783,6 +1832,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       nodePort:
+                        default: false
                         description: 'Enable Service to be exposed as NodePort (default
                           `false`). Deprecated: Use service type instead.'
                         type: boolean
@@ -2293,8 +2343,9 @@ spec:
                           type: string
                         type: array
                       podAffinity:
+                        default: false
                         description: Always co-locates multiple replicas of the integration
-                          in the same node (default *false*).
+                          in the same node (default `false`).
                         type: boolean
                       podAffinityLabels:
                         description: Defines a set of pods (namely those matching
@@ -2304,8 +2355,9 @@ spec:
                           type: string
                         type: array
                       podAntiAffinity:
+                        default: false
                         description: Never co-locates multiple replicas of the integration
-                          in the same node (default *false*).
+                          in the same node (default `false`).
                         type: boolean
                       podAntiAffinityLabels:
                         description: Defines a set of pods (namely those matching
@@ -2330,6 +2382,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       incrementalImageBuild:
+                        default: true
                         description: Use the incremental image build option, to reuse
                           existing containers (default `true`)
                         type: boolean
@@ -2356,8 +2409,13 @@ spec:
                           type: string
                         type: array
                       orderStrategy:
+                        default: sequential
                         description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default sequential)
+                          `fifo` or `sequential` (default `sequential`)
+                        enum:
+                        - dependencies
+                        - fifo
+                        - sequential
                         type: string
                       properties:
                         description: A list of properties to be provided to the build
@@ -2376,8 +2434,12 @@ spec:
                           instead with task name `builder`.'
                         type: string
                       strategy:
+                        default: routine
                         description: The strategy to use, either `pod` or `routine`
-                          (default routine)
+                          (default `routine`)
+                        enum:
+                        - pod
+                        - routine
                         type: string
                       tasks:
                         description: A list of tasks to be executed (available only
@@ -2472,10 +2534,12 @@ spec:
                         description: The maximum amount of memory required.
                         type: string
                       name:
+                        default: integration
                         description: The main container name. It's named `integration`
                           by default.
                         type: string
                       port:
+                        default: 8080
                         description: To configure a different port exposed by the
                           container (default `8080`).
                         type: integer
@@ -2491,10 +2555,12 @@ spec:
                         description: The minimum amount of memory required.
                         type: string
                       servicePort:
+                        default: 80
                         description: To configure under which service port the container
                           port is to be exposed (default `80`).
                         type: integer
                       servicePortName:
+                        default: http
                         description: To configure under which service port name the
                           container port is to be exposed (default `http`).
                         type: string
@@ -2503,6 +2569,7 @@ spec:
                     description: The configuration of Cron trait
                     properties:
                       activeDeadlineSeconds:
+                        default: 60
                         description: Specifies the duration in seconds, relative to
                           the start time, that the job may be continuously active
                           before it is considered to be failed. It defaults to 60s.
@@ -2518,6 +2585,7 @@ spec:
                           be expressed as `0/1 * * * *`, while `35m` or `50s` cannot)."
                         type: boolean
                       backoffLimit:
+                        default: 2
                         description: Specifies the number of retries before marking
                           the job failed. It defaults to 2.
                         format: int32
@@ -2603,6 +2671,7 @@ spec:
                         - knative-service
                         type: string
                       useSSA:
+                        default: true
                         description: Use server-side apply to update the owned resources
                           (default `true`). Note that it automatically falls back
                           to client-side patching, if SSA is not available, e.g.,
@@ -2621,25 +2690,28 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       progressDeadlineSeconds:
+                        default: 60
                         description: The maximum time in seconds for the deployment
                           to make progress before it is considered to be failed. It
-                          defaults to 60s.
+                          defaults to `60s`.
                         format: int32
                         type: integer
                       rollingUpdateMaxSurge:
+                        default: 25
                         description: 'The maximum number of pods that can be scheduled
                           above the desired number of pods. Value can be an absolute
                           number (ex: 5) or a percentage of desired pods (ex: 10%).
                           This can not be 0 if MaxUnavailable is 0. Absolute number
                           is calculated from percentage by rounding up. Defaults to
-                          25%.'
+                          `25%`.'
                         type: integer
                       rollingUpdateMaxUnavailable:
+                        default: 25
                         description: 'The maximum number of pods that can be unavailable
                           during the update. Value can be an absolute number (ex:
                           5) or a percentage of desired pods (ex: 10%). Absolute number
                           is calculated from percentage by rounding down. This can
-                          not be 0 if MaxSurge is 0. Defaults to 25%.'
+                          not be 0 if MaxSurge is 0. Defaults to `25%`.'
                         type: integer
                       strategy:
                         description: The deployment strategy to use to replace existing
@@ -2658,6 +2730,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       containerMeta:
+                        default: true
                         description: Enables injection of `NAMESPACE` and `POD_NAME`
                           environment variables (default `true`)
                         type: boolean
@@ -2665,6 +2738,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       httpProxy:
+                        default: true
                         description: Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and
                           `NO_PROXY` environment variables (default `true`)
                         type: boolean
@@ -2702,6 +2776,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryCache:
+                        default: memory
                         description: 'Discovery client cache to be used, either `disabled`,
                           `disk` or `memory` (default `memory`). Deprecated: to be
                           removed from trait configuration.'
@@ -2742,10 +2817,12 @@ spec:
                         format: int32
                         type: integer
                       livenessProbeEnabled:
+                        default: false
                         description: Configures the liveness probe for the integration
                           container (default `false`).
                         type: boolean
                       livenessScheme:
+                        default: HTTP
                         description: Scheme to use when connecting to the liveness
                           probe (default `HTTP`).
                         type: string
@@ -2774,10 +2851,12 @@ spec:
                         format: int32
                         type: integer
                       readinessProbeEnabled:
+                        default: true
                         description: Configures the readiness probe for the integration
                           container (default `true`).
                         type: boolean
                       readinessScheme:
+                        default: HTTP
                         description: Scheme to use when connecting to the readiness
                           probe (default `HTTP`).
                         type: string
@@ -2806,10 +2885,12 @@ spec:
                         format: int32
                         type: integer
                       startupProbeEnabled:
+                        default: false
                         description: Configures the startup probe for the integration
                           container (default `false`).
                         type: boolean
                       startupScheme:
+                        default: HTTP
                         description: Scheme to use when connecting to the startup
                           probe (default `HTTP`).
                         type: string
@@ -2851,10 +2932,12 @@ spec:
                         description: To configure the host exposed by the ingress.
                         type: string
                       path:
+                        default: /
                         description: To configure the path exposed by the ingress
                           (default `/`).
                         type: string
                       pathType:
+                        default: Prefix
                         description: To configure the path type exposed by the ingress.
                           One of `Exact`, `Prefix`, `ImplementationSpecific` (default
                           to `Prefix`).
@@ -2868,6 +2951,7 @@ spec:
                     description: The configuration of Istio trait
                     properties:
                       allow:
+                        default: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
                         description: Configures a (comma-separated) list of CIDR subnets
                           that should not be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16`
                           by default).
@@ -2913,6 +2997,7 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       discoveryEnabled:
+                        default: false
                         description: Listen for multicast requests (default `false`)
                         type: boolean
                       enabled:
@@ -2926,6 +3011,7 @@ spec:
                           is `true` (default `true` for OpenShift).
                         type: boolean
                       host:
+                        default: '*'
                         description: The Host address to which the Jolokia agent should
                           bind to. If `"\*"` or `"0.0.0.0"` is given, the servers
                           binds to every network interface (default `"*"`).
@@ -2942,6 +3028,7 @@ spec:
                           when the `user` option is set.
                         type: string
                       port:
+                        default: 8778
                         description: The Jolokia endpoint port (default `8778`).
                         type: integer
                       protocol:
@@ -2973,6 +3060,7 @@ spec:
                           can be attached to the JVM, e.g., using port-forwarding
                         type: boolean
                       debugAddress:
+                        default: '*:5005'
                         description: Transport address at which to listen for the
                           newly launched JVM (default `*:5005`)
                         type: string
@@ -2990,6 +3078,7 @@ spec:
                           type: string
                         type: array
                       printCommand:
+                        default: true
                         description: Prints the command used the start the JVM in
                           the container logs (default `true`)
                         type: boolean
@@ -2998,6 +3087,7 @@ spec:
                     description: The configuration of Kamelets trait
                     properties:
                       auto:
+                        default: true
                         description: Automatically inject all referenced Kamelets
                           and their default configuration (enabled by default)
                         type: boolean
@@ -3015,6 +3105,7 @@ spec:
                           into the current integration
                         type: string
                       mountPoint:
+                        default: /etc/camel/kamelets
                         description: The directory where the application mounts and
                           reads Kamelet spec (default `/etc/camel/kamelets`)
                         type: string
@@ -3093,6 +3184,7 @@ spec:
                           in newer versions of Knative, filtering is disabled by default.
                         type: boolean
                       namespaceLabel:
+                        default: true
                         description: 'Enables the camel-k-operator to set the "bindings.knative.dev/include=true"
                           label to the namespace As Knative requires this label to
                           perform injection of K_SINK URL into the service. If this
@@ -3205,7 +3297,8 @@ spec:
                         description: Enable "pretty printing" of the JSON logs
                         type: boolean
                       level:
-                        description: Adjust the logging level (defaults to INFO)
+                        default: INFO
+                        description: Adjust the logging level (defaults to `INFO`)
                         enum:
                         - FATAL
                         - WARN
@@ -3248,8 +3341,9 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       hotReload:
+                        default: false
                         description: Enable "hot reload" when a secret/configmap mounted
-                          is edited (default false)
+                          is edited (default `false`)
                         type: boolean
                       resources:
                         description: 'A list of resources (text or binary content)
@@ -3357,6 +3451,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       global:
+                        default: true
                         description: Indicates if the platform should be created globally
                           in the case of global operator (default true).
                         type: boolean
@@ -3387,6 +3482,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       podMonitor:
+                        default: true
                         description: Whether a `PodMonitor` resource is created (default
                           `true`).
                         type: boolean
@@ -3429,6 +3525,8 @@ spec:
                     description: The configuration of Quarkus trait
                     properties:
                       buildMode:
+                        default:
+                        - jvm
                         description: 'The Quarkus mode to run: either `jvm` or `native`
                           (default `jvm`). In case both `jvm` and `native` are specified,
                           two `IntegrationKit` resources are created, with the `native`
@@ -3449,6 +3547,7 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       nativeBaseImage:
+                        default: quay.io/quarkus/quarkus-micro-image:2.0
                         description: The base image to use when running a native build
                           (default `quay.io/quarkus/quarkus-micro-image:2.0`)
                         type: string
@@ -3604,6 +3703,7 @@ spec:
                           traits share this common property.
                         type: boolean
                       nodePort:
+                        default: false
                         description: 'Enable Service to be exposed as NodePort (default
                           `false`). Deprecated: Use service type instead.'
                         type: boolean

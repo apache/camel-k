@@ -5731,14 +5731,14 @@ bool
 |
 
 
-Always co-locates multiple replicas of the integration in the same node (default *false*).
+Always co-locates multiple replicas of the integration in the same node (default `false`).
 
 |`podAntiAffinity` +
 bool
 |
 
 
-Never co-locates multiple replicas of the integration in the same node (default *false*).
+Never co-locates multiple replicas of the integration in the same node (default `false`).
 
 |`nodeAffinityLabels` +
 []string
@@ -5809,7 +5809,7 @@ string
 |
 
 
-The strategy to use, either `pod` or `routine` (default routine)
+The strategy to use, either `pod` or `routine` (default `routine`)
 
 |`baseImage` +
 string
@@ -5830,7 +5830,7 @@ string
 |
 
 
-The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default sequential)
+The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default `sequential`)
 
 |`requestCPU` +
 string
@@ -6306,7 +6306,7 @@ int32
 
 
 The maximum time in seconds for the deployment to make progress before it
-is considered to be failed. It defaults to 60s.
+is considered to be failed. It defaults to `60s`.
 
 |`strategy` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#deploymentstrategytype-v1-apps[Kubernetes apps/v1.DeploymentStrategyType]*
@@ -6324,7 +6324,7 @@ The maximum number of pods that can be unavailable during the update.
 Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
 Absolute number is calculated from percentage by rounding down.
 This can not be 0 if MaxSurge is 0.
-Defaults to 25%.
+Defaults to `25%`.
 
 |`rollingUpdateMaxSurge` +
 int
@@ -6336,7 +6336,7 @@ pods.
 Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
 This can not be 0 if MaxUnavailable is 0.
 Absolute number is calculated from percentage by rounding up.
-Defaults to 25%.
+Defaults to `25%`.
 
 
 |===
@@ -7250,7 +7250,7 @@ string
 |
 
 
-Adjust the logging level (defaults to INFO)
+Adjust the logging level (defaults to `INFO`)
 
 |`json` +
 bool
@@ -7324,7 +7324,7 @@ bool
 |
 
 
-Enable "hot reload" when a secret/configmap mounted is edited (default false)
+Enable "hot reload" when a secret/configmap mounted is edited (default `false`)
 
 
 |===
