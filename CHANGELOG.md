@@ -13,6 +13,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump k8s.io/klog/v2 from 2.100.1 to 2.110.1 [\#4889](https://github.com/apache/camel-k/pull/4889) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(trait\): execute mount only when deploying [\#4888](https://github.com/apache/camel-k/pull/4888) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump sigs.k8s.io/structured-merge-diff/v4 from 4.4.0 to 4.4.1 [\#4884](https://github.com/apache/camel-k/pull/4884) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/docker/docker from 24.0.0+incompatible to 24.0.7+incompatible [\#4879](https://github.com/apache/camel-k/pull/4879) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(doc\): Runtime resources example fix [\#4878](https://github.com/apache/camel-k/pull/4878) ([gansheer](https://github.com/gansheer))
