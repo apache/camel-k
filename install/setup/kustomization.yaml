@@ -19,3 +19,15 @@ kind: Kustomization
 
 resources:
 - ../config/rbac
+
+transformers:
+- |-
+  apiVersion: builtin
+  kind: PatchTransformer
+  metadata:
+    name: fix-local-registry-rbac-namespace
+  patch: '[{"op": "replace", "path": "/metadata/namespace", "value": "kube-public"}]'
+  target:
+    group: rbac.authorization.k8s.io
+    kind: RoleBinding
+    name: camel-k-operator-local-registry
