@@ -13,8 +13,10 @@
 
 **Merged pull requests:**
 
+- Add e2e test for knative service trait with annotation [\#4895](https://github.com/apache/camel-k/pull/4895) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.100.1 to 2.110.1 [\#4889](https://github.com/apache/camel-k/pull/4889) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(trait\): execute mount only when deploying [\#4888](https://github.com/apache/camel-k/pull/4888) ([squakez](https://github.com/squakez))
+- feat\(crd\): Add default value trait in CRDs when declared in doc [\#4887](https://github.com/apache/camel-k/pull/4887) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump sigs.k8s.io/structured-merge-diff/v4 from 4.4.0 to 4.4.1 [\#4884](https://github.com/apache/camel-k/pull/4884) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/docker/docker from 24.0.0+incompatible to 24.0.7+incompatible [\#4879](https://github.com/apache/camel-k/pull/4879) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(doc\): Runtime resources example fix [\#4878](https://github.com/apache/camel-k/pull/4878) ([gansheer](https://github.com/gansheer))
@@ -30,6 +32,7 @@
 - chore\(e2e\): Randomize integration names in e2e tests [\#4863](https://github.com/apache/camel-k/pull/4863) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Fix golang version file setup in coverage workflow [\#4862](https://github.com/apache/camel-k/pull/4862) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Fix TestCamelTrait [\#4857](https://github.com/apache/camel-k/pull/4857) ([gansheer](https://github.com/gansheer))
+- fix\(core\): Access configmap from another namespace for KEP-1755 [\#4849](https://github.com/apache/camel-k/pull/4849) ([gansheer](https://github.com/gansheer))
 - feat\(runtime\): enable source less integrations [\#4831](https://github.com/apache/camel-k/pull/4831) ([squakez](https://github.com/squakez))
 
 ## [2.1.1-nightly](https://github.com/apache/camel-k/tree/2.1.1-nightly) (2023-10-24)
