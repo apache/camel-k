@@ -64,7 +64,7 @@ type IntegrationPlatformStatus struct {
 
 // +genclient
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip,categories=kamel;camel
+// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip;itp,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"

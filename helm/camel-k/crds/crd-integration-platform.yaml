@@ -35,6 +35,7 @@ spec:
     plural: integrationplatforms
     shortNames:
     - ip
+    - itp
     singular: integrationplatform
   scope: Namespaced
   versions:
