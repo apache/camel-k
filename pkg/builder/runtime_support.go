@@ -63,7 +63,8 @@ type NativeAdapter struct {
 
 // BuildCommands -- .
 func (n *NativeAdapter) BuildCommands() string {
-	return "cd " + n.Directory() + " && ./mvnw package -Dquarkus.package.type=native --global-settings settings.xml"
+	// We must override the local repo as it's not shared from the builder container
+	return "cd " + n.Directory() + " && ./mvnw $(cat MAVEN_CONTEXT) package -Dquarkus.package.type=native -Dmaven.repo.local=./repo"
 }
 
 // Directory -- .
