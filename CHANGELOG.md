@@ -6,18 +6,27 @@
 
 **Closed issues:**
 
+- Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
+- SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
+- TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
+- Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
+- Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 **Merged pull requests:**
 
+- fix\(build\): use maven context arguments [\#4901](https://github.com/apache/camel-k/pull/4901) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/spf13/cobra from 1.7.0 to 1.8.0 [\#4898](https://github.com/apache/camel-k/pull/4898) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/sync from 0.4.0 to 0.5.0 [\#4897](https://github.com/apache/camel-k/pull/4897) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Add e2e test for knative service trait with annotation [\#4895](https://github.com/apache/camel-k/pull/4895) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.100.1 to 2.110.1 [\#4889](https://github.com/apache/camel-k/pull/4889) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(trait\): execute mount only when deploying [\#4888](https://github.com/apache/camel-k/pull/4888) ([squakez](https://github.com/squakez))
 - feat\(crd\): Add default value trait in CRDs when declared in doc [\#4887](https://github.com/apache/camel-k/pull/4887) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump sigs.k8s.io/structured-merge-diff/v4 from 4.4.0 to 4.4.1 [\#4884](https://github.com/apache/camel-k/pull/4884) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Fix SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" [\#4883](https://github.com/apache/camel-k/pull/4883) ([claudio4j](https://github.com/claudio4j))
 - chore\(deps\): bump github.com/docker/docker from 24.0.0+incompatible to 24.0.7+incompatible [\#4879](https://github.com/apache/camel-k/pull/4879) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(doc\): Runtime resources example fix [\#4878](https://github.com/apache/camel-k/pull/4878) ([gansheer](https://github.com/gansheer))
 - fix\(doc\): Remove ambiguous local files usage on config/resources [\#4876](https://github.com/apache/camel-k/pull/4876) ([gansheer](https://github.com/gansheer))
