@@ -6,9 +6,11 @@
 
 **Closed issues:**
 
+- TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
+- Camel K 2.1 documentation still contains information on using local files for runtime resources despite it is no more supported [\#4853](https://github.com/apache/camel-k/issues/4853)
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
@@ -18,6 +20,12 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): HotReload tests should not reload by default [\#4908](https://github.com/apache/camel-k/pull/4908) ([gansheer](https://github.com/gansheer))
+- E2e test for route annotations [\#4907](https://github.com/apache/camel-k/pull/4907) ([lfabriko](https://github.com/lfabriko))
+- chore\(deps\): bump golang.org/x/time from 0.3.0 to 0.4.0 [\#4906](https://github.com/apache/camel-k/pull/4906) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.40 to 0.6.42 [\#4905](https://github.com/apache/camel-k/pull/4905) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/text from 0.13.0 to 0.14.0 [\#4904](https://github.com/apache/camel-k/pull/4904) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(api\): introduce itp shortname [\#4903](https://github.com/apache/camel-k/pull/4903) ([squakez](https://github.com/squakez))
 - fix\(build\): use maven context arguments [\#4901](https://github.com/apache/camel-k/pull/4901) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/spf13/cobra from 1.7.0 to 1.8.0 [\#4898](https://github.com/apache/camel-k/pull/4898) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/sync from 0.4.0 to 0.5.0 [\#4897](https://github.com/apache/camel-k/pull/4897) ([dependabot[bot]](https://github.com/apps/dependabot))
