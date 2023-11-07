@@ -893,6 +893,32 @@ func Route(ns string, name string) func() *routev1.Route {
 	}
 }
 
+func RouteFull(ns string, name string) func() *routev1.Route {
+	return func() *routev1.Route {
+		answer := routev1.Route{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Route",
+				APIVersion: servingv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+		}
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		err := TestClient().Get(TestContext, key, &answer)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			failTest(err)
+		}
+		return &answer
+	}
+}
+
 func RouteStatus(ns string, name string) func() string {
 	return func() string {
 		route := Route(ns, name)()

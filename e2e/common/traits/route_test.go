@@ -199,6 +199,20 @@ func TestRunRoutes(t *testing.T) {
 		Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
+
+	t.Run("Route annotations added", func(t *testing.T) {
+		Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
+			"-t", "route.annotations.'haproxy.router.openshift.io/balance'=roundrobin").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		route := RouteFull(ns, integrationName)()
+		Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
+		// must wait a little time after route is created, before an http request,
+		// otherwise the route is unavailable and the http request will fail
+		time.Sleep(waitBeforeHttpRequest)
+		var annotations = route.ObjectMeta.Annotations
+		Expect(annotations["haproxy.router.openshift.io/balance"]).To(Equal("roundrobin"))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
+	})
 	Expect(TestClient().Delete(TestContext, &secret)).To(Succeed())
 }
 
