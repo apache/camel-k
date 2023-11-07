@@ -6,9 +6,14 @@
 
 **Closed issues:**
 
+- Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
+- SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
+- TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
+- Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
+- Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 ## [2.1.1-nightly](https://github.com/apache/camel-k/tree/2.1.1-nightly) (2023-10-24)
