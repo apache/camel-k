@@ -14,12 +14,14 @@
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
+- Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 **Merged pull requests:**
 
+- chore\(e2e\): Regression test on referenced secret\(/cm\) properties [\#4909](https://github.com/apache/camel-k/pull/4909) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): HotReload tests should not reload by default [\#4908](https://github.com/apache/camel-k/pull/4908) ([gansheer](https://github.com/gansheer))
 - E2e test for route annotations [\#4907](https://github.com/apache/camel-k/pull/4907) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): bump golang.org/x/time from 0.3.0 to 0.4.0 [\#4906](https://github.com/apache/camel-k/pull/4906) ([dependabot[bot]](https://github.com/apps/dependabot))
