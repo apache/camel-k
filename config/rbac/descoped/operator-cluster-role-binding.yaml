@@ -15,30 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# rbac resources applicable for all kubernetes platforms
-#
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- user-cluster-role.yaml
-- operator-cluster-role-custom-resource-definitions.yaml
-- operator-cluster-role-binding-custom-resource-definitions.yaml
-- operator-cluster-role-addressable-resolver.yaml
-- operator-cluster-role-binding-addressable-resolver.yaml
-- operator-cluster-role-local-registry.yaml
-- operator-role-binding-local-registry.yaml
-
-
-transformers:
-- |-
-  apiVersion: builtin
-  kind: PatchTransformer
-  metadata:
-    name: fix-local-registry-rbac-namespace
-  patch: '[{"op": "replace", "path": "/metadata/namespace", "value": "kube-public"}]'
-  target:
-    group: rbac.authorization.k8s.io
-    kind: RoleBinding
-    name: camel-k-operator-local-registry
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: camel-k-operator
+  labels:
+    app: "camel-k"
+subjects:
+- kind: ServiceAccount
+  name: camel-k-operator
+  namespace: placeholder
+roleRef:
+  kind: ClusterRole
+  name: camel-k-operator
+  apiGroup: rbac.authorization.k8s.io

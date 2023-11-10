@@ -16,29 +16,23 @@
 # ---------------------------------------------------------------------------
 
 #
-# rbac resources applicable for all kubernetes platforms
+# rbac resources applicable for all kubernetes platforms - namespaced operator
 #
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- user-cluster-role.yaml
-- operator-cluster-role-custom-resource-definitions.yaml
-- operator-cluster-role-binding-custom-resource-definitions.yaml
-- operator-cluster-role-addressable-resolver.yaml
-- operator-cluster-role-binding-addressable-resolver.yaml
-- operator-cluster-role-local-registry.yaml
-- operator-role-binding-local-registry.yaml
-
-
-transformers:
-- |-
-  apiVersion: builtin
-  kind: PatchTransformer
-  metadata:
-    name: fix-local-registry-rbac-namespace
-  patch: '[{"op": "replace", "path": "/metadata/namespace", "value": "kube-public"}]'
-  target:
-    group: rbac.authorization.k8s.io
-    kind: RoleBinding
-    name: camel-k-operator-local-registry
+- operator-role-events.yaml
+- operator-role-knative.yaml
+- operator-role.yaml
+- operator-role-keda.yaml
+- operator-role-leases.yaml
+- operator-role-podmonitors.yaml
+- operator-role-strimzi.yaml
+- operator-role-binding-events.yaml
+- operator-role-binding-keda.yaml
+- operator-role-binding-knative.yaml
+- operator-role-binding-leases.yaml
+- operator-role-binding-podmonitors.yaml
+- operator-role-binding-strimzi.yaml
+- operator-role-binding.yaml
