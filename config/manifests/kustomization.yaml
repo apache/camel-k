@@ -27,6 +27,7 @@ resources:
 - ../samples
 - ../scorecard
 - ../rbac
+- ../rbac/namespaced
 - ../rbac/openshift
 
 patchesStrategicMerge:

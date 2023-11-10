@@ -241,13 +241,11 @@ endif
 setup: setup-cluster
 # Set the namespace in the setup kustomization yaml
 	@$(call set-kustomize-namespace,$@)
-# If GLOBAL then add the conversion patches for all roles and rolebindings
-ifeq ($(GLOBAL),true)
-	@$(call add-remove-kind-patch,setup,add,../$(ROLE_TO_CROLE_PATCH).$(YAML),Role)
-	@$(call add-remove-kind-patch,setup,add,../$(ROLEBIN_TO_CROLEBIN_PATCH).$(YAML),RoleBinding)
+# If GLOBAL then add the versions with clusterroles and clusterrolebindings
+ifeq ($(GLOBAL), true)
+	@cd $@ || exit 1 && $(KUSTOMIZE) edit add resource ../$(RBAC)/descoped && cd - &> /dev/null;
 else
-	@$(call add-remove-kind-patch,setup,remove,../$(ROLE_TO_CROLE_PATCH).$(YAML),Role)
-	@$(call add-remove-kind-patch,setup,remove,../$(ROLEBIN_TO_CROLEBIN_PATCH).$(YAML),RoleBinding)
+	@cd $@ || exit 1 && $(KUSTOMIZE) edit add resource ../$(RBAC)/namespaced && cd - &> /dev/null;
 endif
 ifeq ($(PLATFORM), openshift)
 	@for res in $(RBAC_OS)/operator-role*; do \
