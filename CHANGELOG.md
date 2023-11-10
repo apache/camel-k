@@ -15,12 +15,15 @@
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 - Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
+- Image Vulnerability of Go package [\#4581](https://github.com/apache/camel-k/issues/4581)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/term from 0.13.0 to 0.14.0 [\#4913](https://github.com/apache/camel-k/pull/4913) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/onsi/gomega from 1.29.0 to 1.30.0 [\#4911](https://github.com/apache/camel-k/pull/4911) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(e2e\): Regression test on referenced secret\(/cm\) properties [\#4909](https://github.com/apache/camel-k/pull/4909) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): HotReload tests should not reload by default [\#4908](https://github.com/apache/camel-k/pull/4908) ([gansheer](https://github.com/gansheer))
 - E2e test for route annotations [\#4907](https://github.com/apache/camel-k/pull/4907) ([lfabriko](https://github.com/lfabriko))
