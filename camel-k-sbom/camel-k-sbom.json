@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:e586c20d-a4be-4bfd-ba6b-6d38a05e700d",
+  "serialNumber": "urn:uuid:4659cd40-9f94-4d9a-af8e-ed51fe1734af",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-11-12T23:45:41Z",
+    "timestamp": "2023-11-13T23:42:56Z",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231111234800-a16096383b3e?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231112234541-410d18a92ac0?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20231111234800-a16096383b3e",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231111234800-a16096383b3e?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20231112234541-410d18a92ac0",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231112234541-410d18a92ac0?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -3853,7 +3853,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231111234800-a16096383b3e?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231112234541-410d18a92ac0?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
         "pkg:golang/github.com/container-tools/spectrum@v0.6.42?type=module",
