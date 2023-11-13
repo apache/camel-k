@@ -2399,7 +2399,7 @@ func CreateOperatorRole(ns string) (err error) {
 		// This should ideally be removed from the common RBAC manifest.
 		customizer = install.RemoveIngressRoleCustomizer
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/rbac/operator-role.yaml")
+	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/rbac/namespaced/operator-role.yaml")
 	if err != nil {
 		return err
 	}
@@ -2414,7 +2414,7 @@ func CreateOperatorRoleBinding(ns string) error {
 	if err != nil {
 		failTest(err)
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/operator-role-binding.yaml")
+	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/namespaced/operator-role-binding.yaml")
 	if err != nil {
 		return err
 	}

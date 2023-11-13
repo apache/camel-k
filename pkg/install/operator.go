@@ -200,41 +200,30 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 					envvar.SetVal(&d.Spec.Template.Spec.Containers[0].Env, "WATCH_NAMESPACE", "")
 				}
 			}
-
-			// Turn Role & RoleBinding into their equivalent cluster types
-			if r, ok := o.(*rbacv1.Role); ok {
-				if strings.HasPrefix(r.Name, "camel-k-operator") {
-					o = &rbacv1.ClusterRole{
-						ObjectMeta: metav1.ObjectMeta{
-							Namespace: cfg.Namespace,
-							Name:      r.Name,
-							Labels: map[string]string{
-								"app": "camel-k",
-							},
-						},
-						Rules: r.Rules,
+			// Configure subject on ClusterRoleBindings
+			if crb, ok := o.(*rbacv1.ClusterRoleBinding); ok {
+				if strings.HasPrefix(crb.Name, "camel-k-operator") {
+					crb.ObjectMeta.Name = fmt.Sprintf("%s-%s", crb.ObjectMeta.Name, cfg.Namespace)
+					bound := false
+					for i, subject := range crb.Subjects {
+						if subject.Name == "camel-k-operator" {
+							if subject.Namespace == cfg.Namespace {
+								bound = true
+								break
+							} else if subject.Namespace == "" || subject.Namespace == "placeholder" {
+								crb.Subjects[i].Namespace = cfg.Namespace
+								bound = true
+								break
+							}
+						}
 					}
-				}
-			}
 
-			if rb, ok := o.(*rbacv1.RoleBinding); ok {
-				if strings.HasPrefix(rb.Name, "camel-k-operator") {
-					rb.Subjects[0].Namespace = cfg.Namespace
-
-					o = &rbacv1.ClusterRoleBinding{
-						ObjectMeta: metav1.ObjectMeta{
+					if !bound {
+						crb.Subjects = append(crb.Subjects, rbacv1.Subject{
+							Kind:      "ServiceAccount",
 							Namespace: cfg.Namespace,
-							Name:      fmt.Sprintf("%s-%s", rb.Name, cfg.Namespace),
-							Labels: map[string]string{
-								"app": "camel-k",
-							},
-						},
-						Subjects: rb.Subjects,
-						RoleRef: rbacv1.RoleRef{
-							APIGroup: rb.RoleRef.APIGroup,
-							Kind:     "ClusterRole",
-							Name:     rb.RoleRef.Name,
-						},
+							Name:      "camel-k-operator",
+						})
 					}
 				}
 			}
@@ -444,7 +433,7 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 				bound = true
 
 				break
-			} else if subject.Namespace == "" {
+			} else if subject.Namespace == "" || subject.Namespace == "placeholder" {
 				target.Subjects[i].Namespace = namespace
 				bound = true
 
