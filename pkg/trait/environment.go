@@ -61,12 +61,12 @@ func newEnvironmentTrait() Trait {
 	}
 }
 
-func (t *environmentTrait) Configure(e *Environment) (bool, error) {
+func (t *environmentTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return e.IntegrationInRunningPhases(), nil
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *environmentTrait) Apply(e *Environment) error {

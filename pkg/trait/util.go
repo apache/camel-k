@@ -47,13 +47,6 @@ func ptrFrom[T any](value T) *T {
 	return &value
 }
 
-func ptrDerefOr[T any](value *T, def T) T {
-	if value != nil {
-		return *value
-	}
-	return def
-}
-
 type Options map[string]map[string]interface{}
 
 func (u Options) Get(id string) (map[string]interface{}, bool) {

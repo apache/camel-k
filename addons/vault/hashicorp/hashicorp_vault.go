@@ -68,16 +68,16 @@ func NewHashicorpVaultTrait() trait.Trait {
 	}
 }
 
-func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, error) {
-	if !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
+	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+		return false, nil, nil
 	}
 
 	if !environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !environment.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {

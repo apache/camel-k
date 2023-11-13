@@ -17,7 +17,11 @@ limitations under the License.
 
 package trait
 
-// The JVM trait is used to configure the JVM that runs the integration.
+// The JVM trait is used to configure the JVM that runs the Integration. This trait can be configured only for Integration and related IntegrationKits
+// (bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
+// trait is disabled by the platform.
+//
+// NOTE: the platform will skip the trait configuration for those container image matching `camel-k-kit-` name.
 //
 // +camel-k:trait=jvm.
 type JVMTrait struct {
@@ -27,8 +31,10 @@ type JVMTrait struct {
 	// Suspends the target JVM immediately before the main class is loaded
 	DebugSuspend *bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
 	// Prints the command used the start the JVM in the container logs (default `true`)
+	// +kubebuilder:default=true
 	PrintCommand *bool `property:"print-command" json:"printCommand,omitempty"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
+	// +kubebuilder:default="*:5005"
 	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
 	// A list of JVM options
 	Options []string `property:"options" json:"options,omitempty"`

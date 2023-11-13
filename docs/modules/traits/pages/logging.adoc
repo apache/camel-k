@@ -42,7 +42,7 @@ CLI usage example:  -t "logging.category.'org.test'=DEBUG"
 
 | logging.level
 | string
-| Adjust the logging level (defaults to INFO)
+| Adjust the logging level (defaults to `INFO`)
 
 | logging.json
 | bool

@@ -19,7 +19,7 @@ name: release-nightly
 description: 'action used to release nightly'
 
 inputs:
-  goVersion:
+  goVersionFile:
     required: true
     type: string
   javaVersion:
@@ -46,10 +46,11 @@ runs:
       with:
         java-version: ${{ inputs.javaVersion }}
         distribution: "temurin"
-    - name: Install Go ${{ inputs.goVersion }}
+    - name: Install Go ${{ inputs.goVersionFile }}
       uses: actions/setup-go@v4
       with:
-        go-version: ${{ inputs.goVersion }}
+        go-version-file: ${{ inputs.goVersionFile }}
+        check-latest: true
     - name: Common smoke tests
       uses: ./.github/actions/e2e-common
       with:

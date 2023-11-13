@@ -40,7 +40,7 @@ type Trait interface {
 	Identifiable
 	client.Injectable
 	InjectContext(context.Context)
-	Configure(environment *Environment) (bool, error)
+	Configure(environment *Environment) (bool, TraitCondition, error)
 	Apply(environment *Environment) error
 	InfluencesKit() bool
 	InfluencesBuild(this, prev map[string]interface{}) bool
@@ -51,7 +51,7 @@ type Trait interface {
 }
 ----
 
-Each trait will implement this interface. The most important methods that will be invoked by the xref:architecture/operator.adoc[Operator] are `Configure()` and `Apply()`. Basically, the `Configure()` method will set those inputs aforementioned (each trait has its own). The method is in charge to verify also the correctness of those expected parameters, where it makes sense (i.e., a well expected `Kubernetes` resource name).
+Each trait will implement this interface. The most important methods that will be invoked by the xref:architecture/operator.adoc[Operator] are `Configure()` and `Apply()`. Basically, the `Configure()` method will set those inputs aforementioned (each trait has its own). The method is in charge to verify also the correctness of those expected parameters, where it makes sense (i.e., a well expected `Kubernetes` resource name). The function can return a `TraitCondition` object containing any informative or warning condition to be attached to the resulting Integration (for instance, traits forcefully altered by the platform, or deprecation notices).
 
 Once configured, the `Apply()` method will be called along the build or initialization phase in order to do the business logic expected for it. The `environment` variable will give you all the below resources you will need to perform your operation (ie, the `Integration` or any Kubernetes resource attached to it). You can have a deeper look at the `https://github.com/apache/camel-k/blob/main/pkg/trait/trait_types.go#L188[Environment]` struct.
 

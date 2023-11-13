@@ -36,9 +36,10 @@ func TestTracingTraitOnQuarkus(t *testing.T) {
 	tt, _ := tracing.(*tracingTrait)
 	tt.Enabled = pointer.Bool(true)
 	tt.Endpoint = "http://endpoint3"
-	ok, err := tracing.Configure(e)
+	ok, condition, err := tracing.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = tracing.Apply(e)
 	assert.Nil(t, err)

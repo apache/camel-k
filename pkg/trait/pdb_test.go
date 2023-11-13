@@ -34,10 +34,11 @@ import (
 
 func TestConfigurePdbTraitDoesSucceed(t *testing.T) {
 	pdbTrait, environment, _ := createPdbTest()
-	configured, err := pdbTrait.Configure(environment)
+	configured, condition, err := pdbTrait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestConfigurePdbTraitDoesNotSucceed(t *testing.T) {
@@ -45,9 +46,10 @@ func TestConfigurePdbTraitDoesNotSucceed(t *testing.T) {
 
 	pdbTrait.MinAvailable = "1"
 	pdbTrait.MaxUnavailable = "2"
-	configured, err := pdbTrait.Configure(environment)
+	configured, condition, err := pdbTrait.Configure(environment)
 	assert.NotNil(t, err)
 	assert.False(t, configured)
+	assert.Nil(t, condition)
 }
 
 func TestPdbIsCreatedWithoutParametersEnabled(t *testing.T) {

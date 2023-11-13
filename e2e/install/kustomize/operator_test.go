@@ -69,6 +69,13 @@ func TestOperatorBasic(t *testing.T) {
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		Eventually(Platform(ns)).ShouldNot(BeNil())
+		registry := os.Getenv("KIND_REGISTRY")
+		if registry != "" {
+			platform := Platform(ns)()
+			Expect(platform.Status.Build.Registry).ShouldNot(BeNil())
+			Expect(platform.Status.Build.Registry.Address).To(Equal(registry))
+		}
+
 	})
 }
 

@@ -49,27 +49,30 @@ var (
 func TestConfigureJvmTraitInRightPhasesDoesSucceed(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
 	assert.True(t, configured)
+	assert.Nil(t, condition)
 }
 
 func TestConfigureJvmTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
 	assert.True(t, configured)
+	assert.Nil(t, condition)
 }
 
 func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
 	assert.False(t, configured)
+	assert.Nil(t, condition)
 }
 
 func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {

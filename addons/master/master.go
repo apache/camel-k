@@ -50,13 +50,16 @@ type Trait struct {
 	// When this flag is active, the operator analyzes the source code to add dependencies required by delegate endpoints.
 	// E.g. when using `master:lockname:timer`, then `camel:timer` is automatically added to the set of dependencies.
 	// It's enabled by default.
+	// +kubebuilder:default=true
 	IncludeDelegateDependencies *bool `property:"include-delegate-dependencies" json:"includeDelegateDependencies,omitempty"`
 	// Name of the configmap that will be used to store the lock. Defaults to "<integration-name>-lock".
 	// Name of the configmap/lease resource that will be used to store the lock. Defaults to "<integration-name>-lock".
 	ResourceName *string `property:"resource-name" json:"resourceName,omitempty"`
 	// Type of Kubernetes resource to use for locking ("ConfigMap" or "Lease"). Defaults to "Lease".
+	// +kubebuilder:default="Lease"
 	ResourceType *string `property:"resource-type" json:"resourceType,omitempty"`
 	// Label that will be used to identify all pods contending the lock. Defaults to "camel.apache.org/integration".
+	// +kubebuilder:default="camel.apache.org/integration"
 	LabelKey *string `property:"label-key" json:"labelKey,omitempty"`
 	// Label value that will be used to identify all pods contending the lock. Defaults to the integration name.
 	LabelValue *string `property:"label-value" json:"labelValue,omitempty"`
@@ -84,25 +87,23 @@ var (
 	configMapResourceType = "ConfigMap"
 )
 
-func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		return false, nil
+		return false, nil, nil
 	}
-
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
-
 	if pointer.BoolDeref(t.Auto, true) {
 		// Check if the master component has been used
 		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
 		if err != nil {
-			return false, err
+			return false, nil, err
 		}
 
 		if t.Enabled == nil {
@@ -113,11 +114,9 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 				}
 			}
 		}
-
 		if !pointer.BoolDeref(t.Enabled, false) {
-			return false, nil
+			return false, trait.NewIntegrationConditionUserDisabled(), nil
 		}
-
 		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
 			t.delegateDependencies = findAdditionalDependencies(e, meta)
 		}
@@ -130,7 +129,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		if t.ResourceType == nil {
 			canUseLeases, err := t.canUseLeases(e)
 			if err != nil {
-				return false, err
+				return false, nil, err
 			}
 			if canUseLeases {
 				t.ResourceType = &leaseResourceType
@@ -149,7 +148,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return pointer.BoolDeref(t.Enabled, true), nil
+	return pointer.BoolDeref(t.Enabled, true), nil, nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {

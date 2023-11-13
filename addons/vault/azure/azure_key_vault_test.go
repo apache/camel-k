@@ -43,9 +43,10 @@ func TestAzureKeyVaultTraitApply(t *testing.T) {
 	secrets.ClientID = "client-id"
 	secrets.ClientSecret = "secret"
 	secrets.VaultName = "my-vault"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)
@@ -85,9 +86,10 @@ func TestAzureKeyVaultTraitApplyWithConfigmapAndRefresh(t *testing.T) {
 	secrets.BlobAccessKey = "configmap:my-configmap2/azure-storage-blob-key"
 	secrets.BlobAccountName = "camel-k"
 	secrets.BlobContainerName = "camel-k-container"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)
@@ -131,9 +133,10 @@ func TestAzureKeyVaultTraitApplyWithSecretAndRefresh(t *testing.T) {
 	secrets.BlobAccessKey = "secret:my-secret2/azure-storage-blob-key"
 	secrets.BlobAccountName = "camel-k"
 	secrets.BlobContainerName = "camel-k-container"
-	ok, err := secrets.Configure(e)
+	ok, condition, err := secrets.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
 	assert.Nil(t, err)

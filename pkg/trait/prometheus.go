@@ -45,12 +45,12 @@ func newPrometheusTrait() Trait {
 	}
 }
 
-func (t *prometheusTrait) Configure(e *Environment) (bool, error) {
+func (t *prometheusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil
+	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *prometheusTrait) Apply(e *Environment) error {

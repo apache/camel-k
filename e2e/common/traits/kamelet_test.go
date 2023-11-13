@@ -49,7 +49,7 @@ func TestKameletTrait(t *testing.T) {
 		}
 		Expect(CreateKamelet(ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
 
-		name := "webhook"
+		name := RandomizedSuffixName("webhook")
 		Expect(KamelRunWithID(operatorID, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

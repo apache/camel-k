@@ -69,63 +69,57 @@ func (t *knativeServiceTrait) IsAllowedInProfile(profile v1.TraitProfile) bool {
 	return profile.Equal(v1.TraitProfileKnative)
 }
 
-func (t *knativeServiceTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
-		if e.Integration != nil {
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionKnativeServiceAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionKnativeServiceNotAvailableReason,
-				"explicitly disabled",
-			)
-		}
-
-		return false, nil
+func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
+	}
+	if !pointer.BoolDeref(t.Enabled, true) {
+		return false, NewIntegrationCondition(
+			v1.IntegrationConditionKnativeServiceAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionKnativeServiceNotAvailableReason,
+			"explicitly disabled",
+		), nil
 	}
 
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if e.Resources.GetDeploymentForIntegration(e.Integration) != nil {
-		e.Integration.Status.SetCondition(
+		// A controller is already present for the integration
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			fmt.Sprintf("different controller strategy used (%s)", string(ControllerStrategyDeployment)),
-		)
-
-		// A controller is already present for the integration
-		return false, nil
+		), nil
 	}
 
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
-		e.Integration.Status.SetErrorCondition(
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionKnativeServiceAvailable,
+			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			err,
-		)
-
-		return false, err
+			err.Error(),
+		), err
 	}
 	if strategy != ControllerStrategyKnativeService {
-		e.Integration.Status.SetCondition(
+		return false, NewIntegrationCondition(
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
 			fmt.Sprintf("different controller strategy used (%s)", string(strategy)),
-		)
-
-		return false, nil
+		), nil
 	}
 
 	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
-		return condition != nil && condition.Status == corev1.ConditionTrue, nil
+		return condition != nil && condition.Status == corev1.ConditionTrue, nil, nil
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {

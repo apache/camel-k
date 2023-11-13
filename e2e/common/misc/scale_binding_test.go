@@ -49,7 +49,7 @@ func TestPipeScale(t *testing.T) {
 		return
 	}
 
-	name := "timer2log"
+	name := RandomizedSuffixName("timer2log")
 	Expect(KamelBindWithID(operatorID, ns, "timer-source?message=HelloPipe", "log-sink", "--name", name).Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

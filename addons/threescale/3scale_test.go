@@ -39,9 +39,10 @@ func TestThreeScaleDisabled(t *testing.T) {
 	}
 
 	threeScale := NewThreeScaleTrait()
-	enabled, err := threeScale.Configure(e)
+	enabled, condition, err := threeScale.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 }
 
 func TestThreeScaleInjection(t *testing.T) {
@@ -49,9 +50,10 @@ func TestThreeScaleInjection(t *testing.T) {
 	threeScale := NewThreeScaleTrait()
 	tst, _ := threeScale.(*threeScaleTrait)
 	tst.Enabled = pointer.Bool(true)
-	ok, err := threeScale.Configure(e)
+	ok, condition, err := threeScale.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = threeScale.Apply(e)
 	assert.Nil(t, err)
@@ -69,9 +71,10 @@ func TestThreeScaleInjectionNoAPIPath(t *testing.T) {
 	tst, _ := threeScale.(*threeScaleTrait)
 	tst.Enabled = pointer.Bool(true)
 	tst.DescriptionPath = pointer.String("")
-	ok, err := threeScale.Configure(e)
+	ok, condition, err := threeScale.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = threeScale.Apply(e)
 	assert.Nil(t, err)

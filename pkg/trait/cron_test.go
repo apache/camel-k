@@ -284,10 +284,10 @@ func TestCronDeps(t *testing.T) {
 	assert.Nil(t, err)
 
 	tc := NewCatalog(c)
-
-	err = tc.apply(&environment)
+	conditions, err := tc.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
@@ -364,9 +364,10 @@ func TestCronDepsFallback(t *testing.T) {
 
 	tc := NewCatalog(c)
 
-	err = tc.apply(&environment)
+	conditions, err := tc.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
@@ -397,7 +398,6 @@ func TestCronWithActiveDeadline(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -440,9 +440,16 @@ func TestCronWithActiveDeadline(t *testing.T) {
 
 	tc := NewCatalog(c)
 
-	err = tc.apply(&environment)
-
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionFalse,
+		"deploymentTraitConfiguration",
+		"controller strategy: cron-job",
+	)
+	conditions, err := tc.apply(&environment)
 	assert.Nil(t, err)
+	assert.Len(t, conditions, 1)
+	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
@@ -480,7 +487,6 @@ func TestCronWithBackoffLimit(t *testing.T) {
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKnative,
 				Sources: []v1.SourceSpec{
 					{
 						DataSpec: v1.DataSpec{
@@ -523,9 +529,16 @@ func TestCronWithBackoffLimit(t *testing.T) {
 
 	tc := NewCatalog(c)
 
-	err = tc.apply(&environment)
-
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionFalse,
+		"deploymentTraitConfiguration",
+		"controller strategy: cron-job",
+	)
+	conditions, err := tc.apply(&environment)
 	assert.Nil(t, err)
+	assert.Len(t, conditions, 1)
+	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)

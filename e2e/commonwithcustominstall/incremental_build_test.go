@@ -35,13 +35,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-/*
 func TestRunIncrementalBuildRoutine(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-incremental-build"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		name := "java"
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 		).Execute()).To(Succeed())
@@ -67,7 +66,7 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 		t.Run("Create incremental kit", func(t *testing.T) {
 			// Another integration that should be built on top of the previous IntegrationKit
 			// just add a new random dependency
-			nameIncremental := "java-incremental"
+			nameIncremental := RandomizedSuffixName("java-incremental")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", nameIncremental,
 				"-d", "camel:zipfile",
@@ -92,7 +91,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 		operatorID := "camel-k-incremental-build"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		name := "java"
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.strategy=pod",
@@ -106,7 +105,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 		Eventually(BuilderPodsCount(ns)).Should(Equal(1))
 
 		t.Run("Reuse previous kit", func(t *testing.T) {
-			nameClone := "java-clone"
+			nameClone := RandomizedSuffixName("java-clone")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", nameClone,
 				"-t", "builder.strategy=pod",
@@ -122,7 +121,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 		t.Run("Create incremental kit", func(t *testing.T) {
 			// Another integration that should be built on top of the previous IntegrationKit
 			// just add a new random dependency
-			nameIncremental := "java-incremental"
+			nameIncremental := RandomizedSuffixName("java-incremental")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", nameIncremental,
 				"-d", "camel:zipfile",
@@ -149,7 +148,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		operatorID := "camel-k-standard-build"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		name := "java"
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 		).Execute()).To(Succeed())
@@ -160,7 +159,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		Eventually(Kit(ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
 		t.Run("Don't reuse previous kit", func(t *testing.T) {
-			nameClone := "java-clone"
+			nameClone := RandomizedSuffixName("java-clone")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", nameClone,
 				"-t", "builder.incremental-image-build=false",
@@ -175,7 +174,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		t.Run("Don't create incremental kit", func(t *testing.T) {
 			// Another integration that should be built on top of the previous IntegrationKit
 			// just add a new random dependency
-			nameIncremental := "java-incremental"
+			nameIncremental := RandomizedSuffixName("java-incremental")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", nameIncremental,
 				"-d", "camel:zipfile",
@@ -191,13 +190,13 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
-*/
+
 func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-standard-build"
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
-		name := "java"
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 		).Execute()).To(Succeed())
@@ -211,7 +210,7 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 		t.Run("Create incremental kit", func(t *testing.T) {
 			// Another integration that should be built on top of the previous IntegrationKit
 			// just add a new random dependency
-			nameIncremental := "java-incremental"
+			nameIncremental := RandomizedSuffixName("java-incremental")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", nameIncremental,
 				"-d", "camel:zipfile",
@@ -230,7 +229,7 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 		t.Run("Create new hierarchy kit", func(t *testing.T) {
 			// We should spin off a new hierarchy of builds
 			newBaseImage := "eclipse-temurin:17.0.8.1_1-jdk-ubi9-minimal"
-			name = "java-new"
+			name = RandomizedSuffixName("java-new")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-d", "camel:mongodb",

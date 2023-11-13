@@ -24,17 +24,18 @@ inputs:
     type: string
   secretGithubToken:
     required: true
-  goVersion:
+  goVersionFile:
     required: true
     type: string
 
 runs:
   using: "composite"
   steps:
-    - name: Install Go ${{ inputs.goVersion }}
+    - name: Install Go ${{ inputs.goVersionFile }}
       uses: actions/setup-go@v4
       with:
-        go-version: ${{ inputs.goVersion }}
+        go-version-file: ${{ inputs.goVersionFile }}
+        check-latest: true
     - name: Generate changelog
       uses: ./.github/actions/changelog
       with:

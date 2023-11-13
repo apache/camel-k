@@ -485,7 +485,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	t.Helper()
 
 	catalog := NewTraitTestCatalog()
-	err := catalog.apply(env)
+	_, err := catalog.apply(env)
 	assert.Nil(t, err)
 	return env.Resources
 }

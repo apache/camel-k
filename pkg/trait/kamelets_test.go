@@ -40,9 +40,10 @@ func TestConfigurationNoKameletsUsed(t *testing.T) {
     steps:
     - to: log:info
 `)
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, "", trait.List)
 }
 
@@ -60,9 +61,10 @@ func TestConfigurationWithKamelets(t *testing.T) {
     - to: kamelet://complex-.-.-1b/a
     - to: kamelet://complex-.-.-1c/b
 `)
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, []string{"c0", "c1", "c2", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{
 		newConfigurationKey("c0", ""),
@@ -99,9 +101,10 @@ func TestKameletLookup(t *testing.T) {
 			},
 		},
 	})
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
@@ -147,9 +150,10 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 			},
 		},
 	})
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
@@ -197,9 +201,10 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 			},
 		},
 	})
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
@@ -271,9 +276,10 @@ func TestMultipleKamelets(t *testing.T) {
 			},
 		},
 	})
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, []string{"logger", "timer"}, trait.getKameletKeys())
 
 	err = trait.Apply(environment)
@@ -357,9 +363,10 @@ func TestKameletConfigLookup(t *testing.T) {
 			},
 		},
 	})
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{newConfigurationKey("timer", "")}, trait.getConfigurationKeys())
 
@@ -420,9 +427,10 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 			},
 		},
 	})
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{
 		newConfigurationKey("timer", ""),
@@ -460,9 +468,10 @@ func TestKameletConditionFalse(t *testing.T) {
 			},
 		})
 
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
 	assert.Error(t, err)
@@ -511,9 +520,10 @@ func TestKameletConditionTrue(t *testing.T) {
 			},
 		})
 
-	enabled, err := trait.Configure(environment)
+	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)

@@ -30,10 +30,11 @@ func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
 	environment, _ := createNominalDeploymentTraitTest()
 	tolerationTrait := createNominalTolerationTrait()
 
-	success, err := tolerationTrait.Configure(environment)
+	success, condition, err := tolerationTrait.Configure(environment)
 
 	assert.Equal(t, false, success)
 	assert.NotNil(t, err)
+	assert.Nil(t, condition)
 }
 
 func TestApplyTolerationTraitMalformedTaint(t *testing.T) {

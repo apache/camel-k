@@ -70,7 +70,7 @@ func TestEnvironmentTrait(t *testing.T) {
 		).Execute()).To(Succeed())
 
 		t.Run("Run integration with default environment", func(t *testing.T) {
-			name := "java-default"
+			name := RandomizedSuffixName("java-default")
 			Expect(KamelRunWithID(operatorID, ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -96,7 +96,7 @@ func TestEnvironmentTrait(t *testing.T) {
 		})
 
 		t.Run("Run integration with custom environment", func(t *testing.T) {
-			name := "java-custom-proxy"
+			name := RandomizedSuffixName("java-custom-proxy")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "environment.vars=HTTP_PROXY=http://custom.proxy",
@@ -125,7 +125,7 @@ func TestEnvironmentTrait(t *testing.T) {
 		})
 
 		t.Run("Run integration without default HTTP proxy environment", func(t *testing.T) {
-			name := "java-no-proxy"
+			name := RandomizedSuffixName("java-no-proxy")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "environment.http-proxy=false",

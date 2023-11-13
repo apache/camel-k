@@ -68,8 +68,10 @@ type CronTrait struct {
 	// Specifies the duration in seconds, relative to the start time, that the job
 	// may be continuously active before it is considered to be failed.
 	// It defaults to 60s.
+	// +kubebuilder:default=60
 	ActiveDeadlineSeconds *int64 `property:"active-deadline-seconds" json:"activeDeadlineSeconds,omitempty"`
 	// Specifies the number of retries before marking the job failed.
 	// It defaults to 2.
+	// +kubebuilder:default=2
 	BackoffLimit *int32 `property:"backoff-limit" json:"backoffLimit,omitempty"`
 }

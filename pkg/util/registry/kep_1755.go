@@ -21,19 +21,22 @@ import (
 	"context"
 
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"gopkg.in/yaml.v2"
-	corev1 "k8s.io/api/core/v1"
-	k8errors "k8s.io/apimachinery/pkg/api/errors"
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GetRegistryAddress KEP-1755
 // https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
 func GetRegistryAddress(ctx context.Context, c client.Client) (*string, error) {
-	config := corev1.ConfigMap{}
-	err := c.Get(ctx, ctrl.ObjectKey{Namespace: "kube-public", Name: "local-registry-hosting"}, &config)
+	config, err := c.CoreV1().ConfigMaps("kube-public").Get(ctx, "local-registry-hosting", metav1.GetOptions{})
 	if err != nil {
-		if k8errors.IsNotFound(err) {
+		if k8serrors.IsForbidden(err) {
+			log.Debug("Cannot access registry configuration local-registry-hosting ConfigMap", "error", err)
+			return nil, nil
+		} else if k8serrors.IsNotFound(err) {
+			log.Debug("Cannot find registry configuration local-registry-hosting ConfigMap", "error", err)
 			return nil, nil
 		}
 		return nil, err

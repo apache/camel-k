@@ -20,6 +20,8 @@ package telemetry
 import (
 	"k8s.io/utils/pointer"
 
+	corev1 "k8s.io/api/core/v1"
+
 	"github.com/apache/camel-k/v2/addons/telemetry/discovery"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -39,16 +41,19 @@ import (
 type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
+	// +kubebuilder:default=true
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes telemetry data (defaults to the integration name)
 	ServiceName string `property:"service-name" json:"serviceName,omitempty"`
 	// The target endpoint of the Telemetry service (automatically discovered by default)
 	Endpoint string `property:"endpoint" json:"endpoint,omitempty"`
 	// The sampler of the telemetry used for tracing (default "on")
+	// +kubebuilder:default="on"
 	Sampler string `property:"sampler" json:"sampler,omitempty"`
 	// The sampler ratio of the telemetry used for tracing
 	SamplerRatio string `property:"sampler-ratio" json:"sampler-ratio,omitempty"`
 	// The sampler of the telemetry used for tracing is parent based (default "true")
+	// +kubebuilder:default=true
 	SamplerParentBased *bool `property:"sampler-parent-based" json:"sampler-parent-based,omitempty"`
 }
 
@@ -85,20 +90,27 @@ func NewTelemetryTrait() trait.Trait {
 	}
 }
 
-func (t *telemetryTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
+	var condition *trait.TraitCondition
 	if pointer.BoolDeref(t.Auto, true) {
 		if t.Endpoint == "" {
 			for _, locator := range discovery.TelemetryLocators {
 				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if endpoint != "" {
 					t.L.Infof("Using tracing endpoint: %s", endpoint)
+					condition = trait.NewIntegrationCondition(
+						v1.IntegrationConditionTraitInfo,
+						corev1.ConditionTrue,
+						"TracingEndpoint",
+						endpoint,
+					)
 					t.Endpoint = endpoint
 					break
 				}
@@ -114,7 +126,7 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return true, nil
+	return true, condition, nil
 }
 
 func (t *telemetryTrait) Apply(e *trait.Environment) error {

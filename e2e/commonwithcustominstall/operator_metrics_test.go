@@ -59,10 +59,11 @@ func TestMetrics(t *testing.T) {
 	RegisterTestingT(t)
 
 	WithNewTestNamespace(t, func(ns string) {
-		name := "java"
+		name := RandomizedSuffixName("java")
 		operatorID := "camel-k-metrics"
 		Expect(KamelInstallWithID(operatorID, ns, "--log-level", "debug").Execute()).To(Succeed())
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
 			"-t", "prometheus.enabled=true",
 			"-t", "prometheus.pod-monitor=false",
 		).Execute()).To(Succeed())

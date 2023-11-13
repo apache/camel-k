@@ -74,7 +74,8 @@ runs:
       uses: actions/setup-go@v4
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
-        go-version: 1.20.x
+        go-version-file: 'go.mod'
+        check-latest: true
 
     - name: (Re-)install kustomize
       shell: bash

@@ -44,7 +44,7 @@ import (
 func TestPodDisruptionBudgetTrait(t *testing.T) {
 	RegisterTestingT(t)
 
-	name := "java"
+	name := RandomizedSuffixName("java")
 	Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 		"--name", name,
 		"-t", "pdb.enabled=true",
@@ -112,7 +112,7 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 				Causes: []metav1.StatusCause{
 					{
 						Type:    "DisruptionBudget",
-						Message: "The disruption budget java needs 2 healthy pods and has 2 currently",
+						Message: "The disruption budget " + name + " needs 2 healthy pods and has 2 currently",
 					},
 				},
 			},

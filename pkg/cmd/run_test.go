@@ -511,13 +511,9 @@ func TestRunBuildPropertyFlag(t *testing.T) {
 
 func TestRunValidateArgs(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
-	args := []string{}
-	err := runCmdOptions.validateArgs(rootCmd, args)
-	assert.NotNil(t, err)
-	assert.Equal(t, "run expects at least 1 argument, received 0", err.Error())
 
-	args = []string{"run_test.go"}
-	err = runCmdOptions.validateArgs(rootCmd, args)
+	args := []string{"run_test.go"}
+	err := runCmdOptions.validateArgs(rootCmd, args)
 	assert.Nil(t, err)
 
 	args = []string{"missing_file"}
@@ -825,4 +821,28 @@ func TestRunOutputWithoutKubernetesCluster(t *testing.T) {
 	runCmdOptions.KubeConfig = tmpFile.Name()
 	_, err = test.ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)
 	require.NoError(t, err)
+}
+
+func TestSourceLessIntegration(t *testing.T) {
+	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
+	output, err := test.ExecuteCommand(runCmd, cmdRun, "--image", "docker.io/my-org/my-app:1.0.0", "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
+	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
+
+	assert.Nil(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+  creationTimestamp: null
+  name: my-app-v1
+spec:
+  traits:
+    container:
+      image: docker.io/my-org/my-app:1.0.0
+    mount:
+      configs:
+      - configmap:my-cm
+status: {}
+`, output)
 }

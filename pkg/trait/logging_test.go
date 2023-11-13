@@ -111,9 +111,10 @@ func NewLoggingTestCatalog() *Catalog {
 
 func TestEmptyLoggingTrait(t *testing.T) {
 	env := createDefaultLoggingTestEnv(t)
-	err := NewLoggingTestCatalog().apply(env)
+	conditions, err := NewLoggingTestCatalog().apply(env)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false
@@ -165,7 +166,9 @@ func TestJsonLoggingTrait(t *testing.T) {
 	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
 	err := NewLoggingTestCatalog().apply(env)
 
+
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false

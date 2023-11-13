@@ -65,9 +65,10 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			trait.Client, err = test.NewFakeClient()
 			assert.Nil(t, err)
 
-			enabled, err := trait.Configure(&e)
+			enabled, condition, err := trait.Configure(&e)
 			assert.Nil(t, err)
 			assert.True(t, enabled)
+			assert.Nil(t, condition)
 
 			err = trait.Apply(&e)
 			assert.Nil(t, err)
@@ -99,9 +100,10 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	trait.Client, err = test.NewFakeClient()
 	assert.Nil(t, err)
 
-	enabled, err := trait.Configure(&e)
+	enabled, condition, err := trait.Configure(&e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 
 	err = trait.Apply(&e)
 	assert.Nil(t, err)
@@ -156,9 +158,10 @@ func TestPlatformTraitExisting(t *testing.T) {
 			trait.Client, err = test.NewFakeClient(&existingPlatform)
 			assert.Nil(t, err)
 
-			enabled, err := trait.Configure(&e)
+			enabled, condition, err := trait.Configure(&e)
 			assert.Nil(t, err)
 			assert.True(t, enabled)
+			assert.Nil(t, condition)
 
 			err = trait.Apply(&e)
 			assert.Nil(t, err)

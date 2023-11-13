@@ -39,7 +39,7 @@ func TestBuilderTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("Run build strategy routine", func(t *testing.T) {
-		name := "java"
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.strategy=routine").Execute()).To(Succeed())
@@ -66,7 +66,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run build order strategy dependencies", func(t *testing.T) {
-		name := "java-fifo-strategy"
+		name := RandomizedSuffixName("java-fifo-strategy")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.order-strategy=dependencies").Execute()).To(Succeed())
@@ -93,7 +93,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run build order strategy fifo", func(t *testing.T) {
-		name := "java-fifo-strategy"
+		name := RandomizedSuffixName("java-fifo-strategy")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.order-strategy=fifo").Execute()).To(Succeed())
@@ -120,7 +120,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run build resources configuration", func(t *testing.T) {
-		name := "java-resource-config"
+		name := RandomizedSuffixName("java-resource-config")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.tasks-request-cpu=builder:500m",
@@ -157,7 +157,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run custom pipeline task", func(t *testing.T) {
-		name := "java-pipeline"
+		name := RandomizedSuffixName("java-pipeline")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.tasks=custom1;alpine;tree",
@@ -203,7 +203,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run custom pipeline task error", func(t *testing.T) {
-		name := "java-error"
+		name := RandomizedSuffixName("java-error")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.tasks=custom1;alpine;cat missingfile.txt",
@@ -227,7 +227,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run maven profile", func(t *testing.T) {
-		name := "java-maven-profile"
+		name := RandomizedSuffixName("java-maven-profile")
 
 		mavenProfile1Cm := newMavenProfileConfigMap(ns, "maven-profile-owasp", "owasp-profile")
 		Expect(TestClient().Create(TestContext, mavenProfile1Cm)).To(Succeed())

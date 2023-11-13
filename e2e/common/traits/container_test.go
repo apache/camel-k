@@ -37,7 +37,7 @@ func TestContainerTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("Container image pull policy and resources configuration", func(t *testing.T) {
-		name := "java1"
+		name := RandomizedSuffixName("java1")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"-t", "container.image-pull-policy=Always",
 			"-t", "container.request-cpu=0.005",
@@ -76,7 +76,7 @@ func TestContainerTrait(t *testing.T) {
 	})
 
 	t.Run("Container name", func(t *testing.T) {
-		name := "java2"
+		name := RandomizedSuffixName("java2")
 		containerName := "my-container-name"
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"-t", "container.name="+containerName,

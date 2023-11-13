@@ -32,12 +32,6 @@ jobs:
 
     steps:
 
-      - name: Setup go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.20'
-          check-latest: true
-
       - name: Prepare repo configuration
         shell: bash
         env:
@@ -62,6 +56,12 @@ jobs:
           CI_TOKEN: ${{ inputs.secretGithubToken }}
         run: |
           git pull --rebase upstream ${{ github.event.pull_request.base.ref }} && echo "rebaseAborted=0" >> $GITHUB_ENV || echo "rebaseAborted=1" >> $GITHUB_ENV
+
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: './${{ github.event.pull_request.head.repo.name }}/go.mod'
+          check-latest: true
 
       - name: Get New Coverage
         shell: bash

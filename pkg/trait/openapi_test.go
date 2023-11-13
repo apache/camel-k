@@ -36,27 +36,31 @@ func TestRestDslTraitApplicability(t *testing.T) {
 	}
 
 	trait, _ := newOpenAPITrait().(*openAPITrait)
-	enabled, err := trait.Configure(e)
+	enabled, condition, err := trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 
 	e.Integration = &v1.Integration{
 		Status: v1.IntegrationStatus{
 			Phase: v1.IntegrationPhaseNone,
 		},
 	}
-	enabled, err = trait.Configure(e)
+	enabled, condition, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 
 	trait.Configmaps = []string{"my-configmap"}
 
-	enabled, err = trait.Configure(e)
+	enabled, condition, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.False(t, enabled)
+	assert.Nil(t, condition)
 
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
-	enabled, err = trait.Configure(e)
+	enabled, condition, err = trait.Configure(e)
 	assert.Nil(t, err)
 	assert.True(t, enabled)
+	assert.Nil(t, condition)
 }

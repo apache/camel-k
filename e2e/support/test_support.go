@@ -82,6 +82,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	v2util "github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -889,6 +890,32 @@ func Route(ns string, name string) func() *routev1.Route {
 			failTest(err)
 		}
 		return &route
+	}
+}
+
+func RouteFull(ns string, name string) func() *routev1.Route {
+	return func() *routev1.Route {
+		answer := routev1.Route{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "Route",
+				APIVersion: servingv1.SchemeGroupVersion.String(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      name,
+			},
+		}
+		key := ctrl.ObjectKey{
+			Namespace: ns,
+			Name:      name,
+		}
+		err := TestClient().Get(TestContext, key, &answer)
+		if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		} else if err != nil {
+			failTest(err)
+		}
+		return &answer
 	}
 }
 
@@ -2885,4 +2912,8 @@ func GetOperatorNamespace(testNamespace string) string {
 	} else {
 		return testNamespace
 	}
+}
+
+func RandomizedSuffixName(name string) string {
+	return name + strings.ToLower(v2util.RandomString(5))
 }

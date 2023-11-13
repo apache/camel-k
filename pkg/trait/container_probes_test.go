@@ -78,9 +78,9 @@ func TestProbesDependencies(t *testing.T) {
 	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
-	err := env.Catalog.apply(&env)
+	conditions, err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
-
+	assert.Empty(t, conditions)
 	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
 }
 
@@ -103,8 +103,9 @@ func TestProbesOnDeployment(t *testing.T) {
 	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
-	err := env.Catalog.apply(&env)
+	conditions, err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	container := env.GetIntegrationContainer()
 
@@ -140,8 +141,9 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
-	err := env.Catalog.apply(&env)
+	conditions, err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	container := env.GetIntegrationContainer()
 
@@ -181,8 +183,24 @@ func TestProbesOnKnativeService(t *testing.T) {
 	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
-	err := env.Catalog.apply(&env)
+	serviceOverrideCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"serviceTraitConfiguration",
+		"explicitly disabled by the platform: knative-service trait has priority over this trait",
+	)
+	ctrlStrategyCondition := NewIntegrationCondition(
+		v1.IntegrationConditionDeploymentAvailable,
+		corev1.ConditionFalse,
+		"deploymentTraitConfiguration",
+		"controller strategy: knative-service",
+	)
+
+	conditions, err := env.Catalog.apply(&env)
 	assert.Nil(t, err)
+	assert.Len(t, conditions, 2)
+	assert.Contains(t, conditions, ctrlStrategyCondition)
+	assert.Contains(t, conditions, serviceOverrideCondition)
 
 	container := env.GetIntegrationContainer()
 

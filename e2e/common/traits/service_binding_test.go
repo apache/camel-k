@@ -63,7 +63,7 @@ func TestServiceBindingTrait(t *testing.T) {
 		serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
 		Expect(TestClient().Create(TestContext, service)).To(Succeed())
 		// Create integration and bind it to our service
-		name := "service-binding"
+		name := RandomizedSuffixName("service-binding")
 		Expect(KamelRunWithID(operatorID, ns, "files/ServiceBinding.java",
 			"--name", name,
 			"--connect", serviceRef,

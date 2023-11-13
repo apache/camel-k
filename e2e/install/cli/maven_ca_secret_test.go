@@ -432,7 +432,7 @@ ProxyPreserveHost On
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Run the Integration
-		name := "java"
+		name := RandomizedSuffixName("java")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))

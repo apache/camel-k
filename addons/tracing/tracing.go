@@ -41,14 +41,17 @@ import (
 type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait, including automatic discovery of the tracing endpoint.
+	// +kubebuilder:default=true
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes tracing data (defaults to the integration name)
 	ServiceName string `property:"service-name" json:"serviceName,omitempty"`
 	// The target endpoint of the OpenTracing service (automatically discovered by default)
 	Endpoint string `property:"endpoint" json:"endpoint,omitempty"`
 	// The sampler type (default "const")
+	// +kubebuilder:default="const"
 	SamplerType *string `property:"sampler-type" json:"samplerType,omitempty"`
 	// The sampler specific param (default "1")
+	// +kubebuilder:default="1"
 	SamplerParam *string `property:"sampler-param" json:"samplerParam,omitempty"`
 }
 
@@ -86,9 +89,9 @@ func NewTracingTrait() trait.Trait {
 	}
 }
 
-func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *tracingTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
@@ -96,7 +99,7 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 			for _, locator := range discovery.TracingLocators {
 				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
 				if err != nil {
-					return false, err
+					return false, nil, err
 				}
 				if endpoint != "" {
 					t.L.Infof("Using tracing endpoint: %s", endpoint)
@@ -119,7 +122,7 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *tracingTrait) Apply(e *trait.Environment) error {

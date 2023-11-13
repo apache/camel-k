@@ -98,7 +98,7 @@ func TestPipe(t *testing.T) {
 
 	// Pipe with wrong spec
 	t.Run("test Pipe with wrong spec", func(t *testing.T) {
-		name := "bad-klb"
+		name := RandomizedSuffixName("bad-klb")
 		kb := v1.NewPipe(ns, name)
 		kb.Spec = v1.PipeSpec{}
 		_, err := kubernetes.ReplaceResource(TestContext, TestClient(), &kb)

@@ -34,10 +34,12 @@ type IngressTrait struct {
 	// To configure the host exposed by the ingress.
 	Host string `property:"host" json:"host,omitempty"`
 	// To configure the path exposed by the ingress (default `/`).
+	// +kubebuilder:default="/"
 	Path string `property:"path" json:"path,omitempty"`
 	// To configure the path type exposed by the ingress.
 	// One of `Exact`, `Prefix`, `ImplementationSpecific` (default to `Prefix`).
 	// +kubebuilder:validation:Enum=Exact;Prefix;ImplementationSpecific
+	// +kubebuilder:default="Prefix"
 	PathType *networkingv1.PathType `property:"path-type" json:"pathType,omitempty"`
 	// To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 	Auto *bool `property:"auto" json:"auto,omitempty"`

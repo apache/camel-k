@@ -109,9 +109,10 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	assert.Nil(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
-	ok, err := tr.Configure(&environment)
+	ok, condition, err := tr.Configure(&environment)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
 	assert.Nil(t, err)
@@ -230,9 +231,10 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 
-	ok, err := tr.Configure(&environment)
+	ok, condition, err := tr.Configure(&environment)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
 	assert.Nil(t, err)
@@ -296,9 +298,8 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 			err = tc.Configure(&environment)
 			assert.Nil(t, err)
 
-			err = tc.apply(&environment)
+			_, err = tc.apply(&environment)
 			assert.Nil(t, err)
-
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 		})
 	}
@@ -343,9 +344,9 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 			err = tc.Configure(&environment)
 			assert.Nil(t, err)
 
-			err = tc.apply(&environment)
+			conditions, err := tc.apply(&environment)
 			assert.Nil(t, err)
-
+			assert.Empty(t, conditions)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-platform-http")
 		})
@@ -394,7 +395,8 @@ func TestKnativeConfigurationSorting(t *testing.T) {
 	tc := NewCatalog(c)
 	err = tc.Configure(&environment)
 	assert.Nil(t, err)
-	_ = tc.apply(&environment)
+	conditions, _ := tc.apply(&environment)
+	assert.Empty(t, conditions)
 	// no matter if there is any other trait error
 	camelEnv := knativeapi.NewCamelEnvironment()
 	err = camelEnv.Deserialize(envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION").Value)

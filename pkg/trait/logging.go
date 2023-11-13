@@ -52,12 +52,16 @@ func newLoggingTraitTrait() Trait {
 	}
 }
 
-func (l loggingTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil || !pointer.BoolDeref(l.Enabled, true) {
-		return false, nil
+func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil {
+		return false, nil, nil
 	}
 
-	return e.IntegrationInRunningPhases(), nil
+	if !pointer.BoolDeref(l.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled(), nil
+	}
+
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (l loggingTrait) Apply(e *Environment) error {

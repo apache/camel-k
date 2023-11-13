@@ -60,12 +60,12 @@ func (t *builderTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
 	return true
 }
 
-func (t *builderTrait) Configure(e *Environment) (bool, error) {
+func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.IntegrationKit == nil {
-		return false, nil
+		return false, nil, nil
 	}
 
-	t.adaptDeprecatedFields()
+	condition := t.adaptDeprecatedFields()
 
 	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
@@ -73,7 +73,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 			isNativeIntegration := quarkus.isNativeIntegration(e)
 			isNativeKit, err := quarkus.isNativeKit(e)
 			if err != nil {
-				return false, err
+				return false, condition, err
 			}
 			if ok && (isNativeIntegration || isNativeKit) {
 				// TODO expect maven repository in local repo (need to change builder pod accordingly!)
@@ -86,7 +86,9 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 				// it should be performed as the last custom task
 				t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, nativeBuilderImage, command))
 				// Force the build to run in a separate Pod and strictly sequential
-				t.L.Info("This is a Quarkus native build: setting build configuration with build Pod strategy, and native container with 1 CPU core and 4 GiB memory. Make sure your cluster can handle it.")
+				m := "This is a Quarkus native build: setting build configuration with build Pod strategy, and native container with 1 CPU core and 4 GiB memory. Make sure your cluster can handle it."
+				t.L.Info(m)
+				condition = newOrAppend(condition, m)
 				t.Strategy = string(v1.BuildStrategyPod)
 				t.OrderStrategy = string(v1.BuildOrderStrategySequential)
 				t.TasksRequestCPU = append(t.TasksRequestCPU, "quarkus-native:1000m")
@@ -94,29 +96,53 @@ func (t *builderTrait) Configure(e *Environment) (bool, error) {
 			}
 		}
 
-		return true, nil
+		return true, condition, nil
 	}
 
-	return false, nil
+	return false, condition, nil
 }
 
-func (t *builderTrait) adaptDeprecatedFields() {
+func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
+	var condition *TraitCondition
 	if t.RequestCPU != "" {
-		t.L.Info("The request-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-cpu parameter instead.")
+		m := "The request-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-cpu parameter instead."
+		t.L.Info(m)
+		condition = newOrAppend(condition, m)
 		t.TasksRequestCPU = append(t.TasksRequestCPU, fmt.Sprintf("builder:%s", t.RequestCPU))
 	}
 	if t.LimitCPU != "" {
-		t.L.Info("The limit-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-cpu parameter instead.")
+		m := "The limit-cpu parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-cpu parameter instead."
+		t.L.Info(m)
+		condition = newOrAppend(condition, m)
 		t.TasksLimitCPU = append(t.TasksLimitCPU, fmt.Sprintf("builder:%s", t.LimitCPU))
 	}
 	if t.RequestMemory != "" {
-		t.L.Info("The request-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-memory parameter instead.")
+		m := "The request-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-request-memory parameter instead."
+		t.L.Info(m)
+		condition = newOrAppend(condition, m)
 		t.TasksRequestMemory = append(t.TasksRequestMemory, fmt.Sprintf("builder:%s", t.RequestMemory))
 	}
 	if t.LimitMemory != "" {
-		t.L.Info("The limit-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-memory parameter instead.")
+		m := "The limit-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-memory parameter instead."
+		t.L.Info(m)
+		if condition == nil {
+			condition = NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, "")
+		}
+		condition = newOrAppend(condition, m)
 		t.TasksLimitMemory = append(t.TasksLimitMemory, fmt.Sprintf("builder:%s", t.LimitMemory))
 	}
+
+	return condition
+}
+
+func newOrAppend(condition *TraitCondition, message string) *TraitCondition {
+	if condition == nil {
+		condition = NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+	} else {
+		condition.message += "; " + message
+	}
+
+	return condition
 }
 
 func (t *builderTrait) Apply(e *Environment) error {

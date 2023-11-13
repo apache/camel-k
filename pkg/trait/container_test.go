@@ -84,9 +84,10 @@ func TestContainerWithDefaults(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("container"))
@@ -150,9 +151,10 @@ func TestContainerWithCustomName(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("container"))
@@ -215,8 +217,10 @@ func TestContainerWithCustomImage(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
+
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	for _, postAction := range environment.PostActions {
 		assert.Nil(t, postAction(&environment))
@@ -294,8 +298,9 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
 	assert.NotNil(t, err)
+	assert.Empty(t, conditions)
 	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
 }
 
@@ -336,8 +341,10 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	environment.Platform.ResyncStatusFullConfig()
 
-	err = traitCatalog.apply(&environment)
+	conditions, err := traitCatalog.apply(&environment)
+
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	container := environment.GetIntegrationContainer()
 
@@ -345,11 +352,8 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 }
 
 func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
-
 	environment := createEnvironment()
-
 	trait, _ := newContainerTrait().(*containerTrait)
-
 	environment.Integration.Spec.Sources = []v1.SourceSpec{
 		{
 			DataSpec: v1.DataSpec{
@@ -361,12 +365,16 @@ func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 			Language: v1.LanguageJavaSource,
 		},
 	}
-	configured, err := trait.Configure(environment)
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionKnativeAvailable,
+		corev1.ConditionFalse,
+		v1.IntegrationConditionKnativeNotInstalledReason,
+		"integration cannot run, as knative is not installed in the cluster",
+	)
+	configured, condition, err := trait.Configure(environment)
 	assert.NotNil(t, err)
+	assert.Equal(t, expectedCondition, condition)
 	assert.False(t, configured)
-	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 1)
-	assert.Equal(t, v1.IntegrationConditionKnativeNotInstalledReason, conditions[0].Reason)
 }
 
 func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
@@ -385,8 +393,9 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 		},
 	}
 
-	configured, err := trait.Configure(environment)
+	configured, condition, err := trait.Configure(environment)
 	assert.Nil(t, err)
+	assert.Nil(t, condition)
 	assert.True(t, configured)
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 0)

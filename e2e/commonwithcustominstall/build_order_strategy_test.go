@@ -42,7 +42,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
 
-		integrationA := "java-a"
+		integrationA := RandomizedSuffixName("java-a")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationA,
 		).Execute()).To(Succeed())
@@ -51,20 +51,20 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		integrationKitNameA := IntegrationKit(ns, integrationA)()
 		Eventually(Build(ns, integrationKitNameA), TestTimeoutMedium).ShouldNot(BeNil())
 
-		integrationB := "java-b"
+		integrationB := RandomizedSuffixName("java-b")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationB,
 			"-d", "camel:joor",
 		).Execute()).To(Succeed())
 
-		integrationC := "java-c"
+		integrationC := RandomizedSuffixName("java-c")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationC,
 			"-d", "camel:joor",
 			"-d", "camel:zipfile",
 		).Execute()).To(Succeed())
 
-		integrationZ := "groovy-z"
+		integrationZ := RandomizedSuffixName("groovy-z")
 		Expect(KamelRunWithID(operatorID, ns, "files/timer-source.groovy",
 			"--name", integrationZ,
 		).Execute()).To(Succeed())
@@ -124,19 +124,19 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 
 		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
 
-		integrationA := "java-a"
+		integrationA := RandomizedSuffixName("java-a")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationA,
 		).Execute()).To(Succeed())
 		Eventually(IntegrationPhase(ns, integrationA)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 
-		integrationB := "java-b"
+		integrationB := RandomizedSuffixName("java-b")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationB,
 			"-d", "camel:joor",
 		).Execute()).To(Succeed())
 
-		integrationZ := "groovy-z"
+		integrationZ := RandomizedSuffixName("groovy-z")
 		Expect(KamelRunWithID(operatorID, ns, "files/timer-source.groovy",
 			"--name", integrationZ,
 		).Execute()).To(Succeed())

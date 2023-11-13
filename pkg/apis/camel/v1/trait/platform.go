@@ -29,6 +29,7 @@ type PlatformTrait struct {
 	// To create a default (empty) platform when the platform is missing.
 	CreateDefault *bool `property:"create-default" json:"createDefault,omitempty"`
 	// Indicates if the platform should be created globally in the case of global operator (default true).
+	// +kubebuilder:default=true
 	Global *bool `property:"global" json:"global,omitempty"`
 	// To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).
 	Auto *bool `property:"auto" json:"auto,omitempty"`

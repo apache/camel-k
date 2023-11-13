@@ -77,7 +77,7 @@ func TestPodTrait(t *testing.T) {
 		},
 	}
 
-	name := "pod-template-test"
+	name := RandomizedSuffixName("pod-template-test")
 
 	for i := range tc {
 		test := tc[i]

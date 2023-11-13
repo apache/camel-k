@@ -123,6 +123,17 @@ func TestKnative(t *testing.T) {
 		Eventually(KnativeService(ns, "http-out"), TestTimeoutShort).ShouldNot(BeNil())
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
+
+	t.Run("Knative-service annotation", func(t *testing.T) {
+		Expect(KamelRunWithID(operatorID, ns, "files/knative2.groovy",
+			"-t", "knative-service.annotations.'haproxy.router.openshift.io/balance'=roundrobin").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, "knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		Eventually(KnativeService(ns, "knative2"), TestTimeoutShort).ShouldNot(BeNil())
+		ks := KnativeService(ns, "knative2")()
+		annotations := ks.ObjectMeta.Annotations
+		Expect(annotations["haproxy.router.openshift.io/balance"]).To(Equal("roundrobin"))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }
 
 func TestRunBroker(t *testing.T) {

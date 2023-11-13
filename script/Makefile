@@ -20,9 +20,9 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 2.1.0-SNAPSHOT
+VERSION ?= 2.2.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 2.0.1
+LAST_RELEASED_VERSION ?= 2.1.0
 DEFAULT_RUNTIME_VERSION := 3.2.0
 BUILDAH_VERSION := 1.30.0
 KANIKO_VERSION := 1.9.1
@@ -260,6 +260,7 @@ test-common: do-build
 	go test -timeout 30m -v ./e2e/common/config -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/misc -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 60m -v ./e2e/common/traits -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 20m -v ./e2e/common/runtimes -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 10m -v ./e2e/common/support/teardown_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
@@ -429,7 +430,7 @@ check-licenses:
 maven-overlay:
 	@echo "####### Preparing maven dependencies bundle..."
 	mkdir -p build/_maven_overlay
-	./script/maven_overlay.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION) build/_maven_overlay
+	./script/maven_overlay.sh build/_maven_overlay
 
 kamel-overlay:
 	mkdir -p build/_output/bin
@@ -508,7 +509,7 @@ git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
 fabric8-crds:
-	./java/mvnw -f java/pom.xml clean package
+	@mvn -f java/crds/pom.xml clean package
 
 cross-compile:
 	# we must wrap the goldflags parameters with quotes as they will need to
@@ -536,7 +537,7 @@ release-kustomize:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag release-notes check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
+.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary

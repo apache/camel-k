@@ -28,7 +28,6 @@ import (
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
@@ -46,36 +45,28 @@ func newMountTrait() Trait {
 	}
 }
 
-func (t *mountTrait) Configure(e *Environment) (bool, error) {
-	if e.Integration == nil {
-		return false, nil
-	}
-
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) ||
-		(!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases()) {
-		return false, nil
+func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration == nil || !e.IntegrationInRunningPhases() {
+		return false, nil, nil
 	}
 
 	// Validate resources and pvcs
 	for _, c := range t.Configs {
 		if !strings.HasPrefix(c, "configmap:") && !strings.HasPrefix(c, "secret:") {
-			return false, fmt.Errorf("unsupported config %s, must be a configmap or secret resource", c)
+			return false, nil, fmt.Errorf("unsupported config %s, must be a configmap or secret resource", c)
 		}
 	}
 	for _, r := range t.Resources {
 		if !strings.HasPrefix(r, "configmap:") && !strings.HasPrefix(r, "secret:") {
-			return false, fmt.Errorf("unsupported resource %s, must be a configmap or secret resource", r)
+			return false, nil, fmt.Errorf("unsupported resource %s, must be a configmap or secret resource", r)
 		}
 	}
 
-	return true, nil
+	// mount trait needs always to be executed as it will process the sources
+	return true, nil, nil
 }
 
 func (t *mountTrait) Apply(e *Environment) error {
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return nil
-	}
-
 	container := e.GetIntegrationContainer()
 	if container == nil {
 		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)

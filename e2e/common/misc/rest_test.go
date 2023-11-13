@@ -48,7 +48,7 @@ func TestRunRest(t *testing.T) {
 	Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 	t.Run("Service works", func(t *testing.T) {
-		name := "John"
+		name := RandomizedSuffixName("John")
 		service := Service(ns, "rest-consumer")
 		Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
 		Expect(KamelRunWithID(operatorID, ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
@@ -59,7 +59,7 @@ func TestRunRest(t *testing.T) {
 
 	if ocp {
 		t.Run("Route works", func(t *testing.T) {
-			name := "Peter"
+			name := RandomizedSuffixName("Peter")
 			route := Route(ns, "rest-consumer")
 			Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
 			Eventually(RouteStatus(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal("True"))

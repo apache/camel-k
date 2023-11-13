@@ -98,6 +98,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	}
 
 	cmd.Flags().String("name", "", "The integration name")
+	cmd.Flags().String("image", "", "An image built externally (ie, via CICD). Enabling it will skip the Integration build phase.")
 	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
 	cmd.Flags().StringArrayP("dependency", "d", nil, usageDependency)
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
@@ -145,6 +146,7 @@ type runCmdOptions struct {
 	Save            bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
 	IntegrationKit  string   `mapstructure:"kit" yaml:",omitempty"`
 	IntegrationName string   `mapstructure:"name" yaml:",omitempty"`
+	ContainerImage  string   `mapstructure:"image" yaml:",omitempty"`
 	Profile         string   `mapstructure:"profile" yaml:",omitempty"`
 	OperatorID      string   `mapstructure:"operator-id" yaml:",omitempty"`
 	OutputFormat    string   `mapstructure:"output" yaml:",omitempty"`
@@ -236,10 +238,6 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 }
 
 func (o *runCmdOptions) validateArgs(cmd *cobra.Command, args []string) error {
-	if len(args) < 1 {
-		return errors.New("run expects at least 1 argument, received 0")
-	}
-
 	if _, err := source.Resolve(context.Background(), args, false, cmd); err != nil {
 		return fmt.Errorf("one of the provided sources is not reachable: %w", err)
 	}
@@ -322,6 +320,11 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	// We need to make this check at this point, in order to have sources filled during decoding
+	if len(args) < 1 && o.ContainerImage == "" {
+		return errors.New("run command expects either an Integration source or the container image (via --image argument)")
 	}
 
 	integration, err := o.createOrUpdateIntegration(cmd, c, args)
@@ -536,8 +539,14 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 		return nil, err
 	}
 
-	if err := o.resolveSources(cmd, sources, integration); err != nil {
-		return nil, err
+	if o.ContainerImage == "" {
+		// Resolve resources
+		if err := o.resolveSources(cmd, sources, integration); err != nil {
+			return nil, err
+		}
+	} else {
+		// Source-less Integration as the user provided a container image built externally
+		o.Traits = append(o.Traits, fmt.Sprintf("container.image=%s", o.ContainerImage))
 	}
 
 	if err := resolvePodTemplate(context.Background(), cmd, o.PodTemplate, &integration.Spec); err != nil {
@@ -868,11 +877,15 @@ func (o *runCmdOptions) getPlatform(cmd *cobra.Command, c client.Client, it *v1.
 
 func (o *runCmdOptions) GetIntegrationName(sources []string) string {
 	name := ""
-	if o.IntegrationName != "" {
+	switch {
+	case o.IntegrationName != "":
 		name = o.IntegrationName
 		name = kubernetes.SanitizeName(name)
-	} else if len(sources) == 1 {
+	case len(sources) == 1:
 		name = kubernetes.SanitizeName(sources[0])
+	case o.ContainerImage != "":
+		// source-less execution
+		name = kubernetes.SanitizeName(strings.ReplaceAll(o.ContainerImage, ":", "-v"))
 	}
 	return name
 }

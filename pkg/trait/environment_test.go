@@ -41,9 +41,9 @@ func TestDefaultEnvironment(t *testing.T) {
 	env := mockEnvironment(catalog)
 	env.Platform.ResyncStatusFullConfig()
 
-	err = NewEnvironmentTestCatalog().apply(&env)
-
+	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	ns := false
 	name := false
@@ -90,9 +90,9 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	}
 	env.Platform.ResyncStatusFullConfig()
 
-	err = NewEnvironmentTestCatalog().apply(&env)
-
+	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	ns := false
 	name := false
@@ -130,9 +130,9 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env.Platform.ResyncStatusFullConfig()
 
-	err = NewEnvironmentTestCatalog().apply(&env)
-
+	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	ns := false
 	name := false
@@ -169,9 +169,9 @@ func TestCustomEnvVars(t *testing.T) {
 	}
 	env.Platform.ResyncStatusFullConfig()
 
-	err = NewEnvironmentTestCatalog().apply(&env)
-
+	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	assert.Nil(t, err)
+	assert.Empty(t, conditions)
 
 	userK1 := false
 	userK2 := false

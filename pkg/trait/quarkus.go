@@ -140,18 +140,19 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 	return true
 }
 
-func (t *quarkusTrait) Configure(e *Environment) (bool, error) {
-	t.adaptDeprecatedFields()
+func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	condition := t.adaptDeprecatedFields()
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases(),
-		nil
+		condition, nil
 }
 
-func (t *quarkusTrait) adaptDeprecatedFields() {
+func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 	if t.PackageTypes != nil {
-		t.L.Info("The package-type parameter is deprecated and may be removed in future releases. Make sure to use mode parameter instead.")
+		message := "The package-type parameter is deprecated and may be removed in future releases. Make sure to use mode parameter instead."
+		t.L.Info(message)
 		for _, pt := range t.PackageTypes {
 			if pt == traitv1.NativePackageType {
 				t.Modes = append(t.Modes, traitv1.NativeQuarkusMode)
@@ -161,7 +162,10 @@ func (t *quarkusTrait) adaptDeprecatedFields() {
 				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
 			}
 		}
+		return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
 	}
+
+	return nil
 }
 
 func (t *quarkusTrait) Apply(e *Environment) error {

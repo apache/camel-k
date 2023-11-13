@@ -39,12 +39,16 @@ type Trait struct {
 	// Enables automatic configuration of the trait.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The scheme to use to contact the service (default `http`)
+	// +kubebuilder:default="http"
 	Scheme string `property:"scheme" json:"scheme,omitempty"`
 	// The path where the API is published (default `/`)
+	// +kubebuilder:default="/"
 	Path string `property:"path" json:"path,omitempty"`
 	// The port where the service is exposed (default `80`)
+	// +kubebuilder:default=80
 	Port int `property:"port" json:"port,omitempty"`
 	// The path where the Open-API specification is published (default `/openapi.json`)
+	// +kubebuilder:default="/openapi.json"
 	DescriptionPath *string `property:"description-path" json:"descriptionPath,omitempty"`
 }
 
@@ -87,14 +91,12 @@ func NewThreeScaleTrait() trait.Trait {
 	}
 }
 
-func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, error) {
+func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
-		// disabled by default
-		return false, nil
+		return false, nil, nil
 	}
-
 	if !e.IntegrationInRunningPhases() {
-		return false, nil
+		return false, nil, nil
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
@@ -113,7 +115,7 @@ func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, error) {
 		}
 	}
 
-	return true, nil
+	return true, nil, nil
 }
 
 func (t *threeScaleTrait) Apply(e *trait.Environment) error {

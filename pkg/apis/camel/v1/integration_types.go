@@ -180,7 +180,8 @@ const (
 	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
 	// IntegrationConditionReady --.
 	IntegrationConditionReady IntegrationConditionType = "Ready"
-
+	// IntegrationConditionTraitInfo --.
+	IntegrationConditionTraitInfo IntegrationConditionType = "TraitInfo"
 	// IntegrationConditionKitAvailableReason --.
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
 	// IntegrationConditionPlatformAvailableReason --.

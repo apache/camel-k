@@ -38,7 +38,7 @@ func TestBadRouteIntegration(t *testing.T) {
 	RegisterTestingT(t)
 
 	t.Run("run bad java route", func(t *testing.T) {
-		name := "bad-route"
+		name := RandomizedSuffixName("bad-route")
 		Expect(KamelRunWithID(operatorID, ns, "files/BadRoute.java", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
@@ -62,7 +62,7 @@ func TestBadRouteIntegration(t *testing.T) {
 	})
 
 	t.Run("run missing dependency java route", func(t *testing.T) {
-		name := "java-route"
+		name := RandomizedSuffixName("java-route")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 			"-d", "mvn:com.example:nonexistent:1.0").Execute()).To(Succeed())
 		// Integration in error
@@ -96,7 +96,7 @@ func TestBadRouteIntegration(t *testing.T) {
 	})
 
 	t.Run("run invalid dependency java route", func(t *testing.T) {
-		name := "invalid-dependency"
+		name := RandomizedSuffixName("invalid-dependency")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 			"-d", "camel:non-existent").Execute()).To(Succeed())
 		// Integration in error with Initialization Failed condition
@@ -126,7 +126,7 @@ func TestBadRouteIntegration(t *testing.T) {
 	})
 
 	t.Run("run unresolvable component java route", func(t *testing.T) {
-		name := "unresolvable-route"
+		name := RandomizedSuffixName("unresolvable-route")
 		Expect(KamelRunWithID(operatorID, ns, "files/Unresolvable.java", "--name", name).Execute()).To(Succeed())
 		// Integration in error with Initialization Failed condition
 		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
@@ -155,7 +155,7 @@ func TestBadRouteIntegration(t *testing.T) {
 	})
 
 	t.Run("run invalid java route", func(t *testing.T) {
-		name := "invalid-java-route"
+		name := RandomizedSuffixName("invalid-java-route")
 		Expect(KamelRunWithID(operatorID, ns, "files/InvalidJava.java", "--name", name).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
