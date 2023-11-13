@@ -25,6 +25,7 @@ package traits
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/onsi/gomega/gstruct"
 	"strings"
 	"testing"
 	"time"
@@ -41,6 +42,104 @@ import (
 
 func TestHealthTrait(t *testing.T) {
 	RegisterTestingT(t)
+
+	t.Run("Readiness condition with stopped route scaled", func(t *testing.T) {
+		name := RandomizedSuffixName("java")
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"-t", "health.enabled=true",
+			// Enable Jolokia for the test to stop the Camel route
+			"-t", "jolokia.enabled=true",
+			"-t", "jolokia.use-ssl-client-authentication=false",
+			"-t", "jolokia.protocol=http",
+			"--name", name,
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+		Expect(ScaleIntegration(ns, name, 3)).To(Succeed())
+		// Check the readiness condition becomes falsy
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+		// Check the scale cascades into the Deployment scale
+		Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(3))
+		// Check it also cascades into the Integration scale subresource Status field
+		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
+			Should(gstruct.PointTo(BeNumerically("==", 3)))
+		// Finally check the readiness condition becomes truthy back
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+
+		pods := IntegrationPods(ns, name)()
+
+		for i, pod := range pods {
+			// Stop the Camel route
+			request := map[string]string{
+				"type":      "exec",
+				"mbean":     "org.apache.camel:context=camel-1,name=\"route1\",type=routes",
+				"operation": "stop()",
+			}
+			body, err := json.Marshal(request)
+			Expect(err).To(BeNil())
+
+			response, err := TestClient().CoreV1().RESTClient().Post().
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
+				Body(body).
+				DoRaw(TestContext)
+			Expect(err).To(BeNil())
+			Expect(response).To(ContainSubstring(`"status":200`))
+
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionFalse))
+
+			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+				WithTransform(IntegrationConditionMessage, Equal(fmt.Sprintf("%d/3 pods are not ready", i+1)))))
+		}
+
+		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+			Satisfy(func(c *v1.IntegrationCondition) bool {
+				if c.Status != corev1.ConditionFalse {
+					return false
+				}
+				if len(c.Pods) != 3 {
+					return false
+				}
+
+				var r *v1.HealthCheckResponse
+
+				for _, pod := range c.Pods {
+					for h := range pod.Health {
+						if pod.Health[h].Name == "camel-routes" {
+							r = &pod.Health[h]
+						}
+					}
+
+					if r == nil {
+						return false
+					}
+
+					if r.Data == nil {
+						return false
+					}
+
+					var data map[string]interface{}
+					if err := json.Unmarshal(r.Data, &data); err != nil {
+						return false
+					}
+					if data["check.kind"].(string) != "READINESS" || data["route.status"].(string) != "Stopped" {
+						return false
+					}
+				}
+				return true
+			}))
+
+		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+
+		// Clean-up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 
 	t.Run("Readiness condition with stopped route", func(t *testing.T) {
 		name := RandomizedSuffixName("java")
