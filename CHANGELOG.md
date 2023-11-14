@@ -22,7 +22,9 @@
 
 **Merged pull requests:**
 
+- Use filepath.clean in json-schema-gen command for destination parameter [\#4918](https://github.com/apache/camel-k/pull/4918) ([oscerd](https://github.com/oscerd))
 - chore\(deps\): bump golang.org/x/term from 0.13.0 to 0.14.0 [\#4913](https://github.com/apache/camel-k/pull/4913) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.13.0 to 0.14.0 [\#4912](https://github.com/apache/camel-k/pull/4912) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/onsi/gomega from 1.29.0 to 1.30.0 [\#4911](https://github.com/apache/camel-k/pull/4911) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(e2e\): Regression test on referenced secret\(/cm\) properties [\#4909](https://github.com/apache/camel-k/pull/4909) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): HotReload tests should not reload by default [\#4908](https://github.com/apache/camel-k/pull/4908) ([gansheer](https://github.com/gansheer))
