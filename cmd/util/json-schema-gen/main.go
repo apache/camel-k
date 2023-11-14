@@ -20,11 +20,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
-
-	"github.com/apache/camel-k/v2/pkg/util"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
@@ -41,7 +41,7 @@ func main() {
 	schema := os.Args[2]
 	path := os.Args[3]
 	isArray := os.Args[4] == "true"
-	destination := os.Args[5]
+	destination := filepath.Clean(os.Args[5])
 
 	if err := generate(crd, schema, path, isArray, destination); err != nil {
 		panic(err)
