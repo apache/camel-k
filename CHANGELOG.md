@@ -14,6 +14,7 @@
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
+- doesnt work "kamel kit delete"  [\#4628](https://github.com/apache/camel-k/issues/4628)
 - Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
 - Image Vulnerability of Go package [\#4581](https://github.com/apache/camel-k/issues/4581)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
@@ -22,6 +23,7 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): Remove golint warning for imports [\#4920](https://github.com/apache/camel-k/pull/4920) ([gansheer](https://github.com/gansheer))
 - Use filepath.clean in json-schema-gen command for destination parameter [\#4918](https://github.com/apache/camel-k/pull/4918) ([oscerd](https://github.com/oscerd))
 - chore\(deps\): bump golang.org/x/term from 0.13.0 to 0.14.0 [\#4913](https://github.com/apache/camel-k/pull/4913) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.13.0 to 0.14.0 [\#4912](https://github.com/apache/camel-k/pull/4912) ([dependabot[bot]](https://github.com/apps/dependabot))
