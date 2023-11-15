@@ -24,12 +24,16 @@ on:
       - "release-*"
     paths:
       - 'pkg/**'
+      - 'cmd/**'
+      - 'addons/**'
   push:
     branches:
       - main
       - "release-*"
     paths:
       - 'pkg/**'
+      - 'cmd/**'
+      - 'addons/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
