@@ -203,7 +203,12 @@ func (c *RuntimeCatalog) IsResolvable(uri string) bool {
 		return false
 	}
 
-	if scheme := uriSplit[0]; strings.HasPrefix(scheme, "{{") && strings.HasSuffix(scheme, "}}") {
+	scheme := uriSplit[0]
+	if strings.Contains(scheme, "?") {
+		scheme = strings.SplitN(scheme, "?", 2)[0]
+	}
+
+	if strings.HasPrefix(scheme, "{{") && strings.HasSuffix(scheme, "}}") {
 		// scheme is a property placeholder (e.g. {{url}}) which is not resolvable
 		return false
 	}

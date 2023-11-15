@@ -46,3 +46,28 @@ func TestHasLoaderByArtifact(t *testing.T) {
 	assert.True(t, catalog.HasLoaderByArtifact("yaml-dsl"))
 	assert.False(t, catalog.HasLoaderByArtifact("python-dsl"))
 }
+
+func TestIsResolvable(t *testing.T) {
+	catalog, err := DefaultCatalog()
+	require.NoError(t, err)
+
+	testCases := []struct {
+		desc     string
+		uri      string
+		expected bool
+	}{
+		{desc: "Basic", uri: "{{url}}", expected: false},
+		{desc: "With query param placeholder", uri: "{{url}}?authMethod={{authMethod}}", expected: false},
+		{desc: "With query param", uri: "{{url}}?authMethod=Basic", expected: false},
+		{desc: "With masked AND url-encoded query params", uri: "{{url}}?authMethod=%7B%7BauthMethod%7D%7D", expected: false},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.desc, func(t *testing.T) {
+			if got := catalog.IsResolvable(testCase.uri); got != testCase.expected {
+				t.Errorf("IsResolvable(%v) = %v, want %v", testCase.uri, got, testCase.expected)
+
+			}
+		})
+	}
+}
