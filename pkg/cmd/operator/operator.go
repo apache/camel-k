@@ -202,11 +202,11 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	options := cache.Options{
-		ByObject: selectors,
+		ByObject:   selectors,
+		Namespaces: []string{watchNamespace},
 	}
 
 	mgr, err := manager.New(cfg, manager.Options{
-		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
 		LeaderElectionNamespace:       operatorNamespace,
