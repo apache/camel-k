@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Component resolvable variables regression [\#4916](https://github.com/apache/camel-k/issues/4916)
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
