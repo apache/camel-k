@@ -19,14 +19,17 @@
 - Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
 - Image Vulnerability of Go package [\#4581](https://github.com/apache/camel-k/issues/4581)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
+- Create a test for structured health check conditions when integrations are scaled \> 1 [\#3997](https://github.com/apache/camel-k/issues/3997)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 **Merged pull requests:**
 
+- chore\(e2e\): Dev mode flaky test randomize name [\#4921](https://github.com/apache/camel-k/pull/4921) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Remove golint warning for imports [\#4920](https://github.com/apache/camel-k/pull/4920) ([gansheer](https://github.com/gansheer))
 - fix\(\#4916\): Improve component resolver [\#4919](https://github.com/apache/camel-k/pull/4919) ([christophd](https://github.com/christophd))
 - Use filepath.clean in json-schema-gen command for destination parameter [\#4918](https://github.com/apache/camel-k/pull/4918) ([oscerd](https://github.com/oscerd))
+- test\(health\): \#3997 structured conditions for scaled integrations [\#4917](https://github.com/apache/camel-k/pull/4917) ([rinaldodev](https://github.com/rinaldodev))
 - chore\(deps\): bump golang.org/x/term from 0.13.0 to 0.14.0 [\#4913](https://github.com/apache/camel-k/pull/4913) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.13.0 to 0.14.0 [\#4912](https://github.com/apache/camel-k/pull/4912) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/onsi/gomega from 1.29.0 to 1.30.0 [\#4911](https://github.com/apache/camel-k/pull/4911) ([dependabot[bot]](https://github.com/apps/dependabot))
