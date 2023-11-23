@@ -96,6 +96,12 @@ import (
 const kubeConfigEnvVar = "KUBECONFIG"
 const ciPID = "/tmp/ci-k8s-pid"
 
+// v1.Build,          v1.Integration
+// v1.IntegrationKit, v1.IntegrationPlatform
+// v1.Kamelet,  v1.Pipe,
+// v1alpha1.Kamelet, v1alpha1.KameletBinding
+const ExpectedCRDs = 8
+
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
 var TestTimeoutLong = 15 * time.Minute
