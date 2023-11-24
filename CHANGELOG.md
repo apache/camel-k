@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
 - Component resolvable variables regression [\#4916](https://github.com/apache/camel-k/issues/4916)
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
@@ -25,6 +26,7 @@
 
 **Merged pull requests:**
 
+- chore\(trait\): run mount only when necessary [\#4926](https://github.com/apache/camel-k/pull/4926) ([squakez](https://github.com/squakez))
 - chore\(e2e\): Dev mode flaky test randomize name [\#4921](https://github.com/apache/camel-k/pull/4921) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Remove golint warning for imports [\#4920](https://github.com/apache/camel-k/pull/4920) ([gansheer](https://github.com/gansheer))
 - fix\(\#4916\): Improve component resolver [\#4919](https://github.com/apache/camel-k/pull/4919) ([christophd](https://github.com/christophd))
