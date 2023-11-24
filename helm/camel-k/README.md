@@ -56,15 +56,38 @@ additional parameters that can be set during installation.
 
 > **Tip**: List all releases using `helm list`
 
+## Upgrading the Chart
+
+If you are upgrading the `camel-k` Deployment, you should always use a specific version of the chart and pre-install the CRDS:
+
+```bash
+# Upgrade the CRDs
+$ curl -LO "https://github.com/apache/camel-k/raw/main/docs/charts/camel-k-x.y.z.tgz"
+$ tar xvzf camel-k-x.y.z.tgz
+$ kubectl replace -f camel-k/crds
+# Upgrade the `camel-k` Deployment
+$ helm upgrade camel-k/camel-k --version x.y.z
+```
+
+> **Note**: If you are using a custom ClusterRole instead of the default one `camel-k:edit` from `camel-k/crds/cluster-role.yaml` you should handle it appropriately.
+
+
 ## Uninstalling the Chart
 
 To uninstall/delete the `camel-k` Deployment:
 
 ```bash
-$ helm delete camel-k
+$ helm uninstall camel-k
 ```
 
-The command removes all the Kubernetes resources installed.
+The command removes all of the Kubernetes resources installed, except the CRDs.
+
+To remove them:
+```bash
+$ curl -LO "https://github.com/apache/camel-k/raw/main/docs/charts/camel-k-x.y.z.tgz"
+$ tar xvzf camel-k-x.y.z.tgz
+$ kubectl delete -f camel-k/crds
+```
 
 ## Configuration
 
