@@ -53,9 +53,9 @@ fi
 crd_version=$("${client}" explain customresourcedefinitions | grep VERSION | awk '{print $2}')
 api="apiextensions.k8s.io"
 
-if [ "${crd_version}" == "${api}/v1beta1" ]; then
+if [ "${crd_version}" == "${api}/v1beta1" ] || [ "${crd_version}" == "v1beta1" ]; then
 	echo "ERROR: CRD API version is too old to install camel-k in this way. Try using the client CLI app, which is able to convert the APIs."
-elif [ "${crd_version}" != "${api}/v1" ]; then
+elif [ "${crd_version}" != "${api}/v1" ] && [ "${crd_version}" != "v1" ]; then
 	echo "ERROR: CRD API version '${crd_version}' is not supported."
 else
 	echo "OK"
