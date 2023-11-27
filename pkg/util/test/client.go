@@ -122,9 +122,10 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
-	camel          camel.Interface
-	scales         *fakescale.FakeScaleClient
-	disabledGroups []string
+	camel            camel.Interface
+	scales           *fakescale.FakeScaleClient
+	disabledGroups   []string
+	enabledOpenshift bool
 }
 
 func (c *FakeClient) CamelV1() camelv1.CamelV1Interface {
@@ -161,10 +162,15 @@ func (c *FakeClient) DisableAPIGroupDiscovery(group string) {
 	c.disabledGroups = append(c.disabledGroups, group)
 }
 
+func (c *FakeClient) EnableOpenshiftDiscovery() {
+	c.enabledOpenshift = true
+}
+
 func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
 	return &FakeDiscovery{
 		DiscoveryInterface: c.Interface.Discovery(),
 		disabledGroups:     c.disabledGroups,
+		enabledOpenshift:   c.enabledOpenshift,
 	}
 }
 
@@ -180,15 +186,22 @@ func (c *FakeClient) ScalesClient() (scale.ScalesGetter, error) {
 
 type FakeDiscovery struct {
 	discovery.DiscoveryInterface
-	disabledGroups []string
+	disabledGroups   []string
+	enabledOpenshift bool
 }
 
 func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
 	// Normalize the fake discovery to behave like the real implementation when checking for openshift
 	if groupVersion == "image.openshift.io/v1" {
-		return nil, k8serrors.NewNotFound(schema.GroupResource{
-			Group: "image.openshift.io",
-		}, "")
+		if f.enabledOpenshift {
+			return &metav1.APIResourceList{
+				GroupVersion: "image.openshift.io/v1",
+			}, nil
+		} else {
+			return nil, k8serrors.NewNotFound(schema.GroupResource{
+				Group: "image.openshift.io",
+			}, "")
+		}
 	}
 
 	// used in util/knative/enabled.go to verify if knative is installed
