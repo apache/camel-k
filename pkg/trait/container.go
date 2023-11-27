@@ -342,7 +342,7 @@ func (t *containerTrait) configureSecurityContext(e *Environment, container *cor
 	// get security context from security context constraint configuration in namespace
 	isOpenShift, _ := openshift.IsOpenShift(e.Client)
 	if isOpenShift {
-		securityContext, _ := openshift.GetOpenshiftSecurityContextRestricted(e.Ctx, e.Client, e.Platform.Namespace)
+		securityContext, _ := openshift.GetOpenshiftSecurityContextRestricted(e.Ctx, e.Client, e.Integration.Namespace)
 		if securityContext != nil {
 			container.SecurityContext = securityContext
 		}
