@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kustomize installation test failing [\#4929](https://github.com/apache/camel-k/issues/4929)
 - Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
 - Component resolvable variables regression [\#4916](https://github.com/apache/camel-k/issues/4916)
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
@@ -26,6 +27,11 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/time from 0.4.0 to 0.5.0 [\#4935](https://github.com/apache/camel-k/pull/4935) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.14.0 to 0.15.0 [\#4933](https://github.com/apache/camel-k/pull/4933) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Fix\(core\): Openshift securityContext on global operator [\#4932](https://github.com/apache/camel-k/pull/4932) ([gansheer](https://github.com/gansheer))
+- \[java\] Add sundrio to generate builders [\#4931](https://github.com/apache/camel-k/pull/4931) ([andreaTP](https://github.com/andreaTP))
+- fix\(e2e\): Error in check crd support script [\#4930](https://github.com/apache/camel-k/pull/4930) ([gansheer](https://github.com/gansheer))
 - chore\(trait\): run mount only when necessary [\#4926](https://github.com/apache/camel-k/pull/4926) ([squakez](https://github.com/squakez))
 - chore\(e2e\): Dev mode flaky test randomize name [\#4921](https://github.com/apache/camel-k/pull/4921) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Remove golint warning for imports [\#4920](https://github.com/apache/camel-k/pull/4920) ([gansheer](https://github.com/gansheer))
