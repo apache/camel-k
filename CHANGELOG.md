@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kustomize installation test failing [\#4929](https://github.com/apache/camel-k/issues/4929)
 - Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
 - Component resolvable variables regression [\#4916](https://github.com/apache/camel-k/issues/4916)
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
