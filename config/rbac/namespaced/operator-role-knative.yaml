@@ -36,6 +36,14 @@ rules:
   - update
   - watch
 - apiGroups:
+  - serving.knative.dev
+  resources:
+  - revisions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - eventing.knative.dev
   resources:
   - triggers

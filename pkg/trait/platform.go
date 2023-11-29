@@ -73,7 +73,8 @@ func (t *platformTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		}
 	}
 
-	return true, nil, nil
+	// Don't run this trait for a synthetic Integration
+	return e.Integration == nil || !e.Integration.IsSynthetic(), nil, nil
 }
 
 func (t *platformTrait) Apply(e *Environment) error {

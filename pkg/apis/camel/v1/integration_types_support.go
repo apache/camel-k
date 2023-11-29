@@ -25,7 +25,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// IntegrationLabel is used to tag k8s object created by a given Integration.
 const IntegrationLabel = "camel.apache.org/integration"
+
+// IntegrationSyntheticLabel is used to tag k8s synthetic Integrations.
+const IntegrationSyntheticLabel = "camel.apache.org/is-synthetic"
+
+// IntegrationImportedKindLabel specifies from what kind of resource an Integration was imported.
+const IntegrationImportedKindLabel = "camel.apache.org/imported-from-kind"
+
+// IntegrationImportedNameLabel specifies from what resource an Integration was imported.
+const IntegrationImportedNameLabel = "camel.apache.org/imported-from-name"
 
 func NewIntegration(namespace string, name string) Integration {
 	return Integration{
@@ -281,6 +291,11 @@ func (in *Integration) SetReadyCondition(status corev1.ConditionStatus, reason, 
 // SetReadyConditionError sets Ready condition to False with the given error message.
 func (in *Integration) SetReadyConditionError(err string) {
 	in.SetReadyCondition(corev1.ConditionFalse, IntegrationConditionErrorReason, err)
+}
+
+// IsSynthetic returns true for synthetic Integrations (non managed, likely imported from external deployments).
+func (in *Integration) IsSynthetic() bool {
+	return in.Annotations[IntegrationSyntheticLabel] == "true"
 }
 
 // GetCondition returns the condition with the provided type.

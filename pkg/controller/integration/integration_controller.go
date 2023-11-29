@@ -27,12 +27,12 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/utils/pointer"
-
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -324,30 +324,47 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 					// Evaluates to false if the object has been confirmed deleted
 					return !e.DeleteStateUnknown
 				},
-			})).
-		// Watch for IntegrationKit phase transitioning to ready or error, and
-		// enqueue requests for any integration that matches the kit, in building
-		// or running phase.
-		Watches(&v1.IntegrationKit{},
-			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-				kit, ok := a.(*v1.IntegrationKit)
-				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
-					return []reconcile.Request{}
-				}
+			}))
+	// Watch for all the resources
+	watchIntegrationResources(c, b)
+	// Watch for the CronJob conditionally
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+		watchCronJobResources(c, b)
+	}
+	// Watch for the Knative Services conditionally
+	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
+		return err
+	} else if ok {
+		if err = watchKnativeResources(ctx, c, b); err != nil {
+			return err
+		}
+	}
 
-				return integrationKitEnqueueRequestsFromMapFunc(ctx, c, kit)
-			})).
+	return b.Complete(r)
+}
+
+func watchIntegrationResources(c client.Client, b *builder.Builder) {
+	// Watch for IntegrationKit phase transitioning to ready or error, and
+	// enqueue requests for any integration that matches the kit, in building
+	// or running phase.
+	b.Watches(&v1.IntegrationKit{},
+		handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+			kit, ok := a.(*v1.IntegrationKit)
+			if !ok {
+				log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve IntegrationKit")
+				return []reconcile.Request{}
+			}
+			return integrationKitEnqueueRequestsFromMapFunc(ctx, c, kit)
+		})).
 		// Watch for IntegrationPlatform phase transitioning to ready and enqueue
 		// requests for any integrations that are in phase waiting for platform
 		Watches(&v1.IntegrationPlatform{},
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				p, ok := a.(*v1.IntegrationPlatform)
 				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integrations")
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve IntegrationPlatform")
 					return []reconcile.Request{}
 				}
-
 				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
 			})).
 		// Watch for Configmaps or Secret used in the Integrations for updates
@@ -355,30 +372,29 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				cm, ok := a.(*corev1.ConfigMap)
 				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve Configmap")
 					return []reconcile.Request{}
 				}
-
 				return configmapEnqueueRequestsFromMapFunc(ctx, c, cm)
 			})).
 		Watches(&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				secret, ok := a.(*corev1.Secret)
 				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve integration list")
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve Secret")
 					return []reconcile.Request{}
 				}
-
 				return secretEnqueueRequestsFromMapFunc(ctx, c, secret)
 			})).
-		// Watch for the owned Deployments
-		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{})).
-		// Watch for the Integration Pods
+		// Watch for the Integration Pods belonging to managed Integrations
 		Watches(&corev1.Pod{},
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				pod, ok := a.(*corev1.Pod)
 				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to list integration pods")
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve Pod")
+					return []reconcile.Request{}
+				}
+				if pod.Labels[v1.IntegrationLabel] == "" {
 					return []reconcile.Request{}
 				}
 				return []reconcile.Request{
@@ -389,36 +405,90 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 						},
 					},
 				}
-			}))
+			})).
+		// Watch for non managed Deployments (ie, imported)
+		Watches(&appsv1.Deployment{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+				deploy, ok := a.(*appsv1.Deployment)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve Deployment")
+					return []reconcile.Request{}
+				}
+				return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelDeployment{deploy: deploy})
+			}),
+			builder.WithPredicates(NonManagedObjectPredicate{}),
+		).
+		// Watch for the owned Deployments
+		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{}))
+}
 
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
+func watchCronJobResources(c client.Client, b *builder.Builder) {
+	// Watch for non managed Deployments (ie, imported)
+	b.Watches(&batchv1.CronJob{},
+		handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+			cron, ok := a.(*batchv1.CronJob)
+			if !ok {
+				log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve CronJob")
+				return []reconcile.Request{}
+			}
+			return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelCronjob{cron: cron})
+		}),
+		builder.WithPredicates(NonManagedObjectPredicate{}),
+	).
 		// Watch for the owned CronJobs
-		b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
-	}
+		Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
+}
 
-	// Watch for the owned Knative Services conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
+func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Builder) error {
+	// Check for permission to watch the Knative Service resource
+	checkCtx, cancel := context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+	if ok, err := kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 		return err
 	} else if ok {
-		// Check for permission to watch the Knative Service resource
-		checkCtx, cancel := context.WithTimeout(ctx, time.Minute)
-		defer cancel()
-		if ok, err = kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
-			return err
-		} else if ok {
-			log.Info("KnativeService resources installed in the cluster. RBAC privileges assigned correctly, you can use Knative features.")
-			b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
-		} else {
-			log.Info(` KnativeService resources installed in the cluster. However Camel K operator has not the required RBAC privileges. You can't use Knative features.
-			Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for Camel K managed Knative Services.`)
-		}
-	} else {
-		log.Info(`KnativeService resources are not installed in the cluster. You can't use Knative features. If you install Knative Serving resources after the
-		Camel K operator, make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for
-		Camel K managed Knative Services.`)
+		// Watch for non managed Knative Service (ie, imported)
+		b.Watches(&servingv1.Service{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+				ksvc, ok := a.(*servingv1.Service)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve KnativeService")
+					return []reconcile.Request{}
+				}
+				return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelKnativeService{ksvc: ksvc})
+			}),
+			builder.WithPredicates(NonManagedObjectPredicate{}),
+		).
+			// We must watch also Revisions, since it's the object that really change when a Knative service scales up and down
+			Watches(&servingv1.Revision{},
+				handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+					revision, ok := a.(*servingv1.Revision)
+					if !ok {
+						log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve KnativeService Revision")
+						return []reconcile.Request{}
+					}
+					ksvc := &servingv1.Service{
+						TypeMeta: metav1.TypeMeta{
+							Kind:       "Service",
+							APIVersion: servingv1.SchemeGroupVersion.String(),
+						},
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      revision.Labels["serving.knative.dev/service"],
+							Namespace: revision.Namespace,
+						},
+					}
+					err := c.Get(ctx, ctrl.ObjectKeyFromObject(ksvc), ksvc)
+					if err != nil {
+						// The revision does not belong to any managed (owned or imported) KnativeService, just discard
+						return []reconcile.Request{}
+					}
+					return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelKnativeService{ksvc: ksvc})
+				}),
+				builder.WithPredicates(NonManagedObjectPredicate{}),
+			).
+			// Watch for the owned CronJobs
+			Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
 	}
-
-	return b.Complete(r)
+	return nil
 }
 
 var _ reconcile.Reconciler = &reconcileIntegration{}
@@ -476,7 +546,12 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		NewPlatformSetupAction(),
 		NewInitializeAction(),
 		newBuildKitAction(),
-		NewMonitorAction(),
+	}
+
+	if instance.IsSynthetic() {
+		actions = append(actions, NewMonitorSyntheticAction())
+	} else {
+		actions = append(actions, NewMonitorAction())
 	}
 
 	for _, a := range actions {

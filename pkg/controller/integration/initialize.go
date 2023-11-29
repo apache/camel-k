@@ -19,6 +19,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -52,6 +53,10 @@ func (action *initializeAction) CanHandle(integration *v1.Integration) bool {
 // Handle handles the integrations.
 func (action *initializeAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	action.L.Info("Initializing Integration")
+
+	if integration.Annotations[v1.IntegrationImportedNameLabel] != "" {
+		return action.importFromExternalApp(integration)
+	}
 
 	if _, err := trait.Apply(ctx, action.client, integration, nil); err != nil {
 		integration.Status.Phase = v1.IntegrationPhaseError
@@ -90,4 +95,86 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	}
 
 	return integration, nil
+}
+
+func (action *initializeAction) importFromExternalApp(integration *v1.Integration) (*v1.Integration, error) {
+	readyMessage := fmt.Sprintf(
+		"imported from %s %s",
+		integration.Annotations[v1.IntegrationImportedNameLabel],
+		integration.Annotations[v1.IntegrationImportedKindLabel],
+	)
+	// We need to set the condition for which this Integration is imported (required later by monitoring)
+	integration.Status.SetConditions(
+		getCamelAppImportingCondition(
+			integration.Annotations[v1.IntegrationImportedKindLabel],
+			readyMessage,
+		)...,
+	)
+	// If it's ready, then we can safely assume the integration is running
+	if integration.IsConditionTrue(v1.IntegrationConditionReady) {
+		integration.Status.Phase = v1.IntegrationPhaseRunning
+	} else {
+		integration.Status.Phase = v1.IntegrationPhaseError
+	}
+
+	return integration, nil
+}
+
+func getCamelAppImportingCondition(kind, message string) []v1.IntegrationCondition {
+	switch kind {
+	case "Deployment":
+		return []v1.IntegrationCondition{
+			{
+				Type:    v1.IntegrationConditionDeploymentAvailable,
+				Status:  corev1.ConditionTrue,
+				Reason:  v1.IntegrationConditionDeploymentAvailableReason,
+				Message: message,
+			},
+			{
+				Type:    v1.IntegrationConditionReady,
+				Status:  corev1.ConditionTrue,
+				Reason:  v1.IntegrationConditionDeploymentReadyReason,
+				Message: message,
+			},
+		}
+	case "CronJob":
+		return []v1.IntegrationCondition{
+			{
+				Type:    v1.IntegrationConditionCronJobAvailable,
+				Status:  corev1.ConditionTrue,
+				Reason:  v1.IntegrationConditionCronJobCreatedReason,
+				Message: message,
+			},
+			{
+				Type:    v1.IntegrationConditionReady,
+				Status:  corev1.ConditionTrue,
+				Reason:  v1.IntegrationConditionDeploymentReadyReason,
+				Message: message,
+			},
+		}
+	case "KnativeService":
+		return []v1.IntegrationCondition{
+			{
+				Type:    v1.IntegrationConditionKnativeServiceAvailable,
+				Status:  corev1.ConditionTrue,
+				Reason:  v1.IntegrationConditionKnativeServiceAvailableReason,
+				Message: message,
+			},
+			{
+				Type:    v1.IntegrationConditionReady,
+				Status:  corev1.ConditionTrue,
+				Reason:  v1.IntegrationConditionKnativeServiceReadyReason,
+				Message: message,
+			},
+		}
+	default:
+		return []v1.IntegrationCondition{
+			{
+				Type:    v1.IntegrationConditionReady,
+				Status:  corev1.ConditionFalse,
+				Reason:  v1.IntegrationConditionImportingKindAvailableReason,
+				Message: fmt.Sprintf("Unsupported %s import kind", kind),
+			},
+		}
+	}
 }
