@@ -23,6 +23,7 @@ import (
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -109,4 +110,19 @@ func (c *cronJobController) updateReadyCondition(readyPods int) bool {
 	}
 
 	return false
+}
+
+func (c *cronJobController) getSelector() metav1.LabelSelector {
+	// We use all the labels which will be transferred to the Pod generated
+	return metav1.LabelSelector{
+		MatchLabels: c.obj.Spec.JobTemplate.Spec.Template.Labels,
+	}
+}
+
+func (c *cronJobController) isEmptySelector() bool {
+	return c.obj.Spec.JobTemplate.Spec.Template.Labels == nil
+}
+
+func (c *cronJobController) getControllerName() string {
+	return fmt.Sprintf("CronJob/%s", c.obj.Name)
 }

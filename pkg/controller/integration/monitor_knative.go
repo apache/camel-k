@@ -19,8 +19,10 @@ package integration
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -62,4 +64,19 @@ func (c *knativeServiceController) updateReadyCondition(readyPods int) bool {
 		ready.GetReason(), ready.GetMessage())
 
 	return false
+}
+
+func (c *knativeServiceController) getSelector() metav1.LabelSelector {
+	// We use all the labels which will be transferred to the Pod generated
+	return metav1.LabelSelector{
+		MatchLabels: c.obj.Spec.Template.Labels,
+	}
+}
+
+func (c *knativeServiceController) isEmptySelector() bool {
+	return c.obj.Spec.Template.Labels == nil
+}
+
+func (c *knativeServiceController) getControllerName() string {
+	return fmt.Sprintf("KnativeService/%s", c.obj.Name)
 }

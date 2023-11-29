@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	"k8s.io/apimachinery/pkg/api/equality"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
@@ -54,4 +55,40 @@ func (StatusChangedPredicate) Update(e event.UpdateEvent) bool {
 	}
 
 	return !equality.Semantic.DeepDerivative(s1.Interface(), s2.Interface())
+}
+
+// NonManagedObjectPredicate implements a generic update predicate function for managed object.
+type NonManagedObjectPredicate struct {
+	predicate.Funcs
+}
+
+// Create --.
+func (NonManagedObjectPredicate) Create(e event.CreateEvent) bool {
+	return !isManagedObject(e.Object)
+}
+
+// Update --.
+func (NonManagedObjectPredicate) Update(e event.UpdateEvent) bool {
+	return !isManagedObject(e.ObjectNew)
+}
+
+// Delete --.
+func (NonManagedObjectPredicate) Delete(e event.DeleteEvent) bool {
+	return !isManagedObject(e.Object)
+}
+
+// Generic --.
+func (NonManagedObjectPredicate) Generic(e event.GenericEvent) bool {
+	return !isManagedObject(e.Object)
+}
+
+// isManagedObject returns true if the object is managed by an Integration.
+func isManagedObject(obj ctrl.Object) bool {
+	for _, mr := range obj.GetOwnerReferences() {
+		if mr.APIVersion == "camel.apache.org/v1" &&
+			mr.Kind == "Integration" {
+			return true
+		}
+	}
+	return false
 }

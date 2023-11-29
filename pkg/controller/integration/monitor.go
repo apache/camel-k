@@ -28,6 +28,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -43,6 +44,7 @@ import (
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
+// NewMonitorAction is an action used to monitor manager Integrations.
 func NewMonitorAction() Action {
 	return &monitorAction{}
 }
@@ -58,7 +60,9 @@ func (action *monitorAction) Name() string {
 func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
 		integration.Status.Phase == v1.IntegrationPhaseRunning ||
-		integration.Status.Phase == v1.IntegrationPhaseError
+		integration.Status.Phase == v1.IntegrationPhaseError ||
+		integration.Status.Phase == v1.IntegrationPhaseImportMissing ||
+		integration.Status.Phase == v1.IntegrationPhaseCannotMonitor
 }
 
 func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
@@ -124,16 +128,51 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return nil, err
 	}
 
+	return action.monitorPods(ctx, environment, integration)
+}
+
+func (action *monitorAction) monitorPods(ctx context.Context, environment *trait.Environment, integration *v1.Integration) (*v1.Integration, error) {
+	controller, err := action.newController(environment, integration)
+	if err != nil {
+		return nil, err
+	}
+	if controller.isEmptySelector() {
+		// This is happening when the Deployment, CronJob, etc resources
+		// have no selector or labels to identify sibling Pods.
+		integration.Status.Phase = v1.IntegrationPhaseCannotMonitor
+		integration.Status.SetConditions(
+			v1.IntegrationCondition{
+				Type:    v1.IntegrationConditionMonitoringPodsAvailable,
+				Status:  corev1.ConditionFalse,
+				Reason:  v1.IntegrationConditionMonitoringPodsAvailableReason,
+				Message: fmt.Sprintf("Could not find any selector for %s. Make sure to include any label in the template and the Pods generated to inherit such label for monitoring purposes.", controller.getControllerName()),
+			},
+		)
+		return integration, nil
+	}
+
+	controllerSelector := controller.getSelector()
+	selector, err := metav1.LabelSelectorAsSelector(&controllerSelector)
+	if err != nil {
+		return nil, err
+	}
+	integration.Status.SetConditions(
+		v1.IntegrationCondition{
+			Type:   v1.IntegrationConditionMonitoringPodsAvailable,
+			Status: corev1.ConditionTrue,
+			Reason: v1.IntegrationConditionMonitoringPodsAvailableReason,
+		},
+	)
 	// Enforce the scale sub-resource label selector.
 	// It is used by the HPA that queries the scale sub-resource endpoint,
 	// to list the pods owned by the integration.
-	integration.Status.Selector = v1.IntegrationLabel + "=" + integration.Name
+	integration.Status.Selector = selector.String()
 
 	// Update the replicas count
 	pendingPods := &corev1.PodList{}
 	err = action.client.List(ctx, pendingPods,
 		ctrl.InNamespace(integration.Namespace),
-		ctrl.MatchingLabels{v1.IntegrationLabel: integration.Name},
+		&ctrl.ListOptions{LabelSelector: selector},
 		ctrl.MatchingFields{"status.phase": string(corev1.PodPending)})
 	if err != nil {
 		return nil, err
@@ -141,7 +180,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	runningPods := &corev1.PodList{}
 	err = action.client.List(ctx, runningPods,
 		ctrl.InNamespace(integration.Namespace),
-		ctrl.MatchingLabels{v1.IntegrationLabel: integration.Name},
+		&ctrl.ListOptions{LabelSelector: selector},
 		ctrl.MatchingFields{"status.phase": string(corev1.PodRunning)})
 	if err != nil {
 		return nil, err
@@ -161,7 +200,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		integration.Status.Phase = v1.IntegrationPhaseRunning
 	}
 	if err = action.updateIntegrationPhaseAndReadyCondition(
-		ctx, environment, integration, pendingPods.Items, runningPods.Items,
+		ctx, controller, environment, integration, pendingPods.Items, runningPods.Items,
 	); err != nil {
 		return nil, err
 	}
@@ -255,6 +294,9 @@ type controller interface {
 	checkReadyCondition(ctx context.Context) (bool, error)
 	getPodSpec() corev1.PodSpec
 	updateReadyCondition(readyPods int) bool
+	getSelector() metav1.LabelSelector
+	isEmptySelector() bool
+	getControllerName() string
 }
 
 func (action *monitorAction) newController(env *trait.Environment, integration *v1.Integration) (controller, error) {
@@ -311,7 +353,7 @@ func getUpdatedController(env *trait.Environment, obj ctrl.Object) ctrl.Object {
 }
 
 func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
-	ctx context.Context, environment *trait.Environment, integration *v1.Integration,
+	ctx context.Context, controller controller, environment *trait.Environment, integration *v1.Integration,
 	pendingPods []corev1.Pod, runningPods []corev1.Pod,
 ) error {
 	controller, err := action.newController(environment, integration)

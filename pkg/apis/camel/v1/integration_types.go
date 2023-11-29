@@ -155,7 +155,13 @@ const (
 	IntegrationPhaseRunning IntegrationPhase = "Running"
 	// IntegrationPhaseError --.
 	IntegrationPhaseError IntegrationPhase = "Error"
+	// IntegrationPhaseImportMissing used when the application from which the Integration is imported has been deleted.
+	IntegrationPhaseImportMissing IntegrationPhase = "Application Missing"
+	// IntegrationPhaseCannotMonitor used when the application from which the Integration has not enough information to monitor its pods.
+	IntegrationPhaseCannotMonitor IntegrationPhase = "Cannot Monitor Pods"
 
+	// IntegrationConditionReady --.
+	IntegrationConditionReady IntegrationConditionType = "Ready"
 	// IntegrationConditionKitAvailable --.
 	IntegrationConditionKitAvailable IntegrationConditionType = "IntegrationKitAvailable"
 	// IntegrationConditionPlatformAvailable --.
@@ -178,10 +184,11 @@ const (
 	IntegrationConditionJolokiaAvailable IntegrationConditionType = "JolokiaAvailable"
 	// IntegrationConditionProbesAvailable --.
 	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
-	// IntegrationConditionReady --.
-	IntegrationConditionReady IntegrationConditionType = "Ready"
 	// IntegrationConditionTraitInfo --.
 	IntegrationConditionTraitInfo IntegrationConditionType = "TraitInfo"
+	// IntegrationConditionMonitoringPodsAvailable used to specify that the Pods generated are available for monitoring.
+	IntegrationConditionMonitoringPodsAvailable IntegrationConditionType = "MonitoringPodsAvailable"
+
 	// IntegrationConditionKitAvailableReason --.
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
 	// IntegrationConditionPlatformAvailableReason --.
@@ -220,7 +227,8 @@ const (
 	IntegrationConditionJolokiaAvailableReason string = "JolokiaAvailable"
 	// IntegrationConditionProbesAvailableReason --.
 	IntegrationConditionProbesAvailableReason string = "ProbesAvailable"
-
+	// IntegrationConditionMonitoringPodsAvailableReason used to specify that the Pods generated are available for monitoring.
+	IntegrationConditionMonitoringPodsAvailableReason string = "MonitoringPodsAvailable"
 	// IntegrationConditionKnativeServiceReadyReason --.
 	IntegrationConditionKnativeServiceReadyReason string = "KnativeServiceReady"
 	// IntegrationConditionDeploymentReadyReason --.
@@ -239,18 +247,18 @@ const (
 	IntegrationConditionRuntimeNotReadyReason string = "RuntimeNotReady"
 	// IntegrationConditionErrorReason --.
 	IntegrationConditionErrorReason string = "Error"
-
 	// IntegrationConditionInitializationFailedReason --.
 	IntegrationConditionInitializationFailedReason string = "InitializationFailed"
 	// IntegrationConditionUnsupportedLanguageReason --.
 	IntegrationConditionUnsupportedLanguageReason string = "UnsupportedLanguage"
-
 	// IntegrationConditionKameletsAvailable --.
 	IntegrationConditionKameletsAvailable IntegrationConditionType = "KameletsAvailable"
 	// IntegrationConditionKameletsAvailableReason --.
 	IntegrationConditionKameletsAvailableReason string = "KameletsAvailable"
 	// IntegrationConditionKameletsNotAvailableReason --.
 	IntegrationConditionKameletsNotAvailableReason string = "KameletsNotAvailable"
+	// IntegrationConditionImportingKindAvailableReason used (as false) if we're trying to import an unsupported kind.
+	IntegrationConditionImportingKindAvailableReason string = "ImportingKindAvailable"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.
