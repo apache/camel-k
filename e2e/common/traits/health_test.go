@@ -25,10 +25,11 @@ package traits
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/onsi/gomega/gstruct"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/onsi/gomega/gstruct"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
@@ -237,13 +238,15 @@ func TestHealthTrait(t *testing.T) {
 
 	t.Run("Readiness condition with stopped binding", func(t *testing.T) {
 		name := RandomizedSuffixName("stopped-binding")
+		source := RandomizedSuffixName("my-health-timer-source")
+		sink := RandomizedSuffixName("my-health-log-sink")
 
-		Expect(CreateTimerKamelet(ns, "my-health-timer-source")()).To(Succeed())
-		Expect(CreateLogKamelet(ns, "my-health-log-sink")()).To(Succeed())
+		Expect(CreateTimerKamelet(ns, source)()).To(Succeed())
+		Expect(CreateLogKamelet(ns, sink)()).To(Succeed())
 
 		Expect(KamelBindWithID(operatorID, ns,
-			"my-health-timer-source",
-			"my-health-log-sink",
+			source,
+			sink,
 			"-p", "source.message=Magicstring!",
 			"-p", "sink.loggerName=binding",
 			"--annotation", "trait.camel.apache.org/health.enabled=true",
@@ -354,6 +357,8 @@ func TestHealthTrait(t *testing.T) {
 
 		// Clean-up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(DeleteKamelet(ns, source)).To(Succeed())
+		Expect(DeleteKamelet(ns, sink)).To(Succeed())
 	})
 
 	t.Run("Readiness condition with never ready route", func(t *testing.T) {
