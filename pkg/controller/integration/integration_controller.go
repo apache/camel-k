@@ -27,7 +27,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
@@ -458,33 +457,6 @@ func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Buil
 			}),
 			builder.WithPredicates(NonManagedObjectPredicate{}),
 		).
-			// We must watch also Revisions, since it's the object that really change when a Knative service scales up and down
-			Watches(&servingv1.Revision{},
-				handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-					revision, ok := a.(*servingv1.Revision)
-					if !ok {
-						log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve KnativeService Revision")
-						return []reconcile.Request{}
-					}
-					ksvc := &servingv1.Service{
-						TypeMeta: metav1.TypeMeta{
-							Kind:       "Service",
-							APIVersion: servingv1.SchemeGroupVersion.String(),
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      revision.Labels["serving.knative.dev/service"],
-							Namespace: revision.Namespace,
-						},
-					}
-					err := c.Get(ctx, ctrl.ObjectKeyFromObject(ksvc), ksvc)
-					if err != nil {
-						// The revision does not belong to any managed (owned or imported) KnativeService, just discard
-						return []reconcile.Request{}
-					}
-					return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelKnativeService{ksvc: ksvc})
-				}),
-				builder.WithPredicates(NonManagedObjectPredicate{}),
-			).
 			// Watch for the owned CronJobs
 			Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
 	}

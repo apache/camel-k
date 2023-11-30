@@ -28,7 +28,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -136,26 +135,30 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 	if err != nil {
 		return nil, err
 	}
-	if controller.isEmptySelector() {
+
+	// In order to simplify the monitoring and have a minor resource requirement, we will watch only those Pods
+	// which are labeled with `camel.apache.org/integration`. This is a design choice that requires the user to
+	// voluntarily add a label to their Pods (via template, possibly) in order to monitor the non managed Camel applications.
+
+	if !controller.hasTemplateIntegrationLabel() {
 		// This is happening when the Deployment, CronJob, etc resources
-		// have no selector or labels to identify sibling Pods.
+		// miss the Integration label, required to identify sibling Pods.
 		integration.Status.Phase = v1.IntegrationPhaseCannotMonitor
 		integration.Status.SetConditions(
 			v1.IntegrationCondition{
-				Type:    v1.IntegrationConditionMonitoringPodsAvailable,
-				Status:  corev1.ConditionFalse,
-				Reason:  v1.IntegrationConditionMonitoringPodsAvailableReason,
-				Message: fmt.Sprintf("Could not find any selector for %s. Make sure to include any label in the template and the Pods generated to inherit such label for monitoring purposes.", controller.getControllerName()),
+				Type:   v1.IntegrationConditionMonitoringPodsAvailable,
+				Status: corev1.ConditionFalse,
+				Reason: v1.IntegrationConditionMonitoringPodsAvailableReason,
+				Message: fmt.Sprintf(
+					"Could not find `camel.apache.org/integration: %s` label in the %s template. Make sure to include this label in the template for Pod monitoring purposes.",
+					integration.GetName(),
+					controller.getControllerName(),
+				),
 			},
 		)
 		return integration, nil
 	}
 
-	controllerSelector := controller.getSelector()
-	selector, err := metav1.LabelSelectorAsSelector(&controllerSelector)
-	if err != nil {
-		return nil, err
-	}
 	integration.Status.SetConditions(
 		v1.IntegrationCondition{
 			Type:   v1.IntegrationConditionMonitoringPodsAvailable,
@@ -166,13 +169,13 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 	// Enforce the scale sub-resource label selector.
 	// It is used by the HPA that queries the scale sub-resource endpoint,
 	// to list the pods owned by the integration.
-	integration.Status.Selector = selector.String()
+	integration.Status.Selector = v1.IntegrationLabel + "=" + integration.Name
 
 	// Update the replicas count
 	pendingPods := &corev1.PodList{}
 	err = action.client.List(ctx, pendingPods,
 		ctrl.InNamespace(integration.Namespace),
-		&ctrl.ListOptions{LabelSelector: selector},
+		ctrl.MatchingLabels{v1.IntegrationLabel: integration.Name},
 		ctrl.MatchingFields{"status.phase": string(corev1.PodPending)})
 	if err != nil {
 		return nil, err
@@ -180,7 +183,7 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 	runningPods := &corev1.PodList{}
 	err = action.client.List(ctx, runningPods,
 		ctrl.InNamespace(integration.Namespace),
-		&ctrl.ListOptions{LabelSelector: selector},
+		ctrl.MatchingLabels{v1.IntegrationLabel: integration.Name},
 		ctrl.MatchingFields{"status.phase": string(corev1.PodRunning)})
 	if err != nil {
 		return nil, err
@@ -296,6 +299,7 @@ type controller interface {
 	updateReadyCondition(readyPods int) bool
 	getSelector() metav1.LabelSelector
 	isEmptySelector() bool
+	hasTemplateIntegrationLabel() bool
 	getControllerName() string
 }
 
