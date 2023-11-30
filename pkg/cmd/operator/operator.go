@@ -188,6 +188,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	selector := labels.NewSelector().Add(*hasIntegrationLabel)
 
 	selectors := map[ctrl.Object]cache.ByObject{
+		&corev1.Pod{}:        {Label: selector},
 		&appsv1.Deployment{}: {Label: selector},
 		&batchv1.Job{}:       {Label: selector},
 		&servingv1.Service{}: {Label: selector},

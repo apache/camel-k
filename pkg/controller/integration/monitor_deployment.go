@@ -23,7 +23,6 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -93,12 +92,8 @@ func (c *deploymentController) updateReadyCondition(readyPods int) bool {
 	return false
 }
 
-func (c *deploymentController) getSelector() metav1.LabelSelector {
-	return *c.obj.Spec.Selector
-}
-
-func (c *deploymentController) isEmptySelector() bool {
-	return c.obj.Spec.Selector.MatchExpressions == nil && c.obj.Spec.Selector.MatchLabels == nil
+func (c *deploymentController) hasTemplateIntegrationLabel() bool {
+	return c.obj.Spec.Template.Labels[v1.IntegrationLabel] != ""
 }
 
 func (c *deploymentController) getControllerName() string {
