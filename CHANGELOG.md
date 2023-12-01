@@ -12,6 +12,7 @@
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
+- Coverage report sends message 3 times [\#4875](https://github.com/apache/camel-k/issues/4875)
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
 - Camel K 2.1 documentation still contains information on using local files for runtime resources despite it is no more supported [\#4853](https://github.com/apache/camel-k/issues/4853)
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
@@ -27,6 +28,9 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): Set default configuration knative http yaks test [\#4952](https://github.com/apache/camel-k/pull/4952) ([gansheer](https://github.com/gansheer))
+- chore\(ci\): Upgrade kind action and image to kubernetes 1.27 [\#4946](https://github.com/apache/camel-k/pull/4946) ([gansheer](https://github.com/gansheer))
+- chore\(test\): Health kamelet test cleanup [\#4945](https://github.com/apache/camel-k/pull/4945) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump ch.qos.logback:logback-classic from 1.3.7 to 1.3.12 in /java/maven-logging [\#4944](https://github.com/apache/camel-k/pull/4944) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump ch.qos.logback:logback-core from 1.3.7 to 1.3.12 in /java/maven-logging [\#4943](https://github.com/apache/camel-k/pull/4943) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/time from 0.4.0 to 0.5.0 [\#4935](https://github.com/apache/camel-k/pull/4935) ([dependabot[bot]](https://github.com/apps/dependabot))
