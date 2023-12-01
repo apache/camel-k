@@ -328,7 +328,7 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 	watchIntegrationResources(c, b)
 	// Watch for the CronJob conditionally
 	if ok, err := kubernetes.IsAPIResourceInstalled(c, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
-		watchCronJobResources(c, b)
+		watchCronJobResources(b)
 	}
 	// Watch for the Knative Services conditionally
 	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
@@ -405,37 +405,13 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 					},
 				}
 			})).
-		// Watch for non managed Deployments (ie, imported)
-		Watches(&appsv1.Deployment{},
-			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-				deploy, ok := a.(*appsv1.Deployment)
-				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve Deployment")
-					return []reconcile.Request{}
-				}
-				return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelDeployment{deploy: deploy})
-			}),
-			builder.WithPredicates(NonManagedObjectPredicate{}),
-		).
 		// Watch for the owned Deployments
 		Owns(&appsv1.Deployment{}, builder.WithPredicates(StatusChangedPredicate{}))
 }
 
-func watchCronJobResources(c client.Client, b *builder.Builder) {
-	// Watch for non managed Deployments (ie, imported)
-	b.Watches(&batchv1.CronJob{},
-		handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-			cron, ok := a.(*batchv1.CronJob)
-			if !ok {
-				log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve CronJob")
-				return []reconcile.Request{}
-			}
-			return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelCronjob{cron: cron})
-		}),
-		builder.WithPredicates(NonManagedObjectPredicate{}),
-	).
-		// Watch for the owned CronJobs
-		Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
+func watchCronJobResources(b *builder.Builder) {
+	// Watch for the owned CronJobs
+	b.Owns(&batchv1.CronJob{}, builder.WithPredicates(StatusChangedPredicate{}))
 }
 
 func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Builder) error {
@@ -445,20 +421,8 @@ func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Buil
 	if ok, err := kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 		return err
 	} else if ok {
-		// Watch for non managed Knative Service (ie, imported)
-		b.Watches(&servingv1.Service{},
-			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
-				ksvc, ok := a.(*servingv1.Service)
-				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve KnativeService")
-					return []reconcile.Request{}
-				}
-				return nonManagedCamelAppEnqueueRequestsFromMapFunc(ctx, c, &NonManagedCamelKnativeService{ksvc: ksvc})
-			}),
-			builder.WithPredicates(NonManagedObjectPredicate{}),
-		).
-			// Watch for the owned CronJobs
-			Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
+		// Watch for the owned Knative Services
+		b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
 	}
 	return nil
 }

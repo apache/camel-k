@@ -45,6 +45,7 @@ rules:
   - camel.apache.org
   resources:
   - builds
+  - integrations
   verbs:
   - delete
 - apiGroups:

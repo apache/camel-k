@@ -60,7 +60,6 @@ func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
 		integration.Status.Phase == v1.IntegrationPhaseRunning ||
 		integration.Status.Phase == v1.IntegrationPhaseError ||
-		integration.Status.Phase == v1.IntegrationPhaseImportMissing ||
 		integration.Status.Phase == v1.IntegrationPhaseCannotMonitor
 }
 
