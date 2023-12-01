@@ -66,7 +66,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 }
 
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	c, err := controller.New("kamelet-binding-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("pipe-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}

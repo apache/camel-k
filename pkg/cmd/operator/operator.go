@@ -59,6 +59,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/controller"
+	"github.com/apache/camel-k/v2/pkg/controller/synthetic"
 	"github.com/apache/camel-k/v2/pkg/event"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -231,6 +232,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
 	exitOnError(findOrCreateIntegrationPlatform(installCtx, bootstrapClient, operatorNamespace), "failed to create integration platform")
 
+	log.Info("Starting the synthetic Integration manager")
+	exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache(), mgr.GetAPIReader()), "synthetic Integration manager error")
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
 }
