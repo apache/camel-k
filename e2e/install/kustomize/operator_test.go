@@ -31,6 +31,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	testutil "github.com/apache/camel-k/v2/e2e/support/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	. "github.com/onsi/gomega"
@@ -69,8 +70,13 @@ func TestOperatorBasic(t *testing.T) {
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
 		registry := os.Getenv("KIND_REGISTRY")
 		if registry != "" {
+			Eventually(Configmap("kube-public", "local-registry-hosting")).ShouldNot(BeNil())
+			Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionTypeRegistryAvailable), TestTimeoutMedium).
+				Should(Equal(corev1.ConditionTrue))
 			platform := Platform(ns)()
 			Expect(platform.Status.Build.Registry).ShouldNot(BeNil())
 			Expect(platform.Status.Build.Registry.Address).To(Equal(registry))
