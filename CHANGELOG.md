@@ -12,6 +12,7 @@
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
+- Coverage report sends message 3 times [\#4875](https://github.com/apache/camel-k/issues/4875)
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
 - Camel K 2.1 documentation still contains information on using local files for runtime resources despite it is no more supported [\#4853](https://github.com/apache/camel-k/issues/4853)
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
