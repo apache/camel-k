@@ -30,6 +30,7 @@ import (
 	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/util"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -55,7 +56,19 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 		return nil, err
 	}
 
-	c := fake.NewClientBuilder().WithScheme(scheme).WithRuntimeObjects(initObjs...).Build()
+	c := fake.
+		NewClientBuilder().
+		WithScheme(scheme).
+		WithIndex(
+			&corev1.Pod{},
+			"status.phase",
+			func(obj controller.Object) []string {
+				pod, _ := obj.(*corev1.Pod)
+				return []string{string(pod.Status.Phase)}
+			},
+		).
+		WithRuntimeObjects(initObjs...).
+		Build()
 
 	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {
 		return strings.Contains(gvk.Group, "camel")

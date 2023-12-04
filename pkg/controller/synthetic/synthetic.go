@@ -220,7 +220,7 @@ func nonManagedCamelApplicationFactory(obj ctrl.Object) (nonManagedCamelApplicat
 	if ok {
 		return &NonManagedCamelKnativeService{ksvc: ksvc}, nil
 	}
-	return nil, fmt.Errorf("unsupported %s object kind", obj)
+	return nil, fmt.Errorf("unsupported %s object kind", obj.GetName())
 }
 
 // NonManagedCamelDeployment represents a regular Camel application built and deployed outside the operator lifecycle.
@@ -252,7 +252,7 @@ func (app *nonManagedCamelDeployment) getContainerNameFromDeployment() string {
 	for _, ct := range app.deploy.Spec.Template.Spec.Containers {
 		// set as fallback if no container is named as the deployment
 		if firstContainerName == "" {
-			firstContainerName = app.deploy.Name
+			firstContainerName = ct.Name
 		}
 		if ct.Name == app.deploy.Name {
 			return app.deploy.Name
