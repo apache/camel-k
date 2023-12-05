@@ -48,6 +48,8 @@ type BuildSpec struct {
 	// the maximum amount of parallel running builds started by this operator instance
 	// Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
+	// Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
+	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
 }
 
 // Task represents the abstract task. Only one of the task should be configured to represent the specific task chosen.

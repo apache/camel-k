@@ -32,6 +32,7 @@ type BuildSpecApplyConfiguration struct {
 	BuilderPodNamespace *string                               `json:"operatorNamespace,omitempty"`
 	Timeout             *metav1.Duration                      `json:"timeout,omitempty"`
 	MaxRunningBuilds    *int32                                `json:"maxRunningBuilds,omitempty"`
+	NodeSelector        map[string]string                     `json:"nodeSelector,omitempty"`
 }
 
 // BuildSpecApplyConfiguration constructs an declarative configuration of the BuildSpec type for use with
@@ -90,5 +91,19 @@ func (b *BuildSpecApplyConfiguration) WithTimeout(value metav1.Duration) *BuildS
 // If called multiple times, the MaxRunningBuilds field is set to the value of the last call.
 func (b *BuildSpecApplyConfiguration) WithMaxRunningBuilds(value int32) *BuildSpecApplyConfiguration {
 	b.MaxRunningBuilds = &value
+	return b
+}
+
+// WithNodeSelector puts the entries into the NodeSelector field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the NodeSelector field,
+// overwriting an existing map entries in NodeSelector field with the same key.
+func (b *BuildSpecApplyConfiguration) WithNodeSelector(entries map[string]string) *BuildSpecApplyConfiguration {
+	if b.NodeSelector == nil && len(entries) > 0 {
+		b.NodeSelector = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.NodeSelector[k] = v
+	}
 	return b
 }

@@ -150,8 +150,9 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 				Annotations: annotations,
 			},
 			Spec: v1.BuildSpec{
-				Tasks:   env.Pipeline,
-				Timeout: timeout,
+				Tasks:        env.Pipeline,
+				Timeout:      timeout,
+				NodeSelector: env.BuilderNodeSelector,
 			},
 		}
 

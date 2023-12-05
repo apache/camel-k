@@ -99,7 +99,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 				}
 			}
 		}
-
+		e.BuilderNodeSelector = t.NodeSelector
 		return true, condition, nil
 	}
 

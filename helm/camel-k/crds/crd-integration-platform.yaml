@@ -538,6 +538,12 @@ spec:
                         items:
                           type: string
                         type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: Defines a set of nodes the builder pod is eligible
+                          to be scheduled on, based on labels on the node.
+                        type: object
                       orderStrategy:
                         default: sequential
                         description: The build order strategy to use, either `dependencies`,
@@ -2409,6 +2415,12 @@ spec:
                         items:
                           type: string
                         type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        description: Defines a set of nodes the builder pod is eligible
+                          to be scheduled on, based on labels on the node.
+                        type: object
                       orderStrategy:
                         default: sequential
                         description: The build order strategy to use, either `dependencies`,

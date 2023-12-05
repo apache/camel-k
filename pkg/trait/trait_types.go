@@ -225,6 +225,7 @@ type Environment struct {
 	ApplicationProperties map[string]string
 	Interceptors          []string
 	ServiceBindingSecret  string
+	BuilderNodeSelector   map[string]string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.
