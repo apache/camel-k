@@ -92,6 +92,30 @@ import (
 const kubeConfigEnvVar = "KUBECONFIG"
 const ciPID = "/tmp/ci-k8s-pid"
 
+// v1.Build,          v1.Integration
+// v1.IntegrationKit, v1.IntegrationPlatform
+// v1.Kamelet,  v1.Pipe,
+// v1alpha1.Kamelet, v1alpha1.KameletBinding
+const ExpectedCRDs = 8
+
+// camel-k-operator,             camel-k-operator-events,
+// camel-k-operator-knative,     camel-k-operator-leases,
+// camel-k-operator-podmonitors, camel-k-operator-strimzi,
+// camel-k-operator-keda
+const ExpectedKubePromoteRoles = 7
+
+// camel-k-edit
+// camel-k-operator-custom-resource-definitions
+// camel-k-operator-bind-addressable-resolver
+// camel-k-operator-local-registry
+const ExpectedKubeClusterRoles = 4
+
+// camel-k-operator-openshift
+const ExpectedOSPromoteRoles = 1
+
+// camel-k-operator-console-openshift
+const ExpectedOSClusterRoles = 1
+
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
 var TestTimeoutLong = 15 * time.Minute

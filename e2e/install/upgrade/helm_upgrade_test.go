@@ -67,7 +67,7 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(OperatorImage(ns)).Should(ContainSubstring(releaseVersion))
-		Eventually(CRDs()).Should(HaveLen(8))
+		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
 
 		//Test a simple route
 		t.Run("simple route", func(t *testing.T) {
@@ -132,7 +132,7 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 		Eventually(OperatorPod(ns)).Should(BeNil())
 
 		//  helm does not remove the CRDs
-		Eventually(CRDs()).Should(HaveLen(8))
+		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
 		ExpectExecSucceed(t,
 			exec.Command(
 				"kubectl",
