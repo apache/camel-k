@@ -1,0 +1,44 @@
+= Importing existing Camel applications
+
+You may have already a Camel application running on your cluster. You may have created it via a manual deployment, a CICD or any other deployment mechanism you have in place. Since the Camel K operator is meant to operate any Camel application out there, then, you will be able to import it and monitor in a similar fashion of any other Camel K **managed Integration**.
+
+This feature is disabled by default. In order to enable it, you need to run the operator deployment with an environment variable, `CAMEL_K_SYNTHETIC_INTEGRATIONS`, set to `true`.
+
+NOTE: you will be only able to monitor the synthetic Integrations. Camel K won't be able to alter the lifecycle of non managed Integrations (ie, rebuild the original application).
+
+It's important to notice that the operator won't be altering any field of the original application in order to avoid breaking any deployment procedure which is already in place. As it cannot make any assumption on the way the application is built and deployed, it will only be able to **watch** for any changes happening around it.
+
+[[deploy-and-monitor]]
+== Deploy externally, monitor via Camel K Operator
+
+An imported Integration is known as **synthetic Integration**. You can import any Camel application deployed as a **Deployment**, **CronJob** or **Knative Service**. We control this behavior via a label (`camel.apache.org/integration`) that the user need to apply on the Camel application (either manually or introducing in the deployment process, ie, via CICD).
+
+NOTE: the example here will work in a similar way using CronJob and Knative Service.
+
+As an example, we show how to import a Camel application which was deployed with the Deployment kind. Let's assume it is called `my-deploy`.
+```
+$ kubectl label deploy my-camel-sb-svc camel.apache.org/integration=my-it
+```
+The operator immediately creates a synthetic Integration:
+```
+$ kubectl get it
+NAMESPACE                                   NAME    PHASE   RUNTIME PROVIDER   RUNTIME VERSION   KIT   REPLICAS
+test-79c385c3-d58e-4c28-826d-b14b6245f908   my-it   Cannot Monitor Pods
+```
+You can see it will be in `Cannot Monitor Pods` status phase. This is expected because the way Camel K operator monitor Pods. It requires that the same label applied to the Deployment is inherited by the generated Pods. For this reason, beside labelling the Deployment, we need to add a label in the Deployment template.
+```
+$ kubectl patch deployment my-camel-sb-svc --patch '{"spec": {"template": {"metadata": {"labels": {"camel.apache.org/integration": "my-it"}}}}}'
+```
+Also this operator can be performed manually or automated in the deployment procedure. We can see now that the operator will be able to monitor accordingly the status of the Pods:
+```
+$ kubectl get it
+NAMESPACE                                   NAME    PHASE   RUNTIME PROVIDER   RUNTIME VERSION   KIT   REPLICAS
+test-79c385c3-d58e-4c28-826d-b14b6245f908   my-it   Running                                                          1
+```
+From now on, you will be able to monitor the status of the synthetic Integration in a similar fashion of what you do with managed Integrations. If, for example, your Deployment will scale up or down, then, you will see this information reflecting accordingly:
+```
+$ kubectl scale deployment my-camel-sb-svc --replicas 2
+$ kubectl get it
+NAMESPACE                                   NAME    PHASE   RUNTIME PROVIDER   RUNTIME VERSION   KIT   REPLICAS
+test-79c385c3-d58e-4c28-826d-b14b6245f908   my-it   Running                                                          2
+```
