@@ -232,8 +232,13 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
 	exitOnError(findOrCreateIntegrationPlatform(installCtx, bootstrapClient, operatorNamespace), "failed to create integration platform")
 
-	log.Info("Starting the synthetic Integration manager")
-	exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache(), mgr.GetAPIReader()), "synthetic Integration manager error")
+	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
+	if synth && synthEnvVal == "true" {
+		log.Info("Starting the synthetic Integration manager")
+		exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache(), mgr.GetAPIReader()), "synthetic Integration manager error")
+	} else {
+		log.Info("Synthetic Integration manager not configured, skipping")
+	}
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
 }

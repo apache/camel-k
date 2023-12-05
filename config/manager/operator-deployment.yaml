@@ -72,6 +72,9 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            # Change to true to be able to create synthetic Integrations
+            - name: CAMEL_K_SYNTHETIC_INTEGRATIONS
+              value: "false"
           livenessProbe:
             httpGet:
               path: /healthz
