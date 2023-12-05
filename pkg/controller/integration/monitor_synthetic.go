@@ -19,11 +19,13 @@ package integration
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // NewMonitorSyntheticAction is an action used to monitor synthetic Integrations.
@@ -42,7 +44,22 @@ func (action *monitorSyntheticAction) Name() string {
 func (action *monitorSyntheticAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	environment, err := trait.NewSyntheticEnvironment(ctx, action.client, integration, nil)
 	if err != nil {
-		// report the error
+		// Importing application no longer available
+		if k8serrors.IsNotFound(err) {
+			// It could be a normal condition, don't report as an error
+			integration.Status.Phase = v1.IntegrationPhaseImportMissing
+			message := fmt.Sprintf(
+				"import %s %s no longer available",
+				integration.Annotations[v1.IntegrationImportedKindLabel],
+				integration.Annotations[v1.IntegrationImportedNameLabel],
+			)
+			integration.SetReadyConditionError(message)
+			zero := int32(0)
+			integration.Status.Phase = v1.IntegrationPhaseImportMissing
+			integration.Status.Replicas = &zero
+			return integration, nil
+		}
+		// other reasons, likely some error to report
 		integration.Status.Phase = v1.IntegrationPhaseError
 		integration.SetReadyCondition(corev1.ConditionFalse, v1.IntegrationConditionImportingKindAvailableReason, err.Error())
 		return integration, err
