@@ -21,6 +21,7 @@ limitations under the License.
 package upgrade
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -39,6 +40,14 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	// need to add last release version
 	releaseVersion := os.Getenv("KAMEL_K_TEST_RELEASE_VERSION")
+
+	// if the last released version chart is not present skip the test
+	releaseChart := fmt.Sprintf("../../../docs/charts/camel-k-%s.tgz", releaseVersion)
+	if _, err := os.Stat(releaseChart); errors.Is(err, os.ErrNotExist) {
+		t.Skip("last release version chart not found: skipping")
+		return
+	}
+
 	customImage := fmt.Sprintf("%s/apache/camel-k", KAMEL_INSTALL_REGISTRY)
 
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
@@ -55,7 +64,7 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 				"helm",
 				"install",
 				"camel-k",
-				fmt.Sprintf("../../../docs/charts/camel-k-%s.tgz", releaseVersion),
+				releaseChart,
 				"--set",
 				fmt.Sprintf("platform.build.registry.address=%s", KAMEL_INSTALL_REGISTRY),
 				"--set",
