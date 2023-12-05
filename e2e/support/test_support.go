@@ -481,6 +481,14 @@ func MakeWithContext(ctx context.Context, rule string, args ...string) *exec.Cmd
 	return exec.Command("make", args...)
 }
 
+func Kubectl(args ...string) *exec.Cmd {
+	return KubectlWithContext(TestContext, args...)
+}
+
+func KubectlWithContext(ctx context.Context, args ...string) *exec.Cmd {
+	return exec.Command("kubectl", args...)
+}
+
 // =============================================================================
 // Curried utility functions for testing
 // =============================================================================
