@@ -6,13 +6,19 @@
 
 **Closed issues:**
 
+- Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
+- Ability to override resources for the quarkus-native task [\#4956](https://github.com/apache/camel-k/issues/4956)
+- java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#4955](https://github.com/apache/camel-k/issues/4955)
+- OGNL Script not working anymore after upgrade to Camel-K 2.1.0 [\#4936](https://github.com/apache/camel-k/issues/4936)
 - Kustomize installation test failing [\#4929](https://github.com/apache/camel-k/issues/4929)
 - Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
 - Component resolvable variables regression [\#4916](https://github.com/apache/camel-k/issues/4916)
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
+- Camel K offline error [\#4894](https://github.com/apache/camel-k/issues/4894)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - Coverage report sends message 3 times [\#4875](https://github.com/apache/camel-k/issues/4875)
+- Bump kube dependencies to 1.27.7 [\#4861](https://github.com/apache/camel-k/issues/4861)
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
 - Camel K 2.1 documentation still contains information on using local files for runtime resources despite it is no more supported [\#4853](https://github.com/apache/camel-k/issues/4853)
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
@@ -24,15 +30,23 @@
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Create a test for structured health check conditions when integrations are scaled \> 1 [\#3997](https://github.com/apache/camel-k/issues/3997)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
+- Camel-K initContainer [\#3459](https://github.com/apache/camel-k/issues/3459)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 **Merged pull requests:**
 
+- fix\(trait\): doc to explain initContainers [\#4966](https://github.com/apache/camel-k/pull/4966) ([squakez](https://github.com/squakez))
+- fix\(\#4961\): Improve cross-namespace check for Kamelet refs [\#4965](https://github.com/apache/camel-k/pull/4965) ([christophd](https://github.com/christophd))
+- fix\(build\): don't override user provided resources [\#4964](https://github.com/apache/camel-k/pull/4964) ([squakez](https://github.com/squakez))
+- chore\(ci\): kubernetes 1.27.7 [\#4963](https://github.com/apache/camel-k/pull/4963) ([squakez](https://github.com/squakez))
+- fix\(ci\): Rollback kind image [\#4960](https://github.com/apache/camel-k/pull/4960) ([gansheer](https://github.com/gansheer))
+- fix\(e2e\): Execute helm upgrade test only on main branch [\#4959](https://github.com/apache/camel-k/pull/4959) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Set default configuration knative http yaks test [\#4952](https://github.com/apache/camel-k/pull/4952) ([gansheer](https://github.com/gansheer))
 - chore\(ci\): Upgrade kind action and image to kubernetes 1.27 [\#4946](https://github.com/apache/camel-k/pull/4946) ([gansheer](https://github.com/gansheer))
 - chore\(test\): Health kamelet test cleanup [\#4945](https://github.com/apache/camel-k/pull/4945) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump ch.qos.logback:logback-classic from 1.3.7 to 1.3.12 in /java/maven-logging [\#4944](https://github.com/apache/camel-k/pull/4944) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump ch.qos.logback:logback-core from 1.3.7 to 1.3.12 in /java/maven-logging [\#4943](https://github.com/apache/camel-k/pull/4943) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump knative.dev/serving from 0.38.2 to 0.39.2 [\#4939](https://github.com/apache/camel-k/pull/4939) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/time from 0.4.0 to 0.5.0 [\#4935](https://github.com/apache/camel-k/pull/4935) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.14.0 to 0.15.0 [\#4933](https://github.com/apache/camel-k/pull/4933) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Fix\(core\): Openshift securityContext on global operator [\#4932](https://github.com/apache/camel-k/pull/4932) ([gansheer](https://github.com/gansheer))
