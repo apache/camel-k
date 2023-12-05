@@ -49,6 +49,7 @@ type SelectorScraper struct {
 
 // NewSelectorScraper creates a new SelectorScraper.
 func NewSelectorScraper(client kubernetes.Interface, namespace string, defaultContainerName string, labelSelector string, tailLines *int64) *SelectorScraper {
+	klog.InitForCmd()
 	return &SelectorScraper{
 		client:               client,
 		namespace:            namespace,

@@ -36,6 +36,7 @@ import (
 )
 
 func PortForward(ctx context.Context, c client.Client, ns, labelSelector string, localPort, remotePort uint, stdOut, stdErr io.Writer) error {
+	log.InitForCmd()
 	list, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})

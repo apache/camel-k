@@ -54,6 +54,7 @@ type PodScraper struct {
 
 // NewPodScraper creates a new pod scraper.
 func NewPodScraper(c kubernetes.Interface, namespace string, podName string, defaultContainerName string, tailLines *int64) *PodScraper {
+	klog.InitForCmd()
 	return &PodScraper{
 		namespace:            namespace,
 		podName:              podName,
