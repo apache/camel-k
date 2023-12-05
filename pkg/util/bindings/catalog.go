@@ -22,10 +22,12 @@ import (
 	"sort"
 
 	"github.com/apache/camel-k/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/pkg/platform"
 )
 
 var bindingProviders []BindingProvider
 
+// RegisterBindingProvider --.
 func RegisterBindingProvider(bp BindingProvider) {
 	bindingProviders = append(bindingProviders, bp)
 	sort.Slice(bindingProviders, func(i, j int) bool {
@@ -58,7 +60,12 @@ func validateEndpoint(ctx BindingContext, e v1alpha1.Endpoint) error {
 		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
 	}
 	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
-		return errors.New("cross-namespace references are not allowed in kamelet binding")
+		// referencing default Kamelets in operator namespace is allowed
+		if e.Ref.Kind == v1alpha1.KameletKind && e.Ref.Namespace == platform.GetOperatorNamespace() {
+			return nil
+		}
+
+		return errors.New("cross-namespace references are not allowed in KameletBinding")
 	}
 	return nil
 }
