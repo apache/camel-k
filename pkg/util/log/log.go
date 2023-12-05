@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/go-logr/logr"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 // Log --.
@@ -33,6 +34,11 @@ func init() {
 	Log = Logger{
 		delegate: logf.Log.WithName("camel-k"),
 	}
+}
+
+// InitForCmd is required to avoid nil pointer exceptions from command line.
+func InitForCmd() {
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 }
 
 // Injectable identifies objects that can receive a Logger.
