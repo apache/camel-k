@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
 var bindingProviders []BindingProvider
@@ -75,6 +76,11 @@ func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
 		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
 	}
 	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
+		// referencing default Kamelets in operator namespace is allowed
+		if e.Ref.Kind == v1.KameletKind && e.Ref.Namespace == platform.GetOperatorNamespace() {
+			return nil
+		}
+
 		return errors.New("cross-namespace references are not allowed in Pipe")
 	}
 	return nil
@@ -104,6 +110,11 @@ func validateEndpointV1alpha1(ctx V1alpha1BindingContext, e v1alpha1.Endpoint) e
 		return errors.New("cannot use both ref and URI to specify an endpoint: only one of them should be used")
 	}
 	if e.Ref != nil && e.Ref.Namespace != "" && e.Ref.Namespace != ctx.Namespace {
+		// referencing default Kamelets in operator namespace is allowed
+		if e.Ref.Kind == v1.KameletKind && e.Ref.Namespace == platform.GetOperatorNamespace() {
+			return nil
+		}
+
 		return errors.New("cross-namespace references are not allowed in KameletBinding")
 	}
 	return nil
