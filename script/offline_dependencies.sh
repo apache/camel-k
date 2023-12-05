@@ -75,8 +75,8 @@ do
     elif [[ $d == org.apache.camel.k* ]]; then
         mvn_dep="$d:$ckr_version"
     else
-        echo "ERROR: cannot parse $d kind of dependency"
-        exit 1
+        echo "WARN: cannot parse $d kind of dependency (likely it misses the version), skipping as it should be imported transitively. If not, add manually to your bundle."
+        continue
     fi
     echo "INFO: downloading $mvn_dep and its transitive dependencies..."
     $mvnCmd -q dependency:get -Dartifact=$mvn_dep -Dmaven.repo.local=$outputLocation -s $location/maven-settings.xml
