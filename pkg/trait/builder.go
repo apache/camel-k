@@ -86,13 +86,17 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 				// it should be performed as the last custom task
 				t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, nativeBuilderImage, command))
 				// Force the build to run in a separate Pod and strictly sequential
-				m := "This is a Quarkus native build: setting build configuration with build Pod strategy, and native container with 1 CPU core and 4 GiB memory. Make sure your cluster can handle it."
+				m := "This is a Quarkus native build: setting build configuration with build Pod strategy and native container sensible resources (if not specified by the user). Make sure your cluster can handle it."
 				t.L.Info(m)
 				condition = newOrAppend(condition, m)
 				t.Strategy = string(v1.BuildStrategyPod)
 				t.OrderStrategy = string(v1.BuildOrderStrategySequential)
-				t.TasksRequestCPU = append(t.TasksRequestCPU, "quarkus-native:1000m")
-				t.TasksRequestMemory = append(t.TasksRequestMemory, "quarkus-native:4Gi")
+				if !existsTaskRequest(t.TasksRequestCPU, "quarkus-native") {
+					t.TasksRequestCPU = append(t.TasksRequestCPU, "quarkus-native:1000m")
+				}
+				if !existsTaskRequest(t.TasksRequestMemory, "quarkus-native") {
+					t.TasksRequestMemory = append(t.TasksRequestMemory, "quarkus-native:4Gi")
+				}
 			}
 		}
 
@@ -100,6 +104,16 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 
 	return false, condition, nil
+}
+
+func existsTaskRequest(tasks []string, taskName string) bool {
+	for _, task := range tasks {
+		ts := strings.Split(task, ":")
+		if len(ts) == 2 && ts[0] == taskName {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
