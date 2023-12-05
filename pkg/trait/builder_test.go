@@ -442,3 +442,10 @@ func TestBuilderDeprecatedParams(t *testing.T) {
 	assert.Equal(t, "builder:100Mi", builderTrait.TasksLimitMemory[0])
 	assert.Equal(t, "builder:100Mi", builderTrait.TasksRequestMemory[0])
 }
+
+func TestExistsTaskRequest(t *testing.T) {
+	tasks := []string{"quarkus-native:1000m", "builder:1000m", "shouldfail"}
+	assert.True(t, existsTaskRequest(tasks, "quarkus-native"))
+	assert.False(t, existsTaskRequest(tasks, "quarkus"))
+	assert.False(t, existsTaskRequest(tasks, "shouldfail"))
+}
