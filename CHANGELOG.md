@@ -6,13 +6,19 @@
 
 **Closed issues:**
 
+- Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
+- Ability to override resources for the quarkus-native task [\#4956](https://github.com/apache/camel-k/issues/4956)
+- java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#4955](https://github.com/apache/camel-k/issues/4955)
+- OGNL Script not working anymore after upgrade to Camel-K 2.1.0 [\#4936](https://github.com/apache/camel-k/issues/4936)
 - Kustomize installation test failing [\#4929](https://github.com/apache/camel-k/issues/4929)
 - Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
 - Component resolvable variables regression [\#4916](https://github.com/apache/camel-k/issues/4916)
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
+- Camel K offline error [\#4894](https://github.com/apache/camel-k/issues/4894)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - Coverage report sends message 3 times [\#4875](https://github.com/apache/camel-k/issues/4875)
+- Bump kube dependencies to 1.27.7 [\#4861](https://github.com/apache/camel-k/issues/4861)
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
 - Camel K 2.1 documentation still contains information on using local files for runtime resources despite it is no more supported [\#4853](https://github.com/apache/camel-k/issues/4853)
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
@@ -24,6 +30,7 @@
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Create a test for structured health check conditions when integrations are scaled \> 1 [\#3997](https://github.com/apache/camel-k/issues/3997)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
+- Camel-K initContainer [\#3459](https://github.com/apache/camel-k/issues/3459)
 - Run without source code [\#3295](https://github.com/apache/camel-k/issues/3295)
 
 ## [2.1.1-nightly](https://github.com/apache/camel-k/tree/2.1.1-nightly) (2023-10-24)
