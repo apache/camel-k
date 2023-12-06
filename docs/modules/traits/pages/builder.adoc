@@ -104,7 +104,7 @@ Syntax: [configmap\|secret]:name[/key], where name represents the resource name,
 
 == Node Selectors
 
-With this trait you will also be able to define node selectors for the builder pod when using the pod build strategy.
+With this trait you will also be able to define node selectors for the `builder`` pod when using the `pod`` build strategy.
 Here is a simple example:
 
 .template.yaml
