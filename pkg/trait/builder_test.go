@@ -455,13 +455,16 @@ func TestBuilderWithNoNodeSelector(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 
 	active, condition, err := builderTrait.Configure(env)
-
 	assert.Nil(t, err)
+
+	err = builderTrait.Apply(env)
+	assert.Nil(t, err)
+
 	assert.True(t, active)
 	assert.Nil(t, condition)
 
 	assert.Nil(t, builderTrait.NodeSelector)
-	assert.Nil(t, env.BuilderNodeSelector)
+	assert.Nil(t, env.Pipeline[0].Builder.Configuration.NodeSelector)
 }
 
 func TestBuilderWithNodeSelector(t *testing.T) {
@@ -472,11 +475,14 @@ func TestBuilderWithNodeSelector(t *testing.T) {
 	}
 
 	active, condition, err := builderTrait.Configure(env)
-
 	assert.Nil(t, err)
+
+	err = builderTrait.Apply(env)
+	assert.Nil(t, err)
+
 	assert.True(t, active)
 	assert.Nil(t, condition)
 
-	assert.Equal(t, map[string]string{"size": "large"}, env.BuilderNodeSelector)
+	assert.Equal(t, map[string]string{"size": "large"}, env.Pipeline[0].Builder.Configuration.NodeSelector)
 	assert.Equal(t, map[string]string{"size": "large"}, builderTrait.NodeSelector)
 }

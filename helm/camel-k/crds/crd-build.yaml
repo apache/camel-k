@@ -94,6 +94,12 @@ spec:
                     description: The maximum amount of memory required. Only used
                       for `pod` strategy
                     type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    description: The node selector for the builder pod. Only used
+                      for `pod` strategy
+                    type: object
                   operatorNamespace:
                     description: The namespace where to run the builder Pod (must
                       be the same of the operator in charge of this Build reconciliation).
@@ -129,12 +135,6 @@ spec:
                   K 2 - maintained for backward compatibility'
                 format: int32
                 type: integer
-              nodeSelector:
-                additionalProperties:
-                  type: string
-                description: Defines a set of nodes the builder pod is eligible to
-                  be scheduled on, based on labels on the node.
-                type: object
               operatorNamespace:
                 description: 'The namespace where to run the builder Pod (must be
                   the same of the operator in charge of this Build reconciliation).
@@ -166,6 +166,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -258,6 +264,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -763,6 +775,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -819,6 +837,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -910,6 +934,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -1000,6 +1030,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -1496,6 +1532,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -1555,6 +1597,12 @@ spec:
                               description: The maximum amount of memory required.
                                 Only used for `pod` strategy
                               type: string
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              description: The node selector for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of

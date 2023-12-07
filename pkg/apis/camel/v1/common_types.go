@@ -53,6 +53,8 @@ type BuildConfiguration struct {
 	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
 	// The maximum amount of memory required. Only used for `pod` strategy
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
+	// The node selector for the builder pod. Only used for `pod` strategy
+	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
 }
 
 // BuildStrategy specifies how the Build should be executed.

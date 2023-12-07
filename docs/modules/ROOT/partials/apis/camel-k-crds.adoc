@@ -601,6 +601,13 @@ string
 
 The maximum amount of memory required. Only used for `pod` strategy
 
+|`nodeSelector` +
+map[string]string
+|
+
+
+The node selector for the builder pod. Only used for `pod` strategy
+
 
 |===
 
@@ -687,13 +694,6 @@ int32
 
 the maximum amount of parallel running builds started by this operator instance
 Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
-
-|`nodeSelector` +
-map[string]string
-|
-
-
-Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
 
 
 |===

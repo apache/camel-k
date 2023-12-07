@@ -99,7 +99,6 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 				}
 			}
 		}
-		e.BuilderNodeSelector = t.NodeSelector
 		return true, condition, nil
 	}
 
@@ -179,6 +178,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}
 		return nil
 	}
+	builderTask.Configuration.NodeSelector = t.NodeSelector
 	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
 	// Custom tasks
