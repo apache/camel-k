@@ -60,6 +60,9 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 |Branch
 |===
 
+//cannot use top level index.adoc as the page with the query is always omitted.
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+
 == Other APIs version matrix
 
 Below you can find a list of the main dependencies and APIs used by Camel K and the related compatibility.
