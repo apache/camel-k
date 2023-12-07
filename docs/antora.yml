@@ -43,7 +43,7 @@ asciidoc:
     kaniko-version: 1.9.1
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.27.7
-    operator-fwk-api-version: 0.17.7
-    knative-api-version: 0.38.5
+    operator-fwk-api-version: 0.20.0
+    knative-api-version: 0.39.1
     service-binding-op-version: 1.4.0
     prometheus-op-version: 0.67.1
