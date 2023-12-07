@@ -7,15 +7,18 @@
 **Closed issues:**
 
 - Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
+- Ability to apply node selectors/affinity configuration [\#4958](https://github.com/apache/camel-k/issues/4958)
 - Ability to override resources for the quarkus-native task [\#4956](https://github.com/apache/camel-k/issues/4956)
 - java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#4955](https://github.com/apache/camel-k/issues/4955)
 - OGNL Script not working anymore after upgrade to Camel-K 2.1.0 [\#4936](https://github.com/apache/camel-k/issues/4936)
 - Kustomize installation test failing [\#4929](https://github.com/apache/camel-k/issues/4929)
 - Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
+- helm upgrade failing - empty task in build [\#4923](https://github.com/apache/camel-k/issues/4923)
 - Component resolvable variables regression [\#4916](https://github.com/apache/camel-k/issues/4916)
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Camel K offline error [\#4894](https://github.com/apache/camel-k/issues/4894)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
+- Runtime compatibility matrix should be changed to default matrix [\#4886](https://github.com/apache/camel-k/issues/4886)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - Coverage report sends message 3 times [\#4875](https://github.com/apache/camel-k/issues/4875)
 - Bump kube dependencies to 1.27.7 [\#4861](https://github.com/apache/camel-k/issues/4861)
@@ -35,6 +38,9 @@
 
 **Merged pull requests:**
 
+- Remove index table which is not refering to any table [\#4975](https://github.com/apache/camel-k/pull/4975) ([apupier](https://github.com/apupier))
+- chore\(doc\): deps matrix [\#4973](https://github.com/apache/camel-k/pull/4973) ([squakez](https://github.com/squakez))
+- feat\(\#4958\): Supporting node selectors for the builder pod [\#4968](https://github.com/apache/camel-k/pull/4968) ([lsergio](https://github.com/lsergio))
 - fix\(trait\): doc to explain initContainers [\#4966](https://github.com/apache/camel-k/pull/4966) ([squakez](https://github.com/squakez))
 - fix\(\#4961\): Improve cross-namespace check for Kamelet refs [\#4965](https://github.com/apache/camel-k/pull/4965) ([christophd](https://github.com/christophd))
 - fix\(build\): don't override user provided resources [\#4964](https://github.com/apache/camel-k/pull/4964) ([squakez](https://github.com/squakez))
@@ -47,6 +53,7 @@
 - chore\(deps\): bump ch.qos.logback:logback-classic from 1.3.7 to 1.3.12 in /java/maven-logging [\#4944](https://github.com/apache/camel-k/pull/4944) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump ch.qos.logback:logback-core from 1.3.7 to 1.3.12 in /java/maven-logging [\#4943](https://github.com/apache/camel-k/pull/4943) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/serving from 0.38.2 to 0.39.2 [\#4939](https://github.com/apache/camel-k/pull/4939) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump knative.dev/eventing from 0.38.5 to 0.39.1 [\#4938](https://github.com/apache/camel-k/pull/4938) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/time from 0.4.0 to 0.5.0 [\#4935](https://github.com/apache/camel-k/pull/4935) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.14.0 to 0.15.0 [\#4933](https://github.com/apache/camel-k/pull/4933) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Fix\(core\): Openshift securityContext on global operator [\#4932](https://github.com/apache/camel-k/pull/4932) ([gansheer](https://github.com/gansheer))
@@ -70,6 +77,7 @@
 - chore\(deps\): bump golang.org/x/text from 0.13.0 to 0.14.0 [\#4904](https://github.com/apache/camel-k/pull/4904) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(api\): introduce itp shortname [\#4903](https://github.com/apache/camel-k/pull/4903) ([squakez](https://github.com/squakez))
 - fix\(build\): use maven context arguments [\#4901](https://github.com/apache/camel-k/pull/4901) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/operator-framework/api from 0.17.7 to 0.19.0 [\#4899](https://github.com/apache/camel-k/pull/4899) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/spf13/cobra from 1.7.0 to 1.8.0 [\#4898](https://github.com/apache/camel-k/pull/4898) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/sync from 0.4.0 to 0.5.0 [\#4897](https://github.com/apache/camel-k/pull/4897) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Add e2e test for knative service trait with annotation [\#4895](https://github.com/apache/camel-k/pull/4895) ([lfabriko](https://github.com/lfabriko))
@@ -94,6 +102,7 @@
 - fix\(e2e\): Fix TestCamelTrait [\#4857](https://github.com/apache/camel-k/pull/4857) ([gansheer](https://github.com/gansheer))
 - fix\(core\): Access configmap from another namespace for KEP-1755 [\#4849](https://github.com/apache/camel-k/pull/4849) ([gansheer](https://github.com/gansheer))
 - feat\(runtime\): enable source less integrations [\#4831](https://github.com/apache/camel-k/pull/4831) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/operator-framework/api from 0.13.0 to 0.17.7 [\#4634](https://github.com/apache/camel-k/pull/4634) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [2.1.1-nightly](https://github.com/apache/camel-k/tree/2.1.1-nightly) (2023-10-24)
 
