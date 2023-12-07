@@ -34,6 +34,7 @@ type BuildConfigurationApplyConfiguration struct {
 	RequestMemory       *string                `json:"requestMemory,omitempty"`
 	LimitCPU            *string                `json:"limitCPU,omitempty"`
 	LimitMemory         *string                `json:"limitMemory,omitempty"`
+	NodeSelector        map[string]string      `json:"nodeSelector,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs an declarative configuration of the BuildConfiguration type for use with
@@ -103,5 +104,19 @@ func (b *BuildConfigurationApplyConfiguration) WithLimitCPU(value string) *Build
 // If called multiple times, the LimitMemory field is set to the value of the last call.
 func (b *BuildConfigurationApplyConfiguration) WithLimitMemory(value string) *BuildConfigurationApplyConfiguration {
 	b.LimitMemory = &value
+	return b
+}
+
+// WithNodeSelector puts the entries into the NodeSelector field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the NodeSelector field,
+// overwriting an existing map entries in NodeSelector field with the same key.
+func (b *BuildConfigurationApplyConfiguration) WithNodeSelector(entries map[string]string) *BuildConfigurationApplyConfiguration {
+	if b.NodeSelector == nil && len(entries) > 0 {
+		b.NodeSelector = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.NodeSelector[k] = v
+	}
 	return b
 }

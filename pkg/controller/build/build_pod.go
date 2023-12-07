@@ -147,6 +147,7 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build
 			ServiceAccountName: platform.BuilderServiceAccount,
 			RestartPolicy:      corev1.RestartPolicyNever,
 			SecurityContext:    podSecurityContext,
+			NodeSelector:       build.TaskConfiguration("builder").NodeSelector,
 		},
 	}
 

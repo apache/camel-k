@@ -601,6 +601,13 @@ string
 
 The maximum amount of memory required. Only used for `pod` strategy
 
+|`nodeSelector` +
+map[string]string
+|
+
+
+The node selector for the builder pod. Only used for `pod` strategy
+
 
 |===
 
@@ -5907,6 +5914,13 @@ A list of limit cpu configuration for the specific task with format `<task-name>
 
 
 A list of limit memory configuration for the specific task with format `<task-name>:<limit-memory-conf>`.
+
+|`nodeSelector` +
+map[string]string
+|
+
+
+Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
 
 
 |===

@@ -449,3 +449,40 @@ func TestExistsTaskRequest(t *testing.T) {
 	assert.False(t, existsTaskRequest(tasks, "quarkus"))
 	assert.False(t, existsTaskRequest(tasks, "shouldfail"))
 }
+
+func TestBuilderWithNoNodeSelector(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+
+	active, condition, err := builderTrait.Configure(env)
+	assert.Nil(t, err)
+
+	err = builderTrait.Apply(env)
+	assert.Nil(t, err)
+
+	assert.True(t, active)
+	assert.Nil(t, condition)
+
+	assert.Nil(t, builderTrait.NodeSelector)
+	assert.Nil(t, env.Pipeline[0].Builder.Configuration.NodeSelector)
+}
+
+func TestBuilderWithNodeSelector(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.NodeSelector = map[string]string{
+		"size": "large",
+	}
+
+	active, condition, err := builderTrait.Configure(env)
+	assert.Nil(t, err)
+
+	err = builderTrait.Apply(env)
+	assert.Nil(t, err)
+
+	assert.True(t, active)
+	assert.Nil(t, condition)
+
+	assert.Equal(t, map[string]string{"size": "large"}, env.Pipeline[0].Builder.Configuration.NodeSelector)
+	assert.Equal(t, map[string]string{"size": "large"}, builderTrait.NodeSelector)
+}

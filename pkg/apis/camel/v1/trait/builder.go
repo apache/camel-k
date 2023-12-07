@@ -66,4 +66,6 @@ type BuilderTrait struct {
 	TasksLimitCPU []string `property:"tasks-limit-cpu" json:"tasksLimitCPU,omitempty"`
 	// A list of limit memory configuration for the specific task with format `<task-name>:<limit-memory-conf>`.
 	TasksLimitMemory []string `property:"tasks-limit-memory" json:"tasksLimitMemory,omitempty"`
+	// Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
+	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
 }
