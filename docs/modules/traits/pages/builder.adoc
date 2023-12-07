@@ -117,3 +117,10 @@ Here is a simple example:
 ----
 
 The `builder` pod will be created with a node selector that allows it to run only on nodes where the `size` label is equal to `large`.
+
+Node selectors can be specified when running an integration with the CLI:
+
+[source,console]
+----
+$ kamel run --trait builder.node-selector.size=large integration.groovy
+----
