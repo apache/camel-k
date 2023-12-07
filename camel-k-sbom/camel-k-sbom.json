@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:4913d2a1-bb6a-4507-a45a-0a34d7482a2a",
+  "serialNumber": "urn:uuid:f0a88b48-a820-4ffc-9d80-1e9912db168a",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-12-06T23:46:48Z",
+    "timestamp": "2023-12-07T23:46:48Z",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231205234823-3429c565716a?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231207234627-f46c270f247e?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20231205234823-3429c565716a",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231205234823-3429c565716a?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20231207234627-f46c270f247e",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231207234627-f46c270f247e?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -609,18 +609,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+      "bom-ref": "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
       "type": "library",
       "name": "github.com/emicklei/go-restful/v3",
-      "version": "v3.9.0",
+      "version": "v3.10.2",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "5f018395fc449d0673ba8a68ab1c1212594d70238cf4386117284520818ac311"
+          "content": "848a2f6e79814cb8c75e4a84054cf71c6a5765d33b66b13d7c921922a9492ea1"
         }
       ],
-      "purl": "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/emicklei/go-restful",
@@ -1943,18 +1943,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/github.com/operator-framework/api@v0.17.7?type=module",
+      "bom-ref": "pkg:golang/github.com/operator-framework/api@v0.20.0?type=module",
       "type": "library",
       "name": "github.com/operator-framework/api",
-      "version": "v0.17.7",
+      "version": "v0.20.0",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "34b9fe21e83e1da3ebc3be4a6d7e1e7e594ddb5a1f140ad0cd2deaf130db418d"
+          "content": "036602461afeeacd24de944969c9f08e1d547bc06a8c81ae4368ef3e0f57081e"
         }
       ],
-      "purl": "pkg:golang/github.com/operator-framework/api@v0.17.7?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/github.com/operator-framework/api@v0.20.0?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/operator-framework/api",
@@ -3653,18 +3653,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/knative.dev/eventing@v0.38.5?type=module",
+      "bom-ref": "pkg:golang/knative.dev/eventing@v0.39.1?type=module",
       "type": "library",
       "name": "knative.dev/eventing",
-      "version": "v0.38.5",
+      "version": "v0.39.1",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "36f4b2de57a4f486cb2d6128b77e8dc807cdbfb56424d977f05d48b552f40fab"
+          "content": "1cc04b7ef019fcb6555d05b8714a8e48cfdc99d7cd2aa417a895917b6a352435"
         }
       ],
-      "purl": "pkg:golang/knative.dev/eventing@v0.38.5?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/knative.dev/eventing@v0.39.1?type=module\u0026goos=linux\u0026goarch=amd64",
       "evidence": {
         "licenses": [
           {
@@ -3830,7 +3830,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231205234823-3429c565716a?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231207234627-f46c270f247e?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
         "pkg:golang/github.com/container-tools/spectrum@v0.6.42?type=module",
@@ -3847,7 +3847,7 @@
         "pkg:golang/github.com/mitchellh/mapstructure@v1.5.0?type=module",
         "pkg:golang/github.com/onsi/gomega@v1.30.0?type=module",
         "pkg:golang/github.com/openshift/api@v0.0.0-20230817133225-564be9ddb58e?type=module",
-        "pkg:golang/github.com/operator-framework/api@v0.17.7?type=module",
+        "pkg:golang/github.com/operator-framework/api@v0.20.0?type=module",
         "pkg:golang/github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring@v0.67.1?type=module",
         "pkg:golang/github.com/prometheus/client_golang@v1.17.0?type=module",
         "pkg:golang/github.com/redhat-developer/service-binding-operator@v1.4.0?type=module",
@@ -3878,7 +3878,7 @@
         "pkg:golang/k8s.io/klog/v2@v2.110.1?type=module",
         "pkg:golang/k8s.io/kubectl@v0.27.7?type=module",
         "pkg:golang/k8s.io/utils@v0.0.0-20230505201702-9f6742963106?type=module",
-        "pkg:golang/knative.dev/eventing@v0.38.5?type=module",
+        "pkg:golang/knative.dev/eventing@v0.39.1?type=module",
         "pkg:golang/knative.dev/pkg@v0.0.0-20231023151236-29775d7c9e5c?type=module",
         "pkg:golang/knative.dev/serving@v0.39.2?type=module",
         "pkg:golang/sigs.k8s.io/controller-runtime@v0.15.2?type=module",
@@ -4055,7 +4055,7 @@
       ]
     },
     {
-      "ref": "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module"
+      "ref": "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module"
     },
     {
       "ref": "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module"
@@ -4332,7 +4332,7 @@
       "ref": "pkg:golang/github.com/openshift/api@v0.0.0-20230817133225-564be9ddb58e?type=module",
       "dependsOn": [
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
         "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6?type=module",
         "pkg:golang/github.com/go-openapi/jsonreference@v0.20.1?type=module",
@@ -4369,12 +4369,12 @@
       ]
     },
     {
-      "ref": "pkg:golang/github.com/operator-framework/api@v0.17.7?type=module",
+      "ref": "pkg:golang/github.com/operator-framework/api@v0.20.0?type=module",
       "dependsOn": [
         "pkg:golang/github.com/beorn7/perks@v1.0.1?type=module",
         "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
         "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6?type=module",
         "pkg:golang/github.com/go-openapi/jsonreference@v0.20.1?type=module",
@@ -4520,7 +4520,7 @@
         "pkg:golang/github.com/beorn7/perks@v1.0.1?type=module",
         "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/evanphx/json-patch/v5@v5.7.0?type=module",
         "pkg:golang/github.com/fsnotify/fsnotify@v1.7.0?type=module",
@@ -4544,7 +4544,7 @@
         "pkg:golang/github.com/modern-go/reflect2@v1.0.2?type=module",
         "pkg:golang/github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822?type=module",
         "pkg:golang/github.com/onsi/gomega@v1.30.0?type=module",
-        "pkg:golang/github.com/operator-framework/api@v0.17.7?type=module",
+        "pkg:golang/github.com/operator-framework/api@v0.20.0?type=module",
         "pkg:golang/github.com/pkg/errors@v0.9.1?type=module",
         "pkg:golang/github.com/pmezard/go-difflib@v1.0.1-0.20181226105442-5d4384ee4fb2?type=module",
         "pkg:golang/github.com/prometheus/client_golang@v1.17.0?type=module",
@@ -5013,7 +5013,7 @@
         "pkg:golang/github.com/beorn7/perks@v1.0.1?type=module",
         "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/fsnotify/fsnotify@v1.7.0?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
@@ -5125,7 +5125,7 @@
       "ref": "pkg:golang/k8s.io/cli-runtime@v0.27.7?type=module",
       "dependsOn": [
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
         "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6?type=module",
@@ -5177,7 +5177,7 @@
       "ref": "pkg:golang/k8s.io/client-go@v0.27.7?type=module",
       "dependsOn": [
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
         "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6?type=module",
@@ -5229,7 +5229,7 @@
         "pkg:golang/github.com/beorn7/perks@v1.0.1?type=module",
         "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
         "pkg:golang/github.com/go-logr/zapr@v1.2.4?type=module",
         "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6?type=module",
@@ -5303,7 +5303,7 @@
       "ref": "pkg:golang/k8s.io/kube-openapi@v0.0.0-20230501164219-8b0f38b5fd1f?type=module",
       "dependsOn": [
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
         "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6?type=module",
         "pkg:golang/github.com/go-openapi/jsonreference@v0.20.1?type=module",
@@ -5345,7 +5345,7 @@
       "dependsOn": [
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
         "pkg:golang/github.com/docker/distribution@v2.8.2+incompatible?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/go-logr/logr@v1.3.0?type=module",
         "pkg:golang/github.com/go-openapi/jsonpointer@v0.19.6?type=module",
@@ -5408,7 +5408,7 @@
       ]
     },
     {
-      "ref": "pkg:golang/knative.dev/eventing@v0.38.5?type=module",
+      "ref": "pkg:golang/knative.dev/eventing@v0.39.1?type=module",
       "dependsOn": [
         "pkg:golang/contrib.go.opencensus.io/exporter/ocagent@v0.7.1-0.20200907061046-05415f1de66d?type=module",
         "pkg:golang/contrib.go.opencensus.io/exporter/prometheus@v0.4.2?type=module",
@@ -5420,7 +5420,7 @@
         "pkg:golang/github.com/cloudevents/sdk-go/sql/v2@v2.13.0?type=module",
         "pkg:golang/github.com/cloudevents/sdk-go/v2@v2.13.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/evanphx/json-patch/v5@v5.7.0?type=module",
         "pkg:golang/github.com/go-kit/log@v0.2.1?type=module",
@@ -5479,6 +5479,8 @@
         "pkg:golang/google.golang.org/api@v0.147.0?type=module",
         "pkg:golang/google.golang.org/appengine@v1.6.7?type=module",
         "pkg:golang/google.golang.org/genproto@v0.0.0-20231002182017-d307bd883b97?type=module",
+        "pkg:golang/google.golang.org/genproto/googleapis/api@v0.0.0-20231002182017-d307bd883b97?type=module",
+        "pkg:golang/google.golang.org/genproto/googleapis/rpc@v0.0.0-20231009173412-8bfb1ae86b6c?type=module",
         "pkg:golang/google.golang.org/grpc@v1.58.3?type=module",
         "pkg:golang/google.golang.org/protobuf@v1.31.0?type=module",
         "pkg:golang/gopkg.in/inf.v0@v0.9.1?type=module",
@@ -5508,7 +5510,7 @@
         "pkg:golang/github.com/census-instrumentation/opencensus-proto@v0.4.1?type=module",
         "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/evanphx/json-patch/v5@v5.7.0?type=module",
         "pkg:golang/github.com/go-kit/log@v0.2.1?type=module",
@@ -5587,7 +5589,7 @@
         "pkg:golang/github.com/census-instrumentation/opencensus-proto@v0.4.1?type=module",
         "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/evanphx/json-patch/v5@v5.7.0?type=module",
         "pkg:golang/github.com/go-kit/log@v0.2.1?type=module",
@@ -5672,7 +5674,7 @@
         "pkg:golang/github.com/docker/distribution@v2.8.2+incompatible?type=module",
         "pkg:golang/github.com/docker/docker@v24.0.7+incompatible?type=module",
         "pkg:golang/github.com/docker/docker-credential-helpers@v0.7.0?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/evanphx/json-patch/v5@v5.7.0?type=module",
         "pkg:golang/github.com/go-kit/log@v0.2.1?type=module",
@@ -5756,7 +5758,7 @@
         "pkg:golang/github.com/beorn7/perks@v1.0.1?type=module",
         "pkg:golang/github.com/cespare/xxhash/v2@v2.2.0?type=module",
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
-        "pkg:golang/github.com/emicklei/go-restful/v3@v3.9.0?type=module",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.10.2?type=module",
         "pkg:golang/github.com/evanphx/json-patch@v5.7.0+incompatible?type=module",
         "pkg:golang/github.com/evanphx/json-patch/v5@v5.7.0?type=module",
         "pkg:golang/github.com/fsnotify/fsnotify@v1.7.0?type=module",
