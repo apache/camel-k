@@ -5887,6 +5887,15 @@ Syntax: [configmap{vbar}secret]:name[/key], where name represents the resource n
 
 A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
 
+|`tasksFilter` +
+string
+|
+
+
+A list of tasks (available only when using `pod` strategy), sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
+Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`)
+if you need to execute them.
+
 |`tasksRequestCPU` +
 []string
 |
