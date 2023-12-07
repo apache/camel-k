@@ -251,15 +251,6 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
 }
 
-func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
-	for _, t := range tasks {
-		if t.Custom != nil && t.Custom.Name == name {
-			return t
-		}
-	}
-	return v1.Task{}
-}
-
 func TestMavenProfilesBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyKaniko, v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
@@ -485,4 +476,94 @@ func TestBuilderWithNodeSelector(t *testing.T) {
 
 	assert.Equal(t, map[string]string{"size": "large"}, env.Pipeline[0].Builder.Configuration.NodeSelector)
 	assert.Equal(t, map[string]string{"size": "large"}, builderTrait.NodeSelector)
+}
+
+func TestBuilderNoTasksFilter(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+
+	err := builderTrait.Apply(env)
+	assert.Nil(t, err)
+
+	pipelineTasks := tasksByName(env.Pipeline)
+	assert.Equal(t, []string{"builder", "package", "jib"}, pipelineTasks)
+}
+
+func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.TasksFilter = "builder,missing-task"
+
+	err := builderTrait.Apply(env)
+	assert.NotNil(t, err)
+	assert.Equal(t, "no task exist for missing-task name", err.Error())
+}
+
+func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.TasksFilter = "builder,package"
+
+	err := builderTrait.Apply(env)
+	assert.Nil(t, err)
+	pipelineTasks := tasksByName(env.Pipeline)
+	assert.Equal(t, []string{"builder", "package"}, pipelineTasks)
+}
+
+func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.TasksFilter = "package,builder"
+
+	err := builderTrait.Apply(env)
+	assert.Nil(t, err)
+	pipelineTasks := tasksByName(env.Pipeline)
+	assert.Equal(t, []string{"package", "builder"}, pipelineTasks)
+}
+
+func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, `my-custom-publish;alpine;mvn test`)
+	builderTrait.Tasks = append(builderTrait.Tasks, "my-custom-task;alpine;ls")
+	builderTrait.TasksFilter = "builder,my-custom-task,package,my-custom-publish"
+
+	err := builderTrait.Apply(env)
+	assert.Nil(t, err)
+	pipelineTasks := tasksByName(env.Pipeline)
+	assert.Equal(t, []string{"builder", "my-custom-task", "package", "my-custom-publish"}, pipelineTasks)
+}
+
+func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
+	for _, t := range tasks {
+		if t.Custom != nil && t.Custom.Name == name {
+			return t
+		}
+	}
+	return v1.Task{}
+}
+
+func tasksByName(tasks []v1.Task) []string {
+	pipelineTasks := make([]string, len(tasks))
+	for i, t := range tasks {
+		if t.Builder != nil {
+			pipelineTasks[i] = t.Builder.Name
+		}
+		if t.Custom != nil {
+			pipelineTasks[i] = t.Custom.Name
+		}
+		if t.Package != nil {
+			pipelineTasks[i] = t.Package.Name
+		}
+		if t.S2i != nil {
+			pipelineTasks[i] = t.S2i.Name
+		}
+		if t.Spectrum != nil {
+			pipelineTasks[i] = t.Spectrum.Name
+		}
+		if t.Jib != nil {
+			pipelineTasks[i] = t.Jib.Name
+		}
+	}
+	return pipelineTasks
 }

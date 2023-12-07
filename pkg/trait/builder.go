@@ -313,6 +313,13 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 	}
 
+	// filter only those tasks required by the user
+	if t.TasksFilter != "" {
+		flt := strings.Split(t.TasksFilter, ",")
+		if pipelineTasks, err = filter(pipelineTasks, flt); err != nil {
+			return err
+		}
+	}
 	// add local pipeline tasks to env pipeline
 	e.Pipeline = append(e.Pipeline, pipelineTasks...)
 	return nil
@@ -558,4 +565,43 @@ func splitContainerCommand(command string) []string {
 	}
 
 	return removeQuotes
+}
+
+func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
+	var filteredTasks []v1.Task
+	for _, f := range filterTasks {
+		found := false
+		for _, t := range tasks {
+			if t.Builder != nil && t.Builder.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			} else if t.Custom != nil && t.Custom.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			} else if t.Package != nil && t.Package.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			} else if t.Spectrum != nil && t.Spectrum.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			} else if t.S2i != nil && t.S2i.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			} else if t.Jib != nil && t.Jib.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			} else if t.Buildah != nil && t.Buildah.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			} else if t.Kaniko != nil && t.Kaniko.Name == f {
+				filteredTasks = append(filteredTasks, t)
+				found = true
+			}
+		}
+		if !found {
+			// If we reach this point it means no tasks exists for the name
+			return nil, fmt.Errorf("no task exist for %s name", f)
+		}
+	}
+	return filteredTasks, nil
 }
