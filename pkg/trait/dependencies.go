@@ -81,6 +81,16 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		if err != nil {
 			return err
 		}
+
+		deps, err := camel.DependencyList(s)
+		if err != nil {
+			return err
+		} else {
+			for _, dep := range deps {
+				dependencies.Add(dep)
+			}
+		}
+
 		meta.RequiredCapabilities.Each(func(item string) bool {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
 			return true

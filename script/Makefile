@@ -397,6 +397,7 @@ clean:
 	rm -rf camel-k-client-*.tar.gz
 	rm -rf camel-k-examples-*.tar.gz
 	rm -rf bundle
+	rm -rf java/camel-deps/target
 	rm -rf $(INDEX_DIR) $(INDEX_DIR).Dockerfile
 
 dep:
@@ -433,6 +434,11 @@ maven-overlay:
 	mkdir -p build/_maven_overlay
 	./script/maven_overlay.sh build/_maven_overlay
 
+# setup camel-deps into the container image
+camel-deps:
+	@echo "####### Preparing to bundle Camel Dependency App..."
+	@mvn -ntp -Papache -s script/maven-settings.xml -f java/camel-deps/pom.xml package
+
 kamel-overlay:
 	mkdir -p build/_output/bin
 ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
@@ -455,7 +461,7 @@ ifneq ($(IMAGE_ARCH), amd64)
 	DOCKER_TAG := $(DOCKER_TAG)-$(IMAGE_ARCH)
 endif
 
-images: build kamel-overlay maven-overlay bundle-kamelets
+images: build kamel-overlay maven-overlay camel-deps bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
 	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif

@@ -1052,6 +1052,16 @@ func IntegrationSpecProfile(ns string, name string) func() v1.TraitProfile {
 	}
 }
 
+func IntegrationStatusDependencies(ns string, name string) func() []string {
+	return func() []string {
+		it := Integration(ns, name)()
+		if it == nil || &it.Status == nil {
+			return nil
+		}
+		return it.Status.Dependencies
+	}
+}
+
 func IntegrationStatusCapabilities(ns string, name string) func() []string {
 	return func() []string {
 		it := Integration(ns, name)()

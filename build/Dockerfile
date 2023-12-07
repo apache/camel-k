@@ -40,13 +40,21 @@ ENV MAVEN_USER_HOME="${MAVEN_HOME}"
 RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default \
     && cp -r /usr/share/maven/lib/. $(cat ${MVNW_DIR}default)/lib \
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider* \
-    && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.* 
+    && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.*
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
 ADD build/_maven_output ${MVN_REPO}
 # Fix https://github.com/moby/moby/issues/37965
 RUN true
 ADD build/_kamelets /kamelets
+
+# prepare camel-deps
+# if you change this directory, you should also change the java/camel-deps/run.sh script and camel_runtimes.go
+ARG APP_DIR="/usr/share/local/camel-deps"
+RUN mkdir -p ${APP_DIR}
+COPY java/camel-deps/target/quarkus-app ${APP_DIR}
+COPY java/camel-deps/run.sh ${APP_DIR}
+RUN chown 1001:0 ${APP_DIR}/run.sh && chmod 755 ${APP_DIR}/run.sh
 
 RUN chgrp -R 0 ${MVN_REPO} \
     && chown -R 1001:0 ${MVN_REPO} \

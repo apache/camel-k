@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,6 +27,25 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
+
+func fakeExecCommand(command string, args ...string) *exec.Cmd {
+	cs := []string{"-test.run=TestHelperProcess", "--", command}
+	cs = append(cs, args...)
+	cmd := exec.Command(os.Args[0], cs...) // #nosec G204 Skip only for testing.
+	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
+	return cmd
+}
+
+func init() {
+	camel.ExecCommand = fakeExecCommand
+}
+
+func TestHelperProcess(t *testing.T) {
+	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
+		return
+	}
+	os.Exit(0)
+}
 
 func TestDependenciesTraitApplicability(t *testing.T) {
 	e := &Environment{

@@ -48,6 +48,7 @@ build/maven/target/
 build/maven
 build/m2
 /api_*
+.camel-jbang
 
 # YAKS test output
 .yaks-jbang/
