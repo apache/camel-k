@@ -56,9 +56,19 @@ func TestIsResolvable(t *testing.T) {
 		uri      string
 		expected bool
 	}{
+		// static dependencies
+		{desc: "Basic static dependency", uri: "log:info", expected: true},
+		{desc: "Basic static dependency with path and param", uri: "http://my-site/test?param=value", expected: true},
+		{desc: "Basic static dependency with path and param placeholder", uri: "http://my-site/test?{{params}}", expected: true},
+		{desc: "Basic static dependency with path placeholder and param", uri: "http://my-site/{{path}}?key=val", expected: true},
+
+		// placeholders
 		{desc: "Basic", uri: "{{url}}", expected: false},
 		{desc: "With query param placeholder", uri: "{{url}}?authMethod={{authMethod}}", expected: false},
+		{desc: "With query path and param placeholders 1", uri: "{{url}}/test?authMethod={{authMethod}}", expected: false},
+		{desc: "With query path and param placeholders 2", uri: "{{url}}/test?authMethod={{authMethod}}&key=val", expected: false},
 		{desc: "With query param", uri: "{{url}}?authMethod=Basic", expected: false},
+		{desc: "With query param and path", uri: "{{url}}/test", expected: false},
 		{desc: "With masked AND url-encoded query params", uri: "{{url}}?authMethod=%7B%7BauthMethod%7D%7D", expected: false},
 	}
 
