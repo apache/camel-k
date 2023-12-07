@@ -64,9 +64,6 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 
 Below you can find a list of the main dependencies and APIs used by Camel K and the related compatibility.
 
-//cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
-
 [caption=]
 .Kubernetes and other dependencies
 [width="100%",cols="4,2,2,2,2,2,2",options="header"]
