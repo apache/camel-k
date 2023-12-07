@@ -42,27 +42,34 @@ The integration code immediately runs in the cloud. **Nothing else** is needed.
 
 Continue reading the documentation to xref:installation/installation.adoc[install and get started with Camel K].
 
-== Compatibility Matrix
+== Camel dependencies matrix
+
+From Camel K version 2 onward you will be able to use any Camel K Runtime. Each runtime depends on a Camel Quarkus, Camel and Quarkus Platform version. Every Camel K has a default runtime used, but you can xref:running/runtime-version.adoc[pick any Camel K Runtime available] (backward and forward compatible).
 
 [caption=]
-.Compatibility between Camel K, Camel and Quarkus
+.Camel dependencies matrix
 [width="100%",cols="4,2,2,2,2,2,1,3",options="header"]
 |===
 |Camel K Version
-|Camel K Runtime version
-|Camel Version
-|Camel-Quarkus Version
-|Quarkus Version
-|Kamelets Version
+|(Default) Camel K Runtime
+|Camel Quarkus
+|Camel
+|Quarkus
+|Kamelets
 |LTS
 |Branch
 |===
 
-//cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelRef(camelVersion, camelDocsVersion)|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+== Other APIs version matrix
 
-.Compatibility between Camel K and dependencies
-[width="100%",cols="4,2,2,2,2,2,2,1,3",options="header"]
+Below you can find a list of the main dependencies and APIs used by Camel K and the related compatibility.
+
+//cannot use top level index.adoc as the page with the query is always omitted.
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+
+[caption=]
+.Kubernetes and other dependencies
+[width="100%",cols="4,2,2,2,2,2,2",options="header"]
 |===
 |Camel K Version
 |Kubernetes API
@@ -70,10 +77,8 @@ indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef
 |Knative API
 |Service Binding Operator
 |Prometheus Operator
-|Buildah
-|Kaniko
 |Kustomize version
 |===
 
 //cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|kubernetesApiVersion|operatorFwkApiVersion|knativeApiVersion|serviceBindingOpVersion|prometheusOpVersion|buildahVersion|kanikoVersion|kustomizeVersion", requires={requires},transform=util.sortCompatibilityItems]
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|kubernetesApiVersion|operatorFwkApiVersion|knativeApiVersion|serviceBindingOpVersion|prometheusOpVersion|kustomizeVersion", requires={requires},transform=util.sortCompatibilityItems]
