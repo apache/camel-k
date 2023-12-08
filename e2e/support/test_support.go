@@ -2404,7 +2404,7 @@ func CreateOperatorRole(ns string) (err error) {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/operator-role-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/namespaced/operator-role-openshift.yaml")
 	}
 	return nil
 }
@@ -2419,7 +2419,7 @@ func CreateOperatorRoleBinding(ns string) error {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/operator-role-binding-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/namespaced/operator-role-binding-openshift.yaml")
 	}
 	return nil
 }

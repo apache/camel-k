@@ -202,11 +202,7 @@ setup-cluster: check-admin check-crd-api-support have-platform kustomize kubectl
 # Set the namespace in the setup-cluster kustomization yaml
 	@$(call set-kustomize-namespace,$@)
 ifeq ($(PLATFORM), openshift)
-	@for res in $(RBAC_OS)/operator-cluster*; do \
-		cd $@ || exit 1 && \
-			$(KUSTOMIZE) edit add resource ../$$res && \
-			cd - &> /dev/null; \
-	done
+	@cd $@ || exit 1 && $(KUSTOMIZE) edit add resource ../$(RBAC_OS) && cd - &> /dev/null;
 endif
 #
 # Build the resources
@@ -248,11 +244,11 @@ else
 	@cd $@ || exit 1 && $(KUSTOMIZE) edit add resource ../$(RBAC)/namespaced && cd - &> /dev/null;
 endif
 ifeq ($(PLATFORM), openshift)
-	@for res in $(RBAC_OS)/operator-role*; do \
-		cd $@ || exit 1 && \
-			$(KUSTOMIZE) edit add resource ../$$res && \
-			cd - &> /dev/null; \
-	done
+ifeq ($(GLOBAL), true)
+	@cd $@ || exit 1 && $(KUSTOMIZE) edit add resource ../$(RBAC_OS)/descoped && cd - &> /dev/null;
+else
+	@cd $@ || exit 1 && $(KUSTOMIZE) edit add resource ../$(RBAC_OS)/namespaced && cd - &> /dev/null;
+endif
 endif
 #
 # Build the resources

@@ -266,7 +266,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 	// Install OpenShift RBAC resources if needed (roles and bindings)
 	if isOpenShift {
-		if err := installOpenShiftRoles(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		if err := installOpenShiftRoles(ctx, c, cfg.Namespace, customizer, collection, force, cfg.Global); err != nil {
 			return err
 		}
 		if err := installClusterRoleBinding(ctx, c, collection, cfg.Namespace, "camel-k-operator-console-openshift", "/rbac/openshift/operator-cluster-role-console-binding-openshift.yaml"); err != nil {
@@ -484,11 +484,18 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 	return c.Patch(ctx, existing, ctrl.RawPatch(types.MergePatchType, p))
 }
 
-func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
-	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-		"/rbac/openshift/operator-role-openshift.yaml",
-		"/rbac/openshift/operator-role-binding-openshift.yaml",
-	)
+func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {
+	if global {
+		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+			"/rbac/openshift/descoped/operator-cluster-role-openshift.yaml",
+			"/rbac/openshift/descoped/operator-cluster-role-binding-openshift.yaml",
+		)
+	} else {
+		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+			"/rbac/openshift/namespaced/operator-role-openshift.yaml",
+			"/rbac/openshift/namespaced/operator-role-binding-openshift.yaml",
+		)
+	}
 }
 
 func installKubernetesRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {

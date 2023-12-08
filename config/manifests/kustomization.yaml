@@ -29,6 +29,7 @@ resources:
 - ../rbac
 - ../rbac/namespaced
 - ../rbac/openshift
+- ../rbac/openshift/namespaced
 
 patchesStrategicMerge:
 - patch-delete-user-cluster-role.yaml
