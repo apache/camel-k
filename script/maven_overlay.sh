@@ -30,6 +30,6 @@ fi
 
 output_dir=$1
 
-mvn $options -f java/maven-logging/pom.xml clean package
+mvn -q $options -f java/maven-logging/pom.xml clean package
 cp java/maven-logging/target/maven-overlay/*.jar ${output_dir}
 cp java/maven-logging/src/main/resources/logback.xml ${output_dir}
