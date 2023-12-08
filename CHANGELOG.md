@@ -27,6 +27,7 @@
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
+- Create a script to verify rbac from config/rbac to helm/camel-k/templates [\#4674](https://github.com/apache/camel-k/issues/4674)
 - doesnt work "kamel kit delete"  [\#4628](https://github.com/apache/camel-k/issues/4628)
 - Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
 - Image Vulnerability of Go package [\#4581](https://github.com/apache/camel-k/issues/4581)
@@ -38,6 +39,7 @@
 
 **Merged pull requests:**
 
+- Set quiet mode to maven overlay build script [\#4980](https://github.com/apache/camel-k/pull/4980) ([claudio4j](https://github.com/claudio4j))
 - Remove index table which is not refering to any table [\#4975](https://github.com/apache/camel-k/pull/4975) ([apupier](https://github.com/apupier))
 - chore\(doc\): deps matrix [\#4973](https://github.com/apache/camel-k/pull/4973) ([squakez](https://github.com/squakez))
 - feat\(\#4958\): Supporting node selectors for the builder pod [\#4968](https://github.com/apache/camel-k/pull/4968) ([lsergio](https://github.com/lsergio))
