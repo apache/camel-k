@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Fail to run route with toD [\#4972](https://github.com/apache/camel-k/issues/4972)
 - Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
 - Ability to apply node selectors/affinity configuration [\#4958](https://github.com/apache/camel-k/issues/4958)
 - Ability to override resources for the quarkus-native task [\#4956](https://github.com/apache/camel-k/issues/4956)
@@ -39,7 +40,11 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/spf13/viper from 1.17.0 to 1.18.1 [\#4982](https://github.com/apache/camel-k/pull/4982) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore: Fix CRD samples [\#4981](https://github.com/apache/camel-k/pull/4981) ([christophd](https://github.com/christophd))
 - Set quiet mode to maven overlay build script [\#4980](https://github.com/apache/camel-k/pull/4980) ([claudio4j](https://github.com/claudio4j))
+- chore\(ci\): Upgrade kind-action to 2.0.2 [\#4979](https://github.com/apache/camel-k/pull/4979) ([gansheer](https://github.com/gansheer))
+- Fix: Fail to run route with toD \#4972 [\#4976](https://github.com/apache/camel-k/pull/4976) ([claudio4j](https://github.com/claudio4j))
 - Remove index table which is not refering to any table [\#4975](https://github.com/apache/camel-k/pull/4975) ([apupier](https://github.com/apupier))
 - chore\(doc\): deps matrix [\#4973](https://github.com/apache/camel-k/pull/4973) ([squakez](https://github.com/squakez))
 - feat\(\#4958\): Supporting node selectors for the builder pod [\#4968](https://github.com/apache/camel-k/pull/4968) ([lsergio](https://github.com/lsergio))
