@@ -29,6 +29,8 @@ For CRC, this means executing `oc login -u system:admin` then `kamel install --c
 
 Camel K can be installed using https://kustomize.io[Kustomize], providing an interface for configuring more advanced features.
 
+**First you need to get the kustomize files**
+
 ```
 # Clone the project repository
 $ https://github.com/apache/camel-k.git
@@ -36,13 +38,47 @@ $ cd camel-k
 # You can use any release branch or skip this step to use it the last code on `main`
 $ git checkout release-a.b.x
 $ cd install
-$ kubectl apply -k setup-cluster
+```
+
+**Next you need to apply configuration at cluster level**
+
+```
+$ kubectl kustomize --load-restrictor LoadRestrictionsNone setup-cluster/ | kubectl create -f -
+```
+
+**Then the roles and privileges needs to be added**
+
+```
 $ kubectl apply -k setup
+$ kubectl apply -k config/rbac/namespaced
+# For openshift
+$ kubectl apply -k config/rbac/openshift
+$ kubectl apply -k config/rbac/openshift/namespaced
+```
+
+Should you want your operator operator to watch all namespaces (global operator), you will replace `config/rbac/namespaced` by `config/rbac/descoped` and `config/rbac/openshift/namespaced` by `config/rbac/openshift/descoped`.
+
+**Finally the operator can be deployed**
+
+```
 $ kubectl apply -k operator
 $ kubectl apply -k platform
 ```
 
-NOTE: you probably want to edit the configuration. Please, do any change right after cloning the repository.
+By default the operator is configured to get the registry information from a Configmap expected the namespace `kube-public` like this example:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: local-registry-hosting
+  namespace: kube-public
+data:
+  localRegistryHosting.v1: |
+    hostFromContainerRuntime: "registry:5000"
+```
+
+NOTE: you probably want to edit the configuration. Please, do any change right after cloning the repository. Be careful to avoid making any modification in the `install/config` folder.
 
 More information on the xref:installation/advanced/kustomize.adoc[Kustomize Camel K installation procedure] page.
 
