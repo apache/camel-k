@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Fail to run route with toD [\#4972](https://github.com/apache/camel-k/issues/4972)
 - Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
 - Ability to apply node selectors/affinity configuration [\#4958](https://github.com/apache/camel-k/issues/4958)
 - Ability to override resources for the quarkus-native task [\#4956](https://github.com/apache/camel-k/issues/4956)
