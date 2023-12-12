@@ -9,3 +9,7 @@ Feature: Camel K can bind Kamelets via HTTP
     Given Camel K integration display is running
     Then Camel K integration display should print type: org.apache.camel.event
     Then Camel K integration display should print Hello
+
+  Scenario: Remove resources
+    Given delete Camel K integration display
+    Given delete KameletBinding timer-source-binding-display

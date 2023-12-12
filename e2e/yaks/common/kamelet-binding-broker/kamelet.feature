@@ -8,3 +8,7 @@ Feature: Camel K can bind Kamelets to the broker
   Scenario: Sending event to the custom broker with KameletBinding
     Given Camel K integration logger-sink-binding is running
     Then Camel K integration logger-sink-binding should print message: Hello Custom Event from sample-broker
+
+  Scenario: Remove resources
+    Given delete Camel K integration timer-source-binding
+    Given delete Camel K integration logger-sink-binding

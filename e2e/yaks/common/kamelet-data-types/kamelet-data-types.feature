@@ -16,3 +16,7 @@ Feature: Kamelets with data types
     Given Camel K integration timer-to-log is running
     Then Camel K integration timer-to-log should print BodyType: byte[], Body: Hello from Camel K!
     Then Camel K integration timer-to-log should print BodyType: String, Body: Hello from Camel K!
+
+  Scenario: Remove resources
+    Given delete KameletBinding event-binding
+    Given delete KameletBinding timer-to-log

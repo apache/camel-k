@@ -23,4 +23,7 @@ Feature: Ensure that Kamelets support multiline configuration
     """
     And expect HTTP request header: Content-Type="application/json;charset=UTF-8"
     And receive POST /events
-    And delete KameletBinding properties-binding
+
+  Scenario: Remove resources
+    Given delete Kubernetes service probe-service
+    Given delete KameletBinding properties-binding
