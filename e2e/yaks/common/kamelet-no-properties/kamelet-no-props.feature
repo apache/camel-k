@@ -26,3 +26,7 @@ from:
     Then KameletBinding no-props-source-uri should be available
     Then Camel K integration no-props-source-uri should be running
     Then Camel K integration no-props-source-uri should print Hello World
+
+  Scenario: Remove resources
+    Given delete Kubernetes service greeting-service
+    Given delete KameletBinding no-props-source-uri

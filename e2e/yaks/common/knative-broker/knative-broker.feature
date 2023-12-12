@@ -52,5 +52,7 @@ Feature: Camel K can correctly filter messages from broker
     And Camel K integration receiver should not print From evt1: event-all
     And Camel K integration receiver should not print From evt2: event-1
     And Camel K integration receiver should not print From evt2: event-all
-    And delete Camel K integration sender
-    And delete Camel K integration receiver
+
+  Scenario: Remove resources
+    Given delete Camel K integration sender
+    Given delete Camel K integration receiver

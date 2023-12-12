@@ -1,8 +1,6 @@
 Feature: Kamelets can declare local beans
 
   Background:
-    Given Disable auto removal of Kamelet resources
-    Given Disable auto removal of Kubernetes resources
     Given Camel K resource polling configuration
       | maxAttempts          | 40   |
       | delayBetweenAttempts | 3000 |
