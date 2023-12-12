@@ -11,6 +11,7 @@
 - Ability to apply node selectors/affinity configuration [\#4958](https://github.com/apache/camel-k/issues/4958)
 - Ability to override resources for the quarkus-native task [\#4956](https://github.com/apache/camel-k/issues/4956)
 - java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#4955](https://github.com/apache/camel-k/issues/4955)
+- Kustomize KEP 1755 failing test [\#4954](https://github.com/apache/camel-k/issues/4954)
 - OGNL Script not working anymore after upgrade to Camel-K 2.1.0 [\#4936](https://github.com/apache/camel-k/issues/4936)
 - Kustomize installation test failing [\#4929](https://github.com/apache/camel-k/issues/4929)
 - Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
@@ -40,6 +41,7 @@
 
 **Merged pull requests:**
 
+- chore: Improve YAKS E2E tests [\#4984](https://github.com/apache/camel-k/pull/4984) ([christophd](https://github.com/christophd))
 - chore\(deps\): bump github.com/spf13/viper from 1.17.0 to 1.18.1 [\#4982](https://github.com/apache/camel-k/pull/4982) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore: Fix CRD samples [\#4981](https://github.com/apache/camel-k/pull/4981) ([christophd](https://github.com/christophd))
 - Set quiet mode to maven overlay build script [\#4980](https://github.com/apache/camel-k/pull/4980) ([claudio4j](https://github.com/claudio4j))
