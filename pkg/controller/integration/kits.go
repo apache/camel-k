@@ -29,9 +29,11 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/trait"
+	trait "github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
@@ -257,10 +259,27 @@ func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
 }
 
 func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
-	if len(it.Sources()) != len(kit.Spec.Sources) {
+	// A kit may have fewer sources during native builds but should not have more
+	if len(kit.Spec.Sources) > len(it.Sources()) {
+		return false
+	}
+
+	isNativeBuild := false
+	if kit.Spec.Traits.Quarkus != nil {
+		// TODO: Verify proper way to determine mode
+		mode := kit.Spec.Traits.Quarkus.Modes[0]
+		isNativeBuild = mode == traitv1.NativeQuarkusMode
+	}
+
+	catalog, err := camel.DefaultCatalog()
+	if err != nil {
+		// TODO: Log error?
 		return false
 	}
 	for _, itSource := range it.Sources() {
+		if isNativeBuild && !requiredByKit(itSource, catalog) {
+			continue
+		}
 		found := false
 		for _, ikSource := range kit.Spec.Sources {
 			if itSource.Content == ikSource.Content {
@@ -273,4 +292,10 @@ func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
 		}
 	}
 	return true
+}
+
+// Not all sources are required to be in a kit; this can happen for native builds
+func requiredByKit(source v1.SourceSpec, catalog *camel.RuntimeCatalog) bool {
+	settings := trait.GetLanguageSettingsFromCatalog(catalog, source.InferLanguage())
+	return settings.SourcesRequiredAtBuildTime
 }

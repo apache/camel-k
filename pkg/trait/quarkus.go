@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -61,7 +62,7 @@ type languageSettings struct {
 	// indicates whether the native mode is supported
 	native bool
 	// indicates whether the sources are required at build time for native compilation
-	sourcesRequiredAtBuildTime bool
+	SourcesRequiredAtBuildTime bool
 }
 
 var (
@@ -71,9 +72,14 @@ var (
 	nativeSupportSettings = languageSettings{true, false}
 )
 
-// Retrieves the settings of the given language from the Camel catalog.
+// Retroactive helper for getting language settings
 func getLanguageSettings(e *Environment, language v1.Language) languageSettings {
-	if loader, ok := e.CamelCatalog.Loaders[string(language)]; ok {
+	return GetLanguageSettingsFromCatalog(e.CamelCatalog, language)
+}
+
+// Retrieves the settings of the given language from the Camel catalog.
+func GetLanguageSettingsFromCatalog(catalog *camel.RuntimeCatalog, language v1.Language) languageSettings {
+	if loader, ok := catalog.Loaders[string(language)]; ok {
 		native, nExists := loader.Metadata["native"]
 		if !nExists {
 			log.Debug("The metadata 'native' is absent from the Camel catalog, the legacy language settings are applied")
@@ -82,7 +88,7 @@ func getLanguageSettings(e *Environment, language v1.Language) languageSettings 
 		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
 		return languageSettings{
 			native:                     native == "true",
-			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == "true",
+			SourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == "true",
 		}
 	}
 	log.Debugf("No loader could be found for the language %q, the legacy language settings are applied", string(language))
@@ -455,7 +461,7 @@ func packageType(mode traitv1.QuarkusMode) quarkusPackageType {
 // Indicates whether the given source file is required at build time for native compilation.
 func sourcesRequiredAtBuildTime(e *Environment, source v1.SourceSpec) bool {
 	settings := getLanguageSettings(e, source.InferLanguage())
-	return settings.native && settings.sourcesRequiredAtBuildTime
+	return settings.native && settings.SourcesRequiredAtBuildTime
 }
 
 // Propagates the sources that are required at build time for native compilation.
