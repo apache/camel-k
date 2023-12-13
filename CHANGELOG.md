@@ -11,6 +11,7 @@
 - Ability to apply node selectors/affinity configuration [\#4958](https://github.com/apache/camel-k/issues/4958)
 - Ability to override resources for the quarkus-native task [\#4956](https://github.com/apache/camel-k/issues/4956)
 - java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#4955](https://github.com/apache/camel-k/issues/4955)
+- Kustomize KEP 1755 failing test [\#4954](https://github.com/apache/camel-k/issues/4954)
 - OGNL Script not working anymore after upgrade to Camel-K 2.1.0 [\#4936](https://github.com/apache/camel-k/issues/4936)
 - Kustomize installation test failing [\#4929](https://github.com/apache/camel-k/issues/4929)
 - Install non-olm test failing [\#4928](https://github.com/apache/camel-k/issues/4928)
