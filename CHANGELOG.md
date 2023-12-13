@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Usage of older Kameletes version on main [\#4985](https://github.com/apache/camel-k/issues/4985)
 - Fail to run route with toD [\#4972](https://github.com/apache/camel-k/issues/4972)
 - Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
 - Ability to apply node selectors/affinity configuration [\#4958](https://github.com/apache/camel-k/issues/4958)
@@ -20,6 +21,7 @@
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Camel K offline error [\#4894](https://github.com/apache/camel-k/issues/4894)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
+- log.SetLogger\(...\) was never called [\#4891](https://github.com/apache/camel-k/issues/4891)
 - Runtime compatibility matrix should be changed to default matrix [\#4886](https://github.com/apache/camel-k/issues/4886)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - Coverage report sends message 3 times [\#4875](https://github.com/apache/camel-k/issues/4875)
@@ -41,6 +43,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/google/uuid from 1.4.0 to 1.5.0 [\#4986](https://github.com/apache/camel-k/pull/4986) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore: Improve YAKS E2E tests [\#4984](https://github.com/apache/camel-k/pull/4984) ([christophd](https://github.com/christophd))
 - chore\(deps\): bump github.com/spf13/viper from 1.17.0 to 1.18.1 [\#4982](https://github.com/apache/camel-k/pull/4982) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore: Fix CRD samples [\#4981](https://github.com/apache/camel-k/pull/4981) ([christophd](https://github.com/christophd))
@@ -49,6 +52,7 @@
 - Fix: Fail to run route with toD \#4972 [\#4976](https://github.com/apache/camel-k/pull/4976) ([claudio4j](https://github.com/claudio4j))
 - Remove index table which is not refering to any table [\#4975](https://github.com/apache/camel-k/pull/4975) ([apupier](https://github.com/apupier))
 - chore\(doc\): deps matrix [\#4973](https://github.com/apache/camel-k/pull/4973) ([squakez](https://github.com/squakez))
+- fix\(cmd\): move log in init to catch all options [\#4969](https://github.com/apache/camel-k/pull/4969) ([squakez](https://github.com/squakez))
 - feat\(\#4958\): Supporting node selectors for the builder pod [\#4968](https://github.com/apache/camel-k/pull/4968) ([lsergio](https://github.com/lsergio))
 - fix\(trait\): doc to explain initContainers [\#4966](https://github.com/apache/camel-k/pull/4966) ([squakez](https://github.com/squakez))
 - fix\(\#4961\): Improve cross-namespace check for Kamelet refs [\#4965](https://github.com/apache/camel-k/pull/4965) ([christophd](https://github.com/christophd))
@@ -75,6 +79,7 @@
 - fix\(\#4916\): Improve component resolver [\#4919](https://github.com/apache/camel-k/pull/4919) ([christophd](https://github.com/christophd))
 - Use filepath.clean in json-schema-gen command for destination parameter [\#4918](https://github.com/apache/camel-k/pull/4918) ([oscerd](https://github.com/oscerd))
 - test\(health\): \#3997 structured conditions for scaled integrations [\#4917](https://github.com/apache/camel-k/pull/4917) ([rinaldodev](https://github.com/rinaldodev))
+- feat\(install\): Separate namespaced and descoped rbacs [\#4914](https://github.com/apache/camel-k/pull/4914) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump golang.org/x/term from 0.13.0 to 0.14.0 [\#4913](https://github.com/apache/camel-k/pull/4913) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.13.0 to 0.14.0 [\#4912](https://github.com/apache/camel-k/pull/4912) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/onsi/gomega from 1.29.0 to 1.30.0 [\#4911](https://github.com/apache/camel-k/pull/4911) ([dependabot[bot]](https://github.com/apps/dependabot))
