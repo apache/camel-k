@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Usage of older Kameletes version on main [\#4985](https://github.com/apache/camel-k/issues/4985)
 - Fail to run route with toD [\#4972](https://github.com/apache/camel-k/issues/4972)
 - Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
 - Ability to apply node selectors/affinity configuration [\#4958](https://github.com/apache/camel-k/issues/4958)
@@ -20,6 +21,7 @@
 - TestSecretHotReload failure [\#4902](https://github.com/apache/camel-k/issues/4902)
 - Camel K offline error [\#4894](https://github.com/apache/camel-k/issues/4894)
 - Native image builds failing with dependencies from private repository [\#4892](https://github.com/apache/camel-k/issues/4892)
+- log.SetLogger\(...\) was never called [\#4891](https://github.com/apache/camel-k/issues/4891)
 - Runtime compatibility matrix should be changed to default matrix [\#4886](https://github.com/apache/camel-k/issues/4886)
 - SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder" when running an integration [\#4882](https://github.com/apache/camel-k/issues/4882)
 - Coverage report sends message 3 times [\#4875](https://github.com/apache/camel-k/issues/4875)
@@ -34,6 +36,7 @@
 - Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
 - Image Vulnerability of Go package [\#4581](https://github.com/apache/camel-k/issues/4581)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
+- Use custom component in camel K [\#4539](https://github.com/apache/camel-k/issues/4539)
 - Create a test for structured health check conditions when integrations are scaled \> 1 [\#3997](https://github.com/apache/camel-k/issues/3997)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Camel-K initContainer [\#3459](https://github.com/apache/camel-k/issues/3459)
