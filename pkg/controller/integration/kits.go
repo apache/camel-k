@@ -264,20 +264,25 @@ func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
 		return false
 	}
 
-	isNativeBuild := false
+	isNativeKit := false
 	if kit.Spec.Traits.Quarkus != nil {
 		// TODO: Verify proper way to determine mode
 		mode := kit.Spec.Traits.Quarkus.Modes[0]
-		isNativeBuild = mode == traitv1.NativeQuarkusMode
+		isNativeKit = mode == traitv1.NativeQuarkusMode
 	}
 
-	catalog, err := camel.DefaultCatalog()
-	if err != nil {
-		// TODO: Log error?
-		return false
+	var kitRuntimeCatalog *camel.RuntimeCatalog
+	if isNativeKit {
+		var err error
+		kitRuntimeCatalog, err = camel.GetVersionedCatalog(kit.Status.RuntimeVersion)
+		if err != nil {
+			// TODO: log error here?
+			return false
+		}
 	}
+
 	for _, itSource := range it.Sources() {
-		if isNativeBuild && !requiredByKit(itSource, catalog) {
+		if isNativeKit && !sourceRequiredByKitCatalog(itSource, kitRuntimeCatalog) {
 			continue
 		}
 		found := false
@@ -295,7 +300,7 @@ func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
 }
 
 // Not all sources are required to be in a kit; this can happen for native builds
-func requiredByKit(source v1.SourceSpec, catalog *camel.RuntimeCatalog) bool {
+func sourceRequiredByKitCatalog(source v1.SourceSpec, catalog *camel.RuntimeCatalog) bool {
 	settings := trait.GetLanguageSettingsFromCatalog(catalog, source.InferLanguage())
 	return settings.SourcesRequiredAtBuildTime
 }
