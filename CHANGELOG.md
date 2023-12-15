@@ -36,6 +36,7 @@
 - Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
 - Image Vulnerability of Go package [\#4581](https://github.com/apache/camel-k/issues/4581)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
+- Use custom component in camel K [\#4539](https://github.com/apache/camel-k/issues/4539)
 - Create a test for structured health check conditions when integrations are scaled \> 1 [\#3997](https://github.com/apache/camel-k/issues/3997)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Camel-K initContainer [\#3459](https://github.com/apache/camel-k/issues/3459)
