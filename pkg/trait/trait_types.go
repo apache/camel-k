@@ -436,7 +436,7 @@ func (e *Environment) addSourcesProperties() {
 		e.ApplicationProperties = make(map[string]string)
 	}
 	idx := 0
-	for _, s := range e.Integration.Sources() {
+	for _, s := range e.Integration.AllSources() {
 		// We don't process routes embedded (native) or Kamelets
 		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
 			continue
@@ -485,7 +485,7 @@ func (e *Environment) addSourcesProperties() {
 func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
 	// Sources
 	idx := 0
-	for _, s := range e.Integration.Sources() {
+	for _, s := range e.Integration.AllSources() {
 		// We don't process routes embedded (native) or Kamelets
 		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
 			continue
@@ -748,7 +748,7 @@ func (e *Environment) getAllInterceptors() []string {
 	util.StringSliceUniqueConcat(&res, e.Interceptors)
 
 	if e.Integration != nil {
-		for _, s := range e.Integration.Sources() {
+		for _, s := range e.Integration.AllSources() {
 			util.StringSliceUniqueConcat(&res, s.Interceptors)
 		}
 	}

@@ -257,13 +257,10 @@ func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
 }
 
 func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) bool {
-	// Does not include generated sources
-	integrationSources := it.Spec.Sources
-
-	if len(integrationSources) != len(kit.Spec.Sources) {
+	if len(it.UserDefinedSources()) != len(kit.Spec.Sources) {
 		return false
 	}
-	for _, itSource := range integrationSources {
+	for _, itSource := range it.UserDefinedSources() {
 		found := false
 		for _, ikSource := range kit.Spec.Sources {
 			if itSource.Content == ikSource.Content {
