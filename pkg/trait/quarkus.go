@@ -71,7 +71,7 @@ var (
 	nativeSupportSettings = languageSettings{true, false}
 )
 
-// Retroactive helper for getting language settings
+// Retrieves the settings of the given language from the Camel catalog.
 func getLanguageSettings(e *Environment, language v1.Language) languageSettings {
 	if loader, ok := e.CamelCatalog.Loaders[string(language)]; ok {
 		native, nExists := loader.Metadata["native"]

@@ -30,7 +30,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/apache/camel-k/v2/pkg/platform"
-	trait "github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -263,9 +263,7 @@ func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) boo
 	if len(integrationSources) != len(kit.Spec.Sources) {
 		return false
 	}
-
 	for _, itSource := range integrationSources {
-
 		found := false
 		for _, ikSource := range kit.Spec.Sources {
 			if itSource.Content == ikSource.Content {
