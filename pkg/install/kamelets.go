@@ -114,12 +114,17 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 				return err
 			}
 			v := hasServerSideApply.Load()
+			var bundleKamError error
 			if vb, ok := v.(bool); ok && vb {
 				if !once {
-					return serverSideApply(gCtx, c, kamelet)
+					bundleKamError = serverSideApply(gCtx, c, kamelet)
 				}
 			} else {
-				return clientSideApply(gCtx, c, kamelet)
+				bundleKamError = clientSideApply(gCtx, c, kamelet)
+			}
+			// We only log the error. If we returned the error, the creation of the ITP would have stopped
+			if bundleKamError != nil {
+				log.Error(bundleKamError, "Error occurred whilst applying bundled kamelet")
 			}
 			return nil
 		})
