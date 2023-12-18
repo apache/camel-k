@@ -19,7 +19,6 @@ package camel
 
 import (
 	"context"
-	"errors"
 	"path/filepath"
 
 	yaml2 "gopkg.in/yaml.v2"
@@ -40,17 +39,10 @@ func DefaultCatalog() (*RuntimeCatalog, error) {
 }
 
 func QuarkusCatalog() (*RuntimeCatalog, error) {
-	return catalogForRuntimeProvider(v1.RuntimeProviderQuarkus, defaults.DefaultRuntimeVersion)
+	return catalogForRuntimeProvider(v1.RuntimeProviderQuarkus)
 }
 
-func GetVersionedCatalog(runtimeVersion string) (*RuntimeCatalog, error) {
-	if runtimeVersion == "" {
-		return nil, errors.New("version cannot be undefined while retrieving catalog")
-	}
-	return catalogForRuntimeProvider(v1.RuntimeProviderQuarkus, runtimeVersion)
-}
-
-func catalogForRuntimeProvider(provider v1.RuntimeProvider, version string) (*RuntimeCatalog, error) {
+func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, error) {
 	catalogs := make([]v1.CamelCatalog, 0)
 
 	names, err := resources.WithPrefix("/camel-catalog-")
@@ -74,7 +66,7 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider, version string) (*Ru
 	}
 
 	return findBestMatch(catalogs, v1.RuntimeSpec{
-		Version:  version,
+		Version:  defaults.DefaultRuntimeVersion,
 		Provider: provider,
 		Metadata: make(map[string]string),
 	})

@@ -29,11 +29,9 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
-	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	trait "github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
@@ -135,7 +133,7 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	}
 	// If IntegrationKit has any source, we must verify that it corresponds with the one in the Integration.
 	// This is important in case of Native builds as we need to rebuild when language requires a source during build.
-	if (kit.Spec.Sources != nil && len(kit.Spec.Sources) > 0) && !hasMatchingSources(integration, kit) {
+	if (kit.Spec.Sources != nil && len(kit.Spec.Sources) > 0) && !hasMatchingSourcesForNative(integration, kit) {
 		ilog.Debug("Integration and integration-kit sources do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false, nil
 	}
@@ -258,33 +256,16 @@ func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
 	return reflect.DeepEqual(it, kt)
 }
 
-func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
-	// A kit may have fewer sources during native builds but should not have more
-	if len(kit.Spec.Sources) > len(it.Sources()) {
+func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) bool {
+	// Does not include generated sources
+	integrationSources := it.Spec.Sources
+
+	if len(integrationSources) != len(kit.Spec.Sources) {
 		return false
 	}
 
-	isNativeKit := false
-	if kit.Spec.Traits.Quarkus != nil {
-		// TODO: Verify proper way to determine mode
-		mode := kit.Spec.Traits.Quarkus.Modes[0]
-		isNativeKit = mode == traitv1.NativeQuarkusMode
-	}
+	for _, itSource := range integrationSources {
 
-	var kitRuntimeCatalog *camel.RuntimeCatalog
-	if isNativeKit {
-		var err error
-		kitRuntimeCatalog, err = camel.GetVersionedCatalog(kit.Status.RuntimeVersion)
-		if err != nil {
-			// TODO: log error here?
-			return false
-		}
-	}
-
-	for _, itSource := range it.Sources() {
-		if isNativeKit && !sourceRequiredByKitCatalog(itSource, kitRuntimeCatalog) {
-			continue
-		}
 		found := false
 		for _, ikSource := range kit.Spec.Sources {
 			if itSource.Content == ikSource.Content {
@@ -297,10 +278,4 @@ func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
 		}
 	}
 	return true
-}
-
-// Not all sources are required to be in a kit; this can happen for native builds
-func sourceRequiredByKitCatalog(source v1.SourceSpec, catalog *camel.RuntimeCatalog) bool {
-	settings := trait.GetLanguageSettingsFromCatalog(catalog, source.InferLanguage())
-	return settings.SourcesRequiredAtBuildTime
 }
