@@ -36,8 +36,6 @@ import (
 func TestRunSimpleKotlinExamples(t *testing.T) {
 	RegisterTestingT(t)
 
-	t.Skip("Skipping test. See https://github.com/apache/camel-k/issues/4738")
-
 	t.Run("run kotlin", func(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "files/kotlin.kts").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "kotlin"), TestTimeoutLong).Should(Equal(v1.PodRunning))
