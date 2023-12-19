@@ -30,7 +30,7 @@ cd $1/
 
 wget https://github.com/apache/camel-k/archive/refs/tags/v$1.tar.gz -O camel-k-sources-$1.tar.gz
 cp ../../../camel-k-client-$1-* .
-cp ../../../java/target/camel-k-crds-$1.jar .
+cp ../../../java/crds/target/camel-k-crds-$1.jar .
 cd ../
 ./sign.sh $1/
 svn import $1/ https://dist.apache.org/repos/dist/dev/camel/camel-k/$2/ -m "Import camel-k release"

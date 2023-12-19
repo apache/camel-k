@@ -509,9 +509,6 @@ set-version:
 git-tag:
 	./script/git_tag.sh $(CUSTOM_VERSION) $(RELEASE_GIT_REMOTE)
 
-fabric8-crds:
-	@mvn -f java/crds/pom.xml clean package
-
 cross-compile:
 	# we must wrap the goldflags parameters with quotes as they will need to
 	# be processed as a single argument by the cross compile script
@@ -519,7 +516,7 @@ cross-compile:
 
 release: clean codegen set-version build-resources check-licenses images images-push cross-compile git-tag
 
-release-staging: clean codegen set-version build-resources check-licenses images-all images-push-staging cross-compile fabric8-crds git-tag
+release-staging: clean codegen set-version build-resources check-licenses images-all images-push-staging cross-compile git-tag
 
 # Build images
 images-nightly: clean codegen set-version build-resources images
