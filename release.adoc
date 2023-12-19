@@ -67,24 +67,27 @@ NOTE: you can run the script with -d option to dry run and evaluate the changes 
 [[releasing-camel-k-crds]]
 === Release Camel K CRD dependency
 
-Camel K ships a Maven dependency containing the CRDs required in Kubernetes. This dependency is available in `/java/` directory and has to be released together with Camel K. The process below is the same used for Camel K Runtime.
+Checkout the release branch for which you want to perform the release:
+```
+git checkout release-2.x.0
+```
 
 To prepare a release and check problems:
 ```
-cd java
-./mvnw release:prepare -Prelease -DautoVersionSubmodules=true -DdryRun
+cd java/crds
+mvn release:prepare -Prelease -DautoVersionSubmodules=true -DdryRun
 ```
 
 Check the signatures of the files, then clean and prepare the actual release:
 
 ```
-./mvnw release:clean release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
+mvn release:clean release:prepare -Prelease -Duser=<your Apache LDAP id> [-Dpassword=<your Apache LDAP pwd>] -Darguments=-DskipTests -DautoVersionSubmodules=true
 ```
 
 Then perform the release (use any settings holding your Apache credentials):
 
 ```
-./mvnw release:perform -Prelease [-s path/to/your/settings.xml]
+mvn release:perform -Prelease [-s path/to/your/settings.xml]
 ```
 
 Go to https://repository.apache.org/ and close the staging repository.
