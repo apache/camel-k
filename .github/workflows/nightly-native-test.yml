@@ -41,14 +41,14 @@ jobs:
         ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
+    - name: Lower mem native smoke tests
+      uses: ./.github/actions/e2e-native
+      with:
+        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
+        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
     - name: Higher mem native smoke tests
       uses: ./.github/actions/e2e-native
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
         high-memory: 'true'
-    - name: Lower mem native smoke tests
-      uses: ./.github/actions/e2e-native
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
