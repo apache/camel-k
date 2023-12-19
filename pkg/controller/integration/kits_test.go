@@ -343,7 +343,7 @@ func TestHasMatchingSources(t *testing.T) {
 		},
 	}
 
-	hms := hasMatchingSources(integration, kit)
+	hms := hasMatchingSourcesForNative(integration, kit)
 	assert.True(t, hms)
 
 	kit2 := &v1.IntegrationKit{
@@ -355,7 +355,7 @@ func TestHasMatchingSources(t *testing.T) {
 		},
 	}
 
-	hms2 := hasMatchingSources(integration, kit2)
+	hms2 := hasMatchingSourcesForNative(integration, kit2)
 	assert.False(t, hms2)
 }
 
@@ -378,7 +378,7 @@ func TestHasMatchingMultipleSources(t *testing.T) {
 		},
 	}
 
-	hms := hasMatchingSources(integration, kit)
+	hms := hasMatchingSourcesForNative(integration, kit)
 	assert.True(t, hms)
 
 	integration2 := &v1.Integration{
@@ -389,7 +389,7 @@ func TestHasMatchingMultipleSources(t *testing.T) {
 		},
 	}
 
-	hms2 := hasMatchingSources(integration2, kit)
+	hms2 := hasMatchingSourcesForNative(integration2, kit)
 	assert.False(t, hms2)
 }
 
@@ -410,7 +410,7 @@ func TestHasNotMatchingSources(t *testing.T) {
 		},
 	}
 
-	hsm := hasMatchingSources(integration, kit)
+	hsm := hasMatchingSourcesForNative(integration, kit)
 	assert.False(t, hsm)
 
 	kit2 := &v1.IntegrationKit{
@@ -419,6 +419,6 @@ func TestHasNotMatchingSources(t *testing.T) {
 		},
 	}
 
-	hsm2 := hasMatchingSources(integration, kit2)
+	hsm2 := hasMatchingSourcesForNative(integration, kit2)
 	assert.False(t, hsm2)
 }

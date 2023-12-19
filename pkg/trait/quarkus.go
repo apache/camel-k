@@ -222,7 +222,7 @@ func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
 }
 
 func (t *quarkusTrait) validateNativeSupport(e *Environment) bool {
-	for _, source := range e.Integration.Sources() {
+	for _, source := range e.Integration.AllSources() {
 		if language := source.InferLanguage(); !getLanguageSettings(e, language).native {
 			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace, e.Integration.Name, language)
 			e.Integration.Status.Phase = v1.IntegrationPhaseError
@@ -458,10 +458,10 @@ func sourcesRequiredAtBuildTime(e *Environment, source v1.SourceSpec) bool {
 	return settings.native && settings.sourcesRequiredAtBuildTime
 }
 
-// Propagates the sources that are required at build time for native compilation.
+// Propagates the user defined sources that are required at build time for native compilation.
 func propagateSourcesRequiredAtBuildTime(e *Environment) []v1.SourceSpec {
 	array := make([]v1.SourceSpec, 0)
-	for _, source := range e.Integration.Sources() {
+	for _, source := range e.Integration.UserDefinedSources() {
 		if sourcesRequiredAtBuildTime(e, source) {
 			array = append(array, source)
 		}

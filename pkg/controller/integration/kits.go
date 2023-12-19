@@ -133,7 +133,7 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	}
 	// If IntegrationKit has any source, we must verify that it corresponds with the one in the Integration.
 	// This is important in case of Native builds as we need to rebuild when language requires a source during build.
-	if (kit.Spec.Sources != nil && len(kit.Spec.Sources) > 0) && !hasMatchingSources(integration, kit) {
+	if (kit.Spec.Sources != nil && len(kit.Spec.Sources) > 0) && !hasMatchingSourcesForNative(integration, kit) {
 		ilog.Debug("Integration and integration-kit sources do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false, nil
 	}
@@ -256,11 +256,11 @@ func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
 	return reflect.DeepEqual(it, kt)
 }
 
-func hasMatchingSources(it *v1.Integration, kit *v1.IntegrationKit) bool {
-	if len(it.Sources()) != len(kit.Spec.Sources) {
+func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) bool {
+	if len(it.UserDefinedSources()) != len(kit.Spec.Sources) {
 		return false
 	}
-	for _, itSource := range it.Sources() {
+	for _, itSource := range it.UserDefinedSources() {
 		found := false
 		for _, ikSource := range kit.Spec.Sources {
 			if itSource.Content == ikSource.Content {

@@ -92,7 +92,7 @@ func ResolveIntegrationSources(
 		return nil, nil
 	}
 
-	return ResolveSources(integration.Sources(), func(name string) (*corev1.ConfigMap, error) {
+	return ResolveSources(integration.AllSources(), func(name string) (*corev1.ConfigMap, error) {
 		// the config map could be part of the resources created
 		// by traits
 		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {

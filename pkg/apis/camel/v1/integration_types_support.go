@@ -61,11 +61,17 @@ func (in *Integration) Initialize() {
 }
 
 // Sources return a new slice containing all the sources associated to the integration.
-func (in *Integration) Sources() []SourceSpec {
+func (in *Integration) AllSources() []SourceSpec {
 	sources := make([]SourceSpec, 0, len(in.Spec.Sources)+len(in.Status.GeneratedSources))
 	sources = append(sources, in.Spec.Sources...)
 	sources = append(sources, in.Status.GeneratedSources...)
 
+	return sources
+}
+
+func (in *Integration) UserDefinedSources() []SourceSpec {
+	sources := make([]SourceSpec, 0, len(in.Spec.Sources))
+	sources = append(sources, in.Spec.Sources...)
 	return sources
 }
 

@@ -185,7 +185,7 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 }
 
 func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
-	sources := e.Integration.Sources()
+	sources := e.Integration.AllSources()
 	maps := make([]ctrl.Object, 0, len(sources)+1)
 
 	// combine properties of integration with kit, integration

@@ -63,7 +63,7 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	// mount trait needs to be executed only when it has sources attached or any trait configuration
-	return len(e.Integration.Sources()) > 0 ||
+	return len(e.Integration.AllSources()) > 0 ||
 		len(t.Configs) > 0 ||
 		len(t.Resources) > 0 ||
 		len(t.Volumes) > 0, nil, nil

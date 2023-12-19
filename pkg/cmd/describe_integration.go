@@ -135,10 +135,10 @@ func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra
 			}
 		}
 
-		if len(i.Sources()) > 0 {
+		if len(i.AllSources()) > 0 {
 			w.Writef(0, "Sources:\n")
 			if command.showSourceContent {
-				for _, s := range i.Sources() {
+				for _, s := range i.AllSources() {
 					w.Writef(1, "Name:\t%s\n", s.Name)
 					w.Writef(1, "Language:\t%s\n", s.InferLanguage())
 					w.Writef(1, "Compression:\t%t\n", s.Compression)
@@ -154,7 +154,7 @@ func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra
 			} else {
 				//nolint:dupword
 				w.Writef(1, "Name\tLanguage\tCompression\tRef\tRef Key\n")
-				for _, s := range i.Sources() {
+				for _, s := range i.AllSources() {
 					w.Writef(1, "%s\t%s\t%t\t%s\t%s\n",
 						s.Name,
 						s.InferLanguage(),
