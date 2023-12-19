@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.4",
-  "serialNumber": "urn:uuid:d27da7a8-d0d1-4890-87d0-ad5baa7a7545",
+  "serialNumber": "urn:uuid:4bb7a521-bbf9-4fb9-995e-8c8aee378aa8",
   "version": 1,
   "metadata": {
-    "timestamp": "2023-12-18T23:46:24Z",
+    "timestamp": "2023-12-19T23:46:25Z",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231217234618-0bd9310cdeda?type=module",
+      "bom-ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231219234609-606281336d54?type=module",
       "type": "application",
       "name": "github.com/apache/camel-k/v2",
-      "version": "v0.0.0-20231217234618-0bd9310cdeda",
-      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231217234618-0bd9310cdeda?type=module\u0026goos=linux\u0026goarch=amd64",
+      "version": "v0.0.0-20231219234609-606281336d54",
+      "purl": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231219234609-606281336d54?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/apache/camel-k",
@@ -2610,18 +2610,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/github.com/spf13/viper@v1.18.1?type=module",
+      "bom-ref": "pkg:golang/github.com/spf13/viper@v1.18.2?type=module",
       "type": "library",
       "name": "github.com/spf13/viper",
-      "version": "v1.18.1",
+      "version": "v1.18.2",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "ae6b94e36ad270a5a5861243c976512894075c55f4d9c852556d48be43c68953"
+          "content": "2d45c29ef52f48ce855c0b23ea79df73c436b69d5d22051f63d29cf06b123a24"
         }
       ],
-      "purl": "pkg:golang/github.com/spf13/viper@v1.18.1?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/github.com/spf13/viper@v1.18.2?type=module\u0026goos=linux\u0026goarch=amd64",
       "externalReferences": [
         {
           "url": "https://github.com/spf13/viper",
@@ -2847,18 +2847,18 @@
       }
     },
     {
-      "bom-ref": "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+      "bom-ref": "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
       "type": "library",
       "name": "golang.org/x/crypto",
-      "version": "v0.16.0",
+      "version": "v0.17.0",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "98c32b173452085d06bc1ecd7b6ed756d5406972eb3e680f0bbfefd2d9301da6"
+          "content": "afc6d136358bdc6b213d6de091df91a6fcd6ad90303d2e3d3a64c667fba13389"
         }
       ],
-      "purl": "pkg:golang/golang.org/x/crypto@v0.16.0?type=module\u0026goos=linux\u0026goarch=amd64",
+      "purl": "pkg:golang/golang.org/x/crypto@v0.17.0?type=module\u0026goos=linux\u0026goarch=amd64",
       "evidence": {
         "licenses": [
           {
@@ -3830,7 +3830,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231217234618-0bd9310cdeda?type=module",
+      "ref": "pkg:golang/github.com/apache/camel-k/v2@v0.0.0-20231219234609-606281336d54?type=module",
       "dependsOn": [
         "pkg:golang/github.com/Masterminds/semver@v1.5.0?type=module",
         "pkg:golang/github.com/container-tools/spectrum@v0.6.42?type=module",
@@ -3857,7 +3857,7 @@
         "pkg:golang/github.com/sirupsen/logrus@v1.9.3?type=module",
         "pkg:golang/github.com/spf13/cobra@v1.8.0?type=module",
         "pkg:golang/github.com/spf13/pflag@v1.0.5?type=module",
-        "pkg:golang/github.com/spf13/viper@v1.18.1?type=module",
+        "pkg:golang/github.com/spf13/viper@v1.18.2?type=module",
         "pkg:golang/github.com/stoewer/go-strcase@v1.3.0?type=module",
         "pkg:golang/github.com/stretchr/testify@v1.8.4?type=module",
         "pkg:golang/go.uber.org/automaxprocs@v1.5.3?type=module",
@@ -3915,7 +3915,7 @@
       "ref": "pkg:golang/github.com/ProtonMail/go-crypto@v0.0.0-20230217124315-7d5c6f04bbb8?type=module",
       "dependsOn": [
         "pkg:golang/github.com/cloudflare/circl@v1.3.3?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module"
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module"
       ]
     },
     {
@@ -3992,7 +3992,7 @@
     {
       "ref": "pkg:golang/github.com/cloudflare/circl@v1.3.3?type=module",
       "dependsOn": [
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/sys@v0.15.0?type=module"
       ]
     },
@@ -4192,7 +4192,7 @@
         "pkg:golang/github.com/golang/protobuf@v1.5.3?type=module",
         "pkg:golang/github.com/google/go-cmp@v0.6.0?type=module",
         "pkg:golang/github.com/google/go-querystring@v1.1.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
         "pkg:golang/golang.org/x/sys@v0.15.0?type=module",
@@ -4649,7 +4649,7 @@
         "pkg:golang/github.com/golang/protobuf@v1.5.3?type=module",
         "pkg:golang/github.com/google/uuid@v1.5.0?type=module",
         "pkg:golang/go.opencensus.io@v0.24.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
         "pkg:golang/golang.org/x/sync@v0.5.0?type=module",
@@ -4683,7 +4683,7 @@
       "ref": "pkg:golang/github.com/spf13/pflag@v1.0.5?type=module"
     },
     {
-      "ref": "pkg:golang/github.com/spf13/viper@v1.18.1?type=module",
+      "ref": "pkg:golang/github.com/spf13/viper@v1.18.2?type=module",
       "dependsOn": [
         "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?type=module",
         "pkg:golang/github.com/fsnotify/fsnotify@v1.7.0?type=module",
@@ -4713,7 +4713,7 @@
         "pkg:golang/go.opencensus.io@v0.24.0?type=module",
         "pkg:golang/go.uber.org/multierr@v1.11.0?type=module",
         "pkg:golang/go.uber.org/zap@v1.26.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/exp@v0.0.0-20230905200255-921286631fa9?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
@@ -4803,7 +4803,7 @@
       ]
     },
     {
-      "ref": "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+      "ref": "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
       "dependsOn": [
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/sys@v0.15.0?type=module",
@@ -4829,7 +4829,7 @@
     {
       "ref": "pkg:golang/golang.org/x/net@v0.19.0?type=module",
       "dependsOn": [
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/sys@v0.15.0?type=module",
         "pkg:golang/golang.org/x/term@v0.15.0?type=module",
         "pkg:golang/golang.org/x/text@v0.14.0?type=module"
@@ -4895,7 +4895,7 @@
         "pkg:golang/github.com/google/go-cmp@v0.6.0?type=module",
         "pkg:golang/github.com/google/uuid@v1.5.0?type=module",
         "pkg:golang/go.opencensus.io@v0.24.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
         "pkg:golang/golang.org/x/sync@v0.5.0?type=module",
@@ -5062,7 +5062,7 @@
         "pkg:golang/github.com/stretchr/testify@v1.8.4?type=module",
         "pkg:golang/go.uber.org/multierr@v1.11.0?type=module",
         "pkg:golang/go.uber.org/zap@v1.26.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/mod@v0.13.0?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
@@ -5479,7 +5479,7 @@
         "pkg:golang/go.uber.org/automaxprocs@v1.5.3?type=module",
         "pkg:golang/go.uber.org/multierr@v1.11.0?type=module",
         "pkg:golang/go.uber.org/zap@v1.26.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/mod@v0.13.0?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
@@ -5639,7 +5639,7 @@
         "pkg:golang/go.uber.org/automaxprocs@v1.5.3?type=module",
         "pkg:golang/go.uber.org/multierr@v1.11.0?type=module",
         "pkg:golang/go.uber.org/zap@v1.26.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/mod@v0.13.0?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
@@ -5730,7 +5730,7 @@
         "pkg:golang/go.uber.org/automaxprocs@v1.5.3?type=module",
         "pkg:golang/go.uber.org/multierr@v1.11.0?type=module",
         "pkg:golang/go.uber.org/zap@v1.26.0?type=module",
-        "pkg:golang/golang.org/x/crypto@v0.16.0?type=module",
+        "pkg:golang/golang.org/x/crypto@v0.17.0?type=module",
         "pkg:golang/golang.org/x/mod@v0.13.0?type=module",
         "pkg:golang/golang.org/x/net@v0.19.0?type=module",
         "pkg:golang/golang.org/x/oauth2@v0.15.0?type=module",
