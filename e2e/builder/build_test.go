@@ -305,7 +305,7 @@ func TestKitKnativeFullBuild(t *testing.T) {
 }
 
 func TestKitTimerToLogFullNativeBuild(t *testing.T) {
-	doKitFullBuild(t, "timer-to-log", "30m0s", TestTimeoutLong*3, kitOptions{
+	doKitFullBuild(t, "timer-to-log", "15m0s", TestTimeoutLong*3, kitOptions{
 		dependencies: []string{
 			"camel:timer", "camel:log",
 		},
