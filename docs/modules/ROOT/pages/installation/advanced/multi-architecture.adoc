@@ -3,19 +3,47 @@
 
 NOTE: this part is evolving quickly during development of version 2 so it may be slightly inaccurate.
 
-To use Camel K operator with any architecture like `arm64` you must use Buildah as builder strategy.
-
 Since version 2, Camel K is publishing an ARM64 architecture beside the default AMD64 architecture. You need to reference this as `apache/camel-k:<version>-arm64`. You can build your particular architecture from source, following the guidelines in xref:contributing/local-development.adoc[Local development].
 
 [[multi-architecture-install]]
 == Install Camel K ARM64 operator
 
-Proceed with installation of kamel inside kubernetes cluster with the below command:
+The default configured base image defaults to the AMD64 architecture manifest, it does not automatically look for the AMR64 architecture manifest reference. To ensure your integrations work correctly, you must specifically reference the ARM64 architecture as your base image.
+
+Proceed with installation of Camel K inside kubernetes cluster with the below command:
 
 [source,shell]
 ----
-kamel install --operator-image=apache/camel-k:<version>-arm64 --build-publish-strategy Buildah --build-publish-strategy-option BuildahPlatform=linux/arm/v8 --registry ...
+kamel install --operator-image apache/camel-k:<version>-arm64 --base-image <base-image-arm64> --registry ...
 ----
+
+=== Example
+
+On Camel K 2.1.0, the default base image is : `eclipse-temurin:17`.
+
+Look through the manifest to find the digest of a valid image containing `"architecture": "arm64"`:
+
+[source,shell]
+----
+docker manifest inspect eclipse-temurin:17
+----
+
+Proceed with installation of Camel K inside kubernetes cluster with the valid image reference:
+
+[source,shell]
+----
+kamel install --operator-image apache/camel-k:2.1.0-arm64 --base-image eclipse-temurin:17@sha256:bbc153da9e6041c65f0d4cdc7ef03eec174c9a74c8852c838582b579081c99c1 --registry ...
+----
+
+The logs should indicate the architecture at the start of the operator pod:
+
+[source,shell]
+----
+{"level":"info","ts":"2023-12-19T16:40:31Z","logger":"camel-k.cmd","msg":"Go Version: go1.21.0"}
+{"level":"info","ts":"2023-12-19T16:40:31Z","logger":"camel-k.cmd","msg":"Go OS/Arch: linux/arm64"}
+{"level":"info","ts":"2023-12-19T16:40:31Z","logger":"camel-k.cmd","msg":"Camel K Operator Version: 2.1.0"}
+----
+
 
 [[multi-architecture-use]]
 == Test an integration
@@ -36,33 +64,10 @@ Send the groovy file to kamel operator to build, publish and run it
 kamel run hello.groovy
 ----
 
-[[multi-architecture-configure-optional]]
-== Optional Buildah Configuration
-
-If you want change the default architecture of Buildah build strategy once this is installed, you must edit integration platform manually.
-
+You should observe base image in the logs of the operator pod:
 [source,shell]
 ----
-kubectl edit ip
+...
+{"level":"info","ts":"2023-12-19T17:10:05Z","logger":"camel-k","msg":"spectrum - 2023/12/19 17:10:05 Pulling base image eclipse-temurin:17@sha256:bbc153da9e6041c65f0d4cdc7ef03eec174c9a74c8852c838582b579081c99c1 (insecure=false)..."}
+...
 ----
-
-This command will open the editor with the yaml of `IntegrationPlatform`, to change the architecture you can fill inside `spec.pipeline.PublishStrategyOptions` as below
-[source,yaml]
-----
-spec:
-  pipeline:
-    PublishStrategyOptions:
-      BuildahPlatform: linux/arm/v8
-----
-
-After few seconds the yaml will be updated and that field is imported inside status
-
-[source,yaml]
-----
-status:
-  pipeline:
-    PublishStrategyOptions:
-      BuildahPlatform: linux/arm/v8
-----
-
-NOTE: It's important to know Buidah supports only amd64 and arm64
