@@ -21,7 +21,7 @@ import "path/filepath"
 
 // QuarkusRuntimeNativeAdapter is used to get the proper Quarkus native configuration which may be different
 // in Camel Quarkus version. It is known that before Camel Quarkus 3.5 there was no support to native-source,
-// and using this interface will adapt the configuration to build natively according the previous configuration.
+// and using this interface will adapt the configuration to build natively according each version expected configuration.
 type QuarkusRuntimeNativeAdapter interface {
 	// The commands used to build a native application
 	BuildCommands() string
@@ -85,7 +85,10 @@ func (n *NativeAdapter) NativeMavenProperty() string {
 
 // QuarkusRuntimeSupport is used to get the proper native configuration based on the Camel Quarkus version.
 func QuarkusRuntimeSupport(version string) QuarkusRuntimeNativeAdapter {
-	if version < "3.5.0" {
+	// Version 3.6.0 depends on a parameter which is available on JDK-21 based image.
+	// For this reason we fallback to the "legacy" Quarkus native build.
+	// Hopefully this will be solved starting from runtime version 3.7.0.
+	if version < "3.7.0" {
 		return &NativeAdapter{}
 	}
 	return &NativeSourcesAdapter{}
