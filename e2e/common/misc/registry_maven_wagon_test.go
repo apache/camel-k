@@ -70,7 +70,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 
 		Expect(KamelRunWithID(operatorID, ns, "files/registry/LaughingRoute.java",
 			"--name", name,
-			"-p", "location=.?filename=laugh.txt",
+			"-p", "location=/deployments/?filename=laugh.txt",
 			"-d", "file://files/registry/laugh.txt",
 		).Execute()).To(Succeed())
 
