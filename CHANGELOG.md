@@ -4,8 +4,16 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.2.0...HEAD)
 
+**Closed issues:**
+
+- JDK 17 release error for Camel K CRDS artifact [\#4826](https://github.com/apache/camel-k/issues/4826)
+- Test ARM64 architecture - operator and builder pods  [\#4519](https://github.com/apache/camel-k/issues/4519)
+- \[Regression\] javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found [\#4266](https://github.com/apache/camel-k/issues/4266)
+
 **Merged pull requests:**
 
+- docs\(install\): Fix advanced doc on multi-architecture ARM64 [\#4997](https://github.com/apache/camel-k/pull/4997) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump knative.dev/serving from 0.39.2 to 0.39.3 [\#4996](https://github.com/apache/camel-k/pull/4996) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(java\): crds dependency compiler java 17 [\#4995](https://github.com/apache/camel-k/pull/4995) ([squakez](https://github.com/squakez))
 - chore\(ci\): run lower memory checks before higher memory [\#4994](https://github.com/apache/camel-k/pull/4994) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/spf13/viper from 1.18.1 to 1.18.2 [\#4993](https://github.com/apache/camel-k/pull/4993) ([dependabot[bot]](https://github.com/apps/dependabot))
