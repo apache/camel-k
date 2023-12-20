@@ -37,7 +37,10 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		operatorID := "camel-k-quarkus-high-memory-native"
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--build-timeout", "90m0s",
-			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=9g",
+			"--maven-cli-option", "-V",
+			"--maven-cli-option", "--no-transfer-progress",
+			"--maven-cli-option", "-Dstyle.color=never",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=13g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -49,7 +52,6 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			name := javaNativeName
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
 				"-t", "quarkus.build-mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))

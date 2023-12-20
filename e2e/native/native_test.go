@@ -38,7 +38,10 @@ func TestNativeIntegrations(t *testing.T) {
 		operatorID := "camel-k-quarkus-native"
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--build-timeout", "90m0s",
-			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
+			"--maven-cli-option", "-V",
+			"--maven-cli-option", "--no-transfer-progress",
+			"--maven-cli-option", "-Dstyle.color=never",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=10g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -46,7 +49,6 @@ func TestNativeIntegrations(t *testing.T) {
 			name := RandomizedSuffixName("unsupported-js")
 			Expect(KamelRunWithID(operatorID, ns, "files/JavaScript.js", "--name", name,
 				"-t", "quarkus.build-mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))

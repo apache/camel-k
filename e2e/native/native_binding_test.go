@@ -35,7 +35,10 @@ func TestNativeBinding(t *testing.T) {
 		operatorID := "camel-k-native-binding"
 		Expect(KamelInstallWithIDAndKameletCatalog(operatorID, ns,
 			"--build-timeout", "90m0s",
-			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
+			"--maven-cli-option", "-V",
+			"--maven-cli-option", "--no-transfer-progress",
+			"--maven-cli-option", "-Dstyle.color=never",
+			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=10g",
 		).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		message := "Magicstring!"
@@ -46,7 +49,6 @@ func TestNativeBinding(t *testing.T) {
 				"log-sink",
 				"-p", "source.message="+message,
 				"--annotation", "trait.camel.apache.org/quarkus.build-mode=native",
-				"--annotation", "trait.camel.apache.org/builder.tasks-limit-memory=quarkus-native:6.5Gi",
 				"--name", bindingName,
 			).Execute()).To(Succeed())
 
