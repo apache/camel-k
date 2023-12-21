@@ -406,8 +406,16 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 		if ok, err = kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
 			return err
 		} else if ok {
+			log.Info("The operator has the privileges to watch KnativeService resources.")
 			b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
+		} else {
+			log.Info("The operator has not the privileges to watch KnativeService resources. Won't be able to work with Knative!")
 		}
+	} else {
+		log.Info(`
+		The cluster has no KnativeService resources installed at the moment. If you install Knative Serving later,
+		make sure to apply the required RBAC privileges and restart the operator in order to be able to watch Knative Services!
+		`)
 	}
 
 	return b.Complete(r)
