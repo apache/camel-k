@@ -57,6 +57,9 @@ func TestBuilderTimeout(t *testing.T) {
 			},
 		))
 
+		operatorPod := OperatorPod(ns)()
+		operatorPodImage := operatorPod.Spec.Containers[0].Image
+
 		t.Run("run yaml", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml",
@@ -68,6 +71,8 @@ func TestBuilderTimeout(t *testing.T) {
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
 			Eventually(BuilderPodPhase(ns, builderKitName)).Should(Equal(corev1.PodPending))
 			Eventually(BuildPhase(ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
+			Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
+			Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
 			// After a few minutes (5 max retries), this has to be in error state
 			Eventually(BuildPhase(ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
 			Eventually(IntegrationPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
