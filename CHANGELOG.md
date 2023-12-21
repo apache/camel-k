@@ -6,7 +6,11 @@
 
 **Closed issues:**
 
+- Node affinity labels not being configured in the integration pod/deployment [\#5005](https://github.com/apache/camel-k/issues/5005)
+- Ability to configure pull-secret trait when installing camel-k [\#5003](https://github.com/apache/camel-k/issues/5003)
+- Jitpack not working as expected [\#4998](https://github.com/apache/camel-k/issues/4998)
 - JDK 17 release error for Camel K CRDS artifact [\#4826](https://github.com/apache/camel-k/issues/4826)
+- Provide more detailed `kamel run` documentation [\#4713](https://github.com/apache/camel-k/issues/4713)
 - Test ARM64 architecture - operator and builder pods  [\#4519](https://github.com/apache/camel-k/issues/4519)
 - \[Regression\] javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found [\#4266](https://github.com/apache/camel-k/issues/4266)
 
