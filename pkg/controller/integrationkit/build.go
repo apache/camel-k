@@ -134,7 +134,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		}
 		// The build operation, when executed as a Pod, should be executed by a container image containing the
 		// `kamel builder` command. Likely the same image running the operator should be fine.
-		buildConfig.ToolImage = defaults.OperatorImage()
+		buildConfig.ToolImage = platform.OperatorImage
 		buildConfig.BuilderPodNamespace = operatorNamespace
 		v1.SetBuilderConfigurationTasks(env.Pipeline, buildConfig)
 
