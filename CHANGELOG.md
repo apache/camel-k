@@ -6,6 +6,9 @@
 
 **Closed issues:**
 
+- JDK 17 release error for Camel K CRDS artifact [\#4826](https://github.com/apache/camel-k/issues/4826)
+- Provide more detailed `kamel run` documentation [\#4713](https://github.com/apache/camel-k/issues/4713)
+- Test ARM64 architecture - operator and builder pods  [\#4519](https://github.com/apache/camel-k/issues/4519)
 - \[Regression\] javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found [\#4266](https://github.com/apache/camel-k/issues/4266)
 
 ## [v2.2.0](https://github.com/apache/camel-k/tree/v2.2.0) (2023-12-19)
