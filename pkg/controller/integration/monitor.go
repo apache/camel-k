@@ -265,7 +265,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 		obj = getUpdatedController(env, &appsv1.Deployment{})
 		deploy, ok := obj.(*appsv1.Deployment)
 		if !ok {
-			return nil, fmt.Errorf("type assertion failed: %v", obj)
+			return nil, fmt.Errorf("type assertion failed, not a Deployment: %v", obj)
 		}
 		controller = &deploymentController{
 			obj:         deploy,
@@ -275,7 +275,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 		obj = getUpdatedController(env, &servingv1.Service{})
 		svc, ok := obj.(*servingv1.Service)
 		if !ok {
-			return nil, fmt.Errorf("type assertion failed: %v", obj)
+			return nil, fmt.Errorf("type assertion failed, not a Knative Service: %v", obj)
 		}
 		controller = &knativeServiceController{
 			obj:         svc,
@@ -285,7 +285,7 @@ func (action *monitorAction) newController(env *trait.Environment, integration *
 		obj = getUpdatedController(env, &batchv1.CronJob{})
 		cj, ok := obj.(*batchv1.CronJob)
 		if !ok {
-			return nil, fmt.Errorf("type assertion failed: %v", obj)
+			return nil, fmt.Errorf("type assertion failed, not a CronJob: %v", obj)
 		}
 		controller = &cronJobController{
 			obj:         cj,
@@ -322,9 +322,11 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	readyPods, unreadyPods := filterPodsByReadyStatus(environment, runningPods, controller.getPodSpec())
 
 	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
-		// There may be pods that are not ready but still probable for getting error messages.
-		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
-		_ = action.probeReadiness(ctx, environment, integration, unreadyPods, readyPods)
+		if len(readyPods) > 0 || len(unreadyPods) > 0 {
+			// There may be pods that are not ready but still probable for getting error messages.
+			// Ignore returned error from probing as it's expected when the ctrl obj is not ready.
+			_ = action.probeReadiness(ctx, environment, integration, unreadyPods, readyPods)
+		}
 		return err
 	}
 	if done := checkPodStatuses(integration, pendingPods, runningPods); done {
