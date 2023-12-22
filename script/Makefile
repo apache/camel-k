@@ -23,7 +23,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.2.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.1.0
-DEFAULT_RUNTIME_VERSION := 3.6.0
+DEFAULT_RUNTIME_VERSION := 3.2.3
 BUILDAH_VERSION := 1.30.0
 KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
@@ -86,7 +86,7 @@ STAGING_RUNTIME_REPO :=
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v4.2.0
+KAMELET_CATALOG_REPO_TAG := v4.0.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
