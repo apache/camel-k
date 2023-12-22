@@ -8,7 +8,7 @@ require (
 	github.com/evanphx/json-patch v5.7.0+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gertd/go-pluralize v0.2.1
-	github.com/go-logr/logr v1.3.0
+	github.com/go-logr/logr v1.4.1
 	github.com/google/go-github/v52 v52.0.0
 	github.com/google/uuid v1.5.0
 	github.com/imdario/mergo v0.3.13
