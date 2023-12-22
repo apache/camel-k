@@ -11,11 +11,15 @@
 - Jitpack not working as expected [\#4998](https://github.com/apache/camel-k/issues/4998)
 - JDK 17 release error for Camel K CRDS artifact [\#4826](https://github.com/apache/camel-k/issues/4826)
 - Provide more detailed `kamel run` documentation [\#4713](https://github.com/apache/camel-k/issues/4713)
+- Error running integration with private registry [\#4694](https://github.com/apache/camel-k/issues/4694)
 - Test ARM64 architecture - operator and builder pods  [\#4519](https://github.com/apache/camel-k/issues/4519)
 - \[Regression\] javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found [\#4266](https://github.com/apache/camel-k/issues/4266)
 
 **Merged pull requests:**
 
+- chore\(runtime\): default to latest LTS [\#5009](https://github.com/apache/camel-k/pull/5009) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/go-logr/logr from 1.3.0 to 1.4.1 [\#5008](https://github.com/apache/camel-k/pull/5008) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(core\): Fix tooling image on multi-arch [\#5004](https://github.com/apache/camel-k/pull/5004) ([gansheer](https://github.com/gansheer))
 - docs\(install\): Fix advanced doc on multi-architecture ARM64 [\#4997](https://github.com/apache/camel-k/pull/4997) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump knative.dev/serving from 0.39.2 to 0.39.3 [\#4996](https://github.com/apache/camel-k/pull/4996) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(java\): crds dependency compiler java 17 [\#4995](https://github.com/apache/camel-k/pull/4995) ([squakez](https://github.com/squakez))
