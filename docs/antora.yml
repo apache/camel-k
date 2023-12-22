@@ -30,15 +30,15 @@ asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
-    camel-kamelets-version: '4.2.0'
-    camel-kamelets-docs-version: 4.2.x
-    camel-k-runtime-version: 3.6.0
+    camel-kamelets-version: '4.0.1'
+    camel-kamelets-docs-version: 4.0.x
+    camel-k-runtime-version: 3.2.3
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
-    camel-version: 4.2.0
-    camel-docs-version: 4.2.x
-    camel-quarkus-version: 3.6.0
-    camel-quarkus-docs-version: 3.6.x
-    quarkus-version: 3.6.0
+    camel-version: 4.0.3
+    camel-docs-version: 4.0.x
+    camel-quarkus-version: 3.2.3
+    camel-quarkus-docs-version: 3.2.x
+    quarkus-version: 3.2.9.Final
     buildah-version: 1.30.0
     kaniko-version: 1.9.1
     kustomize-version: 4.5.4
