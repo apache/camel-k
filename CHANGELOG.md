@@ -11,6 +11,7 @@
 - Jitpack not working as expected [\#4998](https://github.com/apache/camel-k/issues/4998)
 - JDK 17 release error for Camel K CRDS artifact [\#4826](https://github.com/apache/camel-k/issues/4826)
 - Provide more detailed `kamel run` documentation [\#4713](https://github.com/apache/camel-k/issues/4713)
+- Error running integration with private registry [\#4694](https://github.com/apache/camel-k/issues/4694)
 - Test ARM64 architecture - operator and builder pods  [\#4519](https://github.com/apache/camel-k/issues/4519)
 - \[Regression\] javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found [\#4266](https://github.com/apache/camel-k/issues/4266)
 
