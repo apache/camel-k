@@ -48,11 +48,27 @@ func (b *CamelArtifactDependencyApplyConfiguration) WithArtifactID(value string)
 	return b
 }
 
+// WithType sets the Type field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Type field is set to the value of the last call.
+func (b *CamelArtifactDependencyApplyConfiguration) WithType(value string) *CamelArtifactDependencyApplyConfiguration {
+	b.Type = &value
+	return b
+}
+
 // WithVersion sets the Version field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Version field is set to the value of the last call.
 func (b *CamelArtifactDependencyApplyConfiguration) WithVersion(value string) *CamelArtifactDependencyApplyConfiguration {
 	b.Version = &value
+	return b
+}
+
+// WithClassifier sets the Classifier field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Classifier field is set to the value of the last call.
+func (b *CamelArtifactDependencyApplyConfiguration) WithClassifier(value string) *CamelArtifactDependencyApplyConfiguration {
+	b.Classifier = &value
 	return b
 }
 

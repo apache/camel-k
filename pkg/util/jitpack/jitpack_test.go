@@ -45,11 +45,11 @@ func TestConversion(t *testing.T) {
 			d = ToDependency(val.prefixID + ":u")
 			assert.Nil(t, d)
 
-			d = ToDependency(val.prefixID + ":u/r/v")
+			d = ToDependency(val.prefixID + ":u/r/v-1.2")
 			assert.NotNil(t, d)
 			assert.Equal(t, val.prefixGav+".u", d.GroupID)
 			assert.Equal(t, "r", d.ArtifactID)
-			assert.Equal(t, "v", d.Version)
+			assert.Equal(t, "v-1.2", d.Version)
 
 			d = ToDependency(val.prefixID + ":u/r")
 			assert.NotNil(t, d)

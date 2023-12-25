@@ -81,14 +81,18 @@ type RepositoryPolicy struct {
 	ChecksumPolicy string `xml:"checksumPolicy,omitempty" json:"checksumPolicy,omitempty"`
 }
 
-// MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact.
+// MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier) Maven artifact.
 type MavenArtifact struct {
 	// Maven Group
 	GroupID string `json:"groupId" yaml:"groupId" xml:"groupId"`
 	// Maven Artifact
 	ArtifactID string `json:"artifactId" yaml:"artifactId" xml:"artifactId"`
+	// Maven Type
+	Type string `json:"type,omitempty" yaml:"type,omitempty" xml:"type,omitempty"`
 	// Maven Version
 	Version string `json:"version,omitempty" yaml:"version,omitempty" xml:"version,omitempty"`
+	// Maven Classifier
+	Classifier string `json:"classifier,omitempty" yaml:"classifier,omitempty" xml:"classifier,omitempty"`
 }
 
 // Server see link:https://maven.apache.org/settings.html[Maven settings].
