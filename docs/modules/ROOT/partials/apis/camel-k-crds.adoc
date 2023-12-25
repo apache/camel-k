@@ -3918,7 +3918,7 @@ Language represents a supported language (Camel DSL).
 * <<#_camel_apache_org_v1_MavenSpec, MavenSpec>>
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact.
+MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier) Maven artifact.
 
 [cols="2,2a",options="header"]
 |===
@@ -3939,12 +3939,26 @@ string
 
 Maven Artifact
 
+|`type` +
+string
+|
+
+
+Maven Type
+
 |`version` +
 string
 |
 
 
 Maven Version
+
+|`classifier` +
+string
+|
+
+
+Maven Classifier
 
 
 |===

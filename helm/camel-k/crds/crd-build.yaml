@@ -370,14 +370,20 @@ spec:
                             extension:
                               description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
-                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
                                     type: string
+                                  classifier:
+                                    description: Maven Classifier
+                                    type: string
                                   groupId:
                                     description: Maven Group
+                                    type: string
+                                  type:
+                                    description: Maven Type
                                     type: string
                                   version:
                                     description: Maven Version
@@ -637,14 +643,20 @@ spec:
                                 properties:
                                   dependencies:
                                     items:
-                                      description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                      description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                         Maven artifact.
                                       properties:
                                         artifactId:
                                           description: Maven Artifact
                                           type: string
+                                        classifier:
+                                          description: Maven Classifier
+                                          type: string
                                         groupId:
                                           description: Maven Group
+                                          type: string
+                                        type:
+                                          description: Maven Type
                                           type: string
                                         version:
                                           description: Maven Version
@@ -663,14 +675,20 @@ spec:
                               description: list of dependencies needed to run the
                                 application
                               items:
-                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
                                     type: string
+                                  classifier:
+                                    description: Maven Classifier
+                                    type: string
                                   groupId:
                                     description: Maven Group
+                                    type: string
+                                  type:
+                                    description: Maven Type
                                     type: string
                                   version:
                                     description: Maven Version
@@ -1167,14 +1185,20 @@ spec:
                             extension:
                               description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
-                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
                                     type: string
+                                  classifier:
+                                    description: Maven Classifier
+                                    type: string
                                   groupId:
                                     description: Maven Group
+                                    type: string
+                                  type:
+                                    description: Maven Type
                                     type: string
                                   version:
                                     description: Maven Version
@@ -1434,14 +1458,20 @@ spec:
                                 properties:
                                   dependencies:
                                     items:
-                                      description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                      description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                         Maven artifact.
                                       properties:
                                         artifactId:
                                           description: Maven Artifact
                                           type: string
+                                        classifier:
+                                          description: Maven Classifier
+                                          type: string
                                         groupId:
                                           description: Maven Group
+                                          type: string
+                                        type:
+                                          description: Maven Type
                                           type: string
                                         version:
                                           description: Maven Version
@@ -1460,14 +1490,20 @@ spec:
                               description: list of dependencies needed to run the
                                 application
                               items:
-                                description: MavenArtifact defines a GAV (Group:Artifact:Version)
+                                description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.
                                 properties:
                                   artifactId:
                                     description: Maven Artifact
                                     type: string
+                                  classifier:
+                                    description: Maven Classifier
+                                    type: string
                                   groupId:
                                     description: Maven Group
+                                    type: string
+                                  type:
+                                    description: Maven Type
                                     type: string
                                   version:
                                     description: Maven Version

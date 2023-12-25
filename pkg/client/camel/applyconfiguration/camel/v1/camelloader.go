@@ -50,11 +50,27 @@ func (b *CamelLoaderApplyConfiguration) WithArtifactID(value string) *CamelLoade
 	return b
 }
 
+// WithType sets the Type field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Type field is set to the value of the last call.
+func (b *CamelLoaderApplyConfiguration) WithType(value string) *CamelLoaderApplyConfiguration {
+	b.Type = &value
+	return b
+}
+
 // WithVersion sets the Version field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Version field is set to the value of the last call.
 func (b *CamelLoaderApplyConfiguration) WithVersion(value string) *CamelLoaderApplyConfiguration {
 	b.Version = &value
+	return b
+}
+
+// WithClassifier sets the Classifier field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Classifier field is set to the value of the last call.
+func (b *CamelLoaderApplyConfiguration) WithClassifier(value string) *CamelLoaderApplyConfiguration {
+	b.Classifier = &value
 	return b
 }
 
