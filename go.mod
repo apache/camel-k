@@ -52,7 +52,7 @@ require (
 	k8s.io/klog/v2 v2.110.1
 	k8s.io/kubectl v0.27.7
 	k8s.io/utils v0.0.0-20230505201702-9f6742963106
-	knative.dev/eventing v0.39.1
+	knative.dev/eventing v0.39.2
 	knative.dev/pkg v0.0.0-20231023151236-29775d7c9e5c
 	knative.dev/serving v0.39.3
 	sigs.k8s.io/controller-runtime v0.15.2
