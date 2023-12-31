@@ -19,6 +19,7 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): Sanitize PR head.ref [\#5013](https://github.com/apache/camel-k/pull/5013) ([AdnaneKhan](https://github.com/AdnaneKhan))
 - chore\(runtime\): default to latest LTS [\#5009](https://github.com/apache/camel-k/pull/5009) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/go-logr/logr from 1.3.0 to 1.4.1 [\#5008](https://github.com/apache/camel-k/pull/5008) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(core\): Fix tooling image on multi-arch [\#5004](https://github.com/apache/camel-k/pull/5004) ([gansheer](https://github.com/gansheer))
