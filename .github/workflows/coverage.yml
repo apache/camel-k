@@ -37,10 +37,11 @@ jobs:
         env:
           CI_USER: "github-actions[bot]"
           CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+          PR_HEAD: "${{ github.event.pull_request.head.ref }}"
         run: |
           git clone ${{ github.event.pull_request.head.repo.clone_url }}
           cd ${{ github.event.pull_request.head.repo.name }}
-          git checkout ${{ github.event.pull_request.head.ref }}
+          git checkout $PR_HEAD
 
           git config --local user.email "$CI_EMAIL"
           git config --local user.name "$CI_USER"
