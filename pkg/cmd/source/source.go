@@ -88,8 +88,42 @@ func (s Source) IsYaml() bool {
 	return strings.HasSuffix(s.Name, ".yaml") || strings.HasSuffix(s.Name, ".yml")
 }
 
+// globSources identifies glob patterns like sources/*.yaml and expand them into individual file paths.
+func globSources(locations []string) ([]string, error) {
+	var sources = make([]string, 0, len(locations))
+
+	for _, src := range locations {
+		glob, err := isGlobCandidate(src)
+		if err != nil {
+			return nil, err
+		}
+
+		if glob {
+			matches, err := filepath.Glob(src)
+			if err != nil {
+				return nil, err
+			}
+
+			if len(matches) > 0 {
+				sources = append(sources, matches...)
+			} else {
+				// leave the original location if there wasn't any matches
+				sources = append(sources, src)
+			}
+		} else {
+			sources = append(sources, src)
+		}
+	}
+	return sources, nil
+}
+
 // Resolve resolves sources from a variety of locations including local and remote.
 func Resolve(ctx context.Context, locations []string, compress bool, cmd *cobra.Command) ([]Source, error) {
+	locations, err := globSources(locations)
+	if err != nil {
+		return nil, err
+	}
+
 	sources := make([]Source, 0, len(locations))
 
 	for _, location := range locations {

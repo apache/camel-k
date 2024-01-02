@@ -38,6 +38,26 @@ func IsLocalAndFileExists(uri string) (bool, error) {
 		// it's not a local file as it matches one of the supporting schemes
 		return false, nil
 	}
+	return isExistingFile(uri)
+}
+
+// isGlobCandidate checks if the provided uri doesn't have a supported scheme prefix,
+// and is not an existing file, because then it could be a glob pattern like "sources/*.yaml".
+func isGlobCandidate(uri string) (bool, error) {
+	if hasSupportedScheme(uri) {
+		// it's not a local file as it matches one of the supporting schemes
+		return false, nil
+	}
+
+	exists, err := isExistingFile(uri)
+	if err != nil {
+		return false, err
+	}
+
+	return !exists, nil
+}
+
+func isExistingFile(uri string) (bool, error) {
 	info, err := os.Stat(uri)
 	if err != nil {
 		if os.IsNotExist(err) {

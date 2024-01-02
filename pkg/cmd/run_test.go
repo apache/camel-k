@@ -812,6 +812,119 @@ func TestRunOutput(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
 }
 
+func TestRunGlob(t *testing.T) {
+	dir, err := os.MkdirTemp("", "camel-k-TestRunGlob-*")
+	if err != nil {
+		t.Error(err)
+	}
+
+	pattern := "camel-k-*.yaml"
+
+	tmpFile1, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		t.Error(err)
+	}
+	defer tmpFile1.Close()
+	assert.Nil(t, tmpFile1.Sync())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+
+	tmpFile2, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		t.Error(err)
+	}
+	defer tmpFile2.Close()
+	assert.Nil(t, tmpFile2.Sync())
+	assert.Nil(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
+
+	integrationName := "myname"
+
+	_, rootCmd, _ := initializeRunCmdOptionsWithOutput(t)
+
+	file := fmt.Sprintf("%s%c%s*", dir, os.PathSeparator, "camel-k-*") // = dir/camel-k-*
+
+	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
+}
+
+func TestRunGlobAllFiles(t *testing.T) {
+	dir, err := os.MkdirTemp("", "camel-k-TestRunGlobAllFiles-*")
+	if err != nil {
+		t.Error(err)
+	}
+
+	pattern := "camel-k-*.yaml"
+
+	tmpFile1, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		t.Error(err)
+	}
+	defer tmpFile1.Close()
+	assert.Nil(t, tmpFile1.Sync())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+
+	tmpFile2, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		t.Error(err)
+	}
+	defer tmpFile2.Close()
+	assert.Nil(t, tmpFile2.Sync())
+	assert.Nil(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
+
+	integrationName := "myname"
+
+	_, rootCmd, _ := initializeRunCmdOptionsWithOutput(t)
+
+	file := fmt.Sprintf("%s%c*", dir, os.PathSeparator) // = dir/*
+
+	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
+}
+
+func TestRunGlobChange(t *testing.T) {
+	dir, err := os.MkdirTemp("", "camel-k-TestRunGlobChange-*")
+	if err != nil {
+		t.Error(err)
+	}
+
+	pattern := "camel-k-*.yaml"
+
+	tmpFile1, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		t.Error(err)
+	}
+	defer tmpFile1.Close()
+	assert.Nil(t, tmpFile1.Sync())
+	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+
+	integrationName := "myname"
+
+	_, rootCmd, _ := initializeRunCmdOptionsWithOutput(t)
+
+	file := fmt.Sprintf("%s%c%s", dir, os.PathSeparator, "camel-k-*")
+
+	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
+
+	output, err = test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" unchanged\n", integrationName), output)
+
+	tmpFile2, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		t.Error(err)
+	}
+	defer tmpFile2.Close()
+	assert.Nil(t, tmpFile2.Sync())
+	assert.Nil(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
+
+	output, err = test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
+	assert.Nil(t, err)
+	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
+}
+
 func TestRunOutputWithoutKubernetesCluster(t *testing.T) {
 	tmpFile, err := os.CreateTemp("", "camel-k-kubeconfig-*")
 	require.NoError(t, err)
