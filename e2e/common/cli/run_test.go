@@ -138,6 +138,46 @@ func TestKamelCLIRun(t *testing.T) {
 		Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
 	})
 
+	t.Run("Run with glob patterns", func(t *testing.T) {
+		t.Run("YAML", func(t *testing.T) {
+			name := RandomizedSuffixName("run")
+			Expect(KamelRunWithID(operatorID, ns, "files/glob/run*", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 1 default"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 2 default"))
+			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+		})
+
+		t.Run("Java", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			Expect(KamelRunWithID(operatorID, ns, "files/glob/Java*", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 1 default"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 2 default"))
+			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+		})
+
+		t.Run("All", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			Expect(KamelRunWithID(operatorID, ns, "files/glob/*", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 1 default"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 2 default"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 1 default"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 2 default"))
+			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+		})
+
+		// Clean up
+		Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+	})
+
 	/*
 	 * TODO
 	 * The dependency cannot be read by maven while building. See #3708
