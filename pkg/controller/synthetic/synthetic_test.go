@@ -115,6 +115,17 @@ func TestNonManagedDeployment(t *testing.T) {
 			},
 		},
 	}
+	references := []metav1.OwnerReference{
+		{
+			APIVersion:         "apps/v1",
+			Kind:               "Deployment",
+			Name:               deploy.Name,
+			UID:                deploy.UID,
+			Controller:         &controller,
+			BlockOwnerDeletion: &blockOwnerDeletion,
+		},
+	}
+	expectedIt.SetOwnerReferences(references)
 
 	deploymentAdapter, err := nonManagedCamelApplicationFactory(deploy)
 	assert.Nil(t, err)
@@ -164,7 +175,17 @@ func TestNonManagedCronJob(t *testing.T) {
 		v1.IntegrationImportedKindLabel: "CronJob",
 		v1.IntegrationSyntheticLabel:    "true",
 	})
-
+	references := []metav1.OwnerReference{
+		{
+			APIVersion:         "batch/v1",
+			Kind:               "CronJob",
+			Name:               cron.Name,
+			UID:                cron.UID,
+			Controller:         &controller,
+			BlockOwnerDeletion: &blockOwnerDeletion,
+		},
+	}
+	expectedIt.SetOwnerReferences(references)
 	cronJobAdapter, err := nonManagedCamelApplicationFactory(cron)
 	assert.Nil(t, err)
 	assert.NotNil(t, cronJobAdapter)
@@ -174,7 +195,7 @@ func TestNonManagedCronJob(t *testing.T) {
 func TestNonManagedKnativeService(t *testing.T) {
 	ksvc := &servingv1.Service{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: appsv1.SchemeGroupVersion.String(),
+			APIVersion: servingv1.SchemeGroupVersion.String(),
 			Kind:       "Service",
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -213,6 +234,17 @@ func TestNonManagedKnativeService(t *testing.T) {
 		v1.IntegrationImportedKindLabel: "KnativeService",
 		v1.IntegrationSyntheticLabel:    "true",
 	})
+	references := []metav1.OwnerReference{
+		{
+			APIVersion:         servingv1.SchemeGroupVersion.String(),
+			Kind:               "Service",
+			Name:               ksvc.Name,
+			UID:                ksvc.UID,
+			Controller:         &controller,
+			BlockOwnerDeletion: &blockOwnerDeletion,
+		},
+	}
+	expectedIt.SetOwnerReferences(references)
 
 	knativeServiceAdapter, err := nonManagedCamelApplicationFactory(ksvc)
 	assert.Nil(t, err)

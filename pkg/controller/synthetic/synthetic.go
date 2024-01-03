@@ -31,6 +31,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientgocache "k8s.io/client-go/tools/cache"
 	"knative.dev/serving/pkg/apis/serving"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
@@ -38,12 +39,17 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+var (
+	controller         = true
+	blockOwnerDeletion = true
+)
+
 // ManageSyntheticIntegrations is the controller for synthetic Integrations. Consider that the lifecycle of the objects are driven
-// by the way we are monitoring them. Since we're filtering by `camel.apache.org/integration` label in the cached clinet,
+// by the way we are monitoring them. Since we're filtering by `camel.apache.org/integration` label in the cached client,
 // you must consider an add, update or delete
 // accordingly, ie, when the user label the resource, then it is considered as an add, when it removes the label, it is considered as a delete.
 // We must filter only non managed objects in order to avoid to conflict with the reconciliation loop of managed objects (owned by an Integration).
-func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cache.Cache, reader ctrl.Reader) error {
+func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cache.Cache) error {
 	informers, err := getInformers(ctx, c, cache)
 	if err != nil {
 		return err
@@ -73,15 +79,7 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 							log.Errorf(err, "Some error happened while loading a synthetic Integration %s", integrationName)
 						}
 					} else {
-						if it.Status.Phase == v1.IntegrationPhaseImportMissing {
-							// Update with proper phase (reconciliation will take care)
-							it.Status.Phase = v1.IntegrationPhaseNone
-							if err = updateSyntheticIntegration(ctx, c, it); err != nil {
-								log.Errorf(err, "Some error happened while updatinf a synthetic Integration %s", integrationName)
-							}
-						} else {
-							log.Infof("Synthetic Integration %s is in phase %s. Skipping.", integrationName, it.Status.Phase)
-						}
+						log.Infof("Synthetic Integration %s is in phase %s. Skipping.", integrationName, it.Status.Phase)
 					}
 				}
 			},
@@ -93,44 +91,11 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 				}
 				if !isManagedObject(ctrlObj) {
 					integrationName := ctrlObj.GetLabels()[v1.IntegrationLabel]
-					// We must use a non caching client to understand if the object has been deleted from the cluster or only deleted from
-					// the cache (ie, user removed the importing label)
-					err := reader.Get(ctx, ctrl.ObjectKeyFromObject(ctrlObj), ctrlObj)
-					if err != nil {
-						if k8serrors.IsNotFound(err) {
-							// Object removed from the cluster
-							it, err := getSyntheticIntegration(ctx, c, ctrlObj.GetNamespace(), integrationName)
-							if err != nil {
-								log.Errorf(err, "Some error happened while loading a synthetic Integration %s", it.Name)
-								return
-							}
-							// The resource from which we imported has been deleted, report in it status.
-							// It may be a temporary situation, for example, if the deployment from which the Integration is imported
-							// is being redeployed. For this reason we should keep the Integration instead of forcefully removing it.
-							message := fmt.Sprintf(
-								"import %s %s no longer available",
-								it.Annotations[v1.IntegrationImportedKindLabel],
-								it.Annotations[v1.IntegrationImportedNameLabel],
-							)
-							it.SetReadyConditionError(message)
-							zero := int32(0)
-							it.Status.Phase = v1.IntegrationPhaseImportMissing
-							it.Status.Replicas = &zero
-							if err = updateSyntheticIntegration(ctx, c, it); err != nil {
-								log.Errorf(err, "Some error happened while updating a synthetic Integration %s", it.Name)
-							}
-							log.Infof("Updated synthetic Integration %s with status %s", it.GetName(), it.Status.Phase)
-						} else {
-							log.Errorf(err, "Some error happened while loading object %s from the cluster", ctrlObj.GetName())
-							return
-						}
-					} else {
-						// Importing label removed
-						if err = deleteSyntheticIntegration(ctx, c, ctrlObj.GetNamespace(), integrationName); err != nil {
-							log.Errorf(err, "Some error happened while deleting a synthetic Integration %s", integrationName)
-						}
-						log.Infof("Deleted synthetic Integration %s", integrationName)
+					// Importing label removed
+					if err = deleteSyntheticIntegration(ctx, c, ctrlObj.GetNamespace(), integrationName); err != nil {
+						log.Errorf(err, "Some error happened while deleting a synthetic Integration %s", integrationName)
 					}
+					log.Infof("Deleted synthetic Integration %s", integrationName)
 				}
 			},
 		})
@@ -186,10 +151,6 @@ func deleteSyntheticIntegration(ctx context.Context, c client.Client, namespace,
 	return c.Delete(ctx, &it)
 }
 
-func updateSyntheticIntegration(ctx context.Context, c client.Client, it *v1.Integration) error {
-	return c.Status().Update(ctx, it, ctrl.FieldOwner("camel-k-operator"))
-}
-
 // isManagedObject returns true if the object is managed by an Integration.
 func isManagedObject(obj ctrl.Object) bool {
 	for _, mr := range obj.GetOwnerReferences() {
@@ -243,6 +204,17 @@ func (app *nonManagedCamelDeployment) Integration() *v1.Integration {
 			},
 		},
 	}
+	references := []metav1.OwnerReference{
+		{
+			APIVersion:         "apps/v1",
+			Kind:               "Deployment",
+			Name:               app.deploy.Name,
+			UID:                app.deploy.UID,
+			Controller:         &controller,
+			BlockOwnerDeletion: &blockOwnerDeletion,
+		},
+	}
+	it.SetOwnerReferences(references)
 	return &it
 }
 
@@ -277,6 +249,17 @@ func (app *NonManagedCamelCronjob) Integration() *v1.Integration {
 	it.Spec = v1.IntegrationSpec{
 		Traits: v1.Traits{},
 	}
+	references := []metav1.OwnerReference{
+		{
+			APIVersion:         "batch/v1",
+			Kind:               "CronJob",
+			Name:               app.cron.Name,
+			UID:                app.cron.UID,
+			Controller:         &controller,
+			BlockOwnerDeletion: &blockOwnerDeletion,
+		},
+	}
+	it.SetOwnerReferences(references)
 	return &it
 }
 
@@ -296,5 +279,16 @@ func (app *NonManagedCamelKnativeService) Integration() *v1.Integration {
 	it.Spec = v1.IntegrationSpec{
 		Traits: v1.Traits{},
 	}
+	references := []metav1.OwnerReference{
+		{
+			APIVersion:         servingv1.SchemeGroupVersion.String(),
+			Kind:               "Service",
+			Name:               app.ksvc.Name,
+			UID:                app.ksvc.UID,
+			Controller:         &controller,
+			BlockOwnerDeletion: &blockOwnerDeletion,
+		},
+	}
+	it.SetOwnerReferences(references)
 	return &it
 }

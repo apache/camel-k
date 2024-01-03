@@ -235,7 +235,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
 	if synth && synthEnvVal == "true" {
 		log.Info("Starting the synthetic Integration manager")
-		exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache(), mgr.GetAPIReader()), "synthetic Integration manager error")
+		exitOnError(synthetic.ManageSyntheticIntegrations(ctx, ctrlClient, mgr.GetCache()), "synthetic Integration manager error")
 	} else {
 		log.Info("Synthetic Integration manager not configured, skipping")
 	}

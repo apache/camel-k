@@ -125,13 +125,10 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
 	assert.Nil(t, err)
-	assert.Equal(t, v1.IntegrationPhaseCannotMonitor, handledIt.Status.Phase)
-	// Ready condition should be still true
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	// Check monitoring pods condition
-	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Status)
-	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Reason)
-	assert.Equal(t, "Could not find `camel.apache.org/integration: my-imported-it` label in the Deployment/my-deploy template. Make sure to include this label in the template for Pod monitoring purposes.", handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Message)
+	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
+	assert.Equal(t, "Could not find `camel.apache.org/integration: my-imported-it` label in the Deployment/my-deploy template. Make sure to include this label in the template for Pod monitoring purposes.", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
 }
 
 func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
@@ -246,9 +243,6 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionDeploymentReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "1/1 ready replicas", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
-	// Check monitoring pods condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Status)
-	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Reason)
 
 	// Remove label from deployment
 	deploy.Labels = nil
@@ -369,9 +363,6 @@ func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {
 	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionCronJobCreatedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 	assert.Equal(t, "cronjob created", handledIt.Status.GetCondition(v1.IntegrationConditionReady).Message)
-	// Check monitoring pods condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Status)
-	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Reason)
 }
 
 func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
@@ -492,7 +483,4 @@ func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
 	// Ready condition
 	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionKnativeServiceReadyReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
-	// Check monitoring pods condition
-	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Status)
-	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Reason)
 }

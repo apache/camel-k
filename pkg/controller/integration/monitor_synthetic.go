@@ -19,7 +19,6 @@ package integration
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -46,18 +45,8 @@ func (action *monitorSyntheticAction) Handle(ctx context.Context, integration *v
 	if err != nil {
 		// Importing application no longer available
 		if k8serrors.IsNotFound(err) {
-			// It could be a normal condition, don't report as an error
-			integration.Status.Phase = v1.IntegrationPhaseImportMissing
-			message := fmt.Sprintf(
-				"import %s %s no longer available",
-				integration.Annotations[v1.IntegrationImportedKindLabel],
-				integration.Annotations[v1.IntegrationImportedNameLabel],
-			)
-			integration.SetReadyConditionError(message)
-			zero := int32(0)
-			integration.Status.Phase = v1.IntegrationPhaseImportMissing
-			integration.Status.Replicas = &zero
-			return integration, nil
+			// Application was deleted. The GC will take care of
+			return nil, nil
 		}
 		// other reasons, likely some error to report
 		integration.Status.Phase = v1.IntegrationPhaseError
