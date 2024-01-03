@@ -18,9 +18,15 @@ limitations under the License.
 package registry
 
 import (
+	"context"
+	"os"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestAuth_GenerateDockerConfig(t *testing.T) {
@@ -65,4 +71,39 @@ func TestAuth_Validate(t *testing.T) {
 		Username: "nic",
 		Server:   "quay.io",
 	}.validate())
+}
+
+func TestMountSecretRegistryConfig(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	a := Auth{
+		Username: "nic",
+		Registry: "docker.io",
+	}
+	conf, _ := a.GenerateDockerConfig()
+	namespace := v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "test",
+		},
+	}
+	secret := v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-secret1",
+		},
+		Type: v1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			v1.DockerConfigJsonKey: conf,
+		},
+	}
+
+	c, err := test.NewFakeClient(&namespace, &secret)
+	assert.Nil(t, err)
+	assert.NotNil(t, c)
+	registryConfigDir, err := MountSecretRegistryConfig(ctx, c, "test", "prefix-", "my-secret1")
+	assert.Nil(t, err)
+	assert.NotNil(t, registryConfigDir)
+	dockerfileExists, _ := util.FileExists(registryConfigDir + "/config.json")
+	assert.True(t, dockerfileExists)
+	os.RemoveAll(registryConfigDir)
 }
