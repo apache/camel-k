@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/jib"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
+	"github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 type jibTask struct {
@@ -89,14 +90,9 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 
 	registryConfigDir := ""
 	if t.task.Registry.Secret != "" {
-		registryConfigDir, err = MountSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret)
+		registryConfigDir, err = registry.MountSecretRegistryConfig(ctx, t.c, t.build.Namespace, "jib-secret-", t.task.Registry.Secret)
+		os.Setenv(jib.JibRegistryConfigEnvVar, registryConfigDir)
 		if err != nil {
-			return status.Failed(err)
-		}
-	}
-
-	if registryConfigDir != "" {
-		if err := os.RemoveAll(registryConfigDir); err != nil {
 			return status.Failed(err)
 		}
 	}
@@ -125,8 +121,10 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	cmd.Dir = mavenDir
 
 	myerror := util.RunAndLog(ctx, cmd, maven.MavenLogHandler, maven.MavenLogHandler)
+
 	if myerror != nil {
 		log.Errorf(myerror, "jib integration image containerization did not run successfully")
+		_ = cleanRegistryConfig(registryConfigDir)
 		return status.Failed(myerror)
 	} else {
 		log.Debug("jib integration image containerization did run successfully")
@@ -135,10 +133,27 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		// retrieve image digest
 		mavenDigest, errDigest := util.ReadFile(filepath.Join(mavenDir, jib.JibDigestFile))
 		if errDigest != nil {
+			_ = cleanRegistryConfig(registryConfigDir)
 			return status.Failed(errDigest)
 		}
 		status.Digest = string(mavenDigest)
 	}
 
+	if registryConfigDir != "" {
+		if err := cleanRegistryConfig(registryConfigDir); err != nil {
+			return status.Failed(err)
+		}
+	}
+
 	return status
+}
+
+func cleanRegistryConfig(registryConfigDir string) error {
+	if err := os.Unsetenv(jib.JibRegistryConfigEnvVar); err != nil {
+		return err
+	}
+	if err := os.RemoveAll(registryConfigDir); err != nil {
+		return err
+	}
+	return nil
 }
