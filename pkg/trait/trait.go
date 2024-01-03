@@ -137,7 +137,8 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 	return &env, nil
 }
 
-// NewSyntheticEnvironment creates an environment suitable for a synthetic Integration.
+// NewSyntheticEnvironment creates an environment suitable for a synthetic Integration. If the application which generated the synthetic Integration
+// has no longer the label, it will return a nil result.
 func NewSyntheticEnvironment(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (*Environment, error) {
 	if integration == nil && kit == nil {
 		return nil, errors.New("neither integration nor kit are set")
@@ -172,6 +173,10 @@ func NewSyntheticEnvironment(ctx context.Context, c client.Client, integration *
 	)
 	if err != nil {
 		return nil, err
+	}
+	// Verify if the application has still the expected label. If not, return nil.
+	if camelApp.GetLabels()[v1.IntegrationLabel] != integration.Name {
+		return nil, nil
 	}
 	env.Resources.Add(camelApp)
 
