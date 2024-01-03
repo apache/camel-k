@@ -18,10 +18,17 @@ limitations under the License.
 package registry
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/apache/camel-k/v2/pkg/client"
+	"go.uber.org/multierr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var knownServersByRegistry = map[string]string{
@@ -97,4 +104,37 @@ func (a Auth) getActualServer() string {
 
 func (a Auth) encodedCredentials() string {
 	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", a.Username, a.Password)))
+}
+
+// MountSecretRegistryConfig write a file containing the secret registry config in a temporary folder.
+func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, prefix, name string) (string, error) {
+	dir, err := os.MkdirTemp("", prefix)
+	if err != nil {
+		return "", err
+	}
+
+	secret, err := c.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
+	if err != nil {
+		if removeErr := os.RemoveAll(dir); removeErr != nil {
+			err = multierr.Append(err, removeErr)
+		}
+		return "", err
+	}
+
+	for file, content := range secret.Data {
+		if err := os.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
+			if removeErr := os.RemoveAll(dir); removeErr != nil {
+				err = multierr.Append(err, removeErr)
+			}
+			return "", err
+		}
+	}
+	return dir, nil
+}
+
+func remap(name string) string {
+	if name == ".dockerconfigjson" {
+		return "config.json"
+	}
+	return name
 }

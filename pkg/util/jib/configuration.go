@@ -41,6 +41,9 @@ const JibDigestFile = "target/jib-image.digest"
 const JibMavenPluginVersionDefault = "3.3.2"
 const JibLayerFilterExtensionMavenVersionDefault = "0.3.0"
 
+// See: https://github.com/GoogleContainerTools/jib/blob/master/jib-maven-plugin/README.md#using-docker-configuration-files
+const JibRegistryConfigEnvVar = "DOCKER_CONFIG"
+
 type JibBuild struct {
 	Plugins []maven.Plugin `xml:"plugins>plugin,omitempty"`
 }
