@@ -4,22 +4,6 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.2.0...HEAD)
 
-**Closed issues:**
-
-- Node affinity labels not being configured in the integration pod/deployment [\#5005](https://github.com/apache/camel-k/issues/5005)
-- Ability to configure pull-secret trait when installing camel-k [\#5003](https://github.com/apache/camel-k/issues/5003)
-- Jitpack not working as expected [\#4998](https://github.com/apache/camel-k/issues/4998)
-- Ready condition does not report errors if a deployment fails  [\#4974](https://github.com/apache/camel-k/issues/4974)
-- JDK 17 release error for Camel K CRDS artifact [\#4826](https://github.com/apache/camel-k/issues/4826)
-- Knative installation procedure [\#4779](https://github.com/apache/camel-k/issues/4779)
-- Pushing integration to EKS [\#4725](https://github.com/apache/camel-k/issues/4725)
-- Secure internal registry with private TLS certificate fails while pushing and pulling the kit [\#4724](https://github.com/apache/camel-k/issues/4724)
-- Helm installation procedure does not support Knative [\#4716](https://github.com/apache/camel-k/issues/4716)
-- Provide more detailed `kamel run` documentation [\#4713](https://github.com/apache/camel-k/issues/4713)
-- Error running integration with private registry [\#4694](https://github.com/apache/camel-k/issues/4694)
-- Test ARM64 architecture - operator and builder pods  [\#4519](https://github.com/apache/camel-k/issues/4519)
-- \[Regression\] javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found [\#4266](https://github.com/apache/camel-k/issues/4266)
-
 **Merged pull requests:**
 
 - fix\(ci\): Sanitize PR head.ref [\#5013](https://github.com/apache/camel-k/pull/5013) ([AdnaneKhan](https://github.com/AdnaneKhan))
@@ -113,17 +97,21 @@
 - feat\(runtime\): enable source less integrations [\#4831](https://github.com/apache/camel-k/pull/4831) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/operator-framework/api from 0.13.0 to 0.17.7 [\#4634](https://github.com/apache/camel-k/pull/4634) ([dependabot[bot]](https://github.com/apps/dependabot))
 
-## [v2.2.0](https://github.com/apache/camel-k/tree/v2.2.0) (2023-12-19)
+## [v2.2.0](https://github.com/apache/camel-k/tree/v2.2.0) (2024-01-03)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.2.0...v2.2.0)
 
-## [camel-k-crds-2.2.0](https://github.com/apache/camel-k/tree/camel-k-crds-2.2.0) (2023-12-19)
+## [camel-k-crds-2.2.0](https://github.com/apache/camel-k/tree/camel-k-crds-2.2.0) (2024-01-03)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.1.1-nightly...camel-k-crds-2.2.0)
 
 **Closed issues:**
 
+- Node affinity labels not being configured in the integration pod/deployment [\#5005](https://github.com/apache/camel-k/issues/5005)
+- Ability to configure pull-secret trait when installing camel-k [\#5003](https://github.com/apache/camel-k/issues/5003)
+- Jitpack not working as expected [\#4998](https://github.com/apache/camel-k/issues/4998)
 - Usage of older Kameletes version on main [\#4985](https://github.com/apache/camel-k/issues/4985)
+- Ready condition does not report errors if a deployment fails  [\#4974](https://github.com/apache/camel-k/issues/4974)
 - Fail to run route with toD [\#4972](https://github.com/apache/camel-k/issues/4972)
 - Native build fails with OpenAPI spec [\#4971](https://github.com/apache/camel-k/issues/4971)
 - Improve cross-namespace check when referencing Kamelets in Pipes [\#4961](https://github.com/apache/camel-k/issues/4961)
@@ -147,15 +135,24 @@
 - OLM upgrade test channel failing [\#4855](https://github.com/apache/camel-k/issues/4855)
 - Camel K 2.1 documentation still contains information on using local files for runtime resources despite it is no more supported [\#4853](https://github.com/apache/camel-k/issues/4853)
 - TestCamelTrait flaky test [\#4845](https://github.com/apache/camel-k/issues/4845)
+- JDK 17 release error for Camel K CRDS artifact [\#4826](https://github.com/apache/camel-k/issues/4826)
+- Knative installation procedure [\#4779](https://github.com/apache/camel-k/issues/4779)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - \(Re\)Enable support for Kotlin DSL [\#4738](https://github.com/apache/camel-k/issues/4738)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
+- Pushing integration to EKS [\#4725](https://github.com/apache/camel-k/issues/4725)
+- Secure internal registry with private TLS certificate fails while pushing and pulling the kit [\#4724](https://github.com/apache/camel-k/issues/4724)
+- Helm installation procedure does not support Knative [\#4716](https://github.com/apache/camel-k/issues/4716)
+- Provide more detailed `kamel run` documentation [\#4713](https://github.com/apache/camel-k/issues/4713)
+- Error running integration with private registry [\#4694](https://github.com/apache/camel-k/issues/4694)
 - Create a script to verify rbac from config/rbac to helm/camel-k/templates [\#4674](https://github.com/apache/camel-k/issues/4674)
 - doesnt work "kamel kit delete"  [\#4628](https://github.com/apache/camel-k/issues/4628)
 - Facing issue while Integrating Java Code and REST with JAR Dependencies [\#4593](https://github.com/apache/camel-k/issues/4593)
 - Image Vulnerability of Go package [\#4581](https://github.com/apache/camel-k/issues/4581)
 - Failing to serialize java.time.\* objects into json [\#4547](https://github.com/apache/camel-k/issues/4547)
 - Use custom component in camel K [\#4539](https://github.com/apache/camel-k/issues/4539)
+- Test ARM64 architecture - operator and builder pods  [\#4519](https://github.com/apache/camel-k/issues/4519)
+- \[Regression\] javax.xml.parsers.FactoryConfigurationError: Provider org.apache.xerces.jaxp.SAXParserFactoryImpl not found [\#4266](https://github.com/apache/camel-k/issues/4266)
 - Create a test for structured health check conditions when integrations are scaled \> 1 [\#3997](https://github.com/apache/camel-k/issues/3997)
 - Add KEP-1755 support e2e tests [\#3615](https://github.com/apache/camel-k/issues/3615)
 - Camel-K initContainer [\#3459](https://github.com/apache/camel-k/issues/3459)
