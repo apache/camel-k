@@ -110,7 +110,7 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "my-deploy",
-			Annotations: map[string]string{
+			Labels: map[string]string{
 				v1.IntegrationLabel: "my-imported-it",
 			},
 		},
@@ -178,7 +178,7 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "my-deploy",
-			Annotations: map[string]string{
+			Labels: map[string]string{
 				v1.IntegrationLabel: "my-imported-it",
 			},
 		},
@@ -249,6 +249,15 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 	// Check monitoring pods condition
 	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Status)
 	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionMonitoringPodsAvailable).Reason)
+
+	// Remove label from deployment
+	deploy.Labels = nil
+	c, err = test.NewFakeClient(importedIt, deploy)
+	assert.Nil(t, err)
+	a.InjectClient(c)
+	handledIt, err = a.Handle(context.TODO(), importedIt)
+	assert.Nil(t, err)
+	assert.Nil(t, handledIt)
 }
 
 func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {

@@ -65,5 +65,16 @@ func (action *monitorSyntheticAction) Handle(ctx context.Context, integration *v
 		return integration, err
 	}
 
+	if environment == nil {
+		// The application which generated the Integration has no longer the importing label. We may have missed the
+		// delete event, therefore we need to perform the operation here.
+		err := action.client.Delete(ctx, integration)
+		action.L.Infof("Deleting synthetic Integration %s", integration.Name)
+		if err != nil {
+			return integration, err
+		}
+		return nil, nil
+	}
+
 	return action.monitorPods(ctx, environment, integration)
 }
