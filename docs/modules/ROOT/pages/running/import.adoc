@@ -23,13 +23,13 @@ The operator immediately creates a synthetic Integration:
 ```
 $ kubectl get it
 NAMESPACE                                   NAME    PHASE   RUNTIME PROVIDER   RUNTIME VERSION   KIT   REPLICAS
-test-79c385c3-d58e-4c28-826d-b14b6245f908   my-it   Cannot Monitor Pods
+test-79c385c3-d58e-4c28-826d-b14b6245f908   my-it   Running
 ```
-You can see it will be in `Cannot Monitor Pods` status phase. This is expected because the way Camel K operator monitor Pods. It requires that the same label applied to the Deployment is inherited by the generated Pods. For this reason, beside labelling the Deployment, we need to add a label in the Deployment template.
+You can see it will be in `Running` status phase. However, checking the conditions you will be able to see that the Integration is not yet able to be fully monitored. This is expected because the way Camel K operator monitor Pods. It requires that the same label applied to the Deployment is inherited by the generated Pods. For this reason, beside labelling the Deployment, we need to add a label in the Deployment template.
 ```
 $ kubectl patch deployment my-camel-sb-svc --patch '{"spec": {"template": {"metadata": {"labels": {"camel.apache.org/integration": "my-it"}}}}}'
 ```
-Also this operator can be performed manually or automated in the deployment procedure. We can see now that the operator will be able to monitor accordingly the status of the Pods:
+Also this operation can be performed manually or automated in the deployment procedure. We can see now that the operator will be able to monitor accordingly the status of the Pods:
 ```
 $ kubectl get it
 NAMESPACE                                   NAME    PHASE   RUNTIME PROVIDER   RUNTIME VERSION   KIT   REPLICAS

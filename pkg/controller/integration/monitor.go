@@ -59,8 +59,7 @@ func (action *monitorAction) Name() string {
 func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 	return integration.Status.Phase == v1.IntegrationPhaseDeploying ||
 		integration.Status.Phase == v1.IntegrationPhaseRunning ||
-		integration.Status.Phase == v1.IntegrationPhaseError ||
-		integration.Status.Phase == v1.IntegrationPhaseCannotMonitor
+		integration.Status.Phase == v1.IntegrationPhaseError
 }
 
 func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
@@ -142,10 +141,9 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 	if !controller.hasTemplateIntegrationLabel() {
 		// This is happening when the Deployment, CronJob, etc resources
 		// miss the Integration label, required to identify sibling Pods.
-		integration.Status.Phase = v1.IntegrationPhaseCannotMonitor
 		integration.Status.SetConditions(
 			v1.IntegrationCondition{
-				Type:   v1.IntegrationConditionMonitoringPodsAvailable,
+				Type:   v1.IntegrationConditionReady,
 				Status: corev1.ConditionFalse,
 				Reason: v1.IntegrationConditionMonitoringPodsAvailableReason,
 				Message: fmt.Sprintf(
@@ -158,13 +156,6 @@ func (action *monitorAction) monitorPods(ctx context.Context, environment *trait
 		return integration, nil
 	}
 
-	integration.Status.SetConditions(
-		v1.IntegrationCondition{
-			Type:   v1.IntegrationConditionMonitoringPodsAvailable,
-			Status: corev1.ConditionTrue,
-			Reason: v1.IntegrationConditionMonitoringPodsAvailableReason,
-		},
-	)
 	// Enforce the scale sub-resource label selector.
 	// It is used by the HPA that queries the scale sub-resource endpoint,
 	// to list the pods owned by the integration.
@@ -296,8 +287,6 @@ type controller interface {
 	checkReadyCondition(ctx context.Context) (bool, error)
 	getPodSpec() corev1.PodSpec
 	updateReadyCondition(readyPods int) bool
-	getSelector() metav1.LabelSelector
-	isEmptySelector() bool
 	hasTemplateIntegrationLabel() bool
 	getControllerName() string
 }
@@ -359,10 +348,6 @@ func (action *monitorAction) updateIntegrationPhaseAndReadyCondition(
 	ctx context.Context, controller controller, environment *trait.Environment, integration *v1.Integration,
 	pendingPods []corev1.Pod, runningPods []corev1.Pod,
 ) error {
-	controller, err := action.newController(environment, integration)
-	if err != nil {
-		return err
-	}
 	if done, err := controller.checkReadyCondition(ctx); done || err != nil {
 		// There may be pods that are not ready but still probable for getting error messages.
 		// Ignore returned error from probing as it's expected when the ctrl obj is not ready.

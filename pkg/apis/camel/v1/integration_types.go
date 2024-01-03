@@ -155,10 +155,6 @@ const (
 	IntegrationPhaseRunning IntegrationPhase = "Running"
 	// IntegrationPhaseError --.
 	IntegrationPhaseError IntegrationPhase = "Error"
-	// IntegrationPhaseImportMissing used when the application from which the Integration is imported has been deleted.
-	IntegrationPhaseImportMissing IntegrationPhase = "Application Missing"
-	// IntegrationPhaseCannotMonitor used when the application from which the Integration has not enough information to monitor its pods.
-	IntegrationPhaseCannotMonitor IntegrationPhase = "Cannot Monitor Pods"
 
 	// IntegrationConditionReady --.
 	IntegrationConditionReady IntegrationConditionType = "Ready"
@@ -186,8 +182,6 @@ const (
 	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
 	// IntegrationConditionTraitInfo --.
 	IntegrationConditionTraitInfo IntegrationConditionType = "TraitInfo"
-	// IntegrationConditionMonitoringPodsAvailable used to specify that the Pods generated are available for monitoring.
-	IntegrationConditionMonitoringPodsAvailable IntegrationConditionType = "MonitoringPodsAvailable"
 
 	// IntegrationConditionKitAvailableReason --.
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
