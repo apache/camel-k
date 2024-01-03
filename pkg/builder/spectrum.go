@@ -26,16 +26,13 @@ import (
 	"runtime"
 	"strings"
 
-	"go.uber.org/multierr"
-
 	spectrum "github.com/container-tools/spectrum/pkg/builder"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
 type spectrumTask struct {
@@ -105,7 +102,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 
 	registryConfigDir := ""
 	if t.task.Registry.Secret != "" {
-		registryConfigDir, err = MountSecret(ctx, t.c, t.build.Namespace, t.task.Registry.Secret)
+		registryConfigDir, err = registry.MountSecretRegistryConfig(ctx, t.c, t.build.Namespace, "spectrum-secret-", t.task.Registry.Secret)
 		if err != nil {
 			return status.Failed(err)
 		}
@@ -162,36 +159,4 @@ func readSpectrumLogs(newStdOut io.Reader) {
 		line := scanner.Text()
 		log.Infof(line)
 	}
-}
-
-func MountSecret(ctx context.Context, c client.Client, namespace, name string) (string, error) {
-	dir, err := os.MkdirTemp("", "spectrum-secret-")
-	if err != nil {
-		return "", err
-	}
-
-	secret, err := c.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
-	if err != nil {
-		if removeErr := os.RemoveAll(dir); removeErr != nil {
-			err = multierr.Append(err, removeErr)
-		}
-		return "", err
-	}
-
-	for file, content := range secret.Data {
-		if err := os.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
-			if removeErr := os.RemoveAll(dir); removeErr != nil {
-				err = multierr.Append(err, removeErr)
-			}
-			return "", err
-		}
-	}
-	return dir, nil
-}
-
-func remap(name string) string {
-	if name == ".dockerconfigjson" {
-		return "config.json"
-	}
-	return name
 }
