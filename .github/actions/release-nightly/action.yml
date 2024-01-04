@@ -56,13 +56,6 @@ runs:
         cluster-config-data: ${{ inputs.secretE2ECluster }}
         cluster-kube-config-data: ${{ inputs.secretE2EKube }}
         smoke-test-only: true
-    - name: Cache modules
-      uses: actions/cache@v3
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
     - name: Get nightly version and update date
       shell: bash
       run: |
