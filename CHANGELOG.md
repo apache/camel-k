@@ -4,8 +4,17 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.2.0...HEAD)
 
+**Closed issues:**
+
+- Integrations fail with Jib publish strategy [\#5007](https://github.com/apache/camel-k/issues/5007)
+- Multi arch operator default to AMD64 based image [\#4988](https://github.com/apache/camel-k/issues/4988)
+- Wildcards in Routes Sources [\#4941](https://github.com/apache/camel-k/issues/4941)
+
 **Merged pull requests:**
 
+- fix\(ci\): golang caching is already part of go actions [\#5018](https://github.com/apache/camel-k/pull/5018) ([squakez](https://github.com/squakez))
+- fix\(\#5007\): Jib publish strategy registry secret [\#5016](https://github.com/apache/camel-k/pull/5016) ([gansheer](https://github.com/gansheer))
+- feat: add support for glob pattern in run sources  [\#5015](https://github.com/apache/camel-k/pull/5015) ([rinaldodev](https://github.com/rinaldodev))
 - fix\(ci\): Sanitize PR head.ref [\#5013](https://github.com/apache/camel-k/pull/5013) ([AdnaneKhan](https://github.com/AdnaneKhan))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.17.0 to 1.18.0 [\#5012](https://github.com/apache/camel-k/pull/5012) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/eventing from 0.39.1 to 0.39.2 [\#5011](https://github.com/apache/camel-k/pull/5011) ([dependabot[bot]](https://github.com/apps/dependabot))
