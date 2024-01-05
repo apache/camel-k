@@ -128,9 +128,9 @@ func TestKnativeNotInstalled(t *testing.T) {
 	client, err := test.NewFakeClient()
 	assert.NoError(t, err)
 
-	// disable the knative service api
+	// disable the knative eventing api
 	fakeClient := client.(*test.FakeClient) //nolint
-	fakeClient.DisableAPIGroupDiscovery("serving.knative.dev/v1")
+	fakeClient.DisableAPIGroupDiscovery("eventing.knative.dev/v1")
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,

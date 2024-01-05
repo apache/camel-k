@@ -18,6 +18,7 @@ limitations under the License.
 package knative
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
@@ -25,16 +26,30 @@ import (
 	util "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
-// IsInstalled returns true if we are connected to a cluster with Knative installed.
-func IsInstalled(c kubernetes.Interface) (bool, error) {
-	for _, api := range getRequiredKnativeGroupVersions() {
-		if installed, err := isInstalled(c, api); err != nil {
-			return false, err
-		} else if installed {
-			return true, nil
-		}
+// IsRefKindInstalled returns true if the cluster has the referenced Kind installed.
+func IsRefKindInstalled(c kubernetes.Interface, ref corev1.ObjectReference) (bool, error) {
+	if installed, err := isInstalled(c, ref.GroupVersionKind().GroupVersion()); err != nil {
+		return false, err
+	} else if installed {
+		return true, nil
 	}
 	return false, nil
+}
+
+// IsServingInstalled returns true if we are connected to a cluster with Knative Serving installed.
+func IsServingInstalled(c kubernetes.Interface) (bool, error) {
+	return IsRefKindInstalled(c, corev1.ObjectReference{
+		Kind:       "Service",
+		APIVersion: "serving.knative.dev/v1",
+	})
+}
+
+// IsEventingInstalled returns true if we are connected to a cluster with Knative Eventing installed.
+func IsEventingInstalled(c kubernetes.Interface) (bool, error) {
+	return IsRefKindInstalled(c, corev1.ObjectReference{
+		Kind:       "Broker",
+		APIVersion: "eventing.knative.dev/v1",
+	})
 }
 
 func isInstalled(c kubernetes.Interface, api schema.GroupVersion) (bool, error) {
@@ -45,16 +60,4 @@ func isInstalled(c kubernetes.Interface, api schema.GroupVersion) (bool, error) 
 		return false, err
 	}
 	return true, nil
-}
-
-func getRequiredKnativeGroupVersions() []schema.GroupVersion {
-	apis := make(map[schema.GroupVersion]bool)
-	res := make([]schema.GroupVersion, 0)
-	for _, gvk := range RequiredKinds {
-		if !apis[gvk.GroupVersion()] {
-			apis[gvk.GroupVersion()] = true
-			res = append(res, gvk.GroupVersion())
-		}
-	}
-	return res
 }
