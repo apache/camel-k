@@ -36,7 +36,8 @@ func TestAuth_GenerateDockerConfig(t *testing.T) {
 	}
 	conf, err := a.GenerateDockerConfig()
 	assert.Nil(t, err)
-	assert.Equal(t, `{"auths":{"https://index.docker.io/v1/":{"auth":"bmljOg=="}}}`, string(conf))
+	assert.Contains(t, string(conf), `"https://index.docker.io/v1/":{"auth":"bmljOg=="}`)
+	assert.Contains(t, string(conf), `"docker.io":{"auth":"bmljOg=="}`)
 
 	a = Auth{
 		Username: "nic",

@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"go.uber.org/multierr"
@@ -32,7 +33,7 @@ import (
 )
 
 var knownServersByRegistry = map[string]string{
-	"docker.io": "https://index.docker.io/v1/",
+	"docker.io": "https://index.docker.io/v1/,docker.io",
 }
 
 // Auth contains basic information for authenticating against a container registry.
@@ -64,7 +65,8 @@ func (a Auth) IsSet() bool {
 
 // validate checks if all fields are populated correctly.
 func (a Auth) validate() error {
-	if a.getActualServer() == "" || a.Username == "" {
+	actualSevers := a.getActualServers()
+	if len(actualSevers) < 1 || a.Username == "" {
 		return errors.New("not enough information to generate a registry authentication file")
 	}
 
@@ -82,24 +84,26 @@ func (a Auth) GenerateDockerConfig() ([]byte, error) {
 }
 
 func (a Auth) generateDockerConfigObject() DockerConfigList {
-	return DockerConfigList{
-		map[string]DockerConfig{
-			a.getActualServer(): {
-				Auth: a.encodedCredentials(),
-			},
-		},
+	dockerConfigs := make(map[string]DockerConfig)
+	for _, server := range a.getActualServers() {
+		dockerConfigs[server] = DockerConfig{Auth: a.encodedCredentials()}
 	}
+	return DockerConfigList{Auths: dockerConfigs}
 }
 
-func (a Auth) getActualServer() string {
+func (a Auth) getActualServers() []string {
 	if a.Server != "" {
-		return a.Server
+		return []string{a.Server}
 	}
 	if p, ok := knownServersByRegistry[a.Registry]; ok {
-		return p
+		return strings.Split(p, ",")
 	}
 
-	return a.Registry
+	if a.Registry != "" {
+		return []string{a.Registry}
+	}
+
+	return nil
 }
 
 func (a Auth) encodedCredentials() string {
