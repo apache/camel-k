@@ -6,12 +6,16 @@
 
 **Closed issues:**
 
+- Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - Integrations fail with Jib publish strategy [\#5007](https://github.com/apache/camel-k/issues/5007)
 - Multi arch operator default to AMD64 based image [\#4988](https://github.com/apache/camel-k/issues/4988)
 - Wildcards in Routes Sources [\#4941](https://github.com/apache/camel-k/issues/4941)
 
 **Merged pull requests:**
 
+- fix\(ci\): publish java modules to snapshots repo [\#5025](https://github.com/apache/camel-k/pull/5025) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump golang.org/x/term from 0.15.0 to 0.16.0 [\#5022](https://github.com/apache/camel-k/pull/5022) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/sync from 0.5.0 to 0.6.0 [\#5021](https://github.com/apache/camel-k/pull/5021) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ci\): golang caching is already part of go actions [\#5018](https://github.com/apache/camel-k/pull/5018) ([squakez](https://github.com/squakez))
 - fix\(\#5007\): Jib publish strategy registry secret [\#5016](https://github.com/apache/camel-k/pull/5016) ([gansheer](https://github.com/gansheer))
 - feat: add support for glob pattern in run sources  [\#5015](https://github.com/apache/camel-k/pull/5015) ([rinaldodev](https://github.com/rinaldodev))
