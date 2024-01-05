@@ -41,7 +41,7 @@ import (
 func TestKnativePlatformDetection(t *testing.T) {
 	RegisterTestingT(t)
 
-	installed, err := knative.IsInstalled(TestClient())
+	installed, err := knative.IsServingInstalled(TestClient())
 	Expect(err).NotTo(HaveOccurred())
 	if !installed {
 		t.Error("Knative not installed in the cluster")

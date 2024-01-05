@@ -204,10 +204,25 @@ func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*me
 		}
 	}
 
-	// used in util/knative/enabled.go to verify if knative is installed
+	// used to verify if knative is installed
 	if groupVersion == "serving.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
 		return &metav1.APIResourceList{
 			GroupVersion: "serving.knative.dev/v1",
+		}, nil
+	}
+	if groupVersion == "eventing.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+		return &metav1.APIResourceList{
+			GroupVersion: "eventing.knative.dev/v1",
+		}, nil
+	}
+	if groupVersion == "messaging.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+		return &metav1.APIResourceList{
+			GroupVersion: "messaging.knative.dev/v1",
+		}, nil
+	}
+	if groupVersion == "messaging.knative.dev/v1beta1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+		return &metav1.APIResourceList{
+			GroupVersion: "messaging.knative.dev/v1beta1",
 		}, nil
 	}
 	return f.DiscoveryInterface.ServerResourcesForGroupVersion(groupVersion)

@@ -53,8 +53,8 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 		return nil, err
 	}
 
-	if knativeInstalled, _ := knative.IsInstalled(ctx.Client); !knativeInstalled {
-		// works only when Knative is installed
+	if refInstalled, _ := knative.IsRefKindInstalled(ctx.Client, *e.Ref); !refInstalled {
+		// works only when Knative specific API Kind is installed
 		return nil, fmt.Errorf("integration referencing Knative endpoint '%s' that cannot run, "+
 			"because Knative is not installed on the cluster", e.Ref.Name)
 	}
@@ -155,8 +155,8 @@ func (k V1alpha1KnativeRefBindingProvider) Translate(ctx V1alpha1BindingContext,
 		return nil, err
 	}
 
-	if knativeInstalled, _ := knative.IsInstalled(ctx.Client); !knativeInstalled {
-		// works only when Knative is installed
+	if refInstalled, _ := knative.IsRefKindInstalled(ctx.Client, *e.Ref); !refInstalled {
+		// works only when Knative specific API Kind is installed
 		return nil, fmt.Errorf("integration referencing Knative endpoint '%s' that cannot run, "+
 			"because Knative is not installed on the cluster", e.Ref.Name)
 	}

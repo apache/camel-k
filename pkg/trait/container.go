@@ -77,7 +77,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 		return false, nil, nil
 	}
 
-	knativeInstalled, _ := knative.IsInstalled(e.Client)
+	knativeInstalled, _ := knative.IsEventingInstalled(e.Client)
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !knativeInstalled {
 		hasKnativeEndpoint, err := containsEndpoint("knative", e, t.Client)
 		if err != nil {

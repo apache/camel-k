@@ -121,7 +121,7 @@ func installClusterRoles(
 
 	// === For Knative ===
 	// ClusterRole: camel-k-operator-bind-addressable-resolver
-	isKnative, err := knative.IsInstalled(c)
+	isKnative, err := knative.IsEventingInstalled(c)
 	if err != nil {
 		return err
 	}

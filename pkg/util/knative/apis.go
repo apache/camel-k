@@ -132,19 +132,6 @@ var (
 			Resource: "brokers",
 		},
 	}
-
-	// RequiredKinds are Knative kinds used by Camel K for materializing integrations.
-	// They must be present on the cluster.
-	RequiredKinds = []GroupVersionKindResource{
-		{
-			GroupVersionKind: schema.GroupVersionKind{
-				Kind:    "Service",
-				Group:   "serving.knative.dev",
-				Version: "v1",
-			},
-			Resource: "services",
-		},
-	}
 )
 
 // GroupVersionKindResource --.

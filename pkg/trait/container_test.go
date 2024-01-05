@@ -487,9 +487,9 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 func createEnvironment() *Environment {
 
 	client, _ := test.NewFakeClient()
-	// disable the knative service api
+	// disable the knative eventing api
 	fakeClient := client.(*test.FakeClient) //nolint
-	fakeClient.DisableAPIGroupDiscovery("serving.knative.dev/v1")
+	fakeClient.DisableAPIGroupDiscovery("eventing.knative.dev/v1")
 
 	replicas := int32(3)
 	catalog, _ := camel.QuarkusCatalog()

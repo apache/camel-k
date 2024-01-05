@@ -97,7 +97,7 @@ func determineBestProfile(c client.Client, integration *v1.Integration, p *v1.In
 		// Use platform spec profile if set
 		return p.Spec.Profile, nil
 	}
-	if ok, err := knative.IsInstalled(c); err != nil {
+	if ok, err := knative.IsServingInstalled(c); err != nil {
 		return "", err
 	} else if ok {
 		return v1.TraitProfileKnative, nil
