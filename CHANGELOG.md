@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.2.0...HEAD)
+
+**Closed issues:**
+
+- Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
+- Integrations fail with Jib publish strategy [\#5007](https://github.com/apache/camel-k/issues/5007)
+- Multi arch operator default to AMD64 based image [\#4988](https://github.com/apache/camel-k/issues/4988)
+- Wildcards in Routes Sources [\#4941](https://github.com/apache/camel-k/issues/4941)
+
 ## [v2.2.0](https://github.com/apache/camel-k/tree/v2.2.0) (2024-01-03)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.2.0...v2.2.0)
