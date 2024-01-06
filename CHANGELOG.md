@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - Integrations fail with Jib publish strategy [\#5007](https://github.com/apache/camel-k/issues/5007)
 - Multi arch operator default to AMD64 based image [\#4988](https://github.com/apache/camel-k/issues/4988)
 - Wildcards in Routes Sources [\#4941](https://github.com/apache/camel-k/issues/4941)
