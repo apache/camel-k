@@ -62,8 +62,9 @@ func ToYamlDSL(flows []v1.Flow) ([]byte, error) {
 		return nil, err
 	}
 	jsondata := make([]map[string]interface{}, 0)
-	err = json.Unmarshal(data, &jsondata)
-	if err != nil {
+	d := json.NewDecoder(bytes.NewReader(data))
+	d.UseNumber()
+	if err := d.Decode(&jsondata); err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %w", err)
 	}
 	yamldata, err := yaml2.Marshal(&jsondata)
