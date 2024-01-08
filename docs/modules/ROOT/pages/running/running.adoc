@@ -28,7 +28,7 @@ You can run it on the cluster by executing:
 kamel run hello.groovy
 ```
 
-Integrations can be written in any supported xref:languages:languages.adoc[Camel DSL]. We are collecting examples in our https://github.com/apache/camel-k/[Camel K GitHub repository].
+Integrations can be written in any supported Camel DSL. We are collecting examples in our https://github.com/apache/camel-k/[Camel K GitHub repository].
 
 [[monitoring-integration]]
 == Monitoring the application status
@@ -60,7 +60,7 @@ Camel K provide a very nice **dev mode** feature that will allow you to apply an
 [[running-model]]
 == Camel K development model
 
-The idea of Camel K is to simplify the deployment of your Integration to the cloud. For this reason, there are certain limitations you need to take into account, depending on the xref:languages:languages.adoc[Camel DSL] you're using. For instance, taking Java DSL as reference, you are generally requested to maintain your route development within a single class. As soon as your development gain complexity, the suggestion is to keep the business logic in an external dependency and use such dependency from your class containing the route definition. See more about xref:configuration/dependencies.adoc[how to use a dependency].
+The idea of Camel K is to simplify the deployment of your Integration to the cloud. For this reason, there are certain limitations you need to take into account, depending on the Camel DSL you're using. For instance, taking Java DSL as reference, you are generally requested to maintain your route development within a single class. As soon as your development gain complexity, the suggestion is to keep the business logic in an external dependency and use such dependency from your class containing the route definition. See more about xref:configuration/dependencies.adoc[how to use a dependency].
 
 [[running-integration-dsl]]
 == Running locally
