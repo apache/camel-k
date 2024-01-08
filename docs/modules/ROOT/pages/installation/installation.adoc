@@ -49,7 +49,7 @@ More information on the xref:installation/advanced/kustomize.adoc[Kustomize Came
 [[olm]]
 == Installation via Operator Hub
 
-Camel K is also available in Operator Hub. You will need to OLM framework to be properly installed in your cluster. More instructions on the https://operatorhub.io/operator/camel-k[Camel K Operator Hub] page.
+Camel K is also available in Operator Hub. You will need the OLM framework to be properly installed in your cluster. More instructions on the https://operatorhub.io/operator/camel-k[Camel K Operator Hub] page.
 
 ```
 $ kubectl create -f https://operatorhub.io/install/camel-k.yaml
