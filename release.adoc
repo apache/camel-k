@@ -238,16 +238,14 @@ The content of these folders is exactly what you need as base to create a PR for
 
 An helm chart must be generated with the new version.
 
-First update the chart version in the `Chart.yaml` file under the `/helm` section, setting a new chart release.
-
-From the main branch:
+First update the chart version in the `Chart.yaml` file under the `/helm` section, setting a new chart release from the release branch:
 
 ```
 ./script/set_version.sh <released-version>
 make release-helm
 ```
 
-Commit to the `main` branch the tar.gz file and the updated index that have been generated in `/docs/charts` and the updated `Chart.yaml`.
+Locally commit the changes and use the commit ID to cherry pick this commit to the `main` branch. It should be 2 files, the tar.gz file that have been generated in `/docs/charts` and the updated `Chart.yaml`.
 
 NOTE: if you're releasing from a release branch, then, you need to generate the Helm chart in the specific release branch, and later manually commit the chart in `main` branch accordingly.
 
