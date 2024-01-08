@@ -6,16 +6,25 @@
 
 **Closed issues:**
 
-- Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
+- Brew Kamel procedure is failing [\#5030](https://github.com/apache/camel-k/issues/5030)
 - Integrations fail with Jib publish strategy [\#5007](https://github.com/apache/camel-k/issues/5007)
+- Release 2.2.0 [\#4991](https://github.com/apache/camel-k/issues/4991)
 - Multi arch operator default to AMD64 based image [\#4988](https://github.com/apache/camel-k/issues/4988)
+- Improve pipe status when the pod is full of exceptions [\#4977](https://github.com/apache/camel-k/issues/4977)
+- Knative installation check is wrong  [\#4962](https://github.com/apache/camel-k/issues/4962)
 - Wildcards in Routes Sources [\#4941](https://github.com/apache/camel-k/issues/4941)
 
 **Merged pull requests:**
 
+- fix\(docs\): remove languages [\#5035](https://github.com/apache/camel-k/pull/5035) ([squakez](https://github.com/squakez))
+- Update installation.adoc to fix grammatical error \(to -\> the\) [\#5034](https://github.com/apache/camel-k/pull/5034) ([stefkiourk](https://github.com/stefkiourk))
+- chore\(ci\): remove coverage check [\#5031](https://github.com/apache/camel-k/pull/5031) ([squakez](https://github.com/squakez))
+- chore\(ci\): helm 2.2.0 [\#5029](https://github.com/apache/camel-k/pull/5029) ([squakez](https://github.com/squakez))
+- fix\(knative\): func to check when either serving or eventing are insta… [\#5026](https://github.com/apache/camel-k/pull/5026) ([squakez](https://github.com/squakez))
 - fix\(ci\): publish java modules to snapshots repo [\#5025](https://github.com/apache/camel-k/pull/5025) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/term from 0.15.0 to 0.16.0 [\#5022](https://github.com/apache/camel-k/pull/5022) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/sync from 0.5.0 to 0.6.0 [\#5021](https://github.com/apache/camel-k/pull/5021) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(ctrl\): monitor Pod ready condition [\#5020](https://github.com/apache/camel-k/pull/5020) ([squakez](https://github.com/squakez))
 - fix\(ci\): golang caching is already part of go actions [\#5018](https://github.com/apache/camel-k/pull/5018) ([squakez](https://github.com/squakez))
 - fix\(\#5007\): Jib publish strategy registry secret [\#5016](https://github.com/apache/camel-k/pull/5016) ([gansheer](https://github.com/gansheer))
 - feat: add support for glob pattern in run sources  [\#5015](https://github.com/apache/camel-k/pull/5015) ([rinaldodev](https://github.com/rinaldodev))
