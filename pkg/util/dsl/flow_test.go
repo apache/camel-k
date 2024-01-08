@@ -28,6 +28,8 @@ import (
 func TestReadWriteYaml(t *testing.T) {
 	// yaml in conventional form as marshalled by the go runtime
 	yaml := `- from:
+    parameters:
+      period: 3600001
     steps:
     - to: log:info
     uri: timer:tick
