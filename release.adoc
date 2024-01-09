@@ -25,6 +25,7 @@ In order to release Camel K you may need certain software installed in the machi
 * `mvn` CLI
 * Docker and DockerX tooling
 * https://www.qemu.org/[QEMU] - required to emulate ARM64 build
+* `cyclonedx-gomod` CLI - required to generate SBOM
 
 [[arm64-verify]]
 === Verify if your machine can build an ARM64 container image
@@ -148,7 +149,7 @@ Make some test and if all is in order, you can upload the sources and CLIs to th
 
 ```
 cd release-utils/scripts/
-./upload-source.sh <released_version> <released_version>
+./upload-source.sh <released_version>
 ```
 
 Check that all resources have been correctly uploaded to https://dist.apache.org/repos/dist/dev/camel/camel-k/<released_version>/ directory.
@@ -187,7 +188,7 @@ cd release-utils/scripts/
 Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour sometimes.
 
 === Github release
-You can start a release from the tag created in the previous steps (ie, `v2.1.0`). You can use the automatic release note generator, making sure to select the previous stable release. You need to manually add the CLI files and the CRDs dependency created in the previous steps. Select it as latest stable release and finalize the process.
+You can start a release from the tag created in the previous steps (ie, `v2.1.0`). You can use the automatic release note generator, making sure to select the previous stable release to generate the differences. You need to manually add the CLI files, the CRDs dependency and the sbom.json created in the previous steps. Select it as latest stable release and finalize the process.
 
 Before announcing the release, perform a simple test to verify that everything is in place (running a "Hello World" integration
 after an installation done with a simple `kamel install`). Do a simple final test.
