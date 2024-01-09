@@ -40,7 +40,6 @@ runs:
       shell: bash
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       run: |
-        ls -lart
         echo "Initial status:"
         df -h
 
