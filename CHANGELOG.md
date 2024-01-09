@@ -6,9 +6,12 @@
 
 **Closed issues:**
 
-- Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
+- Brew Kamel procedure is failing [\#5030](https://github.com/apache/camel-k/issues/5030)
 - Integrations fail with Jib publish strategy [\#5007](https://github.com/apache/camel-k/issues/5007)
+- Release 2.2.0 [\#4991](https://github.com/apache/camel-k/issues/4991)
 - Multi arch operator default to AMD64 based image [\#4988](https://github.com/apache/camel-k/issues/4988)
+- Improve pipe status when the pod is full of exceptions [\#4977](https://github.com/apache/camel-k/issues/4977)
+- Knative installation check is wrong  [\#4962](https://github.com/apache/camel-k/issues/4962)
 - Wildcards in Routes Sources [\#4941](https://github.com/apache/camel-k/issues/4941)
 
 ## [v2.2.0](https://github.com/apache/camel-k/tree/v2.2.0) (2024-01-03)
