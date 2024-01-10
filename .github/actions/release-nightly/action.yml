@@ -155,8 +155,3 @@ runs:
       run: |
         mvn clean deploy --settings ../../.github/asf-deploy-settings.xml -q
 
-    - name: Deploy Camel-K-maven-logging to ASF Snapshots Repository
-      working-directory: java/maven-logging
-      shell: bash
-      run: |
-        mvn clean deploy --settings ../../.github/asf-deploy-settings.xml -q
