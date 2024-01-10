@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/2.2.1-nightly...HEAD)
+
+**Closed issues:**
+
+- Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
+- Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
+
 ## [2.2.1-nightly](https://github.com/apache/camel-k/tree/2.2.1-nightly) (2024-01-08)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.3.0-nightly...2.2.1-nightly)
