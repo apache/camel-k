@@ -30,3 +30,7 @@ updates:
       - dependency-name: "k8s.io/client-go"
       - dependency-name: "k8s.io/kubectl"
       - dependency-name: "sigs.k8s.io/controller-runtime"
+  - directory: "/java/crds"
+    package-ecosystem: "maven"
+    schedule:
+      interval: "weekly"
