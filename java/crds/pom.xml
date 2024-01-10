@@ -36,9 +36,7 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
 
-    <lombok-version>1.18.30</lombok-version>
-    <sundrio-version>0.103.0</sundrio-version>
-    <fabric8-version>6.9.2</fabric8-version>
+    <fabric8-version>6.10.0</fabric8-version>
     <maven-surefire-plugin-version>3.0.0-M8</maven-surefire-plugin-version>
   </properties>
 
@@ -91,13 +89,11 @@
     <dependency>
       <groupId>io.sundr</groupId>
       <artifactId>builder-annotations</artifactId>
-      <version>${sundrio-version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok-version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
