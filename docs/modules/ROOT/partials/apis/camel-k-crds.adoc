@@ -5674,6 +5674,13 @@ Deprecated: use ContainerCommands
 
 the command to execute
 
+|`publishingImage` +
+string
+|
+
+
+the desired image build name
+
 
 |===
 
@@ -5892,9 +5899,9 @@ string
 |
 
 
-A list of tasks (available only when using `pod` strategy), sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
+A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
 Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`)
-if you need to execute them.
+if you need to execute them. Useful only wih `pod` strategy.
 
 |`tasksRequestCPU` +
 []string

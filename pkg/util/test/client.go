@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/apis"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
@@ -68,6 +69,7 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 			},
 		).
 		WithRuntimeObjects(initObjs...).
+		WithStatusSubresource(&v1.IntegrationKit{}).
 		Build()
 
 	camelClientset := fakecamelclientset.NewSimpleClientset(filterObjects(scheme, initObjs, func(gvk schema.GroupVersionKind) bool {

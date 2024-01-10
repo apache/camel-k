@@ -167,13 +167,18 @@ func (t *builderTrait) Apply(e *Environment) error {
 	if err != nil {
 		return err
 	}
+
+	imageName := getImageName(e)
 	// Building task
 	builderTask, err := t.builderTask(e, taskConfOrDefault(tasksConf, "builder"))
 	if err != nil {
-		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
-		e.IntegrationKit.Status.SetCondition("IntegrationKitPropertiesFormatValid", corev1.ConditionFalse,
-			"IntegrationKitPropertiesFormatValid", fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()))
-		if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
+		if err := failIntegrationKit(
+			e,
+			"IntegrationKitPropertiesFormatValid",
+			corev1.ConditionFalse,
+			"IntegrationKitPropertiesFormatValid",
+			fmt.Sprintf("One or more properties where not formatted as expected: %s", err.Error()),
+		); err != nil {
 			return err
 		}
 		return nil
@@ -188,21 +193,21 @@ func (t *builderTrait) Apply(e *Environment) error {
 			realBuildStrategy = e.Platform.Status.Build.BuildConfiguration.Strategy
 		}
 		if len(t.Tasks) > 0 && realBuildStrategy != v1.BuildStrategyPod {
-			e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
-			e.IntegrationKit.Status.SetCondition("IntegrationKitTasksValid",
+			if err := failIntegrationKit(
+				e,
+				"IntegrationKitTasksValid",
 				corev1.ConditionFalse,
 				"IntegrationKitTasksValid",
 				fmt.Sprintf("Pipeline tasks unavailable when using `%s` platform build strategy: use `%s` instead.",
 					realBuildStrategy,
 					v1.BuildStrategyPod),
-			)
-			if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
+			); err != nil {
 				return err
 			}
 			return nil
 		}
 
-		customTasks, err := t.customTasks(tasksConf)
+		customTasks, err := t.customTasks(tasksConf, imageName)
 		if err != nil {
 			return err
 		}
@@ -228,7 +233,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			},
 			PublishTask: v1.PublishTask{
 				BaseImage: t.getBaseImage(e),
-				Image:     getImageName(e),
+				Image:     imageName,
 				Registry:  e.Platform.Status.Build.Registry,
 			},
 		}})
@@ -241,7 +246,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 			},
 			PublishTask: v1.PublishTask{
 				BaseImage: t.getBaseImage(e),
-				Image:     getImageName(e),
+				Image:     imageName,
 				Registry:  e.Platform.Status.Build.Registry,
 			},
 		}})
@@ -277,7 +282,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Configuration: *taskConfOrDefault(tasksConf, "buildah"),
 			},
 			PublishTask: v1.PublishTask{
-				Image:    getImageName(e),
+				Image:    imageName,
 				Registry: e.Platform.Status.Build.Registry,
 			},
 			Verbose:       t.Verbose,
@@ -301,7 +306,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Configuration: *taskConfOrDefault(tasksConf, "kaniko"),
 			},
 			PublishTask: v1.PublishTask{
-				Image:    getImageName(e),
+				Image:    imageName,
 				Registry: e.Platform.Status.Build.Registry,
 			},
 			Cache: v1.KanikoTaskCache{
@@ -317,11 +322,30 @@ func (t *builderTrait) Apply(e *Environment) error {
 	if t.TasksFilter != "" {
 		flt := strings.Split(t.TasksFilter, ",")
 		if pipelineTasks, err = filter(pipelineTasks, flt); err != nil {
+			if err := failIntegrationKit(
+				e,
+				"IntegrationKitTasksValid",
+				corev1.ConditionFalse,
+				"IntegrationKitTasksValid",
+				err.Error(),
+			); err != nil {
+				return err
+			}
 			return err
 		}
 	}
 	// add local pipeline tasks to env pipeline
 	e.Pipeline = append(e.Pipeline, pipelineTasks...)
+	return nil
+}
+
+// when this trait fails, we must report the failure into the related IntegrationKit if it affects the success of the Build.
+func failIntegrationKit(e *Environment, conditionType v1.IntegrationKitConditionType, status corev1.ConditionStatus, reason, message string) error {
+	e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseError
+	e.IntegrationKit.Status.SetCondition(conditionType, status, reason, message)
+	if err := e.Client.Status().Update(e.Ctx, e.IntegrationKit); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -454,7 +478,7 @@ func (t *builderTrait) getBaseImage(e *Environment) string {
 	return baseImage
 }
 
-func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
+func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration, imageName string) ([]v1.Task, error) {
 	customTasks := make([]v1.Task, len(t.Tasks))
 
 	for i, t := range t.Tasks {
@@ -476,6 +500,7 @@ func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration) 
 					Name:          splitted[0],
 					Configuration: *taskConfOrDefault(tasksConf, splitted[0]),
 				},
+				PublishingImage:   imageName,
 				ContainerImage:    splitted[1],
 				ContainerCommands: containerCommands,
 			},
@@ -603,5 +628,27 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 			return nil, fmt.Errorf("no task exist for %s name", f)
 		}
 	}
+	// make sure the last task is either a publishing task or a custom task
+	if len(filteredTasks) == 0 || !publishingOrUserTask(filteredTasks[len(filteredTasks)-1]) {
+		return nil, fmt.Errorf("last pipeline task is not a publishing or a user task")
+	}
 	return filteredTasks, nil
+}
+
+// return true if the task is either a publishing task or a custom user task
+func publishingOrUserTask(t v1.Task) bool {
+	if t.Custom != nil {
+		return true
+	} else if t.Spectrum != nil {
+		return true
+	} else if t.S2i != nil {
+		return true
+	} else if t.Jib != nil {
+		return true
+	} else if t.Buildah != nil {
+		return true
+	} else if t.Kaniko != nil {
+		return true
+	}
+	return false
 }
