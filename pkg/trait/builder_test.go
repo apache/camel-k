@@ -112,7 +112,16 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 	if err != nil {
 		panic(err)
 	}
-	client, _ := test.NewFakeClient()
+	itk := &v1.IntegrationKit{
+		Status: v1.IntegrationKitStatus{
+			Phase: v1.IntegrationKitPhaseBuildSubmitted,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-kit",
+		},
+	}
+	client, _ := test.NewFakeClient(itk)
 	res := &Environment{
 		Ctx:          context.TODO(),
 		CamelCatalog: c,
@@ -127,14 +136,7 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
-		IntegrationKit: &v1.IntegrationKit{
-			Status: v1.IntegrationKitStatus{
-				Phase: v1.IntegrationKitPhaseBuildSubmitted,
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "my-kit",
-			},
-		},
+		IntegrationKit: itk,
 		Platform: &v1.IntegrationPlatform{
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
@@ -231,7 +233,8 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.NotNil(t, err)
+	// The error will be reported to IntegrationKits
+	assert.Nil(t, err)
 	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
@@ -245,7 +248,8 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.NotNil(t, err)
+	// The error will be reported to IntegrationKits
+	assert.Nil(t, err)
 	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
@@ -285,7 +289,8 @@ func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.NotNil(t, err)
+	// The error will be reported to IntegrationKits
+	assert.Nil(t, err)
 	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
 	assert.Contains(t, env.IntegrationKit.Status.Conditions[0].Message, "fakeprofile")
@@ -314,7 +319,7 @@ func TestBuilderCustomTasks(t *testing.T) {
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;ls")
 	builderTrait.Tasks = append(builderTrait.Tasks, `test;alpine;mvn test`)
 
-	tasks, err := builderTrait.customTasks(nil)
+	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(tasks))
@@ -332,7 +337,7 @@ func TestBuilderCustomTasksFailure(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine")
 
-	_, err := builderTrait.customTasks(nil)
+	_, err := builderTrait.customTasks(nil, "my-kit-img")
 
 	assert.NotNil(t, err)
 }
@@ -341,7 +346,7 @@ func TestBuilderCustomTasksScript(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && ls; echo 'helooo'\"")
 
-	tasks, err := builderTrait.customTasks(nil)
+	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(tasks))
@@ -499,26 +504,36 @@ func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
 	assert.Equal(t, "no task exist for missing-task name", err.Error())
 }
 
-func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
+func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksFilter = "builder,package"
 
 	err := builderTrait.Apply(env)
+	assert.NotNil(t, err)
+	assert.Equal(t, "last pipeline task is not a publishing or a user task", err.Error())
+}
+
+func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.TasksFilter = "builder,package,jib"
+
+	err := builderTrait.Apply(env)
 	assert.Nil(t, err)
 	pipelineTasks := tasksByName(env.Pipeline)
-	assert.Equal(t, []string{"builder", "package"}, pipelineTasks)
+	assert.Equal(t, []string{"builder", "package", "jib"}, pipelineTasks)
 }
 
 func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.TasksFilter = "package,builder"
+	builderTrait.TasksFilter = "package,builder,jib"
 
 	err := builderTrait.Apply(env)
 	assert.Nil(t, err)
 	pipelineTasks := tasksByName(env.Pipeline)
-	assert.Equal(t, []string{"package", "builder"}, pipelineTasks)
+	assert.Equal(t, []string{"package", "builder", "jib"}, pipelineTasks)
 }
 
 func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {

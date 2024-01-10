@@ -192,6 +192,8 @@ type UserTask struct {
 	ContainerCommand string `json:"command,omitempty"`
 	// the command to execute
 	ContainerCommands []string `json:"commands,omitempty"`
+	// the desired image build name
+	PublishingImage string `json:"publishingImage,omitempty"`
 }
 
 // BuildStatus defines the observed state of Build.

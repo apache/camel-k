@@ -572,6 +572,7 @@ func addCustomTaskToPod(build *v1.Build, task *v1.UserTask, pod *corev1.Pod) {
 		WorkingDir:      filepath.Join(builderDir, build.Name),
 		Env:             proxyFromEnvironment(),
 	}
+	container.Env = append(container.Env, corev1.EnvVar{Name: "INTEGRATION_KIT_IMAGE", Value: task.PublishingImage})
 
 	configureResources(task.Name, build, &container)
 	addContainerToPod(build, container, pod)

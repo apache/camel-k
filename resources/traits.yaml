@@ -285,10 +285,10 @@ traits:
       with format `<name>;<container-image>;<container-command>`.
   - name: tasks-filter
     type: string
-    description: A list of tasks (available only when using `pod` strategy), sorted
-      by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-      Mind that you must include also the operator tasks (`builder`, `quarkus-native`,
-      `package`, `jib`, `spectrum`, `s2i`) if you need to execute them.
+    description: A list of tasks sorted by the order of execution in a csv format,
+      ie, `<taskName1>,<taskName2>,...`. Mind that you must include also the operator
+      tasks (`builder`, `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`) if
+      you need to execute them. Useful only wih `pod` strategy.
   - name: tasks-request-cpu
     type: '[]string'
     description: A list of request cpu configuration for the specific task with format

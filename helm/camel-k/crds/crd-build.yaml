@@ -818,6 +818,9 @@ spec:
                         name:
                           description: name of the task
                           type: string
+                        publishingImage:
+                          description: the desired image build name
+                          type: string
                       type: object
                     jib:
                       description: a JibTask, for Jib strategy
