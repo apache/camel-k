@@ -5659,6 +5659,13 @@ string
 
 the container image to use
 
+|`userId` +
+int64
+|
+
+
+the user id used to run the container
+
 |`command` +
 string
 |

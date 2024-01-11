@@ -573,6 +573,12 @@ func addCustomTaskToPod(build *v1.Build, task *v1.UserTask, pod *corev1.Pod) {
 		Env:             proxyFromEnvironment(),
 	}
 	container.Env = append(container.Env, corev1.EnvVar{Name: "INTEGRATION_KIT_IMAGE", Value: task.PublishingImage})
+	if task.ContainerUserID != nil {
+		container.SecurityContext = &corev1.SecurityContext{
+			RunAsUser:  task.ContainerUserID,
+			RunAsGroup: task.ContainerUserID,
+		}
+	}
 
 	configureResources(task.Name, build, &container)
 	addContainerToPod(build, container, pod)

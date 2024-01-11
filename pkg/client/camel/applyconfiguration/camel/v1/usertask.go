@@ -24,6 +24,7 @@ package v1
 type UserTaskApplyConfiguration struct {
 	BaseTaskApplyConfiguration `json:",inline"`
 	ContainerImage             *string  `json:"image,omitempty"`
+	ContainerUserID            *int64   `json:"userId,omitempty"`
 	ContainerCommand           *string  `json:"command,omitempty"`
 	ContainerCommands          []string `json:"commands,omitempty"`
 	PublishingImage            *string  `json:"publishingImage,omitempty"`
@@ -56,6 +57,14 @@ func (b *UserTaskApplyConfiguration) WithConfiguration(value *BuildConfiguration
 // If called multiple times, the ContainerImage field is set to the value of the last call.
 func (b *UserTaskApplyConfiguration) WithContainerImage(value string) *UserTaskApplyConfiguration {
 	b.ContainerImage = &value
+	return b
+}
+
+// WithContainerUserID sets the ContainerUserID field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ContainerUserID field is set to the value of the last call.
+func (b *UserTaskApplyConfiguration) WithContainerUserID(value int64) *UserTaskApplyConfiguration {
+	b.ContainerUserID = &value
 	return b
 }
 

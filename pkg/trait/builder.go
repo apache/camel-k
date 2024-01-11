@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -478,22 +479,15 @@ func (t *builderTrait) getBaseImage(e *Environment) string {
 	return baseImage
 }
 
+// the format expected is "<task-name>;<task-image>;<task-container-command>[;<task-container-user-id>]".
 func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration, imageName string) ([]v1.Task, error) {
 	customTasks := make([]v1.Task, len(t.Tasks))
 
 	for i, t := range t.Tasks {
 		splitted := strings.Split(t, ";")
 		if len(splitted) < 3 {
-			return nil, fmt.Errorf(`provide a custom task with at least 3 arguments, ie "my-task-name;my-image;echo 'hello', was %v"`, t)
+			return nil, fmt.Errorf(`provide a custom task with at least 3 arguments, ie "my-task-name;my-image;echo 'hello'", was %v`, t)
 		}
-		var containerCommand string
-		if len(splitted) > 3 {
-			// recompose in case of usage of separator char in the script
-			containerCommand = strings.Join(splitted[2:], ";")
-		} else {
-			containerCommand = splitted[2]
-		}
-		containerCommands := splitContainerCommand(containerCommand)
 		customTasks[i] = v1.Task{
 			Custom: &v1.UserTask{
 				BaseTask: v1.BaseTask{
@@ -502,8 +496,15 @@ func (t *builderTrait) customTasks(tasksConf map[string]*v1.BuildConfiguration, 
 				},
 				PublishingImage:   imageName,
 				ContainerImage:    splitted[1],
-				ContainerCommands: containerCommands,
+				ContainerCommands: splitContainerCommand(splitted[2]),
 			},
+		}
+		if len(splitted) > 3 {
+			uid, err := strconv.ParseInt(splitted[3], 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf(`provide a custom task with a correct numeric user id, was %v`, splitted[3])
+			}
+			customTasks[i].Custom.ContainerUserID = &uid
 		}
 	}
 	return customTasks, nil
@@ -596,33 +597,36 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 	var filteredTasks []v1.Task
 	for _, f := range filterTasks {
 		found := false
+
 		for _, t := range tasks {
-			if t.Builder != nil && t.Builder.Name == f {
+			switch {
+			case t.Builder != nil && t.Builder.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			} else if t.Custom != nil && t.Custom.Name == f {
+			case t.Custom != nil && t.Custom.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			} else if t.Package != nil && t.Package.Name == f {
+			case t.Package != nil && t.Package.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			} else if t.Spectrum != nil && t.Spectrum.Name == f {
+			case t.Spectrum != nil && t.Spectrum.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			} else if t.S2i != nil && t.S2i.Name == f {
+			case t.S2i != nil && t.S2i.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			} else if t.Jib != nil && t.Jib.Name == f {
+			case t.Jib != nil && t.Jib.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			} else if t.Buildah != nil && t.Buildah.Name == f {
+			case t.Buildah != nil && t.Buildah.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			} else if t.Kaniko != nil && t.Kaniko.Name == f {
+			case t.Kaniko != nil && t.Kaniko.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
 			}
 		}
+
 		if !found {
 			// If we reach this point it means no tasks exists for the name
 			return nil, fmt.Errorf("no task exist for %s name", f)
@@ -635,20 +639,20 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 	return filteredTasks, nil
 }
 
-// return true if the task is either a publishing task or a custom user task
+// return true if the task is either a publishing task or a custom user task.
 func publishingOrUserTask(t v1.Task) bool {
-	if t.Custom != nil {
+	switch {
+	case t.Custom != nil:
 		return true
-	} else if t.Spectrum != nil {
+	case t.Spectrum != nil:
 		return true
-	} else if t.S2i != nil {
+	case t.Jib != nil:
 		return true
-	} else if t.Jib != nil {
+	case t.Buildah != nil:
 		return true
-	} else if t.Buildah != nil {
-		return true
-	} else if t.Kaniko != nil {
+	case t.Kaniko != nil:
 		return true
 	}
+
 	return false
 }
