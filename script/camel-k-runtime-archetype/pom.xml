@@ -67,7 +67,7 @@
               <properties>
                 <quarkus.banner.enabled>false</quarkus.banner.enabled>
                 <quarkus.camel.routes-discovery.enabled>false</quarkus.camel.routes-discovery.enabled>
-                <quarkus.camel.service.discovery.include-patterns>META-INF/services/org/apache/camel/datatype/converter/*</quarkus.camel.service.discovery.include-patterns>
+                <quarkus.camel.service.discovery.include-patterns>META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*</quarkus.camel.service.discovery.include-patterns>
               </properties>
             </configuration>
           </execution>

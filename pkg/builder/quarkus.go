@@ -178,8 +178,9 @@ func GenerateQuarkusProjectCommon(runtimeVersion string, quarkusVersion string, 
 	// proxies which in some case may fail.
 	buildProperties["quarkus.camel.routes-discovery.enabled"] = "false"
 
-	// required for Kamelets utils to resolve data type converters at runtime
-	buildProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*"
+	// required for to resolve data type transformers at runtime with service discovery
+	// the different Camel runtimes use different resource paths for the service lookup
+	buildProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
 
 	// copy all user defined quarkus.camel build time properties to the quarkus-maven-plugin build properties
 	for key, value := range buildTimeProperties {
