@@ -20,6 +20,7 @@ package bindings
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
@@ -140,15 +141,20 @@ func (k BindingConverter) DataTypeStep(e v1.Endpoint, id string, typeSlot v1.Typ
 		return nil, nil
 	}
 
-	if inDataType, ok := e.DataTypes[typeSlot]; ok {
+	if dataType, ok := e.DataTypes[typeSlot]; ok {
 		scheme := "camel"
-		if inDataType.Scheme != "" {
-			scheme = inDataType.Scheme
+		format := dataType.Format
+		if dataType.Scheme != "" {
+			scheme = dataType.Scheme
+		} else if strings.Contains(format, ":") {
+			tuple := strings.SplitN(format, ":", 2)
+			scheme = tuple[0]
+			format = tuple[1]
 		}
 
 		props := make(map[string]string, 2)
 		props[fmt.Sprintf("camel.kamelet.%s.%s-%s.scheme", datTypeActionKamelet, id, typeSlot)] = scheme
-		props[fmt.Sprintf("camel.kamelet.%s.%s-%s.format", datTypeActionKamelet, id, typeSlot)] = inDataType.Format
+		props[fmt.Sprintf("camel.kamelet.%s.%s-%s.format", datTypeActionKamelet, id, typeSlot)] = format
 
 		stepDsl := map[string]interface{}{
 			"kamelet": map[string]interface{}{
