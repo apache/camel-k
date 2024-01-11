@@ -147,19 +147,22 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		observeBuildResult(build, build.Status.Phase, buildCreator, duration)
 
 		build.Status.Image = publishTaskImageName(build.Spec.Tasks)
-		build.Status.Digest = publishTaskDigest(build.Spec.Tasks, pod.Status.ContainerStatuses)
-		if build.Status.Digest == "" {
-			// Likely to happen for users provided publishing tasks and not providing the digest image among statuses
-			build.Status.Phase = v1.BuildPhaseError
-			build.Status.SetCondition(
-				"ImageDigestAvailable",
-				corev1.ConditionFalse,
-				"ImageDigestAvailable",
-				fmt.Sprintf(
-					"%s publishing task completed but no digest is available in container status. Make sure that the process successfully push the image to the registry and write its digest to /dev/termination-log",
-					publishTaskName(build.Spec.Tasks),
-				),
-			)
+		// operator supported publishing tasks should provide the digest in the builder command process execution
+		if !operatorSupportedPublishingStrategy(build.Spec.Tasks) {
+			build.Status.Digest = publishTaskDigest(build.Spec.Tasks, pod.Status.ContainerStatuses)
+			if build.Status.Digest == "" {
+				// Likely to happen for users provided publishing tasks and not providing the digest image among statuses
+				build.Status.Phase = v1.BuildPhaseError
+				build.Status.SetCondition(
+					"ImageDigestAvailable",
+					corev1.ConditionFalse,
+					"ImageDigestAvailable",
+					fmt.Sprintf(
+						"%s publishing task completed but no digest is available in container status. Make sure that the process successfully push the image to the registry and write its digest to /dev/termination-log",
+						publishTaskName(build.Spec.Tasks),
+					),
+				)
+			}
 		}
 
 	case corev1.PodFailed:
@@ -339,7 +342,7 @@ func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context
 }
 
 // we expect that the last task is any of the supported publishing task
-// or a custom user task
+// or a custom user task.
 func publishTask(tasks []v1.Task) *v1.Task {
 	if len(tasks) > 0 {
 		return &tasks[len(tasks)-1]
@@ -354,15 +357,16 @@ func publishTaskImageName(tasks []v1.Task) string {
 	if t == nil {
 		return ""
 	}
-	if t.Custom != nil {
+	switch {
+	case t.Custom != nil:
 		return t.Custom.PublishingImage
-	} else if t.Spectrum != nil {
+	case t.Spectrum != nil:
 		return t.Spectrum.Image
-	} else if t.Jib != nil {
+	case t.Jib != nil:
 		return t.Jib.Image
-	} else if t.Buildah != nil {
+	case t.Buildah != nil:
 		return t.Buildah.Image
-	} else if t.Kaniko != nil {
+	case t.Kaniko != nil:
 		return t.Kaniko.Image
 	}
 
@@ -374,15 +378,16 @@ func publishTaskName(tasks []v1.Task) string {
 	if t == nil {
 		return ""
 	}
-	if t.Custom != nil {
+	switch {
+	case t.Custom != nil:
 		return t.Custom.Name
-	} else if t.Spectrum != nil {
+	case t.Spectrum != nil:
 		return t.Spectrum.Name
-	} else if t.Jib != nil {
+	case t.Jib != nil:
 		return t.Jib.Name
-	} else if t.Buildah != nil {
+	case t.Buildah != nil:
 		return t.Buildah.Name
-	} else if t.Kaniko != nil {
+	case t.Kaniko != nil:
 		return t.Kaniko.Name
 	}
 
@@ -398,4 +403,9 @@ func publishTaskDigest(tasks []v1.Task, cntStates []corev1.ContainerStatus) stri
 		}
 	}
 	return ""
+}
+
+func operatorSupportedPublishingStrategy(tasks []v1.Task) bool {
+	taskName := publishTaskName(tasks)
+	return taskName == "jib" || taskName == "spectrum" || taskName == "s2i"
 }

@@ -3090,6 +3090,11 @@ func (in *Traits) DeepCopy() *Traits {
 func (in *UserTask) DeepCopyInto(out *UserTask) {
 	*out = *in
 	in.BaseTask.DeepCopyInto(&out.BaseTask)
+	if in.ContainerUserID != nil {
+		in, out := &in.ContainerUserID, &out.ContainerUserID
+		*out = new(int64)
+		**out = **in
+	}
 	if in.ContainerCommands != nil {
 		in, out := &in.ContainerCommands, &out.ContainerCommands
 		*out = make([]string, len(*in))

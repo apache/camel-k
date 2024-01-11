@@ -340,11 +340,12 @@ func TestBuilderCustomTasksFailure(t *testing.T) {
 	_, err := builderTrait.customTasks(nil, "my-kit-img")
 
 	assert.NotNil(t, err)
+	assert.Equal(t, "provide a custom task with at least 3 arguments, ie \"my-task-name;my-image;echo 'hello'\", was test;alpine", err.Error())
 }
 
-func TestBuilderCustomTasksScript(t *testing.T) {
+func TestBuilderCustomTasksBashScript(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
-	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && ls; echo 'helooo'\"")
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && echo 'helooo'\"")
 
 	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
@@ -354,7 +355,23 @@ func TestBuilderCustomTasksScript(t *testing.T) {
 	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
 	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
 	assert.Equal(t, "-c", tasks[0].Custom.ContainerCommands[1])
-	assert.Equal(t, "cd test && ls; echo 'helooo'", tasks[0].Custom.ContainerCommands[2])
+	assert.Equal(t, "cd test && echo 'helooo'", tasks[0].Custom.ContainerCommands[2])
+}
+
+func TestBuilderCustomTasksSecurityContextScript(t *testing.T) {
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Tasks = append(builderTrait.Tasks, "test;alpine;/bin/bash -c \"cd test && echo 'helooo'\";1000")
+
+	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(tasks))
+	assert.Equal(t, "test", tasks[0].Custom.Name)
+	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
+	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
+	assert.Equal(t, "-c", tasks[0].Custom.ContainerCommands[1])
+	assert.Equal(t, "cd test && echo 'helooo'", tasks[0].Custom.ContainerCommands[2])
+	assert.Equal(t, int64(1000), *tasks[0].Custom.ContainerUserID)
 }
 
 func TestBuilderCustomTasksConfiguration(t *testing.T) {

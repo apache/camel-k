@@ -821,6 +821,10 @@ spec:
                         publishingImage:
                           description: the desired image build name
                           type: string
+                        userId:
+                          description: the user id used to run the container
+                          format: int64
+                          type: integer
                       type: object
                     jib:
                       description: a JibTask, for Jib strategy

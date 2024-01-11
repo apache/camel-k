@@ -187,6 +187,8 @@ type UserTask struct {
 	BaseTask `json:",inline"`
 	// the container image to use
 	ContainerImage string `json:"image,omitempty"`
+	// the user id used to run the container
+	ContainerUserID *int64 `json:"userId,omitempty"`
 	// the command to execute
 	// Deprecated: use ContainerCommands
 	ContainerCommand string `json:"command,omitempty"`

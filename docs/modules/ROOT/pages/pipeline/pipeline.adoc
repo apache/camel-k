@@ -1,22 +1,25 @@
 [[build-pipeline]]
 = Build Pipeline
-Since version 2.0, we've introduced the concept of `Pipeline` in order to provide a degree of flexibility for those user that want to customize the entire building process. We can think of a pipeline as a series of tasks that can be executed after the project generation and before the artifact publishing into the container registry.
 
-In Camel K version 1 we used to have 2 static tasks: `builder` and `publisher` (named after the strategy adopted, ie, `spectrum`). Now you can include any further task in the middle by opportunely configuring the Build. Here a diagram illustrating the pipeline:
+Since version 2.0, we've introduced the concept of `Pipeline` in order to provide a degree of flexibility for those user that want to customize the entire building process. We can think of a pipeline as a series of tasks that can be executed to generate a Camel application project, build it accordingly and publish into a container registry.
+
+Camel K operator creates a default pipeline containing an opinionated `build`, `package` and `publish` operations. Beside them you can include any additional task in order to enrich the building process:
 
 image::camel_k_pipeline.png[Camel K Pipeline, width=1024]
 
-We have 3 tasks which are required by Camel K to perform a build and provide a container image which will be used to start a Camel application. The **build** is a Maven process which is in charge to create a maven project based on the Integration sources provided. Then, after the Maven project is created and compiled, you can add any custom task (see section below). With this part we are introducing that level of flexibility required to accommodate any company build process. This part is optional, by default, Camel K does not need any **custom task**.
+The main 3 tasks are required by Camel K to perform a build and provide a container image which will be used to start a Camel application. The **build** is a Maven process which is in charge to create a maven project based on the Integration sources provided.
 
-In reality we do make use of the custom task in one particular situation. In order to build a Quarkus Native image, the quarkus trait influences the builder in order to include a custom task which takes care of executing the native image compilation. But this is completely hidden to the final user.
+If you're building a Quarkus Native image, the quarkus trait influences the builder in order to include a custom task (named **quarkus-native**) which takes care of executing the native image compilation. But this is completely hidden to the final user.
 
-Once the build and any customization are over, the **package** task takes care to prepare the context later required by the publishing operations. Basically this task is in charge to copy all artifacts and also prepare a Dockerfile which could be used eventually by the rest of the process. Finally, the **publish** task is in charge to generate and push the container to the registry using all the artifacts generated in the package task.
+Once the build is over, the **package** task takes care to prepare the context later required by the publishing operations. Basically this task is in charge to copy all artifacts and also prepare a Dockerfile which could be used eventually by the rest of the process. Finally, the **publish** task is in charge to generate and push the container to the registry using all the artifacts generated in the package task.
+
+The **custom tasks** can be provided at any point of the pipeline (read task sorting section). With them we are introducing that level of flexibility required to accommodate any company build process. This part is optional, by default, Camel K does not need any **custom task**.
 
 [[add-custom-tasks]]
 == Add custom user tasks
-As you have seen, the final user can include any optional task after a build operation is performed. We think this is the best moment when any custom operation can be performed as it is the immediate step after the Maven project is generated. And ideally, the context of any custom operation is the project.
+The final user can include any optional task, which, by default is run after a build operation is performed. We think this is the best moment when any custom operation can be performed as it is the immediate step after the Maven project is generated. And ideally, the context of any custom operation is the project.
 
-NOTE: Please, notice that, since the customization may require any tool not available in the operator container, you will need to run any additional task using builder `pod` strategy.
+Custom tasks are only available using builder `pod` strategy in order to let the user provide each task with the tools required to run the specific customization.
 
 Let's see an example:
 
@@ -29,6 +32,7 @@ spec:
       command: tree
       image: alpine
       name: custom1
+      userId: 0
   - custom:
       command: cat maven/pom.xml
       image: alpine
@@ -36,7 +40,7 @@ spec:
   - spectrum:
       ...
 ```
-The custom tasks will be executed in the directory where the Camel K runtime Maven project was generated. In this example we're creating 2 tasks to retrieve certain values from the project just for the scope of illustrating the feature. For each task you need to specify a name, the container image which you want to use to run and the command to execute.
+The custom tasks will be executed in the directory where the Camel K runtime Maven project was generated. In this example we're creating 2 tasks to retrieve certain values from the project just for the scope of illustrating the feature. For each task you need to specify a name, the container image which you want to use to run, the command to execute and (optionally) the user ID that has to run in the container.
 
 The goal is to let the user perform custom tasks which may result in a success or a failure. If the task executed results in a failure, then, the entire build is stopped and fails accordingly.
 
@@ -47,7 +51,7 @@ We are aware that configuring the `Build` type directly is something that the ma
 Maintaining the example above as a reference, configuring a custom task will be as easy as adding a trait property when running your Integration, for instance, via CLI:
 
 ```
-kamel run Test.java -t builder.tasks=custom1;alpine;tree -t builder.tasks="custom2;alpine;cat maven/pom.xml"
+kamel run Test.java -t builder.tasks=custom1;alpine;tree;0 -t builder.tasks="custom2;alpine;cat maven/pom.xml"
 ```
 
 Another interesting configuration you can provide via Builder trait is the (https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)[Kubernetes requests and limits]. Each of the task you are providing in the pipeline, can be configured with the proper resource settings. You can use, for instance the `-t builder.request-cpu <task-name>:1000m` to configure the container executed by the `task-name`. This configuration works for all the tasks including `builder`, `package` and the publishing ones.
@@ -55,7 +59,7 @@ Another interesting configuration you can provide via Builder trait is the (http
 [[build-pipeline-result]]
 == Getting task execution status
 
-Altough the main goal of this custom task execution is to have a success/failure result, we thought it could be useful to get the log of each task to be consulted by the user. For this reason, you will be able to read it directly in the Build type. See the following example:
+Although the main goal of this custom task execution is to have a success/failure result, we thought it could be useful to get the log of each task to be consulted by the user. For this reason, you will be able to read it directly in the Build type. See the following example:
 
 ```
   conditions:
@@ -113,9 +117,44 @@ Given the limited space we can use in a Kubernetes custom resource, we are trunc
 
 If for any reason you still need to access the entire log of the execution, you can always access to the log of the builder `Pod` and the specific container that was executed, ie `kubectl logs camel-k-kit-chj2gpi9rcoc73cjfv2g-builder -c task1 -p`
 
+[[build-pipeline-sort]]
+=== Tasks filtering and sorting
+The default execution of tasks can be changed. You can include or remove tasks and provide your order of execution. When using the `builder` trait, this is done via `builder.tasks-filter` property. This parameter accepts a comma separated value list of tasks to execute. It must specify both operator tasks (ie, builder) and custom tasks.
+
+WARNING: altering the order of tasks may result in a disruptive build behavior.
+
+With this approach you can also provide your own publishing strategy. The pipeline run as a Kubernetes Pod. Each task is an `initContainer` and the last one is the final `container` which has to provide the published image digest into the `/dev/termination-log` in order to know the publish was completed. This is done out of the box when a supported publishing strategy is executed. If you want to provide your own publishing strategy, then, you need to make sure to follow this rule to have the entire process working (see examples later).
+
+There are certain environment variables we are injecting in each custom container in order to be able to get dynamic values required to perform certain operation (ie, publishing a container image):
+
+* INTEGRATION_KIT_IMAGE contains the name of the image expected to be used for the IntegrationKit generated during the pipeline execution
+
+We may add more if they are required and useful for a general case.
+
+[[build-pipeline-privileges]]
+=== Execution privileges
+The builder Pod will set a `PodSecurityContext` with a specific user ID privileges. This is a convention in order to maintain the same default user ID for the container images we use by default. Each container image will inherit this value unless specified with the user ID parameter. The value is by default 1001 unless you're using S2I publishing strategy (the default strategy for Openshift), where the value is defined by the platform.
+
+NOTE: you may run your task with root privileges using user ID 0. However, this is highly discouraged. You should instead make your container image being able to run with the default user ID privileges.
+
 [[build-pipeline-examples]]
 == Custom tasks examples
-
 As we are using container registry for execution, you will be able to execute virtually any kind of task. You can provide your own container with tools required by your company or use any one available in the OSS.
 
 As the target of the execution is the project, before the artifact is published to the registry, you can execute any task to validate the project. We can think of any vulnerability tool scanner, quality of code or any other action you tipically perform in your build pipeline.
+
+[[build-pipeline-examples-buildah]]
+=== Use your own publishing strategy
+We suggest to use the supported publishing strategy as they are working out of the box and optimized for the operator. However you may choose to adopt your own publishing strategy. Here an example to run an Integration using a Buildah publishing strategy:
+
+```bash
+$ kamel run test.yaml -t builder.strategy=pod -t builder.base-image=docker.io/library/eclipse-temurin:17 -t builder.tasks="my-buildah;quay.io/buildah/stable;/bin/bash -c \"cd context && buildah bud --storage-driver=vfs --tls-verify=false -t \$(INTEGRATION_KIT_IMAGE) . && buildah push --storage-driver=vfs --digestfile=/dev/termination-log --tls-verify=false \$(INTEGRATION_KIT_IMAGE) docker://\$(INTEGRATION_KIT_IMAGE)\";0" -t builder.tasks-filter=builder,package,my-buildah
+```
+
+You can see in this case we have created a custom task named `my-buildah`. This is expecting to run the build and publish operations. We must change directory to `/context/` where the **package** task has written a `Dockerfile`. We are using the INTEGRATION_KIT_IMAGE environment variable and we are writing the pushed image digest to `/dev/termination-log` as expected by the procedure.
+
+NOTE: depending on the strategy used you may not have a direct feature. It would suffice to add some command and just write the digest of the generated image via `echo $my-image-digest > /dev/termination-log`.
+
+Finally we filter the tasks we want to execute, making sure to include the **builder** and the **package** tasks which are provided by the operator and are in charge to do the building and the packaging.
+
+NOTE: we had to run the `my-buildah` task with root privileges as this is required by the default container image. We had also to override the `builder.base-image` as it also require a special treatment for Buildah to work.
