@@ -8,6 +8,7 @@
 
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
+- Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 
 ## [2.2.1-nightly](https://github.com/apache/camel-k/tree/2.2.1-nightly) (2024-01-08)
 
@@ -302,7 +303,6 @@
 - Remove deprecated linters [\#4785](https://github.com/apache/camel-k/issues/4785)
 - Camel K on operatorhub.io [\#4783](https://github.com/apache/camel-k/issues/4783)
 - Consider adding `/PipeSpec/traits` [\#4780](https://github.com/apache/camel-k/issues/4780)
-- 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
 - E2E failure on common TestRunExtraRepository test [\#4774](https://github.com/apache/camel-k/issues/4774)
 - Logger error in `--dev` mode [\#4770](https://github.com/apache/camel-k/issues/4770)
 - Prometheus checks failing in Camel 4 [\#4765](https://github.com/apache/camel-k/issues/4765)
