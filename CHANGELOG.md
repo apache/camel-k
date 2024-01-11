@@ -6,12 +6,23 @@
 
 **Closed issues:**
 
+- Need to update CEQ service discovery setting for data type transformer [\#5047](https://github.com/apache/camel-k/issues/5047)
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
+- Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
+- Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 
 **Merged pull requests:**
 
+- feat\(ci\): new coverage flow [\#5058](https://github.com/apache/camel-k/pull/5058) ([squakez](https://github.com/squakez))
+- fix\(\#5047\): Update Quarkus service discovery setting for data type transformer [\#5055](https://github.com/apache/camel-k/pull/5055) ([christophd](https://github.com/christophd))
+- chore\(deps\): bump org.apache.maven.plugins:maven-surefire-plugin from 3.0.0-M8 to 3.2.5 in /java/crds [\#5053](https://github.com/apache/camel-k/pull/5053) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump org.apache:apache from 23 to 31 in /java/crds [\#5052](https://github.com/apache/camel-k/pull/5052) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump knative.dev/eventing from 0.39.2 to 0.39.3 [\#5050](https://github.com/apache/camel-k/pull/5050) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump k8s.io/klog/v2 from 2.110.1 to 2.120.0 [\#5049](https://github.com/apache/camel-k/pull/5049) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump Fabric8, use the BOM and dependabot [\#5046](https://github.com/apache/camel-k/pull/5046) ([andreaTP](https://github.com/andreaTP))
+- fix\(core\): Fix docker hub registry configuration [\#5045](https://github.com/apache/camel-k/pull/5045) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): generate sbom during release process [\#5043](https://github.com/apache/camel-k/pull/5043) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.15.0 to 0.16.0 [\#5041](https://github.com/apache/camel-k/pull/5041) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(trait\) Fixed a scientific notation issue with camel when generating yaml [\#5040](https://github.com/apache/camel-k/pull/5040) ([cdmikechen](https://github.com/cdmikechen))
