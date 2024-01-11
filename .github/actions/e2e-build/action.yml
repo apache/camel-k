@@ -29,4 +29,18 @@ runs:
 
   - name: Test
     shell: bash
-    run: make
+    run: |
+      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out" make build
+
+  - name: Save coverage PR value
+    shell: bash
+    run: |
+      mkdir -p ./pr
+      go tool cover -func=coverage.out -o=coverage.out
+      grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs > ./pr/coverage
+      echo ${{ github.event.number }} > ./pr/id
+
+  - uses: actions/upload-artifact@v2
+    with:
+      name: pr
+      path: pr/

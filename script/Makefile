@@ -243,11 +243,7 @@ endif
 
 test: do-build
 	@echo "####### Running unit test..."
-	go test ./...
-
-test-fmt: do-build
-	@echo "####### Running unit test..."
-	go test -v ./... -json 2>&1 | gotestfmt
+	go test ./... $(COVERAGE_OPTS)
 
 #
 # Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce

@@ -69,6 +69,7 @@ runs:
       run: |
         go test -v ./... -covermode=count -coverprofile=coverage.out
         go tool cover -func=coverage.out -o=coverage.out
+        grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs > coverage
         touch badge.out
     - name: Go Coverage Badge
       uses: ./.github/actions/coverage-badge
@@ -89,7 +90,7 @@ runs:
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
-        git add -A && git commit -m 'chore: nightly coverage badge update' && echo "badge=1" >> $GITHUB_ENV || echo "No changes to coverage badge"
+        git add -A -f && git commit -m 'chore: nightly coverage changed' && echo "badge=1" >> $GITHUB_ENV || echo "No changes to coverage"
 
     # Git push
     - name: Push changes
