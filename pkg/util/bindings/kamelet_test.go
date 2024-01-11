@@ -139,23 +139,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			name:         "action-input",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step: map[string]interface{}{
-				"pipeline": map[string]interface{}{
-					"id": "action-0-pipeline",
-					"steps": []map[string]interface{}{
-						{
-							"kamelet": map[string]interface{}{
-								"name": "data-type-action/action-0-in",
-							},
-						},
-						{
-							"kamelet": map[string]interface{}{
-								"name": "mykamelet/action-0",
-							},
-						},
-					},
-				},
-			},
+			step:         getExpectedStep(true, false),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
@@ -167,76 +151,89 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			inputFormat: "string",
 		},
 		{
-			name:         "action-output",
+			name:         "action-input-scheme-prefix",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step: map[string]interface{}{
-				"pipeline": map[string]interface{}{
-					"id": "action-1-pipeline",
-					"steps": []map[string]interface{}{
-						{
-							"kamelet": map[string]interface{}{
-								"name": "mykamelet/action-1",
-							},
-						},
-						{
-							"kamelet": map[string]interface{}{
-								"name": "data-type-action/action-1-out",
-							},
-						},
-					},
-				},
-			},
+			step:         getExpectedStep(true, false),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
 			applicationProperties: map[string]string{
-				"camel.kamelet.mykamelet.action-1.foo":               "bar",
-				"camel.kamelet.data-type-action.action-1-out.scheme": "camel",
-				"camel.kamelet.data-type-action.action-1-out.format": "string",
+				"camel.kamelet.mykamelet.action-0.foo":              "bar",
+				"camel.kamelet.data-type-action.action-0-in.scheme": "foo",
+				"camel.kamelet.data-type-action.action-0-in.format": "string",
+			},
+			inputFormat: "foo:string",
+		},
+		{
+			name:         "action-output",
+			endpointType: v1.EndpointTypeAction,
+			uri:          "",
+			step:         getExpectedStep(false, true),
+			endpointProperties: map[string]string{
+				"foo": "bar",
+			},
+			applicationProperties: map[string]string{
+				"camel.kamelet.mykamelet.action-0.foo":               "bar",
+				"camel.kamelet.data-type-action.action-0-out.scheme": "camel",
+				"camel.kamelet.data-type-action.action-0-out.format": "string",
 			},
 			outputFormat: "string",
+		},
+		{
+			name:         "action-output-scheme-prefix",
+			endpointType: v1.EndpointTypeAction,
+			uri:          "",
+			step:         getExpectedStep(false, true),
+			endpointProperties: map[string]string{
+				"foo": "bar",
+			},
+			applicationProperties: map[string]string{
+				"camel.kamelet.mykamelet.action-0.foo":               "bar",
+				"camel.kamelet.data-type-action.action-0-out.scheme": "foo",
+				"camel.kamelet.data-type-action.action-0-out.format": "string",
+			},
+			outputFormat: "foo:string",
 		},
 		{
 			name:         "action-input-output",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step: map[string]interface{}{
-				"pipeline": map[string]interface{}{
-					"id": "action-2-pipeline",
-					"steps": []map[string]interface{}{
-						{
-							"kamelet": map[string]interface{}{
-								"name": "data-type-action/action-2-in",
-							},
-						},
-						{
-							"kamelet": map[string]interface{}{
-								"name": "mykamelet/action-2",
-							},
-						},
-						{
-							"kamelet": map[string]interface{}{
-								"name": "data-type-action/action-2-out",
-							},
-						},
-					},
-				},
-			},
+			step:         getExpectedStep(true, true),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
 			applicationProperties: map[string]string{
-				"camel.kamelet.mykamelet.action-2.foo":               "bar",
-				"camel.kamelet.data-type-action.action-2-in.scheme":  "foo",
-				"camel.kamelet.data-type-action.action-2-in.format":  "string",
-				"camel.kamelet.data-type-action.action-2-out.scheme": "foo",
-				"camel.kamelet.data-type-action.action-2-out.format": "binary",
+				"camel.kamelet.mykamelet.action-0.foo":               "bar",
+				"camel.kamelet.data-type-action.action-0-in.scheme":  "foo",
+				"camel.kamelet.data-type-action.action-0-in.format":  "string",
+				"camel.kamelet.data-type-action.action-0-out.scheme": "foo",
+				"camel.kamelet.data-type-action.action-0-out.format": "binary",
 			},
 			inputScheme:  "foo",
 			inputFormat:  "string",
 			outputScheme: "foo",
 			outputFormat: "binary",
+		},
+		{
+			name:         "action-input-output-schema-and-prefix",
+			endpointType: v1.EndpointTypeAction,
+			uri:          "",
+			step:         getExpectedStep(true, true),
+			endpointProperties: map[string]string{
+				"foo": "bar",
+			},
+			applicationProperties: map[string]string{
+				"camel.kamelet.mykamelet.action-0.foo":               "bar",
+				"camel.kamelet.data-type-action.action-0-in.scheme":  "camel",
+				"camel.kamelet.data-type-action.action-0-in.format":  "foo:string",
+				"camel.kamelet.data-type-action.action-0-out.scheme": "camel",
+				"camel.kamelet.data-type-action.action-0-out.format": "foo:binary",
+			},
+			inputScheme:  "camel",
+			inputFormat:  "foo:string",
+			outputScheme: "camel",
+			outputFormat: "foo:binary",
 		},
 	}
 
@@ -275,6 +272,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 				}
 			}
 
+			pos := 0
 			binding, err := BindingConverter{}.Translate(
 				BindingContext{
 					Ctx:       ctx,
@@ -284,7 +282,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 				},
 				EndpointContext{
 					Type:     tc.endpointType,
-					Position: &i,
+					Position: &pos,
 				},
 				endpoint)
 
@@ -299,5 +297,38 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 				assert.True(t, len(binding.ApplicationProperties) == 0)
 			}
 		})
+	}
+}
+
+func getExpectedStep(withIn bool, withOut bool) map[string]interface{} {
+	var steps []map[string]interface{}
+
+	if withIn {
+		steps = append(steps, map[string]interface{}{
+			"kamelet": map[string]interface{}{
+				"name": "data-type-action/action-0-in",
+			},
+		})
+	}
+
+	steps = append(steps, map[string]interface{}{
+		"kamelet": map[string]interface{}{
+			"name": "mykamelet/action-0",
+		},
+	})
+
+	if withOut {
+		steps = append(steps, map[string]interface{}{
+			"kamelet": map[string]interface{}{
+				"name": "data-type-action/action-0-out",
+			},
+		})
+	}
+
+	return map[string]interface{}{
+		"pipeline": map[string]interface{}{
+			"id":    "action-0-pipeline",
+			"steps": steps,
+		},
 	}
 }
