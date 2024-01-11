@@ -1,0 +1,67 @@
+name: Comment on the pull request
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  workflow_run:
+    workflows: ["build"]
+    types:
+      - completed
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: 'Download coverage artifact'
+        uses: actions/github-script@v3.1.0
+        with:
+          script: |
+            var artifacts = await github.actions.listWorkflowRunArtifacts({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               run_id: ${{github.event.workflow_run.id }},
+            });
+            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "pr"
+            })[0];
+            var download = await github.actions.downloadArtifact({
+               owner: context.repo.owner,
+               repo: context.repo.repo,
+               artifact_id: matchArtifact.id,
+               archive_format: 'zip',
+            });
+            var fs = require('fs');
+            fs.writeFileSync('${{github.workspace}}/pr.zip', Buffer.from(download.data));
+      - run: unzip pr.zip
+
+      - name: 'Comment on PR'
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            var fs = require('fs');
+            const coverage = Number(fs.readFileSync('./coverage'));
+            const issue_number = Number(fs.readFileSync('./id'));
+            const main_coverage_result = await github.request('https://raw.githubusercontent.com/' + context.repo.owner + '/' + context.repo.repo + '/main/coverage')
+            const main_cov_num = Number(main_coverage_result.data)
+            diff = Math.round((coverage - main_cov_num + Number.EPSILON) * 100) / 100
+
+            if(diff > 0){
+              await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                body: ':heavy_check_mark: Unit test coverage report - coverage increased from ' + main_cov_num + '% to ' + coverage + '% (**+' + diff + '%**)'
+              })
+            }else if(diff < 0){
+              await github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                body: ':warning: Unit test coverage report - coverage decreased from ' + main_cov_num + '% to ' + coverage + '% (**' + diff + '%**)'
+              })
+            }
