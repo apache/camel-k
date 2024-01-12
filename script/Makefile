@@ -24,8 +24,6 @@ VERSION ?= 2.3.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.2.0
 DEFAULT_RUNTIME_VERSION := 3.2.3
-BUILDAH_VERSION := 1.30.0
-KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.27.4
 OPERATOR_SDK_VERSION := v1.28.0
@@ -179,12 +177,6 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultRuntimeVersion = \"$(DEFAULT_RUNTIME_VERSION)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // BuildahVersion -- " >> $(VERSIONFILE)
-	@echo "  BuildahVersion = \"$(BUILDAH_VERSION)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
-	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // baseImage -- " >> $(VERSIONFILE)
 	@echo "  baseImage = \"$(BASE_IMAGE)\"" >> $(VERSIONFILE)

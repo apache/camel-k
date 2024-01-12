@@ -163,14 +163,6 @@ func TestInstallHealthFlag(t *testing.T) {
 	assert.Equal(t, int32(7777), installCmdOptions.HealthPort)
 }
 
-func TestInstallBuildPublishStrategyOptions(t *testing.T) {
-	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
-	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--build-publish-strategy-option", "foo1=bar1", "--build-publish-strategy-option", "foo2=bar2")
-	assert.Nil(t, err)
-	assert.Equal(t, "foo1=bar1", installCmdOptions.BuildPublishStrategyOptions[0])
-	assert.Equal(t, "foo2=bar2", installCmdOptions.BuildPublishStrategyOptions[1])
-}
-
 func TestInstallLocalRepositoryFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--maven-local-repository", "someString")

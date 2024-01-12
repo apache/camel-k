@@ -67,10 +67,10 @@ type Task struct {
 	// Application Publishing
 
 	// a BuildahTask, for Buildah strategy
-	// Deprecated: use spectrum, jib or s2i instead
+	// Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 	Buildah *BuildahTask `json:"buildah,omitempty"`
 	// a KanikoTask, for Kaniko strategy
-	// Deprecated: use spectrum, jib or s2i instead
+	// Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 	Kaniko *KanikoTask `json:"kaniko,omitempty"`
 	// a SpectrumTask, for Spectrum strategy
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`

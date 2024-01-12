@@ -24,6 +24,7 @@ package trait
 type BuilderTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// Enable verbose logging on build components that support it (e.g. Kaniko build pod).
+	// Deprecated no longer in use
 	Verbose *bool `property:"verbose" json:"verbose,omitempty"`
 	// A list of properties to be provided to the build task
 	Properties []string `property:"properties" json:"properties,omitempty"`

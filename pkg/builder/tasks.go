@@ -55,18 +55,6 @@ func (b *Build) Task(task v1.Task) Task {
 			build: b.build,
 			task:  task.Package,
 		}
-	// Buildah tasks are not supported in routines
-	case task.Buildah != nil:
-		return &unsupportedTask{
-			build: b.build,
-			name:  task.Buildah.Name,
-		}
-	// Kaniko tasks are not supported in routines
-	case task.Kaniko != nil:
-		return &unsupportedTask{
-			build: b.build,
-			name:  task.Kaniko.Name,
-		}
 	case task.Spectrum != nil:
 		return &spectrumTask{
 			c:     b.builder.client,
@@ -151,16 +139,6 @@ func (b *Build) TaskByName(name string) Task {
 				log:   b.builder.log,
 				build: b.build,
 				task:  task.Package,
-			}
-		case task.Buildah != nil && task.Buildah.Name == name:
-			return &unsupportedTask{
-				build: b.build,
-				name:  task.Buildah.Name,
-			}
-		case task.Kaniko != nil && task.Kaniko.Name == name:
-			return &unsupportedTask{
-				build: b.build,
-				name:  task.Kaniko.Name,
 			}
 		case task.Spectrum != nil && task.Spectrum.Name == name:
 			return &spectrumTask{

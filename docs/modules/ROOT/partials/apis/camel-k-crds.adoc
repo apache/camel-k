@@ -5206,7 +5206,7 @@ a PackageTask, used to package the project
 
 
 a BuildahTask, for Buildah strategy
-Deprecated: use spectrum, jib or s2i instead
+Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
@@ -5214,7 +5214,7 @@ Deprecated: use spectrum, jib or s2i instead
 
 
 a KanikoTask, for Kaniko strategy
-Deprecated: use spectrum, jib or s2i instead
+Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
@@ -5817,6 +5817,7 @@ bool
 
 
 Enable verbose logging on build components that support it (e.g. Kaniko build pod).
+Deprecated no longer in use
 
 |`properties` +
 []string
