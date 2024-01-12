@@ -646,8 +646,7 @@ func NewPlatform(
 			pl.Spec.Build.Registry.Address = *address
 			pl.Spec.Build.Registry.Insecure = true
 			if pl.Spec.Build.PublishStrategy == "" {
-				// Use spectrum in insecure dev clusters by default
-				pl.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
+				pl.Spec.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyJib
 			}
 		}
 	}

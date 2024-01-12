@@ -75,7 +75,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
 			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyS2I
 		} else {
-			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategySpectrum
+			p.Status.Build.PublishStrategy = v1.IntegrationPlatformBuildPublishStrategyJib
 		}
 		log.Debugf("Integration Platform %s [%s]: setting publishing strategy %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
 	}
