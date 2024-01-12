@@ -33,7 +33,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
@@ -83,16 +82,6 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 
 	if p.Status.Build.BuildConfiguration.Strategy == "" {
 		defaultStrategy := v1.BuildStrategyRoutine
-		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah ||
-			p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
-			defaultStrategy = v1.BuildStrategyPod
-			log.Infof("Integration Platform %s [%s]: setting fallback build strategy %s because PublishStrategy is configured as %s",
-				p.Name,
-				p.Namespace,
-				defaultStrategy,
-				p.Status.Build.PublishStrategy,
-			)
-		}
 		p.Status.Build.BuildConfiguration.Strategy = defaultStrategy
 		log.Debugf("Integration Platform %s [%s]: setting build strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.Strategy)
 	}
@@ -253,10 +242,6 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	if target.Status.Build.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", target.Name, target.Namespace)
 		target.Status.Build.BaseImage = source.Status.Build.BaseImage
-		// Workaround to ensure the default image from buildah is full name. Any baseImage override is in charge of it's validity
-		if target.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && defaults.IsBaseImageDefault() {
-			target.Status.Build.BaseImage = builder.BuildahDefaultBaseImageName
-		}
 	}
 
 	if target.Status.Build.Maven.LocalRepository == "" {
@@ -330,10 +315,6 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	if p.Status.Build.BaseImage == "" {
 		log.Debugf("Integration Platform %s [%s]: setting base image", p.Name, p.Namespace)
 		p.Status.Build.BaseImage = defaults.BaseImage()
-		// Workaround to ensure the default image from buildah is full name. Any baseImage override is in charge of it's validity
-		if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah && defaults.IsBaseImageDefault() {
-			p.Status.Build.BaseImage = builder.BuildahDefaultBaseImageName
-		}
 	}
 	if p.Status.Build.Maven.LocalRepository == "" {
 		log.Debugf("Integration Platform %s [%s]: setting local repository", p.Name, p.Namespace)
@@ -346,10 +327,6 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 			"--no-transfer-progress",
 			"-Dstyle.color=never",
 		}
-	}
-	if _, ok := p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]; !ok {
-		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", p.Name, p.Namespace)
-		p.Status.Build.PublishStrategyOptions[builder.KanikoPVCName] = p.Name
 	}
 
 	// Build timeout
@@ -379,18 +356,6 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 		}
 	}
 
-	_, cacheEnabled := p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled]
-	if p.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko && !cacheEnabled {
-		// Default to disabling Kaniko cache warmer
-		// Using the cache warmer pod seems unreliable with the current Kaniko version
-		// and requires relying on a persistent volume.
-		defaultKanikoBuildCache := "false"
-		p.Status.Build.PublishStrategyOptions[builder.KanikoBuildCacheEnabled] = defaultKanikoBuildCache
-		if verbose {
-			log.Log.Infof("Kaniko cache set to %s", defaultKanikoBuildCache)
-		}
-	}
-
 	if len(p.Status.Kamelet.Repositories) == 0 {
 		log.Debugf("Integration Platform %s [%s]: setting kamelet repositories", p.Name, p.Namespace)
 		p.Status.Kamelet.Repositories = append(p.Status.Kamelet.Repositories, v1.IntegrationPlatformKameletRepositorySpec{
@@ -411,13 +376,6 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 func setStatusAdditionalInfo(platform *v1.IntegrationPlatform) {
 	platform.Status.Info = make(map[string]string)
-
-	log.Debugf("Integration Platform %s [%s]: setting build publish strategy", platform.Name, platform.Namespace)
-	if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyBuildah {
-		platform.Status.Info["buildahVersion"] = defaults.BuildahVersion
-	} else if platform.Spec.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyKaniko {
-		platform.Status.Info["kanikoVersion"] = defaults.KanikoVersion
-	}
 	log.Debugf("Integration Platform %s [%s]: setting status info", platform.Name, platform.Namespace)
 	platform.Status.Info["goVersion"] = runtime.Version()
 	platform.Status.Info["goOS"] = runtime.GOOS

@@ -260,63 +260,6 @@ func (t *builderTrait) Apply(e *Environment) error {
 			},
 			Tag: e.IntegrationKit.ResourceVersion,
 		}})
-
-	case v1.IntegrationPlatformBuildPublishStrategyBuildah:
-		t.L.Infof("Warning: Buildah publishing strategy is deprecated and may be removed in future releases. Use any alternative publishing strategy.")
-		var platform string
-		var found bool
-		if platform, found = e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahPlatform]; !found {
-			platform = ""
-			t.L.Infof("Attribute platform for buildah not found, default from host will be used!")
-		} else {
-			t.L.Infof("User defined %s platform, will be used from buildah!", platform)
-		}
-		var executorImage string
-		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.BuildahImage]; found {
-			executorImage = image
-			t.L.Infof("User defined executor image %s will be used for buildah", image)
-		}
-		pipelineTasks = append(pipelineTasks, v1.Task{Buildah: &v1.BuildahTask{
-			Platform: platform,
-			BaseTask: v1.BaseTask{
-				Name:          "buildah",
-				Configuration: *taskConfOrDefault(tasksConf, "buildah"),
-			},
-			PublishTask: v1.PublishTask{
-				Image:    imageName,
-				Registry: e.Platform.Status.Build.Registry,
-			},
-			Verbose:       t.Verbose,
-			ExecutorImage: executorImage,
-		}})
-	//nolint: staticcheck,nolintlint
-	case v1.IntegrationPlatformBuildPublishStrategyKaniko:
-		t.L.Infof("Warning: Kaniko publishing strategy is deprecated and may be removed in future releases. Use any alternative publishing strategy.")
-		persistentVolumeClaim := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoPVCName]
-		cacheEnabled := e.Platform.Status.Build.IsOptionEnabled(builder.KanikoBuildCacheEnabled)
-
-		var executorImage string
-		if image, found := e.Platform.Status.Build.PublishStrategyOptions[builder.KanikoExecutorImage]; found {
-			executorImage = image
-			t.L.Infof("User defined executor image %s will be used for kaniko", image)
-		}
-
-		pipelineTasks = append(pipelineTasks, v1.Task{Kaniko: &v1.KanikoTask{
-			BaseTask: v1.BaseTask{
-				Name:          "kaniko",
-				Configuration: *taskConfOrDefault(tasksConf, "kaniko"),
-			},
-			PublishTask: v1.PublishTask{
-				Image:    imageName,
-				Registry: e.Platform.Status.Build.Registry,
-			},
-			Cache: v1.KanikoTaskCache{
-				Enabled:               &cacheEnabled,
-				PersistentVolumeClaim: persistentVolumeClaim,
-			},
-			Verbose:       t.Verbose,
-			ExecutorImage: executorImage,
-		}})
 	}
 
 	// filter only those tasks required by the user
@@ -618,12 +561,6 @@ func filter(tasks []v1.Task, filterTasks []string) ([]v1.Task, error) {
 			case t.Jib != nil && t.Jib.Name == f:
 				filteredTasks = append(filteredTasks, t)
 				found = true
-			case t.Buildah != nil && t.Buildah.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
-			case t.Kaniko != nil && t.Kaniko.Name == f:
-				filteredTasks = append(filteredTasks, t)
-				found = true
 			}
 		}
 
@@ -647,10 +584,6 @@ func publishingOrUserTask(t v1.Task) bool {
 	case t.Spectrum != nil:
 		return true
 	case t.Jib != nil:
-		return true
-	case t.Buildah != nil:
-		return true
-	case t.Kaniko != nil:
 		return true
 	}
 

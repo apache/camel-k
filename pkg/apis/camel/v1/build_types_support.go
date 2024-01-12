@@ -104,12 +104,6 @@ func ConfigurationTasksByName(tasks []Task, name string) *BuildConfiguration {
 		if t.Jib != nil && t.Jib.Name == name {
 			return &t.Jib.Configuration
 		}
-		if t.Buildah != nil && t.Buildah.Name == name {
-			return &t.Buildah.Configuration
-		}
-		if t.Kaniko != nil && t.Kaniko.Name == name {
-			return &t.Kaniko.Configuration
-		}
 	}
 	return &BuildConfiguration{}
 }

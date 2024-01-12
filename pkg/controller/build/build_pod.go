@@ -19,12 +19,8 @@ package build
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -32,10 +28,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
@@ -45,76 +39,7 @@ const (
 	builderVolume = "camel-k-builder"
 )
 
-type registryConfigMap struct {
-	fileName    string
-	mountPath   string
-	destination string
-}
-
-var (
-	serviceCABuildahRegistryConfigMap = registryConfigMap{
-		fileName:    "service-ca.crt",
-		mountPath:   "/etc/containers/certs.d",
-		destination: "service-ca.crt",
-	}
-
-	buildahRegistryConfigMaps = []registryConfigMap{
-		serviceCABuildahRegistryConfigMap,
-	}
-)
-
-type registrySecret struct {
-	fileName    string
-	mountPath   string
-	destination string
-	refEnv      string
-}
-
-var (
-	plainDockerBuildahRegistrySecret = registrySecret{
-		fileName:    corev1.DockerConfigKey,
-		mountPath:   "/buildah/.docker",
-		destination: "config.json",
-	}
-	standardDockerBuildahRegistrySecret = registrySecret{
-		fileName:    corev1.DockerConfigJsonKey,
-		mountPath:   "/buildah/.docker",
-		destination: "config.json",
-		refEnv:      "REGISTRY_AUTH_FILE",
-	}
-
-	buildahRegistrySecrets = []registrySecret{
-		plainDockerBuildahRegistrySecret,
-		standardDockerBuildahRegistrySecret,
-	}
-)
-
-var (
-	gcrKanikoRegistrySecret = registrySecret{
-		fileName:    "kaniko-secret.json",
-		mountPath:   "/secret",
-		destination: "kaniko-secret.json",
-		refEnv:      "GOOGLE_APPLICATION_CREDENTIALS",
-	}
-	plainDockerKanikoRegistrySecret = registrySecret{
-		fileName:    "config.json",
-		mountPath:   "/kaniko/.docker",
-		destination: "config.json",
-	}
-	standardDockerKanikoRegistrySecret = registrySecret{
-		fileName:    corev1.DockerConfigJsonKey,
-		mountPath:   "/kaniko/.docker",
-		destination: "config.json",
-	}
-
-	kanikoRegistrySecrets = []registrySecret{
-		gcrKanikoRegistrySecret,
-		plainDockerKanikoRegistrySecret,
-		standardDockerKanikoRegistrySecret,
-	}
-)
-
-func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build *v1.Build) (*corev1.Pod, error) {
+func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *corev1.Pod {
 	var ugfid int64 = 1001
 	podSecurityContext := &corev1.PodSecurityContext{
 		RunAsUser:  &ugfid,
@@ -165,17 +90,6 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build
 		// It's a type of builder task, we can reuse the same type
 		case task.Package != nil:
 			addBuildTaskToPod(ctx, client, build, task.Package.Name, pod)
-		// Publish task
-		case task.Buildah != nil:
-			err := addBuildahTaskToPod(ctx, c, build, task.Buildah, pod)
-			if err != nil {
-				return nil, err
-			}
-		case task.Kaniko != nil:
-			err := addKanikoTaskToPod(ctx, c, build, task.Kaniko, pod)
-			if err != nil {
-				return nil, err
-			}
 		case task.S2i != nil:
 			addBuildTaskToPod(ctx, client, build, task.S2i.Name, pod)
 		case task.Spectrum != nil:
@@ -189,7 +103,7 @@ func newBuildPod(ctx context.Context, c ctrl.Reader, client client.Client, build
 	pod.Spec.Containers = pod.Spec.InitContainers[len(pod.Spec.InitContainers)-1 : len(pod.Spec.InitContainers)]
 	pod.Spec.InitContainers = pod.Spec.InitContainers[:len(pod.Spec.InitContainers)-1]
 
-	return pod, nil
+	return pod
 }
 
 func configureResources(taskName string, build *v1.Build, container *corev1.Container) {
@@ -317,252 +231,6 @@ func addBuildTaskToPod(ctx context.Context, client client.Client, build *v1.Buil
 	addContainerToPod(build, container, pod)
 }
 
-func addBuildahTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.BuildahTask, pod *corev1.Pod) error {
-	var bud []string
-
-	bud = []string{
-		"buildah",
-		"bud",
-		"--storage-driver=vfs",
-	}
-
-	if task.Platform != "" {
-		bud = append(bud, []string{
-			"--platform",
-			task.Platform,
-		}...)
-	}
-
-	bud = append(bud, []string{
-		"--pull-always",
-		"-f",
-		"Dockerfile",
-		"-t",
-		task.Image,
-		".",
-	}...)
-
-	push := []string{
-		"buildah",
-		"push",
-		"--storage-driver=vfs",
-		"--digestfile=/dev/termination-log",
-		task.Image,
-		"docker://" + task.Image,
-	}
-
-	if task.Verbose != nil && *task.Verbose {
-		bud = append(bud[:2], append([]string{"--log-level=debug"}, bud[2:]...)...)
-		push = append(push[:2], append([]string{"--log-level=debug"}, push[2:]...)...)
-	}
-
-	env := make([]corev1.EnvVar, 0)
-	volumes := make([]corev1.Volume, 0)
-	volumeMounts := make([]corev1.VolumeMount, 0)
-
-	if task.Registry.CA != "" {
-		config, err := getRegistryConfigMap(ctx, c, build.Namespace, task.Registry.CA, buildahRegistryConfigMaps)
-		if err != nil {
-			return err
-		}
-		addRegistryConfigMap(task.Registry.CA, config, &volumes, &volumeMounts)
-		// This is easier to use the --cert-dir option, otherwise Buildah defaults to looking up certificates
-		// into a directory named after the registry address
-		bud = append(bud[:2], append([]string{"--cert-dir=/etc/containers/certs.d"}, bud[2:]...)...)
-		push = append(push[:2], append([]string{"--cert-dir=/etc/containers/certs.d"}, push[2:]...)...)
-	}
-
-	var auth string
-	if task.Registry.Secret != "" {
-		secret, err := getRegistrySecret(ctx, c, build.Namespace, task.Registry.Secret, buildahRegistrySecrets)
-		if err != nil {
-			return err
-		}
-		if secret == plainDockerBuildahRegistrySecret {
-			// Handle old format and make it compatible with Buildah
-			auth = "(echo '{ \"auths\": ' ; cat /buildah/.docker/config.json ; echo \"}\") > /tmp/.dockercfg"
-			env = append(env, corev1.EnvVar{
-				Name:  "REGISTRY_AUTH_FILE",
-				Value: "/tmp/.dockercfg",
-			})
-		}
-		addRegistrySecret(task.Registry.Secret, secret, &volumes, &volumeMounts, &env)
-	}
-
-	if task.Registry.Insecure {
-		bud = append(bud[:2], append([]string{"--tls-verify=false"}, bud[2:]...)...)
-		push = append(push[:2], append([]string{"--tls-verify=false"}, push[2:]...)...)
-	}
-
-	env = append(env, proxyFromEnvironment()...)
-
-	args := []string{
-		strings.Join(bud, " "),
-		strings.Join(push, " "),
-	}
-	if auth != "" {
-		args = append([]string{auth}, args...)
-	}
-
-	image := task.ExecutorImage
-	if image == "" {
-		image = fmt.Sprintf("%s:v%s", builder.BuildahDefaultImageName, defaults.BuildahVersion)
-	}
-
-	var root int64 = 0
-	container := corev1.Container{
-		Name:            task.Name,
-		Image:           image,
-		ImagePullPolicy: corev1.PullIfNotPresent,
-		Command:         []string{"/bin/sh", "-c"},
-		Args:            []string{strings.Join(args, " && ")},
-		Env:             env,
-		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
-		VolumeMounts:    volumeMounts,
-		// Buildah requires root privileges
-		SecurityContext: &corev1.SecurityContext{
-			RunAsUser:  &root,
-			RunAsGroup: &root,
-		},
-	}
-
-	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
-
-	configureResources(task.Name, build, &container)
-	addContainerToPod(build, container, pod)
-
-	return nil
-}
-
-func addKanikoTaskToPod(ctx context.Context, c ctrl.Reader, build *v1.Build, task *v1.KanikoTask, pod *corev1.Pod) error {
-	cache := false
-	if task.Cache.Enabled != nil && *task.Cache.Enabled {
-		cache = true
-	}
-
-	args := []string{
-		"--dockerfile=Dockerfile",
-		"--context=" + filepath.Join(builderDir, build.Name, builder.ContextDir),
-		"--destination=" + task.Image,
-		"--cache=" + strconv.FormatBool(cache),
-		"--cache-dir=" + builder.KanikoCacheDir,
-	}
-
-	if task.Verbose != nil && *task.Verbose {
-		args = append(args, "-v=debug")
-	}
-
-	affinity := &corev1.Affinity{}
-	env := make([]corev1.EnvVar, 0)
-	volumes := make([]corev1.Volume, 0)
-	volumeMounts := make([]corev1.VolumeMount, 0)
-
-	if task.Registry.Secret != "" {
-		secret, err := getRegistrySecret(ctx, c, build.Namespace, task.Registry.Secret, kanikoRegistrySecrets)
-		if err != nil {
-			return err
-		}
-		addRegistrySecret(task.Registry.Secret, secret, &volumes, &volumeMounts, &env)
-	}
-
-	if task.Registry.Insecure {
-		args = append(args, "--insecure")
-		args = append(args, "--insecure-pull")
-	}
-
-	env = append(env, proxyFromEnvironment()...)
-
-	if cache {
-		// Co-locate with the Kaniko warmer pod for sharing the host path volume as the current
-		// persistent volume claim uses the default storage class which is likely relying
-		// on the host path provisioner.
-		// This has to be done manually by retrieving the Kaniko warmer pod node name and using
-		// node affinity as pod affinity only works for running pods and the Kaniko warmer pod
-		// has already completed at that stage.
-
-		// Locate the kaniko warmer pod
-		pods := &corev1.PodList{}
-		err := c.List(ctx, pods,
-			ctrl.InNamespace(build.Namespace),
-			ctrl.MatchingLabels{
-				"camel.apache.org/component": "kaniko-warmer",
-			})
-		if err != nil {
-			return err
-		}
-
-		if len(pods.Items) != 1 {
-			return errors.New("failed to locate the Kaniko cache warmer pod")
-		}
-
-		// Use node affinity with the Kaniko warmer pod node name
-		affinity = &corev1.Affinity{
-			NodeAffinity: &corev1.NodeAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
-					NodeSelectorTerms: []corev1.NodeSelectorTerm{
-						{
-							MatchExpressions: []corev1.NodeSelectorRequirement{
-								{
-									Key:      "kubernetes.io/hostname",
-									Operator: "In",
-									Values:   []string{pods.Items[0].Spec.NodeName},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-		// Mount the PV used to warm the Kaniko cache into the Kaniko image build
-		volumes = append(volumes, corev1.Volume{
-			Name: "kaniko-cache",
-			VolumeSource: corev1.VolumeSource{
-				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-					ClaimName: task.Cache.PersistentVolumeClaim,
-				},
-			},
-		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "kaniko-cache",
-			MountPath: builder.KanikoCacheDir,
-		})
-	}
-
-	image := task.ExecutorImage
-	if image == "" {
-		image = fmt.Sprintf("%s:v%s", builder.KanikoDefaultExecutorImageName, defaults.KanikoVersion)
-	}
-
-	container := corev1.Container{
-		Name:            task.Name,
-		Image:           image,
-		ImagePullPolicy: corev1.PullIfNotPresent,
-		Args:            args,
-		Env:             env,
-		WorkingDir:      filepath.Join(builderDir, build.Name, builder.ContextDir),
-		VolumeMounts:    volumeMounts,
-	}
-
-	// We may want to handle possible conflicts
-	pod.Spec.Affinity = affinity
-	pod.Spec.Volumes = append(pod.Spec.Volumes, volumes...)
-
-	// Warning: Kaniko requires root privileges to work correctly
-	// As we're planning to deprecate this building strategy we're fixing in the first
-	// releases of version 2
-	var ugfid int64 = 0
-	pod.Spec.SecurityContext = &corev1.PodSecurityContext{
-		RunAsUser:  &ugfid,
-		RunAsGroup: &ugfid,
-		FSGroup:    &ugfid,
-	}
-
-	configureResources(task.Name, build, &container)
-	addContainerToPod(build, container, pod)
-
-	return nil
-}
-
 func addCustomTaskToPod(build *v1.Build, task *v1.UserTask, pod *corev1.Pod) {
 	container := corev1.Container{
 		Name:            task.Name,
@@ -602,89 +270,6 @@ func hasVolume(pod *corev1.Pod, name string) bool {
 		}
 	}
 	return false
-}
-
-func getRegistryConfigMap(ctx context.Context, c ctrl.Reader, ns, name string, registryConfigMaps []registryConfigMap) (registryConfigMap, error) {
-	config := corev1.ConfigMap{}
-	err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &config)
-	if err != nil {
-		return registryConfigMap{}, err
-	}
-	for _, k := range registryConfigMaps {
-		if _, ok := config.Data[k.fileName]; ok {
-			return k, nil
-		}
-	}
-	return registryConfigMap{}, errors.New("unsupported registry config map")
-}
-
-func addRegistryConfigMap(name string, config registryConfigMap, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
-	*volumes = append(*volumes, corev1.Volume{
-		Name: "registry-config",
-		VolumeSource: corev1.VolumeSource{
-			ConfigMap: &corev1.ConfigMapVolumeSource{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: name,
-				},
-				Items: []corev1.KeyToPath{
-					{
-						Key:  config.fileName,
-						Path: config.destination,
-					},
-				},
-			},
-		},
-	})
-
-	*volumeMounts = append(*volumeMounts, corev1.VolumeMount{
-		Name:      "registry-config",
-		MountPath: config.mountPath,
-		ReadOnly:  true,
-	})
-}
-
-func getRegistrySecret(ctx context.Context, c ctrl.Reader, ns, name string, registrySecrets []registrySecret) (registrySecret, error) {
-	secret := corev1.Secret{}
-	err := c.Get(ctx, ctrl.ObjectKey{Namespace: ns, Name: name}, &secret)
-	if err != nil {
-		return registrySecret{}, err
-	}
-	for _, k := range registrySecrets {
-		if _, ok := secret.Data[k.fileName]; ok {
-			return k, nil
-		}
-	}
-	return registrySecret{}, errors.New("unsupported secret type for registry authentication")
-}
-
-func addRegistrySecret(name string, secret registrySecret, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount, env *[]corev1.EnvVar) {
-	*volumes = append(*volumes, corev1.Volume{
-		Name: "registry-secret",
-		VolumeSource: corev1.VolumeSource{
-			Secret: &corev1.SecretVolumeSource{
-				SecretName: name,
-				Items: []corev1.KeyToPath{
-					{
-						Key:  secret.fileName,
-						Path: secret.destination,
-					},
-				},
-			},
-		},
-	})
-
-	*volumeMounts = append(*volumeMounts, corev1.VolumeMount{
-		Name:      "registry-secret",
-		MountPath: secret.mountPath,
-		ReadOnly:  true,
-	})
-
-	if secret.refEnv != "" {
-		*env = append(*env, corev1.EnvVar{
-			Name:  secret.refEnv,
-			Value: filepath.Join(secret.mountPath, secret.destination),
-		})
-	}
 }
 
 func proxyFromEnvironment() []corev1.EnvVar {

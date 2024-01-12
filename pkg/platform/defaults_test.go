@@ -27,7 +27,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
@@ -125,14 +124,14 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.Equal(t, "global_value2", ip.Status.Build.Maven.Properties["global_prop2"])
 }
 
-func TestPlatformBuildahUpdateOverrideLocalPlatformSpec(t *testing.T) {
+func TestPlatformS2IhUpdateOverrideLocalPlatformSpec(t *testing.T) {
 	global := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 			},
 		},
 	}
@@ -142,7 +141,6 @@ func TestPlatformBuildahUpdateOverrideLocalPlatformSpec(t *testing.T) {
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
 	assert.Nil(t, err)
-	assert.Equal(t, builder.BuildahDefaultBaseImageName, global.Status.Build.BaseImage)
 
 	ip := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
@@ -151,7 +149,7 @@ func TestPlatformBuildahUpdateOverrideLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 				BaseImage:       "overridden",
 			},
 		},
@@ -161,19 +159,18 @@ func TestPlatformBuildahUpdateOverrideLocalPlatformSpec(t *testing.T) {
 
 	applyPlatformSpec(&global, &ip)
 
-	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyBuildah, ip.Status.Build.PublishStrategy)
+	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyS2I, ip.Status.Build.PublishStrategy)
 	assert.Equal(t, "overridden", ip.Status.Build.BaseImage)
 }
 
-func TestPlatformBuildahUpdateDefaultLocalPlatformSpec(t *testing.T) {
-
+func TestPlatformS2IUpdateDefaultLocalPlatformSpec(t *testing.T) {
 	global := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 				BaseImage:       "overridden",
 			},
 		},
@@ -193,7 +190,7 @@ func TestPlatformBuildahUpdateDefaultLocalPlatformSpec(t *testing.T) {
 		},
 		Spec: v1.IntegrationPlatformSpec{
 			Build: v1.IntegrationPlatformBuildSpec{
-				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyBuildah,
+				PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 			},
 		},
 	}
@@ -202,8 +199,7 @@ func TestPlatformBuildahUpdateDefaultLocalPlatformSpec(t *testing.T) {
 
 	applyPlatformSpec(&global, &ip)
 
-	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyBuildah, ip.Status.Build.PublishStrategy)
-	assert.Equal(t, builder.BuildahDefaultBaseImageName, ip.Status.Build.BaseImage)
+	assert.Equal(t, v1.IntegrationPlatformBuildPublishStrategyS2I, ip.Status.Build.PublishStrategy)
 }
 
 func TestRetainLocalPlatformSpec(t *testing.T) {

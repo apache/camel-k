@@ -6820,7 +6820,8 @@ spec:
                             type: array
                           verbose:
                             description: Enable verbose logging on build components
-                              that support it (e.g. Kaniko build pod).
+                              that support it (e.g. Kaniko build pod). Deprecated
+                              no longer in use
                             type: boolean
                         type: object
                       camel:

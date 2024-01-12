@@ -222,7 +222,6 @@ When configuring the IDE task, make sure to add all required environment variabl
 After you set up the IDE task, with Java 11+ to be used by default, you can run and debug the operator process.
 
 NOTE: The operator can be fully debugged in CRC, because it uses OpenShift S2I binary builds under the hood.
-The build phase cannot be (currently) debugged in Minikube because the Kaniko builder requires that the operator and the publisher pod share a common persistent volume.
 
 [[publishing]]
 == Building Metadata for Publishing the Operator in Operator Hub
