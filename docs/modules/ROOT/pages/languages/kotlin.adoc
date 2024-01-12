@@ -1,0 +1,124 @@
+= Writing Integrations in Kotlin
+
+[WARNING]
+====
+The Kotlin DSL is experimental.
+====
+
+An integration written in Kotlin looks very similar to a Java one except it can leverages Kotlin's language enhancements over Java:
+
+[source,kotlin]
+----
+from("timer:tick")
+    .process { e -> e.getIn().body = "Hello Camel K!" }
+    .to("log:info")
+----
+
+You can run it with the standard command:
+
+```
+kamel run example.kts
+```
+
+Camel K extends the Camel Java DSL making it easier to configure the context in which the integration runs using the top level _context_ block
+
+[source,kotlin]
+----
+context {
+  // configure the context here
+}
+----
+
+At the moment, the enhanced DSL provides a way to bind items to the registry, to configure the components the context creates and some improvements over the REST DSL.
+
+== Beans DSL
+
+To register beans as you would do with a Camel registry you can use the Beans DSL
+
+[source,kotlin]
+----
+beans {
+    bean<org.apache.commons.dbcp2.BasicDataSource>("dataSource") { <1>
+        driverClassName = "org.h2.Driver"
+        url = "jdbc:h2:mem:camel"
+        username = "sa"
+        password = ""
+    }
+
+    bean("filterStrategy") { <1>
+        org.apache.camel.support.DefaultHeaderFilterStrategy()
+    }
+
+    processor("myProcessor") { <2>
+        it.getIn().body = "Hello"
+    }
+
+    predicate("myPredicate") { <3>
+        false
+    }
+}
+----
+<1> bind beans to the context for the database and filter strategy
+<2> define a custom processor to be used later in the routes by ref
+<3> define a custom predicate to be used later in the routes by ref
+
+
+== Components Configuration
+
+Components can be configured within the _components_ block inside the _camel_ one:
+
+[source,kotlin]
+----
+camel {
+    components {
+
+        component<SedaComponent>("seda") { //<1>
+            queueSize = 1234
+            concurrentConsumers = 12
+        }
+
+        component<SedaComponent>("mySeda") { // <2>
+            queueSize = 4321
+            concurrentConsumers = 21
+        }
+
+        component<LogComponent>("log") { // <3>
+            setExchangeFormatter {
+                e: Exchange -> "" + e.getIn().body
+            }
+        }
+    }
+}
+----
+<1> configure the properties of a component whit type _SedaComponent_ and name _seda_
+<2> configure the properties of a component with type SedaComponent and name _mySeda_, note that as _mySeda_ does not represent a valid component scheme, a new component of the required type will be instantiated.
+<3> configure the properties of the component whit name _log_
+
+[NOTE]
+====
+As for Groovy, you can provide your custom extension to the DSL
+====
+
+== Rest Endpoints
+
+Integrations REST endpoints can be configured using the top level _rest_ block:
+
+[source,kotlin]
+----
+rest {
+    configuration { // <1>
+        host = "my-host"
+        port = "9192"
+    }
+
+    path("/my/path") { // <2>
+        get("/get") {
+            consumes("application/json")
+            produces("application/json")
+            to("direct:get")
+        }
+    }
+}
+----
+<1> Configure the rest engine
+<2> Configure the rest endpoint for the base path '/my/path'

@@ -1,0 +1,25 @@
+= Writing Integrations in Java
+
+[WARNING]
+====
+The JShell DSL is experimental.
+====
+
+Using Java and JShell to write an integration to be deployed using Camel K is no different from defining your routing rules in Camel with the only difference that you do not need to implement or extend a RouteBuilder but you can access the current builder thx to the built-in `builder` variable.
+
+[source,java]
+.example.jsh
+----
+builder.from("timer:tick")
+    .setBody()
+        .constant("Hello Camel K!")
+    .to("log:info");-
+----
+
+You can run it with the standard command:
+
+```
+kamel run example.jsh
+```
+
+
