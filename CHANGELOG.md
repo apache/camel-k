@@ -6,16 +6,25 @@
 
 **Closed issues:**
 
+- Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
 - Need to update CEQ service discovery setting for data type transformer [\#5047](https://github.com/apache/camel-k/issues/5047)
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
+- Provide a page linking to Camel DSLs [\#5037](https://github.com/apache/camel-k/issues/5037)
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
 - Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
+- Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
+- Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
+- Use build-tags to configure what feature are included in a camel-k build [\#2801](https://github.com/apache/camel-k/issues/2801)
 
 **Merged pull requests:**
 
+- doc: add languages section [\#5064](https://github.com/apache/camel-k/pull/5064) ([squakez](https://github.com/squakez))
+- chore\(ci\): simplify nightly updates action [\#5061](https://github.com/apache/camel-k/pull/5061) ([squakez](https://github.com/squakez))
 - feat\(ci\): new coverage flow [\#5058](https://github.com/apache/camel-k/pull/5058) ([squakez](https://github.com/squakez))
+- feat\(pipeline\): user publishing task [\#5057](https://github.com/apache/camel-k/pull/5057) ([squakez](https://github.com/squakez))
+- fix\(\#5048\): Support component scheme prefix in data type references [\#5056](https://github.com/apache/camel-k/pull/5056) ([christophd](https://github.com/christophd))
 - fix\(\#5047\): Update Quarkus service discovery setting for data type transformer [\#5055](https://github.com/apache/camel-k/pull/5055) ([christophd](https://github.com/christophd))
 - chore\(deps\): bump org.apache.maven.plugins:maven-surefire-plugin from 3.0.0-M8 to 3.2.5 in /java/crds [\#5053](https://github.com/apache/camel-k/pull/5053) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump org.apache:apache from 23 to 31 in /java/crds [\#5052](https://github.com/apache/camel-k/pull/5052) ([dependabot[bot]](https://github.com/apps/dependabot))
