@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
 - Need to update CEQ service discovery setting for data type transformer [\#5047](https://github.com/apache/camel-k/issues/5047)
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
@@ -20,6 +21,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/evanphx/json-patch from 5.7.0+incompatible to 5.8.0+incompatible [\#5068](https://github.com/apache/camel-k/pull/5068) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/prometheus/common from 0.45.0 to 0.46.0 [\#5067](https://github.com/apache/camel-k/pull/5067) ([dependabot[bot]](https://github.com/apps/dependabot))
 - doc: add languages section [\#5064](https://github.com/apache/camel-k/pull/5064) ([squakez](https://github.com/squakez))
 - chore\(ci\): simplify nightly updates action [\#5061](https://github.com/apache/camel-k/pull/5061) ([squakez](https://github.com/squakez))
 - feat\(ci\): new coverage flow [\#5058](https://github.com/apache/camel-k/pull/5058) ([squakez](https://github.com/squakez))
