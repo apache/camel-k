@@ -213,7 +213,6 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       incrementalImageBuild:
-                        default: true
                         description: Use the incremental image build option, to reuse
                           existing containers (default `true`)
                         type: boolean
@@ -246,7 +245,6 @@ spec:
                           to be scheduled on, based on labels on the node.
                         type: object
                       orderStrategy:
-                        default: sequential
                         description: The build order strategy to use, either `dependencies`,
                           `fifo` or `sequential` (default `sequential`)
                         enum:
@@ -271,7 +269,6 @@ spec:
                           instead with task name `builder`.'
                         type: string
                       strategy:
-                        default: routine
                         description: The strategy to use, either `pod` or `routine`
                           (default `routine`)
                         enum:
@@ -343,8 +340,6 @@ spec:
                       build must have enough memory available.'
                     properties:
                       buildMode:
-                        default:
-                        - jvm
                         description: 'The Quarkus mode to run: either `jvm` or `native`
                           (default `jvm`). In case both `jvm` and `native` are specified,
                           two `IntegrationKit` resources are created, with the `native`
@@ -365,7 +360,6 @@ spec:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
                       nativeBaseImage:
-                        default: quay.io/quarkus/quarkus-micro-image:2.0
                         description: The base image to use when running a native build
                           (default `quay.io/quarkus/quarkus-micro-image:2.0`)
                         type: string

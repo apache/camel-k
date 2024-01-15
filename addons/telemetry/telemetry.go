@@ -41,19 +41,16 @@ import (
 type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
-	// +kubebuilder:default=true
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The name of the service that publishes telemetry data (defaults to the integration name)
 	ServiceName string `property:"service-name" json:"serviceName,omitempty"`
 	// The target endpoint of the Telemetry service (automatically discovered by default)
 	Endpoint string `property:"endpoint" json:"endpoint,omitempty"`
 	// The sampler of the telemetry used for tracing (default "on")
-	// +kubebuilder:default="on"
 	Sampler string `property:"sampler" json:"sampler,omitempty"`
 	// The sampler ratio of the telemetry used for tracing
 	SamplerRatio string `property:"sampler-ratio" json:"sampler-ratio,omitempty"`
 	// The sampler of the telemetry used for tracing is parent based (default "true")
-	// +kubebuilder:default=true
 	SamplerParentBased *bool `property:"sampler-parent-based" json:"sampler-parent-based,omitempty"`
 }
 
