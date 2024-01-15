@@ -31,10 +31,8 @@ type JVMTrait struct {
 	// Suspends the target JVM immediately before the main class is loaded
 	DebugSuspend *bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
 	// Prints the command used the start the JVM in the container logs (default `true`)
-	// +kubebuilder:default=true
 	PrintCommand *bool `property:"print-command" json:"printCommand,omitempty"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
-	// +kubebuilder:default="*:5005"
 	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
 	// A list of JVM options
 	Options []string `property:"options" json:"options,omitempty"`

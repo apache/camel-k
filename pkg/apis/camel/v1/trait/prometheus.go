@@ -34,7 +34,6 @@ package trait
 type PrometheusTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// Whether a `PodMonitor` resource is created (default `true`).
-	// +kubebuilder:default=true
 	PodMonitor *bool `property:"pod-monitor" json:"podMonitor,omitempty"`
 	// The `PodMonitor` resource labels, applicable when `pod-monitor` is `true`.
 	PodMonitorLabels []string `property:"pod-monitor-labels" json:"podMonitorLabels,omitempty"`
