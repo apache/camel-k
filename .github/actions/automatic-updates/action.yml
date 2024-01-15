@@ -80,7 +80,7 @@ runs:
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
-        git add -A -f && git commit -m 'chore: nightly automatic updates'
+        git add -A -f && git commit -m 'chore: nightly automatic updates' || echo "No nightly automatic updates changes to commit"
         git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ inputs.branch-ref }} || echo "No nightly automatic updates changes to push"
 
     # Give it a rest to avoid hitting Github API rate limit
