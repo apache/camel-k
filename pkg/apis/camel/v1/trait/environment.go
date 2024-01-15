@@ -24,10 +24,8 @@ package trait
 type EnvironmentTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// Enables injection of `NAMESPACE` and `POD_NAME` environment variables (default `true`)
-	// +kubebuilder:default=true
 	ContainerMeta *bool `property:"container-meta" json:"containerMeta,omitempty"`
 	// Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables (default `true`)
-	// +kubebuilder:default=true
 	HTTPProxy *bool `property:"http-proxy" json:"httpProxy,omitempty"`
 	// A list of environment variables to be added to the integration container.
 	// The syntax is KEY=VALUE, e.g., `MY_VAR="my value"`.

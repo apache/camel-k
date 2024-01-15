@@ -36,6 +36,5 @@ type MountTrait struct {
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
 	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`)
-	// +kubebuilder:default=false
 	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
 }
