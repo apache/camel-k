@@ -143,7 +143,7 @@ func (c *Command) Do(ctx context.Context) error {
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
 	// generate maven file
-	if err := generateMavenContext(c.context.Path, args); err != nil {
+	if err := generateMavenContext(c.context.Path, args, mavenOptions); err != nil {
 		return err
 	}
 
@@ -286,8 +286,12 @@ func ParseGAV(gav string) (Dependency, error) {
 }
 
 // Create a MAVEN_CONTEXT file containing all arguments for a maven command.
-func generateMavenContext(path string, args []string) error {
+func generateMavenContext(path string, args []string, options string) error {
 	// TODO refactor maven code to avoid creating a file to pass command args
+	return util.WriteToFile(filepath.Join(path, "MAVEN_CONTEXT"), getMavenContext(args, options))
+}
+
+func getMavenContext(args []string, options string) string {
 	commandArgs := make([]string, 0)
 	for _, arg := range args {
 		if arg != "package" && len(strings.TrimSpace(arg)) != 0 {
@@ -295,5 +299,10 @@ func generateMavenContext(path string, args []string) error {
 		}
 	}
 
-	return util.WriteToFile(filepath.Join(path, "MAVEN_CONTEXT"), strings.Join(commandArgs, " "))
+	mavenContext := strings.Join(commandArgs, " ")
+	if options != "" {
+		mavenContext += " " + options
+	}
+
+	return mavenContext
 }
