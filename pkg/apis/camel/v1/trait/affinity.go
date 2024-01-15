@@ -25,10 +25,8 @@ package trait
 // +camel-k:trait=affinity.
 type AffinityTrait struct {
 	Trait `property:",squash" json:",inline"`
-	// +kubebuilder:default=false
 	// Always co-locates multiple replicas of the integration in the same node (default `false`).
 	PodAffinity *bool `property:"pod-affinity" json:"podAffinity,omitempty"`
-	// +kubebuilder:default=false
 	// Never co-locates multiple replicas of the integration in the same node (default `false`).
 	PodAntiAffinity *bool `property:"pod-anti-affinity" json:"podAntiAffinity,omitempty"`
 	// Defines a set of nodes the integration pod(s) are eligible to be scheduled on, based on labels on the node.

@@ -30,16 +30,13 @@ type BuilderTrait struct {
 	Properties []string `property:"properties" json:"properties,omitempty"`
 	// The strategy to use, either `pod` or `routine` (default `routine`)
 	// +kubebuilder:validation:Enum=pod;routine
-	// +kubebuilder:default="routine"
 	Strategy string `property:"strategy" json:"strategy,omitempty"`
 	// Specify a base image
 	BaseImage string `property:"base-image" json:"baseImage,omitempty"`
 	// Use the incremental image build option, to reuse existing containers (default `true`)
-	// +kubebuilder:default=true
 	IncrementalImageBuild *bool `property:"incremental-image-build" json:"incrementalImageBuild,omitempty"`
 	// The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default `sequential`)
 	// +kubebuilder:validation:Enum=dependencies;fifo;sequential
-	// +kubebuilder:default="sequential"
 	OrderStrategy string `property:"order-strategy" json:"orderStrategy,omitempty"`
 	// When using `pod` strategy, the minimum amount of CPU required by the pod builder.
 	// Deprecated: use TasksRequestCPU instead with task name `builder`.
