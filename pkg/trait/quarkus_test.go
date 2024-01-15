@@ -20,6 +20,8 @@ package trait
 import (
 	"testing"
 
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+
 	"github.com/stretchr/testify/assert"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -82,6 +84,24 @@ func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
 	assert.Equal(t, v1.IntegrationKitLayoutFastJar, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel])
 	assert.Equal(t, "camel-k", environment.IntegrationKits[0].Annotations[v1.TraitAnnotationPrefix+"quarkus.foo"])
 
+}
+
+func TestQuarkusTraitBuildModeOrder(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	quarkusTrait.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode, traitv1.JvmQuarkusMode}
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			Language: v1.LanguageYaml,
+		},
+	}
+
+	err := quarkusTrait.Apply(environment)
+	assert.Nil(t, err)
+	assert.Len(t, environment.IntegrationKits, 2)
+	// assure jvm mode is executed before native mode
+	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
+	assert.Equal(t, environment.IntegrationKits[1].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutNativeSources)
 }
 
 func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
