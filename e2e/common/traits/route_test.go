@@ -41,6 +41,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -211,6 +212,15 @@ func TestRunRoutes(t *testing.T) {
 		time.Sleep(waitBeforeHttpRequest)
 		var annotations = route.ObjectMeta.Annotations
 		Expect(annotations["haproxy.router.openshift.io/balance"]).To(Equal("roundrobin"))
+
+		// check integration schema does not contains unwanted default trait value.
+		Eventually(UnstructuredIntegration(ns, integrationName)).ShouldNot(BeNil())
+		unstructuredIntegration := UnstructuredIntegration(ns, integrationName)()
+		routeTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "route")
+		Expect(routeTrait).ToNot(BeNil())
+		Expect(len(routeTrait)).To(Equal(1))
+		Expect(routeTrait["enabled"]).To(Equal(true))
+
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).Should(BeNil())
 	})
 	Expect(TestClient().Delete(TestContext, &secret)).To(Succeed())

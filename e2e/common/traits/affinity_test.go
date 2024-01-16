@@ -30,6 +30,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -48,20 +49,30 @@ func TestAffinityTrait(t *testing.T) {
 
 	if hostname != "" {
 		t.Run("Run Java with node affinity", func(t *testing.T) {
+			name1 := RandomizedSuffixName("java1")
 			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-				"--name", "java1",
+				"--name", name1,
 				"-t", "affinity.enabled=true",
 				"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "java1", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java1"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, name1), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name1, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name1), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(ns, "java1")()
+			pod := IntegrationPod(ns, name1)()
 			Expect(pod.Spec.Affinity).NotTo(BeNil())
 			Expect(pod.Spec.Affinity.NodeAffinity).To(Equal(&corev1.NodeAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: nodeSelector("kubernetes.io/hostname", corev1.NodeSelectorOpIn, hostname),
 			}))
 			Expect(pod.Spec.NodeName).To(Equal(hostname))
+
+			// check integration schema does not contains unwanted default trait value.
+			Eventually(UnstructuredIntegration(ns, name1)).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(ns, name1)()
+			affinityTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "affinity")
+			Expect(affinityTrait).NotTo(BeNil())
+			Expect(len(affinityTrait)).To(Equal(2))
+			Expect(affinityTrait["enabled"]).To(Equal(true))
+			Expect(affinityTrait["nodeAffinityLabels"]).NotTo(BeNil())
 
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
