@@ -271,6 +271,11 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		return err
 	}
 
+	// Deploy the platformcontroller
+	if err := installPlatformcontroller(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		return err
+	}
+
 	if err = installEvents(ctx, c, cfg.Namespace, customizer, collection, force, cfg.Global); err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return err
@@ -494,6 +499,12 @@ func installKubernetesRoles(ctx context.Context, c client.Client, namespace stri
 func installOperator(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"/config/manager/operator-deployment.yaml",
+	)
+}
+
+func installPlatformcontroller(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+		"/config/manager/platformcontroller-deployment.yaml",
 	)
 }
 

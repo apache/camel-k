@@ -18,9 +18,22 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/apache/camel-k/v2/pkg/controller/integrationplatform"
+	"context"
+
+	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/apache/camel-k/v2/pkg/client"
 )
 
-func init() {
-	addToPlatformManager = append(addToPlatformManager, integrationplatform.Add)
+// addToPlatformManager is a list of functions to add Controllers to the PlatformManager.
+var addToPlatformManager []func(context.Context, ctrl.Manager, client.Client) error
+
+// AddToPlatformManager adds Controllers to the PlatformManager.
+func AddToPlatformManager(ctx context.Context, manager ctrl.Manager, client client.Client) error {
+	for _, f := range addToPlatformManager {
+		if err := f(ctx, manager, client); err != nil {
+			return err
+		}
+	}
+	return nil
 }

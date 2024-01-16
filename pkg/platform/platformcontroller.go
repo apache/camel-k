@@ -15,12 +15,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package platform
 
-import (
-	"github.com/apache/camel-k/v2/pkg/controller/integrationplatform"
+import "fmt"
+
+const (
+	PlatformControllerWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
+	platformControllerNamespaceEnvVariable      = "NAMESPACE"
+	platformControllerPodNameEnvVariable        = "POD_NAME"
 )
 
-func init() {
-	addToPlatformManager = append(addToPlatformManager, integrationplatform.Add)
+const PlatformControllerLockName = "camel-k-platform-controller-lock"
+
+var PlatformControllerImage string
+
+// GetPlatformControllerLockName returns the name of the lock lease that is electing a leader on the particular namespace.
+func GetPlatformControllerLockName(platformControllerID string) string {
+	return fmt.Sprintf("camel-k-platform-controller-%s-lock", platformControllerID)
 }
