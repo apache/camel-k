@@ -2420,6 +2420,14 @@ func ConsoleCLIDownload(t *testing.T, ctx context.Context, name string) func() *
 }
 
 func OperatorPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
+	return componentPod(t, ctx, ns, "operator")
+}
+
+func PlatformcontrollerPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
+	return componentPod(t, ctx, ns, "platformcontroller")
+}
+
+func componentPod(t *testing.T, ctx context.Context, ns string, componentLabelValue string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -2430,7 +2438,7 @@ func OperatorPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Po
 		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
-				"camel.apache.org/component": "operator",
+				"camel.apache.org/component": componentLabelValue,
 			}); err != nil {
 			failTest(t, err)
 		}

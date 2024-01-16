@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/spf13/cobra"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -97,7 +98,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 	customizer := func(o ctrl.Object) ctrl.Object {
 		if cfg.CustomImage != "" {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					d.Spec.Template.Spec.Containers[0].Image = cfg.CustomImage
 				}
 			}
@@ -105,7 +106,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 		if cfg.CustomImagePullPolicy != "" {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					d.Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullPolicy(cfg.CustomImagePullPolicy)
 				}
 			}
@@ -113,7 +114,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 		if cfg.Tolerations != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					tolerations, err := kubernetes.NewTolerations(cfg.Tolerations)
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured tolerations!")
@@ -125,7 +126,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 		if cfg.ResourcesRequirements != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					resourceReq, err := kubernetes.NewResourceRequirements(cfg.ResourcesRequirements)
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured resources requests!")
@@ -139,7 +140,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 		if cfg.EnvVars != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					envVars, _, _, err := env.ParseEnv(cfg.EnvVars, nil)
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse environment variables!")
@@ -155,7 +156,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 		if cfg.NodeSelectors != nil {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					nodeSelector, err := kubernetes.NewNodeSelectors(cfg.NodeSelectors)
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured node selectors!")
@@ -166,7 +167,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		}
 
 		if d, ok := o.(*appsv1.Deployment); ok {
-			if d.Labels["camel.apache.org/component"] == "operator" {
+			if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 				// Metrics endpoint port
 				d.Spec.Template.Spec.Containers[0].Args = append(d.Spec.Template.Spec.Containers[0].Args,
 					fmt.Sprintf("--monitoring-port=%d", cfg.Monitoring.Port))
@@ -179,7 +180,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 		}
 		if cfg.Debugging.Enabled {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					d.Spec.Template.Spec.Containers[0].Command = []string{"dlv",
 						fmt.Sprintf("--listen=:%d", cfg.Debugging.Port), "--headless=true", "--api-version=2",
 						"exec", cfg.Debugging.Path, "--", "operator", "--leader-election=false"}
@@ -196,7 +197,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 		if cfg.Global {
 			if d, ok := o.(*appsv1.Deployment); ok {
-				if d.Labels["camel.apache.org/component"] == "operator" {
+				if util.StringSliceContainsAnyOf(getComponentsNames(), d.Labels["camel.apache.org/component"]) {
 					// Make the operator watch all namespaces
 					envvar.SetVal(&d.Spec.Template.Spec.Containers[0].Env, "WATCH_NAMESPACE", "")
 				}
@@ -270,6 +271,11 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 
 	// Deploy the operator
 	if err := installOperator(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
+		return err
+	}
+
+	// Deploy the platformcontroller
+	if err := installPlatformcontroller(ctx, c, cfg.Namespace, customizer, collection, force); err != nil {
 		return err
 	}
 
@@ -496,6 +502,12 @@ func installKubernetesRoles(ctx context.Context, c client.Client, namespace stri
 func installOperator(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
 	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
 		"/config/manager/operator-deployment.yaml",
+	)
+}
+
+func installPlatformcontroller(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool) error {
+	return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
+		"/config/manager/platformcontroller-deployment.yaml",
 	)
 }
 
