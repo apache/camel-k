@@ -32,7 +32,7 @@
 ** xref:languages/xml.adoc[XML]
 ** xref:languages/groovy.adoc[Groovy]
 ** xref:languages/javascript.adoc[Javascript]
-** xref:languages/jshell.adoc[JSheel]
+** xref:languages/jsh.adoc[JSheel]
 ** xref:languages/kotlin.adoc[Kotlin]
 * xref:configuration/configuration.adoc[Configuration]
 ** xref:configuration/build-time-properties.adoc[Build time properties]
