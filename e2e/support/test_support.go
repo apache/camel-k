@@ -54,6 +54,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -1009,6 +1010,28 @@ func Integration(ns string, name string) func() *v1.Integration {
 			return nil
 		}
 		return &it
+	}
+}
+
+func UnstructuredIntegration(ns string, name string) func() *unstructured.Unstructured {
+	return func() *unstructured.Unstructured {
+		gvk := schema.GroupVersionKind{Group: v1.SchemeGroupVersion.Group, Version: v1.SchemeGroupVersion.Version, Kind: v1.IntegrationKind}
+		return UnstructuredObject(ns, name, gvk)()
+	}
+}
+
+func UnstructuredObject(ns string, name string, gvk schema.GroupVersionKind) func() *unstructured.Unstructured {
+	return func() *unstructured.Unstructured {
+		object := &unstructured.Unstructured{}
+		object.SetNamespace(ns)
+		object.SetName(name)
+		object.SetGroupVersionKind(gvk)
+		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(object), object); err != nil && !k8serrors.IsNotFound(err) {
+			failTest(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return object
 	}
 }
 

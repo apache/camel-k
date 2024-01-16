@@ -76,9 +76,7 @@ func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
-//
 // Expect a command error with an exit code of 1
-//
 func ExpectExecError(t *testing.T, command *exec.Cmd) {
 	t.Helper()
 
