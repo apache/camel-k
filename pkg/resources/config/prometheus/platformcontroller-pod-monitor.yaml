@@ -15,10 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-- operator-deployment.yaml
-- platformcontroller-deployment.yaml
-- operator-service-account.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: camel-k-platformcontroller
+  labels:
+    app: "camel-k"
+    camel.apache.org/component: platformcontroller
+spec:
+  selector:
+    matchLabels:
+      app: "camel-k"
+      camel.apache.org/component: platformcontroller
+  podMetricsEndpoints:
+    - port: metrics

@@ -2275,38 +2275,8 @@ func ConsoleCLIDownload(t *testing.T, ctx context.Context, name string) func() *
 	}
 }
 
-func operatorPods(t *testing.T, ctx context.Context, ns string) []corev1.Pod {
-	lst := corev1.PodList{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-	}
-	opts := []ctrl.ListOption{
-		ctrl.MatchingLabels{
-			"camel.apache.org/component": "operator",
-		},
-	}
-	if ns != "" {
-		opts = append(opts, ctrl.InNamespace(ns))
-	}
-	if err := TestClient(t).List(ctx, &lst, opts...); err != nil {
-		failTest(t, err)
-	}
-	if len(lst.Items) == 0 {
-		return nil
-	}
-	return lst.Items
-}
-
 func OperatorPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
-	return func() *corev1.Pod {
-		pods := operatorPods(t, ctx, ns)
-		if len(pods) > 0 {
-			return &pods[0]
-		}
-		return nil
-	}
+	return componentPod(t, ctx, ns, "operator")
 }
 
 // Return the first global operator Pod found in the cluster (if any).
@@ -2321,6 +2291,69 @@ func OperatorPodGlobal(t *testing.T, ctx context.Context) func() *corev1.Pod {
 					}
 				}
 			}
+		}
+		return nil
+	}
+}
+
+func PlatformcontrollerPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
+	return componentPod(t, ctx, ns, "platformcontroller")
+}
+
+// Return the first global platformcontoller Pod found in the cluster (if any).
+func PlatformcontrollerPodGlobal(t *testing.T, ctx context.Context) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		pods := platformcontrollerPods(t, ctx, "")
+		for _, pod := range pods {
+			for _, envVar := range pod.Spec.Containers[0].Env {
+				if envVar.Name == "WATCH_NAMESPACE" {
+					if envVar.Value == "" {
+						return &pod
+					}
+				}
+			}
+		}
+		return nil
+	}
+}
+
+func componentPods(t *testing.T, ctx context.Context, ns string, componentLabelValue string) []corev1.Pod {
+	lst := corev1.PodList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+	}
+	opts := []ctrl.ListOption{
+		ctrl.MatchingLabels{
+			"camel.apache.org/component": componentLabelValue,
+		},
+	}
+	if ns != "" {
+		opts = append(opts, ctrl.InNamespace(ns))
+	}
+	if err := TestClient(t).List(ctx, &lst, opts...); err != nil {
+		failTest(t, err)
+	}
+	if len(lst.Items) == 0 {
+		return nil
+	}
+	return lst.Items
+}
+
+func operatorPods(t *testing.T, ctx context.Context, ns string) []corev1.Pod {
+	return componentPods(t, ctx, ns, "operator")
+}
+
+func platformcontrollerPods(t *testing.T, ctx context.Context, ns string) []corev1.Pod {
+	return componentPods(t, ctx, ns, "platformcontroller")
+}
+
+func componentPod(t *testing.T, ctx context.Context, ns string, componentLabelValue string) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		pods := componentPods(t, ctx, ns, componentLabelValue)
+		if len(pods) > 0 {
+			return &pods[0]
 		}
 		return nil
 	}
