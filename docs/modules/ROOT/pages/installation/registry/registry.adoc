@@ -50,7 +50,7 @@ You can therefore update the values in the `IntegrationPlatform` in order to per
 == Container registry requirements
 Each platform may have its default registry of choice. And each container registry may have a slight different configuration. Please, be aware that we won't be able to support all the available solutions.
 
-The only requirement we have is that the registry must be able to produces/consumes images with the following tagging convention: `<registry-host>[:<registry-port>]/<k8s-namespace>/camel-k-kit-<hash-code>@sha256:<sha256-code>`, ie `10.110.251.124/default/camel-k-kit-ck0612dahvgs73ffe5g0@sha256:3c9589dd093b689aee6bf5c2d35aa1fce9d0e76d5bb7da8b61d87e7a1ed6f36a`.
+The only requirement we have is that the registry must be able to produce/consume images with the following tagging convention: `<registry-host>[:<registry-port>]/<k8s-namespace>/camel-k-kit-<hash-code>@sha256:<sha256-code>`, ie `10.110.251.124/default/camel-k-kit-ck0612dahvgs73ffe5g0@sha256:3c9589dd093b689aee6bf5c2d35aa1fce9d0e76d5bb7da8b61d87e7a1ed6f36a`.
 
 This should be within the standard convention adopted by https://docs.docker.com/engine/reference/commandline/pull/#pull-an-image-by-digest-immutable-identifier[pulling a Docker image by digest] (immutable).
 
