@@ -31,6 +31,7 @@ The following configuration options are available:
 | builder.verbose
 | bool
 | Enable verbose logging on build components that support it (e.g. Kaniko build pod).
+Deprecated no longer in use
 
 | builder.properties
 | []string

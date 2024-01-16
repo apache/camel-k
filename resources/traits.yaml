@@ -237,7 +237,7 @@ traits:
   - name: verbose
     type: bool
     description: Enable verbose logging on build components that support it (e.g.
-      Kaniko build pod).
+      Kaniko build pod). Deprecated no longer in use
   - name: properties
     type: '[]string'
     description: A list of properties to be provided to the build task

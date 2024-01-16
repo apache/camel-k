@@ -14,6 +14,7 @@
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
 - Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
+- Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
@@ -21,9 +22,14 @@
 
 **Merged pull requests:**
 
+- fix: broken link [\#5074](https://github.com/apache/camel-k/pull/5074) ([zregvart](https://github.com/zregvart))
+- fix: use relative paths [\#5073](https://github.com/apache/camel-k/pull/5073) ([zregvart](https://github.com/zregvart))
+- Update registry.adoc [\#5071](https://github.com/apache/camel-k/pull/5071) ([stefkiourk](https://github.com/stefkiourk))
+- fix\(\#5001\): Execute Quarkus JVM buildMode before native buildMode [\#5070](https://github.com/apache/camel-k/pull/5070) ([michalvavrik](https://github.com/michalvavrik))
 - chore\(deps\): bump github.com/evanphx/json-patch from 5.7.0+incompatible to 5.8.0+incompatible [\#5068](https://github.com/apache/camel-k/pull/5068) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/common from 0.45.0 to 0.46.0 [\#5067](https://github.com/apache/camel-k/pull/5067) ([dependabot[bot]](https://github.com/apps/dependabot))
 - doc: add languages section [\#5064](https://github.com/apache/camel-k/pull/5064) ([squakez](https://github.com/squakez))
+- feat\(builder\): remove deprecated strategies and default to Jib [\#5062](https://github.com/apache/camel-k/pull/5062) ([squakez](https://github.com/squakez))
 - chore\(ci\): simplify nightly updates action [\#5061](https://github.com/apache/camel-k/pull/5061) ([squakez](https://github.com/squakez))
 - feat\(ci\): new coverage flow [\#5058](https://github.com/apache/camel-k/pull/5058) ([squakez](https://github.com/squakez))
 - feat\(pipeline\): user publishing task [\#5057](https://github.com/apache/camel-k/pull/5057) ([squakez](https://github.com/squakez))
