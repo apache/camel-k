@@ -14,6 +14,7 @@
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
 - Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
+- Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
