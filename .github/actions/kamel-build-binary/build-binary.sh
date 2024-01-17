@@ -68,6 +68,12 @@ if [ -n "${REGISTRY_PUSH_HOST}" ]; then
   # for docker to push the image.
   #
   export CUSTOM_IMAGE=${REGISTRY_PUSH_HOST}/${IMAGE_NAMESPACE}/camel-k
+
+  # TODO remove as soon as the issue is fixed
+  # https://github.com/actions/runner-images/issues/8649
+  if [ "$RUNNER_OS" == "macOS" ]; then
+    export CUSTOM_IMAGE="127.0.0.1:5000/${IMAGE_NAMESPACE}/camel-k"
+  fi
 fi
 
 if [ -n "${DEBUG_USE_EXISTING_IMAGE}" ] && [ -n "${CUSTOM_IMAGE}" ]; then
