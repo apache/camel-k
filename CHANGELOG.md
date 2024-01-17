@@ -8,6 +8,7 @@
 
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
+- Operator 2.2.0 does not spawn builder pod with strategy: pod [\#5060](https://github.com/apache/camel-k/issues/5060)
 - Need to update CEQ service discovery setting for data type transformer [\#5047](https://github.com/apache/camel-k/issues/5047)
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
 - Provide a page linking to Camel DSLs [\#5037](https://github.com/apache/camel-k/issues/5037)
@@ -22,6 +23,7 @@
 
 **Merged pull requests:**
 
+- fix\(crd\): Remove traits default values [\#5075](https://github.com/apache/camel-k/pull/5075) ([gansheer](https://github.com/gansheer))
 - fix: broken link [\#5074](https://github.com/apache/camel-k/pull/5074) ([zregvart](https://github.com/zregvart))
 - fix: use relative paths [\#5073](https://github.com/apache/camel-k/pull/5073) ([zregvart](https://github.com/zregvart))
 - Update registry.adoc [\#5071](https://github.com/apache/camel-k/pull/5071) ([stefkiourk](https://github.com/stefkiourk))
@@ -212,7 +214,6 @@
 - Knative installation procedure [\#4779](https://github.com/apache/camel-k/issues/4779)
 - Release 2.1.0 [\#4752](https://github.com/apache/camel-k/issues/4752)
 - \(Re\)Enable support for Kotlin DSL [\#4738](https://github.com/apache/camel-k/issues/4738)
-- Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 - Pushing integration to EKS [\#4725](https://github.com/apache/camel-k/issues/4725)
 - Secure internal registry with private TLS certificate fails while pushing and pulling the kit [\#4724](https://github.com/apache/camel-k/issues/4724)
 - Helm installation procedure does not support Knative [\#4716](https://github.com/apache/camel-k/issues/4716)
