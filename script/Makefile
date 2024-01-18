@@ -449,7 +449,7 @@ ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-	docker build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
+	docker buildx build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
 
 # Mainly used for internal CI purposes
 image-push:
