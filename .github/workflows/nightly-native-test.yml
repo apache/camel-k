@@ -30,7 +30,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ref-branch: [main, release-2.1.x, release-2.2.x]
+        # We let it on main only because it's too much resource consuming
+        ref-branch: [main]
 
     if: github.repository == 'apache/camel-k'
     runs-on: macos-12

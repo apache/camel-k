@@ -55,7 +55,8 @@ main() {
   echo "Swapping GH actions tasks from $oldest_release_branch to $new_release_branch"
 
   sed -i "s/$oldest_release_branch/$new_release_branch/g" $location/../.github/workflows/nightly-automatic-updates.yml
-  sed -i "s/$oldest_release_branch/$new_release_branch/g" $location/../.github/workflows/nightly-native-test.yml
+  # We're skipping from release branches because it takes too much resources
+  #sed -i "s/$oldest_release_branch/$new_release_branch/g" $location/../.github/workflows/nightly-native-test.yml
   sed -i "s/$oldest_release_branch/$new_release_branch/g" $location/../.github/workflows/nightly-release.yml
 
   if [ $DRYRUN == "true" ]
