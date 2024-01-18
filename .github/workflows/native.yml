@@ -32,6 +32,7 @@ on:
       - "release-*"
     paths-ignore:
       - 'docs/**'
+      - 'java/**'
       - 'proposals/**'
       - '**.adoc'
       - '**.md'

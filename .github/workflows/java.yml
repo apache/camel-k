@@ -15,7 +15,7 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: build
+name: java
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -25,30 +25,17 @@ on:
     branches:
       - main
       - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'java/**'
-      - 'proposals/**'
-      - '**.adoc'
-      - '**.md'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
+    paths:
+      - "java/**"
+      - "config/crd/**"
   push:
     branches:
       - main
       - "release-*"
-    paths-ignore:
-      - 'docs/**'
-      - 'java/**'
-      - 'proposals/**'
-      - '**.md'
-      - '**.adoc'
-      - 'KEYS'
-      - 'LICENSE'
-      - 'NOTICE'
+    paths:
+      - "java/**"
+      - "config/crd/**"
   workflow_dispatch:
-    inputs:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -56,18 +43,14 @@ concurrency:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        # TODO: test an all the supported OS
-        # [ubuntu-latest, macos-latest, windows-latest]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
-    runs-on: ${{ matrix.os }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        persist-credentials: false
-        submodules: recursive
-    - name: Execute Build (make)
-      uses: ./.github/actions/e2e-build
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build java modules ${{ matrix.ref-branch }} branch
+        uses: ./.github/actions/java-build
+        with:
+          javaVersion: "17"
+          javaDistribution: "temurin"
