@@ -29,7 +29,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up JDK ${{ inputs.javaVersion }}
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: ${{ inputs.javaDistribution }}
         java-version: ${{ inputs.javaVersion }}
