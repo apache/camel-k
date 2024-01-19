@@ -9,6 +9,7 @@
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
 - Operator 2.2.0 does not spawn builder pod with strategy: pod [\#5060](https://github.com/apache/camel-k/issues/5060)
+- Run a different set of checks for java dependencies [\#5054](https://github.com/apache/camel-k/issues/5054)
 - Support component scheme prefix in data type references [\#5048](https://github.com/apache/camel-k/issues/5048)
 - Need to update CEQ service discovery setting for data type transformer [\#5047](https://github.com/apache/camel-k/issues/5047)
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
@@ -26,6 +27,8 @@
 
 **Merged pull requests:**
 
+- feat\(ci\): Run specific action for java code [\#5083](https://github.com/apache/camel-k/pull/5083) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump k8s.io/klog/v2 from 2.120.0 to 2.120.1 [\#5082](https://github.com/apache/camel-k/pull/5082) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): nightly quarkus native only on main branch [\#5081](https://github.com/apache/camel-k/pull/5081) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/evanphx/json-patch from 5.8.0+incompatible to 5.8.1+incompatible [\#5079](https://github.com/apache/camel-k/pull/5079) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/onsi/gomega from 1.30.0 to 1.31.0 [\#5078](https://github.com/apache/camel-k/pull/5078) ([dependabot[bot]](https://github.com/apps/dependabot))
