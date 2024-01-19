@@ -63,7 +63,7 @@ runs:
         df -h
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       if: ${{ env.ENV_PREPARED != 'true' }}
       with:
         java-version: '17'
