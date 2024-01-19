@@ -9,6 +9,7 @@
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
 - Operator 2.2.0 does not spawn builder pod with strategy: pod [\#5060](https://github.com/apache/camel-k/issues/5060)
+- Support component scheme prefix in data type references [\#5048](https://github.com/apache/camel-k/issues/5048)
 - Need to update CEQ service discovery setting for data type transformer [\#5047](https://github.com/apache/camel-k/issues/5047)
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
 - Provide a page linking to Camel DSLs [\#5037](https://github.com/apache/camel-k/issues/5037)
@@ -17,7 +18,9 @@
 - Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
+- Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
+- Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 - Use build-tags to configure what feature are included in a camel-k build [\#2801](https://github.com/apache/camel-k/issues/2801)
 
