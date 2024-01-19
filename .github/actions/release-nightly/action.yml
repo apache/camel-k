@@ -98,10 +98,10 @@ runs:
         sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     - name: Set up QEMU (required by multi platform build)
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
 
     - name: Login to Container Registry
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ inputs.secretDockerHubUser }}
         password: ${{ inputs.secretDockerHubPassword }}
