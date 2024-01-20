@@ -9,6 +9,7 @@
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
 - Operator 2.2.0 does not spawn builder pod with strategy: pod [\#5060](https://github.com/apache/camel-k/issues/5060)
+- Run a different set of checks for java dependencies [\#5054](https://github.com/apache/camel-k/issues/5054)
 - Support component scheme prefix in data type references [\#5048](https://github.com/apache/camel-k/issues/5048)
 - Need to update CEQ service discovery setting for data type transformer [\#5047](https://github.com/apache/camel-k/issues/5047)
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
