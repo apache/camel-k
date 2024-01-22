@@ -140,7 +140,7 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 		p.Status.Build.Registry.Address == "" {
 		log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
 		// Default to using OpenShift internal container images registry when using a strategy other than S2I
-		p.Status.Build.Registry.Address = "image-registry.openshift-image-registry.svc:5000"
+		p.Status.Build.Registry.Address = defaults.OpenShiftRegistryAddress
 
 		// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
 		cm, err := createServiceCaBundleConfigMap(ctx, c, p)

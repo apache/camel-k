@@ -29,6 +29,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/registry"
 
@@ -70,7 +71,7 @@ func (t *registryTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 func (t *registryTrait) Apply(e *Environment) error {
 	registryAddress := e.Platform.Status.Build.Registry.Address
 	if registryAddress == "" && e.Platform.Status.Cluster == v1.IntegrationPlatformClusterOpenShift {
-		registryAddress = "image-registry.openshift-image-registry.svc:5000"
+		registryAddress = defaults.OpenShiftRegistryAddress
 	}
 	if registryAddress == "" {
 		return errors.New("could not figure out Image Registry URL, please set it manually")

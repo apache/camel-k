@@ -23,12 +23,13 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestStringContainsPrefix(t *testing.T) {
-	args := []string{"install", "--operator-image=xxx/yyy:zzz", "--registry", "image-registry.openshift-image-registry.svc:5000"}
+	args := []string{"install", "--operator-image=xxx/yyy:zzz", "--registry", defaults.OpenShiftRegistryAddress}
 	assert.True(t, StringContainsPrefix(args, "--operator-image="))
 	assert.False(t, StringContainsPrefix(args, "--olm"))
 }

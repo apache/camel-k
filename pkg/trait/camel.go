@@ -18,23 +18,18 @@ limitations under the License.
 package trait
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
 
@@ -124,56 +119,9 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 		// the required versions (camel and runtime) are not expressed as
 		// semver constraints
 		if exactVersionRegexp.MatchString(runtimeVersion) {
-			ctx, cancel := context.WithTimeout(e.Ctx, e.Platform.Status.Build.GetTimeout().Duration)
-			defer cancel()
-			catalog, err = camel.GenerateCatalog(ctx, e.Client,
-				catalogNamespace, e.Platform.Status.Build.Maven, runtime, []maven.Dependency{})
+			catalog, err = camel.CreateCatalog(e.Ctx, e.Client, catalogNamespace, e.Platform, runtime)
 			if err != nil {
 				return err
-			}
-
-			// sanitize catalog name
-			catalogName := "camel-catalog-" + strings.ToLower(runtimeVersion)
-
-			cx := v1.NewCamelCatalogWithSpecs(catalogNamespace, catalogName, catalog.CamelCatalogSpec)
-			cx.Labels = make(map[string]string)
-			cx.Labels["app"] = "camel-k"
-			cx.Labels["camel.apache.org/runtime.version"] = runtime.Version
-			cx.Labels["camel.apache.org/runtime.provider"] = string(runtime.Provider)
-			cx.Labels["camel.apache.org/catalog.generated"] = True
-
-			if err := e.Client.Create(e.Ctx, &cx); err != nil {
-				if k8serrors.IsAlreadyExists(err) {
-					// It's still possible that catalog wasn't yet found at the time of loading
-					// but then created in the background before the client tries to create it.
-					// In this case, simply try loading again and reuse the existing catalog.
-					catalog, err = camel.LoadCatalog(e.Ctx, e.Client, catalogNamespace, runtime)
-					if err != nil {
-						// unexpected error
-						return fmt.Errorf("catalog %q already exists but unable to load: %w", catalogName, err)
-					}
-				} else {
-					return fmt.Errorf("unable to create catalog runtime=%s, provider=%s, name=%s: %w",
-						runtime.Version,
-						runtime.Provider,
-						catalogName, err)
-
-				}
-			}
-
-			// verify that the catalog has been generated
-			ct, err := kubernetes.GetUnstructured(
-				e.Ctx,
-				e.Client,
-				schema.GroupVersionKind{Group: "camel.apache.org", Version: "v1", Kind: "CamelCatalog"},
-				catalogName,
-				catalogNamespace,
-			)
-			if ct == nil || err != nil {
-				return fmt.Errorf("unable to create catalog runtime=%s, provider=%s, name=%s: %w",
-					runtime.Version,
-					runtime.Provider,
-					catalogName, err)
 			}
 		}
 	}

@@ -46,10 +46,12 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	// Prepare maven wrapper helps when running the builder as Pod as it makes
-	// the builder container, Maven agnostic
-	if err := c.prepareMavenWrapper(ctx); err != nil {
-		return err
+	if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
+		// Prepare maven wrapper helps when running the builder as Pod as it makes
+		// the builder container, Maven agnostic
+		if err := c.prepareMavenWrapper(ctx); err != nil {
+			return err
+		}
 	}
 
 	mvnCmd := "./mvnw"
