@@ -37,6 +37,9 @@ const (
 	// ImageName --
 	ImageName = "docker.io/apache/camel-k"
 
+	// OpenShiftRegistryAddress --
+	OpenShiftRegistryAddress = "image-registry.openshift-image-registry.svc:5000"
+
 	// installDefaultKamelets --
 	installDefaultKamelets = true
 )

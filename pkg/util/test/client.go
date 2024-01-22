@@ -25,7 +25,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/apis"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
@@ -137,10 +136,14 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
-	camel            camel.Interface
+	camel            *fakecamelclientset.Clientset
 	scales           *fakescale.FakeScaleClient
 	disabledGroups   []string
 	enabledOpenshift bool
+}
+
+func (c *FakeClient) AddReactor(verb, resource string, reaction testing.ReactionFunc) {
+	c.camel.AddReactor(verb, resource, reaction)
 }
 
 func (c *FakeClient) CamelV1() camelv1.CamelV1Interface {

@@ -193,6 +193,8 @@ const (
 	IntegrationPlatformPhaseReady IntegrationPlatformPhase = "Ready"
 	// IntegrationPlatformPhaseError when the IntegrationPlatform had some error (see Conditions).
 	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
+	// IntegrationPlatformPhaseCreateCatalog when the IntegrationPlatform creates a new CamelCatalog.
+	IntegrationPlatformPhaseCreateCatalog IntegrationPlatformPhase = "CreateCatalog"
 	// IntegrationPlatformPhaseDuplicate when the IntegrationPlatform is duplicated.
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 
@@ -205,8 +207,15 @@ const (
 	// IntegrationPlatformConditionTypeRegistryAvailable is the condition for the availability of a container registry.
 	IntegrationPlatformConditionTypeRegistryAvailable IntegrationPlatformConditionType = "RegistryAvailable"
 
+	// IntegrationPlatformConditionCamelCatalogAvailable is the condition for the availability of a container registry.
+	IntegrationPlatformConditionCamelCatalogAvailable IntegrationPlatformConditionType = "CamelCatalogAvailable"
+
 	// IntegrationPlatformConditionCreatedReason represents the reason that the IntegrationPlatform is created.
 	IntegrationPlatformConditionCreatedReason = "IntegrationPlatformCreated"
+	// IntegrationPlatformConditionTypeRegistryAvailableReason represents the reason that the IntegrationPlatform Registry is available.
+	IntegrationPlatformConditionTypeRegistryAvailableReason = "IntegrationPlatformRegistryAvailable"
+	// IntegrationPlatformConditionCamelCatalogAvailableReason represents the reason that the IntegrationPlatform is created.
+	IntegrationPlatformConditionCamelCatalogAvailableReason = "IntegrationPlatformCamelCatalogAvailable"
 )
 
 // IntegrationPlatformCondition describes the state of a resource at a certain point.

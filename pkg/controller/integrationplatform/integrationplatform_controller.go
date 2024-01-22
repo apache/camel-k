@@ -157,6 +157,7 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		NewInitializeAction(),
 		NewCreateAction(),
 		NewMonitorAction(),
+		NewCreateCatalogAction(),
 	}
 
 	var targetPhase v1.IntegrationPlatformPhase

@@ -49,9 +49,10 @@ METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
-LINT_GOGC := 10
+LINT_GOGC := 20
 LINT_DEADLINE := 10m
 DEBUG_MODE ?= false
+OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 
 # olm bundle vars
 MANAGER := config/manager
@@ -186,6 +187,9 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // OpenShiftRegistryAddress -- " >> $(VERSIONFILE)
+	@echo "  OpenShiftRegistryAddress = \"$(OPENSHIFT_REGISTRY)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // installDefaultKamelets -- " >> $(VERSIONFILE)
 	@echo "  installDefaultKamelets = $(INSTALL_DEFAULT_KAMELETS)" >> $(VERSIONFILE)
@@ -404,10 +408,10 @@ OS_LOWER := $(shell echo $(OS) | tr '[:upper:]' '[:lower:]')
 endif
 
 lint:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --verbose
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --deadline $(LINT_DEADLINE) --verbose
 
 lint-fix:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --fix
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --deadline $(LINT_DEADLINE) --fix
 
 dir-licenses:
 	./script/vendor-license-directory.sh
