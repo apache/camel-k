@@ -1417,11 +1417,11 @@ github.com/apache/camel-k/v2/pkg/trait/builder.go:580:							publishingOrUserTas
 github.com/apache/camel-k/v2/pkg/trait/camel.go:46:							newCamelTrait						100.0%
 github.com/apache/camel-k/v2/pkg/trait/camel.go:53:							InfluencesKit						100.0%
 github.com/apache/camel-k/v2/pkg/trait/camel.go:58:							InfluencesBuild						0.0%
-github.com/apache/camel-k/v2/pkg/trait/camel.go:62:							Configure						100.0%
-github.com/apache/camel-k/v2/pkg/trait/camel.go:71:							Apply							93.8%
-github.com/apache/camel-k/v2/pkg/trait/camel.go:102:							loadOrCreateCatalog					26.5%
-github.com/apache/camel-k/v2/pkg/trait/camel.go:188:							computeConfigMaps					100.0%
-github.com/apache/camel-k/v2/pkg/trait/camel.go:269:							determineRuntimeVersion					71.4%
+github.com/apache/camel-k/v2/pkg/trait/camel.go:62:							Configure						80.0%
+github.com/apache/camel-k/v2/pkg/trait/camel.go:75:							Apply							93.8%
+github.com/apache/camel-k/v2/pkg/trait/camel.go:106:							loadOrCreateCatalog					26.5%
+github.com/apache/camel-k/v2/pkg/trait/camel.go:192:							computeConfigMaps					100.0%
+github.com/apache/camel-k/v2/pkg/trait/camel.go:273:							determineRuntimeVersion					71.4%
 github.com/apache/camel-k/v2/pkg/trait/container.go:59:							newContainerTrait					100.0%
 github.com/apache/camel-k/v2/pkg/trait/container.go:71:							Configure						80.0%
 github.com/apache/camel-k/v2/pkg/trait/container.go:114:						isValidPullPolicy					100.0%

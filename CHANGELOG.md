@@ -20,6 +20,7 @@
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
+- 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
@@ -27,6 +28,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/onsi/gomega from 1.31.0 to 1.31.1 [\#5087](https://github.com/apache/camel-k/pull/5087) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(\#4776\): Fix catalog loading in camel trait [\#5086](https://github.com/apache/camel-k/pull/5086) ([christophd](https://github.com/christophd))
 - feat\(ci\): Run specific action for java code [\#5083](https://github.com/apache/camel-k/pull/5083) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.120.0 to 2.120.1 [\#5082](https://github.com/apache/camel-k/pull/5082) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): nightly quarkus native only on main branch [\#5081](https://github.com/apache/camel-k/pull/5081) ([squakez](https://github.com/squakez))
