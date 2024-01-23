@@ -67,6 +67,18 @@ func TestMarshalProperties(t *testing.T) {
 	assert.Contains(t, result, "<v2>bar</v2>")
 }
 
+func TestUnMarshalProperties(t *testing.T) {
+	x := `<properties>
+		<p1>val</p1>
+		<p2>val2</p2>
+	</properties>`
+	var mp map[string]string
+	err := xml.Unmarshal([]byte(x), (*Properties)(&mp))
+	assert.Nil(t, err)
+	assert.Equal(t, "val", mp["p1"])
+	assert.Equal(t, "val2", mp["p2"])
+}
+
 func TestMarshalEmptyPluginProperties(t *testing.T) {
 	buf := new(bytes.Buffer)
 	e := xml.NewEncoder(buf)

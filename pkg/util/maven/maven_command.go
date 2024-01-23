@@ -30,28 +30,24 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
+// Log is the logger used to log maven execution.
 var Log = log.WithName("maven")
 
+// Command define the execution context over a given project.
 type Command struct {
 	context Context
 	project Project
 }
 
+// Do executes the command.
 func (c *Command) Do(ctx context.Context) error {
-	if err := generateProjectStructure(c.context, c.project); err != nil {
+	if err := c.generateProjectStructure(c.project); err != nil {
 		return err
-	}
-
-	if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
-		// Prepare maven wrapper helps when running the builder as Pod as it makes
-		// the builder container, Maven agnostic
-		if err := c.prepareMavenWrapper(ctx); err != nil {
-			return err
-		}
 	}
 
 	mvnCmd := "./mvnw"
@@ -152,6 +148,7 @@ func (c *Command) Do(ctx context.Context) error {
 	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
 }
 
+// NewContext creates a new Maven execution context.
 func NewContext(buildDir string) Context {
 	return Context{
 		Path:                buildDir,
@@ -160,6 +157,7 @@ func NewContext(buildDir string) Context {
 	}
 }
 
+// Context is the Maven execution context.
 type Context struct {
 	Path                string
 	ExtraMavenOpts      []string
@@ -171,54 +169,49 @@ type Context struct {
 	LocalRepository     string
 }
 
-func (c *Context) AddEntry(id string, entry interface{}) {
-	if c.AdditionalEntries == nil {
-		c.AdditionalEntries = make(map[string]interface{})
-	}
-
-	c.AdditionalEntries[id] = entry
-}
-
+// AddArgument -- .
 func (c *Context) AddArgument(argument string) {
 	c.AdditionalArguments = append(c.AdditionalArguments, argument)
 }
 
-func (c *Context) AddArgumentf(format string, args ...interface{}) {
+// AddSystemProperty -- .
+func (c *Context) AddSystemProperty(name string, value string) {
+	c.addArgumentf("-D%s=%s", name, value)
+}
+
+func (c *Context) addArgumentf(format string, args ...interface{}) {
 	c.AdditionalArguments = append(c.AdditionalArguments, fmt.Sprintf(format, args...))
 }
 
-func (c *Context) AddArguments(arguments ...string) {
-	c.AdditionalArguments = append(c.AdditionalArguments, arguments...)
-}
-
-func (c *Context) AddSystemProperty(name string, value string) {
-	c.AddArgumentf("-D%s=%s", name, value)
-}
-
-func generateProjectStructure(context Context, project Project) error {
-	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", project); err != nil {
+// generateProjectStructure takes care to prepare a maven project. It clones the base archetype and it customize with the
+// specific configuration for each project.
+func (c *Command) generateProjectStructure(project Project) error {
+	if err := c.cloneCamelQuarkusArchetype(); err != nil {
+		return err
+	}
+	if err := util.WriteFileWithBytesMarshallerContent(c.context.Path, "pom.xml", project); err != nil {
 		return err
 	}
 
-	if context.GlobalSettings != nil {
-		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings.xml"), context.GlobalSettings); err != nil {
+	if c.context.GlobalSettings != nil {
+		if err := util.WriteFileWithContent(filepath.Join(c.context.Path, "settings.xml"), c.context.GlobalSettings); err != nil {
 			return err
 		}
 	}
 
-	if context.UserSettings != nil {
-		if err := util.WriteFileWithContent(filepath.Join(context.Path, "user-settings.xml"), context.UserSettings); err != nil {
+	if c.context.UserSettings != nil {
+		if err := util.WriteFileWithContent(filepath.Join(c.context.Path, "user-settings.xml"), c.context.UserSettings); err != nil {
 			return err
 		}
 	}
 
-	if context.SettingsSecurity != nil {
-		if err := util.WriteFileWithContent(filepath.Join(context.Path, "settings-security.xml"), context.SettingsSecurity); err != nil {
+	if c.context.SettingsSecurity != nil {
+		if err := util.WriteFileWithContent(filepath.Join(c.context.Path, "settings-security.xml"), c.context.SettingsSecurity); err != nil {
 			return err
 		}
 	}
 
-	for k, v := range context.AdditionalEntries {
+	for k, v := range c.context.AdditionalEntries {
 		var bytes []byte
 		var err error
 
@@ -236,7 +229,7 @@ func generateProjectStructure(context Context, project Project) error {
 		if len(bytes) > 0 {
 			Log.Infof("write entry: %s (%d bytes)", k, len(bytes))
 
-			err = util.WriteFileWithContent(filepath.Join(context.Path, k), bytes)
+			err = util.WriteFileWithContent(filepath.Join(c.context.Path, k), bytes)
 			if err != nil {
 				return err
 			}
@@ -246,11 +239,9 @@ func generateProjectStructure(context Context, project Project) error {
 	return nil
 }
 
-// We expect a maven wrapper under /usr/share/maven/mvnw.
-func (c *Command) prepareMavenWrapper(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
-	cmd.Dir = c.context.Path
-	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
+// cloneCamelQuarkusArchetype clones the archetype which is required as a base for the Maven project.
+func (c *Command) cloneCamelQuarkusArchetype() error {
+	return resources.Copy("/archetypes/camel-quarkus/", c.context.Path)
 }
 
 // ParseGAV decodes the provided Maven GAV into the corresponding Dependency.

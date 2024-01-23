@@ -26,6 +26,17 @@ import (
 // NewRuntimeCatalog creates a runtime catalog with the given catalog.
 func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 	catalog := RuntimeCatalog{}
+
+	// TODO we need to manage the group id into the catalog generation instead!
+	if cat.Spec.Runtime.Metadata == nil {
+		cat.Spec.Runtime.Metadata = make(map[string]string)
+	}
+	if cat.Spec.Runtime.Metadata["quarkus.group.id"] == "" {
+		cat.Spec.Runtime.Metadata["quarkus.group.id"] = "io.quarkus.platform"
+	}
+	// TODO we need to remove this dependency from the catalog generation instead!
+	cat.Spec.Runtime.Dependencies = make([]v1.MavenArtifact, 0)
+
 	catalog.CamelCatalogSpec = cat.Spec
 	catalog.CamelCatalogStatus = cat.Status
 	catalog.artifactByScheme = make(map[string]string)

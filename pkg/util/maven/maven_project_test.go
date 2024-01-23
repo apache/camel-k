@@ -136,7 +136,6 @@ func TestPomGeneration(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.NotNil(t, pom)
-
 	assert.Equal(t, expectedPom, string(pom))
 }
 
@@ -261,4 +260,28 @@ func TestNewRepositoryWithChecksumPolicy(t *testing.T) {
 	assert.False(t, r.Snapshots.Enabled)
 	assert.Equal(t, "warn", r.Releases.ChecksumPolicy)
 	assert.Equal(t, "warn", r.Snapshots.ChecksumPolicy)
+}
+
+func TestCamelQuarkusArchetypeEmptyProject(t *testing.T) {
+	p, err := LoadProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", "1.0.0")
+
+	assert.Nil(t, err)
+	assert.Equal(t, "org.apache.camel.k.integration", p.GroupID)
+	assert.Equal(t, "camel-k-integration", p.ArtifactID)
+	assert.Equal(t, "1.0.0", p.Version)
+	assert.NotNil(t, p.Properties)
+	assert.Len(t, p.DependencyManagement.Dependencies, 2)
+	assert.Len(t, p.Dependencies, 1)
+	assert.Equal(t, "org.apache.camel.quarkus", p.Dependencies[0].GroupID)
+	assert.Equal(t, "camel-quarkus-core", p.Dependencies[0].ArtifactID)
+	assert.Equal(t, "", p.Dependencies[0].Version)
+	assert.NotNil(t, p.Build)
+	assert.Len(t, p.Build.Plugins, 1)
+	quarkusMavenPlugin := false
+	for _, plugin := range p.Build.Plugins {
+		if plugin.ArtifactID == "quarkus-maven-plugin" {
+			quarkusMavenPlugin = true
+		}
+	}
+	assert.True(t, quarkusMavenPlugin, "expected quarkus-maven-plugin to exist")
 }

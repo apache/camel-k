@@ -19,6 +19,7 @@ package resources
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -91,6 +92,10 @@ func TestGetResource(t *testing.T) {
 	NoErrorAndContains(t, "/config/manager", "config/manager/operator-service-account.yaml", Resources)
 }
 
+func TestGetArchetype(t *testing.T) {
+	NoErrorAndNotEmptyBytes(t, "/archetypes/camel-quarkus/pom.xml", Resource)
+}
+
 func TestGetNoResource(t *testing.T) {
 	ErrorBytes(t, "config/manager/operator-service-account.json", Resource)
 	ErrorBytes(t, "/config/manager/operator-service-account.json", Resource)
@@ -159,4 +164,15 @@ func TestCRDResources(t *testing.T) {
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_kamelets.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_kameletbindings.yaml", Resource)
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_pipes.yaml", Resource)
+}
+
+func TestCopyResources(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-resources")
+	assert.Nil(t, err)
+	err = Copy("/archetypes/camel-quarkus/", tmpDir)
+	assert.Nil(t, err)
+	// TODO we'd need to include permissions for each resource
+	// info, err := os.Stat(filepath.Join(tmpDir, "pom.xml"))
+	// assert.Nil(t, err)
+	// assert.Equal(t, "", info.Mode())
 }

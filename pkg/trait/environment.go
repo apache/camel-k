@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"os"
 
 	"k8s.io/utils/pointer"
@@ -78,6 +79,8 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, camel.ConfigConfigmapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, camel.ConfigSecretsMountPath)
+
+	envvar.SetVal(&e.EnvVars, "QUARKUS_CONFIG_LOCATIONS", fmt.Sprintf("%s/application.properties,%s/user.properties", camel.BasePath, camel.ConfDPath))
 
 	if pointer.BoolDeref(t.ContainerMeta, true) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")

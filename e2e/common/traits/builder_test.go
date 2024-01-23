@@ -206,7 +206,7 @@ func TestBuilderTrait(t *testing.T) {
 
 		// Check logs
 		Eventually(Logs(integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
-		Eventually(Logs(integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-runtime-bom</artifactId>`))
+		Eventually(Logs(integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-quarkus-core</artifactId>`))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})

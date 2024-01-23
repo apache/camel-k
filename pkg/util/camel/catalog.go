@@ -34,10 +34,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
+// DefaultCatalog returns the default catalog.
 func DefaultCatalog() (*RuntimeCatalog, error) {
 	return QuarkusCatalog()
 }
 
+// QuarkusCatalog returns the default Quarkus catalog.
 func QuarkusCatalog() (*RuntimeCatalog, error) {
 	return catalogForRuntimeProvider(v1.RuntimeProviderQuarkus)
 }
@@ -72,6 +74,7 @@ func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, er
 	})
 }
 
+// GenerateCatalog creates a catalog for the given input specs.
 func GenerateCatalog(
 	ctx context.Context,
 	client ctrl.Reader,
@@ -104,6 +107,7 @@ func GenerateCatalog(
 	return GenerateCatalogCommon(ctx, globalSettings, []byte(userSettings), caCerts, mvn, runtime, providerDependencies)
 }
 
+// GenerateCatalogCommon creates the base for a catalog for the given input specs.
 func GenerateCatalogCommon(
 	ctx context.Context,
 	globalSettings []byte,

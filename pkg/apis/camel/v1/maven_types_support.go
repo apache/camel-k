@@ -19,6 +19,8 @@ package v1
 
 import (
 	"encoding/xml"
+	"errors"
+	"io"
 )
 
 func (in *MavenArtifact) GetDependencyID() string {
@@ -46,16 +48,19 @@ type propertiesEntry struct {
 	Value   string `xml:",chardata"`
 }
 
+// AddAll --.
 func (m Properties) AddAll(properties map[string]string) {
 	for k, v := range properties {
 		m.Add(k, v)
 	}
 }
 
+// Add --.
 func (m Properties) Add(key string, value string) {
 	m[key] = value
 }
 
+// MarshalXML --.
 func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if len(m) == 0 {
 		return nil
@@ -75,20 +80,48 @@ func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeToken(start.End())
 }
 
+// nolint: musttag
+type xmlMapEntry struct {
+	XMLName xml.Name
+	Value   string `xml:",chardata"`
+}
+
+// UnmarshalXML --.
+func (m *Properties) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	*m = Properties{}
+	for {
+		var e xmlMapEntry
+
+		err := d.Decode(&e)
+		if errors.Is(err, io.EOF) {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		(*m)[e.XMLName.Local] = e.Value
+	}
+	return nil
+}
+
+// AddAll -- .
 func (m PluginProperties) AddAll(properties map[string]string) {
 	for k, v := range properties {
 		m.Add(k, v)
 	}
 }
 
+// Add -- .
 func (m PluginProperties) Add(key string, value string) {
 	m[key] = StringOrProperties{Value: value}
 }
 
+// AddProperties -- .
 func (m PluginProperties) AddProperties(key string, properties map[string]string) {
 	m[key] = StringOrProperties{Properties: properties}
 }
 
+// MarshalXML -- .
 func (m PluginProperties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if len(m) == 0 {
 		return nil

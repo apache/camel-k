@@ -58,7 +58,7 @@ type extraRepositories struct {
 func (o extraRepositories) apply(settings *Settings) error {
 	for i, r := range o.repositories {
 		if strings.Contains(r, "@mirrorOf=") {
-			mirror := NewMirror(r)
+			mirror := newMirror(r)
 			if mirror.ID == "" {
 				mirror.ID = fmt.Sprintf("mirror-%03d", i)
 			}
@@ -93,4 +93,23 @@ func upsertMirror(mirror Mirror, mirrors *[]Mirror) {
 		}
 	}
 	*mirrors = append(*mirrors, mirror)
+}
+
+func newMirror(repo string) Mirror {
+	m := Mirror{}
+	if idx := strings.Index(repo, "@"); idx != -1 {
+		m.URL = repo[:idx]
+
+		for _, attribute := range strings.Split(repo[idx+1:], "@") {
+			switch {
+			case strings.HasPrefix(attribute, "mirrorOf="):
+				m.MirrorOf = attribute[9:]
+			case strings.HasPrefix(attribute, "id="):
+				m.ID = attribute[3:]
+			case strings.HasPrefix(attribute, "name="):
+				m.Name = attribute[5:]
+			}
+		}
+	}
+	return m
 }

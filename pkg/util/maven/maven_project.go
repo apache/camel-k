@@ -23,9 +23,12 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/resources"
 )
 
-func NewProject() Project {
+const camelQuarkusArchetypeResource = "/archetypes/camel-quarkus/pom.xml"
+
+func newProject() Project {
 	return Project{
 		XMLName:           xml.Name{Local: "project"},
 		XMLNs:             "http://maven.apache.org/POM/4.0.0",
@@ -35,8 +38,9 @@ func NewProject() Project {
 	}
 }
 
+// NewProjectWithGAV creates an empty Maven project in memory.
 func NewProjectWithGAV(group string, artifact string, version string) Project {
-	p := NewProject()
+	p := newProject()
 	p.GroupID = group
 	p.ArtifactID = artifact
 	p.Version = version
@@ -47,6 +51,35 @@ func NewProjectWithGAV(group string, artifact string, version string) Project {
 	return p
 }
 
+// LoadProjectWithGAV creates an empty Maven project in memory, loading from a local resource.
+func LoadProjectWithGAV(group string, artifact string, version string) (Project, error) {
+	p, err := loadProject(camelQuarkusArchetypeResource)
+	if err != nil {
+		return Project{}, err
+	}
+	p.GroupID = group
+	p.ArtifactID = artifact
+	p.Version = version
+	if p.Properties == nil {
+		p.Properties = v1.Properties{}
+	}
+
+	return p, nil
+}
+
+func loadProject(location string) (Project, error) {
+	var project Project
+	b, err := resources.Resource(location)
+	if err != nil {
+		return project, err
+	}
+	if err := xml.Unmarshal(b, &project); err != nil {
+		return project, err
+	}
+	return project, nil
+}
+
+// Command return an executable command to be done over a project.
 func (p Project) Command(context Context) *Command {
 	return &Command{
 		context: context,
@@ -54,6 +87,7 @@ func (p Project) Command(context Context) *Command {
 	}
 }
 
+// MarshalBytes encodes a project in its binary format.
 func (p Project) MarshalBytes() ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
@@ -68,7 +102,7 @@ func (p Project) MarshalBytes() ([]byte, error) {
 	return w.Bytes(), nil
 }
 
-func (p *Project) LookupDependency(dep Dependency) *Dependency {
+func (p *Project) lookupDependency(dep Dependency) *Dependency {
 	for i := range p.Dependencies {
 		// Check if the given dependency is already included in the dependency list
 		if p.Dependencies[i].GroupID == dep.GroupID && p.Dependencies[i].ArtifactID == dep.ArtifactID {
@@ -79,18 +113,7 @@ func (p *Project) LookupDependency(dep Dependency) *Dependency {
 	return nil
 }
 
-func (p *Project) ReplaceDependency(dep Dependency) {
-	for i, d := range p.Dependencies {
-		// Check if the given dependency is already included in the dependency list
-		if d.GroupID == dep.GroupID && d.ArtifactID == dep.ArtifactID {
-			p.Dependencies[i] = dep
-
-			return
-		}
-	}
-}
-
-// AddDependency adds a dependency to maven's dependencies.
+// AddDependency adds a dependency to maven project's dependencies.
 func (p *Project) AddDependency(dep Dependency) {
 	for _, d := range p.Dependencies {
 		// Check if the given dependency is already included in the dependency list
@@ -102,16 +125,19 @@ func (p *Project) AddDependency(dep Dependency) {
 	p.Dependencies = append(p.Dependencies, dep)
 }
 
-// AddDependencies adds dependencies to maven's dependencies.
-func (p *Project) AddDependencies(deps ...Dependency) {
-	for _, d := range deps {
-		p.AddDependency(d)
-	}
-}
-
 // AddDependencyGAV adds a dependency to maven's dependencies.
 func (p *Project) AddDependencyGAV(groupID string, artifactID string, version string) {
-	p.AddDependency(NewDependency(groupID, artifactID, version))
+	p.AddDependency(newDependency(groupID, artifactID, version))
+}
+
+func newDependency(groupID string, artifactID string, version string) Dependency {
+	return Dependency{
+		GroupID:    groupID,
+		ArtifactID: artifactID,
+		Version:    version,
+		Type:       "",
+		Classifier: "",
+	}
 }
 
 // AddEncodedDependencyGAV adds a dependency in GAV format to maven's dependencies.
@@ -122,8 +148,9 @@ func (p *Project) AddEncodedDependencyGAV(gav string) {
 	}
 }
 
+// AddDependencyExclusion add a dependency with exclusion.
 func (p *Project) AddDependencyExclusion(dep Dependency, exclusion Exclusion) {
-	if t := p.LookupDependency(dep); t != nil {
+	if t := p.lookupDependency(dep); t != nil {
 		if t.Exclusions == nil {
 			exclusions := make([]Exclusion, 0)
 			t.Exclusions = &exclusions
@@ -139,32 +166,9 @@ func (p *Project) AddDependencyExclusion(dep Dependency, exclusion Exclusion) {
 	}
 }
 
-func (p *Project) AddDependencyExclusions(dep Dependency, exclusions ...Exclusion) {
-	for _, e := range exclusions {
-		p.AddDependencyExclusion(dep, e)
-	}
-}
-
-func (p *Project) AddEncodedDependencyExclusion(gav string, exclusion Exclusion) {
-	if d, err := ParseGAV(gav); err == nil {
-		// TODO: error handling
-		p.AddDependencyExclusion(d, exclusion)
-	}
-}
-
+// AddProfiles add profiles to the project.
 func (p *Project) AddProfiles(profiles string) {
 	p.Profiles = ProfilesContent{InnerXML: profiles}
-}
-
-// NewDependency creates an new dependency from the given GAV.
-func NewDependency(groupID string, artifactID string, version string) Dependency {
-	return Dependency{
-		GroupID:    groupID,
-		ArtifactID: artifactID,
-		Version:    version,
-		Type:       "",
-		Classifier: "",
-	}
 }
 
 // NewRepository parses the given repository URL and generates the corresponding v1.Repository.
@@ -209,23 +213,4 @@ func NewRepository(repo string) v1.Repository {
 	}
 
 	return r
-}
-
-func NewMirror(repo string) Mirror {
-	m := Mirror{}
-	if idx := strings.Index(repo, "@"); idx != -1 {
-		m.URL = repo[:idx]
-
-		for _, attribute := range strings.Split(repo[idx+1:], "@") {
-			switch {
-			case strings.HasPrefix(attribute, "mirrorOf="):
-				m.MirrorOf = attribute[9:]
-			case strings.HasPrefix(attribute, "id="):
-				m.ID = attribute[3:]
-			case strings.HasPrefix(attribute, "name="):
-				m.Name = attribute[5:]
-			}
-		}
-	}
-	return m
 }

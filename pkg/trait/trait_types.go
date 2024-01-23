@@ -20,7 +20,6 @@ package trait
 import (
 	"context"
 	"fmt"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -435,51 +434,8 @@ func (e *Environment) addSourcesProperties() {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	idx := 0
-	for _, s := range e.Integration.AllSources() {
-		// We don't process routes embedded (native) or Kamelets
-		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
-			continue
-		}
-		srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
-		src := "file:" + path.Join(filepath.ToSlash(camel.SourcesMountPath), srcName)
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", idx)] = src
-
-		simpleName := srcName
-		if strings.Contains(srcName, ".") {
-			simpleName = srcName[0:strings.Index(srcName, ".")]
-		}
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", idx)] = simpleName
-
-		for pid, p := range s.PropertyNames {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", idx, pid)] = p
-		}
-
-		if s.Type != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", idx)] = string(s.Type)
-		}
-		if s.InferLanguage() != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", idx)] = string(s.InferLanguage())
-		}
-		if s.Loader != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
-		}
-		if s.Compression {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = "true"
-		}
-
-		interceptors := make([]string, 0, len(s.Interceptors))
-		if s.Interceptors != nil {
-			interceptors = append(interceptors, s.Interceptors...)
-		}
-		if e.Interceptors != nil {
-			interceptors = append(interceptors, e.Interceptors...)
-		}
-		for intID, interceptor := range interceptors {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].interceptors[%d]", idx, intID)] = interceptor
-		}
-		idx++
-	}
+	e.ApplicationProperties["camel.main.source-location-enabled"] = "true"
+	e.ApplicationProperties["camel.main.routes-include-pattern"] = fmt.Sprintf("file:%s/**", camel.SourcesMountPath)
 }
 
 func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
