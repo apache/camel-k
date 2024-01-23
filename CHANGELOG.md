@@ -30,6 +30,7 @@
 
 - chore\(deps\): bump github.com/onsi/gomega from 1.31.0 to 1.31.1 [\#5087](https://github.com/apache/camel-k/pull/5087) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(\#4776\): Fix catalog loading in camel trait [\#5086](https://github.com/apache/camel-k/pull/5086) ([christophd](https://github.com/christophd))
+- chore\(ci\): Upgrade github ci  actions [\#5085](https://github.com/apache/camel-k/pull/5085) ([gansheer](https://github.com/gansheer))
 - feat\(ci\): Run specific action for java code [\#5083](https://github.com/apache/camel-k/pull/5083) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.120.0 to 2.120.1 [\#5082](https://github.com/apache/camel-k/pull/5082) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(ci\): nightly quarkus native only on main branch [\#5081](https://github.com/apache/camel-k/pull/5081) ([squakez](https://github.com/squakez))
