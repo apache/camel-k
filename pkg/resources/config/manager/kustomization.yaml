@@ -20,6 +20,7 @@ kind: Kustomization
 
 resources:
 - operator-deployment.yaml
+- platformcontroller-deployment.yaml
 - operator-service-account.yaml
 
 patchesStrategicMerge:
