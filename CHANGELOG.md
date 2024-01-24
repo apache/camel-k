@@ -17,6 +17,7 @@
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
 - Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
+- Data type Kamelet hardcoded [\#5014](https://github.com/apache/camel-k/issues/5014)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
@@ -26,6 +27,7 @@
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 - Use build-tags to configure what feature are included in a camel-k build [\#2801](https://github.com/apache/camel-k/issues/2801)
+- shipwright.io builder [\#1673](https://github.com/apache/camel-k/issues/1673)
 
 ## [2.2.1-nightly](https://github.com/apache/camel-k/tree/2.2.1-nightly) (2024-01-08)
 
