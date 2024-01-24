@@ -51,14 +51,14 @@ jobs:
             diff = Math.round((coverage - main_cov_num + Number.EPSILON) * 100) / 100
 
             if(diff > 0){
-              await github.issues.createComment({
+              await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue_number,
                 body: ':heavy_check_mark: Unit test coverage report - coverage increased from ' + main_cov_num + '% to ' + coverage + '% (**+' + diff + '%**)'
               })
             }else if(diff < 0){
-              await github.issues.createComment({
+              await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issue_number,
