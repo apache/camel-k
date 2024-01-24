@@ -139,7 +139,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			name:         "action-input",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step:         getExpectedStep(true, false),
+			step:         getExpectedStep(true, false, defaultDataTypeActionKamelet),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
@@ -154,7 +154,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			name:         "action-input-scheme-prefix",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step:         getExpectedStep(true, false),
+			step:         getExpectedStep(true, false, defaultDataTypeActionKamelet),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
@@ -169,7 +169,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			name:         "action-output",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step:         getExpectedStep(false, true),
+			step:         getExpectedStep(false, true, defaultDataTypeActionKamelet),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
@@ -184,7 +184,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			name:         "action-output-scheme-prefix",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step:         getExpectedStep(false, true),
+			step:         getExpectedStep(false, true, defaultDataTypeActionKamelet),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
@@ -199,7 +199,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			name:         "action-input-output",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step:         getExpectedStep(true, true),
+			step:         getExpectedStep(true, true, defaultDataTypeActionKamelet),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
@@ -219,7 +219,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			name:         "action-input-output-schema-and-prefix",
 			endpointType: v1.EndpointTypeAction,
 			uri:          "",
-			step:         getExpectedStep(true, true),
+			step:         getExpectedStep(true, true, defaultDataTypeActionKamelet),
 			endpointProperties: map[string]string{
 				"foo": "bar",
 			},
@@ -300,13 +300,109 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 	}
 }
 
-func getExpectedStep(withIn bool, withOut bool) map[string]interface{} {
+func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
+	testcases := []struct {
+		name                  string
+		endpointType          v1.EndpointType
+		uri                   string
+		step                  map[string]interface{}
+		endpointProperties    map[string]string
+		applicationProperties map[string]string
+		inputScheme           string
+		inputFormat           string
+		outputScheme          string
+		outputFormat          string
+	}{
+		{
+			name:         "action-input",
+			endpointType: v1.EndpointTypeAction,
+			uri:          "",
+			step:         getExpectedStep(true, false, "data-type-action-v2"),
+			endpointProperties: map[string]string{
+				"foo": "bar",
+			},
+			applicationProperties: map[string]string{
+				"camel.kamelet.mykamelet.action-0.foo":                 "bar",
+				"camel.kamelet.data-type-action-v2.action-0-in.scheme": "camel",
+				"camel.kamelet.data-type-action-v2.action-0-in.format": "string",
+			},
+			inputFormat: "string",
+		},
+	}
+
+	for i, tc := range testcases {
+		t.Run(fmt.Sprintf("test-%d-%s", i, tc.name), func(t *testing.T) {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			client, err := test.NewFakeClient()
+			assert.NoError(t, err)
+
+			endpoint := v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "Kamelet",
+					APIVersion: "camel.apache.org/v1any1",
+					Name:       "mykamelet",
+				},
+			}
+
+			if len(tc.endpointProperties) > 0 {
+				endpoint.Properties = asEndpointProperties(tc.endpointProperties)
+			}
+
+			endpoint.DataTypes = make(map[v1.TypeSlot]v1.DataTypeReference)
+			if tc.inputFormat != "" {
+				endpoint.DataTypes[v1.TypeSlotIn] = v1.DataTypeReference{
+					Scheme: tc.inputScheme,
+					Format: tc.inputFormat,
+				}
+			}
+
+			if tc.outputFormat != "" {
+				endpoint.DataTypes[v1.TypeSlotOut] = v1.DataTypeReference{
+					Scheme: tc.outputScheme,
+					Format: tc.outputFormat,
+				}
+			}
+
+			pos := 0
+			binding, err := BindingConverter{}.Translate(
+				BindingContext{
+					Ctx:       ctx,
+					Client:    client,
+					Namespace: "test",
+					Profile:   v1.TraitProfileKubernetes,
+					Metadata: map[string]string{
+						v1.KameletDataTypeLabel: "data-type-action-v2",
+					},
+				},
+				EndpointContext{
+					Type:     tc.endpointType,
+					Position: &pos,
+				},
+				endpoint)
+
+			assert.NoError(t, err)
+			assert.NotNil(t, binding)
+			assert.Equal(t, tc.step, binding.Step)
+			assert.Equal(t, tc.uri, binding.URI)
+
+			if len(tc.applicationProperties) > 0 {
+				assert.Equal(t, tc.applicationProperties, binding.ApplicationProperties)
+			} else {
+				assert.True(t, len(binding.ApplicationProperties) == 0)
+			}
+		})
+	}
+}
+
+func getExpectedStep(withIn bool, withOut bool, dataTypeActionKamelet string) map[string]interface{} {
 	var steps []map[string]interface{}
 
 	if withIn {
 		steps = append(steps, map[string]interface{}{
 			"kamelet": map[string]interface{}{
-				"name": "data-type-action/action-0-in",
+				"name": dataTypeActionKamelet + "/action-0-in",
 			},
 		})
 	}
@@ -320,7 +416,7 @@ func getExpectedStep(withIn bool, withOut bool) map[string]interface{} {
 	if withOut {
 		steps = append(steps, map[string]interface{}{
 			"kamelet": map[string]interface{}{
-				"name": "data-type-action/action-0-out",
+				"name": dataTypeActionKamelet + "/action-0-out",
 			},
 		})
 	}

@@ -60,6 +60,7 @@ type BindingContext struct {
 	Client    client.Client
 	Namespace string
 	Profile   v1.TraitProfile
+	Metadata  map[string]string
 }
 
 type EndpointContext struct {

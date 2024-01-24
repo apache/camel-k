@@ -42,6 +42,7 @@ var (
 	endpointTypeSinkContext   = bindings.EndpointContext{Type: v1.EndpointTypeSink}
 )
 
+// CreateIntegrationFor creates and Integration from the a Pipe.
 func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true
@@ -102,6 +103,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 		Client:    c,
 		Namespace: it.Namespace,
 		Profile:   profile,
+		Metadata:  it.Annotations,
 	}
 
 	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, binding.Spec.Source)
