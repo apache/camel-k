@@ -303,7 +303,16 @@ func TestContainerWithCustomImage(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
+	assert.Equal(t, &TraitCondition{
+		integrationConditionType:    "TraitInfo",
+		integrationKitConditionType: "",
+		conditionStatus:             "True",
+		message:                     "explicitly disabled by the platform: container image was not built via Camel K operator",
+		reason:                      "healthTraitConfiguration",
+	},
+		conditions[0],
+	)
 
 	for _, postAction := range environment.PostActions {
 		assert.Nil(t, postAction(&environment))
