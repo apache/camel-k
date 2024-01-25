@@ -165,6 +165,8 @@ func generateQuarkusProjectCommon(quarkusPlatformGroupID string, quarkusPlatform
 	// required for to resolve data type transformers at runtime with service discovery
 	// the different Camel runtimes use different resource paths for the service lookup
 	buildProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
+	// Workaround to prevent JS runtime errors, see https://github.com/apache/camel-quarkus/issues/5678
+	buildProperties["quarkus.class-loading.parent-first-artifacts"] = "org.graalvm.regex:regex"
 
 	// copy all user defined quarkus.camel build time properties to the quarkus-maven-plugin build properties
 	for key, value := range buildTimeProperties {
