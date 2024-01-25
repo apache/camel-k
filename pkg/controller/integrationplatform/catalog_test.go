@@ -80,7 +80,7 @@ func TestCreateCatalog(t *testing.T) {
 	ip.Spec.Build.Registry.Address = defaults.OpenShiftRegistryAddress
 
 	ip.Status.Phase = v1.IntegrationPlatformPhaseCreateCatalog
-	ip.Spec.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	ip.Spec.Build.RuntimeVersion = "3.2.3"
 
 	c, err := test.NewFakeClient(&ip)
 	assert.Nil(t, err)
