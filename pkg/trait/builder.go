@@ -185,6 +185,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		return nil
 	}
 	builderTask.Configuration.NodeSelector = t.NodeSelector
+	builderTask.Configuration.Annotations = t.Annotations
 	pipelineTasks = append(pipelineTasks, v1.Task{Builder: builderTask})
 
 	// Custom tasks
