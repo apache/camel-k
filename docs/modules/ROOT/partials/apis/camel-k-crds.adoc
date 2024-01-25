@@ -608,6 +608,13 @@ map[string]string
 
 The node selector for the builder pod. Only used for `pod` strategy
 
+|`annotations` +
+map[string]string
+|
+
+
+Annotation to use for the builder pod. Only used for `pod` strategy
+
 
 |===
 
