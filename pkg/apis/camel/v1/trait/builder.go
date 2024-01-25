@@ -70,4 +70,6 @@ type BuilderTrait struct {
 	TasksLimitMemory []string `property:"tasks-limit-memory" json:"tasksLimitMemory,omitempty"`
 	// Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
+	// When using `pod` strategy, annotation to use for the builder pod.
+	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 }

@@ -483,6 +483,26 @@ func TestBuilderWithNodeSelector(t *testing.T) {
 	assert.Equal(t, map[string]string{"size": "large"}, builderTrait.NodeSelector)
 }
 
+func TestBuilderWithAnnotations(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.Annotations = map[string]string{
+		"annotation": "value",
+	}
+
+	active, condition, err := builderTrait.Configure(env)
+	assert.Nil(t, err)
+
+	err = builderTrait.Apply(env)
+	assert.Nil(t, err)
+
+	assert.True(t, active)
+	assert.Nil(t, condition)
+
+	assert.Equal(t, map[string]string{"annotation": "value"}, env.Pipeline[0].Builder.Configuration.Annotations)
+	assert.Equal(t, map[string]string{"annotation": "value"}, builderTrait.Annotations)
+}
+
 func TestBuilderNoTasksFilter(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
 	builderTrait := createNominalBuilderTraitTest()
