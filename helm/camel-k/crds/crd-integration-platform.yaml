@@ -105,6 +105,12 @@ spec:
                     description: the configuration required to build an Integration
                       container image
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: Annotation to use for the builder pod. Only used
+                          for `pod` strategy
+                        type: object
                       limitCPU:
                         description: The maximum amount of CPU required. Only used
                           for `pod` strategy
@@ -1905,6 +1911,12 @@ spec:
                     description: the configuration required to build an Integration
                       container image
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: Annotation to use for the builder pod. Only used
+                          for `pod` strategy
+                        type: object
                       limitCPU:
                         description: The maximum amount of CPU required. Only used
                           for `pod` strategy

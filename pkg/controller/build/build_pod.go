@@ -67,12 +67,13 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 				"camel.apache.org/build":     build.Name,
 				"camel.apache.org/component": "builder",
 			},
+			Annotations: build.BuilderConfiguration().Annotations,
 		},
 		Spec: corev1.PodSpec{
 			ServiceAccountName: platform.BuilderServiceAccount,
 			RestartPolicy:      corev1.RestartPolicyNever,
 			SecurityContext:    podSecurityContext,
-			NodeSelector:       build.TaskConfiguration("builder").NodeSelector,
+			NodeSelector:       build.BuilderConfiguration().NodeSelector,
 		},
 	}
 

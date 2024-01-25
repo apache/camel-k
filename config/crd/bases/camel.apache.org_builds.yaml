@@ -86,6 +86,12 @@ spec:
                   Build. Deprecated: no longer in use in Camel K 2 - maintained for
                   backward compatibility'
                 properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotation to use for the builder pod. Only used
+                      for `pod` strategy
+                    type: object
                   limitCPU:
                     description: The maximum amount of CPU required. Only used for
                       `pod` strategy
@@ -158,6 +164,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy
@@ -256,6 +268,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy
@@ -767,6 +785,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy
@@ -836,6 +860,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy
@@ -933,6 +963,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy
@@ -1029,6 +1065,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy
@@ -1531,6 +1573,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy
@@ -1596,6 +1644,12 @@ spec:
                           description: The configuration that should be used to perform
                             the Build.
                           properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              description: Annotation to use for the builder pod.
+                                Only used for `pod` strategy
+                              type: object
                             limitCPU:
                               description: The maximum amount of CPU required. Only
                                 used for `pod` strategy

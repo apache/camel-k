@@ -55,6 +55,8 @@ type BuildConfiguration struct {
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
 	// The node selector for the builder pod. Only used for `pod` strategy
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
+	// Annotation to use for the builder pod. Only used for `pod` strategy
+	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 }
 
 // BuildStrategy specifies how the Build should be executed.

@@ -35,6 +35,7 @@ type BuildConfigurationApplyConfiguration struct {
 	LimitCPU            *string                `json:"limitCPU,omitempty"`
 	LimitMemory         *string                `json:"limitMemory,omitempty"`
 	NodeSelector        map[string]string      `json:"nodeSelector,omitempty"`
+	Annotations         map[string]string      `json:"annotations,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs an declarative configuration of the BuildConfiguration type for use with
@@ -117,6 +118,20 @@ func (b *BuildConfigurationApplyConfiguration) WithNodeSelector(entries map[stri
 	}
 	for k, v := range entries {
 		b.NodeSelector[k] = v
+	}
+	return b
+}
+
+// WithAnnotations puts the entries into the Annotations field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the Annotations field,
+// overwriting an existing map entries in Annotations field with the same key.
+func (b *BuildConfigurationApplyConfiguration) WithAnnotations(entries map[string]string) *BuildConfigurationApplyConfiguration {
+	if b.Annotations == nil && len(entries) > 0 {
+		b.Annotations = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.Annotations[k] = v
 	}
 	return b
 }
