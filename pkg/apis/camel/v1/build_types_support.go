@@ -108,11 +108,6 @@ func ConfigurationTasksByName(tasks []Task, name string) *BuildConfiguration {
 	return &BuildConfiguration{}
 }
 
-// SetBuilderConfiguration set the configuration required for this Build.
-func (build *Build) SetBuilderConfiguration(conf *BuildConfiguration) {
-	SetBuilderConfigurationTasks(build.Spec.Tasks, conf)
-}
-
 // SetBuilderConfigurationTasks set the configuration required for the builder in the list of tasks.
 func SetBuilderConfigurationTasks(tasks []Task, conf *BuildConfiguration) {
 	for _, t := range tasks {
