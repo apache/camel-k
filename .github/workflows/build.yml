@@ -71,3 +71,5 @@ jobs:
         submodules: recursive
     - name: Execute Build (make)
       uses: ./.github/actions/e2e-build
+      with:
+        artifact-name: pr
