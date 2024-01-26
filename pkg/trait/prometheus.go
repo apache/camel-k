@@ -56,11 +56,6 @@ func (t *prometheusTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 func (t *prometheusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPrometheus)
-		// Deprecated
-		// remove dependencies after Camel K Runtime > 2.16.0 and no longer supported or LTS
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-micrometer")
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:io.micrometer:micrometer-registry-prometheus")
-		return nil
 	}
 
 	container := e.GetIntegrationContainer()

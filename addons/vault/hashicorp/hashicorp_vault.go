@@ -84,9 +84,6 @@ func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
 	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityHashicorpVault)
-		// Deprecated
-		// remove dependencies after Camel K Runtime > 2.16.0 and no longer supported or LTS
-		util.StringSliceUniqueAdd(&environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-hashicorp-vault")
 	}
 
 	if environment.IntegrationInRunningPhases() {

@@ -36,6 +36,12 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 	}
 	// TODO we need to remove this dependency from the catalog generation instead!
 	cat.Spec.Runtime.Dependencies = make([]v1.MavenArtifact, 0)
+	// TODO manage jolokia version from catalog instead!
+	for i, cpb := range cat.Spec.Runtime.Capabilities["jolokia"].Dependencies {
+		if cpb.GroupID == "org.jolokia" && cpb.ArtifactID == "jolokia-jvm" {
+			cat.Spec.Runtime.Capabilities["jolokia"].Dependencies[i].Version = "1.7.2"
+		}
+	}
 
 	catalog.CamelCatalogSpec = cat.Spec
 	catalog.CamelCatalogStatus = cat.Status
