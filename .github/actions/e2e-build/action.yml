@@ -18,6 +18,11 @@
 name: e2e-build
 description: 'End-to-End tests for build use-cases'
 
+inputs:
+  artifact-name:
+    description: 'The name of the artifact to store coverage results'
+    required: true
+
 runs:
   using: "composite"
 
@@ -27,20 +32,39 @@ runs:
     name: Prepare Test Environment
     uses: ./.github/actions/kamel-prepare-env
 
-  - name: Test
+  - name: Test new branch
     shell: bash
     run: |
       COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out" make build
 
-  - name: Save coverage PR value
+  # Only run these on pull request events
+  - name: Save new coverage value
+    if: github.event_name == 'pull_request'
     shell: bash
     run: |
-      mkdir -p ./pr
+      mkdir -p /tmp/${{ inputs.artifact-name }}
       go tool cover -func=coverage.out -o=coverage.out
-      grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs > ./pr/coverage
-      echo ${{ github.event.number }} > ./pr/id
+      grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs > /tmp/${{ inputs.artifact-name }}/coverage_new
+      echo ${{ github.event.number }} > /tmp/${{ inputs.artifact-name }}/id
+
+  - name: Checkout target branch code
+    if: github.event_name == 'pull_request'
+    uses: actions/checkout@v4
+    with:
+      persist-credentials: false
+      submodules: recursive
+      ref: ${{ github.event.pull_request.base.ref }}
+
+  - name: Test and save target coverage value
+    if: github.event_name == 'pull_request'
+    shell: bash
+    run: |
+      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out" make build
+      go tool cover -func=coverage.out -o=coverage.out
+      grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs > /tmp/${{ inputs.artifact-name }}/coverage_old
 
   - uses: actions/upload-artifact@v4
+    if: github.event_name == 'pull_request'
     with:
-      name: pr
-      path: pr/
+      name: ${{ inputs.artifact-name }}
+      path: /tmp/${{ inputs.artifact-name }}/
