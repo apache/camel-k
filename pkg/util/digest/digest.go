@@ -136,15 +136,63 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 		}
 	}
 
-	// Configmap and secret content
+	// Configmap content
 	for _, cm := range configmaps {
-		if _, err := hash.Write([]byte(cm.String())); err != nil {
-			return "", err
+		if cm != nil {
+			//name, ns
+			if _, err := hash.Write([]byte(fmt.Sprintf("#{cm.Name}/#{cm.Namespace}"))); err != nil {
+				return "", err
+			}
+			//Data with sorted keys
+			if cm.Data != nil {
+				//sort keys
+				keys := make([]string, 0, len(cm.Data))
+				for k := range cm.Data {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for _, k := range keys {
+					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, cm.Data[k]))); err != nil {
+						return "", err
+					}
+				}
+			}
 		}
 	}
+
+	//Secret content
 	for _, s := range secrets {
-		if _, err := hash.Write([]byte(s.String())); err != nil {
-			return "", err
+		if s != nil {
+			//name, ns
+			if _, err := hash.Write([]byte(fmt.Sprintf("#{s.Name}/#{s.Namespace}"))); err != nil {
+				return "", err
+			}
+			//Data with sorted keys
+			if s.Data != nil {
+				keys := make([]string, 0, len(s.Data))
+				for k := range s.Data {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for _, k := range keys {
+					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, s.Data[k]))); err != nil {
+						return "", err
+					}
+				}
+			}
+			//StringData with sorted keys
+			if s.StringData != nil {
+				keys2 := make([]string, 0, len(s.StringData))
+				for k := range s.Data {
+					keys2 = append(keys2, k)
+				}
+				sort.Strings(keys2)
+				for _, k := range keys2 {
+					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, s.StringData[k]))); err != nil {
+						return "", err
+					}
+				}
+			}
 		}
 	}
 
