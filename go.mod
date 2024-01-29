@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/container-tools/spectrum v0.6.42
-	github.com/evanphx/json-patch v5.8.1+incompatible
+	github.com/evanphx/json-patch v5.9.0+incompatible
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-logr/logr v1.4.1
