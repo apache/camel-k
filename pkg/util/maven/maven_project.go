@@ -122,6 +122,11 @@ func (p *Project) AddDependency(dep Dependency) {
 		}
 	}
 
+	// TODO must manage classifiers instead!
+	if dep.ArtifactID == "jolokia-agent-jvm" {
+		dep.Classifier = "javaagent"
+	}
+
 	p.Dependencies = append(p.Dependencies, dep)
 }
 

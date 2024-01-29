@@ -37,10 +37,8 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 	// TODO we need to remove this dependency from the catalog generation instead!
 	cat.Spec.Runtime.Dependencies = make([]v1.MavenArtifact, 0)
 	// TODO manage jolokia version from catalog instead!
-	for i, cpb := range cat.Spec.Runtime.Capabilities["jolokia"].Dependencies {
-		if cpb.GroupID == "org.jolokia" && cpb.ArtifactID == "jolokia-jvm" {
-			cat.Spec.Runtime.Capabilities["jolokia"].Dependencies[i].Version = "1.7.2"
-		}
+	if cat.Spec.Runtime.Capabilities != nil {
+		cat.Spec.Runtime.Capabilities["jolokia"] = jolokiaCatalogWorkaround()
 	}
 
 	catalog.CamelCatalogSpec = cat.Spec
@@ -231,4 +229,39 @@ func (c *RuntimeCatalog) IsResolvable(uri string) bool {
 	}
 
 	return true
+}
+
+func jolokiaCatalogWorkaround() v1.Capability {
+	return v1.Capability{
+		Dependencies: []v1.MavenArtifact{
+			{
+				GroupID:    "org.jolokia",
+				ArtifactID: "jolokia-server-core",
+				Version:    "2.0.1",
+			},
+			{
+				GroupID:    "org.jolokia",
+				ArtifactID: "jolokia-service-jmx",
+				Version:    "2.0.1",
+			},
+			{
+				GroupID:    "org.jolokia",
+				ArtifactID: "jolokia-service-serializer",
+				Version:    "2.0.1",
+			},
+			{
+				GroupID:    "org.jolokia",
+				ArtifactID: "jolokia-agent-jvm",
+				Version:    "2.0.1",
+			},
+			{
+				GroupID:    "org.apache.camel",
+				ArtifactID: "camel-jaxb",
+			},
+			{
+				GroupID:    "org.apache.camel.quarkus",
+				ArtifactID: "camel-quarkus-management",
+			},
+		},
+	}
 }

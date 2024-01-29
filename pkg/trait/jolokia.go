@@ -114,8 +114,14 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 
 	jolokiaFilepath := ""
 	for _, ar := range e.IntegrationKit.Status.Artifacts {
+
 		if strings.HasPrefix(ar.ID, "org.jolokia.jolokia-agent-jvm") || strings.HasPrefix(ar.ID, "org.jolokia.jolokia-jvm") {
-			jolokiaFilepath = ar.Target
+			agentPath := ar.Target
+			// TODO workaround to be removed when we introduce the concept of classifiers!
+			if !strings.Contains(agentPath, "-javaagent") {
+				agentPath = strings.ReplaceAll(ar.Target, ".jar", "-javaagent.jar")
+			}
+			jolokiaFilepath = agentPath
 			break
 		}
 	}

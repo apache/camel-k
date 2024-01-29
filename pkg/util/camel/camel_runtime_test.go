@@ -54,5 +54,5 @@ func TestCreateCatalog(t *testing.T) {
 	}
 
 	rtCat := NewRuntimeCatalog(camelCatalog)
-	assert.Equal(t, "1.7.2", rtCat.Runtime.Capabilities["jolokia"].Dependencies[2].Version)
+	assert.Equal(t, "2.0.1", rtCat.Runtime.Capabilities["jolokia"].Dependencies[0].Version)
 }
