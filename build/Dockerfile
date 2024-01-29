@@ -15,7 +15,7 @@
 
 FROM eclipse-temurin:17-jdk as base
 
-ARG MAVEN_DEFAULT_VERSION="3.8.6"
+ARG MAVEN_DEFAULT_VERSION="3.9.3"
 ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
@@ -30,17 +30,20 @@ COPY build/_maven_overlay/ /usr/share/maven/lib/
 ADD build/_maven_overlay/logback.xml /usr/share/maven/conf/
 
 # Prepare the maven wrapper required in the build Pod strategy
+# TODO use the distribution from resource archetype instead
+# we may have a startup process that takes care to install a default distro at runtime instead!
 COPY build/mvnw/mvnw.tar ${MVNW_DIR}
 RUN tar -xC ${MVNW_DIR} -f ${MVNW_DIR}mvnw.tar \
     && rm -v ${MVNW_DIR}mvnw.tar \
-    && sed -i "s;distributionUrl=.*;distributionUrl=${MAVEN_DIST_URL};" ${MVNW_DIR}.mvn/wrapper/maven-wrapper.properties
+    && sed -i "s;distributionUrl=.*;distributionUrl=${MAVEN_DIST_URL};" ${MVNW_DIR}.mvn/wrapper/maven-wrapper.properties \
+    && set -i "s;3.1.1;3.2.0;" ${MVNW_DIR}.mvn/wrapper/maven-wrapper.properties \
 # Used by mvnw to download maven dist into it
 ENV MAVEN_USER_HOME="${MAVEN_HOME}"
 # Install a default mvnw distribution at build time and prepare the config for formatting log
 RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default \
     && cp -r /usr/share/maven/lib/. $(cat ${MVNW_DIR}default)/lib \
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider* \
-    && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.* 
+    && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.*
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
 ADD build/_maven_output ${MVN_REPO}

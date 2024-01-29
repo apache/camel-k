@@ -81,7 +81,7 @@ func TestBasicInstallation(t *testing.T) {
 
 			req.VersionedParams(&corev1.PodExecOptions{
 				Container: OperatorPod(ns)().Spec.Containers[0].Name,
-				Command:   []string{"test", "-e", defaults.LocalRepository + "/org/apache/camel/k"},
+				Command:   []string{"test", "-e", defaults.LocalRepository + "/org/apache/camel/quarkus"},
 				Stdin:     false,
 				Stdout:    true,
 				Stderr:    true,
