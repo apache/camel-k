@@ -40,7 +40,7 @@ waitForOperator() {
   #
   local timeout=360
   local i=1
-  local command="kubectl get pods -n ${NAMESPACE} 2> /dev/null | grep camel-k | grep Running &> /dev/null"
+  local command="kubectl get pods -n ${NAMESPACE} 2> /dev/null | grep camel-k-operator | grep Running &> /dev/null"
 
   until eval "${command}"
   do
@@ -225,7 +225,7 @@ waitForOperator
 echo "Finding the operator pod identifier"
 for i in {1..5}
 do
-  camel_operator=$(kubectl get pods -n ${NAMESPACE} | grep camel-k | grep Running | awk '{print $1}')
+  camel_operator=$(kubectl get pods -n ${NAMESPACE} | grep camel-k-operator | grep Running | awk '{print $1}')
   if [ -n "${camel_operator}" ]; then
     break
   fi
