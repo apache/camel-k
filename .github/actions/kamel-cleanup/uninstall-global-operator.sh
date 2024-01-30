@@ -91,7 +91,7 @@ if [ "${has_olm}" == "true" ]; then
     xargs -I '{}' kubectl delete csv '{}' -n ${GLOBAL_OPERATOR_NAMESPACE} &> /dev/null
 else
   kubectl get deploy -n ${GLOBAL_OPERATOR_NAMESPACE} | \
-    grep camel-k | awk '{print $1}' | \
+    grep camel-k-operator | awk '{print $1}' | \
     xargs -I '{}' kubectl delete deploy '{}' -n ${GLOBAL_OPERATOR_NAMESPACE} &> /dev/null
 fi
 
@@ -102,7 +102,7 @@ sleep 3
 #
 timeout=180
 i=1
-command="kubectl get pods -n ${GLOBAL_OPERATOR_NAMESPACE} 2> /dev/null | grep camel-k &> /dev/null"
+command="kubectl get pods -n ${GLOBAL_OPERATOR_NAMESPACE} 2> /dev/null | grep camel-k-operator &> /dev/null"
 
 while eval "${command}"
 do
