@@ -117,6 +117,7 @@ The following table lists the most commonly configured parameters of the Camel K
 | `platform.cluster`                     | The kind of Kubernetes cluster (Kubernetes or OpenShift)                  | `Kubernetes`                   |
 | `platform.profile`                     | The trait profile to use (Knative, Kubernetes or OpenShift)               | auto                           |
 | `operator.global`                      | Indicates if the operator should watch all namespaces                     | `false`                        |
+| `operator.nodeSelector`                | The nodeSelector to use for the operator                                  |                                |
 | `operator.resources`                   | The resource requests and limits to use for the operator                  |                                |
 | `operator.securityContext`             | The (container-related) securityContext to use for the operator           |                                |
 | `operator.tolerations`                 | The list of tolerations to use for the operator                           |                                |
