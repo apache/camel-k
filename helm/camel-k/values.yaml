@@ -28,6 +28,7 @@ operator:
   resources: {}
   securityContext: {}
   tolerations: []
+  nodeSelector: {}
   logLevel: "info"
 
   ## Deployment annotations
