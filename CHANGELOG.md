@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Coverage report wrong percentage [\#5108](https://github.com/apache/camel-k/issues/5108)
 - Add possibility to configure annotation for the builder pods [\#5106](https://github.com/apache/camel-k/issues/5106)
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
