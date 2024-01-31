@@ -183,7 +183,7 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 			//StringData with sorted keys
 			if s.StringData != nil {
 				keys2 := make([]string, 0, len(s.StringData))
-				for k := range s.Data {
+				for k := range s.StringData {
 					keys2 = append(keys2, k)
 				}
 				sort.Strings(keys2)
