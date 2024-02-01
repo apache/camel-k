@@ -201,6 +201,12 @@ spec:
                     description: The builder trait is internally used to determine
                       the best strategy to build and configure IntegrationKits.
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: When using `pod` strategy, annotation to use
+                          for the builder pod.
+                        type: object
                       baseImage:
                         description: Specify a base image
                         type: string

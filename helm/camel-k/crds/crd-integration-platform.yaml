@@ -510,6 +510,12 @@ spec:
                   builder:
                     description: The configuration of Builder trait
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: When using `pod` strategy, annotation to use
+                          for the builder pod.
+                        type: object
                       baseImage:
                         description: Specify a base image
                         type: string
@@ -2364,6 +2370,12 @@ spec:
                   builder:
                     description: The configuration of Builder trait
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: When using `pod` strategy, annotation to use
+                          for the builder pod.
+                        type: object
                       baseImage:
                         description: Specify a base image
                         type: string
