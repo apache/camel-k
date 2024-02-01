@@ -31,6 +31,8 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -189,4 +191,120 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
+}
+
+func TestMountPropertiesEnvironmentVariable(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	fakeClient, _ := test.NewFakeClient(
+		&corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "default",
+				Name:      "my-cm",
+			},
+			Data: map[string]string{
+				"cm.properties": "cm-value=hello",
+				"plain.cm-key":  "plain-cm-message",
+			},
+		}, &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "default",
+				Name:      "my-sec",
+			},
+			Data: map[string][]byte{
+				"sec.properties": []byte("sec-value=world"),
+				"plain.sec.key":  []byte("plain-sec-message"),
+			},
+		},
+	)
+	catalog, _ := camel.DefaultCatalog()
+	compressedRoute, _ := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
+
+	environment := &Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Ctx:          context.Background(),
+		Client:       fakeClient,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "hello",
+				Namespace: "default",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.js",
+							Content:     string(compressedRoute),
+							Compression: true,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+				Traits: v1.Traits{
+					Mount: &traitv1.MountTrait{
+						Configs: []string{"configmap:my-cm", "secret:my-sec"},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				RuntimeVersion: defaults.DefaultRuntimeVersion,
+				Phase:          v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+
+	conditions, err := traitCatalog.apply(environment)
+	require.NoError(t, err)
+	assert.Empty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	container := environment.GetIntegrationContainer()
+	assert.Equal(t,
+		"/etc/camel/application.properties,/etc/camel/conf.d/_configmaps/my-cm/cm.properties,/etc/camel/conf.d/_secrets/my-sec/sec.properties",
+		envvar.Get(container.Env, "QUARKUS_CONFIG_LOCATIONS").Value,
+	)
+	assert.Equal(t,
+		corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "my-cm",
+			},
+			Key: "plain.cm-key",
+		},
+		*envvar.Get(container.Env, "PLAIN_CM_KEY").ValueFrom.ConfigMapKeyRef,
+	)
+	assert.Equal(t,
+		corev1.SecretKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "my-sec",
+			},
+			Key: "plain.sec.key",
+		},
+		*envvar.Get(container.Env, "PLAIN_SEC_KEY").ValueFrom.SecretKeyRef,
+	)
+
+	cm := environment.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+		return m.Name == environment.Integration.Name+"-implicit-properties"
+	})
+	assert.NotNil(t, cm)
+	assert.Contains(t, cm.Data["application.properties"], "plain.cm-key=\nplain.sec.key=\n")
 }

@@ -167,8 +167,6 @@ func generateQuarkusProjectCommon(quarkusPlatformGroupID string, quarkusPlatform
 	buildProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
 	// Workaround to prevent JS runtime errors, see https://github.com/apache/camel-quarkus/issues/5678
 	buildProperties["quarkus.class-loading.parent-first-artifacts"] = "org.graalvm.regex:regex"
-	// Required to load sources at runtime
-	buildProperties["quarkus.config.locations"] = fmt.Sprintf("%s/application.properties,%s/user.properties", camel.BasePath, camel.ConfDPath)
 
 	// copy all user defined quarkus.camel build time properties to the quarkus-maven-plugin build properties
 	for key, value := range buildTimeProperties {

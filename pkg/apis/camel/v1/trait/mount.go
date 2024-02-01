@@ -38,4 +38,11 @@ type MountTrait struct {
 	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
 	// marked with `camel.apache.org/integration` label to be taken in account.
 	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
+	// Deprecated: use camel.properties or include your properties in an explicit property file backed by a configmap or secret.
+	// Will let the operator to treat configmaps or secret as plain properties file with their key/value list
+	// (ie .spec.data["camel.my-property"] = my-value) (default `true`).
+	ConfigsAsPropertyFiles *bool `property:"configs-as-property-files" json:"configsAsPropertyFiles,omitempty"`
+	// Will include any property file (suffix `.properties`) listed in configmaps/secrets provided in the `configs`
+	// parameter as a runtime property file (default `true`).
+	ScanConfigsForProperties *bool `property:"configs-as-properties" json:"configsAsProperties,omitempty"`
 }

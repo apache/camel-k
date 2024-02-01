@@ -438,7 +438,8 @@ func (e *Environment) addSourcesProperties() {
 	e.ApplicationProperties["camel.main.routes-include-pattern"] = fmt.Sprintf("file:%s/**", camel.SourcesMountPath)
 }
 
-func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
+func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) []string {
+	camelProperties := make([]string, 0, 1)
 	// Sources
 	idx := 0
 	for _, s := range e.Integration.AllSources() {
@@ -488,6 +489,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 					*vols = append(*vols, *vol)
 					*mnts = append(*mnts, *mnt)
+
+					camelProperties = append(camelProperties, mountPath)
 				} else {
 					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
 				}
@@ -514,6 +517,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
+
+		camelProperties = append(camelProperties, mountPath)
 	}
 
 	// Deprecated - should use mount trait
@@ -526,6 +531,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
+
+		camelProperties = append(camelProperties, mountPath)
 	}
 	// append Service Binding secrets
 	if len(e.ServiceBindingSecret) > 0 {
@@ -556,6 +563,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
 	}
+
+	return camelProperties
 }
 
 func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {

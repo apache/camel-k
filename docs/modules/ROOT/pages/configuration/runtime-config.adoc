@@ -74,6 +74,8 @@ NOTE: you can provide a `Secret` which is not yet available on the cluster. The 
 [[runtime-config-props]]
 == Configmap/Secret property references
 
+WARNING: this feature is deprecated since version 2.3.0 and may be removed in future versions. Use instead `camel.properties` trait configuration.
+
 Each `Configmap`/`Secret` will be parsed as a property file and you will be able to use those properties inside your `Route` definition or, more in general, as you would do with any other xref:configuration/runtime-properties.adoc[runtime property]. As an example, you can create the following `Secret`:
 
 [source,text]

@@ -7662,6 +7662,19 @@ spec:
                             items:
                               type: string
                             type: array
+                          configsAsProperties:
+                            description: Will include any property file (suffix `.properties`)
+                              listed in configmaps/secrets provided in the `configs`
+                              parameter as a runtime property file (default `true`).
+                            type: boolean
+                          configsAsPropertyFiles:
+                            description: 'Deprecated: use camel.properties or include
+                              your properties in an explicit property file backed
+                              by a configmap or secret. Will let the operator to treat
+                              configmaps or secret as plain properties file with their
+                              key/value list (ie .spec.data["camel.my-property"] =
+                              my-value) (default `true`).'
+                            type: boolean
                           configuration:
                             description: 'Legacy trait configuration parameters. Deprecated:
                               for backward compatibility.'
