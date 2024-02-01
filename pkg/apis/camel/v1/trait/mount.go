@@ -38,4 +38,9 @@ type MountTrait struct {
 	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
 	// marked with `camel.apache.org/integration` label to be taken in account.
 	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
+	// Deprecated: include your properties in an explicit property file backed by a secret.
+	// Let the operator to scan for secret labeled with `camel.apache.org/kamelet` and `camel.apache.org/kamelet.configuration`.
+	// These secrets are mounted to the application and treated as plain properties file with their key/value list
+	// (ie .spec.data["camel.my-property"] = my-value) (default `true`).
+	ScanKameletsImplicitLabelSecrets *bool `property:"scan-kamelets-implicit-label-secrets" json:"scanKameletsImplicitLabelSecrets,omitempty"`
 }
