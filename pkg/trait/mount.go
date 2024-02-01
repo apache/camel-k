@@ -54,6 +54,9 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
+	// Look for implicit secrets which may be required by kamelets
+	condition := t.addImplicitKameletsSecrets(e)
+
 	// Validate resources and pvcs
 	for _, c := range t.Configs {
 		if !strings.HasPrefix(c, "configmap:") && !strings.HasPrefix(c, "secret:") {
@@ -70,7 +73,7 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	return len(e.Integration.AllSources()) > 0 ||
 		len(t.Configs) > 0 ||
 		len(t.Resources) > 0 ||
-		len(t.Volumes) > 0, nil, nil
+		len(t.Volumes) > 0, condition, nil
 }
 
 func (t *mountTrait) Apply(e *Environment) error {
@@ -297,7 +300,7 @@ func (t *mountTrait) setConfigPropertiesAsEnvVar(propsAsEnv []corev1.EnvVar, e *
 				APIVersion: "v1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      e.Integration.Name + "-implicit-properties",
+				Name:      e.Integration.Name + "-imp-props",
 				Namespace: e.Integration.Namespace,
 				Labels: map[string]string{
 					v1.IntegrationLabel:                e.Integration.Name,
@@ -314,7 +317,7 @@ func (t *mountTrait) setConfigPropertiesAsEnvVar(propsAsEnv []corev1.EnvVar, e *
 		c, err := utilResource.ParseConfig(
 			fmt.Sprintf(
 				"configmap:%s/%s@%s",
-				e.Integration.Name+"-implicit-properties",
+				e.Integration.Name+"-imp-props",
 				"application.properties",
 				"/deployments/config/application.properties",
 			),
@@ -323,6 +326,49 @@ func (t *mountTrait) setConfigPropertiesAsEnvVar(propsAsEnv []corev1.EnvVar, e *
 			return err
 		}
 		t.mountResource(e, vols, &container.VolumeMounts, c)
+	}
+	return nil
+}
+
+// Deprecated: to be removed in future releases.
+// nolint: staticcheck
+func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition {
+	featureUsed := false
+	if trait := e.Catalog.GetTrait(kameletsTraitID); trait != nil {
+		kamelets, ok := trait.(*kameletsTrait)
+		if !ok {
+			return NewIntegrationCondition(
+				v1.IntegrationConditionTraitInfo,
+				corev1.ConditionTrue,
+				traitConfigurationReason,
+				"Unexpected error happened while casting to kamelets trait",
+			)
+		}
+		if !pointer.BoolDeref(t.ScanKameletsImplicitLabelSecrets, true) {
+			return nil
+		}
+		implicitKameletSecrets, err := kamelets.listConfigurationSecrets(e)
+		if err != nil {
+			return NewIntegrationCondition(
+				v1.IntegrationConditionTraitInfo,
+				corev1.ConditionTrue,
+				traitConfigurationReason,
+				err.Error(),
+			)
+		}
+		for _, secret := range implicitKameletSecrets {
+			featureUsed = true
+			t.Configs = append(t.Configs, "secret:"+secret)
+		}
+	}
+
+	if featureUsed {
+		return NewIntegrationCondition(
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			traitConfigurationReason,
+			"Implicit Kamelet labelling secrets are deprecated and may be removed in future releases. Make sure to use explicit mount.config secrets instead.",
+		)
 	}
 	return nil
 }

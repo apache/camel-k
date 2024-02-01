@@ -303,7 +303,7 @@ func TestMountPropertiesEnvironmentVariable(t *testing.T) {
 	)
 
 	cm := environment.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
-		return m.Name == environment.Integration.Name+"-implicit-properties"
+		return m.Name == environment.Integration.Name+"-imp-props"
 	})
 	assert.NotNil(t, cm)
 	assert.Contains(t, cm.Data["application.properties"], "plain.cm-key=\nplain.sec.key=\n")

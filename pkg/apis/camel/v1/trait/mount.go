@@ -39,10 +39,15 @@ type MountTrait struct {
 	// marked with `camel.apache.org/integration` label to be taken in account.
 	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
 	// Deprecated: use camel.properties or include your properties in an explicit property file backed by a configmap or secret.
-	// Will let the operator to treat configmaps or secret as plain properties file with their key/value list
+	// Let the operator to treat configmaps or secret as plain properties file with their key/value list
 	// (ie .spec.data["camel.my-property"] = my-value) (default `true`).
 	ConfigsAsPropertyFiles *bool `property:"configs-as-property-files" json:"configsAsPropertyFiles,omitempty"`
-	// Will include any property file (suffix `.properties`) listed in configmaps/secrets provided in the `configs`
+	// Include any property file (suffix `.properties`) listed in configmaps/secrets provided in the `configs`
 	// parameter as a runtime property file (default `true`).
 	ScanConfigsForProperties *bool `property:"configs-as-properties" json:"configsAsProperties,omitempty"`
+	// Deprecated: include your properties in an explicit property file backed by a secret.
+	// Let the operator to scan for secret labeled with `camel.apache.org/kamelet` and `camel.apache.org/kamelet.configuration`.
+	// These secrets are mounted to the application and treated as plain properties file with their key/value list
+	// (ie .spec.data["camel.my-property"] = my-value) (default `true`).
+	ScanKameletsImplicitLabelSecrets *bool `property:"scan-kamelets-implicit-label-secrets" json:"scanKameletsImplicitLabelSecrets,omitempty"`
 }

@@ -36,8 +36,7 @@ import (
 )
 
 const (
-	quarkusTraitID = "quarkus"
-
+	quarkusTraitID                    = "quarkus"
 	QuarkusNativeDefaultBaseImageName = "quay.io/quarkus/quarkus-micro-image:2.0"
 )
 

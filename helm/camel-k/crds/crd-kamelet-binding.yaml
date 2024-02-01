@@ -7663,14 +7663,14 @@ spec:
                               type: string
                             type: array
                           configsAsProperties:
-                            description: Will include any property file (suffix `.properties`)
+                            description: Include any property file (suffix `.properties`)
                               listed in configmaps/secrets provided in the `configs`
                               parameter as a runtime property file (default `true`).
                             type: boolean
                           configsAsPropertyFiles:
                             description: 'Deprecated: use camel.properties or include
                               your properties in an explicit property file backed
-                              by a configmap or secret. Will let the operator to treat
+                              by a configmap or secret. Let the operator to treat
                               configmaps or secret as plain properties file with their
                               key/value list (ie .spec.data["camel.my-property"] =
                               my-value) (default `true`).'
@@ -7701,6 +7701,16 @@ spec:
                             items:
                               type: string
                             type: array
+                          scanKameletsImplicitLabelSecrets:
+                            description: 'Deprecated: include your properties in an
+                              explicit property file backed by a secret. Let the operator
+                              to scan for secret labeled with `camel.apache.org/kamelet`
+                              and `camel.apache.org/kamelet.configuration`. These
+                              secrets are mounted to the application and treated as
+                              plain properties file with their key/value list (ie
+                              .spec.data["camel.my-property"] = my-value) (default
+                              `true`).'
+                            type: boolean
                           volumes:
                             description: 'A list of Persistent Volume Claims to be
                               mounted. Syntax: [pvcname:/container/path]'
