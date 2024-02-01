@@ -5953,6 +5953,13 @@ map[string]string
 
 Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
 
+|`annotations` +
+map[string]string
+|
+
+
+When using `pod` strategy, annotation to use for the builder pod.
+
 
 |===
 
@@ -6156,6 +6163,8 @@ For such tasks, the cron trait can materialize the integration as a Kubernetes C
 in order to save resources when the integration does not need to be executed.
 
 Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
+
+WARNING: In case of native build-mode defined in xref:traits:quarkus.adoc[quarkus] trait, the component can't be customized.
 
 The rules for using a Kubernetes CronJob are the following:
 
