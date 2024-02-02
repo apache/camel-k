@@ -49,7 +49,7 @@ runs:
         distribution: "temurin"
 
     - name: Install Go ${{ inputs.goVersionFile }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version-file: ${{ inputs.goVersionFile }}
         check-latest: true

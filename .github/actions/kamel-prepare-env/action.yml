@@ -70,7 +70,7 @@ runs:
         distribution: 'temurin'
 
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
         go-version-file: 'go.mod'
