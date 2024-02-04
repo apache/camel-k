@@ -23,6 +23,8 @@ limitations under the License.
 package config
 
 import (
+	"github.com/stretchr/testify/assert"
+	"strconv"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -114,4 +116,55 @@ func TestSecretHotReload(t *testing.T) {
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret updated"))
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+}
+
+func TestConfigmapHotReloadDefaultDigest(t *testing.T) {
+	CheckConfigmapDigest(t, false)
+}
+
+func TestConfigmapHotReloadDigest(t *testing.T) {
+	CheckConfigmapDigest(t, true)
+}
+
+func CheckConfigmapDigest(t *testing.T, hotreload bool) {
+	RegisterTestingT(t)
+	name := RandomizedSuffixName("config-configmap-route")
+	cmName := RandomizedSuffixName("my-hot-cm-")
+	Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
+		"--config",
+		"configmap:"+cmName,
+		"--name",
+		name,
+		"-t",
+		"mount.hot-reload="+strconv.FormatBool(hotreload),
+	).Execute()).To(Succeed())
+	uid := Integration(ns, name)().UID
+	ikName := Integration(ns, name)().Status.IntegrationKit.Name
+	Eventually(KitPhase(ns, ikName), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+
+	digest := Integration(ns, name)().Status.Digest
+
+	Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+	var cmData = make(map[string]string)
+	cmData["my-configmap-key"] = "my configmap content"
+	CreatePlainTextConfigmapWithOwnerRef(ns, cmName, cmData, name, uid)
+	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseRunning))
+	Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content"))
+
+	digest2 := Integration(ns, name)().Status.Digest
+	assert.NotEqual(t, digest, digest2)
+
+	cmData["my-configmap-key"] = "my configmap content updated"
+	UpdatePlainTextConfigmap(ns, cmName, cmData)
+	if hotreload {
+		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content updated"))
+		assert.NotEqual(t, digest2, Integration(ns, name)().Status.Digest)
+	} else {
+		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(Not(ContainSubstring("my configmap content updated")))
+		assert.Equal(t, digest2, Integration(ns, name)().Status.Digest)
+	}
+
+	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	DeleteConfigmap(ns, cmName)
 }

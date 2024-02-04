@@ -157,6 +157,19 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 					}
 				}
 			}
+			//BinaryData with sorted keys
+			if cm.BinaryData != nil {
+				keys := make([]string, 0, len(cm.BinaryData))
+				for k := range cm.BinaryData {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for _, k := range keys {
+					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, cm.BinaryData[k]))); err != nil {
+						return "", err
+					}
+				}
+			}
 		}
 	}
 
@@ -176,19 +189,6 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 				sort.Strings(keys)
 				for _, k := range keys {
 					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, s.Data[k]))); err != nil {
-						return "", err
-					}
-				}
-			}
-			//StringData with sorted keys
-			if s.StringData != nil {
-				keys2 := make([]string, 0, len(s.StringData))
-				for k := range s.StringData {
-					keys2 = append(keys2, k)
-				}
-				sort.Strings(keys2)
-				for _, k := range keys2 {
-					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, s.StringData[k]))); err != nil {
 						return "", err
 					}
 				}
