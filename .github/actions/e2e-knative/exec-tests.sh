@@ -129,9 +129,9 @@ export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 export KAMEL_INSTALL_OPERATOR_ENV_VARS=KAMEL_INSTALL_DEFAULT_KAMELETS=false
 
 if [ -n "${GLOBAL_OPERATOR_NAMESPACE}" ]; then
-  echo "Info: Tests being run using global operator"
-  export CAMEL_K_FORCE_GLOBAL_TEST=true
   export CAMEL_K_GLOBAL_OPERATOR_NS="${GLOBAL_OPERATOR_NAMESPACE}"
+else
+  export CAMEL_K_GLOBAL_OPERATOR_NS="default"
 fi
 
 # Then run integration tests

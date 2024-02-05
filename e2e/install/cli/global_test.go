@@ -24,15 +24,12 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,20 +37,9 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 func TestRunGlobalInstall(t *testing.T) {
-	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if !forceGlobalTest {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
-			return
-		}
-	}
-
 	RegisterTestingT(t)
 
 	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {

@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"fmt"
@@ -46,6 +46,7 @@ func TestKamelCLIDump(t *testing.T) {
 
 		t.Run("dump non-empty namespace", func(t *testing.T) {
 			operatorID := fmt.Sprintf("camel-k-%s", ns)
+			Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 			Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------------
 
 name: kamel-config-cluster-custom
-description: 'Provides configuration for acessing a custom kubernetes cluster'
+description: 'Provides configuration for accessing a custom kubernetes cluster'
 
 inputs:
   cluster-config-data:

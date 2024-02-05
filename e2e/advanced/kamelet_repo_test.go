@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"fmt"
@@ -38,6 +38,7 @@ func TestKameletFromCustomRepository(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 

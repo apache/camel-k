@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"fmt"
@@ -38,6 +38,7 @@ import (
 func TestRunIncrementalBuildRoutine(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-incremental-build"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := RandomizedSuffixName("java")
@@ -89,6 +90,7 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 func TestRunIncrementalBuildPod(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-incremental-build"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := RandomizedSuffixName("java")
@@ -146,6 +148,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 func TestRunIncrementalBuildOff(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-standard-build"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := RandomizedSuffixName("java")
@@ -194,6 +197,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-standard-build"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		name := RandomizedSuffixName("java")

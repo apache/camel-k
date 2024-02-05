@@ -69,12 +69,7 @@ func TestRunDevMode(t *testing.T) {
 		args := os.Args
 		defer func() { os.Args = args }()
 
-		globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-		if globalTest {
-			os.Args = []string{"kamel", "run", "-n", ns, file, "--name", name, "--dev"}
-		} else {
-			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
-		}
+		os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
 		go kamelRun.Execute()
 
 		Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), TestTimeoutMedium).Should(BeTrue())
@@ -103,12 +98,7 @@ func TestRunDevMode(t *testing.T) {
 		args := os.Args
 		defer func() { os.Args = args }()
 
-		globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-		if globalTest {
-			os.Args = []string{"kamel", "run", "-n", ns, remoteFile, "--name", name, "--dev"}
-		} else {
-			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, remoteFile, "--name", name, "--dev"}
-		}
+		os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, remoteFile, "--name", name, "--dev"}
 
 		go kamelRun.Execute()
 
@@ -152,12 +142,7 @@ func TestRunDevMode(t *testing.T) {
 		args := os.Args
 		defer func() { os.Args = args }()
 
-		globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-		if globalTest {
-			os.Args = []string{"kamel", "run", "-n", ns, file, "--name", name, "--dev"}
-		} else {
-			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
-		}
+		os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
 
 		go kamelRun.Execute()
 

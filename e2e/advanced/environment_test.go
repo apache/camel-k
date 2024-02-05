@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"fmt"
@@ -65,6 +65,7 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		// Install Camel K with the HTTP proxy environment variable
 		operatorID := "camel-k-trait-environment"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy),
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),

@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"testing"
@@ -39,6 +39,7 @@ func TestKamelCLIPromote(t *testing.T) {
 	// Dev environment namespace
 	WithNewTestNamespace(t, func(nsDev string) {
 		operatorDevID := "camel-k-cli-promote-dev"
+		Expect(CopyCamelCatalog(nsDev, operatorDevID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorDevID, nsDev).Execute()).To(Succeed())
 
 		// Dev content configmap
@@ -79,6 +80,7 @@ func TestKamelCLIPromote(t *testing.T) {
 		// Prod environment namespace
 		WithNewTestNamespace(t, func(nsProd string) {
 			operatorProdID := "camel-k-cli-promote-prod"
+			Expect(CopyCamelCatalog(nsProd, operatorProdID)).To(Succeed())
 			Expect(KamelInstallWithID(operatorProdID, nsProd).Execute()).To(Succeed())
 			Eventually(PlatformPhase(nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 

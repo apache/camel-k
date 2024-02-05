@@ -23,7 +23,6 @@ package util
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -258,18 +257,8 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	}
 
 	// Some log from running pods
-
-	//
-	// Get logs for global operator if it is being used
-	//
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if globalTest {
-		opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-		if opns == "" {
-			err := errors.New("No operator namespace defined in CAMEL_K_GLOBAL_OPERATOR_NS")
-			t.Logf("ERROR cannot find global operator namespace: %v\n", err)
-		}
-
+	opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
+	if opns != "" {
 		lst, err := c.CoreV1().Pods(opns).List(ctx, metav1.ListOptions{})
 		if err != nil {
 			return err

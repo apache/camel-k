@@ -73,7 +73,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  common-it-single-operator-installation:
+  common-it:
     runs-on: ubuntu-latest
 
     steps:
@@ -96,7 +96,7 @@ jobs:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
 
-  common-it-custom-operator-installation:
+  common-it-advanced:
     runs-on: ubuntu-latest
 
     steps:

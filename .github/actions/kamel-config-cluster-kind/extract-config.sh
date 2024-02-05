@@ -30,6 +30,8 @@ echo "cluster-image-registry-push-host=${KIND_REGISTRY}" >> $GITHUB_OUTPUT
 echo "cluster-image-registry-pull-host=${KIND_REGISTRY}" >> $GITHUB_OUTPUT
 echo "cluster-image-registry-insecure=$(echo true)" >> $GITHUB_OUTPUT
 
+echo "cluster-global-operator-namespace=$(echo default)" >> $GITHUB_OUTPUT
+
 #
 # Export the context used for admin and user
 # Since kind has no rbac switched on then these can be the same

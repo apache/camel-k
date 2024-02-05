@@ -283,9 +283,9 @@ test-smoke: do-build
 #
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
-test-common-with-custom-install: do-build
+test-advanced: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/commonwithcustominstall -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 90m -v ./e2e/advanced -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #

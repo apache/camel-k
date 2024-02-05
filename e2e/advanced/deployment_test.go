@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"testing"
@@ -35,9 +35,10 @@ import (
 
 func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		op := "camel-k-failing-deploy"
+		operatorID := "camel-k-failing-deploy"
 		nsRestr := "restr"
-		Expect(KamelInstallWithID(op, ns, "--global", "--force").Execute()).To(Succeed())
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(KamelInstallWithID(operatorID, ns, "--global", "--force").Execute()).To(Succeed())
 		// Create restricted namespace
 		ExpectExecSucceed(t,
 			exec.Command(
@@ -64,7 +65,7 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 		)
 		// Create an Integration into a restricted namespace
 		name := RandomizedSuffixName("java-fail")
-		Expect(KamelRunWithID(op, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
 		// Check the error is reported into the Integration
 		Eventually(IntegrationPhase(nsRestr, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
 		Eventually(IntegrationCondition(nsRestr, name, v1.IntegrationConditionReady)().Status).

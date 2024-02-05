@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"testing"
@@ -39,6 +39,7 @@ func TestSyntheticIntegrationOff(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// Install Camel K without synthetic Integration feature variable (default)
 		operatorID := "camel-k-synthetic-env-off"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		// Run the external deployment
@@ -59,6 +60,7 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		// Install Camel K with the synthetic Integration feature variable
 		operatorID := "camel-k-synthetic-env"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--operator-env-vars", "CAMEL_K_SYNTHETIC_INTEGRATIONS=true",
 		).Execute()).To(Succeed())
