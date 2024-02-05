@@ -30,6 +30,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -41,6 +42,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NewMonitorAction is an action used to monitor manager Integrations.
@@ -228,19 +230,17 @@ func isInIntegrationKitFailed(status v1.IntegrationStatus) bool {
 }
 
 func (action *monitorAction) checkDigestAndRebuild(ctx context.Context, integration *v1.Integration, kit *v1.IntegrationKit) (*v1.Integration, error) {
-	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, action.client, integration)
+	secrets, configmaps := getIntegrationSecretAndConfigmapResourceVersions(ctx, action.client, integration)
 	hash, err := digest.ComputeForIntegration(integration, configmaps, secrets)
 	if err != nil {
 		return nil, err
 	}
 
 	if hash != integration.Status.Digest {
-		action.L.Info("Monitor: Integration needs a rebuild")
-
+		action.L.Infof("Integration %s digest has changed: resetting its status. Will check if it needs to be rebuilt and restarted.", integration.Name)
 		if isIntegrationKitResetRequired(integration, kit) {
 			integration.SetIntegrationKit(nil)
 		}
-
 		integration.Initialize()
 		integration.Status.Digest = hash
 
@@ -279,29 +279,40 @@ func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.Integrat
 	return false
 }
 
-func getIntegrationSecretsAndConfigmaps(ctx context.Context, client client.Client, integration *v1.Integration) ([]*corev1.Secret, []*corev1.ConfigMap) {
-	configmaps := make([]*corev1.ConfigMap, 0)
-	secrets := make([]*corev1.Secret, 0)
-	if integration.Spec.Traits.Mount != nil {
-		for _, c := range integration.Spec.Traits.Mount.Configs {
+// getIntegrationSecretAndConfigmapResourceVersions returns the list of resource versions only useful to watch for changes.
+func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, client client.Client, integration *v1.Integration) ([]string, []string) {
+	configmaps := make([]string, 0)
+	secrets := make([]string, 0)
+	if integration.Spec.Traits.Mount != nil && pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, false) {
+		mergedResources := make([]string, 0)
+		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Configs...)
+		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Resources...)
+		for _, c := range mergedResources {
 			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 				if conf.StorageType() == utilResource.StorageTypeConfigmap {
-					configmap := kubernetes.LookupConfigmap(ctx, client, integration.Namespace, conf.Name())
-					configmaps = append(configmaps, configmap)
+					cm := corev1.ConfigMap{
+						TypeMeta: metav1.TypeMeta{
+							Kind:       "ConfigMap",
+							APIVersion: corev1.SchemeGroupVersion.String(),
+						},
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: integration.Namespace,
+							Name:      conf.Name(),
+						},
+					}
+					configmaps = append(configmaps, kubernetes.LookupResourceVersion(ctx, client, &cm))
 				} else if conf.StorageType() == utilResource.StorageTypeSecret {
-					secret := kubernetes.LookupSecret(ctx, client, integration.Namespace, conf.Name())
-					secrets = append(secrets, secret)
-				}
-			}
-		}
-		for _, r := range integration.Spec.Traits.Mount.Resources {
-			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
-				if conf.StorageType() == utilResource.StorageTypeConfigmap {
-					configmap := kubernetes.LookupConfigmap(ctx, client, integration.Namespace, conf.Name())
-					configmaps = append(configmaps, configmap)
-				} else if conf.StorageType() == utilResource.StorageTypeSecret {
-					secret := kubernetes.LookupSecret(ctx, client, integration.Namespace, conf.Name())
-					secrets = append(secrets, secret)
+					sec := corev1.Secret{
+						TypeMeta: metav1.TypeMeta{
+							Kind:       "Secret",
+							APIVersion: corev1.SchemeGroupVersion.String(),
+						},
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: integration.Namespace,
+							Name:      conf.Name(),
+						},
+					}
+					secrets = append(secrets, kubernetes.LookupResourceVersion(ctx, client, &sec))
 				}
 			}
 		}

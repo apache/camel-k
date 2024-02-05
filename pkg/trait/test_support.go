@@ -31,7 +31,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -140,11 +139,11 @@ func ToAddonTrait(t *testing.T, config map[string]interface{}) v1.AddonTrait {
 	t.Helper()
 
 	data, err := json.Marshal(config)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var addon v1.AddonTrait
 	err = json.Unmarshal(data, &addon)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return addon
 }

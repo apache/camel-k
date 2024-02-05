@@ -23,11 +23,12 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,93 +41,102 @@ import (
 )
 
 func TestPipeScale(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
-	if ocp {
-		t.Skip("TODO: Temporarily disabled as this test is flaky on OpenShift 3")
-		return
-	}
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-pipe-scale"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithIDAndKameletCatalog(t, ctx, operatorID, ns)).To(Succeed())
 
-	name := RandomizedSuffixName("timer2log")
-	Expect(KamelBindWithID(operatorID, ns, "timer-source?message=HelloPipe", "log-sink", "--name", name).Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(PipeConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("HelloPipe"))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-	t.Run("Update Pipe scale spec", func(t *testing.T) {
-		Expect(ScalePipe(ns, name, 3)).To(Succeed())
-		// Check the scale cascades into the Deployment scale
-		Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(3))
-		// Check it also cascades into the Integration scale subresource Status field
-		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 3)))
-		// Check it also cascades into the Pipe scale subresource Status field
-		Eventually(PipeStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 3)))
-		// Check the readiness condition becomes truthy back
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		// Finally check the readiness condition becomes truthy back onPipe
-		Eventually(PipeConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		ocp, err := openshift.IsOpenShift(TestClient(t))
+		require.NoError(t, err)
+		if ocp {
+			t.Skip("TODO: Temporarily disabled as this test is flaky on OpenShift 3")
+			return
+		}
+
+		name := RandomizedSuffixName("timer2log")
+		g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "timer-source?message=HelloPipe", "log-sink", "--name", name).Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("HelloPipe"))
+
+		t.Run("Update Pipe scale spec", func(t *testing.T) {
+			g.Expect(ScalePipe(t, ctx, ns, name, 3)).To(Succeed())
+			// Check the scale cascades into the Deployment scale
+			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(3))
+			// Check it also cascades into the Integration scale subresource Status field
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+			// Check it also cascades into the Pipe scale subresource Status field
+			g.Eventually(PipeStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+			// Check the readiness condition becomes truthy back
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			// Finally check the readiness condition becomes truthy back onPipe
+			g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		})
+
+		t.Run("ScalePipe with polymorphic client", func(t *testing.T) {
+			scaleClient, err := TestClient(t).ScalesClient()
+			g.Expect(err).To(BeNil())
+
+			// Patch the integration scale subresource
+			patch := "{\"spec\":{\"replicas\":2}}"
+			_, err = scaleClient.Scales(ns).Patch(ctx, v1.SchemeGroupVersion.WithResource("Pipes"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
+			g.Expect(err).To(BeNil())
+
+			// Check the readiness condition is still truthy as down-scaling
+			g.Expect(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+			// Check the Integration scale subresource Spec field
+			g.Eventually(IntegrationSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
+			// Then check it cascades into the Deployment scale
+			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(2))
+			// Check it cascades into the Integration scale subresource Status field
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
+			// Finally check it cascades into the Pipe scale subresource Status field
+			g.Eventually(PipeStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
+		})
+
+		t.Run("ScalePipe with Camel K client", func(t *testing.T) {
+			camel, err := versioned.NewForConfig(TestClient(t).GetConfig())
+			g.Expect(err).To(BeNil())
+
+			// Getter
+			PipeScale, err := camel.CamelV1().Pipes(ns).GetScale(ctx, name, metav1.GetOptions{})
+			g.Expect(err).To(BeNil())
+			g.Expect(PipeScale.Spec.Replicas).To(BeNumerically("==", 2))
+			g.Expect(PipeScale.Status.Replicas).To(BeNumerically("==", 2))
+
+			// Setter
+			PipeScale.Spec.Replicas = 1
+			_, err = camel.CamelV1().Pipes(ns).UpdateScale(ctx, name, PipeScale, metav1.UpdateOptions{})
+			g.Expect(err).To(BeNil())
+
+			// Check the readiness condition is still truthy as down-scaling inPipe
+			g.Expect(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+			// Check the Pipe scale subresource Spec field
+			g.Eventually(PipeSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			// Check the readiness condition is still truthy as down-scaling
+			g.Expect(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
+			// Check the Integration scale subresource Spec field
+			g.Eventually(IntegrationSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			// Then check it cascades into the Deployment scale
+			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(1))
+			// Finally check it cascades into the Integration scale subresource Status field
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+		})
+
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	t.Run("ScalePipe with polymorphic client", func(t *testing.T) {
-		scaleClient, err := TestClient().ScalesClient()
-		Expect(err).To(BeNil())
-
-		// Patch the integration scale subresource
-		patch := "{\"spec\":{\"replicas\":2}}"
-		_, err = scaleClient.Scales(ns).Patch(TestContext, v1.SchemeGroupVersion.WithResource("Pipes"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
-		Expect(err).To(BeNil())
-
-		// Check the readiness condition is still truthy as down-scaling
-		Expect(PipeConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
-		// Check the Integration scale subresource Spec field
-		Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 2)))
-		// Then check it cascades into the Deployment scale
-		Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(2))
-		// Check it cascades into the Integration scale subresource Status field
-		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 2)))
-		// Finally check it cascades into the Pipe scale subresource Status field
-		Eventually(PipeStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 2)))
-	})
-
-	t.Run("ScalePipe with Camel K client", func(t *testing.T) {
-		camel, err := versioned.NewForConfig(TestClient().GetConfig())
-		Expect(err).To(BeNil())
-
-		// Getter
-		PipeScale, err := camel.CamelV1().Pipes(ns).GetScale(TestContext, name, metav1.GetOptions{})
-		Expect(err).To(BeNil())
-		Expect(PipeScale.Spec.Replicas).To(BeNumerically("==", 2))
-		Expect(PipeScale.Status.Replicas).To(BeNumerically("==", 2))
-
-		// Setter
-		PipeScale.Spec.Replicas = 1
-		_, err = camel.CamelV1().Pipes(ns).UpdateScale(TestContext, name, PipeScale, metav1.UpdateOptions{})
-		Expect(err).To(BeNil())
-
-		// Check the readiness condition is still truthy as down-scaling inPipe
-		Expect(PipeConditionStatus(ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
-		// Check the Pipe scale subresource Spec field
-		Eventually(PipeSpecReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 1)))
-		// Check the readiness condition is still truthy as down-scaling
-		Expect(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
-		// Check the Integration scale subresource Spec field
-		Eventually(IntegrationSpecReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 1)))
-		// Then check it cascades into the Deployment scale
-		Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(1))
-		// Finally check it cascades into the Integration scale subresource Status field
-		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 1)))
-	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -51,6 +52,8 @@ const (
 	sourceCompressionAnnotation = "camel.apache.org/source.compression"
 )
 
+var capabilityDynamicProperty = regexp.MustCompile(`(\$\{([^}]*)\})`)
+
 // Identifiable represent an identifiable type.
 type Identifiable interface {
 	ID() ID
@@ -73,11 +76,6 @@ type Trait interface {
 	// InfluencesKit determines if the trait has any influence on Integration Kits
 	InfluencesKit() bool
 
-	// InfluencesBuild defines a low level of granularity for those traits which influences the build.
-	// The trait can specify if any particular trait configuration influences a build or not.
-	// Note: You must override this method if you override `InfluencesKit()`
-	InfluencesBuild(this, prev map[string]interface{}) bool
-
 	// IsPlatformTrait marks all fundamental traits that allow the platform to work
 	IsPlatformTrait() bool
 
@@ -85,16 +83,18 @@ type Trait interface {
 	RequiresIntegrationPlatform() bool
 
 	// IsAllowedInProfile tells if the trait supports the given profile
-	IsAllowedInProfile(v1.TraitProfile) bool
+	IsAllowedInProfile(traitProfile v1.TraitProfile) bool
 
 	// Order is the order in which the trait should be executed in the normal flow
 	Order() int
 }
 
+// Comparable is the interface exposing comparable funcs.
 type Comparable interface {
-	Matches(Trait) bool
+	Matches(trait Trait) bool
 }
 
+// ComparableTrait is the interface used to compare two traits between them.
 type ComparableTrait interface {
 	Trait
 	Comparable
@@ -154,12 +154,6 @@ func (trait *BaseTrait) InfluencesKit() bool {
 	return false
 }
 
-// InfluencesBuild defines a low level of granularity for those traits which influences the build.
-// The trait can specify if any particular trait configuration influences a build or not.
-func (trait *BaseTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return false
-}
-
 // IsPlatformTrait marks all fundamental traits that allow the platform to work.
 func (trait *BaseTrait) IsPlatformTrait() bool {
 	return false
@@ -194,7 +188,7 @@ func (trait *BasePlatformTrait) IsPlatformTrait() bool {
 // ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
 type ControllerStrategySelector interface {
 	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
-	SelectControllerStrategy(*Environment) (*ControllerStrategy, error)
+	SelectControllerStrategy(env *Environment) (*ControllerStrategy, error)
 	// ControllerStrategySelectorOrder returns the order (priority) of the controller strategy selector
 	ControllerStrategySelectorOrder() int
 }
@@ -735,4 +729,18 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	return nil
+}
+
+// CapabilityPropertyKey returns the key or expand any variable provided in it. vars variable contain the
+// possible dynamic values to use.
+func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) string {
+	if capabilityDynamicProperty.MatchString(camelPropertyKey) && vars != nil {
+		match := capabilityDynamicProperty.FindStringSubmatch(camelPropertyKey)
+		if len(match) < 2 {
+			// Should not happen, but fallback to the key not expanded instead of panic if it comes to happen
+			return camelPropertyKey
+		}
+		return strings.ReplaceAll(camelPropertyKey, match[1], vars[match[2]])
+	}
+	return camelPropertyKey
 }

@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -36,14 +37,14 @@ import (
 
 func TestDefaultEnvironment(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	env := mockEnvironment(catalog)
 	env.Platform.ResyncStatusFullConfig()
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 
 	ns := false
 	name := false
@@ -80,7 +81,7 @@ func TestDefaultEnvironment(t *testing.T) {
 
 func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	c, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
@@ -91,8 +92,8 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	env.Platform.ResyncStatusFullConfig()
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 
 	ns := false
 	name := false
@@ -119,7 +120,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 
 func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	c, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
@@ -131,8 +132,8 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	env.Platform.ResyncStatusFullConfig()
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 
 	ns := false
 	name := false
@@ -159,7 +160,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 func TestCustomEnvVars(t *testing.T) {
 	c, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
@@ -170,8 +171,8 @@ func TestCustomEnvVars(t *testing.T) {
 	env.Platform.ResyncStatusFullConfig()
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 
 	userK1 := false
 	userK2 := false

@@ -59,6 +59,8 @@ type BuildConfiguration struct {
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
 	// Annotation to use for the builder pod. Only used for `pod` strategy
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	// The list of platforms used in order to build a container image.
+	ImagePlatforms []string `property:"platforms" json:"platforms,omitempty"`
 }
 
 // BuildStrategy specifies how the Build should be executed.
@@ -232,6 +234,7 @@ type Traits struct {
 	// The configuration of Quarkus trait
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 	// The configuration of Registry trait
+	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The configuration of Route trait
 	Route *trait.RouteTrait `property:"route" json:"route,omitempty"`
@@ -341,10 +344,23 @@ type RuntimeSpec struct {
 	Capabilities map[string]Capability `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
 }
 
-// Capability is a particular feature which requires a well known set of dependencies
+// Capability is a particular feature which requires a well known set of dependencies and other properties
 // which are specified in the runtime catalog.
 type Capability struct {
-	Dependencies []MavenArtifact `json:"dependencies" yaml:"dependencies"`
+	// List of required Maven dependencies
+	Dependencies []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+	// Set of required Camel runtime properties
+	RuntimeProperties []CamelProperty `json:"runtimeProperties,omitempty" yaml:"runtimeProperties,omitempty"`
+	// Set of required Camel build time properties
+	BuildTimeProperties []CamelProperty `json:"buildTimeProperties,omitempty" yaml:"buildTimeProperties,omitempty"`
+	// Set of generic metadata
+	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+}
+
+// CamelProperty represents a Camel property that may end up in an application.properties file.
+type CamelProperty struct {
+	Key   string `json:"key" yaml:"key"`
+	Value string `json:"value,omitempty" yaml:"value,omitempty"`
 }
 
 const (

@@ -68,7 +68,7 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, *TraitCondition, 
 		return false, nil, nil
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+		return false, NewIntegrationConditionUserDisabled("ServiceBinding"), nil
 	}
 	if len(t.Services) == 0 {
 		return false, nil, nil

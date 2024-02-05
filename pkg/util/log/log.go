@@ -43,7 +43,7 @@ func InitForCmd() {
 
 // Injectable identifies objects that can receive a Logger.
 type Injectable interface {
-	InjectLogger(Logger)
+	InjectLogger(logger Logger)
 }
 
 // Logger --.

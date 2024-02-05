@@ -112,7 +112,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 			}
 		}
 		if !pointer.BoolDeref(t.Enabled, false) {
-			return false, trait.NewIntegrationConditionUserDisabled(), nil
+			return false, trait.NewIntegrationConditionUserDisabled("Master"), nil
 		}
 		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
 			t.delegateDependencies = findAdditionalDependencies(e, meta)

@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,7 +34,7 @@ func TestConfigureGCTraitDoesSucceed(t *testing.T) {
 	configured, condition, err := gcTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 }
@@ -43,6 +44,7 @@ func TestConfigureDisabledGCTraitDoesNotSucceed(t *testing.T) {
 	gcTrait.Enabled = pointer.Bool(false)
 
 	expectedCondition := NewIntegrationCondition(
+		"GC",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",
@@ -50,7 +52,7 @@ func TestConfigureDisabledGCTraitDoesNotSucceed(t *testing.T) {
 	)
 	configured, condition, err := gcTrait.Configure(environment)
 	assert.False(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, condition)
 	assert.Equal(t, expectedCondition, condition)
 }
@@ -60,7 +62,7 @@ func TestApplyGarbageCollectorTraitFirstGenerationDoesSucceed(t *testing.T) {
 
 	err := gcTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.PostProcessors, 1)
 	assert.Len(t, environment.PostActions, 0)
 }
@@ -71,7 +73,7 @@ func TestApplyGarbageCollectorTraitNextGenerationDoesSucceed(t *testing.T) {
 
 	err := gcTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.PostProcessors, 1)
 	assert.Len(t, environment.PostActions, 1)
 }
@@ -82,7 +84,7 @@ func TestApplyGCTraitDuringInitializationPhaseSkipPostActions(t *testing.T) {
 
 	err := gcTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.PostProcessors, 1)
 	assert.Len(t, environment.PostActions, 0)
 }

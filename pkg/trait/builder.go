@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -56,9 +57,33 @@ func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild overrides base class method.
-func (t *builderTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return true
+func (t *builderTrait) Matches(trait Trait) bool {
+	otherTrait, ok := trait.(*builderTrait)
+	if !ok {
+		return false
+	}
+	if t.BaseImage != otherTrait.BaseImage || len(t.Properties) != len(otherTrait.Properties) || len(t.Tasks) != len(otherTrait.Tasks) {
+		return false
+	}
+	// More sofisticated check if len is the same. Sort and compare via slices equal func.
+	// Although the Matches func is used as a support for comparison, it makes sense
+	// to copy the properties and avoid possible inconsistencies caused by the sorting operation.
+	srtThisProps := make([]string, len(t.Properties))
+	srtOtheProps := make([]string, len(otherTrait.Properties))
+	copy(srtThisProps, t.Properties)
+	copy(srtOtheProps, otherTrait.Properties)
+	slices.Sort(srtThisProps)
+	slices.Sort(srtOtheProps)
+	if !slices.Equal(srtThisProps, srtOtheProps) {
+		return false
+	}
+	srtThisTasks := make([]string, len(t.Tasks))
+	srtOtheTasks := make([]string, len(otherTrait.Tasks))
+	copy(srtThisTasks, t.Tasks)
+	copy(srtOtheTasks, otherTrait.Tasks)
+	slices.Sort(srtThisTasks)
+	slices.Sort(srtOtheTasks)
+	return slices.Equal(srtThisTasks, srtOtheTasks)
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
@@ -140,7 +165,7 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 		m := "The limit-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-memory parameter instead."
 		t.L.Info(m)
 		if condition == nil {
-			condition = NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, "")
+			condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, "")
 		}
 		condition = newOrAppend(condition, m)
 		t.TasksLimitMemory = append(t.TasksLimitMemory, fmt.Sprintf("builder:%s", t.LimitMemory))
@@ -151,7 +176,7 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 
 func newOrAppend(condition *TraitCondition, message string) *TraitCondition {
 	if condition == nil {
-		condition = NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+		condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
 	} else {
 		condition.message += "; " + message
 	}
@@ -241,7 +266,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
-		pipelineTasks = append(pipelineTasks, v1.Task{Jib: &v1.JibTask{
+		jibTask := v1.Task{Jib: &v1.JibTask{
 			BaseTask: v1.BaseTask{
 				Name:          "jib",
 				Configuration: *taskConfOrDefault(tasksConf, "jib"),
@@ -251,7 +276,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Image:     imageName,
 				Registry:  e.Platform.Status.Build.Registry,
 			},
-		}})
+		}}
+		if t.ImagePlatforms != nil {
+			jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
+		}
+		pipelineTasks = append(pipelineTasks, jibTask)
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{

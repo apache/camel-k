@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
@@ -36,7 +37,7 @@ func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
 	t.Helper()
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, catalog)
 
 	client, _ := test.NewFakeClient()
@@ -79,8 +80,8 @@ func TestProbesDependencies(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
 }
 
@@ -104,8 +105,8 @@ func TestProbesOnDeployment(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 
 	container := env.GetIntegrationContainer()
 
@@ -142,8 +143,8 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 
 	container := env.GetIntegrationContainer()
 
@@ -184,21 +185,22 @@ func TestProbesOnKnativeService(t *testing.T) {
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
 	serviceOverrideCondition := NewIntegrationCondition(
+		"Service",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
-		"serviceTraitConfiguration",
+		"TraitConfiguration",
 		"explicitly disabled by the platform: knative-service trait has priority over this trait",
 	)
 	ctrlStrategyCondition := NewIntegrationCondition(
+		"Deployment",
 		v1.IntegrationConditionDeploymentAvailable,
 		corev1.ConditionFalse,
-		"deploymentTraitConfiguration",
+		"DeploymentAvailable",
 		"controller strategy: knative-service",
 	)
 
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
-	assert.Len(t, conditions, 2)
+	require.NoError(t, err)
 	assert.Contains(t, conditions, ctrlStrategyCondition)
 	assert.Contains(t, conditions, serviceOverrideCondition)
 

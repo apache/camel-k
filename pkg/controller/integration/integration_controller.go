@@ -20,6 +20,7 @@ package integration
 import (
 	"context"
 	"fmt"
+
 	"reflect"
 	"time"
 
@@ -95,6 +96,7 @@ func integrationUpdateFunc(old *v1.Integration, it *v1.Integration) bool {
 		timeToFirstReadiness.Observe(duration.Seconds())
 	}
 
+	updateIntegrationPhase(it.Name, string(it.Status.Phase))
 	// If traits have changed, the reconciliation loop must kick in as
 	// traits may have impact
 	sameTraits, err := trait.IntegrationsHaveSameTraits(old, it)
@@ -595,7 +597,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 }
 
 func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration, log *log.Logger) error {
-	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, r.client, target)
+	secrets, configmaps := getIntegrationSecretAndConfigmapResourceVersions(ctx, r.client, target)
 	d, err := digest.ComputeForIntegration(target, configmaps, secrets)
 	if err != nil {
 		return err

@@ -25,7 +25,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
@@ -67,7 +66,7 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 			t.addErrorHandlerDependencies(e, defaultErrorHandlerURI)
 		}
 
-		return t.addErrorHandlerAsSource(e)
+		return t.addGlobalErrorHandlerAsSource(e)
 	}
 	return nil
 }
@@ -84,10 +83,10 @@ func (t *errorHandlerTrait) addErrorHandlerDependencies(e *Environment, uri stri
 	}
 }
 
-func (t *errorHandlerTrait) addErrorHandlerAsSource(e *Environment) error {
+func (t *errorHandlerTrait) addGlobalErrorHandlerAsSource(e *Environment) error {
 	flowErrorHandler := map[string]interface{}{
-		"error-handler": map[string]string{
-			"ref-error-handler": t.ErrorHandlerRef,
+		"errorHandler": map[string]string{
+			"refErrorHandler": t.ErrorHandlerRef,
 		},
 	}
 	encodedFlowErrorHandler, err := yaml.Marshal([]map[string]interface{}{flowErrorHandler})

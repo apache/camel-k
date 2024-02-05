@@ -23,6 +23,7 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -35,31 +36,38 @@ import (
 )
 
 func TestStructuredLogs(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	name := RandomizedSuffixName("java")
-	Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-		"--name", name,
-		"-t", "logging.format=json").Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-structured-logs"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-	pod := OperatorPod(ns)()
-	Expect(pod).NotTo(BeNil())
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-	// pod.Namespace could be different from ns if using global operator
-	fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
-	logOptions := &corev1.PodLogOptions{
-		Container: "camel-k-operator",
-	}
-	logs, err := StructuredLogs(pod.Namespace, pod.Name, logOptions, false)
-	Expect(err).To(BeNil())
-	Expect(logs).NotTo(BeEmpty())
+		name := RandomizedSuffixName("java")
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "logging.format=json").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-	it := Integration(ns, name)()
-	Expect(it).NotTo(BeNil())
-	build := Build(IntegrationKitNamespace(ns, name)(), IntegrationKit(ns, name)())()
-	Expect(build).NotTo(BeNil())
+		pod := OperatorPod(t, ctx, ns)()
+		g.Expect(pod).NotTo(BeNil())
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		// pod.Namespace could be different from ns if using global operator
+		fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
+		logOptions := &corev1.PodLogOptions{
+			Container: "camel-k-operator",
+		}
+		logs, err := StructuredLogs(t, ctx, pod.Namespace, pod.Name, logOptions, false)
+		g.Expect(err).To(BeNil())
+		g.Expect(logs).NotTo(BeEmpty())
+
+		it := Integration(t, ctx, ns, name)()
+		g.Expect(it).NotTo(BeNil())
+		build := Build(t, ctx, IntegrationKitNamespace(t, ctx, ns, name)(), IntegrationKit(t, ctx, ns, name)())()
+		g.Expect(build).NotTo(BeNil())
+
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }

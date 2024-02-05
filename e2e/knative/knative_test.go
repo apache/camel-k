@@ -23,6 +23,7 @@ limitations under the License.
 package knative
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -36,120 +37,120 @@ import (
 )
 
 func TestKnative(t *testing.T) {
-	RegisterTestingT(t)
+	ctx := TestContext()
+	g := NewWithT(t)
 
 	knChannelMessages := "messages"
 	knChannelWords := "words"
-	Expect(CreateKnativeChannel(ns, knChannelMessages)()).To(Succeed())
-	Expect(CreateKnativeChannel(ns, knChannelWords)()).To(Succeed())
+	g.Expect(CreateKnativeChannel(t, ctx, ns, knChannelMessages)()).To(Succeed())
+	g.Expect(CreateKnativeChannel(t, ctx, ns, knChannelWords)()).To(Succeed())
 
 	t.Run("Service combo", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/knative2.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "knative2", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
-		Expect(KamelRunWithID(operatorID, ns, "files/knative3.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knative3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "knative3", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
-		Expect(KamelRunWithID(operatorID, ns, "files/knative1.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knative1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "knative1", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knative2.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knative2", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knative3.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knative3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knative3", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knative1.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knative1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "knative1", camelv1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(v1.ConditionTrue))
 		// Correct logs
-		Eventually(IntegrationLogs(ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 2: Hello from knative2"))
-		Eventually(IntegrationLogs(ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 3: Hello from knative3"))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 2: Hello from knative2"))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knative1"), TestTimeoutMedium).Should(ContainSubstring("Received from 3: Hello from knative3"))
 		// Incorrect logs
-		Consistently(IntegrationLogs(ns, "knative1"), 10*time.Second).ShouldNot(ContainSubstring("Received from 2: Hello from knative3"))
-		Consistently(IntegrationLogs(ns, "knative1"), 10*time.Second).ShouldNot(ContainSubstring("Received from 3: Hello from knative2"))
+		g.Consistently(IntegrationLogs(t, ctx, ns, "knative1"), 10*time.Second).ShouldNot(ContainSubstring("Received from 2: Hello from knative3"))
+		g.Consistently(IntegrationLogs(t, ctx, ns, "knative1"), 10*time.Second).ShouldNot(ContainSubstring("Received from 3: Hello from knative2"))
 		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Channel combo v1beta1", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/knativech2.groovy").Execute()).To(Succeed())
-		Expect(KamelRunWithID(operatorID, ns, "files/knativech1.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knativech2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationPodPhase(ns, "knativech1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationLogs(ns, "knativech2"), TestTimeoutMedium).Should(ContainSubstring("Received: Hello from knativech1"))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativech2.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativech1.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativech2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativech1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativech2"), TestTimeoutMedium).Should(ContainSubstring("Received: Hello from knativech1"))
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Channel combo get to post", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/knativegetpost2.groovy").Execute()).To(Succeed())
-		Expect(KamelRunWithID(operatorID, ns, "files/knativegetpost1.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knativegetpost2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationPodPhase(ns, "knativegetpost1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationLogs(ns, "knativegetpost2"), TestTimeoutMedium).Should(ContainSubstring(`Received ""`))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativegetpost2.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativegetpost1.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativegetpost2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativegetpost1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativegetpost2"), TestTimeoutMedium).Should(ContainSubstring(`Received ""`))
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Multi channel chain", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/knativemultihop3.groovy").Execute()).To(Succeed())
-		Expect(KamelRunWithID(operatorID, ns, "files/knativemultihop2.groovy").Execute()).To(Succeed())
-		Expect(KamelRunWithID(operatorID, ns, "files/knativemultihop1.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knativemultihop3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationPodPhase(ns, "knativemultihop2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationPodPhase(ns, "knativemultihop1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationLogs(ns, "knativemultihop3"), TestTimeoutMedium).Should(ContainSubstring(`From messages: message`))
-		Eventually(IntegrationLogs(ns, "knativemultihop3"), TestTimeoutMedium).Should(ContainSubstring(`From words: word`))
-		Eventually(IntegrationLogs(ns, "knativemultihop3"), TestTimeoutMedium).Should(ContainSubstring(`From words: transformed message`))
-		Eventually(IntegrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: word`))
-		Eventually(IntegrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From words: message`))
-		Eventually(IntegrationLogs(ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: transformed message`))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativemultihop3.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativemultihop2.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativemultihop1.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativemultihop3"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativemultihop2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativemultihop1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativemultihop3"), TestTimeoutMedium).Should(ContainSubstring(`From messages: message`))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativemultihop3"), TestTimeoutMedium).Should(ContainSubstring(`From words: word`))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativemultihop3"), TestTimeoutMedium).Should(ContainSubstring(`From words: transformed message`))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: word`))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From words: message`))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativemultihop3"), 10*time.Second).ShouldNot(ContainSubstring(`From messages: transformed message`))
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Flow", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/flow.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "flow"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "flow", camelv1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(v1.ConditionTrue))
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/flow.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "flow"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "flow", camelv1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(v1.ConditionTrue))
 
 		t.Run("Scale to zero", func(t *testing.T) {
-			Eventually(IntegrationPod(ns, "flow"), TestTimeoutLong).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "flow"), TestTimeoutLong).Should(BeNil())
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Knative-service disabled", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/http_out.groovy", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "http-out"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(Service(ns, "http-out"), TestTimeoutShort).ShouldNot(BeNil())
-		Consistently(KnativeService(ns, "http-out"), TestTimeoutShort).Should(BeNil())
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/http_out.groovy", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "http-out"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(Service(t, ctx, ns, "http-out"), TestTimeoutShort).ShouldNot(BeNil())
+		g.Consistently(KnativeService(t, ctx, ns, "http-out"), TestTimeoutShort).Should(BeNil())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Knative-service priority", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/http_out.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "http-out"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(KnativeService(ns, "http-out"), TestTimeoutShort).ShouldNot(BeNil())
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/http_out.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "http-out"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(KnativeService(t, ctx, ns, "http-out"), TestTimeoutShort).ShouldNot(BeNil())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
 	t.Run("Knative-service annotation", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/knative2.groovy",
-			"-t", "knative-service.annotations.'haproxy.router.openshift.io/balance'=roundrobin").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(KnativeService(ns, "knative2"), TestTimeoutShort).ShouldNot(BeNil())
-		ks := KnativeService(ns, "knative2")()
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knative2.groovy", "-t", "knative-service.annotations.'haproxy.router.openshift.io/balance'=roundrobin").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knative2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(KnativeService(t, ctx, ns, "knative2"), TestTimeoutShort).ShouldNot(BeNil())
+		ks := KnativeService(t, ctx, ns, "knative2")()
 		annotations := ks.ObjectMeta.Annotations
-		Expect(annotations["haproxy.router.openshift.io/balance"]).To(Equal("roundrobin"))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(annotations["haproxy.router.openshift.io/balance"]).To(Equal("roundrobin"))
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
 func TestRunBroker(t *testing.T) {
-	RegisterTestingT(t)
-
-	WithNewTestNamespaceWithKnativeBroker(t, func(ns string) {
+	WithNewTestNamespaceWithKnativeBroker(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--trait-profile", "knative").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--trait-profile", "knative")).To(Succeed())
 
-		Expect(KamelRunWithID(operatorID, ns, "files/knativeevt1.groovy").Execute()).To(Succeed())
-		Expect(KamelRunWithID(operatorID, ns, "files/knativeevt2.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "knativeevt1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationPodPhase(ns, "knativeevt2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationLogs(ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 1: Hello 1"))
-		Eventually(IntegrationLogs(ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 2: Hello 2"))
-		Eventually(IntegrationLogs(ns, "knativeevt2")).ShouldNot(ContainSubstring("Received 1: Hello 2"))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(camelv1.IntegrationPlatformPhaseReady))
+
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativeevt1.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativeevt2.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeevt1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeevt2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 1: Hello 1"))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 2: Hello 2"))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "knativeevt2")).ShouldNot(ContainSubstring("Received 1: Hello 2"))
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

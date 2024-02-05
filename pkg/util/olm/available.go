@@ -18,8 +18,6 @@ limitations under the License.
 package olm
 
 import (
-	"context"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
@@ -34,7 +32,7 @@ import (
 // IsAPIAvailable returns true if we are connected to a cluster with OLM installed.
 //
 // This method should not be called from the operator, as it might require permissions that are not available.
-func IsAPIAvailable(ctx context.Context, c kubernetes.Interface, namespace string) (bool, error) {
+func IsAPIAvailable(c kubernetes.Interface) (bool, error) {
 	// check some Knative APIs
 	for _, api := range getOLMGroupVersions() {
 		if installed, err := isAvailable(c, api); err != nil {

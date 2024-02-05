@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -32,42 +33,42 @@ import (
 )
 
 func TestRunGlobalKamelet(t *testing.T) {
-	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
+	WithGlobalOperatorNamespace(t, func(ctx context.Context, g *WithT, operatorNamespace string) {
 		operatorID := "camel-k-global-kamelet"
-		Expect(KamelInstallWithID(operatorID, operatorNamespace, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, operatorNamespace, "--global", "--force")).To(Succeed())
 
 		t.Run("Global operator + namespaced kamelet test", func(t *testing.T) {
 
 			// NS2: namespace without operator
-			WithNewTestNamespace(t, func(ns2 string) {
-				Expect(CreateTimerKamelet(ns2, "my-own-timer-source")()).To(Succeed())
+			WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns2 string) {
+				g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns2, "my-own-timer-source")()).To(Succeed())
 
-				Expect(KamelInstallWithID(operatorID, ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+				g.Expect(KamelInstallWithID(t, ctx, operatorID, ns2, "--skip-operator-setup", "--olm=false")).To(Succeed())
 
-				Expect(KamelRunWithID(operatorID, ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns2, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationLogs(ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
-				Expect(Kamel("delete", "--all", "-n", ns2).Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ctx, ns2, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
+				g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns2).Execute()).To(Succeed())
 			})
 		})
 
 		t.Run("Global operator + global kamelet test", func(t *testing.T) {
 
-			Expect(CreateTimerKamelet(operatorNamespace, "my-own-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, ctx, operatorID, operatorNamespace, "my-own-timer-source")()).To(Succeed())
 
 			// NS3: namespace without operator
-			WithNewTestNamespace(t, func(ns3 string) {
-				Expect(KamelInstallWithID(operatorID, ns3, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+			WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns3 string) {
+				g.Expect(KamelInstallWithID(t, ctx, operatorID, ns3, "--skip-operator-setup", "--olm=false")).To(Succeed())
 
-				Expect(KamelRunWithID(operatorID, ns3, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns3, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationLogs(ns3, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
-				Expect(Kamel("delete", "--all", "-n", ns3).Execute()).To(Succeed())
-				Expect(TestClient().Delete(TestContext, Kamelet("my-own-timer-source", operatorNamespace)())).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns3, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ctx, ns3, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns3, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
+				g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns3).Execute()).To(Succeed())
+				g.Expect(TestClient(t).Delete(ctx, Kamelet(t, ctx, "my-own-timer-source", operatorNamespace)())).To(Succeed())
 			})
 		})
 
-		Expect(Kamel("uninstall", "-n", operatorNamespace, "--skip-crd", "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "uninstall", "-n", operatorNamespace, "--skip-crd", "--skip-cluster-roles=false", "--skip-cluster-role-bindings=false").Execute()).To(Succeed())
 	})
 
 }

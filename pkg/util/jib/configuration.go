@@ -36,9 +36,10 @@ import (
 const JibMavenGoal = "jib:build"
 const JibMavenToImageParam = "-Djib.to.image="
 const JibMavenFromImageParam = "-Djib.from.image="
+const JibMavenFromPlatforms = "-Djib.from.platforms="
 const JibMavenInsecureRegistries = "-Djib.allowInsecureRegistries="
 const JibDigestFile = "target/jib-image.digest"
-const JibMavenPluginVersionDefault = "3.3.2"
+const JibMavenPluginVersionDefault = "3.4.1"
 const JibLayerFilterExtensionMavenVersionDefault = "0.3.0"
 
 // See: https://github.com/GoogleContainerTools/jib/blob/master/jib-maven-plugin/README.md#using-docker-configuration-files
@@ -93,7 +94,7 @@ func CreateProfileConfigmap(ctx context.Context, c client.Client, kit *v1.Integr
 	return nil
 }
 
-// Create a maven profile defining jib plugin build.
+// JibMavenProfile creates a maven profile defining jib plugin build.
 func JibMavenProfile(jibMavenPluginVersion string, jibLayerFilterExtensionMavenVersion string) (string, error) {
 	jibVersion := JibMavenPluginVersionDefault
 	if jibMavenPluginVersion != "" {

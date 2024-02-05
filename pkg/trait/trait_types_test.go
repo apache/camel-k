@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
@@ -33,7 +34,7 @@ func TestMultilinePropertiesHandled(t *testing.T) {
 		Integration: &v1.Integration{},
 	}
 	cm, err := e.computeApplicationProperties()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cm)
 	assert.Equal(t, "prop = multi\\nline\n", cm.Data["application.properties"])
 }
@@ -152,4 +153,14 @@ func TestVolumeWithKeyOnly(t *testing.T) {
 	assert.Equal(t, 1, len(items))
 	assert.Equal(t, "SomeKey", items[0].Key)
 	assert.Equal(t, "SomeKey", items[0].Path)
+}
+
+func TestCapabilityPropertyKey(t *testing.T) {
+	camelPropertyKeyStatic := CapabilityPropertyKey("quarkus.camel.cluster.kubernetes.resource-name", nil)
+	assert.Equal(t, "quarkus.camel.cluster.kubernetes.resource-name", camelPropertyKeyStatic)
+	vars := map[string]string{
+		"camel.k.master.labelKey": "org.apache.camel/integration",
+	}
+	camelPropertyKeyDynamic := CapabilityPropertyKey(`quarkus.camel.cluster.kubernetes.labels."${camel.k.master.labelKey}"`, vars)
+	assert.Equal(t, `quarkus.camel.cluster.kubernetes.labels."org.apache.camel/integration"`, camelPropertyKeyDynamic)
 }

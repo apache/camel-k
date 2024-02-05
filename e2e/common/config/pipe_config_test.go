@@ -23,211 +23,221 @@ limitations under the License.
 package config
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 // Tests on pipe with kamelets containing configuration from properties and secrets.
 func TestPipeConfig(t *testing.T) {
-	RegisterTestingT(t)
-	t.Run("test custom source/sink pipe", func(t *testing.T) {
-		Expect(CreateTimerKamelet(ns, "my-pipe-timer-source")()).To(Succeed())
-		Expect(CreateLogKamelet(ns, "my-pipe-log-sink")()).To(Succeed())
-		t.Run("run test default config using properties", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-properties")
+	t.Parallel()
 
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-p", "source.message=My pipe message",
-				"-p", "sink.loggerName=myPipeLogger",
-				"--name", name,
-			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myPipeLogger"))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-pipe-config"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		t.Run("test custom source/sink pipe", func(t *testing.T) {
+			g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, "my-pipe-timer-source")()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, ctx, operatorID, ns, "my-pipe-log-sink")()).To(Succeed())
+			t.Run("run test default config using properties", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-properties")
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-p", "source.message=My pipe message",
+					"-p", "sink.loggerName=myPipeLogger",
+					"--name", name,
+				).Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			})
+
+			t.Run("run test implicit default config using labeled secret", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
+				secretName := "my-pipe-default-implicit-secret"
+
+				var secData = make(map[string]string)
+				secData["camel.kamelet.my-pipe-timer-source.message"] = "My pipe secret message"
+				var labels = make(map[string]string)
+				labels["camel.apache.org/kamelet"] = "my-pipe-timer-source"
+				g.Expect(CreatePlainTextSecretWithLabels(t, ctx, ns, secretName, secData, labels)).To(Succeed())
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-p", "sink.loggerName=myDefaultLogger",
+					"--name", name,
+				).Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe secret message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myDefaultLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+				g.Expect(DeleteSecret(t, ctx, ns, secretName)).To(Succeed())
+			})
+
+			t.Run("run test implicit default config using mounted secret", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
+				secretName := "my-pipe-default-implicit-secret"
+
+				var secData = make(map[string]string)
+				secData["camel.kamelet.my-pipe-timer-source.message"] = "My pipe secret message"
+				secData["camel.kamelet.my-pipe-log-sink.loggerName"] = "myPipeSecretLogger"
+				g.Expect(CreatePlainTextSecret(t, ctx, ns, secretName, secData)).To(Succeed())
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-t", "mount.configs=secret:"+secretName,
+					"--name", name,
+				).Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe secret message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeSecretLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+				g.Expect(DeleteSecret(t, ctx, ns, secretName)).To(Succeed())
+			})
+
+			t.Run("run test implicit default config using mounted configmap", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-default-implicit-configmap")
+				cmName := "my-pipe-default-implicit-configmap"
+
+				var cmData = make(map[string]string)
+				cmData["camel.kamelet.my-pipe-timer-source.message"] = "My pipe configmap message"
+				cmData["camel.kamelet.my-pipe-log-sink.loggerName"] = "myPipeConfigmapLogger"
+				g.Expect(CreatePlainTextConfigmap(t, ctx, ns, cmName, cmData)).To(Succeed())
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-t", "mount.configs=configmap:"+cmName,
+					"--name", name,
+				).Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe configmap message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeConfigmapLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+				g.Expect(DeleteConfigmap(t, ctx, ns, cmName)).To(Succeed())
+			})
+
+			t.Run("run test implicit named config using mounted secret", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-named-implicit-secret")
+				secretName := "my-pipe-named-implicit-secret"
+
+				var secData = make(map[string]string)
+				secData["camel.kamelet.my-pipe-timer-source.mynamedconfig.message"] = "My pipe named secret message"
+				secData["camel.kamelet.my-pipe-log-sink.mynamedconfig.loggerName"] = "myPipeNamedSecretLogger"
+				g.Expect(CreatePlainTextSecret(t, ctx, ns, secretName, secData)).To(Succeed())
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-t", "mount.configs=secret:"+secretName,
+					"-p", "source.message={{mynamedconfig.message}}",
+					"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
+					"--name", name,
+				).Execute()).To(Succeed())
+
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe named secret message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeNamedSecretLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+				g.Expect(DeleteSecret(t, ctx, ns, secretName)).To(Succeed())
+			})
+
+			t.Run("run test implicit named config using mounted configmap", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-named-implicit-configmap")
+				cmName := "my-pipe-named-implicit-configmap"
+
+				var cmData = make(map[string]string)
+				cmData["camel.kamelet.my-pipe-timer-source.mynamedconfig.message"] = "My pipe named configmap message"
+				cmData["camel.kamelet.my-pipe-log-sink.mynamedconfig.loggerName"] = "myPipeNamedConfigmapLogger"
+				g.Expect(CreatePlainTextConfigmap(t, ctx, ns, cmName, cmData)).To(Succeed())
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-t", "mount.configs=configmap:"+cmName,
+					"-p", "source.message={{mynamedconfig.message}}",
+					"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
+					"--name", name,
+				).Execute()).To(Succeed())
+
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe named configmap message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeNamedConfigmapLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+				g.Expect(DeleteConfigmap(t, ctx, ns, cmName)).To(Succeed())
+			})
+			t.Run("run test implicit specific config using mounted secret", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-specific-secret")
+				secretName := "my-pipe-specific-secret"
+
+				var secData = make(map[string]string)
+				secData["mynamedconfig.message"] = "My pipe specific secret message"
+				secData["mynamedconfig.loggerName"] = "myPipeSpecificSecretLogger"
+				g.Expect(CreatePlainTextSecret(t, ctx, ns, secretName, secData)).To(Succeed())
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-t", "mount.configs=secret:"+secretName,
+					"-p", "source.message={{mynamedconfig.message}}",
+					"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
+					"--name", name,
+				).Execute()).To(Succeed())
+
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe specific secret message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeSpecificSecretLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+				g.Expect(DeleteSecret(t, ctx, ns, secretName)).To(Succeed())
+			})
+			t.Run("run test implicit specific config using mounted configmap", func(t *testing.T) {
+				name := RandomizedSuffixName("my-pipe-with-specific-configmap")
+				cmName := "my-pipe-specific-configmap"
+
+				var cmData = make(map[string]string)
+				cmData["mynamedconfig.message"] = "My pipe specific configmap message"
+				cmData["mynamedconfig.loggerName"] = "myPipeSpecificConfgmapLogger"
+				g.Expect(CreatePlainTextConfigmap(t, ctx, ns, cmName, cmData)).To(Succeed())
+
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns,
+					"my-pipe-timer-source",
+					"my-pipe-log-sink",
+					"-t", "mount.configs=configmap:"+cmName,
+					"-p", "source.message={{mynamedconfig.message}}",
+					"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
+					"--name", name,
+				).Execute()).To(Succeed())
+
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe specific configmap message"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeSpecificConfgmapLogger"))
+
+				g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+				g.Expect(DeleteConfigmap(t, ctx, ns, cmName)).To(Succeed())
+			})
 		})
 
-		t.Run("run test implicit default config using labeled secret", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
-			secretName := "my-pipe-default-implicit-secret"
-
-			var secData = make(map[string]string)
-			secData["camel.kamelet.my-pipe-timer-source.message"] = "My pipe secret message"
-			var labels = make(map[string]string)
-			labels["camel.apache.org/kamelet"] = "my-pipe-timer-source"
-			Expect(CreatePlainTextSecretWithLabels(ns, secretName, secData, labels)).To(Succeed())
-
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-p", "sink.loggerName=myDefaultLogger",
-				"--name", name,
-			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe secret message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myDefaultLogger"))
-
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteSecret(ns, secretName)).To(Succeed())
-		})
-
-		t.Run("run test implicit default config using mounted secret", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
-			secretName := "my-pipe-default-implicit-secret"
-
-			var secData = make(map[string]string)
-			secData["camel.kamelet.my-pipe-timer-source.message"] = "My pipe secret message"
-			secData["camel.kamelet.my-pipe-log-sink.loggerName"] = "myPipeSecretLogger"
-			Expect(CreatePlainTextSecret(ns, secretName, secData)).To(Succeed())
-
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-t", "mount.configs=secret:"+secretName,
-				"--name", name,
-			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe secret message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myPipeSecretLogger"))
-
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteSecret(ns, secretName)).To(Succeed())
-		})
-
-		t.Run("run test implicit default config using mounted configmap", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-default-implicit-configmap")
-			cmName := "my-pipe-default-implicit-configmap"
-
-			var cmData = make(map[string]string)
-			cmData["camel.kamelet.my-pipe-timer-source.message"] = "My pipe configmap message"
-			cmData["camel.kamelet.my-pipe-log-sink.loggerName"] = "myPipeConfigmapLogger"
-			Expect(CreatePlainTextConfigmap(ns, cmName, cmData)).To(Succeed())
-
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-t", "mount.configs=configmap:"+cmName,
-				"--name", name,
-			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe configmap message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myPipeConfigmapLogger"))
-
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteConfigmap(ns, cmName)).To(Succeed())
-		})
-
-		t.Run("run test implicit named config using mounted secret", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-named-implicit-secret")
-			secretName := "my-pipe-named-implicit-secret"
-
-			var secData = make(map[string]string)
-			secData["camel.kamelet.my-pipe-timer-source.mynamedconfig.message"] = "My pipe named secret message"
-			secData["camel.kamelet.my-pipe-log-sink.mynamedconfig.loggerName"] = "myPipeNamedSecretLogger"
-			Expect(CreatePlainTextSecret(ns, secretName, secData)).To(Succeed())
-
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-t", "mount.configs=secret:"+secretName,
-				"-p", "source.message={{mynamedconfig.message}}",
-				"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
-				"--name", name,
-			).Execute()).To(Succeed())
-
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe named secret message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myPipeNamedSecretLogger"))
-
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteSecret(ns, secretName)).To(Succeed())
-		})
-
-		t.Run("run test implicit named config using mounted configmap", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-named-implicit-configmap")
-			cmName := "my-pipe-named-implicit-configmap"
-
-			var cmData = make(map[string]string)
-			cmData["camel.kamelet.my-pipe-timer-source.mynamedconfig.message"] = "My pipe named configmap message"
-			cmData["camel.kamelet.my-pipe-log-sink.mynamedconfig.loggerName"] = "myPipeNamedConfigmapLogger"
-			Expect(CreatePlainTextConfigmap(ns, cmName, cmData)).To(Succeed())
-
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-t", "mount.configs=configmap:"+cmName,
-				"-p", "source.message={{mynamedconfig.message}}",
-				"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
-				"--name", name,
-			).Execute()).To(Succeed())
-
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe named configmap message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myPipeNamedConfigmapLogger"))
-
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteConfigmap(ns, cmName)).To(Succeed())
-		})
-		t.Run("run test implicit specific config using mounted secret", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-specific-secret")
-			secretName := "my-pipe-specific-secret"
-
-			var secData = make(map[string]string)
-			secData["mynamedconfig.message"] = "My pipe specific secret message"
-			secData["mynamedconfig.loggerName"] = "myPipeSpecificSecretLogger"
-			Expect(CreatePlainTextSecret(ns, secretName, secData)).To(Succeed())
-
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-t", "mount.configs=secret:"+secretName,
-				"-p", "source.message={{mynamedconfig.message}}",
-				"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
-				"--name", name,
-			).Execute()).To(Succeed())
-
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe specific secret message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myPipeSpecificSecretLogger"))
-
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteSecret(ns, secretName)).To(Succeed())
-		})
-		t.Run("run test implicit specific config using mounted configmap", func(t *testing.T) {
-			name := RandomizedSuffixName("my-pipe-with-specific-configmap")
-			cmName := "my-pipe-specific-configmap"
-
-			var cmData = make(map[string]string)
-			cmData["mynamedconfig.message"] = "My pipe specific configmap message"
-			cmData["mynamedconfig.loggerName"] = "myPipeSpecificConfgmapLogger"
-			Expect(CreatePlainTextConfigmap(ns, cmName, cmData)).To(Succeed())
-
-			Expect(KamelBindWithID(operatorID, ns,
-				"my-pipe-timer-source",
-				"my-pipe-log-sink",
-				"-t", "mount.configs=configmap:"+cmName,
-				"-p", "source.message={{mynamedconfig.message}}",
-				"-p", "sink.loggerName={{mynamedconfig.loggerName}}",
-				"--name", name,
-			).Execute()).To(Succeed())
-
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("My pipe specific configmap message"))
-			Eventually(IntegrationLogs(ns, name)).Should(ContainSubstring("myPipeSpecificConfgmapLogger"))
-
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteConfigmap(ns, cmName)).To(Succeed())
-		})
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	Expect(DeleteKamelet(ns, "my-pipe-timer-source")).To(Succeed())
-	Expect(DeleteKamelet(ns, "my-pipe-log-sink")).To(Succeed())
 }

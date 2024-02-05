@@ -22,6 +22,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,7 +36,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
-func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string) *Environment {
+func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string, logCategory map[string]string) *Environment {
+func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string, logCategory map[string]string) *Environment {
 	t.Helper()
 
 	client, _ := test.NewFakeClient()
@@ -65,6 +68,8 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 						JSON:            pointer.Bool(json),
 						JSONPrettyPrint: pointer.Bool(jsonPrettyPrint),
 						Level:           logLevel,
+						Category:        logCategory,
+						Category:        logCategory,
 					},
 				},
 			},
@@ -101,7 +106,8 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 func createDefaultLoggingTestEnv(t *testing.T) *Environment {
 	t.Helper()
 
-	return createLoggingTestEnv(t, true, false, false, defaultLogLevel, "")
+	return createLoggingTestEnv(t, true, false, false, defaultLogLevel, "", map[string]string{})
+	return createLoggingTestEnv(t, true, false, false, defaultLogLevel, "", map[string]string{})
 }
 
 func NewLoggingTestCatalog() *Catalog {
@@ -112,8 +118,10 @@ func TestEmptyLoggingTrait(t *testing.T) {
 	env := createDefaultLoggingTestEnv(t)
 	conditions, err := NewLoggingTestCatalog().apply(env)
 
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false
@@ -162,11 +170,14 @@ func TestEmptyLoggingTrait(t *testing.T) {
 
 func TestJsonLoggingTrait(t *testing.T) {
 	// When running, this log should look like "09:07:00 INFO  (main) Profile prod activated."
-	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n")
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
 	conditions, err := NewLoggingTestCatalog().apply(env)
 
-	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false
@@ -213,4 +224,42 @@ func TestJsonLoggingTrait(t *testing.T) {
 	assert.True(t, logLevelIsTrace)
 	assert.True(t, logFormatIsNotDefault)
 	assert.NotEmpty(t, env.ExecutedTraits)
+}
+
+func TestSingleLoggingCategory(t *testing.T) {
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
+	env.Integration.Spec.Traits = v1.Traits{
+		Logging: &traitv1.LoggingTrait{
+			Category: map[string]string{"org.apache.camel.impl": "debug"},
+		},
+	}
+	conditions, err := NewLoggingTestCatalog().apply(env)
+
+	assert.Nil(t, err)
+	assert.Empty(t, conditions)
+
+	testEnvVar := corev1.EnvVar{"QUARKUS_LOG_CATEGORY__ORG_APACHE_CAMEL_IMPL__LEVEL", "DEBUG", nil}
+	assert.Contains(t, env.EnvVars, testEnvVar)
+}
+
+func TestLoggingCategories(t *testing.T) {
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
+	env.Integration.Spec.Traits = v1.Traits{
+		Logging: &traitv1.LoggingTrait{
+			Category: map[string]string{"org.apache.camel.impl": "debug", "org.jboss.resteasy": "debug"},
+		},
+	}
+	conditions, err := NewLoggingTestCatalog().apply(env)
+	assert.Empty(t, conditions)
+	assert.Nil(t, err)
+
+	testEnvVars := []corev1.EnvVar{
+		corev1.EnvVar{"QUARKUS_LOG_CATEGORY__ORG_APACHE_CAMEL_IMPL__LEVEL", "DEBUG", nil},
+		corev1.EnvVar{"QUARKUS_LOG_CATEGORY__ORG_JBOSS_RESTEASY__LEVEL", "DEBUG", nil},
+	}
+
+	for _, v := range testEnvVars {
+		assert.Contains(t, env.EnvVars, v)
+	}
+
 }

@@ -20,13 +20,16 @@ package camel
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -36,12 +39,15 @@ func TestCreateCatalog(t *testing.T) {
 		Duration: 5 * time.Minute,
 	}
 	c, err := test.NewFakeClient()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", "false")
 	_, ok := os.LookupEnv("MAVEN_CMD")
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
+	}
+	if strings.Contains(defaults.DefaultRuntimeVersion, "SNAPSHOT") {
+		maven.DefaultMavenRepositories += ",https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
 	}
 	catalog, err := CreateCatalog(
 		context.TODO(),
@@ -49,7 +55,7 @@ func TestCreateCatalog(t *testing.T) {
 		"",
 		&ip,
 		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.DefaultRuntimeVersion})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, catalog)
 	assert.Equal(t, defaults.DefaultRuntimeVersion, catalog.Runtime.Version)
 	assert.Equal(t, v1.RuntimeProviderQuarkus, catalog.Runtime.Provider)

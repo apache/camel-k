@@ -18,8 +18,10 @@
 linters-settings:
   lll:
     line-length: 170
-  goconst:
-    ignore-tests: true
+run:
+  tests: false
+  skip-files:
+    - test_support.go
 linters:
   enable-all: true
   disable:

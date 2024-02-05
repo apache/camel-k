@@ -27,10 +27,10 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/apache/camel-k/v2/pkg/trait"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
@@ -91,11 +91,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
-
-	a := buildKitAction{}
-	a.InjectLogger(log.Log)
-	a.InjectClient(c)
+	require.NoError(t, err)
 
 	kits, err := lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
@@ -114,7 +110,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		},
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, kits)
 	assert.Len(t, kits, 1)
 	assert.Equal(t, "my-kit-2", kits[0].Name)
@@ -182,11 +178,6 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
-				Traits: v1.IntegrationKitTraits{
-					Builder: &traitv1.BuilderTrait{
-						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					},
-				},
 			},
 		},
 		// Should NOT be discarded because it contains a subset of the required traits and
@@ -219,23 +210,11 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
-				Traits: v1.IntegrationKitTraits{
-					Builder: &traitv1.BuilderTrait{
-						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-						Properties: []string{
-							"build-key1=build-value1",
-						},
-					},
-				},
 			},
 		},
 	)
 
-	assert.Nil(t, err)
-
-	a := buildKitAction{}
-	a.InjectLogger(log.Log)
-	a.InjectClient(c)
+	require.NoError(t, err)
 
 	kits, err := lookupKitsForIntegration(context.TODO(), c, &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
@@ -261,18 +240,10 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				"camel-core",
 				"camel-irc",
 			},
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
 		},
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, kits)
 	assert.Len(t, kits, 1)
 	assert.Equal(t, "my-kit-3", kits[0].Name)
@@ -295,13 +266,6 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 				},
 			},
 		},
-		Status: v1.IntegrationStatus{
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-				},
-			},
-		},
 	}
 
 	kit := &v1.IntegrationKit{
@@ -315,11 +279,8 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 		},
 	}
 
-	a := buildKitAction{}
-	a.InjectLogger(log.Log)
-
 	ok, err := integrationAndKitHaveSameTraits(integration, kit)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, ok)
 }
 
@@ -334,16 +295,6 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
-		},
-		Status: v1.IntegrationStatus{
 			Traits: v1.Traits{
 				Builder: &traitv1.BuilderTrait{
 					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
@@ -374,23 +325,10 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 				},
 			},
 		},
-		Status: v1.IntegrationKitStatus{
-			Traits: v1.IntegrationKitTraits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
-		},
 	}
 
-	a := buildKitAction{}
-	a.InjectLogger(log.Log)
-
 	ok, err := integrationAndKitHaveSameTraits(integration, kit)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 }
 

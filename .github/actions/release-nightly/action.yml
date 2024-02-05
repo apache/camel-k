@@ -110,7 +110,6 @@ runs:
       shell: bash
       run: |
         make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} images-nightly
-        make IMAGE_ARCH=arm64 VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} images-nightly
         make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
 
     - name: Generate SBOM

@@ -34,7 +34,7 @@ if [ ! -z $2 ]; then
 fi
 
 # Refresh catalog sets. We can clean any leftover as well.
-rm -f ${rootdir}/resources/camel-catalog-*
+rm -f ${rootdir}/pkg/resources/resources/camel-catalog-*
 
 mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$runtime_version:yaml:catalog" \
   -Dmdep.useBaseVersion=true \

@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -38,7 +39,7 @@ func TestStrimziDirect(t *testing.T) {
 	defer cancel()
 
 	client, err := test.NewFakeClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bindingContext := bindings.BindingContext{
 		Ctx:       ctx,
@@ -61,7 +62,7 @@ func TestStrimziDirect(t *testing.T) {
 	binding, err := BindingProvider{}.Translate(bindingContext, bindings.EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopic?brokers=my-cluster-kafka-bootstrap%3A9092", binding.URI)
 	assert.Equal(t, camelv1.Traits{}, binding.Traits)
@@ -121,7 +122,7 @@ func TestStrimziLookup(t *testing.T) {
 	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopicy?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
 	assert.Equal(t, camelv1.Traits{}, binding.Traits)

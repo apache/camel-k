@@ -52,7 +52,7 @@ func TestTraitConfiguration(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.Configure(&env))
+	require.NoError(t, c.Configure(&env))
 	logging, ok := c.GetTrait("logging").(*loggingTrait)
 	require.True(t, ok)
 	assert.True(t, *logging.JSON)
@@ -85,7 +85,7 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.Configure(&env))
+	require.NoError(t, c.Configure(&env))
 	ct, _ := c.GetTrait("cron").(*cronTrait)
 	assert.True(t, *ct.Fallback)
 	assert.Equal(t, "annotated-policy", ct.ConcurrencyPolicy)
@@ -163,7 +163,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.Configure(&env))
+	require.NoError(t, c.Configure(&env))
 	ct, _ := c.GetTrait("cron").(*cronTrait)
 	assert.Equal(t, "schedule2", ct.Schedule)
 	assert.Equal(t, "cmp4", ct.Components)
@@ -187,7 +187,7 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.Configure(&env))
+	require.NoError(t, c.Configure(&env))
 	jt, _ := c.GetTrait("jolokia").(*jolokiaTrait)
 	assert.Equal(t, []string{"opt1", "opt2"}, jt.Options)
 	sbt, _ := c.GetTrait("service-binding").(*serviceBindingTrait)
@@ -208,7 +208,7 @@ func TestTraitSplitConfiguration(t *testing.T) {
 		},
 	}
 	c := NewCatalog(nil)
-	assert.NoError(t, c.Configure(&env))
+	require.NoError(t, c.Configure(&env))
 	ot, _ := c.GetTrait("owner").(*ownerTrait)
 	assert.Equal(t, []string{"opt1", "opt2"}, ot.TargetLabels)
 }
@@ -228,5 +228,5 @@ func TestTraitDecode(t *testing.T) {
 
 	assert.Equal(t, "test-container", target.Name)
 	assert.Equal(t, 7071, target.Port)
-	assert.Equal(t, false, pointer.BoolDeref(target.Auto, true))
+	assert.False(t, pointer.BoolDeref(target.Auto, true))
 }

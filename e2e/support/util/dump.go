@@ -258,7 +258,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	// OLM CSV
 	csvs := olm.ClusterServiceVersionList{}
 	err = c.List(ctx, &csvs, ctrl.InNamespace(ns))
-	if err != nil {
+	if err != nil && !kubernetes.IsUnknownAPIError(err) {
 		return err
 	}
 	t.Logf("\nFound %d OLM CSVs:\n", len(csvs.Items))

@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateKeystore(t *testing.T) {
@@ -32,16 +32,16 @@ func TestGenerateKeystore(t *testing.T) {
 	var data [][]byte
 	ctx := context.Background()
 	err := GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// Non-Nil Data
 	data = [][]byte{{0}, {1}}
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", NewKeystorePassword(), data)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	// Incorrect password format
 	err = GenerateKeystore(ctx, "", "/tmp/keystore", "", data)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 
 	testFileExists, _ := util.FileExists("/tmp/keystore")
 	if testFileExists {

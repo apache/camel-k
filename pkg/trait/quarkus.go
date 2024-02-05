@@ -36,8 +36,7 @@ import (
 )
 
 const (
-	quarkusTraitID = "quarkus"
-
+	quarkusTraitID                    = "quarkus"
 	QuarkusNativeDefaultBaseImageName = "quay.io/quarkus/quarkus-micro-image:2.0"
 )
 
@@ -110,23 +109,14 @@ func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild overrides base class method.
-func (t *quarkusTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return true
-}
-
-var _ ComparableTrait = &quarkusTrait{}
-
 func (t *quarkusTrait) Matches(trait Trait) bool {
 	qt, ok := trait.(*quarkusTrait)
 	if !ok {
 		return false
 	}
-
 	if len(t.Modes) == 0 && len(qt.Modes) != 0 && !qt.containsMode(traitv1.JvmQuarkusMode) {
 		return false
 	}
-
 	for _, md := range t.Modes {
 		if md == traitv1.JvmQuarkusMode && len(qt.Modes) == 0 {
 			continue
@@ -136,8 +126,17 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		}
 		return false
 	}
+	// We need to check if the native base image used is the same
+	thisNativeBaseImage := t.NativeBaseImage
+	if thisNativeBaseImage == "" {
+		thisNativeBaseImage = QuarkusNativeDefaultBaseImageName
+	}
+	otherNativeBaseImage := qt.NativeBaseImage
+	if otherNativeBaseImage == "" {
+		otherNativeBaseImage = QuarkusNativeDefaultBaseImageName
+	}
 
-	return true
+	return thisNativeBaseImage == otherNativeBaseImage
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
@@ -162,7 +161,7 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
 			}
 		}
-		return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+		return NewIntegrationCondition("Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
 	}
 
 	return nil
@@ -274,26 +273,25 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
 		}
 	}
-
 	for k, v := range integration.Annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			v1.SetAnnotation(&kit.ObjectMeta, k, v)
 		}
 	}
-
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {
 		kit.SetOperatorID(operatorID)
 	}
-
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies: e.Integration.Status.Dependencies,
 		Repositories: e.Integration.Spec.Repositories,
 		Traits:       propagateKitTraits(e),
 	}
-
 	if packageType == nativeSourcesPackageType {
 		kit.Spec.Sources = propagateSourcesRequiredAtBuildTime(e)
+	}
+	if e.Integration.Status.Capabilities != nil {
+		kit.Spec.Capabilities = e.Integration.Status.Capabilities
 	}
 	return kit
 }
@@ -316,9 +314,10 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 
 func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKitTraits, e *Environment) {
 	ikt := v1.IntegrationKitTraits{
-		Builder:  traits.Builder.DeepCopy(),
-		Camel:    traits.Camel.DeepCopy(),
-		Quarkus:  traits.Quarkus.DeepCopy(),
+		Builder: traits.Builder.DeepCopy(),
+		Camel:   traits.Camel.DeepCopy(),
+		Quarkus: traits.Quarkus.DeepCopy(),
+		// nolint: staticcheck
 		Registry: traits.Registry.DeepCopy(),
 	}
 

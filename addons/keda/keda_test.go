@@ -32,6 +32,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -53,10 +54,10 @@ func TestManualConfig(t *testing.T) {
 	env := createBasicTestEnvironment()
 
 	res, condition, err := keda.Configure(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, res)
 	assert.Nil(t, condition)
-	assert.NoError(t, keda.Apply(env))
+	require.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
 	assert.Len(t, so.Spec.Triggers, 1)
@@ -92,10 +93,10 @@ func TestConfigFromSecret(t *testing.T) {
 	})
 
 	res, condition, err := keda.Configure(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, res)
 	assert.Nil(t, condition)
-	assert.NoError(t, keda.Apply(env))
+	require.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
 	assert.Len(t, so.Spec.Triggers, 1)
@@ -180,10 +181,10 @@ func TestKameletAutoDetection(t *testing.T) {
 		})
 
 	res, condition, err := keda.Configure(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, res)
 	assert.Nil(t, condition)
-	assert.NoError(t, keda.Apply(env))
+	require.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
 	assert.Len(t, so.Spec.Triggers, 1)
@@ -281,24 +282,24 @@ func TestPipeAutoDetection(t *testing.T) {
 		})
 
 	it, err := pipe.CreateIntegrationFor(env.Ctx, env.Client, &klb)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, it)
 	env.Integration = it
 
 	it.Status.Phase = camelv1.IntegrationPhaseInitialization
 	init := trait.NewInitTrait()
 	ok, condition, err := init.Configure(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
-	assert.NoError(t, init.Apply(env))
+	require.NoError(t, init.Apply(env))
 
 	it.Status.Phase = camelv1.IntegrationPhaseDeploying
 	res, condition, err := keda.Configure(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, res)
 	assert.Nil(t, condition)
-	assert.NoError(t, keda.Apply(env))
+	require.NoError(t, keda.Apply(env))
 	so := getScaledObject(env)
 	assert.NotNil(t, so)
 	assert.Len(t, so.Spec.Triggers, 1)
@@ -345,14 +346,14 @@ func TestHackReplicas(t *testing.T) {
 	)
 
 	res, condition, err := keda.Configure(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, res)
 	assert.Nil(t, condition)
-	assert.NoError(t, keda.Apply(env))
+	require.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1.SchemeGroupVersion.WithResource("integrations").GroupResource(), "my-it", metav1.GetOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int32(1), sc.Spec.Replicas)
 }
 
@@ -393,14 +394,14 @@ func TestHackKLBReplicas(t *testing.T) {
 	)
 
 	res, condition, err := keda.Configure(env)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, res)
 	assert.Nil(t, condition)
-	assert.NoError(t, keda.Apply(env))
+	require.NoError(t, keda.Apply(env))
 	scalesClient, err := env.Client.ScalesClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	sc, err := scalesClient.Scales("test").Get(env.Ctx, camelv1.SchemeGroupVersion.WithResource("pipes").GroupResource(), "my-klb", metav1.GetOptions{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int32(1), sc.Spec.Replicas)
 }
 

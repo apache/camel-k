@@ -23,26 +23,36 @@ limitations under the License.
 package languages
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestRunPolyglotExamples(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	t.Run("run polyglot", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "--name", "polyglot", "files/js-polyglot.js", "files/yaml-polyglot.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "polyglot"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "polyglot", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-yaml"))
-		Eventually(IntegrationLogs(ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-js"))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-runtimes-polyglot"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		t.Run("run polyglot", func(t *testing.T) {
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "polyglot", "files/js-polyglot.js", "files/yaml-polyglot.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "polyglot"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "polyglot", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-yaml"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-js"))
+		})
+
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

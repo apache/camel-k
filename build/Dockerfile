@@ -15,6 +15,8 @@
 
 FROM eclipse-temurin:17-jdk as base
 
+ARG IMAGE_ARCH
+
 ARG MAVEN_DEFAULT_VERSION="3.8.6"
 ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
@@ -59,9 +61,9 @@ RUN chgrp -R 0 ${MVN_REPO} \
 
 USER 1001:0
 
-ADD build/_output/bin/kamel /usr/local/bin/kamel
+ADD build/_output/bin/kamel-${IMAGE_ARCH} /usr/local/bin/kamel
 
-FROM golang:1.20 as go
+FROM golang:1.21 as go
 
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 

@@ -28,7 +28,7 @@ func TestLogsAlias(t *testing.T) {
 	logCommand, _ := newCmdLog(options)
 	rootCommand.AddCommand(logCommand)
 
-	kamelTestPostAddCommandInit(t, rootCommand)
+	kamelTestPostAddCommandInit(t, rootCommand, options)
 
 	_, err := test.ExecuteCommand(rootCommand, "logs")
 

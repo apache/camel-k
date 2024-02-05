@@ -28,6 +28,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
@@ -37,12 +38,12 @@ func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
 	tt.Enabled = pointer.Bool(true)
 	tt.Endpoint = "http://endpoint3"
 	ok, condition, err := telemetry.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = telemetry.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.opentelemetry.enabled"])
 	assert.Equal(t, "http://endpoint3", e.ApplicationProperties["quarkus.opentelemetry.tracer.exporter.otlp.endpoint"])
@@ -63,12 +64,12 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	tt.SamplerRatio = "0.001"
 	tt.SamplerParentBased = pointer.Bool(false)
 	ok, condition, err := telemetry.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = telemetry.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.opentelemetry.enabled"])
 	assert.Equal(t, "http://endpoint3", e.ApplicationProperties["quarkus.opentelemetry.tracer.exporter.otlp.endpoint"])
@@ -82,7 +83,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 	t.Helper()
 
 	catalog, err := catalogGen()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,

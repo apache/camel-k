@@ -23,6 +23,7 @@ limitations under the License.
 package traits
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,45 +35,48 @@ import (
 )
 
 func TestErroredTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	t.Run("Integration trait should fail", func(t *testing.T) {
-		name := RandomizedSuffixName("it-errored")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-t", "kamelets.list=missing",
-		).Execute()).To(Succeed())
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
-			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionInitializationFailedReason)),
-			WithTransform(IntegrationConditionMessage, HavePrefix("error during trait customization")),
-		))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-traits-error"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		t.Run("Integration trait should fail", func(t *testing.T) {
+			name := RandomizedSuffixName("it-errored")
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "kamelets.list=missing").Execute()).To(Succeed())
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionInitializationFailedReason)),
+				WithTransform(IntegrationConditionMessage, HavePrefix("error during trait customization")),
+			))
+		})
+
+		t.Run("Pipe trait should fail", func(t *testing.T) {
+			name := RandomizedSuffixName("kb-errored")
+			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "timer:foo", "log:bar", "--name", name, "-t", "kamelets.list=missing").Execute()).To(Succeed())
+			// Pipe
+			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
+			g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(PipeCondition(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
+				WithTransform(PipeConditionMessage, And(
+					ContainSubstring("error during trait customization"),
+					ContainSubstring("[missing] not found"),
+				)))
+			// Integration related
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionInitializationFailedReason)),
+				WithTransform(IntegrationConditionMessage, HavePrefix("error during trait customization")),
+			))
+		})
+
+		// Clean up
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	t.Run("Pipe trait should fail", func(t *testing.T) {
-		name := RandomizedSuffixName("kb-errored")
-		Expect(KamelBindWithID(operatorID, ns, "timer:foo", "log:bar",
-			"--name", name,
-			"-t", "kamelets.list=missing",
-		).Execute()).To(Succeed())
-		// Pipe
-		Eventually(PipePhase(ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
-		Eventually(PipeConditionStatus(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		Eventually(PipeCondition(ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
-			WithTransform(PipeConditionMessage, And(
-				ContainSubstring("error during trait customization"),
-				ContainSubstring("[missing] not found"),
-			)))
-		// Integration related
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(And(
-			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionInitializationFailedReason)),
-			WithTransform(IntegrationConditionMessage, HavePrefix("error during trait customization")),
-		))
-	})
-
-	// Clean up
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

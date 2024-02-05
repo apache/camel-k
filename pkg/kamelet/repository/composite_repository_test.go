@@ -24,6 +24,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -47,12 +48,12 @@ func TestKubernetesRepositoryMultiNS(t *testing.T) {
 		newKubernetesKameletRepository(fakeClient, "test2"),
 	)
 	list, err := repo.List(ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, list, 2)
 	k1, err := repo.Get(ctx, "kamelet1")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "kamelet1", k1.Name)
 	k2, err := repo.Get(ctx, "kamelet2")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "kamelet2", k2.Name)
 }

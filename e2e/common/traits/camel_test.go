@@ -23,6 +23,7 @@ limitations under the License.
 package traits
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,36 +35,40 @@ import (
 )
 
 func TestCamelTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	t.Run("properties changes should not rebuild", func(t *testing.T) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-traits-camel"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name,
-		).Execute()).To(Succeed())
+		t.Run("properties changes should not rebuild", func(t *testing.T) {
 
-		// checking the integration status
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		integrationKit := IntegrationKit(ns, name)()
+			g.Expect(Kamel(t, ctx, "reset", "-n", ns).Execute()).To(Succeed())
 
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-p", "a=1",
-		).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(IntegrationKit(ns, name)).Should(Equal(integrationKit))
+			name := RandomizedSuffixName("java")
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
-		Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-		Eventually(Integration(ns, name), TestTimeoutLong).Should(BeNil())
+			// checking the integration status
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			integrationKit := IntegrationKit(t, ctx, ns, name)()
+
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-p", "a=1").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationKit(t, ctx, ns, name)).Should(Equal(integrationKit))
+
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, name), TestTimeoutLong).Should(BeNil())
+		})
+
+		// Clean-up
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	// Clean-up
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

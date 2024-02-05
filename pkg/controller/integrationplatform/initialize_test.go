@@ -25,6 +25,7 @@ import (
 	"github.com/rs/xid"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -41,16 +42,16 @@ func TestTimeouts_Default(t *testing.T) {
 	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+	require.NoError(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
 	answer, err := h.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)
@@ -64,23 +65,23 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	timeout, err := time.ParseDuration("1m1ms")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: timeout,
 	}
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+	require.NoError(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
 	answer, err := h.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, 1*time.Minute, answer.Status.Build.GetTimeout().Duration)
@@ -94,23 +95,23 @@ func TestTimeouts_Truncated(t *testing.T) {
 	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	bt, err := time.ParseDuration("5m1ms")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ip.Spec.Build.Timeout = &metav1.Duration{
 		Duration: bt,
 	}
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+	require.NoError(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
 	answer, err := h.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, 5*time.Minute, answer.Status.Build.GetTimeout().Duration)

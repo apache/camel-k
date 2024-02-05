@@ -23,9 +23,11 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -38,31 +40,33 @@ import (
 )
 
 func TestClientFunctionalities(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	cfg, err := config.GetConfig()
-	assert.Nil(t, err)
-	camel, err := versioned.NewForConfig(cfg)
-	assert.Nil(t, err)
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		cfg, err := config.GetConfig()
+		require.NoError(t, err)
+		camel, err := versioned.NewForConfig(cfg)
+		require.NoError(t, err)
 
-	lst, err := camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
-	assert.Nil(t, err)
-	assert.Empty(t, lst.Items)
+		lst, err := camel.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
+		require.NoError(t, err)
+		assert.Empty(t, lst.Items)
 
-	integration, err := camel.CamelV1().Integrations(ns).Create(TestContext, &v1.Integration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "dummy",
-		},
-	}, metav1.CreateOptions{})
-	assert.Nil(t, err)
+		integration, err := camel.CamelV1().Integrations(ns).Create(ctx, &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "dummy",
+			},
+		}, metav1.CreateOptions{})
+		require.NoError(t, err)
 
-	lst, err = camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
-	assert.Nil(t, err)
-	assert.NotEmpty(t, lst.Items)
-	assert.Equal(t, lst.Items[0].Name, integration.Name)
+		lst, err = camel.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
+		require.NoError(t, err)
+		assert.NotEmpty(t, lst.Items)
+		assert.Equal(t, lst.Items[0].Name, integration.Name)
 
-	err = camel.CamelV1().Integrations(ns).Delete(TestContext, "dummy", metav1.DeleteOptions{})
-	assert.Nil(t, err)
+		err = camel.CamelV1().Integrations(ns).Delete(ctx, "dummy", metav1.DeleteOptions{})
+		require.NoError(t, err)
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }

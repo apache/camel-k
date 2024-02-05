@@ -23,6 +23,7 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -36,18 +37,20 @@ import (
 )
 
 func TestCamelCatalogBuilder(t *testing.T) {
+	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
-		Eventually(CamelCatalog(ns, catalogName)).ShouldNot(BeNil())
-		Eventually(CamelCatalogPhase(ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+		g.Eventually(CamelCatalog(t, ctx, ns, catalogName)).ShouldNot(BeNil())
+		g.Eventually(CamelCatalogPhase(t, ctx, ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 
 		// Run an integration with a catalog not compatible
 		// The operator should create the catalog, but fail on reconciliation as it is not compatible
@@ -55,24 +58,22 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		t.Run("Run catalog not compatible", func(t *testing.T) {
 			name := RandomizedSuffixName("java-1-15")
 			nonCompatibleCatalogName := "camel-catalog-1.15.0"
-			Expect(
-				KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-					"-t", "camel.runtime-version=1.15.0",
-				).Execute()).To(Succeed())
+			g.Expect(
+				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version=1.15.0").Execute()).To(Succeed())
 
-			Eventually(CamelCatalog(ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
-			Eventually(CamelCatalogPhase(ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
-			Eventually(CamelCatalogCondition(ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("Container image tool missing in catalog"))
+			g.Eventually(CamelCatalog(t, ctx, ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
+			g.Eventually(CamelCatalogPhase(t, ctx, ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
+			g.Eventually(CamelCatalogCondition(t, ctx, ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("Container image tool missing in catalog"))
 
-			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))
-			kitName := IntegrationKit(ns, name)()
-			Eventually(KitPhase(ns, kitName)).Should(Equal(v1.IntegrationKitPhaseError))
-			Eventually(KitCondition(ns, kitName, v1.IntegrationKitConditionCatalogAvailable)().Reason).Should(Equal("Camel Catalog 1.15.0 error"))
-			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseError))
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionKitAvailable)().Status).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationKit(t, ctx, ns, name)).ShouldNot(Equal(""))
+			kitName := IntegrationKit(t, ctx, ns, name)()
+			g.Eventually(KitPhase(t, ctx, ns, kitName)).Should(Equal(v1.IntegrationKitPhaseError))
+			g.Eventually(KitCondition(t, ctx, ns, kitName, v1.IntegrationKitConditionCatalogAvailable)().Reason).Should(Equal("Camel Catalog 1.15.0 error"))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)().Status).Should(Equal(corev1.ConditionFalse))
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns)).Should(Equal(0))
+			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
 		// Run an integration with a compatible catalog
@@ -83,24 +84,22 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			compatibleCatalogName := "camel-catalog-" + strings.ToLower(compatibleVersion)
 
 			// First of all we delete the catalog, if by any chance it was created previously
-			Expect(DeleteCamelCatalog(ns, compatibleCatalogName)()).Should(BeTrue())
-			Eventually(CamelCatalog(ns, compatibleCatalogName)).Should(BeNil())
+			g.Expect(DeleteCamelCatalog(t, ctx, ns, compatibleCatalogName)()).Should(BeTrue())
+			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).Should(BeNil())
 
-			Expect(
-				KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-					"-t", "camel.runtime-version="+compatibleVersion,
-				).Execute()).To(Succeed())
+			g.Expect(
+				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
 
-			Eventually(CamelCatalog(ns, compatibleCatalogName)).ShouldNot(BeNil())
-			Eventually(CamelCatalogPhase(ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
-			Eventually(CamelCatalogCondition(ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(Equal("Container image tool found in catalog"))
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).ShouldNot(BeNil())
+			g.Eventually(CamelCatalogPhase(t, ctx, ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
+			g.Eventually(CamelCatalogCondition(t, ctx, ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(Equal("Container image tool found in catalog"))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns)).Should(Equal(0))
+			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
 		t.Run("Run catalog container exists", func(t *testing.T) {
@@ -109,32 +108,30 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			compatibleCatalogName := "camel-catalog-" + strings.ToLower(compatibleVersion)
 
 			// First of all we delete the catalog, if by any chance it was created previously
-			Expect(DeleteCamelCatalog(ns, compatibleCatalogName)()).Should(BeTrue())
-			Eventually(CamelCatalog(ns, compatibleCatalogName)).Should(BeNil())
+			g.Expect(DeleteCamelCatalog(t, ctx, ns, compatibleCatalogName)()).Should(BeTrue())
+			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).Should(BeNil())
 
-			Expect(
-				KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-					"-t", "camel.runtime-version="+compatibleVersion,
-				).Execute()).To(Succeed())
+			g.Expect(
+				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
 
-			Eventually(CamelCatalog(ns, compatibleCatalogName)).ShouldNot(BeNil())
-			Eventually(CamelCatalogPhase(ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
-			Eventually(CamelCatalogCondition(ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(
+			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).ShouldNot(BeNil())
+			g.Eventually(CamelCatalogPhase(t, ctx, ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
+			g.Eventually(CamelCatalogCondition(t, ctx, ns, compatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(
 				Equal("Container image tool found in catalog"),
 			)
 
-			Eventually(IntegrationKit(ns, name)).ShouldNot(Equal(""))
-			kitName := IntegrationKit(ns, name)()
-			Eventually(KitPhase(ns, kitName)).Should(Equal(v1.IntegrationKitPhaseReady))
-			Eventually(IntegrationPodPhase(ns, name)).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationKit(t, ctx, ns, name)).ShouldNot(Equal(""))
+			kitName := IntegrationKit(t, ctx, ns, name)()
+			g.Eventually(KitPhase(t, ctx, ns, kitName)).Should(Equal(v1.IntegrationKitPhaseReady))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns)).Should(Equal(0))
+			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

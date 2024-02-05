@@ -31,6 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -44,12 +45,12 @@ func TestAwsSecretsManagerTraitApply(t *testing.T) {
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
@@ -67,12 +68,12 @@ func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
@@ -107,12 +108,12 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 	secrets.AccessKey = "secret:my-secret2/aws-access-key"
 	secrets.SecretKey = "secret:my-secret1/aws-secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
@@ -147,12 +148,12 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 	secrets.AccessKey = "configmap:my-configmap2/aws-access-key"
 	secrets.SecretKey = "configmap:my-configmap1/aws-secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
@@ -166,7 +167,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 
 	catalog, err := catalogGen()
 	client, _ := test.NewFakeClient(objects...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,

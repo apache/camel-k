@@ -658,6 +658,13 @@ map[string]string
 
 Annotation to use for the builder pod. Only used for `pod` strategy
 
+|`platforms` +
+[]string
+|
+
+
+The list of platforms used in order to build a container image.
+
 
 |===
 
@@ -1317,6 +1324,37 @@ the metadata of the loader
 
 |===
 
+[#_camel_apache_org_v1_CamelProperty]
+=== CamelProperty
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Capability, Capability>>
+
+CamelProperty represents a Camel property that may end up in an application.properties file.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`key` +
+string
+|
+
+
+
+
+|`value` +
+string
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_CamelScheme]
 === CamelScheme
 
@@ -1400,7 +1438,7 @@ list of dependencies needed for this scope
 
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-Capability is a particular feature which requires a well known set of dependencies
+Capability is a particular feature which requires a well known set of dependencies and other properties
 which are specified in the runtime catalog.
 
 [cols="2,2a",options="header"]
@@ -1413,7 +1451,28 @@ which are specified in the runtime catalog.
 |
 
 
+List of required Maven dependencies
 
+|`runtimeProperties` +
+*xref:#_camel_apache_org_v1_CamelProperty[[\]CamelProperty]*
+|
+
+
+Set of required Camel runtime properties
+
+|`buildTimeProperties` +
+*xref:#_camel_apache_org_v1_CamelProperty[[\]CamelProperty]*
+|
+
+
+Set of required Camel build time properties
+
+|`metadata` +
+map[string]string
+|
+
+
+Set of generic metadata
 
 
 |===
@@ -2494,6 +2553,13 @@ Maven repositories that can be used by the kit
 
 the sources to add at build time
 
+|`capabilities` +
+[]string
+|
+
+
+features offered by the IntegrationKit
+
 
 |===
 
@@ -2602,13 +2668,6 @@ the Camel K operator version for which this kit was configured
 
 a list of conditions which happened for the events related the kit
 
-|`traits` +
-*xref:#_camel_apache_org_v1_IntegrationKitTraits[IntegrationKitTraits]*
-|
-
-
-generated traits executed by the kit
-
 
 |===
 
@@ -2618,7 +2677,6 @@ generated traits executed by the kit
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
-* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 
 IntegrationKitTraits defines traits assigned to an `IntegrationKit`.
 
@@ -2656,6 +2714,7 @@ NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the
 
 
 The Registry trait sets up Maven to use the Image registry as a Maven repository.
+Deprecated: use jvm trait or read documentation.
 
 |`addons` +
 *xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.AddonTrait]*
@@ -3504,13 +3563,6 @@ label selector
 
 
 features offered by the Integration
-
-|`traits` +
-*xref:#_camel_apache_org_v1_Traits[Traits]*
-|
-
-
-the traits generated and executed for this Integration
 
 |`lastInitTimestamp` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
@@ -5666,7 +5718,6 @@ TraitConfiguration parameters configuration
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 * <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
-* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
 Traits represents the collection of trait configurations.
 
@@ -5884,6 +5935,7 @@ The configuration of Quarkus trait
 
 
 The configuration of Registry trait
+Deprecated: use jvm trait or read documentation.
 
 |`route` +
 *xref:#_camel_apache_org_v1_trait_RouteTrait[RouteTrait]*
@@ -6286,6 +6338,13 @@ map[string]string
 
 When using `pod` strategy, annotation to use for the builder pod.
 
+|`platforms` +
+[]string
+|
+
+
+The list of manifest platforms to use to build a container image (default `linux/amd64`).
+
 
 |===
 
@@ -6488,7 +6547,7 @@ require to be activated at specific hours of the day or with a periodic delay of
 For such tasks, the cron trait can materialize the integration as a Kubernetes CronJob instead of a standard deployment,
 in order to save resources when the integration does not need to be executed.
 
-Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
+Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`. The trait does support multiple evaluated components only if they have the same schedule, else it will fallback to Camel implementation instead of instanciating a Kubernetes CronJob.
 
 WARNING: In case of native build-mode defined in xref:traits:quarkus.adoc[quarkus] trait, the component can't be customized.
 
@@ -6696,7 +6755,7 @@ is considered to be failed. It defaults to `60s`.
 The deployment strategy to use to replace existing pods with new ones.
 
 |`rollingUpdateMaxUnavailable` +
-int
+k8s.io/apimachinery/pkg/util/intstr.IntOrString
 |
 
 
@@ -6707,7 +6766,7 @@ This can not be 0 if MaxSurge is 0.
 Defaults to `25%`.
 
 |`rollingUpdateMaxSurge` +
-int
+k8s.io/apimachinery/pkg/util/intstr.IntOrString
 |
 
 
@@ -7610,6 +7669,15 @@ The logging backend is provided by Quarkus, whose configuration is documented at
 
 
 
+|`category` +
+map[string]string
+|
+
+
+Log Level category of the trait
+This can be used to set log levels of specific packages
+CLI usage example:  -t "logging.category.'org.test'=DEBUG"
+
 |`color` +
 bool
 |
@@ -7704,7 +7772,18 @@ bool
 
 
 Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
-marked with `camel.apache.org/integration` label to be taken in account.
+marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
+changes in metadata.
+
+|`scanKameletsImplicitLabelSecrets` +
+bool
+|
+
+
+Deprecated: include your properties in an explicit property file backed by a secret.
+Let the operator to scan for secret labeled with `camel.apache.org/kamelet` and `camel.apache.org/kamelet.configuration`.
+These secrets are mounted to the application and treated as plain properties file with their key/value list
+(ie .spec.data["camel.my-property"] = my-value) (default `true`).
 
 
 |===
@@ -8162,6 +8241,8 @@ Deprecated: for backward compatibility.
 
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
+
+WARNING: The Registry trait is **deprecated** and will removed in future release versions.
 
 The Registry trait sets up Maven to use the Image registry
 as a Maven repository.

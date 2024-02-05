@@ -34,6 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -58,7 +59,7 @@ func TestMonitorSyntheticIntegrationImportingKindUnavailable(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
 	a.InjectLogger(log.Log)
@@ -66,7 +67,7 @@ func TestMonitorSyntheticIntegrationImportingKindUnavailable(t *testing.T) {
 	assert.Equal(t, "monitor-synthetic", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionImportingKindAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
@@ -116,7 +117,7 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt, deploy)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
 	a.InjectLogger(log.Log)
@@ -124,7 +125,7 @@ func TestMonitorSyntheticIntegrationCannotMonitorPods(t *testing.T) {
 	assert.Equal(t, "monitor-synthetic", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	// Check monitoring pods condition
 	assert.Equal(t, v1.IntegrationConditionMonitoringPodsAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
@@ -228,7 +229,7 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt, deploy, pod)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
 	a.InjectLogger(log.Log)
@@ -236,7 +237,7 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 	assert.Equal(t, "monitor-synthetic", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	assert.Equal(t, int32(1), *handledIt.Status.Replicas)
 	// Ready condition
@@ -247,10 +248,10 @@ func TestMonitorSyntheticIntegrationDeployment(t *testing.T) {
 	// Remove label from deployment
 	deploy.Labels = nil
 	c, err = test.NewFakeClient(importedIt, deploy)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	a.InjectClient(c)
 	handledIt, err = a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, handledIt)
 }
 
@@ -348,7 +349,7 @@ func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt, cron, pod)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
 	a.InjectLogger(log.Log)
@@ -356,7 +357,7 @@ func TestMonitorSyntheticIntegrationCronJob(t *testing.T) {
 	assert.Equal(t, "monitor-synthetic", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	assert.Equal(t, int32(1), *handledIt.Status.Replicas)
 	// Ready condition
@@ -469,7 +470,7 @@ func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt, ksvc, pod)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := monitorSyntheticAction{}
 	a.InjectLogger(log.Log)
@@ -477,7 +478,7 @@ func TestMonitorSyntheticIntegrationKnativeService(t *testing.T) {
 	assert.Equal(t, "monitor-synthetic", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	assert.Equal(t, int32(1), *handledIt.Status.Replicas)
 	// Ready condition

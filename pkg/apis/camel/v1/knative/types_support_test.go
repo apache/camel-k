@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSetSinkBinding(t *testing.T) {
@@ -34,7 +35,7 @@ func TestSetSinkBinding(t *testing.T) {
 		"apiVersion",
 		"InMemoryChannel",
 	)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	camelEnv.Services = append(camelEnv.Services, svc1)
 	svc := camelEnv.FindService("test",
 		CamelEndpointKindSink,

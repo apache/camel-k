@@ -23,6 +23,7 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,21 +35,27 @@ import (
 )
 
 func TestRunExtraRepository(t *testing.T) {
-	RegisterTestingT(t)
-	name := RandomizedSuffixName("java")
-	Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-		"--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat",
-		"--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001",
-		"--name", name,
-	).Execute()).To(Succeed())
+	t.Parallel()
 
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-	Eventually(Integration(ns, name)).Should(WithTransform(IntegrationSpec, And(
-		HaveExistingField("Repositories"),
-		HaveField("Repositories", ContainElements("https://maven.repository.redhat.com/ga@id=redhat")),
-	)))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-extra-repository"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		name := RandomizedSuffixName("java")
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat", "--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001", "--name", name).Execute()).To(Succeed())
+
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(Integration(t, ctx, ns, name)).Should(WithTransform(IntegrationSpec, And(
+			HaveExistingField("Repositories"),
+			HaveField("Repositories", ContainElements("https://maven.repository.redhat.com/ga@id=redhat")),
+		)))
+
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }

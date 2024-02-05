@@ -25,6 +25,7 @@ package cli
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -56,7 +57,7 @@ import (
 )
 
 func TestMavenCASecret(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		hostname := fmt.Sprintf("%s.%s.svc", "nexus", ns)
 		tlsMountPath := "/etc/tls/private"
 
@@ -77,7 +78,7 @@ func TestMavenCASecret(t *testing.T) {
 
 		// generate certPem private key
 		certPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-		Expect(err).To(BeNil())
+		g.Expect(err).To(BeNil())
 
 		privateKeyBytes := x509.MarshalPKCS1PrivateKey(certPrivateKey)
 		// encode for storing into secret
@@ -88,7 +89,7 @@ func TestMavenCASecret(t *testing.T) {
 			},
 		)
 		certBytes, err := x509.CreateCertificate(rand.Reader, cert, cert, &certPrivateKey.PublicKey, certPrivateKey)
-		Expect(err).To(BeNil())
+		g.Expect(err).To(BeNil())
 
 		// encode for storing into secret
 		certPem := pem.EncodeToMemory(&pem.Block{
@@ -111,7 +112,7 @@ func TestMavenCASecret(t *testing.T) {
 				corev1.TLSPrivateKeyKey: privateKeyPem,
 			},
 		}
-		Expect(TestClient().Create(TestContext, secret)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, secret)).To(Succeed())
 
 		// HTTPD configuration
 		config := &corev1.ConfigMap{
@@ -179,7 +180,7 @@ ProxyPreserveHost On
 				),
 			},
 		}
-		Expect(TestClient().Create(TestContext, config)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, config)).To(Succeed())
 
 		// Deploy Nexus
 		// https://help.sonatype.com/repomanager3/installation/run-behind-a-reverse-proxy
@@ -296,7 +297,7 @@ ProxyPreserveHost On
 				},
 			},
 		}
-		Expect(TestClient().Create(TestContext, deployment)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, deployment)).To(Succeed())
 
 		service := &corev1.Service{
 			TypeMeta: metav1.TypeMeta{
@@ -318,10 +319,10 @@ ProxyPreserveHost On
 				},
 			},
 		}
-		Expect(TestClient().Create(TestContext, service)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, service)).To(Succeed())
 
 		// Wait for the Deployment to become ready
-		Eventually(Deployment(ns, deployment.Name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+		g.Eventually(Deployment(t, ctx, ns, deployment.Name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
 			Fields{
 				"Status": MatchFields(IgnoreExtras,
 					Fields{
@@ -337,14 +338,14 @@ ProxyPreserveHost On
 				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
-		Expect(TestClient().List(TestContext, pods,
+		g.Expect(TestClient(t).List(ctx, pods,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{"camel-k": "maven-test-nexus"},
 		)).To(Succeed())
-		Expect(pods.Items).To(HaveLen(1))
+		g.Expect(pods.Items).To(HaveLen(1))
 
 		// Retrieve the Nexus admin password
-		req := TestClient().CoreV1().RESTClient().Post().
+		req := TestClient(t).CoreV1().RESTClient().Post().
 			Resource("pods").
 			Name(pods.Items[0].Name).
 			Namespace(ns).
@@ -359,18 +360,18 @@ ProxyPreserveHost On
 			TTY:       false,
 		}, scheme.ParameterCodec)
 
-		exec, err := remotecommand.NewSPDYExecutor(TestClient().GetConfig(), "POST", req.URL())
-		Expect(err).To(BeNil())
+		exec, err := remotecommand.NewSPDYExecutor(TestClient(t).GetConfig(), "POST", req.URL())
+		g.Expect(err).To(BeNil())
 
 		var password bytes.Buffer
-		Expect(exec.Stream(remotecommand.StreamOptions{
+		g.Expect(exec.Stream(remotecommand.StreamOptions{
 			Stdout: bufio.NewWriter(&password),
 			Stderr: os.Stderr,
 			Tty:    false,
 		})).To(Succeed())
 
 		// Create the Apache Snapshot proxy repository using the Nexus REST API
-		req = TestClient().CoreV1().RESTClient().Post().
+		req = TestClient(t).CoreV1().RESTClient().Post().
 			Resource("pods").
 			Name(pods.Items[0].Name).
 			Namespace(ns).
@@ -410,10 +411,10 @@ ProxyPreserveHost On
 			TTY:    false,
 		}, scheme.ParameterCodec)
 
-		exec, err = remotecommand.NewSPDYExecutor(TestClient().GetConfig(), "POST", req.URL())
-		Expect(err).To(BeNil())
+		exec, err = remotecommand.NewSPDYExecutor(TestClient(t).GetConfig(), "POST", req.URL())
+		g.Expect(err).To(BeNil())
 
-		Expect(exec.Stream(remotecommand.StreamOptions{
+		g.Expect(exec.Stream(remotecommand.StreamOptions{
 			Stdout: os.Stdout,
 			Stderr: os.Stderr,
 			Tty:    false,
@@ -421,40 +422,34 @@ ProxyPreserveHost On
 
 		// Install Camel K with the Maven Central Nexus proxy and the corresponding Maven CA secret
 		operatorID := "camel-k-maven-ca-secret"
-		Expect(KamelInstallWithID(operatorID, ns,
-			"--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central-internal@mirrorOf=central`, hostname),
-			"--maven-repository", fmt.Sprintf(`https://%s/repository/%s/%s`, hostname, stagingRepository.ID, strings.Join(getRepositoryAttributes(stagingRepository), "")),
-			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
-			// Active batch mode to assert dependencies download
-			"--maven-cli-option", "--batch-mode",
-		).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--maven-repository", fmt.Sprintf(`https://%s/repository/maven-public/@id=central-internal@mirrorOf=central`, hostname), "--maven-repository", fmt.Sprintf(`https://%s/repository/%s/%s`, hostname, stagingRepository.ID, strings.Join(getRepositoryAttributes(stagingRepository), "")), "--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey, "--maven-cli-option", "--batch-mode")).To(Succeed())
 
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Run the Integration
 		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutLong).Should(ContainSubstring("Magicstring!"))
 
 		// Assert no dependencies have been downloaded from the Maven central repository
 		// Note: this should be adapted for the Pod build strategy
-		pod := OperatorPod(ns)()
-		Expect(pod).NotTo(BeNil())
+		pod := OperatorPod(t, ctx, ns)()
+		g.Expect(pod).NotTo(BeNil())
 
 		// pod.Namespace could be different from ns if using global operator
-		logs := Logs(pod.Namespace, pod.Name, corev1.PodLogOptions{})()
-		Expect(logs).NotTo(BeEmpty())
-		Expect(logs).NotTo(ContainSubstring("Downloaded from central:"))
+		logs := Logs(t, ctx, pod.Namespace, pod.Name, corev1.PodLogOptions{})()
+		g.Expect(logs).NotTo(BeEmpty())
+		g.Expect(logs).NotTo(ContainSubstring("Downloaded from central:"))
 
 		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		Expect(TestClient().Delete(TestContext, deployment)).To(Succeed())
-		Expect(TestClient().Delete(TestContext, service)).To(Succeed())
-		Expect(TestClient().Delete(TestContext, secret)).To(Succeed())
-		Expect(TestClient().Delete(TestContext, config)).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, deployment)).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, service)).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, secret)).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, config)).To(Succeed())
 	})
 }
 

@@ -42,7 +42,7 @@ func newCmdLog(rootCmdOptions *RootCmdOptions) (*cobra.Command, *logCmdOptions) 
 		Long:    `Print the logs of an integration.`,
 		Aliases: []string{"logs"},
 		Args:    options.validate,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE:    options.run,
 	}
 

@@ -308,7 +308,7 @@ func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context
 			var err error
 			terminationMessage := t.Message
 			// Dynamic condition type (it depends on each container name)
-			containerConditionType := v1.BuildConditionType(fmt.Sprintf("Container %s succeeded", container.Name))
+			containerConditionType := v1.BuildConditionType(fmt.Sprintf("Container%sSucceeded", container.Name))
 			containerSucceeded := corev1.ConditionTrue
 			if t.ExitCode != 0 {
 				containerSucceeded = corev1.ConditionFalse

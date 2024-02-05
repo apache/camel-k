@@ -68,7 +68,7 @@ type Client interface {
 
 // Injectable identifies objects that can receive a Client.
 type Injectable interface {
-	InjectClient(Client)
+	InjectClient(client Client)
 }
 
 // Provider is used to provide a new instance of the Client each time it's required.

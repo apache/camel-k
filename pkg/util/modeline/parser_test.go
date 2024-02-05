@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseGroovyFile(t *testing.T) {
@@ -31,7 +32,7 @@ func TestParseGroovyFile(t *testing.T) {
 		from("timer:tick").log("Ciao")
     `
 	opts, err := Parse("simple.groovy", it)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, opts, 4)
 	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
 	assert.Contains(t, opts, Option{Name: "paperino"})
@@ -47,7 +48,7 @@ func TestParseKotlinFile(t *testing.T) {
 		from("timer:tick").log("Ciao")
     `
 	opts, err := Parse("example.kts", it)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, opts, 4)
 	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
 	assert.Contains(t, opts, Option{Name: "paperino"})
@@ -77,7 +78,7 @@ func TestParseJavaFile(t *testing.T) {
 		}
     `
 	opts, err := Parse("Example.java", it)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, opts, 4)
 	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
 	assert.Contains(t, opts, Option{Name: "paperino"})
@@ -97,7 +98,7 @@ func TestParseJSFile(t *testing.T) {
 			.to('log:info')
     `
 	opts, err := Parse("example.js", it)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, opts, 4)
 	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
 	assert.Contains(t, opts, Option{Name: "paperino"})
@@ -122,7 +123,7 @@ func TestParseYAMLFile(t *testing.T) {
 
     `
 	opts, err := Parse("example.yaml", it)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, opts, 4)
 	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
 	assert.Contains(t, opts, Option{Name: "paperino"})
@@ -160,7 +161,7 @@ func TestParseXMLFile(t *testing.T) {
 
     `
 	opts, err := Parse("example.xml", it)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, opts, 5)
 	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
 	assert.Contains(t, opts, Option{Name: "paperino"})

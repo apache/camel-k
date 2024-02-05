@@ -23,6 +23,7 @@ limitations under the License.
 package native
 
 import (
+	"context"
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
@@ -31,44 +32,34 @@ import (
 )
 
 func TestNativeBinding(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-native-binding"
-		Expect(KamelInstallWithIDAndKameletCatalog(operatorID, ns,
-			"--build-timeout", "90m0s",
-			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
-		).Execute()).To(Succeed())
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(KamelInstallWithIDAndKameletCatalog(t, ctx, operatorID, ns, "--build-timeout", "90m0s", "--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g")).To(Succeed())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		message := "Magicstring!"
 		t.Run("binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
-			Expect(KamelBindWithID(operatorID, ns,
-				"timer-source",
-				"log-sink",
-				"-p", "source.message="+message,
-				"--annotation", "trait.camel.apache.org/quarkus.build-mode=native",
-				"--annotation", "trait.camel.apache.org/builder.tasks-limit-memory=quarkus-native:6.5Gi",
-				"--name", bindingName,
-			).Execute()).To(Succeed())
+			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "timer-source", "log-sink", "-p", "source.message="+message, "--annotation", "trait.camel.apache.org/quarkus.build-mode=native", "--annotation", "trait.camel.apache.org/builder.tasks-limit-memory=quarkus-native:6.5Gi", "--name", bindingName).Execute()).To(Succeed())
 
 			// ====================================
 			// !!! THE MOST TIME-CONSUMING PART !!!
 			// ====================================
-			Eventually(Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
+			g.Eventually(Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutVeryLong).Should(HaveLen(1))
 
-			nativeKit := Kits(ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
-			Eventually(IntegrationKit(ns, bindingName), TestTimeoutShort).Should(Equal(nativeKit.Name))
+			nativeKit := Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
+			g.Eventually(IntegrationKit(t, ctx, ns, bindingName), TestTimeoutShort).Should(Equal(nativeKit.Name))
 
-			Eventually(IntegrationPodPhase(ns, bindingName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, bindingName), TestTimeoutShort).Should(ContainSubstring(message))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, bindingName), TestTimeoutShort).Should(ContainSubstring(message))
 
-			Eventually(IntegrationPod(ns, bindingName), TestTimeoutShort).
+			g.Eventually(IntegrationPod(t, ctx, ns, bindingName), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(),
 					MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 
 			// Clean up
-			Expect(Kamel("delete", bindingName, "-n", ns).Execute()).To(Succeed())
-			Expect(DeleteKits(ns)).To(Succeed())
+			g.Expect(Kamel(t, ctx, "delete", bindingName, "-n", ns).Execute()).To(Succeed())
+			g.Expect(DeleteKits(t, ctx, ns)).To(Succeed())
 		})
 	})
 }

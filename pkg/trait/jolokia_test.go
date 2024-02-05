@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -36,7 +37,7 @@ func TestConfigureJolokiaTraitInRunningPhaseDoesSucceed(t *testing.T) {
 
 	configured, condition, err := trait.Configure(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, configured)
 	assert.Nil(t, condition)
 }
@@ -46,7 +47,7 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
@@ -73,7 +74,7 @@ func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
@@ -103,7 +104,7 @@ func TestApplyJolokiaTraitWithoutContainerShouldReportJolokiaUnavailable(t *test
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
 	assert.Equal(t, v1.IntegrationConditionJolokiaAvailable, condition.Type)
@@ -124,7 +125,7 @@ func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 
@@ -141,7 +142,7 @@ func TestApplyJolokiaTraitWithUnparseableOptionShouldReturnError(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestSetDefaultJolokiaOptionShouldNotOverrideOptionsMap(t *testing.T) {
@@ -203,7 +204,7 @@ func TestSetDefaultBoolJolokiaOptionShouldSucceed(t *testing.T) {
 
 	trait.setDefaultJolokiaOption(options, &option, "key", true)
 
-	assert.Equal(t, true, *option)
+	assert.True(t, *option)
 }
 
 func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
@@ -213,7 +214,7 @@ func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T)
 
 	trait.setDefaultJolokiaOption(options, &option, "key", true)
 
-	assert.Equal(t, false, *option)
+	assert.False(t, *option)
 }
 
 func TestAddStringOptionToJolokiaOptions(t *testing.T) {

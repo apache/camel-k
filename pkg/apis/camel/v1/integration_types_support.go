@@ -116,6 +116,11 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 	in.Dependencies = append(in.Dependencies, dependency)
 }
 
+// AddConfigurationProperty adds a new configuration property.
+func (in *IntegrationSpec) AddConfigurationProperty(confValue string) {
+	in.AddConfiguration("property", confValue)
+}
+
 // GetConfigurationProperty returns a configuration property.
 func (in *IntegrationSpec) GetConfigurationProperty(property string) string {
 	for _, confSpec := range in.Configuration {
@@ -153,21 +158,6 @@ func (in *IntegrationStatus) AddOrReplaceGeneratedSources(sources ...SourceSpec)
 	}
 
 	in.GeneratedSources = append(in.GeneratedSources, newSources...)
-}
-
-func (in *IntegrationStatus) AddConfigurationsIfMissing(configurations ...ConfigurationSpec) {
-	for _, config := range configurations {
-		alreadyPresent := false
-		for _, r := range in.Configuration {
-			if r.Type == config.Type && r.Value == config.Value {
-				alreadyPresent = true
-				break
-			}
-		}
-		if !alreadyPresent {
-			in.Configuration = append(in.Configuration, config)
-		}
-	}
 }
 
 func (in *IntegrationSpec) Configurations() []ConfigurationSpec {

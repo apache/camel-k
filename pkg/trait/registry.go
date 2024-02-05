@@ -54,18 +54,23 @@ func (t *registryTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild overrides base class method.
-func (t *registryTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return true
-}
-
 func (t *registryTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// disabled by default
 	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil, nil
 	}
-
-	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted), nil, nil
+	enabled := e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted)
+	if enabled {
+		condition := NewIntegrationCondition(
+			"Registry",
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			traitConfigurationReason,
+			"Registry trait is deprecated. It may be removed in future version. Read documentation to find alternatives (likely JVM trait).",
+		)
+		return true, condition, nil
+	}
+	return false, nil, nil
 }
 
 func (t *registryTrait) Apply(e *Environment) error {

@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	routev1 "github.com/openshift/api/route/v1"
 
@@ -161,7 +162,7 @@ func TestTraitHierarchyDecode(t *testing.T) {
 	c := NewTraitTestCatalog()
 	err := c.Configure(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	knt := c.GetTrait("knative-service")
 	assert.NotNil(t, knt)
@@ -486,7 +487,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 
 	catalog := NewTraitTestCatalog()
 	_, err := catalog.apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	return env.Resources
 }
 
@@ -495,7 +496,7 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 
 	client, _ := test.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	res := &Environment{
 		CamelCatalog: catalog,
@@ -547,4 +548,20 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 
 func NewTraitTestCatalog() *Catalog {
 	return NewCatalog(nil)
+}
+
+func TestExecutedTraitsCondition(t *testing.T) {
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
+	catalog := NewTraitTestCatalog()
+	conditions, err := catalog.apply(env)
+	require.NoError(t, err)
+
+	expectedCondition := NewIntegrationCondition(
+		"",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"TraitConfiguration",
+		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,mount,quarkus,jvm,owner",
+	)
+	assert.Contains(t, conditions, expectedCondition)
 }

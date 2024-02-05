@@ -33,7 +33,7 @@ func newCmdBuilder(rootCmdOptions *RootCmdOptions) (*cobra.Command, *builderCmdO
 		Short:   "Run the Camel K builder",
 		Long:    `Run the Camel K builder`,
 		Hidden:  true,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		Run:     options.run,
 	}
 

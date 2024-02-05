@@ -23,33 +23,37 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"strings"
 	"testing"
 
-	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+
+	. "github.com/apache/camel-k/v2/e2e/support"
 )
 
 func TestKamelCLILog(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("check integration log", func(t *testing.T) {
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", "log-yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "log-yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			// first line of the integration logs
+			firstLine := strings.Split(IntegrationLogs(t, ctx, ns, "log-yaml")(), "\n")[0]
+			podName := IntegrationPod(t, ctx, ns, "log-yaml")().Name
 
-	t.Run("check integration log", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", "log-yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "log-yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		// first line of the integration logs
-		firstLine := strings.Split(IntegrationLogs(ns, "log-yaml")(), "\n")[0]
-		podName := IntegrationPod(ns, "log-yaml")().Name
+			logsCLI := GetOutputStringAsync(Kamel(t, ctx, "log", "log-yaml", "-n", ns))
+			g.Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
+			g.Eventually(logsCLI).Should(ContainSubstring(firstLine))
 
-		logsCLI := GetOutputStringAsync(Kamel("log", "log-yaml", "-n", ns))
-		Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-		Eventually(logsCLI).Should(ContainSubstring(firstLine))
+			logs := strings.Split(IntegrationLogs(t, ctx, ns, "log-yaml")(), "\n")
+			lastLine := logs[len(logs)-1]
 
-		logs := strings.Split(IntegrationLogs(ns, "log-yaml")(), "\n")
-		lastLine := logs[len(logs)-1]
+			logsCLI = GetOutputStringAsync(Kamel(t, ctx, "log", "log-yaml", "-n", ns, "--tail", "5"))
+			g.Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
+			g.Eventually(logsCLI).Should(ContainSubstring(lastLine))
+		})
 
-		logsCLI = GetOutputStringAsync(Kamel("log", "log-yaml", "-n", ns, "--tail", "5"))
-		Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-		Eventually(logsCLI).Should(ContainSubstring(lastLine))
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

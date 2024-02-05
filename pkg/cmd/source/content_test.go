@@ -27,11 +27,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRawContentFileMissing(t *testing.T) {
 	_, _, err := LoadRawContent(context.Background(), "dsadas")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestRawBinaryContentType(t *testing.T) {
@@ -40,11 +41,11 @@ func TestRawBinaryContentType(t *testing.T) {
 	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
+	require.NoError(t, tmpFile.Close())
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
 
 	data, contentType, err := LoadRawContent(context.Background(), tmpFile.Name())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []byte{1, 2, 3, 4, 5, 6}, data)
 	assert.True(t, IsBinary(contentType))
 }
@@ -55,11 +56,11 @@ func TestRawApplicationContentType(t *testing.T) {
 	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	require.NoError(t, tmpFile.Close())
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, err := LoadRawContent(context.Background(), tmpFile.Name())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `{"hello":"world"}`, string(data))
 	assert.False(t, IsBinary(contentType))
 }
@@ -70,11 +71,11 @@ func TestTextContentType(t *testing.T) {
 	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	require.NoError(t, tmpFile.Close())
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := LoadTextContent(context.Background(), tmpFile.Name(), false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `{"hello":"world"}`, data)
 	assert.False(t, IsBinary(contentType))
 	assert.False(t, compressed)
@@ -87,10 +88,10 @@ func TestTextCompressed(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := LoadTextContent(context.Background(), tmpFile.Name(), true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, `{"hello":"world"}`, data)
 	assert.False(t, IsBinary(contentType))
 	assert.True(t, compressed)
@@ -110,10 +111,10 @@ func TestContentHttp(t *testing.T) {
 	defer svr.Close()
 
 	u, err := url.Parse(svr.URL)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	data, err := loadContentHTTP(context.Background(), u)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, data)
 	assert.Equal(t, expected, string(data))
 }

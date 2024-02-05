@@ -45,7 +45,6 @@ type IntegrationStatusApplyConfiguration struct {
 	Replicas                *int32                                   `json:"replicas,omitempty"`
 	Selector                *string                                  `json:"selector,omitempty"`
 	Capabilities            []string                                 `json:"capabilities,omitempty"`
-	Traits                  *TraitsApplyConfiguration                `json:"traits,omitempty"`
 	InitializationTimestamp *metav1.Time                             `json:"lastInitTimestamp,omitempty"`
 }
 
@@ -207,14 +206,6 @@ func (b *IntegrationStatusApplyConfiguration) WithCapabilities(values ...string)
 	for i := range values {
 		b.Capabilities = append(b.Capabilities, values[i])
 	}
-	return b
-}
-
-// WithTraits sets the Traits field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Traits field is set to the value of the last call.
-func (b *IntegrationStatusApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *IntegrationStatusApplyConfiguration {
-	b.Traits = value
 	return b
 }
 

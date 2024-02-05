@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNumberConversion(t *testing.T) {
@@ -33,12 +34,12 @@ func TestNumberConversion(t *testing.T) {
 		"float64": float64(1111123.123),
 	}
 	ser, err := json.Marshal(props)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	ep := EndpointProperties{
 		RawMessage: ser,
 	}
 	res, err := ep.GetPropertyMap()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "str", res["string"])
 	assert.Equal(t, "1000000", res["int32"])
 	assert.Equal(t, "10000000000", res["int64"])

@@ -23,6 +23,7 @@ limitations under the License.
 package runtimes
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,40 +35,50 @@ import (
 )
 
 func TestSourceLessIntegrations(t *testing.T) {
-	RegisterTestingT(t)
-	var cmData = make(map[string]string)
-	cmData["my-file.txt"] = "Hello World!"
-	CreatePlainTextConfigmap(ns, "my-cm-sourceless", cmData)
+	t.Parallel()
 
-	t.Run("Camel Main", func(t *testing.T) {
-		itName := "my-camel-main-v1"
-		Expect(KamelRunWithID(operatorID, ns, "--image", "docker.io/squakez/my-camel-main:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationCondition(ns, itName, v1.IntegrationConditionTraitInfo)().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
-		Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring(cmData["my-file.txt"]))
-		Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring("Apache Camel (Main)"))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-runtimes"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		var cmData = make(map[string]string)
+		cmData["my-file.txt"] = "Hello World!"
+		CreatePlainTextConfigmap(t, ctx, ns, "my-cm-sourceless", cmData)
+
+		t.Run("Camel Main", func(t *testing.T) {
+			itName := "my-camel-main-v1"
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-main:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationCondition(t, ctx, ns, itName, v1.IntegrationConditionType("JVMTraitInfo"))().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring(cmData["my-file.txt"]))
+			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring("Apache Camel (Main)"))
+		})
+
+		t.Run("Camel Spring Boot", func(t *testing.T) {
+			itName := "my-camel-sb-v1"
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-sb:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationCondition(t, ctx, ns, itName, v1.IntegrationConditionType("JVMTraitInfo"))().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring(cmData["my-file.txt"]))
+			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring("Spring Boot"))
+		})
+
+		t.Run("Camel Quarkus", func(t *testing.T) {
+			itName := "my-camel-quarkus-v1"
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-quarkus:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationCondition(t, ctx, ns, itName, v1.IntegrationConditionType("JVMTraitInfo"))().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring(cmData["my-file.txt"]))
+			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring("powered by Quarkus"))
+		})
+
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	t.Run("Camel Spring Boot", func(t *testing.T) {
-		itName := "my-camel-sb-v1"
-		Expect(KamelRunWithID(operatorID, ns, "--image", "docker.io/squakez/my-camel-sb:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationCondition(ns, itName, v1.IntegrationConditionTraitInfo)().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
-		Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring(cmData["my-file.txt"]))
-		Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring("Spring Boot"))
-	})
-
-	t.Run("Camel Quarkus", func(t *testing.T) {
-		itName := "my-camel-quarkus-v1"
-		Expect(KamelRunWithID(operatorID, ns, "--image", "docker.io/squakez/my-camel-quarkus:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationCondition(ns, itName, v1.IntegrationConditionTraitInfo)().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
-		Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring(cmData["my-file.txt"]))
-		Eventually(IntegrationLogs(ns, itName), TestTimeoutShort).Should(ContainSubstring("powered by Quarkus"))
-	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

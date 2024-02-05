@@ -33,6 +33,7 @@ type IntegrationKitSpecApplyConfiguration struct {
 	Configuration []ConfigurationSpecApplyConfiguration   `json:"configuration,omitempty"`
 	Repositories  []string                                `json:"repositories,omitempty"`
 	Sources       []SourceSpecApplyConfiguration          `json:"sources,omitempty"`
+	Capabilities  []string                                `json:"capabilities,omitempty"`
 }
 
 // IntegrationKitSpecApplyConfiguration constructs an declarative configuration of the IntegrationKitSpec type for use with
@@ -107,6 +108,16 @@ func (b *IntegrationKitSpecApplyConfiguration) WithSources(values ...*SourceSpec
 			panic("nil value passed to WithSources")
 		}
 		b.Sources = append(b.Sources, *values[i])
+	}
+	return b
+}
+
+// WithCapabilities adds the given value to the Capabilities field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Capabilities field.
+func (b *IntegrationKitSpecApplyConfiguration) WithCapabilities(values ...string) *IntegrationKitSpecApplyConfiguration {
+	for i := range values {
+		b.Capabilities = append(b.Capabilities, values[i])
 	}
 	return b
 }

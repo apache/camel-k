@@ -25,18 +25,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfigureEnabledCamelTraitSucceeds(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 }
@@ -45,12 +47,12 @@ func TestApplyCamelTraitSucceeds(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "0.0.1", environment.RuntimeVersion)
 	assert.Equal(t, "0.0.1", environment.Integration.Status.RuntimeVersion)
 	assert.Equal(t, "0.0.1", environment.IntegrationKit.Status.RuntimeVersion)
@@ -68,12 +70,12 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 	environment.Integration.Status.RuntimeProvider = v1.RuntimeProviderQuarkus
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "unable to find catalog matching version requirement: runtime=Unmatchable version, provider=quarkus", err.Error())
 }
 
@@ -171,12 +173,12 @@ func TestApplyCamelTraitWithProperties(t *testing.T) {
 	trait.Properties = []string{"a=b", "c=d"}
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	userPropertiesCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels["camel.apache.org/properties.type"] == "user"
@@ -191,12 +193,12 @@ func TestApplyCamelTraitWithSources(t *testing.T) {
 	trait, environment := createNominalCamelTest(true)
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, 1, environment.Resources.Size())
 	sourceCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
@@ -206,4 +208,25 @@ func TestApplyCamelTraitWithSources(t *testing.T) {
 	assert.Equal(t, map[string]string{
 		"content": "XML Source Code",
 	}, sourceCm.Data)
+}
+
+func TestCamelMatches(t *testing.T) {
+	t1 := camelTrait{
+		BasePlatformTrait: NewBasePlatformTrait("camel", 600),
+		CamelTrait: traitv1.CamelTrait{
+			RuntimeVersion: "1.2.3",
+		},
+	}
+	t2 := camelTrait{
+		BasePlatformTrait: NewBasePlatformTrait("camel", 600),
+		CamelTrait: traitv1.CamelTrait{
+			RuntimeVersion: "1.2.3",
+		},
+	}
+
+	assert.True(t, t1.Matches(&t2))
+	t1.Properties = []string{"hello=world"}
+	assert.True(t, t1.Matches(&t2))
+	t2.RuntimeVersion = "3.2.1"
+	assert.False(t, t1.Matches(&t2))
 }

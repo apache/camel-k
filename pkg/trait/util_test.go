@@ -27,6 +27,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestToTraitMap(t *testing.T) {
@@ -74,7 +75,7 @@ func TestToTraitMap(t *testing.T) {
 
 	traitMap, err := ToTraitMap(traits)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, traitMap)
 }
 
@@ -101,7 +102,7 @@ func TestToPropertyMap(t *testing.T) {
 
 	propMap, err := ToPropertyMap(trait)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, propMap)
 }
 
@@ -129,7 +130,7 @@ func TestMigrateLegacyConfiguration(t *testing.T) {
 
 	err := MigrateLegacyConfiguration(trait)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, trait)
 }
 
@@ -141,7 +142,7 @@ func TestMigrateLegacyConfiguration_invalidConfiguration(t *testing.T) {
 
 	err := MigrateLegacyConfiguration(trait)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestToTrait(t *testing.T) {
@@ -168,7 +169,7 @@ func TestToTrait(t *testing.T) {
 	trait := traitv1.ContainerTrait{}
 	err := ToTrait(config, &trait)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, trait)
 }
 
@@ -190,7 +191,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -219,7 +220,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -248,7 +249,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, ok)
 	})
 
@@ -273,7 +274,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -294,7 +295,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -319,7 +320,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, ok)
 	})
 
@@ -340,7 +341,97 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, ok)
 	})
+}
+
+func TestHasMathchingTraitsEmpty(t *testing.T) {
+	opt1 := Options{
+		"builder": {},
+		"camel": {
+			"runtimeVersion": "1.2.3",
+		},
+		"quarkus": {},
+	}
+	opt2 := Options{
+		"camel": {
+			"runtimeVersion": "1.2.3",
+		},
+	}
+	opt3 := Options{
+		"camel": {
+			"runtimeVersion": "1.2.3",
+		},
+	}
+	opt4 := Options{
+		"camel": {
+			"runtimeVersion": "3.2.1",
+		},
+	}
+	b1, err := HasMatchingTraits(opt1, opt2)
+	assert.Nil(t, err)
+	assert.True(t, b1)
+	b2, err := HasMatchingTraits(opt1, opt4)
+	assert.Nil(t, err)
+	assert.False(t, b2)
+	b3, err := HasMatchingTraits(opt2, opt3)
+	assert.Nil(t, err)
+	assert.True(t, b3)
+}
+
+func TestHasMathchingTraitsMissing(t *testing.T) {
+	opt1 := Options{}
+	opt2 := Options{
+		"camel": {
+			"properties": []string{"a=1"},
+		},
+	}
+	b1, err := HasMatchingTraits(opt1, opt2)
+	assert.Nil(t, err)
+	assert.True(t, b1)
+}
+
+func TestFromAnnotationsPlain(t *testing.T) {
+	meta := metav1.ObjectMeta{
+		Annotations: map[string]string{
+			"trait.camel.apache.org/trait.prop1": "hello1",
+			"trait.camel.apache.org/trait.prop2": "hello2",
+		},
+	}
+	opt, err := FromAnnotations(&meta)
+	require.NoError(t, err)
+	tt, ok := opt.Get("trait")
+	assert.True(t, ok)
+	assert.Equal(t, "hello1", tt["prop1"])
+	assert.Equal(t, "hello2", tt["prop2"])
+}
+
+func TestFromAnnotationsArray(t *testing.T) {
+	meta := metav1.ObjectMeta{
+		Annotations: map[string]string{
+			"trait.camel.apache.org/trait.prop1": "[hello,world]",
+			// The func should trim empty spaces as well
+			"trait.camel.apache.org/trait.prop2": "[\"hello=1\", \"world=2\"]",
+		},
+	}
+	opt, err := FromAnnotations(&meta)
+	require.NoError(t, err)
+	tt, ok := opt.Get("trait")
+	assert.True(t, ok)
+	assert.Equal(t, []string{"hello", "world"}, tt["prop1"])
+	assert.Equal(t, []string{"\"hello=1\"", "\"world=2\""}, tt["prop2"])
+}
+
+func TestFromAnnotationsArrayEmpty(t *testing.T) {
+	meta := metav1.ObjectMeta{
+		Annotations: map[string]string{
+			"trait.camel.apache.org/trait.prop": "[]",
+		},
+	}
+	opt, err := FromAnnotations(&meta)
+	require.NoError(t, err)
+	tt, ok := opt.Get("trait")
+	assert.True(t, ok)
+	assert.Equal(t, []string{}, tt["prop"])
 }

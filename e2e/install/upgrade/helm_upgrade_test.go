@@ -23,21 +23,26 @@ limitations under the License.
 package upgrade
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"testing"
 
+	. "github.com/onsi/gomega"
+
+	corev1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+
 	. "github.com/apache/camel-k/v2/e2e/support"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
 func TestHelmOperatorUpgrade(t *testing.T) {
-	RegisterTestingT(t)
+	ctx := TestContext()
+	g := NewWithT(t)
 
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	// need to add last release version
@@ -51,16 +56,22 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 
 	customImage := fmt.Sprintf("%s/apache/camel-k", KAMEL_INSTALL_REGISTRY)
 
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
+	if err := os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../"); err != nil {
+		t.Logf("Unable to set makefile directory envvar - %s", err.Error())
+	}
 
-	// Ensure no CRDs are already installed
-	UninstallAll()
-	Eventually(CRDs()).Should(HaveLen(0))
+	if len(CRDs(t)()) > 0 {
+		// Clean up old installation - maybe leftover from another test
+		if err := UninstallAll(t, ctx); err != nil && !kerrors.IsNotFound(err) {
+			t.Error(err)
+			t.FailNow()
+		}
+	}
+	g.Eventually(CRDs(t), TestTimeoutMedium).Should(HaveLen(0))
 
-	WithNewTestNamespace(t, func(ns string) {
-
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Install operator in last released version
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"helm",
 				"install",
@@ -75,20 +86,20 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorImage(ns)).Should(ContainSubstring(releaseVersion))
-		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(releaseVersion))
+		g.Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(releaseVersion)))
 
-		//Test a simple route
+		// Test a simple route
 		t.Run("simple route", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRun(ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
 		// Delete CRDs with kustomize
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"kubectl",
 				"delete",
@@ -101,7 +112,7 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 		)
 
 		// Re-Create CRDs with kustomize
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"kubectl",
 				"create",
@@ -113,9 +124,9 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 		)
 
 		// Upgrade operator to current version
-		ExpectExecSucceed(t, Make(fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
-		ExpectExecSucceed(t, Make("release-helm"))
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
+		ExpectExecSucceed(t, g, Make(t, "release-helm"))
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"helm",
 				"upgrade",
@@ -131,19 +142,25 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorImage(ns)).Should(ContainSubstring(defaults.Version))
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(defaults.Version))
 
-		//Test again a simple route
+		// Test again a simple route
 		t.Run("simple route upgraded", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRun(ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
+		// Clean up
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+
+		// Delete Integration Platform as it does not get removed with uninstall and might cause next tests to fail
+		DeletePlatform(t, ctx, ns)()
+
 		// Uninstall with helm
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"helm",
 				"uninstall",
@@ -152,11 +169,11 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 				ns,
 			),
 		)
-		Eventually(OperatorPod(ns)).Should(BeNil())
+		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
 
 		//  helm does not remove the CRDs
-		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
-		ExpectExecSucceed(t,
+		g.Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"kubectl",
 				"delete",
@@ -166,6 +183,6 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 				ns,
 			),
 		)
-		Eventually(CRDs()).Should(HaveLen(0))
+		g.Eventually(CRDs(t)).Should(HaveLen(0))
 	})
 }
