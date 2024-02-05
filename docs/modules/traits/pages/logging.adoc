@@ -26,6 +26,12 @@ The following configuration options are available:
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
 
+| logging.category
+| map[string]string
+| Log Level category of the trait
+This can be used to set log levels of specific packages
+CLI usage example:  -t "logging.category.'org.test'=DEBUG"
+
 | logging.color
 | bool
 | Colorize the log output

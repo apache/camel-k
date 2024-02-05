@@ -18,6 +18,8 @@ limitations under the License.
 package trait
 
 import (
+	"strings"
+
 	"k8s.io/utils/pointer"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -28,6 +30,7 @@ const (
 	envVarQuarkusConsoleColor     = "QUARKUS_CONSOLE_COLOR"
 	envVarQuarkusLogLevel         = "QUARKUS_LOG_LEVEL"
 	envVarQuarkusLogConsoleFormat = "QUARKUS_LOG_CONSOLE_FORMAT"
+	envVarQuarkusLogCategory      = "QUARKUS_LOG_CATEGORY"
 	// nolint: gosec // no sensitive credentials
 	envVarQuarkusLogConsoleJSON            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJSONPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
@@ -43,7 +46,8 @@ func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
 		BaseTrait: NewBaseTrait("logging", 800),
 		LoggingTrait: traitv1.LoggingTrait{
-			Level: defaultLogLevel,
+			Level:    defaultLogLevel,
+			Category: map[string]string{},
 		},
 	}
 }
@@ -77,6 +81,8 @@ func (l loggingTrait) setEnvConfiguration(e *Environment) {
 	if l.Format != "" {
 		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
+
+	addLogCategoriesEnv(&l, e)
 
 	if pointer.BoolDeref(l.JSON, false) {
 		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, True)
@@ -113,10 +119,23 @@ func (l loggingTrait) setCatalogConfiguration(e *Environment) {
 			e.ApplicationProperties["camel.k.logging.color"] = True
 		}
 	}
+	addLogCategoriesEnv(&l, e)
 
 	for _, cp := range e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties {
 		if CapabilityPropertyKey(cp.Value, e.ApplicationProperties) != "" {
 			e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 		}
 	}
+}
+
+func addLogCategoriesEnv(l *loggingTrait, e *Environment) {
+	if len(l.Category) > 0 {
+		for k, v := range l.Category {
+			envVarQuarkusPackage := strings.ReplaceAll(strings.ToUpper(k), ".", "_")
+			envVarQuarkusLogCategoryPackageFormat := envVarQuarkusLogCategory + "__" + envVarQuarkusPackage + "__LEVEL"
+			envVarQuarkusLogCatagoryValue := strings.ToUpper(v)
+			envvar.SetVal(&e.EnvVars, envVarQuarkusLogCategoryPackageFormat, envVarQuarkusLogCatagoryValue)
+		}
+	}
+
 }

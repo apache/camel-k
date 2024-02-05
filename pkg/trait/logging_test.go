@@ -35,7 +35,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
-func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string) *Environment {
+func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint bool, logLevel string, logFormat string, logCategory map[string]string) *Environment {
 	t.Helper()
 
 	client, _ := test.NewFakeClient()
@@ -66,6 +66,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 						JSON:            pointer.Bool(json),
 						JSONPrettyPrint: pointer.Bool(jsonPrettyPrint),
 						Level:           logLevel,
+						Category:        logCategory,
 					},
 				},
 			},
@@ -102,7 +103,7 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 func createDefaultLoggingTestEnv(t *testing.T) *Environment {
 	t.Helper()
 
-	return createLoggingTestEnv(t, true, false, false, defaultLogLevel, "")
+	return createLoggingTestEnv(t, true, false, false, defaultLogLevel, "", map[string]string{})
 }
 
 func NewLoggingTestCatalog() *Catalog {
@@ -132,7 +133,7 @@ func TestEmptyLoggingTrait(t *testing.T) {
 
 func TestJsonLoggingTrait(t *testing.T) {
 	// When running, this log should look like "09:07:00 INFO  (main) Profile prod activated."
-	env := createLoggingTestEnv(t, true, true, true, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n")
+	env := createLoggingTestEnv(t, true, true, true, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", map[string]string{})
 	conditions, err := NewLoggingTestCatalog().apply(env)
 
 	require.NoError(t, err)
@@ -150,4 +151,37 @@ func TestJsonLoggingTrait(t *testing.T) {
 	assert.Equal(t, "${camel.k.logging.json}", env.ApplicationProperties["quarkus.log.console.json"])
 	assert.Equal(t, "${camel.k.logging.jsonPrettyPrint}", env.ApplicationProperties["quarkus.log.console.json.pretty-print"])
 	assert.Equal(t, "", env.ApplicationProperties["quarkus.console.color"])
+}
+
+func TestSingleLoggingCategory(t *testing.T) {
+	category := make(map[string]string, 0)
+	category["org.apache.camel.impl"] = "debug"
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", category)
+	conditions, err := NewLoggingTestCatalog().apply(env)
+
+	assert.Nil(t, err)
+	assert.NotEmpty(t, conditions)
+
+	testEnvVar := corev1.EnvVar{Name: "QUARKUS_LOG_CATEGORY__ORG_APACHE_CAMEL_IMPL__LEVEL", Value: "DEBUG"}
+	assert.Contains(t, env.EnvVars, testEnvVar)
+}
+
+func TestLoggingCategories(t *testing.T) {
+	category := make(map[string]string, 0)
+	category["org.apache.camel.impl"] = "debug"
+	category["org.jboss.resteasy"] = "trace"
+	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n", category)
+	conditions, err := NewLoggingTestCatalog().apply(env)
+	assert.NotEmpty(t, conditions)
+	assert.Nil(t, err)
+
+	testEnvVars := []corev1.EnvVar{
+		{Name: "QUARKUS_LOG_CATEGORY__ORG_APACHE_CAMEL_IMPL__LEVEL", Value: "DEBUG"},
+		{Name: "QUARKUS_LOG_CATEGORY__ORG_JBOSS_RESTEASY__LEVEL", Value: "TRACE"},
+	}
+
+	for _, v := range testEnvVars {
+		assert.Contains(t, env.EnvVars, v)
+	}
+
 }
