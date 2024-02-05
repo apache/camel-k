@@ -19,7 +19,7 @@ resources:
   kind: Integration
   version: v1
 - group: camel
-  kind: Binding
+  kind: Pipe
   version: v1
 - group: camel
   kind: Kamelet

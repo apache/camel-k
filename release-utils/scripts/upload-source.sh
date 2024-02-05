@@ -18,7 +18,7 @@
 set -e
 
 if [ "$#" -lt 2 ]; then
-    echo "usage: $0 upload-sources release-version destination-version"
+    echo "usage: $0 upload-sources release-version"
     exit 1
 fi
 
@@ -31,8 +31,9 @@ cd $1/
 wget https://github.com/apache/camel-k/archive/refs/tags/v$1.tar.gz -O camel-k-sources-$1.tar.gz
 cp ../../../camel-k-client-$1-* .
 cp ../../../java/target/camel-k-crds-$1.jar .
+cp ../../../sbom.json .
 cd ../
 ./sign.sh $1/
-svn import $1/ https://dist.apache.org/repos/dist/dev/camel/camel-k/$2/ -m "Import camel-k release"
+svn import $1/ https://dist.apache.org/repos/dist/dev/camel/camel-k/$1/ -m "Import camel-k release"
 
 rm -rf $1/

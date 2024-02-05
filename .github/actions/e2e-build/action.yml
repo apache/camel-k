@@ -27,14 +27,6 @@ runs:
     name: Prepare Test Environment
     uses: ./.github/actions/kamel-prepare-env
 
-  - name: Cache modules
-    uses: actions/cache@v3
-    with:
-      path: ~/go/pkg/mod
-      key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-      restore-keys: |
-        ${{ runner.os }}-go-
-
   - name: Test
     shell: bash
     run: make
