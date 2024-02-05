@@ -23,29 +23,15 @@ limitations under the License.
 package cli
 
 import (
-	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 func TestRunGlobalKamelet(t *testing.T) {
-	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if !forceGlobalTest {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
-			return
-		}
-	}
-
 	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
 		operatorID := "camel-k-global-kamelet"
 		Expect(KamelInstallWithID(operatorID, operatorNamespace, "--global", "--force").Execute()).To(Succeed())

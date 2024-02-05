@@ -20,27 +20,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 func TestOperatorIDCamelCatalogReconciliation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operator1 := "operator-1"
+		Expect(CopyCamelCatalog(ns, operator1)).To(Succeed())
 		Expect(KamelInstallWithID(operator1, ns, "--global", "--force").Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		Eventually(DefaultCamelCatalogPhase(ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
@@ -50,20 +47,11 @@ func TestOperatorIDCamelCatalogReconciliation(t *testing.T) {
 func TestOperatorIDFiltering(t *testing.T) {
 	RegisterTestingT(t)
 
-	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if !forceGlobalTest {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
-			return
-		}
-	}
-
 	WithNewTestNamespace(t, func(ns string) {
 		WithNewTestNamespace(t, func(nsop1 string) {
 			WithNewTestNamespace(t, func(nsop2 string) {
 				operator1 := "operator-1"
+				Expect(CopyCamelCatalog(ns, operator1)).To(Succeed())
 				Expect(KamelInstallWithIDAndKameletCatalog(operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
 				Eventually(PlatformPhase(nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -72,12 +60,12 @@ func TestOperatorIDFiltering(t *testing.T) {
 				Eventually(PlatformPhase(nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
-					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "untouched", "--force").Execute()).To(Succeed())
+					Expect(KamelRunWithID("operator-x", ns, "files/yaml.yaml", "--name", "untouched", "--force").Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "untouched"), 10*time.Second).Should(BeEmpty())
 				})
 
 				t.Run("Operators run scoped integrations", func(t *testing.T) {
-					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
+					Expect(KamelRunWithID("operator-x", ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
 					Expect(AssignIntegrationToOperator(ns, "moving", operator1)).To(Succeed())
 					Eventually(IntegrationPhase(ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 					Eventually(IntegrationPodPhase(ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -107,7 +95,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 					// Save resources by deleting "moving" integration
 					Expect(Kamel("delete", "moving", "-n", ns).Execute()).To(Succeed())
 
-					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "pre-built", "--force",
+					Expect(KamelRunWithID("operator-x", ns, "files/yaml.yaml", "--name", "pre-built", "--force",
 						"-t", fmt.Sprintf("container.image=%s", image), "-t", "jvm.enabled=true").Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "pre-built"), 10*time.Second).Should(BeEmpty())
 					Expect(AssignIntegrationToOperator(ns, "pre-built", operator2)).To(Succeed())
@@ -118,7 +106,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can run scoped Pipes", func(t *testing.T) {
-					Expect(KamelBind(ns, "timer-source?message=Hello", "log-sink",
+					Expect(KamelBindWithID("operator-x", ns, "timer-source?message=Hello", "log-sink",
 						"--name", "klb", "--force").Execute()).To(Succeed())
 					Consistently(Integration(ns, "klb"), 10*time.Second).Should(BeNil())
 

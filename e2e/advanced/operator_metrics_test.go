@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"bytes"
@@ -61,6 +61,7 @@ func TestMetrics(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		name := RandomizedSuffixName("java")
 		operatorID := "camel-k-metrics"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns, "--log-level", "debug").Execute()).To(Succeed())
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,

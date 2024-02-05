@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package commonwithcustominstall
+package advanced
 
 import (
 	"crypto/rand"
@@ -148,6 +148,7 @@ func TestMavenProxy(t *testing.T) {
 
 		// Install Camel K with the HTTP proxy
 		operatorID := "camel-k-maven-proxy"
+		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		olm, olmErr := olm.IsAPIAvailable(TestContext, TestClient(), ns)
 		installed, inErr := kubernetes.IsAPIResourceInstalled(TestClient(), configv1.GroupVersion.String(), reflect.TypeOf(configv1.Proxy{}).Name())
 		permission, pErr := kubernetes.CheckPermission(TestContext, TestClient(), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")

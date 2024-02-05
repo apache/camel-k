@@ -270,21 +270,7 @@ func KamelInstallWithIDAndKameletCatalog(operatorID string, namespace string, ar
 func kamelInstallWithContext(ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) *cobra.Command {
 	var installArgs []string
 
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if globalTest {
-		fmt.Printf("Executing as global test\n")
-
-		if err := verifyGlobalOperator(); err != nil {
-			failTest(err)
-		}
-
-		// Have a global operator pod watching all namespaces
-		// so ensure an integration platform is installed in target namespace
-		installArgs = []string{"install", "--skip-operator-setup", "-n", namespace}
-	} else {
-		// NOT global so proceed with local namespaced kamel install using the operator id
-		installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
-	}
+	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
 
 	if skipKameletCatalog {
 		installArgs = append(installArgs, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false")
@@ -355,20 +341,7 @@ func KamelCommandWithContext(ctx context.Context, command string, operatorID str
 	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	var cmdArgs []string
 
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if globalTest {
-		fmt.Printf("Running as globally managed resource\n")
-
-		if err := verifyGlobalOperator(); err != nil {
-			failTest(err)
-		}
-
-		// Have a global operator reconciling the integration
-		cmdArgs = []string{command, "-n", namespace}
-	} else {
-		// NOT global so proceed with local namespaced operator reconciling the integration
-		cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
-	}
+	cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
 
 	cmdArgs = append(cmdArgs, args...)
 	return KamelWithContext(ctx, cmdArgs...)
@@ -377,7 +350,7 @@ func KamelCommandWithContext(ctx context.Context, command string, operatorID str
 func verifyGlobalOperator() error {
 	opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
 	if opns == "" {
-		return errors.New("No operator namespace defined in CAMEL_K_GLOBAL_OPERATOR_NS")
+		return errors.New("no operator namespace defined in CAMEL_K_GLOBAL_OPERATOR_NS")
 	}
 
 	oppod := OperatorPod(opns)()
@@ -1969,6 +1942,24 @@ func PlatformByName(ns string, name string) func() *v1.IntegrationPlatform {
 	}
 }
 
+func CopyCamelCatalog(ns, operatorID string) error {
+	catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+	defaultCatalog := CamelCatalog("default", catalogName)()
+	if defaultCatalog != nil {
+		catalog := v1.CamelCatalog{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      catalogName,
+			},
+			Spec: *defaultCatalog.Spec.DeepCopy(),
+		}
+		v1.SetAnnotation(&catalog.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
+		return CreateCamelCatalog(&catalog)()
+	}
+
+	return nil
+}
+
 func CamelCatalog(ns, name string) func() *v1.CamelCatalog {
 	return func() *v1.CamelCatalog {
 		cat := v1.CamelCatalog{}
@@ -2237,15 +2228,6 @@ func ConsoleCLIDownload(name string) func() *consoleV1.ConsoleCLIDownload {
 }
 
 func OperatorPod(ns string) func() *corev1.Pod {
-	namespace := ns
-
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-	if globalTest && len(opns) > 0 {
-		// Use the global operator pod instead of given namespace
-		namespace = opns
-	}
-
 	return func() *corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -2254,7 +2236,7 @@ func OperatorPod(ns string) func() *corev1.Pod {
 			},
 		}
 		if err := TestClient().List(TestContext, &lst,
-			ctrl.InNamespace(namespace),
+			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"camel.apache.org/component": "operator",
 			}); err != nil {
@@ -2709,13 +2691,13 @@ func userCleanup(t *testing.T) {
 }
 
 func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-
-	defer func(isGlobal bool) {
+	defer func() {
 		DumpNamespace(t, ns)
 
+		osns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
+
 		// Try to clean up namespace
-		if !isGlobal && HasPlatform(ns)() {
+		if ns != osns && HasPlatform(ns)() {
 			t.Logf("Clean up test namespace: %s", ns)
 
 			if err := Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute(); err != nil {
@@ -2724,7 +2706,7 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 
 			t.Logf("Successfully cleaned up test namespace: %s", ns)
 		}
-	}(globalTest)
+	}()
 
 	gomega.RegisterTestingT(t)
 	doRun(ns)
@@ -2995,15 +2977,6 @@ func DeleteCIProcessID() {
 	err := os.Remove(ciPID)
 	if err != nil {
 		panic(err)
-	}
-}
-
-func GetOperatorNamespace(testNamespace string) string {
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if globalTest {
-		return os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-	} else {
-		return testNamespace
 	}
 }
 
