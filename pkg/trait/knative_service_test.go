@@ -35,7 +35,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -124,8 +123,7 @@ func TestKnativeService(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative"))
-	assert.NotNil(t, envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION"))
-	assert.Equal(t, 4, environment.Resources.Size())
+	assert.Equal(t, 5, environment.Resources.Size())
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName
@@ -135,8 +133,8 @@ func TestKnativeService(t *testing.T) {
 
 	spec := s.Spec.ConfigurationSpec.Template.Spec
 
-	assert.Len(t, spec.Containers[0].VolumeMounts, 5)
-	assert.Len(t, spec.Volumes, 5)
+	assert.Len(t, spec.Containers[0].VolumeMounts, 6)
+	assert.Len(t, spec.Volumes, 6)
 
 	assert.Condition(t, func() bool {
 		for _, v := range spec.Containers[0].VolumeMounts {

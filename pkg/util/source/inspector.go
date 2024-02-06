@@ -164,7 +164,10 @@ var (
 
 // Inspector is the common interface for language specific inspector implementations.
 type Inspector interface {
+	// Extract scan the source spec for metadata.
 	Extract(v1.SourceSpec, *Metadata) error
+	// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI.
+	ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error)
 }
 
 // InspectorForLanguage is the factory function to return a new inspector for the given language
@@ -223,6 +226,10 @@ type baseInspector struct {
 
 func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 	return nil
+}
+
+func (i baseInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
+	return false, nil
 }
 
 func (i *baseInspector) extract(source v1.SourceSpec, meta *Metadata,

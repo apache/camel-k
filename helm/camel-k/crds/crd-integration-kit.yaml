@@ -151,8 +151,9 @@ spec:
                       description: True if the spec is generated from a Kamelet
                       type: boolean
                     interceptors:
-                      description: Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
+                      description: 'Deprecated: no longer in use Interceptors are
+                        optional identifiers the org.apache.camel.k.RoutesLoader uses
+                        to pre/post process sources'
                       items:
                         type: string
                       type: array

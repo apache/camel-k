@@ -18,6 +18,8 @@ limitations under the License.
 package source
 
 import (
+	"strings"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
 )
@@ -47,4 +49,26 @@ func (i JavaSourceInspector) Extract(source v1.SourceSpec, meta *Metadata) error
 	hasRest := restRegexp.MatchString(source.Content)
 
 	return i.extract(source, meta, from, to, kameletEips, hasRest)
+}
+
+// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
+func (i JavaSourceInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
+	froms := util.FindAllDistinctStringSubmatch(
+		source.Content,
+		doubleQuotedFrom,
+		doubleQuotedFromF,
+	)
+	newContent := source.Content
+	if froms == nil {
+		return false, nil
+	}
+	for _, from := range froms {
+		newContent = strings.ReplaceAll(newContent, from, newFromURI)
+	}
+	replaced := newContent != source.Content
+	if replaced {
+		source.Content = newContent
+	}
+
+	return replaced, nil
 }

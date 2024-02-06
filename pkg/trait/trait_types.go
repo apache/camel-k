@@ -34,7 +34,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -222,7 +221,6 @@ type Environment struct {
 	ExecutedTraits        []Trait
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
-	Interceptors          []string
 	ServiceBindingSecret  string
 }
 
@@ -469,8 +467,9 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	// Resources (likely application properties or kamelets)
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
-			// Camel properties
-			if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "camel-properties" {
+			switch configMap.Labels[kubernetes.ConfigMapTypeLabel] {
+			case "camel-properties":
+				// Camel properties
 				propertiesType := configMap.Labels["camel.apache.org/properties.type"]
 				resName := propertiesType + ".properties"
 
@@ -494,12 +493,21 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 				} else {
 					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
 				}
-			} else if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "kamelets-bundle" {
+			case "kamelets-bundle":
 				// Kamelets bundle configmap
 				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
 				refName := "kamelets-bundle"
 				vol := getVolume(refName, "configmap", configMap.Name, "", "")
 				mnt := getMount(refName, kameletMountPoint, "", true)
+
+				*vols = append(*vols, *vol)
+				*mnts = append(*mnts, *mnt)
+			case "knative":
+				// Knative configuration
+				knativeConfigMountPoint := configMap.Annotations[knativeMountPointAnnotation]
+				refName := "knative-config"
+				vol := getVolume(refName, "configmap", configMap.Name, "config.json", "config.json")
+				mnt := getMount(refName, knativeConfigMountPoint, "config.json", true)
 
 				*vols = append(*vols, *vol)
 				*mnts = append(*mnts, *mnt)
@@ -705,17 +713,4 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	return nil
-}
-
-// nolint: unused
-func (e *Environment) getAllInterceptors() []string {
-	res := make([]string, 0)
-	util.StringSliceUniqueConcat(&res, e.Interceptors)
-
-	if e.Integration != nil {
-		for _, s := range e.Integration.AllSources() {
-			util.StringSliceUniqueConcat(&res, s.Interceptors)
-		}
-	}
-	return res
 }

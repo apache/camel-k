@@ -33,6 +33,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -184,10 +185,12 @@ func (t *cronTrait) Apply(e *Environment) error {
 		if e.ApplicationProperties == nil {
 			e.ApplicationProperties = make(map[string]string)
 		}
-
-		e.ApplicationProperties["camel.main.duration-max-idle-seconds"] = "5"
-		e.ApplicationProperties["loader.interceptor.cron.overridable-components"] = t.Components
-		e.Interceptors = append(e.Interceptors, "cron")
+		// Will change the from URI in order to execute the task just once
+		if err := t.changeSourcesCronURI(e); err != nil {
+			return err
+		}
+		// Will instruct the context to stop as soon as the first message is done
+		e.ApplicationProperties["camel.main.durationMaxMessages"] = "1"
 
 		cronJob := t.getCronJobFor(e)
 		e.Resources.Add(cronJob)
@@ -347,6 +350,7 @@ func getCronForURIs(camelURIs []string) *cronInfo {
 	var globalCron *cronInfo
 	for _, camelURI := range camelURIs {
 		cr := getCronForURI(camelURI)
+
 		if cr == nil {
 			return nil
 		}
@@ -474,4 +478,32 @@ func checkedStringToUint64(str string) uint64 {
 		panic(err)
 	}
 	return res
+}
+
+// changeSourcesCronURI is in charge to change the value of the from route with a component that executes
+// the workload just once.
+func (t *cronTrait) changeSourcesCronURI(e *Environment) error {
+	var replaced bool
+	var err error
+	e.Resources.VisitConfigMap(func(cm *corev1.ConfigMap) {
+		srcName := cm.Annotations[camelSourceNameAnnotation]
+		if cm.Annotations[camelSourceNameAnnotation] != "" {
+			lang := v1.Language(cm.Annotations[camelSourceLanguageAnnotation])
+			dslInspector := source.InspectorForLanguage(e.CamelCatalog, lang)
+			newSrc := v1.SourceSpec{
+				Language: lang,
+				DataSpec: v1.DataSpec{
+					Name:    srcName,
+					Content: cm.Data["content"],
+				},
+			}
+			replaced, err = dslInspector.ReplaceFromURI(&newSrc, "timer:camel-k-overridden-cron")
+			if replaced {
+				cm.Data["content"] = newSrc.Content
+			} else if err != nil {
+				err = fmt.Errorf("wasn't able to replace cron uri trigger in source %s", srcName)
+			}
+		}
+	})
+	return err
 }

@@ -39,7 +39,6 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	knativeutil "github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
@@ -50,7 +49,8 @@ type knativeTrait struct {
 }
 
 const (
-	knativeHistoryHeader = "ce-knativehistory"
+	knativeHistoryHeader        = "ce-knativehistory"
+	knativeMountPointAnnotation = "camel.apache.org/knative.mount-point"
 )
 
 func newKnativeTrait() Trait {
@@ -224,7 +224,27 @@ func (t *knativeTrait) Apply(e *Environment) error {
 			return fmt.Errorf("unable to fetch environment configuration: %w", err)
 		}
 
-		envvar.SetVal(&e.EnvVars, "CAMEL_KNATIVE_CONFIGURATION", conf)
+		cmName := fmt.Sprintf("%s-knative-conf", e.Integration.Name)
+		configPath := fmt.Sprintf("/etc/camel/%s/config.json", cmName)
+		cm := kubernetes.NewConfigMap(
+			e.Integration.Namespace,
+			cmName,
+			"config.json",
+			"config.json",
+			conf,
+			nil,
+		)
+		cm.Labels = map[string]string{
+			kubernetes.ConfigMapTypeLabel: "knative",
+		}
+		cm.Annotations = map[string]string{
+			knativeMountPointAnnotation: configPath,
+		}
+		e.Resources.Add(cm)
+		if e.ApplicationProperties == nil {
+			e.ApplicationProperties = make(map[string]string)
+		}
+		e.ApplicationProperties["camel.component.knative.environmentPath"] = fmt.Sprintf("file:%s", configPath)
 	}
 
 	return nil
@@ -448,11 +468,23 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 	}
 
 	err := t.withServiceDo(false, e, env, services, serviceType, knativeapi.CamelEndpointKindSink, func(ref *corev1.ObjectReference, serviceURI string, _ func() (*url.URL, error)) error {
-		e.ApplicationProperties["camel.k.customizer.sinkbinding.enabled"] = "true"
-		e.ApplicationProperties["camel.k.customizer.sinkbinding.name"] = ref.Name
-		e.ApplicationProperties["camel.k.customizer.sinkbinding.type"] = string(serviceType)
-		e.ApplicationProperties["camel.k.customizer.sinkbinding.kind"] = ref.Kind
-		e.ApplicationProperties["camel.k.customizer.sinkbinding.api-version"] = ref.APIVersion
+		if e.ApplicationProperties == nil {
+			e.ApplicationProperties = make(map[string]string)
+		}
+		// Putting the bean in the registry which will be available at runtime.
+		e.ApplicationProperties["camel.beans."+ref.Name] = "#class:org.apache.camel.component.knative.spi.KnativeResource"
+		e.ApplicationProperties["camel.beans."+ref.Name+".name"] = ref.Name
+		// Will expand the env variable at runtime. The variable will be provided by Knative
+		e.ApplicationProperties["camel.beans."+ref.Name+".url"] = "${K_SINK}"
+		// Cloud native events
+		e.ApplicationProperties["camel.beans."+ref.Name+".ceOverrides"] = "${K_CE_OVERRIDES}"
+		e.ApplicationProperties["camel.beans."+ref.Name+".type"] = string(serviceType)
+		e.ApplicationProperties["camel.beans."+ref.Name+".objectKind"] = ref.Kind
+		e.ApplicationProperties["camel.beans."+ref.Name+".objectApiVersion"] = ref.APIVersion
+		e.ApplicationProperties["camel.beans."+ref.Name+".endpointKind"] = "sink"
+		if serviceType == knativeapi.CamelServiceTypeEvent {
+			e.ApplicationProperties["camel.beans."+ref.Name+".objectName"] = ref.Name
+		}
 
 		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
 			e.PostStepProcessors = append(e.PostStepProcessors, func(e *Environment) error {

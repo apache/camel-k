@@ -39,6 +39,24 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 	// TODO manage jolokia version from catalog instead!
 	if cat.Spec.Runtime.Capabilities != nil {
 		cat.Spec.Runtime.Capabilities["jolokia"] = jolokiaCatalogWorkaround()
+		// TODO manage timer dependencies from the catalog
+		cronCapability := cat.Spec.Runtime.Capabilities["cron"]
+		cronCapability.Dependencies = []v1.MavenArtifact{
+			{
+				GroupID:    "org.apache.camel.quarkus",
+				ArtifactID: "camel-quarkus-timer",
+			},
+		}
+		cat.Spec.Runtime.Capabilities["cron"] = cronCapability
+		// TODO manage Knative from the catalog
+		knativeCapability := cat.Spec.Runtime.Capabilities["knative"]
+		knativeCapability.Dependencies = []v1.MavenArtifact{
+			{
+				GroupID:    "org.apache.camel.quarkus",
+				ArtifactID: "camel-quarkus-knative",
+			},
+		}
+		cat.Spec.Runtime.Capabilities["knative"] = knativeCapability
 	}
 
 	catalog.CamelCatalogSpec = cat.Spec

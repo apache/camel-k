@@ -293,12 +293,12 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 				v1.IntegrationLabel: e.Integration.Name,
 			},
 			Annotations: map[string]string{
-				"camel.apache.org/source.language":    string(v1.LanguageXML),
-				"camel.apache.org/source.name":        resource.Name,
-				"camel.apache.org/source.compression": strconv.FormatBool(resource.Compression),
-				"camel.apache.org/source.generated":   "true",
-				"camel.apache.org/source.type":        "openapi",
-				"camel.apache.org/source.digest":      hash,
+				camelSourceLanguageAnnotation:       string(v1.LanguageXML),
+				camelSourceNameAnnotation:           resource.Name,
+				camelSourceCompressionAnnotation:    strconv.FormatBool(resource.Compression),
+				"camel.apache.org/source.generated": "true",
+				"camel.apache.org/source.type":      "openapi",
+				"camel.apache.org/source.digest":    hash,
 			},
 		},
 		Data: map[string]string{

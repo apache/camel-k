@@ -34,7 +34,7 @@ package trait
 //
 //   - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
 //
-//     `cron:tab?schedule=0/2${plus}*{plus}*{plus}*{plus}?` or `quartz:trigger?cron=0{plus}0/2{plus}*{plus}*{plus}*{plus}?`.
+//     `cron:tab?schedule=0/2 * * * ?` or `quartz:trigger?cron=0 0/2 * * * ?`.
 //
 // +camel-k:trait=cron.
 type CronTrait struct {
@@ -43,9 +43,6 @@ type CronTrait struct {
 	// mechanism to work correctly.
 	Schedule string `property:"schedule" json:"schedule,omitempty"`
 	// A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
-	// A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
-	// activated (it's present in the `org.apache.camel.k:camel-k-cron` library).
-	//
 	// Supported components are currently: `cron`, `timer` and `quartz`.
 	Components string `property:"components" json:"components,omitempty"`
 	// Use the default Camel implementation of the `cron` endpoint (`quartz`) instead of trying to materialize the integration

@@ -368,12 +368,12 @@ func initializeConfigmapKameletSource(source v1.SourceSpec, hash, name, namespac
 				"camel.apache.org/kamelet":     kamName,
 			},
 			Annotations: map[string]string{
-				"camel.apache.org/source.language":    string(source.Language),
-				"camel.apache.org/source.name":        name,
-				"camel.apache.org/source.compression": strconv.FormatBool(source.Compression),
-				"camel.apache.org/source.generated":   "true",
-				"camel.apache.org/source.type":        string(source.Type),
-				"camel.apache.org/source.digest":      hash,
+				camelSourceLanguageAnnotation:       string(source.Language),
+				camelSourceNameAnnotation:           name,
+				camelSourceCompressionAnnotation:    strconv.FormatBool(source.Compression),
+				"camel.apache.org/source.generated": "true",
+				"camel.apache.org/source.type":      string(source.Type),
+				"camel.apache.org/source.digest":    hash,
 			},
 		},
 		Data: map[string]string{

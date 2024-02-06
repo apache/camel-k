@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
@@ -151,4 +152,21 @@ func TestKotlinDataFormat(t *testing.T) {
 			})
 		})
 	}
+}
+func TestKotlinReplaceURI(t *testing.T) {
+	inspector := newTestKotlinInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.java",
+			Content: "from(\"quartz:trigger?cron=0 0/1 * * * ?\").to(\"log:info\")",
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, "from(\"direct:newURI?hello=world\").to(\"log:info\")", sourceSpec.Content)
 }

@@ -33,6 +33,13 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
 
+const (
+	camelSourceLanguageAnnotation    = "camel.apache.org/source.language"
+	camelSourceLoaderAnnotation      = "camel.apache.org/source.loader"
+	camelSourceNameAnnotation        = "camel.apache.org/source.name"
+	camelSourceCompressionAnnotation = "camel.apache.org/source.compression"
+)
+
 type camelTrait struct {
 	BasePlatformTrait
 	traitv1.CamelTrait `property:",squash"`
@@ -200,10 +207,10 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 					v1.IntegrationLabel: e.Integration.Name,
 				},
 				Annotations: map[string]string{
-					"camel.apache.org/source.language":    string(s.InferLanguage()),
-					"camel.apache.org/source.loader":      s.Loader,
-					"camel.apache.org/source.name":        s.Name,
-					"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
+					camelSourceLanguageAnnotation:    string(s.InferLanguage()),
+					camelSourceLoaderAnnotation:      s.Loader,
+					camelSourceNameAnnotation:        s.Name,
+					camelSourceCompressionAnnotation: strconv.FormatBool(s.Compression),
 				},
 			},
 			Data: map[string]string{

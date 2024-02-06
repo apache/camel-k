@@ -105,3 +105,25 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 	return nil
 }
+
+// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
+func (i XMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
+	metadata := NewMetadata()
+	if err := i.Extract(*source, &metadata); err != nil {
+		return false, err
+	}
+	newContent := source.Content
+	if metadata.FromURIs == nil {
+		return false, nil
+	}
+	for _, from := range metadata.FromURIs {
+		newContent = strings.ReplaceAll(newContent, from, newFromURI)
+	}
+	replaced := newContent != source.Content
+
+	if replaced {
+		source.Content = newContent
+	}
+
+	return replaced, nil
+}

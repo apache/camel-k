@@ -338,12 +338,6 @@ func ComputeForSource(s v1.SourceSpec) (string, error) {
 	if _, err := hash.Write([]byte(s.Loader)); err != nil {
 		return "", err
 	}
-	for _, i := range s.Interceptors {
-		if _, err := hash.Write([]byte(i)); err != nil {
-			return "", err
-		}
-	}
-
 	if _, err := hash.Write([]byte(strconv.FormatBool(s.Compression))); err != nil {
 		return "", err
 	}

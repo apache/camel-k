@@ -38,7 +38,6 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	k8sutils "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
@@ -117,11 +116,14 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	err = tr.Apply(&environment)
 	assert.Nil(t, err)
 
-	kc := envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION")
-	assert.NotNil(t, kc)
+	cm := environment.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+		return m.Labels[k8sutils.ConfigMapTypeLabel] == "knative"
+	})
+	assert.NotNil(t, cm)
+	assert.NotNil(t, cm.Data["config.json"])
 
 	ne := knativeapi.NewCamelEnvironment()
-	err = ne.Deserialize(kc.Value)
+	err = ne.Deserialize(cm.Data["config.json"])
 	assert.Nil(t, err)
 
 	cSource1 := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1", "Channel")
@@ -239,11 +241,14 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	err = tr.Apply(&environment)
 	assert.Nil(t, err)
 
-	kc := envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION")
-	assert.NotNil(t, kc)
+	cm := environment.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+		return m.Labels[k8sutils.ConfigMapTypeLabel] == "knative"
+	})
+	assert.NotNil(t, cm)
+	assert.NotNil(t, cm.Data["config.json"])
 
 	ne := knativeapi.NewCamelEnvironment()
-	err = ne.Deserialize(kc.Value)
+	err = ne.Deserialize(cm.Data["config.json"])
 	assert.Nil(t, err)
 
 	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
@@ -397,9 +402,13 @@ func TestKnativeConfigurationSorting(t *testing.T) {
 	assert.Nil(t, err)
 	conditions, _ := tc.apply(&environment)
 	assert.Empty(t, conditions)
-	// no matter if there is any other trait error
+	cm := environment.Resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+		return m.Labels[k8sutils.ConfigMapTypeLabel] == "knative"
+	})
+	assert.NotNil(t, cm)
+	assert.NotNil(t, cm.Data["config.json"])
 	camelEnv := knativeapi.NewCamelEnvironment()
-	err = camelEnv.Deserialize(envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION").Value)
+	err = camelEnv.Deserialize(cm.Data["config.json"])
 	assert.Nil(t, err)
 	assert.Equal(t, "channel-source-1", camelEnv.Services[0].Name)
 	assert.Equal(t, "channel-source-2", camelEnv.Services[1].Name)
@@ -708,4 +717,36 @@ func SortChannelFakeClient(namespace string) (client.Client, error) {
 			},
 		},
 	)
+}
+
+func TestKnativeSinkBinding(t *testing.T) {
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "sink.groovy",
+			Content: `from('timer:foo').to('knative:channel/knative-channel?apiVersion=messaging.knative.dev%2Fv1&kind=InMemoryChannel')`,
+		},
+		Language: v1.LanguageGroovy,
+	}
+
+	environment := NewFakeEnvironment(t, source)
+	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+
+	c, err := NewFakeClient("ns")
+	assert.Nil(t, err)
+
+	tc := NewCatalog(c)
+
+	err = tc.Configure(&environment)
+	assert.Nil(t, err)
+
+	_, err = tc.apply(&environment)
+	assert.Nil(t, err)
+	assert.Equal(t, "#class:org.apache.camel.component.knative.spi.KnativeResource", environment.ApplicationProperties["camel.beans.knative-channel"])
+	assert.Equal(t, "knative-channel", environment.ApplicationProperties["camel.beans.knative-channel.name"])
+	assert.Equal(t, "${K_SINK}", environment.ApplicationProperties["camel.beans.knative-channel.url"])
+	assert.Equal(t, "${K_CE_OVERRIDES}", environment.ApplicationProperties["camel.beans.knative-channel.ceOverrides"])
+	assert.Equal(t, "channel", environment.ApplicationProperties["camel.beans.knative-channel.type"])
+	assert.Equal(t, "InMemoryChannel", environment.ApplicationProperties["camel.beans.knative-channel.objectKind"])
+	assert.Equal(t, "messaging.knative.dev/v1", environment.ApplicationProperties["camel.beans.knative-channel.objectApiVersion"])
+	assert.Equal(t, "sink", environment.ApplicationProperties["camel.beans.knative-channel.endpointKind"])
 }

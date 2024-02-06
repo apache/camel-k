@@ -20,7 +20,7 @@ package trait
 // The Knative trait automatically discovers addresses of Knative resources and inject them into the
 // running integration.
 //
-// The full Knative configuration is injected in the CAMEL_KNATIVE_CONFIGURATION in JSON format.
+// The full Knative configuration is injected in a runtime configuration file in JSON format.
 // The Camel Knative component will then use the full configuration to configure the routes.
 //
 // The trait is enabled by default when the Knative profile is active.
