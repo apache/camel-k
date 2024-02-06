@@ -57,7 +57,13 @@ func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, false) {
+	// The trait must be disabled if it's a user based build (for which we do not control the way to handle Health checks)
+	if ct := e.Catalog.GetTrait(containerTraitID); ct != nil {
+		if ct, ok := ct.(*containerTrait); ok && ct.hasUserProvidedImage() {
+			return false, newIntegrationConditionPlatformDisabledWithMessage("container image was not built via Camel K operator"), nil
+		}
+	}
+	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, nil, nil
 	}
 
@@ -82,7 +88,7 @@ func (t *healthTrait) Apply(e *Environment) error {
 
 	container := e.GetIntegrationContainer()
 	if container == nil {
-		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+		return fmt.Errorf("unable to find integration container for %s", e.Integration.Name)
 	}
 	var port *intstr.IntOrString
 	// Use the default named HTTP container port if it exists.

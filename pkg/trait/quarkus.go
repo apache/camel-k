@@ -410,7 +410,7 @@ func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
 	if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
 		container := e.GetIntegrationContainer()
 		if container == nil {
-			return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+			return fmt.Errorf("unable to find integration container for %s", e.Integration.Name)
 		}
 
 		container.Command = []string{"./camel-k-integration-" + defaults.Version + "-runner"}

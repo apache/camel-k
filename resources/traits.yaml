@@ -679,7 +679,7 @@ traits:
   - Knative
   - OpenShift
   description: The health trait is responsible for configuring the health probes on
-    the integration container. It's disabled by default.
+    the integration container. It's enabled by default.
   properties:
   - name: enabled
     type: bool

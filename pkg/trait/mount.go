@@ -72,7 +72,7 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 func (t *mountTrait) Apply(e *Environment) error {
 	container := e.GetIntegrationContainer()
 	if container == nil {
-		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+		return fmt.Errorf("unable to find integration container for %s", e.Integration.Name)
 	}
 
 	var volumes *[]corev1.Volume

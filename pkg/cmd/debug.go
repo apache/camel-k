@@ -133,18 +133,24 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 	return kubernetes.PortForward(o.Context, cmdClient, o.Namespace, selector, o.Port, o.RemotePort, cmd.OutOrStdout(), cmd.ErrOrStderr())
 }
 
+// toggleDebug will add/remove traits which are required to perform the task.
 func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
 	if it.Spec.Traits.JVM == nil {
 		it.Spec.Traits.JVM = &traitv1.JVMTrait{}
 	}
 	jvmTrait := it.Spec.Traits.JVM
-
+	if it.Spec.Traits.Health == nil {
+		it.Spec.Traits.Health = &traitv1.HealthTrait{}
+	}
+	healthTrait := it.Spec.Traits.Health
 	if active {
 		jvmTrait.Debug = pointer.Bool(true)
 		jvmTrait.DebugSuspend = pointer.Bool(o.Suspend)
+		healthTrait.Enabled = pointer.Bool(false)
 	} else {
 		jvmTrait.Debug = nil
 		jvmTrait.DebugSuspend = nil
+		healthTrait.Enabled = pointer.Bool(true)
 	}
 
 	return c.Integrations(it.Namespace).Update(o.Context, it, metav1.UpdateOptions{})
