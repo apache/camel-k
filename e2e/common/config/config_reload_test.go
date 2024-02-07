@@ -141,11 +141,11 @@ func CheckConfigmapWithOwnerRef(t *testing.T, hotreload bool) {
 	Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
 	var cmData = make(map[string]string)
 	cmData["my-configmap-key"] = "my configmap content"
-	CreatePlainTextConfigmapWithOwnerRef(ns, cmName, cmData, name, Integration(ns, name)().UID)
+	CreatePlainTextConfigmapWithOwnerRefWithLabels(ns, cmName, cmData, name, Integration(ns, name)().UID, map[string]string{"camel.apache.org/integration": "test"})
 	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content"))
 	cmData["my-configmap-key"] = "my configmap content updated"
-	UpdatePlainTextConfigmap(ns, cmName, cmData)
+	UpdatePlainTextConfigmapWithLabels(ns, cmName, cmData, map[string]string{"camel.apache.org/integration": "test"})
 	if hotreload {
 		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content updated"))
 	} else {

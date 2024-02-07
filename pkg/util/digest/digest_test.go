@@ -18,11 +18,14 @@ limitations under the License.
 package digest
 
 import (
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
-	"os"
-	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
@@ -77,7 +80,7 @@ func TestDigestUsesConfigmap(t *testing.T) {
 	}
 
 	digest1, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	cm := corev1.ConfigMap{
 		Data: map[string]string{
@@ -87,16 +90,16 @@ func TestDigestUsesConfigmap(t *testing.T) {
 	cms := []*corev1.ConfigMap{&cm}
 
 	digest2, err := ComputeForIntegration(&it, cms, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest2)
 
 	cm.Data["foo"] = "bar updated"
 	digest3, err := ComputeForIntegration(&it, cms, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, digest2, digest3)
 
 	digest4, err := ComputeForIntegration(&it, cms, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, digest4, digest3)
 }
 
@@ -113,7 +116,7 @@ func TestDigestUsesSecret(t *testing.T) {
 	}
 
 	digest1, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	sec := corev1.Secret{
 		Data: map[string][]byte{
@@ -127,11 +130,11 @@ func TestDigestUsesSecret(t *testing.T) {
 	secrets := []*corev1.Secret{&sec}
 
 	digest2, err := ComputeForIntegration(&it, nil, secrets)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest2)
 
 	sec.Data["foo"] = []byte("bar updated")
 	digest3, err := ComputeForIntegration(&it, nil, secrets)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, digest2, digest3)
 }

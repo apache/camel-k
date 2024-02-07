@@ -24,7 +24,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"hash"
 	"io"
 	"path/filepath"
@@ -37,6 +36,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
 	corev1 "k8s.io/api/core/v1"
+
+	"fmt"
 )
 
 const (
@@ -139,13 +140,13 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 	// Configmap content
 	for _, cm := range configmaps {
 		if cm != nil {
-			//name, ns
-			if _, err := hash.Write([]byte(fmt.Sprintf("#{cm.Name}/#{cm.Namespace}"))); err != nil {
+			// name, ns
+			if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", cm.Name, cm.Namespace))); err != nil {
 				return "", err
 			}
-			//Data with sorted keys
+			// Data with sorted keys
 			if cm.Data != nil {
-				//sort keys
+				// sort keys
 				keys := make([]string, 0, len(cm.Data))
 				for k := range cm.Data {
 					keys = append(keys, k)
@@ -157,7 +158,7 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 					}
 				}
 			}
-			//BinaryData with sorted keys
+			// BinaryData with sorted keys
 			if cm.BinaryData != nil {
 				keys := make([]string, 0, len(cm.BinaryData))
 				for k := range cm.BinaryData {
@@ -173,14 +174,14 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 		}
 	}
 
-	//Secret content
+	// Secret content
 	for _, s := range secrets {
 		if s != nil {
-			//name, ns
-			if _, err := hash.Write([]byte(fmt.Sprintf("#{s.Name}/#{s.Namespace}"))); err != nil {
+			// name, ns
+			if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", s.Name, s.Namespace))); err != nil {
 				return "", err
 			}
-			//Data with sorted keys
+			// Data with sorted keys
 			if s.Data != nil {
 				keys := make([]string, 0, len(s.Data))
 				for k := range s.Data {

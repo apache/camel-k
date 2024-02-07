@@ -1606,7 +1606,7 @@ func CreatePlainTextConfigmapWithLabels(ns string, name string, data map[string]
 	return TestClient().Create(TestContext, &cm)
 }
 
-func CreatePlainTextConfigmapWithOwnerRef(ns string, name string, data map[string]string, orname string, uid types.UID) error {
+func CreatePlainTextConfigmapWithOwnerRefWithLabels(ns string, name string, data map[string]string, orname string, uid types.UID, labels map[string]string) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1624,6 +1624,7 @@ func CreatePlainTextConfigmapWithOwnerRef(ns string, name string, data map[strin
 				BlockOwnerDeletion: pointer.Bool(true),
 			},
 			},
+			Labels: labels,
 		},
 		Data: data,
 	}
