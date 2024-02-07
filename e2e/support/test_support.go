@@ -1607,6 +1607,10 @@ func CreatePlainTextConfigmapWithLabels(ns string, name string, data map[string]
 }
 
 func UpdatePlainTextConfigmap(ns string, name string, data map[string]string) error {
+	return UpdatePlainTextConfigmapWithLabels(ns, name, data, nil)
+}
+
+func UpdatePlainTextConfigmapWithLabels(ns string, name string, data map[string]string, labels map[string]string) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1615,6 +1619,7 @@ func UpdatePlainTextConfigmap(ns string, name string, data map[string]string) er
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
+			Labels:    labels,
 		},
 		Data: data,
 	}
@@ -1655,6 +1660,10 @@ func CreatePlainTextSecret(ns string, name string, data map[string]string) error
 }
 
 func UpdatePlainTextSecret(ns string, name string, data map[string]string) error {
+	return UpdatePlainTextSecretWithLabels(ns, name, data, nil)
+}
+
+func UpdatePlainTextSecretWithLabels(ns string, name string, data map[string]string, labels map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -1663,6 +1672,7 @@ func UpdatePlainTextSecret(ns string, name string, data map[string]string) error
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
+			Labels:    labels,
 		},
 		StringData: data,
 	}

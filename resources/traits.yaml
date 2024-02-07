@@ -1214,7 +1214,8 @@ traits:
   - name: hot-reload
     type: bool
     description: Enable "hot reload" when a secret/configmap mounted is edited (default
-      `false`)
+      `false`). The configmap/secret must be marked with `camel.apache.org/integration`
+      label to be taken in account.
 - name: openapi
   platform: true
   profiles:

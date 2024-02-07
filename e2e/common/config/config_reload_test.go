@@ -40,7 +40,7 @@ func TestConfigmapHotReload(t *testing.T) {
 
 	var cmData = make(map[string]string)
 	cmData["my-configmap-key"] = "my configmap content"
-	CreatePlainTextConfigmap(ns, "my-hot-cm", cmData)
+	CreatePlainTextConfigmapWithLabels(ns, "my-hot-cm", cmData, map[string]string{"camel.apache.org/integration": "test"})
 
 	Expect(KamelRunWithID(operatorID, ns,
 		"./files/config-configmap-route.groovy",
@@ -56,7 +56,7 @@ func TestConfigmapHotReload(t *testing.T) {
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content"))
 
 	cmData["my-configmap-key"] = "my configmap content updated"
-	UpdatePlainTextConfigmap(ns, "my-hot-cm", cmData)
+	UpdatePlainTextConfigmapWithLabels(ns, "my-hot-cm", cmData, map[string]string{"camel.apache.org/integration": "test"})
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content updated"))
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -69,7 +69,7 @@ func TestConfigmapHotReloadDefault(t *testing.T) {
 
 	var cmData = make(map[string]string)
 	cmData["my-configmap-key"] = "my configmap content"
-	CreatePlainTextConfigmap(ns, "my-hot-cm-2", cmData)
+	CreatePlainTextConfigmapWithLabels(ns, "my-hot-cm-2", cmData, map[string]string{"camel.apache.org/integration": "test"})
 
 	Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
 		"--config",
@@ -82,7 +82,7 @@ func TestConfigmapHotReloadDefault(t *testing.T) {
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content"))
 
 	cmData["my-configmap-key"] = "my configmap content updated"
-	UpdatePlainTextConfigmap(ns, "my-hot-cm-2", cmData)
+	UpdatePlainTextConfigmapWithLabels(ns, "my-hot-cm-2", cmData, map[string]string{"camel.apache.org/integration": "test"})
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(Not(ContainSubstring("my configmap content updated")))
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -95,7 +95,7 @@ func TestSecretHotReload(t *testing.T) {
 
 	var secData = make(map[string]string)
 	secData["my-secret-key"] = "very top secret"
-	CreatePlainTextSecret(ns, "my-hot-sec", secData)
+	CreatePlainTextSecretWithLabels(ns, "my-hot-sec", secData, map[string]string{"camel.apache.org/integration": "test"})
 
 	Expect(KamelRunWithID(operatorID, ns, "./files/config-secret-route.groovy",
 		"--config",
@@ -110,7 +110,7 @@ func TestSecretHotReload(t *testing.T) {
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret"))
 
 	secData["my-secret-key"] = "very top secret updated"
-	UpdatePlainTextSecret(ns, "my-hot-sec", secData)
+	UpdatePlainTextSecretWithLabels(ns, "my-hot-sec", secData, map[string]string{"camel.apache.org/integration": "test"})
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret updated"))
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

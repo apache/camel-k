@@ -35,6 +35,7 @@ type MountTrait struct {
 	Resources []string `property:"resources" json:"resources,omitempty"`
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
-	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`)
+	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
+	// marked with `camel.apache.org/integration` label to be taken in account.
 	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
 }

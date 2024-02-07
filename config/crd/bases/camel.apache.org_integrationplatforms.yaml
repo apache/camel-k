@@ -1474,7 +1474,9 @@ spec:
                         type: boolean
                       hotReload:
                         description: Enable "hot reload" when a secret/configmap mounted
-                          is edited (default `false`)
+                          is edited (default `false`). The configmap/secret must be
+                          marked with `camel.apache.org/integration` label to be taken
+                          in account.
                         type: boolean
                       resources:
                         description: 'A list of resources (text or binary content)
@@ -3340,7 +3342,9 @@ spec:
                         type: boolean
                       hotReload:
                         description: Enable "hot reload" when a secret/configmap mounted
-                          is edited (default `false`)
+                          is edited (default `false`). The configmap/secret must be
+                          marked with `camel.apache.org/integration` label to be taken
+                          in account.
                         type: boolean
                       resources:
                         description: 'A list of resources (text or binary content)
