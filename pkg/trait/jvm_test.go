@@ -75,6 +75,56 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T)
 	assert.Nil(t, condition)
 }
 
+func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	trait.Enabled = pointer.Bool(false)
+
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"TraitConfiguration",
+		"explicitly disabled by the user",
+	)
+	configured, condition, err := trait.Configure(environment)
+	assert.Nil(t, err)
+	assert.False(t, configured)
+	assert.NotNil(t, condition)
+	assert.Equal(t, expectedCondition, condition)
+}
+
+func TestConfigureJvmTraitInWrongIntegrationKitPhaseExternal(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypeExternal)
+
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"TraitConfiguration",
+		"explicitly disabled by the platform: integration kit was not created via Camel K operator",
+	)
+	configured, condition, err := trait.Configure(environment)
+	assert.Nil(t, err)
+	assert.False(t, configured)
+	assert.NotNil(t, condition)
+	assert.Equal(t, expectedCondition, condition)
+}
+
+func TestConfigureJvmTraitInRightIntegrationKitPhaseExternalAndJvmEnabled(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypeExternal)
+	trait.Enabled = pointer.Bool(true)
+
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"TraitConfiguration",
+		"explicitly enabled by the user: integration kit was not created via Camel K operator",
+	)
+	configured, condition, err := trait.Configure(environment)
+	assert.Nil(t, err)
+	assert.True(t, configured)
+	assert.NotNil(t, condition)
+	assert.Equal(t, expectedCondition, condition)
+}
+
 func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 

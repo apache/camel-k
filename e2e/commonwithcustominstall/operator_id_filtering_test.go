@@ -108,7 +108,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 					Expect(Kamel("delete", "moving", "-n", ns).Execute()).To(Succeed())
 
 					Expect(KamelRun(ns, "files/yaml.yaml", "--name", "pre-built", "--force",
-						"-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+						"-t", fmt.Sprintf("container.image=%s", image), "-t", "jvm.enabled=true").Execute()).To(Succeed())
 					Consistently(IntegrationPhase(ns, "pre-built"), 10*time.Second).Should(BeEmpty())
 					Expect(AssignIntegrationToOperator(ns, "pre-built", operator2)).To(Succeed())
 					Eventually(IntegrationPhase(ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
