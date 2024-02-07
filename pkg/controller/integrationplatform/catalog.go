@@ -65,7 +65,7 @@ func (action *catalogAction) Handle(ctx context.Context, platform *v1.Integratio
 				v1.IntegrationPlatformConditionCamelCatalogAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
-				fmt.Sprintf("camel catalog %s not available, please review given runtime version", runtimeSpec.Version))
+				fmt.Sprintf("camel catalog %s not available, please review given runtime version. Error: %s", runtimeSpec.Version, err))
 
 			return platform, nil
 		}

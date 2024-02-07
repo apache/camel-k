@@ -112,7 +112,7 @@ func TestCreateCatalog(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, answer)
 
-	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
+	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase, "Error", answer.Status.Conditions[0])
 	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 
 	list := v1.NewCamelCatalogList()
@@ -218,5 +218,5 @@ func TestCreateCatalogError(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 	assert.Equal(t, v1.IntegrationPlatformConditionCamelCatalogAvailableReason, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Reason)
-	assert.Equal(t, "camel catalog 0.0.0 not available, please review given runtime version", answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Message)
+	assert.Equal(t, "camel catalog 0.0.0 not available, please review given runtime version. Error: [ERROR] Plugin org.apache.camel.k:camel-k-maven-plugin:0.0.0 or one of its dependencies could not be resolved: The following artifacts could not be resolved: org.apache.camel.k:camel-k-maven-plugin:jar:0.0.0 (absent): Could not find artifact org.apache.camel.k:camel-k-maven-plugin:jar:0.0.0 in google-maven-central (https://maven-central.storage-download.googleapis.com/maven2/) -> [Help 1]: exit status 1", answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Message)
 }
