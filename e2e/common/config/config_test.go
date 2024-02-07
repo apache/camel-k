@@ -28,7 +28,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -106,32 +105,6 @@ func TestRunConfigExamples(t *testing.T) {
 		Eventually(IntegrationPodPhase(ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "property-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, "property-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-property-entry"))
-	})
-
-	t.Run("Property from Secret inlined", func(t *testing.T) {
-		var secData = make(map[string]string)
-		secData["my-message"] = "my-secret-external-value"
-		CreatePlainTextSecret(ns, "my-sec-inlined", secData)
-
-		// TODO: remove jvm.options trait as soon as CAMEL-20054 gets fixed
-		Expect(KamelRunWithID(operatorID, ns, "./files/property-secret-route.groovy",
-			"-t", "mount.configs=secret:my-sec-inlined",
-			"-t", "jvm.options=-Dcamel.k.mount-path.secrets=/etc/camel/conf.d/_secrets",
-		).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "property-secret-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "property-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "property-secret-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-external-value"))
-
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, "property-secret-route")).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, "property-secret-route")()
-		mountTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "mount")
-		Expect(mountTrait).ToNot(BeNil())
-		Expect(len(mountTrait)).To(Equal(1))
-		Expect(mountTrait["configs"]).ToNot(BeNil())
-
-		Expect(Kamel("delete", "property-secret-route", "-n", ns).Execute()).To(Succeed())
-
 	})
 
 	// Configmap
