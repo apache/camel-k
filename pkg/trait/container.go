@@ -182,19 +182,19 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF", filepath.Join(camel.BasePath, "application.properties"))
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
-	e.addSourcesProperties()
-	if props, err := e.computeApplicationProperties(); err != nil {
-		return err
-	} else if props != nil {
-		e.Resources.Add(props)
+	if !t.hasUserProvidedImage() {
+		e.addSourcesProperties()
+		if props, err := e.computeApplicationProperties(); err != nil {
+			return err
+		} else if props != nil {
+			e.Resources.Add(props)
+		}
 	}
-
 	t.configureResources(&container)
 	if pointer.BoolDeref(t.Expose, false) {
 		t.configureService(e, &container)
 	}
 	t.configureCapabilities(e)
-
 	t.configureSecurityContext(e, &container)
 
 	var containers *[]corev1.Container
