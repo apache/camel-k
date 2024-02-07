@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
+- camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
 - Coverage report wrong percentage [\#5108](https://github.com/apache/camel-k/issues/5108)
 - Add possibility to configure annotation for the builder pods [\#5106](https://github.com/apache/camel-k/issues/5106)
 - Include the operator node-selector in the helm chart [\#5103](https://github.com/apache/camel-k/issues/5103)
