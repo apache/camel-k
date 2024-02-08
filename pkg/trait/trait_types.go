@@ -224,7 +224,6 @@ type Environment struct {
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
 	Interceptors          []string
-	ServiceBindingSecret  string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.
@@ -566,17 +565,6 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := kubernetes.SanitizeLabel(secret["value"])
 		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], "secret", secret["resourceType"])
 		vol := getVolume(refName, "secret", secret["value"], secret["resourceKey"], secret["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-	// append Service Binding secrets
-	if len(e.ServiceBindingSecret) > 0 {
-		secret := e.ServiceBindingSecret
-		refName := kubernetes.SanitizeLabel(secret)
-		mountPath := filepath.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret))
-		vol := getVolume(refName, "secret", secret, "", "")
 		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)
