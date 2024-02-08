@@ -160,7 +160,7 @@ func (c *FakeClient) GetScheme() *runtime.Scheme {
 }
 
 func (c *FakeClient) GetConfig() *rest.Config {
-	return nil
+	return &rest.Config{}
 }
 
 func (c *FakeClient) GetCurrentNamespace(kubeConfig string) (string, error) {
@@ -209,6 +209,8 @@ type FakeDiscovery struct {
 }
 
 func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
+	fmt.Println("****** ServerResourcesForGroupVersion")
+
 	// Normalize the fake discovery to behave like the real implementation when checking for openshift
 	if groupVersion == "image.openshift.io/v1" {
 		if f.enabledOpenshift {

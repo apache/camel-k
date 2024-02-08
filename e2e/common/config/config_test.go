@@ -301,7 +301,6 @@ func TestRunConfigExamples(t *testing.T) {
 	Expect(DeleteConfigmap(ns, "my-cm-test-build-properties")).To(Succeed())
 	Expect(DeleteConfigmap(ns, "my-cm-test-property")).To(Succeed())
 	Expect(DeleteConfigmap(ns, "my-cm-test-properties")).To(Succeed())
-	Expect(DeleteSecret(ns, "my-sec-inlined")).To(Succeed())
 	Expect(DeleteSecret(ns, "my-sec-test-build-property")).To(Succeed())
 	Expect(DeleteSecret(ns, "my-sec-test-build-properties")).To(Succeed())
 	Expect(DeleteSecret(ns, "my-sec-test-property")).To(Succeed())

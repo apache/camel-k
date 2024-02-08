@@ -204,6 +204,26 @@ func (c *Collection) RemoveConfigMap(filter func(*corev1.ConfigMap) bool) *corev
 	return cm
 }
 
+// VisitSecret executes the visitor function on all Secrets resources.
+func (c *Collection) VisitSecret(visitor func(*corev1.Secret)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*corev1.Secret); ok {
+			visitor(conv)
+		}
+	})
+}
+
+// GetSecret returns a Secret that matches the given function.
+func (c *Collection) GetSecret(filter func(*corev1.Secret) bool) *corev1.Secret {
+	var retValue *corev1.Secret
+	c.VisitSecret(func(re *corev1.Secret) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
 // VisitService executes the visitor function on all Service resources.
 func (c *Collection) VisitService(visitor func(*corev1.Service)) {
 	c.Visit(func(res runtime.Object) {

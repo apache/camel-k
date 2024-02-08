@@ -53,7 +53,8 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
+	// Look for secrets which may have been created by service binding trait
+	t.addServiceBindingSecret(e)
 	// Look for implicit secrets which may be required by kamelets
 	condition := t.addImplicitKameletsSecrets(e)
 
@@ -328,6 +329,15 @@ func (t *mountTrait) setConfigPropertiesAsEnvVar(propsAsEnv []corev1.EnvVar, e *
 		t.mountResource(e, vols, &container.VolumeMounts, c)
 	}
 	return nil
+}
+
+func (t *mountTrait) addServiceBindingSecret(e *Environment) {
+	e.Resources.VisitSecret(func(secret *corev1.Secret) {
+		switch secret.Labels[serviceBindingLabel] {
+		case "true":
+			t.Configs = append(t.Configs, "secret:"+secret.Name)
+		}
+	})
 }
 
 // Deprecated: to be removed in future releases.
