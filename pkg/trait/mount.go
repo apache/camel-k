@@ -49,6 +49,8 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
+	// Look for secrets which may have been created by service binding trait
+	t.addServiceBindingSecret(e)
 
 	// Validate resources and pvcs
 	for _, c := range t.Configs {
@@ -165,4 +167,12 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 
 	*vols = append(*vols, *vol)
 	*mnts = append(*mnts, *mnt)
+}
+
+func (t *mountTrait) addServiceBindingSecret(e *Environment) {
+	e.Resources.VisitSecret(func(secret *corev1.Secret) {
+		if secret.Labels[serviceBindingLabel] == "true" {
+			t.Configs = append(t.Configs, "secret:"+secret.Name)
+		}
+	})
 }
