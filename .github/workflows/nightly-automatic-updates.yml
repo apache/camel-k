@@ -49,3 +49,5 @@ jobs:
         branch-ref: ${{ matrix.ref-branch }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
         goVersionFile: "go.mod"
+        javaVersion: "17"
+        javaDistribution: "temurin"
