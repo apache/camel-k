@@ -2559,6 +2559,13 @@ the Camel K operator version for which this kit was configured
 
 a list of conditions which happened for the events related the kit
 
+|`traits` +
+*xref:#_camel_apache_org_v1_IntegrationKitTraits[IntegrationKitTraits]*
+|
+
+
+generated traits executed by the kit
+
 
 |===
 
@@ -2568,6 +2575,7 @@ a list of conditions which happened for the events related the kit
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 
 IntegrationKitTraits defines traits assigned to an `IntegrationKit`.
 
@@ -3229,6 +3237,13 @@ label selector
 
 
 features offered by the Integration
+
+|`traits` +
+*xref:#_camel_apache_org_v1_Traits[Traits]*
+|
+
+
+the traits generated and executed for this Integration
 
 |`lastInitTimestamp` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
@@ -5355,6 +5370,7 @@ TraitConfiguration parameters configuration
 
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
 Traits represents the collection of trait configurations.
 

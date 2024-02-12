@@ -114,11 +114,11 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	// A kit can be used only if it contains a subset of the traits and related configurations
 	// declared on integration.
 
-	itc, err := trait.NewTraitsOptionsForIntegration(integration)
+	itc, err := trait.NewStatusTraitsOptionsForIntegration(integration)
 	if err != nil {
 		return false, err
 	}
-	ikc, err := trait.NewTraitsOptionsForIntegrationKit(kit)
+	ikc, err := trait.NewStatusTraitsOptionsForIntegrationKit(kit)
 	if err != nil {
 		return false, err
 	}
@@ -162,25 +162,26 @@ func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *lo
 	return true
 }
 
-// kitMatches returns whether the two v1.IntegrationKit match.
-func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) {
-	version := kit1.Status.Version
+// kitMatches returns whether the kit matches with the existing target kit.
+func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
+	version := kit.Status.Version
 	if version == "" {
 		// Defaults with the version that is going to be set during the kit initialization
 		version = defaults.Version
 	}
-	if version != kit2.Status.Version {
+	if version != target.Status.Version {
 		return false, nil
 	}
-	if len(kit1.Spec.Dependencies) != len(kit2.Spec.Dependencies) {
+	if len(kit.Spec.Dependencies) != len(target.Spec.Dependencies) {
 		return false, nil
 	}
 
-	c1, err := trait.NewTraitsOptionsForIntegrationKit(kit1)
+	// We cannot have yet the status set
+	c1, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
 	if err != nil {
 		return false, err
 	}
-	c2, err := trait.NewTraitsOptionsForIntegrationKit(kit2)
+	c2, err := trait.NewStatusTraitsOptionsForIntegrationKit(target)
 	if err != nil {
 		return false, err
 	}
@@ -188,7 +189,7 @@ func kitMatches(kit1 *v1.IntegrationKit, kit2 *v1.IntegrationKit) (bool, error) 
 	if match, err := hasMatchingTraits(c1, c2); !match || err != nil {
 		return false, err
 	}
-	if !util.StringSliceContains(kit1.Spec.Dependencies, kit2.Spec.Dependencies) {
+	if !util.StringSliceContains(kit.Spec.Dependencies, target.Spec.Dependencies) {
 		return false, nil
 	}
 

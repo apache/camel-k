@@ -120,6 +120,8 @@ type IntegrationKitStatus struct {
 	Version string `json:"version,omitempty"`
 	// a list of conditions which happened for the events related the kit
 	Conditions []IntegrationKitCondition `json:"conditions,omitempty"`
+	// generated traits executed by the kit
+	Traits IntegrationKitTraits `json:"traits,omitempty"`
 }
 
 // +kubebuilder:object:root=true
