@@ -26,31 +26,35 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestMonitorSequentialBuilds(t *testing.T) {
 	testcases := []struct {
-		name     string
-		running  []*v1.Build
-		finished []*v1.Build
-		build    *v1.Build
-		allowed  bool
+		name      string
+		running   []*v1.Build
+		finished  []*v1.Build
+		build     *v1.Build
+		allowed   bool
+		condition *v1.BuildCondition
 	}{
 		{
-			name:     "allowNewBuild",
-			running:  []*v1.Build{},
-			finished: []*v1.Build{},
-			build:    newBuild("ns", "my-build"),
-			allowed:  true,
+			name:      "allowNewBuild",
+			running:   []*v1.Build{},
+			finished:  []*v1.Build{},
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
-			name:     "allowNewNativeBuild",
-			running:  []*v1.Build{},
-			finished: []*v1.Build{},
-			build:    newNativeBuild("ns", "my-native-build"),
-			allowed:  true,
+			name:      "allowNewNativeBuild",
+			running:   []*v1.Build{},
+			finished:  []*v1.Build{},
+			build:     newNativeBuild("ns", "my-native-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-native-build) is scheduled"),
 		},
 		{
 			name:    "allowNewBuildWhenOthersFinished",
@@ -59,8 +63,9 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 				newBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed),
 			},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name:    "allowNewNativeBuildWhenOthersFinished",
@@ -69,8 +74,9 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 				newNativeBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 				newNativeBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed),
 			},
-			build:   newNativeBuild("ns", "my-native-build"),
-			allowed: true,
+			build:     newNativeBuild("ns", "my-native-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-native-build) is scheduled"),
 		},
 		{
 			name: "limitMaxRunningBuilds",
@@ -84,6 +90,8 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build"),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Maximum number of running builds (3) exceeded - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "limitMaxRunningNativeBuilds",
@@ -97,14 +105,17 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 			},
 			build:   newNativeBuildInPhase("ns", "my-build", v1.BuildPhaseInitialization),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Maximum number of running builds (3) exceeded - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "allowParallelBuildsWithDifferentLayout",
 			running: []*v1.Build{
 				newNativeBuildInPhase("ns", "my-build-1", v1.BuildPhaseRunning),
 			},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "queueBuildsInSameNamespaceWithSameLayout",
@@ -117,6 +128,8 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build"),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Found a running build in this namespace - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "allowBuildsInNewNamespace",
@@ -127,8 +140,9 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 			finished: []*v1.Build{
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 			},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 	}
 
@@ -154,10 +168,14 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 				monitorRunningBuild(build)
 			}
 
-			allowed, err := bm.canSchedule(context.TODO(), c, tc.build)
+			allowed, condition, err := bm.canSchedule(context.TODO(), c, tc.build)
 
 			assert.Nil(t, err)
 			assert.Equal(t, tc.allowed, allowed)
+			assert.Equal(t, tc.condition.Type, condition.Type)
+			assert.Equal(t, tc.condition.Status, condition.Status)
+			assert.Equal(t, tc.condition.Reason, condition.Reason)
+			assert.Equal(t, tc.condition.Message, condition.Message)
 		})
 	}
 }
@@ -180,40 +198,45 @@ func TestAllowBuildRequeue(t *testing.T) {
 	monitorRunningBuild(newBuild("another-ns", "my-build-3"))
 
 	build := newBuild("ns", "my-build")
-	allowed, err := bm.canSchedule(context.TODO(), c, build)
+	allowed, condition, err := bm.canSchedule(context.TODO(), c, build)
 
 	assert.Nil(t, err)
 	assert.False(t, allowed)
+	assert.Equal(t, corev1.ConditionFalse, condition.Status)
 
 	monitorFinishedBuild(runningBuild)
 
-	allowed, err = bm.canSchedule(context.TODO(), c, build)
+	allowed, condition, err = bm.canSchedule(context.TODO(), c, build)
 
 	assert.Nil(t, err)
 	assert.True(t, allowed)
+	assert.Equal(t, corev1.ConditionTrue, condition.Status)
 }
 
 func TestMonitorFIFOBuilds(t *testing.T) {
 	testcases := []struct {
-		name    string
-		running []*v1.Build
-		builds  []*v1.Build
-		build   *v1.Build
-		allowed bool
+		name      string
+		running   []*v1.Build
+		builds    []*v1.Build
+		build     *v1.Build
+		allowed   bool
+		condition *v1.BuildCondition
 	}{
 		{
-			name:    "allowNewBuild",
-			running: []*v1.Build{},
-			builds:  []*v1.Build{},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			name:      "allowNewBuild",
+			running:   []*v1.Build{},
+			builds:    []*v1.Build{},
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
-			name:    "allowNewNativeBuild",
-			running: []*v1.Build{},
-			builds:  []*v1.Build{},
-			build:   newNativeBuild("ns1", "my-build"),
-			allowed: true,
+			name:      "allowNewNativeBuild",
+			running:   []*v1.Build{},
+			builds:    []*v1.Build{},
+			build:     newNativeBuild("ns1", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name:    "allowNewBuildWhenOthersFinished",
@@ -222,8 +245,9 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 				newBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed),
 			},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name:    "allowNewNativeBuildWhenOthersFinished",
@@ -232,8 +256,9 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 				newNativeBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 				newNativeBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed),
 			},
-			build:   newNativeBuild("ns", "my-build"),
-			allowed: true,
+			build:     newNativeBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "limitMaxRunningBuilds",
@@ -247,6 +272,8 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build"),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Maximum number of running builds (3) exceeded - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "limitMaxRunningNativeBuilds",
@@ -260,14 +287,17 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 			},
 			build:   newNativeBuildInPhase("ns", "my-build", v1.BuildPhaseInitialization),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Maximum number of running builds (3) exceeded - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "allowParallelBuildsWithDifferentLayout",
 			running: []*v1.Build{
 				newNativeBuildInPhase("ns", "my-build-1", v1.BuildPhaseRunning),
 			},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "allowParallelBuildsInSameNamespace",
@@ -279,8 +309,9 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 				newBuildInPhase("other-ns", "my-build-new", v1.BuildPhaseScheduling),
 			},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "queueBuildWhenOlderBuildIsAlreadyInitialized",
@@ -294,6 +325,8 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build"),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Waiting for build (my-build-new) because it has been created before - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "queueBuildWhenOlderBuildIsAlreadyScheduled",
@@ -307,6 +340,8 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build"),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Waiting for build (my-build-new) because it has been created before - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "allowBuildsInNewNamespace",
@@ -317,8 +352,9 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 			builds: []*v1.Build{
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded),
 			},
-			build:   newBuild("ns", "my-build"),
-			allowed: true,
+			build:     newBuild("ns", "my-build"),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 	}
 
@@ -344,10 +380,14 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 				monitorRunningBuild(build)
 			}
 
-			allowed, err := bm.canSchedule(context.TODO(), c, tc.build)
+			allowed, condition, err := bm.canSchedule(context.TODO(), c, tc.build)
 
 			assert.Nil(t, err)
 			assert.Equal(t, tc.allowed, allowed)
+			assert.Equal(t, tc.condition.Type, condition.Type)
+			assert.Equal(t, tc.condition.Status, condition.Status)
+			assert.Equal(t, tc.condition.Reason, condition.Reason)
+			assert.Equal(t, tc.condition.Message, condition.Message)
 		})
 	}
 }
@@ -356,25 +396,28 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 	deps := []string{"camel:core", "camel:timer", "camel:log", "mvn:org.apache.camel.k:camel-k-runtime"}
 
 	testcases := []struct {
-		name    string
-		running []*v1.Build
-		builds  []*v1.Build
-		build   *v1.Build
-		allowed bool
+		name      string
+		running   []*v1.Build
+		builds    []*v1.Build
+		build     *v1.Build
+		allowed   bool
+		condition *v1.BuildCondition
 	}{
 		{
-			name:    "allowNewBuild",
-			running: []*v1.Build{},
-			builds:  []*v1.Build{},
-			build:   newBuild("ns", "my-build", deps...),
-			allowed: true,
+			name:      "allowNewBuild",
+			running:   []*v1.Build{},
+			builds:    []*v1.Build{},
+			build:     newBuild("ns", "my-build", deps...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
-			name:    "allowNewNativeBuild",
-			running: []*v1.Build{},
-			builds:  []*v1.Build{},
-			build:   newNativeBuild("ns1", "my-build", deps...),
-			allowed: true,
+			name:      "allowNewNativeBuild",
+			running:   []*v1.Build{},
+			builds:    []*v1.Build{},
+			build:     newNativeBuild("ns1", "my-build", deps...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name:    "allowNewBuildWhenOthersFinished",
@@ -383,8 +426,9 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded, deps...),
 				newBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed, deps...),
 			},
-			build:   newBuild("ns", "my-build", deps...),
-			allowed: true,
+			build:     newBuild("ns", "my-build", deps...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name:    "allowNewNativeBuildWhenOthersFinished",
@@ -393,8 +437,9 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 				newNativeBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded, deps...),
 				newNativeBuildInPhase("ns", "my-build-failed", v1.BuildPhaseFailed, deps...),
 			},
-			build:   newNativeBuild("ns", "my-build", deps...),
-			allowed: true,
+			build:     newNativeBuild("ns", "my-build", deps...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "limitMaxRunningBuilds",
@@ -408,6 +453,8 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build", deps...),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Maximum number of running builds (3) exceeded - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "limitMaxRunningNativeBuilds",
@@ -421,14 +468,17 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			},
 			build:   newNativeBuildInPhase("ns", "my-build", v1.BuildPhaseInitialization, deps...),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Maximum number of running builds (3) exceeded - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "allowParallelBuildsWithDifferentLayout",
 			running: []*v1.Build{
 				newNativeBuildInPhase("ns", "my-build-1", v1.BuildPhaseRunning, deps...),
 			},
-			build:   newBuild("ns", "my-build", deps...),
-			allowed: true,
+			build:     newBuild("ns", "my-build", deps...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "allowParallelBuildsInSameNamespaceWithTooManyMissingDependencies",
@@ -440,8 +490,9 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded, deps...),
 				newBuildInPhase("other-ns", "my-build-new", v1.BuildPhaseScheduling, deps...),
 			},
-			build:   newBuild("ns", "my-build", append(deps, "camel:test", "camel:foo")...),
-			allowed: true,
+			build:     newBuild("ns", "my-build", append(deps, "camel:test", "camel:foo")...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "allowParallelBuildsInSameNamespaceWithLessDependencies",
@@ -453,8 +504,9 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded, deps...),
 				newBuildInPhase("ns", "my-build-scheduled", v1.BuildPhaseScheduling, append(deps, "camel:test")...),
 			},
-			build:   newBuild("ns", "my-build", deps...),
-			allowed: true,
+			build:     newBuild("ns", "my-build", deps...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 		{
 			name: "queueBuildWhenSuitableBuildHasOnlyOneSingleMissingDependency",
@@ -468,6 +520,8 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build", append(deps, "camel:test")...),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Waiting for build (my-build-new) to finish in order to use incremental image builds - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "queueBuildWhenSuitableBuildIsAlreadyRunning",
@@ -481,6 +535,8 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build", deps...),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Waiting for build (my-build-running) to finish in order to use incremental image builds - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "queueBuildWhenSuitableBuildIsAlreadyPending",
@@ -494,6 +550,8 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build", deps...),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Waiting for build (my-build-pending) to finish in order to use incremental image builds - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "queueBuildWhenSuitableBuildWithSupersetDependenciesIsAlreadyRunning",
@@ -507,6 +565,8 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build", deps...),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Waiting for build (my-build-running) to finish in order to use incremental image builds - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "queueBuildWhenSuitableBuildWithSameDependenciesIsAlreadyScheduled",
@@ -520,6 +580,8 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			},
 			build:   newBuild("ns", "my-build", deps...),
 			allowed: false,
+			condition: newCondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason,
+				"Waiting for build (my-build-existing) to finish in order to use incremental image builds - the build (my-build) gets enqueued"),
 		},
 		{
 			name: "allowBuildsInNewNamespace",
@@ -530,8 +592,9 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 			builds: []*v1.Build{
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded, deps...),
 			},
-			build:   newBuild("ns", "my-build", deps...),
-			allowed: true,
+			build:     newBuild("ns", "my-build", deps...),
+			allowed:   true,
+			condition: newCondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, "the build (my-build) is scheduled"),
 		},
 	}
 
@@ -557,10 +620,14 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 				monitorRunningBuild(build)
 			}
 
-			allowed, err := bm.canSchedule(context.TODO(), c, tc.build)
+			allowed, condition, err := bm.canSchedule(context.TODO(), c, tc.build)
 
 			assert.Nil(t, err)
 			assert.Equal(t, tc.allowed, allowed)
+			assert.Equal(t, tc.condition.Type, condition.Type)
+			assert.Equal(t, tc.condition.Status, condition.Status)
+			assert.Equal(t, tc.condition.Reason, condition.Reason)
+			assert.Equal(t, tc.condition.Message, condition.Message)
 		})
 	}
 }
@@ -570,6 +637,15 @@ func cleanRunningBuildsMonitor() {
 		runningBuilds.Delete(key)
 		return true
 	})
+}
+
+func newCondition(status corev1.ConditionStatus, reason string, msg string) *v1.BuildCondition {
+	return &v1.BuildCondition{
+		Type:    v1.BuildConditionScheduled,
+		Status:  status,
+		Reason:  reason,
+		Message: msg,
+	}
 }
 
 func newBuild(namespace string, name string, dependencies ...string) *v1.Build {

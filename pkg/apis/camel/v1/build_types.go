@@ -256,6 +256,14 @@ const (
 	BuildPhaseInterrupted = "Interrupted"
 	// BuildPhaseError -- .
 	BuildPhaseError BuildPhase = "Error"
+
+	// BuildConditionScheduled --.
+	BuildConditionScheduled BuildConditionType = "Scheduled"
+
+	// BuildConditionReadyReason --.
+	BuildConditionReadyReason string = "Ready"
+	// BuildConditionWaitingReason --.
+	BuildConditionWaitingReason string = "Waiting"
 )
 
 // +genclient
