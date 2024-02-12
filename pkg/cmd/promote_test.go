@@ -101,7 +101,8 @@ spec:
   traits:
     container:
       image: my-special-image
-status: {}
+status:
+  traits: {}
 `, output)
 }
 
@@ -197,7 +198,8 @@ spec:
   traits:
     container:
       image: my-special-image
-status: {}
+status:
+  traits: {}
 `, output)
 }
 
@@ -316,7 +318,8 @@ spec:
   traits:
     container:
       image: my-special-image
-status: {}
+status:
+  traits: {}
 `, output)
 	// Verify also when the operator Id is set in the integration
 	defaultIntegration.Annotations = map[string]string{
@@ -338,6 +341,7 @@ spec:
   traits:
     container:
       image: my-special-image
-status: {}
+status:
+  traits: {}
 `, output)
 }

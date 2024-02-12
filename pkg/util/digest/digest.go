@@ -108,7 +108,7 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 	// Calculation logic prior to 1.10.0 (the new Traits API schema) is maintained
 	// in order to keep consistency in the digest calculated from the same set of
 	// Trait configurations for backward compatibility.
-	traitsMap, err := toMap(integration.Spec.Traits)
+	traitsMap, err := toMap(integration.Status.Traits)
 	if err != nil {
 		return "", err
 	}
