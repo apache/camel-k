@@ -32,6 +32,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 type kitOptions struct {
@@ -131,8 +132,10 @@ func TestKitMaxBuildLimit(t *testing.T) {
 				// verify that all builds are successful
 				Eventually(BuildPhase(ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
 				Eventually(KitPhase(ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+
 				Eventually(BuildPhase(ns1, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
 				Eventually(KitPhase(ns1, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+
 				Eventually(BuildPhase(ns2, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
 				Eventually(KitPhase(ns2, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 			})
@@ -285,6 +288,76 @@ func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
 		Eventually(KitPhase(ns, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 		Eventually(BuildPhase(ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
 		Eventually(KitPhase(ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+	})
+}
+
+func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
+	WithNewTestNamespace(t, func(ns string) {
+		createOperator(ns, "8m0s", "--global", "--force")
+
+		pl := Platform(ns)()
+		// set maximum number of running builds and order strategy
+		pl.Spec.Build.MaxRunningBuilds = 1
+		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyFIFO
+		if err := TestClient().Update(TestContext, pl); err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		buildA := "integration-a"
+		buildB := "integration-b"
+		buildC := "integration-c"
+
+		doKitBuildInNamespace(buildA, ns, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:timer", "camel:log",
+			},
+			traits: []string{
+				"builder.properties=build-property=A",
+			},
+		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
+
+		doKitBuildInNamespace(buildB, ns, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:cron", "camel:log", "camel:joor",
+			},
+			traits: []string{
+				"builder.properties=build-property=B",
+			},
+		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
+
+		doKitBuildInNamespace(buildC, ns, TestTimeoutShort, kitOptions{
+			operatorID: fmt.Sprintf("camel-k-%s", ns),
+			dependencies: []string{
+				"camel:timer", "camel:log", "camel:joor", "camel:http",
+			},
+			traits: []string{
+				"builder.properties=build-property=C",
+			},
+		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
+
+		// verify that last build is waiting
+		Eventually(BuildConditions(ns, buildC), TestTimeoutMedium).ShouldNot(BeNil())
+		Eventually(
+			BuildCondition(ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Status,
+			TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+		Eventually(
+			BuildCondition(ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Reason,
+			TestTimeoutShort).Should(Equal(v1.BuildConditionWaitingReason))
+
+		// verify that last build is scheduled
+		Eventually(BuildPhase(ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(KitPhase(ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+
+		Eventually(BuildConditions(ns, buildC), TestTimeoutLong).ShouldNot(BeNil())
+		Eventually(
+			BuildCondition(ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Status,
+			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(
+			BuildCondition(ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Reason,
+			TestTimeoutShort).Should(Equal(v1.BuildConditionReadyReason))
 	})
 }
 

@@ -1872,6 +1872,16 @@ func BuildConditions(ns, name string) func() []v1.BuildCondition {
 	}
 }
 
+func BuildCondition(ns string, name string, conditionType v1.BuildConditionType) func() *v1.BuildCondition {
+	return func() *v1.BuildCondition {
+		build := Build(ns, name)()
+		if build != nil && &build.Status != nil && build.Status.Conditions != nil {
+			return build.Status.GetCondition(conditionType)
+		}
+		return &v1.BuildCondition{}
+	}
+}
+
 func BuildFailureRecovery(ns, name string) func() int {
 	return func() int {
 		build := Build(ns, name)()
