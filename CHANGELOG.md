@@ -38,6 +38,7 @@
 **Merged pull requests:**
 
 - fix\(ci\): Java required by automatic-updates [\#5150](https://github.com/apache/camel-k/pull/5150) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.16.0 to 0.17.0 [\#5149](https://github.com/apache/camel-k/pull/5149) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/term from 0.16.0 to 0.17.0 [\#5148](https://github.com/apache/camel-k/pull/5148) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(test\): add apache-snapshot repository as the test may run agains a camel-k-runtime snaphost release [\#5147](https://github.com/apache/camel-k/pull/5147) ([claudio4j](https://github.com/claudio4j))
 - fix\(controller\): filter confimap/secret watches [\#5144](https://github.com/apache/camel-k/pull/5144) ([squakez](https://github.com/squakez))
@@ -48,6 +49,7 @@
 - fix\(github actions\): Made some checks on pod names more specific to a… [\#5123](https://github.com/apache/camel-k/pull/5123) ([valdar](https://github.com/valdar))
 - feat\(\#5103\): Adding nodeSelector to the operator helm chart [\#5122](https://github.com/apache/camel-k/pull/5122) ([lsergio](https://github.com/lsergio))
 - chore\(deps\): bump github.com/evanphx/json-patch from 5.8.1+incompatible to 5.9.0+incompatible [\#5116](https://github.com/apache/camel-k/pull/5116) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Compute digest of configmap and secret from its data [\#5115](https://github.com/apache/camel-k/pull/5115) ([lfabriko](https://github.com/lfabriko))
 - Builder annotation support [\#5104](https://github.com/apache/camel-k/pull/5104) ([rodcloutier](https://github.com/rodcloutier))
 - fix\(ci\): Comment PR github action issues uses octokit  [\#5098](https://github.com/apache/camel-k/pull/5098) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Comment PR action uses octokit [\#5094](https://github.com/apache/camel-k/pull/5094) ([gansheer](https://github.com/gansheer))
