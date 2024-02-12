@@ -23,6 +23,7 @@ limitations under the License.
 package config
 
 import (
+	"strconv"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -114,4 +115,42 @@ func TestSecretHotReload(t *testing.T) {
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret updated"))
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+}
+
+func TestConfigmapWithOwnerRefHotReloadDefault(t *testing.T) {
+	CheckConfigmapWithOwnerRef(t, false)
+}
+
+func TestConfigmapWithOwnerRefHotReload(t *testing.T) {
+	CheckConfigmapWithOwnerRef(t, true)
+}
+
+func CheckConfigmapWithOwnerRef(t *testing.T, hotreload bool) {
+	RegisterTestingT(t)
+	name := RandomizedSuffixName("config-configmap-route")
+	cmName := RandomizedSuffixName("my-hot-cm-")
+	Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
+		"--config",
+		"configmap:"+cmName,
+		"--name",
+		name,
+		"-t",
+		"mount.hot-reload="+strconv.FormatBool(hotreload),
+	).Execute()).To(Succeed())
+
+	Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+	var cmData = make(map[string]string)
+	cmData["my-configmap-key"] = "my configmap content"
+	CreatePlainTextConfigmapWithOwnerRefWithLabels(ns, cmName, cmData, name, Integration(ns, name)().UID, map[string]string{"camel.apache.org/integration": "test"})
+	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content"))
+	cmData["my-configmap-key"] = "my configmap content updated"
+	UpdatePlainTextConfigmapWithLabels(ns, cmName, cmData, map[string]string{"camel.apache.org/integration": "test"})
+	if hotreload {
+		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content updated"))
+	} else {
+		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(Not(ContainSubstring("my configmap content updated")))
+	}
+	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	DeleteConfigmap(ns, cmName)
 }

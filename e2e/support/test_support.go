@@ -1606,6 +1606,31 @@ func CreatePlainTextConfigmapWithLabels(ns string, name string, data map[string]
 	return TestClient().Create(TestContext, &cm)
 }
 
+func CreatePlainTextConfigmapWithOwnerRefWithLabels(ns string, name string, data map[string]string, orname string, uid types.UID, labels map[string]string) error {
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         v1.SchemeGroupVersion.String(),
+				Kind:               "Integration",
+				Name:               orname,
+				UID:                uid,
+				Controller:         pointer.Bool(true),
+				BlockOwnerDeletion: pointer.Bool(true),
+			},
+			},
+			Labels: labels,
+		},
+		Data: data,
+	}
+	return TestClient().Create(TestContext, &cm)
+}
+
 func UpdatePlainTextConfigmap(ns string, name string, data map[string]string) error {
 	return UpdatePlainTextConfigmapWithLabels(ns, name, data, nil)
 }

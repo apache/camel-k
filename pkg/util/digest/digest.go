@@ -24,7 +24,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"hash"
 	"io"
 	"path/filepath"
@@ -37,6 +36,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
 	corev1 "k8s.io/api/core/v1"
+
+	"fmt"
 )
 
 const (
@@ -136,15 +137,63 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 		}
 	}
 
-	// Configmap and secret content
+	// Configmap content
 	for _, cm := range configmaps {
-		if _, err := hash.Write([]byte(cm.String())); err != nil {
-			return "", err
+		if cm != nil {
+			// name, ns
+			if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", cm.Name, cm.Namespace))); err != nil {
+				return "", err
+			}
+			// Data with sorted keys
+			if cm.Data != nil {
+				// sort keys
+				keys := make([]string, 0, len(cm.Data))
+				for k := range cm.Data {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for _, k := range keys {
+					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, cm.Data[k]))); err != nil {
+						return "", err
+					}
+				}
+			}
+			// BinaryData with sorted keys
+			if cm.BinaryData != nil {
+				keys := make([]string, 0, len(cm.BinaryData))
+				for k := range cm.BinaryData {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for _, k := range keys {
+					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, cm.BinaryData[k]))); err != nil {
+						return "", err
+					}
+				}
+			}
 		}
 	}
+
+	// Secret content
 	for _, s := range secrets {
-		if _, err := hash.Write([]byte(s.String())); err != nil {
-			return "", err
+		if s != nil {
+			// name, ns
+			if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", s.Name, s.Namespace))); err != nil {
+				return "", err
+			}
+			// Data with sorted keys
+			if s.Data != nil {
+				keys := make([]string, 0, len(s.Data))
+				for k := range s.Data {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for _, k := range keys {
+					if _, err := hash.Write([]byte(fmt.Sprintf("%s=%v,", k, s.Data[k]))); err != nil {
+						return "", err
+					}
+				}
+			}
 		}
 	}
 
