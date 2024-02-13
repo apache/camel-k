@@ -18,6 +18,7 @@ limitations under the License.
 package builder
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
@@ -130,74 +131,30 @@ func generateQuarkusProject(ctx *builderContext) error {
 	p, err := generateQuarkusProjectCommon(
 		ctx.Build.Runtime.Metadata["quarkus.group.id"],
 		ctx.Build.Runtime.Metadata["quarkus.version"],
-		ctx.Build.Maven.Properties)
+	)
 	if err != nil {
 		return err
 	}
 	// Add Maven build extensions
-	p.Build.Extensions = ctx.Build.Maven.Extension
-
-	// Add Maven repositories
+	p.Build.Extensions = ctx.Build.Maven.Extension // Add Maven repositories
 	p.Repositories = append(p.Repositories, ctx.Build.Maven.Repositories...)
 	p.PluginRepositories = append(p.PluginRepositories, ctx.Build.Maven.Repositories...)
-
 	ctx.Maven.Project = p
 
 	return nil
 }
 
-func generateQuarkusProjectCommon(quarkusPlatformGroupID string, quarkusPlatformVersion string, buildTimeProperties map[string]string) (maven.Project, error) {
+func generateQuarkusProjectCommon(quarkusPlatformGroupID string, quarkusPlatformVersion string) (maven.Project, error) {
 	p, err := maven.LoadProjectWithGAV("org.apache.camel.k.integration", "camel-k-integration", defaults.Version)
 	if err != nil {
 		return maven.Project{}, err
 	}
-
 	p.Properties["quarkus.platform.group-id"] = quarkusPlatformGroupID
 	p.Properties["quarkus.platform.version"] = quarkusPlatformVersion
 	// set fast-jar packaging by default, since it gives some startup time improvements
 	p.Properties.Add("quarkus.package.type", "fast-jar")
-	// Add all the properties from the build configuration
-	p.Properties.AddAll(buildTimeProperties)
-	// Quarkus build time properties
-	buildProperties := make(map[string]string)
-	// disable quarkus banner
-	buildProperties["quarkus.banner.enabled"] = "false"
-	// required for to resolve data type transformers at runtime with service discovery
-	// the different Camel runtimes use different resource paths for the service lookup
-	buildProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
-	// Workaround to prevent JS runtime errors, see https://github.com/apache/camel-quarkus/issues/5678
-	buildProperties["quarkus.class-loading.parent-first-artifacts"] = "org.graalvm.regex:regex"
-
-	// copy all user defined quarkus.camel build time properties to the quarkus-maven-plugin build properties
-	for key, value := range buildTimeProperties {
-		if strings.HasPrefix(key, "quarkus.camel.") {
-			buildProperties[key] = value
-		}
-	}
-	if err = setBuildPluginExecutionConfiguration(p.Build, buildProperties); err != nil {
-		return p, err
-	}
 
 	return p, nil
-}
-
-// identify the build goal of quarkus-maven-plugin and set its configuration.
-func setBuildPluginExecutionConfiguration(build *maven.Build, props map[string]string) error {
-	configuration := v1.PluginProperties{}
-	configuration.AddProperties("properties", props)
-	for i := range build.Plugins {
-		if build.Plugins[i].ArtifactID == "quarkus-maven-plugin" {
-			for j := range build.Plugins[i].Executions {
-				for k := range build.Plugins[i].Executions[j].Goals {
-					if build.Plugins[i].Executions[j].Goals[k] == "build" {
-						build.Plugins[i].Executions[j].Configuration = configuration
-						return nil
-					}
-				}
-			}
-		}
-	}
-	return fmt.Errorf("no quarkus-maven-plugin build goal found")
 }
 
 func buildQuarkusRunner(ctx *builderContext) error {
@@ -215,7 +172,7 @@ func buildQuarkusRunner(ctx *builderContext) error {
 		)
 	}
 
-	err := buildQuarkusRunnerCommon(ctx.C, mc, ctx.Maven.Project)
+	err := buildQuarkusRunnerCommon(ctx.C, mc, ctx.Maven.Project, ctx.Build.Maven.Properties)
 	if err != nil {
 		return err
 	}
@@ -223,28 +180,53 @@ func buildQuarkusRunner(ctx *builderContext) error {
 	return nil
 }
 
-func buildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project maven.Project) error {
+func buildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project maven.Project, applicationProperties map[string]string) error {
 	resourcesPath := filepath.Join(mc.Path, "src", "main", "resources")
 	if err := os.MkdirAll(resourcesPath, os.ModePerm); err != nil {
 		return fmt.Errorf("failure while creating resource folder: %w", err)
 	}
-
-	// Generate an empty application.properties so that there will be something in
-	// target/classes as if such directory does not exist, the quarkus maven plugin
-	// may fail the build.
-	// In the future there should be a way to provide build information from secrets,
-	// configmap, etc.
-	if _, err := os.OpenFile(filepath.Join(resourcesPath, "application.properties"), os.O_RDWR|os.O_CREATE, 0666); err != nil {
-		return fmt.Errorf("failure while creating application.properties: %w", err)
+	if err := computeApplicationProperties(filepath.Join(resourcesPath, "application.properties"), applicationProperties); err != nil {
+		return err
 	}
-
 	mc.AddArgument("package")
-
 	// Run the Maven goal
 	if err := project.Command(mc).Do(ctx); err != nil {
 		return fmt.Errorf("failure while building project: %w", err)
 	}
 
+	return nil
+}
+
+func computeApplicationProperties(appPropertiesPath string, applicationProperties map[string]string) error {
+	f, err := os.OpenFile(appPropertiesPath, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return fmt.Errorf("failure while creating application.properties: %w", err)
+	}
+	if applicationProperties == nil {
+		// Default build time properties
+		applicationProperties = make(map[string]string)
+	}
+	// disable quarkus banner
+	applicationProperties["quarkus.banner.enabled"] = "false"
+	// required for to resolve data type transformers at runtime with service discovery
+	// the different Camel runtimes use different resource paths for the service lookup
+	applicationProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
+	// Workaround to prevent JS runtime errors, see https://github.com/apache/camel-quarkus/issues/5678
+	applicationProperties["quarkus.class-loading.parent-first-artifacts"] = "org.graalvm.regex:regex"
+	defer f.Close()
+	// Fill with properties coming from user configuration
+	for k, v := range applicationProperties {
+		if _, err := f.WriteString(fmt.Sprintf("%s=%s\n", k, v)); err != nil {
+			return err
+		}
+	}
+	if err := f.Sync(); err != nil {
+		return err
+	}
+	w := bufio.NewWriter(f)
+	if err = w.Flush(); err != nil {
+		return err
+	}
 	return nil
 }
 

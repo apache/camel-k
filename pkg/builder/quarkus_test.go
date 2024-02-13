@@ -32,10 +32,7 @@ import (
 )
 
 func TestGenerateQuarkusProjectCommon(t *testing.T) {
-	p, err := generateQuarkusProjectCommon("io.quarkus.platform", "4.5.6", map[string]string{
-		"hello": "world",
-		"weare": "thechampions",
-	})
+	p, err := generateQuarkusProjectCommon("io.quarkus.platform", "4.5.6")
 	assert.Nil(t, err)
 	assert.Equal(t, "org.apache.camel.k.integration", p.GroupID)
 	assert.Equal(t, "camel-k-integration", p.ArtifactID)
@@ -43,8 +40,6 @@ func TestGenerateQuarkusProjectCommon(t *testing.T) {
 	assert.Equal(t, "fast-jar", p.Properties["quarkus.package.type"])
 	assert.Equal(t, "io.quarkus.platform", p.Properties["quarkus.platform.group-id"])
 	assert.Equal(t, "4.5.6", p.Properties["quarkus.platform.version"])
-	assert.Equal(t, "world", p.Properties["hello"])
-	assert.Equal(t, "thechampions", p.Properties["weare"])
 }
 
 func TestLoadCamelQuarkusCatalogMissing(t *testing.T) {
@@ -130,9 +125,6 @@ func TestGenerateQuarkusProject(t *testing.T) {
 	assert.Len(t, builderContext.Maven.Project.DependencyManagement.Dependencies, 2)
 	assert.Len(t, builderContext.Maven.Project.Dependencies, 1)
 	assert.Equal(t, "camel-quarkus-core", builderContext.Maven.Project.Dependencies[0].ArtifactID)
-	assert.Equal(t, "quarkus-maven-plugin", builderContext.Maven.Project.Build.Plugins[0].ArtifactID)
-	assert.Equal(t, "false", builderContext.Maven.Project.Build.Plugins[0].Executions[0].Configuration["properties"].Properties["quarkus.banner.enabled"])
-	assert.Equal(t, "world", builderContext.Maven.Project.Build.Plugins[0].Executions[0].Configuration["properties"].Properties["quarkus.camel.hello"])
 }
 
 func TestBuildQuarkusRunner(t *testing.T) {
@@ -142,7 +134,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 	assert.Nil(t, err)
 
 	mavenProps := v1.Properties{}
-	mavenProps.Add("quarkus.camel.hello", "world")
+	mavenProps.Add("camel.hello", "world")
 	builderContext := builderContext{
 		C:         context.TODO(),
 		Path:      tmpDir,
@@ -161,6 +153,13 @@ func TestBuildQuarkusRunner(t *testing.T) {
 	assert.Nil(t, err)
 	err = buildQuarkusRunner(&builderContext)
 	assert.Nil(t, err)
+	// Verify default application properties
+	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
+	assert.Nil(t, err)
+	assert.Contains(t, string(appProps), "camel.hello=world\n")
+	assert.Contains(t, string(appProps), "quarkus.banner.enabled=false\n")
+	assert.Contains(t, string(appProps), "quarkus.camel.service.discovery.include-patterns=META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*\n")
+	assert.Contains(t, string(appProps), "quarkus.class-loading.parent-first-artifacts=org.graalvm.regex:regex\n")
 	// At this stage a maven project should have been executed. Verify the package was created.
 	_, err = os.Stat(filepath.Join(tmpDir, "maven", "target", "camel-k-integration-"+defaults.Version+".jar"))
 	assert.Nil(t, err)
@@ -181,4 +180,42 @@ func TestBuildQuarkusRunner(t *testing.T) {
 		}
 	}
 	assert.True(t, camelQuarkusCoreFound, "Did not find expected artifact: %s", expectedArtifact)
+}
+
+func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus-with-props")
+	assert.Nil(t, err)
+	defaultCatalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	mavenProps := v1.Properties{}
+	mavenProps.Add("quarkus.camel.hello", "world")
+	mavenProps.Add("my-build-time-var", "my-build-time-val")
+	mavenProps.Add("my-build-time\var2", "my-build-time-val2")
+	builderContext := builderContext{
+		C:         context.TODO(),
+		Path:      tmpDir,
+		Namespace: "test",
+		Build: v1.BuilderTask{
+			Runtime: defaultCatalog.Runtime,
+			Maven: v1.MavenBuildSpec{
+				MavenSpec: v1.MavenSpec{
+					Properties: mavenProps,
+				},
+			},
+		},
+	}
+
+	err = generateQuarkusProject(&builderContext)
+	assert.Nil(t, err)
+	err = buildQuarkusRunner(&builderContext)
+	assert.Nil(t, err)
+	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
+	assert.Nil(t, err)
+	assert.Contains(t, string(appProps), "camel.hello=world\n")
+	assert.Contains(t, string(appProps), "my-build-time-var=my-build-time-val\n")
+	assert.Contains(t, string(appProps), "my-build-time\var2=my-build-time-val2\n")
+	// At this stage a maven project should have been executed. Verify the package was created.
+	_, err = os.Stat(filepath.Join(tmpDir, "maven", "target", "camel-k-integration-"+defaults.Version+".jar"))
+	assert.Nil(t, err)
 }

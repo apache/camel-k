@@ -333,8 +333,7 @@ func (t *mountTrait) setConfigPropertiesAsEnvVar(propsAsEnv []corev1.EnvVar, e *
 
 func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 	e.Resources.VisitSecret(func(secret *corev1.Secret) {
-		switch secret.Labels[serviceBindingLabel] {
-		case "true":
+		if secret.Labels[serviceBindingLabel] == "true" {
 			t.Configs = append(t.Configs, "secret:"+secret.Name)
 		}
 	})
