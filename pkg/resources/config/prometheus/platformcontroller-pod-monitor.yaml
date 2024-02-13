@@ -15,8 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-resources:
-- operator-pod-monitor.yaml
-- operator-prometheus-rule.yaml
-- platformcontroller-pod-monitor.yaml
-- platformcontroller-prometheus-rule.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: camel-k-platformcontroller
+  labels:
+    app: "camel-k"
+    camel.apache.org/component: platformcontroller
+spec:
+  selector:
+    matchLabels:
+      app: "camel-k"
+      camel.apache.org/component: platformcontroller
+  podMetricsEndpoints:
+    - port: metrics

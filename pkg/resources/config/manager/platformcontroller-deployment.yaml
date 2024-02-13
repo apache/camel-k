@@ -21,10 +21,10 @@ metadata:
   name: camel-k-platformcontroller
   labels:
     app: "camel-k"
-    camel.apache.org/component: operator
+    camel.apache.org/component: platformcontroller
     name: camel-k-platformcontroller
-    app.kubernetes.io/component: operator
-    app.kubernetes.io/name: camel-k
+    app.kubernetes.io/component: platformcontroller
+    app.kubernetes.io/name: camel-k-platformcontroller
     app.kubernetes.io/version: "2.3.0-SNAPSHOT"
 spec:
   replicas: 1
@@ -37,10 +37,10 @@ spec:
     metadata:
       labels:
         name: camel-k-platformcontroller
-        camel.apache.org/component: operator
+        camel.apache.org/component: platformcontroller
         app: "camel-k"
-        app.kubernetes.io/component: operator
-        app.kubernetes.io/name: camel-k
+        app.kubernetes.io/component: platformcontroller
+        app.kubernetes.io/name: camel-k-platformcontroller
         app.kubernetes.io/version: "2.3.0-SNAPSHOT"
     spec:
       serviceAccountName: camel-k-operator

@@ -20,7 +20,7 @@ kind: Deployment
 metadata:
   labels:
     app: camel-k
-    camel.apache.org/component: operator
+    camel.apache.org/component: platformcontroller
     {{- include "camel-k.labels" . | nindent 4 }}
   {{- with .Values.operator.annotations }}
   annotations:
@@ -38,7 +38,7 @@ spec:
     metadata:
       labels:
         app: camel-k
-        camel.apache.org/component: operator
+        camel.apache.org/component: platformcontroller
         name: camel-k-platformcontroller
     spec:
     {{- if .Values.operator.imagePullSecrets }}
