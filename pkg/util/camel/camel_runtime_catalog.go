@@ -57,6 +57,19 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 			},
 		}
 		cat.Spec.Runtime.Capabilities["knative"] = knativeCapability
+		// TODO manage Master from the catalog
+		masterCapability := cat.Spec.Runtime.Capabilities["master"]
+		masterCapability.Dependencies = []v1.MavenArtifact{
+			{
+				GroupID:    "org.apache.camel.quarkus",
+				ArtifactID: "camel-quarkus-master",
+			},
+			{
+				GroupID:    "org.apache.camel.quarkus",
+				ArtifactID: "camel-quarkus-kubernetes",
+			},
+		}
+		cat.Spec.Runtime.Capabilities["master"] = masterCapability
 	}
 
 	catalog.CamelCatalogSpec = cat.Spec

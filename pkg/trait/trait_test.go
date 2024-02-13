@@ -419,7 +419,7 @@ func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
 
 func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 	c := NewTraitTestCatalog()
-	buildTraits := []string{"builder", "camel", "quarkus", "registry"}
+	buildTraits := []string{"builder", "camel", "master", "quarkus", "registry"}
 
 	for _, trait := range c.AllTraits() {
 		if trait.InfluencesKit() {
