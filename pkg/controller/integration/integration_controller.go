@@ -20,6 +20,8 @@ package integration
 import (
 	"context"
 	"fmt"
+	"github.com/apache/camel-k/v2/pkg/metrics"
+
 	"reflect"
 	"time"
 
@@ -533,6 +535,8 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 			break
 		}
 	}
+
+	metrics.UpdateIntegrationPhase(instance.Name, string(instance.Status.Phase))
 
 	return reconcile.Result{}, nil
 }
