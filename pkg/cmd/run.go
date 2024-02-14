@@ -818,6 +818,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 	var platform *v1.IntegrationPlatform
 	var catalog *camel.RuntimeCatalog
 	for _, item := range o.Dependencies {
+		// Deprecated: won't be supported in future releases
 		if strings.HasPrefix(item, "file://") || strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
 			if platform == nil {
 				var err error
@@ -826,6 +827,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 					return err
 				}
 			}
+			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: this feature is deprecated and may disappear in future release. Use jvm trait instead.\n")
 			if err := o.uploadDependency(platform, item, name, cmd, it); err != nil {
 				return fmt.Errorf("error trying to upload %s to the Image Registry.: %w", item, err)
 			}
@@ -834,7 +836,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				// The catalog used for lightweight validation of Camel components.
 				// The exact runtime version is not used here since resolving the runtime version may be
 				// a costly operation and most of the use cases should be covered by the default catalog.
-				// And the validation only warns potential misusages of Camel components at the CLI level,
+				// And the validation only warns potential misusage of Camel components at the CLI level,
 				// so strictness of catalog version is not necessary here.
 				var err error
 				catalog, err = createCamelCatalog(o.Context)
@@ -1008,6 +1010,7 @@ func (o *runCmdOptions) getTargetPath() string {
 	return o.RegistryOptions.Get("targetPath")
 }
 
+// Deprecated: won't be supported in future releases.
 func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	var localPath string
 	if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
