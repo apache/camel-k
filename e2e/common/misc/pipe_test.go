@@ -54,8 +54,8 @@ func TestPipe(t *testing.T) {
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
-			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("integrationLogger"))
+			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
+			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
 
 		})
 
@@ -71,8 +71,8 @@ func TestPipe(t *testing.T) {
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("kameletErrorHandler"))
-			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
+			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
+			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
 
 		})
 	})
