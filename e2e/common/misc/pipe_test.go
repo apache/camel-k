@@ -50,12 +50,14 @@ func TestPipe(t *testing.T) {
 				"-p", "source.message=throw Error",
 				"-p", "sink.loggerName=integrationLogger",
 				"-p", "error-handler.loggerName=kameletErrorHandler",
+				// Needed in the test to make sure to do the right string comparison later
+				"-t", "logging.color=false",
 				"--name", "throw-error-binding",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("kameletErrorHandler"))
-			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("integrationLogger"))
+			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
+			Eventually(IntegrationLogs(ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
 
 		})
 
@@ -67,12 +69,14 @@ func TestPipe(t *testing.T) {
 				"-p", "source.message=true",
 				"-p", "sink.loggerName=integrationLogger",
 				"-p", "error-handler.loggerName=kameletErrorHandler",
+				// Needed in the test to make sure to do the right string comparison later
+				"-t", "logging.color=false",
 				"--name", "no-error-binding",
 			).Execute()).To(Succeed())
 
 			Eventually(IntegrationPodPhase(ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("kameletErrorHandler"))
-			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
+			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
+			Eventually(IntegrationLogs(ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
 
 		})
 	})
