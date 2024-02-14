@@ -205,3 +205,13 @@ func TestXMLReplaceURI(t *testing.T) {
 	assert.True(t, replaced)
 	assert.Contains(t, sourceSpec.Content, "<from uri=\"direct:newURI?hello=world\"/>")
 }
+
+func TestXMLBeanDependencies(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+
+	assertExtract(t, inspector, "<from uri=\"timer:foo\"/><bean>something</bean><to uri=\"log:bar\"></to>", func(meta *Metadata) {
+		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
+		assert.Contains(t, meta.Dependencies.List(), "camel:bean")
+		assert.Contains(t, meta.Dependencies.List(), "camel:log")
+	})
+}
