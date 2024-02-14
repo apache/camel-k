@@ -50,6 +50,8 @@ func TestPipe(t *testing.T) {
 				"-p", "source.message=throw Error",
 				"-p", "sink.loggerName=integrationLogger",
 				"-p", "error-handler.loggerName=kameletErrorHandler",
+				// Needed in the test to make sure to do the right string comparison later
+				"-t", "logging.color=false",
 				"--name", "throw-error-binding",
 			).Execute()).To(Succeed())
 
@@ -67,6 +69,8 @@ func TestPipe(t *testing.T) {
 				"-p", "source.message=true",
 				"-p", "sink.loggerName=integrationLogger",
 				"-p", "error-handler.loggerName=kameletErrorHandler",
+				// Needed in the test to make sure to do the right string comparison later
+				"-t", "logging.color=false",
 				"--name", "no-error-binding",
 			).Execute()).To(Succeed())
 

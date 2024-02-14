@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -182,7 +183,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF", filepath.Join(camel.BasePath, "application.properties"))
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
-	if e.IntegrationKit == nil || !e.IntegrationKit.IsExternal() {
+	if !t.hasUserProvidedImage() {
 		e.addSourcesProperties()
 		if props, err := e.computeApplicationProperties(); err != nil {
 			return err
@@ -346,4 +347,9 @@ func (t *containerTrait) configureSecurityContext(e *Environment, container *cor
 			container.SecurityContext = securityContext
 		}
 	}
+}
+
+// It's a user provided image if it does not match the naming convention used by Camel K Integration Kits.
+func (t *containerTrait) hasUserProvidedImage() bool {
+	return t.Image != "" && !strings.Contains(t.Image, "camel-k-kit-")
 }
