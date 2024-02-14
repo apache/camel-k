@@ -8,6 +8,7 @@
 
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
+- Externally built Integrations are deployed without a command in Camel-K 2.2.0 [\#5112](https://github.com/apache/camel-k/issues/5112)
 - Coverage report wrong percentage [\#5108](https://github.com/apache/camel-k/issues/5108)
 - Add possibility to configure annotation for the builder pods [\#5106](https://github.com/apache/camel-k/issues/5106)
 - Include the operator node-selector in the helm chart [\#5103](https://github.com/apache/camel-k/issues/5103)
@@ -26,6 +27,7 @@
 - Data type Kamelet hardcoded [\#5014](https://github.com/apache/camel-k/issues/5014)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
+- Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
 - Pipe using simple language expressions causing failure [\#4777](https://github.com/apache/camel-k/issues/4777)
 - 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
