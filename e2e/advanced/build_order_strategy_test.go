@@ -57,13 +57,13 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		integrationB := RandomizedSuffixName("java-b")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationB,
-			"-d", "camel:joor",
+			"-d", "camel:bean",
 		).Execute()).To(Succeed())
 
 		integrationC := RandomizedSuffixName("java-c")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationC,
-			"-d", "camel:joor",
+			"-d", "camel:bean",
 			"-d", "camel:zipfile",
 		).Execute()).To(Succeed())
 
