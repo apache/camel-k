@@ -20,6 +20,7 @@ package resources
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -93,7 +94,7 @@ func TestGetResource(t *testing.T) {
 }
 
 func TestGetArchetype(t *testing.T) {
-	NoErrorAndNotEmptyBytes(t, "/archetypes/camel-quarkus/pom.xml", Resource)
+	NoErrorAndNotEmptyBytes(t, "resources/archetypes/camel-quarkus/pom.xml", Resource)
 }
 
 func TestGetNoResource(t *testing.T) {
@@ -166,13 +167,36 @@ func TestCRDResources(t *testing.T) {
 	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_pipes.yaml", Resource)
 }
 
-func TestCopyResources(t *testing.T) {
+func TestCopyDefault(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-resources")
 	assert.Nil(t, err)
-	err = Copy("/archetypes/camel-quarkus/", tmpDir)
+	copiedFile := filepath.Join(tmpDir, "pom.xml")
+	err = Copy("resources/archetypes/camel-quarkus/pom.xml", copiedFile)
 	assert.Nil(t, err)
-	// TODO we'd need to include permissions for each resource
-	// info, err := os.Stat(filepath.Join(tmpDir, "pom.xml"))
-	// assert.Nil(t, err)
-	// assert.Equal(t, "", info.Mode())
+	expectedContent, err := os.ReadFile("resources/archetypes/camel-quarkus/pom.xml")
+	assert.Nil(t, err)
+	copiedContent, err := os.ReadFile(copiedFile)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedContent, copiedContent)
+	info, err := os.Stat(copiedFile)
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0444), info.Mode())
+}
+
+func TestCopyWithPermissions(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-resources")
+	assert.Nil(t, err)
+	copiedFile := filepath.Join(tmpDir, "pom.xml")
+	err = CopyWithPermission("resources/archetypes/camel-quarkus/pom.xml", copiedFile, 0644)
+	assert.Nil(t, err)
+	info, err := os.Stat(copiedFile)
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0644), info.Mode())
+
+	copiedFile = filepath.Join(tmpDir, "mvnw")
+	err = CopyWithPermission("resources/archetypes/mvnw/mvnw", copiedFile, 0744)
+	assert.Nil(t, err)
+	info, err = os.Stat(copiedFile)
+	assert.Nil(t, err)
+	assert.Equal(t, os.FileMode(0744), info.Mode())
 }

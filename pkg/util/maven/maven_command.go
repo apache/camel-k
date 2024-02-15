@@ -24,6 +24,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -241,7 +242,39 @@ func (c *Command) generateProjectStructure(project Project) error {
 
 // cloneCamelQuarkusArchetype clones the archetype which is required as a base for the Maven project.
 func (c *Command) cloneCamelQuarkusArchetype() error {
-	return resources.Copy("/archetypes/camel-quarkus/", c.context.Path)
+	if err := resources.CopyWithPermission(
+		"resources/archetypes/camel-quarkus/pom.xml",
+		path.Join(c.context.Path, "pom.xml"),
+		0664,
+	); err != nil {
+		return err
+	}
+	if err := resources.CopyWithPermission(
+		"resources/archetypes/mvnw/mvnw",
+		path.Join(c.context.Path, "mvnw"),
+		0774,
+	); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(path.Join(c.context.Path, "/.mvn/wrapper"), 0766); err != nil {
+		return err
+	}
+	if err := resources.CopyWithPermission(
+		"resources/archetypes/mvnw/maven-wrapper.jar",
+		path.Join(c.context.Path, "/.mvn/wrapper/maven-wrapper.jar"),
+		0664,
+	); err != nil {
+		return err
+	}
+	if err := resources.CopyWithPermission(
+		"resources/archetypes/mvnw/maven-wrapper.properties",
+		path.Join(c.context.Path, "/.mvn/wrapper/maven-wrapper.properties"),
+		0664,
+	); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ParseGAV decodes the provided Maven GAV into the corresponding Dependency.

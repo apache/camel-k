@@ -26,7 +26,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/resources"
 )
 
-const camelQuarkusArchetypeResource = "/archetypes/camel-quarkus/pom.xml"
+const camelQuarkusArchetypeResource = "resources/archetypes/camel-quarkus/pom.xml"
 
 func newProject() Project {
 	return Project{
@@ -120,11 +120,6 @@ func (p *Project) AddDependency(dep Dependency) {
 		if d.GroupID == dep.GroupID && d.ArtifactID == dep.ArtifactID {
 			return
 		}
-	}
-
-	// TODO must manage classifiers instead!
-	if dep.ArtifactID == "jolokia-agent-jvm" {
-		dep.Classifier = "javaagent"
 	}
 
 	p.Dependencies = append(p.Dependencies, dep)

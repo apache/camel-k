@@ -147,3 +147,22 @@ func Resources(dirName string) ([]string, error) {
 
 	return res, dir.Close()
 }
+
+// Copy the embedded resource to a specific path with a default read only permission.
+func Copy(resourceName, path string) error {
+	return CopyWithPermission(resourceName, path, 0444)
+}
+
+// CopyWithPermission copies the embedded resource to a specific path with a given permission.
+func CopyWithPermission(resourceName, path string, perm os.FileMode) error {
+	data, err := Resource(resourceName)
+	if err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(path, data, perm); err != nil {
+		return err
+	}
+
+	return nil
+}

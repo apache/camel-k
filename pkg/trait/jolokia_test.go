@@ -51,9 +51,9 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
 
-	assert.Equal(t, container.Args, []string{
+	assert.Equal(t, []string{
 		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-agent-jvm-2.0.1-javaagent.jar=discoveryEnabled=false,host=*,port=8778",
-	})
+	}, container.Args)
 
 	assert.Len(t, container.Ports, 1)
 	containerPort := container.Ports[0]
@@ -78,12 +78,12 @@ func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
 
-	assert.Equal(t, container.Args, []string{
+	assert.Equal(t, []string{
 		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-agent-jvm-2.0.1-javaagent.jar=caCert=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt," +
 			"clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc," +
 			"clientPrincipal.3=cn=fuse-console.fuse.svc,discoveryEnabled=false,extendedClientCheck=true," +
 			"host=*,port=8778,protocol=https,useSslClientAuthentication=true",
-	})
+	}, container.Args)
 
 	assert.Len(t, container.Ports, 1)
 	containerPort := container.Ports[0]
@@ -128,11 +128,11 @@ func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 
-	assert.Equal(t, container.Args, []string{
+	assert.Equal(t, []string{
 		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-agent-jvm-2.0.1-javaagent.jar=caCert=.cacert,clientPrincipal=cn:any," +
 			"discoveryEnabled=true,extendedClientCheck=false,host=explicit-host,port=8778,protocol=http," +
 			"useSslClientAuthentication=false",
-	})
+	}, container.Args)
 }
 
 func TestApplyJolokiaTraitWithUnparseableOptionShouldReturnError(t *testing.T) {
@@ -285,8 +285,8 @@ func createNominalJolokiaTest() (*jolokiaTrait, *Environment) {
 			Status: v1.IntegrationKitStatus{
 				Artifacts: []v1.Artifact{
 					{
-						ID:     "org.jolokia.jolokia-agent-jvm-2.0.1.jar",
-						Target: "dependencies/lib/main/org.jolokia.jolokia-agent-jvm-2.0.1.jar",
+						ID:     "org.jolokia.jolokia-agent-jvm-2.0.1-javaagent.jar",
+						Target: "dependencies/lib/main/org.jolokia.jolokia-agent-jvm-2.0.1-javaagent.jar",
 					},
 				},
 			},

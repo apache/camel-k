@@ -284,6 +284,7 @@ func jolokiaCatalogWorkaround() v1.Capability {
 				GroupID:    "org.jolokia",
 				ArtifactID: "jolokia-agent-jvm",
 				Version:    "2.0.1",
+				Classifier: "javaagent",
 			},
 			{
 				GroupID:    "org.apache.camel",

@@ -18,6 +18,7 @@ limitations under the License.
 package maven
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,4 +34,16 @@ func TestGetMavenContext(t *testing.T) {
 	assert.Equal(t, "compile -s my-settings.xml -DmyProperty=hello", mvnOptionsCompile)
 	assert.Equal(t, "-s my-settings.xml", mvnSimplePackage)
 	assert.Equal(t, "-s my-settings.xml -DmyProperty=hello", mvnOptionsPackage)
+}
+
+func TestCloneMavenQuarkus(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-resources")
+	assert.Nil(t, err)
+	mvnCommand := Command{
+		context: Context{
+			Path: tmpDir,
+		},
+	}
+	err = mvnCommand.cloneCamelQuarkusArchetype()
+	assert.Nil(t, err)
 }
