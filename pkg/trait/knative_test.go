@@ -729,7 +729,7 @@ func TestKnativeSinkBinding(t *testing.T) {
 	}
 
 	environment := NewFakeEnvironment(t, source)
-	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+	environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	c, err := NewFakeClient("ns")
 	assert.Nil(t, err)
@@ -738,7 +738,15 @@ func TestKnativeSinkBinding(t *testing.T) {
 
 	err = tc.Configure(&environment)
 	assert.Nil(t, err)
+	_, err = tc.apply(&environment)
+	assert.Nil(t, err)
+	assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityKnative)
+	assert.Contains(t, environment.Integration.Status.Dependencies, "camel:bean")
 
+	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+
+	err = tc.Configure(&environment)
+	assert.Nil(t, err)
 	_, err = tc.apply(&environment)
 	assert.Nil(t, err)
 	assert.Equal(t, "#class:org.apache.camel.component.knative.spi.KnativeResource", environment.ApplicationProperties["camel.beans.knative-channel"])

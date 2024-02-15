@@ -739,10 +739,30 @@ const yamlBean = `
     - to: "log:bar"
 `
 
+const yamlTemplateBean = `
+- beans:
+  - name: myBean
+    type: "#class:java.util.Date"
+    property:
+    - key: time
+      value: 0
+- from:
+    uri: "timer:foo"
+    steps:
+    - setBody:
+        simple: "Bean time is ${bean:{{myBean}}?method=getTime}!"
+    - to: "log:bar"
+`
+
 func TestYamlBeanDependencies(t *testing.T) {
 	inspector := newTestYAMLInspector(t)
 
 	assertExtract(t, inspector, yamlBean, func(meta *Metadata) {
+		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
+		assert.Contains(t, meta.Dependencies.List(), "camel:bean")
+		assert.Contains(t, meta.Dependencies.List(), "camel:log")
+	})
+	assertExtract(t, inspector, yamlTemplateBean, func(meta *Metadata) {
 		assert.Contains(t, meta.Dependencies.List(), "camel:timer")
 		assert.Contains(t, meta.Dependencies.List(), "camel:bean")
 		assert.Contains(t, meta.Dependencies.List(), "camel:log")

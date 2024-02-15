@@ -64,7 +64,7 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
-	case "bean":
+	case "bean", "beans":
 		if bean := i.catalog.GetArtifactByScheme("bean"); bean != nil {
 			meta.AddDependency(bean.GetDependencyID())
 		}

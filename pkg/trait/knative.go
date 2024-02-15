@@ -189,6 +189,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 func (t *knativeTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityKnative)
+		if pointer.BoolDeref(t.SinkBinding, false) {
+			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:bean")
+		}
 	}
 
 	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {
