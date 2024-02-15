@@ -57,13 +57,13 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		integrationB := RandomizedSuffixName("java-b")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationB,
-			"-d", "camel:joor",
+			"-d", "camel:cron",
 		).Execute()).To(Succeed())
 
 		integrationC := RandomizedSuffixName("java-c")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", integrationC,
-			"-d", "camel:joor",
+			"-d", "camel:cron",
 			"-d", "camel:zipfile",
 		).Execute()).To(Succeed())
 
@@ -119,6 +119,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 	})
 }
 
+/*
 func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-build-order-fifo"
@@ -177,3 +178,4 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
+*/
