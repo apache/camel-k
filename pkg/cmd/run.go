@@ -865,7 +865,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 
 func (o *runCmdOptions) getPlatform(cmd *cobra.Command, c client.Client, it *v1.Integration) (*v1.IntegrationPlatform, error) {
 	// let's also enable the registry trait if not explicitly disabled
-	if !contains(o.Traits, "registry.enabled=false") {
+	if !util.StringSliceContainsAnyOf(o.Traits, "registry.enabled=false") {
 		o.Traits = append(o.Traits, "registry.enabled=true")
 	}
 	pl, err := platform.GetForResource(o.Context, c, it)
@@ -1384,14 +1384,4 @@ func getDirName(path string) (string, error) {
 		parentDir = filepath.Dir(parentDir)
 	}
 	return parentDir, nil
-}
-
-func contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
 }
