@@ -38,7 +38,9 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-build-order-deps"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns, "--build-order-strategy", string(v1.BuildOrderStrategyDependencies)).Execute()).To(Succeed())
+		Expect(KamelInstallWithID(operatorID, ns,
+			"--max-running-pipelines", "4",
+			"--build-order-strategy", string(v1.BuildOrderStrategyDependencies)).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
