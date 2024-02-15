@@ -37,13 +37,6 @@ import (
 
 func PortForward(ctx context.Context, c client.Client, ns, labelSelector string, localPort, remotePort uint, stdOut, stdErr io.Writer) error {
 	log.InitForCmd()
-	list, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{
-		LabelSelector: labelSelector,
-	})
-	if err != nil {
-		return err
-	}
-
 	var forwardPod *corev1.Pod
 	var forwardCtx context.Context
 	var forwardCtxCancel context.CancelFunc
@@ -52,6 +45,7 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 		if forwardPod == nil && podReady(pod) {
 			forwardPod = pod
 			forwardCtx, forwardCtxCancel = context.WithCancel(ctx)
+			log.Debugf("Setting up Port Forward for pod with name: %q\n", forwardPod.Name)
 			if _, err := portFowardPod(forwardCtx, c.GetConfig(), ns, forwardPod.Name, localPort, remotePort, stdOut, stdErr); err != nil {
 				return err
 			}
@@ -59,12 +53,13 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 		return nil
 	}
 
-	if len(list.Items) > 0 {
-		if err := setupPortForward(&list.Items[0]); err != nil {
-			return err
-		}
+	log.Debugf("First attempt to bootstrap Port Forward with LabelSelector: %v\n", labelSelector)
+	list, err := bootstrapPortForward(ctx, c, ns, labelSelector, setupPortForward)
+	if err != nil {
+		return err
 	}
 
+	log.Debugf("Instantiating pod event watcher with LabelSelector: %v and ResourceVersion: %v in namespace: %v\n", labelSelector, list.ResourceVersion, ns)
 	watcher, err := c.CoreV1().Pods(ns).Watch(ctx, metav1.ListOptions{
 		LabelSelector:   labelSelector,
 		ResourceVersion: list.ResourceVersion,
@@ -90,6 +85,7 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 				if !ok {
 					return fmt.Errorf("type assertion failed: %v", e.Object)
 				}
+				log.Debugf("Handling watch.Added event for pod with name: %v\n", pod.Name)
 				if err := setupPortForward(pod); err != nil {
 					return err
 				}
@@ -98,25 +94,50 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 				if !ok {
 					return fmt.Errorf("type assertion failed: %v", e.Object)
 				}
+				log.Debugf("Handling watch.Modified event for pod with name: %v\n", pod.Name)
 				if err := setupPortForward(pod); err != nil {
 					return err
 				}
 			case watch.Deleted:
+				log.Debugf("Handling watch.Deleted event\n")
 				if forwardPod != nil && e.Object != nil {
 					deletedPod, ok := e.Object.(*corev1.Pod)
 					if !ok {
 						return fmt.Errorf("type assertion failed: %v", e.Object)
 					}
+					log.Debugf("Handling watch.Deleted event for pod with name: %v while Port Forward was active for pod with name: %v\n", deletedPod.Name, forwardPod.Name)
 					if deletedPod.Name == forwardPod.Name {
 						forwardCtxCancel()
 						forwardPod = nil
 						forwardCtx = nil
 						forwardCtxCancel = nil
+
+						log.Debugf("Handling watch.Deleted event, since the pod with Port Forward enabled has been deleted we try to bootstrap Port Forward with LabelSelector: %v\n", labelSelector)
+						_, err := bootstrapPortForward(ctx, c, ns, labelSelector, setupPortForward)
+						if err != nil {
+							return err
+						}
 					}
 				}
 			}
 		}
 	}
+}
+
+func bootstrapPortForward(ctx context.Context, c client.Client, ns string, labelSelector string, setupPortForward func(pod *corev1.Pod) error) (*corev1.PodList, error) {
+	list, err := c.CoreV1().Pods(ns).List(ctx, metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(list.Items) > 0 {
+		log.Debugf("Bootstrapping Port Forward for pod with name: %v\n", list.Items[0].Name)
+		if err := setupPortForward(&list.Items[0]); err != nil {
+			return nil, err
+		}
+	}
+	return list, nil
 }
 
 func portFowardPod(ctx context.Context, config *restclient.Config, ns, pod string, localPort, remotePort uint, stdOut, stdErr io.Writer) (string, error) {
