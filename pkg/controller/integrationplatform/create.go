@@ -48,7 +48,7 @@ func (action *createAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 }
 
 func (action *createAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
-	paths, err := resources.WithPrefix("/camel-catalog-")
+	paths, err := resources.WithPrefix("/resources/camel-catalog-")
 	if err != nil {
 		return nil, err
 	}

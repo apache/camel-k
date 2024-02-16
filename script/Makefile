@@ -55,8 +55,8 @@ DEBUG_MODE ?= false
 OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 
 # olm bundle vars
-MANAGER := config/manager
-MANIFESTS := config/manifests
+MANAGER := pkg/resources/config/manager
+MANIFESTS := pkg/resources/config/manifests
 DEFAULT_CHANNEL ?= $(shell echo "stable-v$(word 1,$(subst ., ,$(lastword $(OPERATOR_VERSION))))")
 CHANNELS ?= $(DEFAULT_CHANNEL),latest
 PACKAGE := camel-k
@@ -358,7 +358,6 @@ build-kamel:
 
 build-resources:
 	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
-	go generate ./pkg/...
 
 bundle-kamelets:
 	@echo "Preparing Kamelets bundle resource..."
@@ -610,8 +609,8 @@ $(BUNDLE_CAMEL_APIS): operator-sdk
 	@# operator-sdk generate ... cannot execute across separate modules so need to temporarily move api
 	$(OPERATOR_SDK) generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
 	@# Adds the licence header to the csv file.
-	./script/add_license.sh config/manifests/bases ./script/headers/yaml.txt
-	./script/add_createdAt.sh config/manifests/bases
+	./script/add_license.sh pkg/resources/config/manifests/bases ./script/headers/yaml.txt
+	./script/add_createdAt.sh pkg/resources/config/manifests/bases
 	@# Clean up temporary working api directories
 	rm -rf api_*
 
@@ -648,12 +647,12 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Display BUNDLE_METADATA_OPTS for debugging
 	$(info BUNDLE_METADATA_OPTS=$(BUNDLE_METADATA_OPTS))
 	@# Sets the operator image to the preferred image:tag
-	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+	@cd pkg/resources/config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	@$(KUSTOMIZE) build config/manifests | \
+	@$(KUSTOMIZE) build pkg/resources/config/manifests | \
 		$(OPERATOR_SDK) generate bundle \
 			-q --overwrite --version $(OPERATOR_VERSION) \
-			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)
+			--kustomize-dir pkg/resources/config/manifests $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
 	@mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
 	@# Adds the licence headers to the csv file

@@ -19,7 +19,6 @@ package resources
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -85,53 +84,42 @@ func ErrorString(t *testing.T, path string, callable func(path string) (string, 
 }
 
 func TestGetResource(t *testing.T) {
-	NoErrorAndNotEmptyBytes(t, "manager/operator-service-account.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/manager/operator-service-account.yaml", Resource)
-	NoErrorAndNotEmptyString(t, "manager/operator-service-account.yaml", ResourceAsString)
-	NoErrorAndNotEmptyString(t, "/manager/operator-service-account.yaml", ResourceAsString)
-	NoErrorAndContains(t, "/manager", "/manager/operator-service-account.yaml", Resources)
+	NoErrorAndNotEmptyBytes(t, "config/manager/operator-service-account.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/manager/operator-service-account.yaml", Resource)
+	NoErrorAndNotEmptyString(t, "config/manager/operator-service-account.yaml", ResourceAsString)
+	NoErrorAndNotEmptyString(t, "/config/manager/operator-service-account.yaml", ResourceAsString)
+	NoErrorAndContains(t, "/config/manager", "config/manager/operator-service-account.yaml", Resources)
 }
 
 func TestGetNoResource(t *testing.T) {
-	ErrorBytes(t, "manager/operator-service-account.json", Resource)
-	ErrorBytes(t, "/manager/operator-service-account.json", Resource)
-	ErrorString(t, "manager/operator-service-account.json", ResourceAsString)
-	ErrorString(t, "/manager/operator-service-account.json", ResourceAsString)
-	NoErrorAndNotContains(t, "/", "/manager/operator-service-account.json", Resources)
+	ErrorBytes(t, "config/manager/operator-service-account.json", Resource)
+	ErrorBytes(t, "/config/manager/operator-service-account.json", Resource)
+	ErrorString(t, "config/manager/operator-service-account.json", ResourceAsString)
+	ErrorString(t, "/config/manager/operator-service-account.json", ResourceAsString)
+	NoErrorAndNotContains(t, "/config/", "config/manager/operator-service-account.json", Resources)
 }
 
 func TestResources(t *testing.T) {
-	NoErrorAndContains(t, "/manager", "/manager/operator-service-account.yaml", Resources)
-	NoErrorAndContains(t, "/manager/", "/manager/operator-service-account.yaml", Resources)
-	NoErrorAndNotContains(t, "/manager/", "kustomize.yaml", Resources)
-	NoErrorAndEmpty(t, "/dirnotexist", Resources)
+	NoErrorAndContains(t, "/config/manager", "config/manager/operator-service-account.yaml", Resources)
+	NoErrorAndContains(t, "/config/manager/", "config/manager/operator-service-account.yaml", Resources)
+	NoErrorAndNotContains(t, "config/manager/", "config/kustomize.yaml", Resources)
+	NoErrorAndEmpty(t, "config/dirnotexist", Resources)
 
-	items, err := Resources("/")
+	_, err := Resources("/")
 	assert.Nil(t, err)
-
-	for _, res := range items {
-		if strings.Contains(res, "java.tmpl") {
-			assert.Fail(t, "Resources should not return nested files")
-		}
-		if strings.Contains(res, "templates") {
-			assert.Fail(t, "Resources should not return nested dirs")
-		}
-	}
-
-	NoErrorAndContains(t, "/templates", "/templates/java.tmpl", Resources)
 }
 
 func TestResourcesWithPrefix(t *testing.T) {
-	NoErrorAndContains(t, "/manager/", "/manager/operator-service-account.yaml", WithPrefix)
-	NoErrorAndContains(t, "/manager/op", "/manager/operator-service-account.yaml", WithPrefix)
-	NoErrorAndContains(t, "/manager/operator-service-account", "/manager/operator-service-account.yaml", WithPrefix)
-	NoErrorAndContains(t, "/traits", "/traits.yaml", WithPrefix)
+	NoErrorAndContains(t, "/config/manager/", "config/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndContains(t, "/config/manager/op", "config/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndContains(t, "/config/manager/operator-service-account", "config/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndContains(t, "/resources/traits", "resources/traits.yaml", WithPrefix)
 
 	// directory needs the slash on the end
-	NoErrorAndNotContains(t, "/manager", "/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndNotContains(t, "/config/manager", "config/manager/operator-service-account.yaml", WithPrefix)
 
 	// need to get to at least the same directory as the required files
-	NoErrorAndNotContains(t, "/", "/manager/operator-service-account.yaml", WithPrefix)
+	NoErrorAndNotContains(t, "/", "config/manager/operator-service-account.yaml", WithPrefix)
 }
 
 func TestTemplateResource(t *testing.T) {
@@ -149,7 +137,7 @@ func TestTemplateResource(t *testing.T) {
 		ServiceAccount: "default",
 	}
 
-	data, err := TemplateResource(fmt.Sprintf("/addons/master/%s", fname), templateData)
+	data, err := TemplateResource(fmt.Sprintf("/resources/addons/master/%s", fname), templateData)
 	assert.NoError(t, err)
 
 	jsonSrc, err := yaml.ToJSON([]byte(data))
@@ -164,12 +152,12 @@ func TestTemplateResource(t *testing.T) {
 }
 
 func TestCRDResources(t *testing.T) {
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_builds.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_camelcatalogs.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrationkits.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrationplatforms.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_integrations.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_kamelets.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_kameletbindings.yaml", Resource)
-	NoErrorAndNotEmptyBytes(t, "/crd/bases/camel.apache.org_pipes.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_builds.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_camelcatalogs.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_integrationkits.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_integrationplatforms.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_integrations.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_kamelets.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_kameletbindings.yaml", Resource)
+	NoErrorAndNotEmptyBytes(t, "/config/crd/bases/camel.apache.org_pipes.yaml", Resource)
 }

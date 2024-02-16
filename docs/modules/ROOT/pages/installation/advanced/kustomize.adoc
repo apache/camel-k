@@ -24,7 +24,7 @@ The kustomization resources can be applied directly to a cluster using ``kubectl
 Due to its declarative nature, it is expected that the configuration files would be edited to suit the
 custom implementation. For example, when creating an integration-platform:
 
-* ``kustomization.yaml`` references configuration in ``config/samples/patch-integration-platform.yaml``
+* ``kustomization.yaml`` references configuration in ``pkg/resources/config/samples/patch-integration-platform.yaml``
 * Edit this file according to installation requirements
 * Apply the resources by executing ``kubectl -k platform``
 

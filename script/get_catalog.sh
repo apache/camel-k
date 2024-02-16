@@ -43,6 +43,6 @@ mvn -q dependency:copy -Dartifact="org.apache.camel.k:camel-k-catalog:$runtime_v
   -Papache
 
 if [ -f "${rootdir}/resources/camel-k-catalog-${runtime_version}-catalog.yaml" ]; then
-    mv ${rootdir}/resources/camel-k-catalog-"${runtime_version}"-catalog.yaml ${rootdir}/resources/camel-catalog-"${runtime_version}".yaml
+    mv ${rootdir}/resources/camel-k-catalog-"${runtime_version}"-catalog.yaml ${rootdir}/pkg/resources/resources/camel-catalog-"${runtime_version}".yaml
 fi
 

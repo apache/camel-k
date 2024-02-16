@@ -75,7 +75,7 @@ func installClusterRoles(
 		return err
 	}
 	if !ok || collection != nil {
-		err := installResource(ctx, c, collection, "/rbac/user-cluster-role.yaml")
+		err := installResource(ctx, c, collection, "/config/rbac/user-cluster-role.yaml")
 		if err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func installClusterRoles(
 	}
 	if !ok {
 		if err := installResource(ctx, c, collection,
-			"/rbac/operator-cluster-role-custom-resource-definitions.yaml"); err != nil {
+			"/config/rbac/operator-cluster-role-custom-resource-definitions.yaml"); err != nil {
 			return err
 		}
 	}
@@ -97,7 +97,7 @@ func installClusterRoles(
 	ok, err = isClusterRoleInstalled(ctx, c, "camel-k-operator-local-registry")
 	if err == nil && !ok {
 		// ignore errors
-		_ = installResource(ctx, c, collection, "/rbac/operator-cluster-role-local-registry.yaml")
+		_ = installResource(ctx, c, collection, "/config/rbac/operator-cluster-role-local-registry.yaml")
 	}
 
 	// === For OpenShift ===
@@ -112,7 +112,7 @@ func installClusterRoles(
 			return err
 		}
 		if !ok || collection != nil {
-			err := installResource(ctx, c, collection, "/rbac/openshift/operator-cluster-role-console-openshift.yaml")
+			err := installResource(ctx, c, collection, "/config/rbac/openshift/operator-cluster-role-console-openshift.yaml")
 			if err != nil {
 				return err
 			}
@@ -131,7 +131,7 @@ func installClusterRoles(
 			return err
 		}
 		if !ok || collection != nil {
-			err := installResource(ctx, c, collection, "/rbac/operator-cluster-role-addressable-resolver.yaml")
+			err := installResource(ctx, c, collection, "/config/rbac/operator-cluster-role-addressable-resolver.yaml")
 			if err != nil {
 				return err
 			}
@@ -352,7 +352,7 @@ func installCRD(
 	ctx context.Context, c client.Client, kind string, version string, resourceName string,
 	customizer ResourceCustomizer, collection *kubernetes.Collection, force bool,
 ) error {
-	content, err := resources.ResourceAsString("/crd/bases/" + resourceName)
+	content, err := resources.ResourceAsString("config/crd/bases/" + resourceName)
 	if err != nil {
 		return err
 	}

@@ -25,8 +25,8 @@ import (
 
 // IntegrationPlatformViewerRole installs the role that allows any user to access integrationplatforms in the global namespace.
 func IntegrationPlatformViewerRole(ctx context.Context, c client.Client, namespace string) error {
-	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/viewer/user-global-platform-viewer-role.yaml"); err != nil {
+	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/resources/viewer/user-global-platform-viewer-role.yaml"); err != nil {
 		return err
 	}
-	return Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/viewer/user-global-platform-viewer-role-binding.yaml")
+	return Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/resources/viewer/user-global-platform-viewer-role-binding.yaml")
 }

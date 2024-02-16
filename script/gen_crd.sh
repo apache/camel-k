@@ -23,8 +23,8 @@ apidir=$location/../pkg/apis/camel
 cd "$apidir"
 $(go env GOPATH)/bin/controller-gen crd \
   paths=./... \
-  output:crd:artifacts:config=../../../config/crd/bases \
-  output:crd:dir=../../../config/crd/bases \
+  output:crd:artifacts:config=../../../pkg/resources/config/crd/bases \
+  output:crd:dir=../../../pkg/resources/config/crd/bases \
   crd:crdVersions=v1
 
 # cleanup working directory in $apidir
@@ -58,7 +58,7 @@ deploy_crd() {
   name=$1
   plural=$2
 
-  deploy_crd_file ./config/crd/bases/camel.apache.org_"$plural".yaml \
+  deploy_crd_file ./pkg/resources/config/crd/bases/camel.apache.org_"$plural".yaml \
     ./helm/camel-k/crds/crd-"$name".yaml
 }
 
