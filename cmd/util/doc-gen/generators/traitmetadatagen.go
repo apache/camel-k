@@ -20,38 +20,13 @@ package generators
 import (
 	"fmt"
 	"io"
-	"os"
-	"path"
 	"reflect"
-	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/v2/pkg/util"
-
-	"gopkg.in/yaml.v2"
 	"k8s.io/gengo/args"
 	"k8s.io/gengo/generator"
 	"k8s.io/gengo/types"
 )
-
-const traitFile = "traits.yaml"
-
-const licenseHeader = "# ---------------------------------------------------------------------------\n" +
-	"# Licensed to the Apache Software Foundation (ASF) under one or more\n" +
-	"# contributor license agreements.  See the NOTICE file distributed with\n" +
-	"# this work for additional information regarding copyright ownership.\n" +
-	"# The ASF licenses this file to You under the Apache License, Version 2.0\n" +
-	"# (the \"License\"); you may not use this file except in compliance with\n" +
-	"# the License.  You may obtain a copy of the License at\n" +
-	"#\n" +
-	"#      http://www.apache.org/licenses/LICENSE-2.0\n" +
-	"#\n" +
-	"# Unless required by applicable law or agreed to in writing, software\n" +
-	"# distributed under the License is distributed on an \"AS IS\" BASIS,\n" +
-	"# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n" +
-	"# See the License for the specific language governing permissions and\n" +
-	"# limitations under the License.\n" +
-	"# ---------------------------------------------------------------------------\n"
 
 // traitMetaDataGen produces YAML documentation about trait descriptions.
 type traitMetaDataGen struct {
@@ -110,35 +85,6 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 	g.buildFields(t, td)
 	g.Root.Traits = append(g.Root.Traits, *td)
 	return nil
-}
-
-func (g *traitMetaDataGen) Finalize(c *generator.Context, w io.Writer) error {
-	customArgs, ok := g.arguments.CustomArgs.(*CustomArgs)
-	if !ok {
-		return fmt.Errorf("type assertion failed: %v", g.arguments.CustomArgs)
-	}
-	deployDir := customArgs.ResourceDir
-	filename := path.Join(deployDir, traitFile)
-
-	// reorder the traits metadata so that it always gets the identical result
-	sort.Slice(g.Root.Traits, func(i, j int) bool {
-		return g.Root.Traits[i].Name < g.Root.Traits[j].Name
-	})
-
-	return util.WithFile(filename, os.O_RDWR|os.O_CREATE, 0o777, func(file *os.File) error {
-		if err := file.Truncate(0); err != nil {
-			return err
-		}
-
-		fmt.Fprintf(file, "%s", string(licenseHeader))
-		data, err := yaml.Marshal(g.Root)
-		if err != nil {
-			fmt.Fprintf(file, "error: %v", err)
-		}
-		fmt.Fprintf(file, "%s", string(data))
-
-		return nil
-	})
 }
 
 func (g *traitMetaDataGen) getTraitID(t *types.Type) string {

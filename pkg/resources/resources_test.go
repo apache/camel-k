@@ -113,7 +113,6 @@ func TestResourcesWithPrefix(t *testing.T) {
 	NoErrorAndContains(t, "/config/manager/", "config/manager/operator-service-account.yaml", WithPrefix)
 	NoErrorAndContains(t, "/config/manager/op", "config/manager/operator-service-account.yaml", WithPrefix)
 	NoErrorAndContains(t, "/config/manager/operator-service-account", "config/manager/operator-service-account.yaml", WithPrefix)
-	NoErrorAndContains(t, "/resources/traits", "resources/traits.yaml", WithPrefix)
 
 	// directory needs the slash on the end
 	NoErrorAndNotContains(t, "/config/manager", "config/manager/operator-service-account.yaml", WithPrefix)

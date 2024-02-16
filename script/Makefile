@@ -607,10 +607,10 @@ $(BUNDLE_CAMEL_APIS): operator-sdk
 	@# Remove the camel directory and re-copy only the required api
 	rm -rf api_$@/camel/* && cp -rf pkg/apis/camel/$@ api_$@/camel/
 	@# operator-sdk generate ... cannot execute across separate modules so need to temporarily move api
-	$(OPERATOR_SDK) generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
+	$(OPERATOR_SDK) generate kustomize manifests --apis-dir $(addprefix api_, $@) -q --input-dir $(MANIFESTS) --output-dir $(MANIFESTS)
 	@# Adds the licence header to the csv file.
-	./script/add_license.sh pkg/resources/config/manifests/bases ./script/headers/yaml.txt
-	./script/add_createdAt.sh pkg/resources/config/manifests/bases
+	./script/add_license.sh $(MANIFESTS)/bases ./script/headers/yaml.txt
+	./script/add_createdAt.sh $(MANIFESTS)/bases
 	@# Clean up temporary working api directories
 	rm -rf api_*
 

@@ -38,9 +38,7 @@ var resources embed.FS
 func Resource(name string) ([]byte, error) {
 	name = strings.Trim(name, " ")
 	name = filepath.ToSlash(name)
-	if strings.HasPrefix(name, "/") {
-		name = name[1:]
-	}
+	name = strings.TrimPrefix(name, "/")
 
 	file, err := resources.Open(name)
 	if err != nil {
@@ -96,9 +94,7 @@ func DirExists(dirName string) bool {
 // WithPrefix lists all file names that begins with the give path prefix
 // If pathPrefix is a path of directories then be sure to end it with a '/'.
 func WithPrefix(pathPrefix string) ([]string, error) {
-	if strings.HasPrefix(pathPrefix, "/") {
-		pathPrefix = pathPrefix[1:]
-	}
+	pathPrefix = strings.TrimPrefix(pathPrefix, "/")
 	dirPath := filepath.Dir(pathPrefix)
 	paths, err := Resources(dirPath)
 	if err != nil {
@@ -118,12 +114,9 @@ func WithPrefix(pathPrefix string) ([]string, error) {
 // Resources lists all file names in the given path.
 func Resources(dirName string) ([]string, error) {
 	dirName = filepath.ToSlash(dirName)
-	if strings.HasPrefix(dirName, "/") {
-		dirName = dirName[1:]
-	}
-	if strings.HasSuffix(dirName, "/") {
-		dirName = dirName[:len(dirName)-1]
-	}
+	dirName = strings.TrimPrefix(dirName, "/")
+	dirName = strings.TrimSuffix(dirName, "/")
+
 	dir, err := resources.Open(dirName)
 	if err != nil {
 		if os.IsNotExist(err) {
