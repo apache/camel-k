@@ -42,7 +42,7 @@ $mvnCmd --version | grep "Apache Maven"
 echo "INFO: downloading catalog for Camel K runtime $1..."
 ${location}/get_catalog.sh $1 $2
 
-catalog="$rootdir/resources/camel-catalog-$runtime_version.yaml"
+catalog="$rootdir/pkg/resources/resources/camel-catalog-$runtime_version.yaml"
 ckr_version=$(yq .spec.runtime.version $catalog)
 cq_version=$(yq '.spec.runtime.metadata."camel-quarkus.version"' $catalog)
 quarkus_version=$(yq '.spec.runtime.metadata."quarkus.version"' $catalog)

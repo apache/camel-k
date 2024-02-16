@@ -247,7 +247,7 @@ func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationM
 }
 
 func loadResource(e *trait.Environment, name string, params interface{}) (ctrl.Object, error) {
-	data, err := resources.TemplateResource(fmt.Sprintf("/addons/master/%s", name), params)
+	data, err := resources.TemplateResource(fmt.Sprintf("/resources/addons/master/%s", name), params)
 	if err != nil {
 		return nil, err
 	}

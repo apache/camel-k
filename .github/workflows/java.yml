@@ -27,14 +27,14 @@ on:
       - "release-*"
     paths:
       - "java/**"
-      - "config/crd/**"
+      - "pkg/resources/config/crd/**"
   push:
     branches:
       - main
       - "release-*"
     paths:
       - "java/**"
-      - "config/crd/**"
+      - "pkg/resources/config/crd/**"
   workflow_dispatch:
 
 concurrency:

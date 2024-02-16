@@ -28,13 +28,13 @@ image_name=${2:-docker.io\/apache\/camel-k}
 sanitized_image_name=${image_name//\//\\\/}
 k8s_version_label="app.kubernetes.io\/version"
 
-for f in $(find $location/../config/manager -type f -name "*.yaml");
+for f in $(find $location/../pkg/resources/config/manager -type f -name "*.yaml");
 do
   sed -i -r "s/image: .*/image: ${sanitized_image_name}:${version}/" $f
   sed -i -r "s/${k8s_version_label}: .*/${k8s_version_label}: \""${version}"\"/" $f
 done
 
-for f in $(find $location/../config/manifests/bases -type f -name "*.yaml");
+for f in $(find $location/../pkg/resources/config/manifests/bases -type f -name "*.yaml");
 do
   sed -i -r "s/containerImage: .*/containerImage: ${sanitized_image_name}:${version}/" $f
 done

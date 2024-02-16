@@ -2454,7 +2454,7 @@ func ClusterDomainName() (string, error) {
 */
 
 func CreateOperatorServiceAccount(ns string) error {
-	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/manager/operator-service-account.yaml")
+	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/manager/operator-service-account.yaml")
 }
 
 func CreateOperatorRole(ns string) (err error) {
@@ -2468,12 +2468,12 @@ func CreateOperatorRole(ns string) (err error) {
 		// This should ideally be removed from the common RBAC manifest.
 		customizer = install.RemoveIngressRoleCustomizer
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/rbac/namespaced/operator-role.yaml")
+	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/config/rbac/namespaced/operator-role.yaml")
 	if err != nil {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/namespaced/operator-role-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-openshift.yaml")
 	}
 	return nil
 }
@@ -2483,12 +2483,12 @@ func CreateOperatorRoleBinding(ns string) error {
 	if err != nil {
 		failTest(err)
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/namespaced/operator-role-binding.yaml")
+	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/rbac/namespaced/operator-role-binding.yaml")
 	if err != nil {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/namespaced/operator-role-binding-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-binding-openshift.yaml")
 	}
 	return nil
 }
