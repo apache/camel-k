@@ -8,10 +8,12 @@
 
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
+- Integrations remain in Initialization loop when referenced config map has owner references [\#5114](https://github.com/apache/camel-k/issues/5114)
 - Externally built Integrations are deployed without a command in Camel-K 2.2.0 [\#5112](https://github.com/apache/camel-k/issues/5112)
 - Coverage report wrong percentage [\#5108](https://github.com/apache/camel-k/issues/5108)
 - Add possibility to configure annotation for the builder pods [\#5106](https://github.com/apache/camel-k/issues/5106)
 - Include the operator node-selector in the helm chart [\#5103](https://github.com/apache/camel-k/issues/5103)
+- TestCreateCatalog fail when DEFAULT\_RUNTIME\_VERSION=3.6.0-SNAPSHOT [\#5099](https://github.com/apache/camel-k/issues/5099)
 - Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
@@ -35,11 +37,15 @@
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
+- Use `go:embed` instead of vfsgen for embedded resources handling [\#3384](https://github.com/apache/camel-k/issues/3384)
 - Use build-tags to configure what feature are included in a camel-k build [\#2801](https://github.com/apache/camel-k/issues/2801)
 - shipwright.io builder [\#1673](https://github.com/apache/camel-k/issues/1673)
 
 **Merged pull requests:**
 
+- feat\(ci\): go:embed usage [\#5160](https://github.com/apache/camel-k/pull/5160) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/common from 0.46.0 to 0.47.0 [\#5159](https://github.com/apache/camel-k/pull/5159) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Reduce write to hash, prepare string from secret, configmap [\#5155](https://github.com/apache/camel-k/pull/5155) ([lfabriko](https://github.com/lfabriko))
 - feat\(traits\): persist generated status [\#5153](https://github.com/apache/camel-k/pull/5153) ([squakez](https://github.com/squakez))
 - fix\(core\): Externally built Integrations run command configuration from jvm trait [\#5151](https://github.com/apache/camel-k/pull/5151) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Java required by automatic-updates [\#5150](https://github.com/apache/camel-k/pull/5150) ([gansheer](https://github.com/gansheer))
@@ -47,6 +53,7 @@
 - chore\(deps\): bump golang.org/x/term from 0.16.0 to 0.17.0 [\#5148](https://github.com/apache/camel-k/pull/5148) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(test\): add apache-snapshot repository as the test may run agains a camel-k-runtime snaphost release [\#5147](https://github.com/apache/camel-k/pull/5147) ([claudio4j](https://github.com/claudio4j))
 - fix\(controller\): filter confimap/secret watches [\#5144](https://github.com/apache/camel-k/pull/5144) ([squakez](https://github.com/squakez))
+- chore\(ci\): upgrade setup-go action [\#5132](https://github.com/apache/camel-k/pull/5132) ([gansheer](https://github.com/gansheer))
 - fix\(github actions\): restircted image-pull-policy-always patch apply … [\#5128](https://github.com/apache/camel-k/pull/5128) ([valdar](https://github.com/valdar))
 - fix\(doc\): Add warning on cron trait for native build [\#5127](https://github.com/apache/camel-k/pull/5127) ([gansheer](https://github.com/gansheer))
 - Enhancement add classifier field to the MavenArtifact struct [\#5126](https://github.com/apache/camel-k/pull/5126) ([claudio4j](https://github.com/claudio4j))
