@@ -1,0 +1,41 @@
+FAILED=0; STAGING_RUNTIME_REPO=""; \
+go test -run  TestMetrics -timeout 90m -v ./e2e/commonwithcustominstall -tags=integration   || FAILED=1; \
+exit ${FAILED}
+=== RUN   TestMetrics
+OLM is not available in the cluster. Fallback to regular installation.
+Camel K installed in namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0 
+2024-02-19T19:15:15+01:00	DEBUG	camel-k	Finding available platforms
+2024-02-19T19:15:15+01:00	DEBUG	camel-k	Not found a local integration platform
+No IntegrationPlatform resource in test-07e171a8-7ecc-4ddb-b421-c768470ae1d0 namespace
+Integration "javauantv" created
+Fetching logs for component pod camel-k-operator-598d789df5-hbphb in namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0Fetching logs for component pod camel-k-platformcontroller-5bf746556d-7bxhg in namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0=== RUN   TestMetrics/Build_duration_metric
+=== RUN   TestMetrics/Build_recovery_attempts_metric
+=== RUN   TestMetrics/reconciliation_duration_metric
+=== RUN   TestMetrics/Build_queue_duration_metric
+=== RUN   TestMetrics/Integration_first_readiness_metric
+2024-02-19T19:16:46+01:00	DEBUG	camel-k	Finding available platforms
+2024-02-19T19:16:46+01:00	DEBUG	camel-k	Found active local integration platform camel-k-operator
+1 integration(s) deleted
+=== NAME  TestMetrics
+    test_support.go:2727: Clean up test namespace: test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+2024-02-19T19:16:46+01:00	DEBUG	camel-k	Finding available platforms
+2024-02-19T19:16:46+01:00	DEBUG	camel-k	Found active local integration platform camel-k-operator
+Camel K Integration Platform removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Config Maps removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Registry Secret removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Platform Kamelets removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Platform Camel Catalogs removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Operator removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Role Bindings removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Role Bindings removed from namespace kube-public
+Camel K Roles removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+Camel K Service Accounts removed from namespace test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+    test_support.go:2733: Successfully cleaned up test namespace: test-07e171a8-7ecc-4ddb-b421-c768470ae1d0
+--- PASS: TestMetrics (91.91s)
+    --- PASS: TestMetrics/Build_duration_metric (0.00s)
+    --- PASS: TestMetrics/Build_recovery_attempts_metric (0.00s)
+    --- PASS: TestMetrics/reconciliation_duration_metric (0.01s)
+    --- PASS: TestMetrics/Build_queue_duration_metric (0.00s)
+    --- PASS: TestMetrics/Integration_first_readiness_metric (0.00s)
+PASS
+ok  	github.com/apache/camel-k/v2/e2e/commonwithcustominstall	91.930s
