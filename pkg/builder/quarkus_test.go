@@ -219,3 +219,51 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 	_, err = os.Stat(filepath.Join(tmpDir, "maven", "target", "camel-k-integration-"+defaults.Version+".jar"))
 	assert.Nil(t, err)
 }
+
+func TestGenerateQuarkusProjectWithSources(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus-with-sources")
+	assert.Nil(t, err)
+	defaultCatalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	builderContext := builderContext{
+		C:         context.TODO(),
+		Path:      tmpDir,
+		Namespace: "test",
+		Build: v1.BuilderTask{
+			Runtime: defaultCatalog.Runtime,
+			Sources: []v1.SourceSpec{
+				{
+					Language: v1.LanguageJavaSource,
+					DataSpec: v1.DataSpec{
+						Name: "Test.java",
+						Content: `
+			import org.apache.camel.builder.RouteBuilder;
+            public class Test extends RouteBuilder {
+                @Override
+                public void configure() throws Exception {
+                    from("timer:java?period={{time:1000}}")
+                        .setBody()
+                            .simple("Hello Camel from ${routeId}")
+                        .log("${body}");
+                }
+            }`,
+					},
+				},
+			},
+		},
+	}
+
+	err = generateQuarkusProject(&builderContext)
+	assert.Nil(t, err)
+	err = prepareProjectWithSources(&builderContext)
+	assert.Nil(t, err)
+	err = buildQuarkusRunner(&builderContext)
+	assert.Nil(t, err)
+	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
+	assert.Nil(t, err)
+	assert.Contains(t, string(appProps), "camel.main.routes-include-pattern = classpath:routes/Test.java\n")
+	assert.Contains(t, string(appProps), "quarkus.banner.enabled=false\n")
+	_, err = os.Stat(filepath.Join(tmpDir, "maven", "src", "main", "resources", "routes", "Test.java"))
+	assert.Nil(t, err)
+}

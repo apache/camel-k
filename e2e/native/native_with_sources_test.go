@@ -97,6 +97,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		})
 
 		t.Run("groovy native support", func(t *testing.T) {
+			// TODO restore, once the fix is available
+			t.Skip("Skipping Groovy native test due to not fully supported in Camel Quarkus")
 			name := RandomizedSuffixName("groovy-native")
 			Expect(KamelRunWithID(operatorID, ns, "files/Groovy.groovy", "--name", name,
 				"-t", "quarkus.build-mode=native",
@@ -116,6 +118,8 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		})
 
 		t.Run("kotlin native support", func(t *testing.T) {
+			// TODO restore, once the fix is available
+			t.Skip("Skipping Groovy native test due to not fully supported in Camel Quarkus")
 			name := RandomizedSuffixName("kotlin-native")
 			Expect(KamelRunWithID(operatorID, ns, "files/Kotlin.kts", "--name", name,
 				"-t", "quarkus.build-mode=native",

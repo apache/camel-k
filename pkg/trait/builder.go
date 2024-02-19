@@ -71,7 +71,7 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
 			quarkus, ok := trait.(*quarkusTrait)
-			isNativeIntegration := quarkus.isNativeIntegration(e)
+			isNativeIntegration := e.IntegrationKitQuarkusNative()
 			isNativeKit, err := quarkus.isNativeKit(e)
 			if err != nil {
 				return false, condition, err

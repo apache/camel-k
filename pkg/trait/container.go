@@ -183,7 +183,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF", filepath.Join(camel.BasePath, "application.properties"))
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
-	if !t.hasUserProvidedImage() {
+	if !t.hasUserProvidedImage() && !e.IntegrationKitQuarkusNative() {
 		e.addSourcesProperties()
 		if props, err := e.computeApplicationProperties(); err != nil {
 			return err

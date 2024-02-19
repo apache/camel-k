@@ -102,7 +102,7 @@ func prepareProjectWithSources(ctx *builderContext) error {
 	}
 
 	if sourceList != "" {
-		routesIncludedPattern := "camel.main.routes-include-pattern = " + sourceList
+		routesIncludedPattern := fmt.Sprintf("camel.main.routes-include-pattern = %s\n", sourceList)
 		if err := os.WriteFile(filepath.Join(filepath.Dir(sourcesPath), "application.properties"), []byte(routesIncludedPattern), os.ModePerm); err != nil {
 			return fmt.Errorf("failure while writing the configuration application.properties: %w", err)
 		}
@@ -198,7 +198,7 @@ func buildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 }
 
 func computeApplicationProperties(appPropertiesPath string, applicationProperties map[string]string) error {
-	f, err := os.OpenFile(appPropertiesPath, os.O_RDWR|os.O_CREATE, 0666)
+	f, err := os.OpenFile(appPropertiesPath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		return fmt.Errorf("failure while creating application.properties: %w", err)
 	}

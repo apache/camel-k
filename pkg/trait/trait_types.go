@@ -263,6 +263,14 @@ func (e *Environment) IntegrationInRunningPhases() bool {
 	return e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning, v1.IntegrationPhaseError)
 }
 
+func (e *Environment) IntegrationKitQuarkusNative() bool {
+	if e.IntegrationKit == nil {
+		return false
+	}
+
+	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNativeSources
+}
+
 func (e *Environment) IntegrationKitInPhase(phases ...v1.IntegrationKitPhase) bool {
 	if e.IntegrationKit == nil {
 		return false

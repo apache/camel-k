@@ -406,7 +406,7 @@ func (t *quarkusTrait) isIncrementalImageBuild(e *Environment) bool {
 }
 
 func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
-	if e.IntegrationInRunningPhases() && t.isNativeIntegration(e) {
+	if e.IntegrationInRunningPhases() && e.IntegrationKitQuarkusNative() {
 		container := e.GetIntegrationContainer()
 		if container == nil {
 			return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
@@ -419,15 +419,10 @@ func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
 	return nil
 }
 
-func (t *quarkusTrait) isNativeIntegration(e *Environment) bool {
-	// The current IntegrationKit determines the Integration runtime type
-	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNativeSources
-}
-
 // Indicates whether the given source code is embedded into the final binary.
 func (t *quarkusTrait) isEmbedded(e *Environment, source v1.SourceSpec) bool {
 	if e.IntegrationInRunningPhases() {
-		return e.IntegrationKit != nil && t.isNativeIntegration(e) && sourcesRequiredAtBuildTime(e, source)
+		return e.IntegrationKit != nil && e.IntegrationKitQuarkusNative() && sourcesRequiredAtBuildTime(e, source)
 	} else if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		native, _ := t.isNativeKit(e)
 		return native && sourcesRequiredAtBuildTime(e, source)
