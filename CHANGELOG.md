@@ -43,6 +43,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/prometheus/client\_model from 0.5.0 to 0.6.0 [\#5162](https://github.com/apache/camel-k/pull/5162) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(ci\): go:embed usage [\#5160](https://github.com/apache/camel-k/pull/5160) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.46.0 to 0.47.0 [\#5159](https://github.com/apache/camel-k/pull/5159) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Reduce write to hash, prepare string from secret, configmap [\#5155](https://github.com/apache/camel-k/pull/5155) ([lfabriko](https://github.com/lfabriko))
