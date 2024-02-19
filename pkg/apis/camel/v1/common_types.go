@@ -325,7 +325,7 @@ func (o *ValueSource) String() string {
 
 // RuntimeSpec represents the configuration for the Java runtime in charge to execute the Camel application.
 type RuntimeSpec struct {
-	// Camel K Runtime version
+	// Camel runtime version
 	Version string `json:"version" yaml:"version"`
 	// Camel main application provider, ie, Camel Quarkus
 	Provider RuntimeProvider `json:"provider" yaml:"provider"`

@@ -3,8 +3,7 @@
 
 We love contributions!
 
-The https://github.com/apache/camel-k/[main project] is written in https://golang.org/[go] and contains some parts written in Java for the https://github.com/apache/camel-k-runtime/[integration runtime].
-Camel K is built on top of Kubernetes through *Custom Resource Definitions*.
+The https://github.com/apache/camel-k/[project] is written in https://golang.org/[go]. Camel K is built on top of Kubernetes through *Custom Resource Definitions*.
 
 [[how]]
 == How can I contribute?
@@ -28,11 +27,6 @@ In order to build the project, you need to comply with the following requirement
 * **Windows Subsystem for Linux (WSL)**: for running Linux binary executables natively on Windows. Refer to https://docs.microsoft.com/en-us/windows/wsl/install[WSL Website] for installation. Alternatively, you can use https://www.cygwin.com/[Cygwin] or https://www.educative.io/edpresso/how-to-install-git-bash-in-windows[Git Bash].
 
 NOTE: MacOS users will need to use *gnu-sed* to successfully run the Make build scripts (e.g. for generating the Camel K bundle). Please install gnu-sed on your machine (e.g. `brew install gnu-sed`) and set your PATH accordingly to use gnu-sed with: `export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"`
-
-The Camel K Java runtime (camel-k-runtime) requires:
-
-* **Java 11**: needed for compilation
-* **Maven**: needed for building
 
 [[checks]]
 == Running checks

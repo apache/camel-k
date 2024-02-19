@@ -4930,7 +4930,7 @@ string
 |
 
 
-Camel K Runtime version
+Camel runtime version
 
 |`provider` +
 *xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
@@ -6002,7 +6002,7 @@ When using `pod` strategy, annotation to use for the builder pod.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The Camel trait can be used to configure versions of Apache Camel K runtime and related libraries, it cannot be disabled.
+The Camel trait can be used to configure versions of Apache Camel runtime and related libraries, it cannot be disabled.
 
 
 [cols="2,2a",options="header"]
@@ -6022,7 +6022,7 @@ string
 |
 
 
-The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+The camel-quarkus version to use for the integration. It overrides the default version set in the Integration Platform.
 
 |`properties` +
 []string

@@ -58,28 +58,3 @@ Update the ``IntegrationPlatform`` to instruct it to use the ``localhost`` regis
 A similar procedure may work if you use other local environments. The idea is to expose the docker registry and be able to use it from your local operator.
 
 IMPORTANT: using build strategy as `Pod` won't probably work as it will expect the registry to be available at a URL not possible to reach from a local machine.
-
-=== Local Camel K runtime
-
-Camel K integrations are based on https://github.com/apache/camel-k-runtime[Camel K runtime], generally paired with the operator release. If you need to specify a different runtime, or you have a local Camel K runtime that you want to test, then you will need to specify it in the `Integration Platform`:
-----
-./kamel install --skip-operator-setup -n operator-test --registry localhost:5000 --force --runtime-version $version -x camel-k-dev
-----
-
-The `$version` variable must be replaced with the version you are building. For example, `1.3.1-SNAPSHOT`. With these instructions, the operator will pick up and use the snapshot version you have released locally. In order to use the local maven repository, you will also need to edit your IntegrationPlatform as follow:
-----
-$ k edit ip -n operator-test
-
-...
-  spec:
-    build:
-      maven:
-        cliOptions:
-        - -V
-        localRepository: /home/user/.m2/repository
-        settings: {}
-...
-----
-pointing the `localRepository` where your local maven is storing the artifacts (it will look for the camel-k-runtime dependencies there).
-
-Alternatively, if no local registry is available, you can use another type of registry as explained in xref:installation/registry/registry.adoc[the Registry section].

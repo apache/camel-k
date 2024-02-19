@@ -3,7 +3,7 @@
 
 When you install Camel K, you typically got bundled a series of Kamelets which are coming from the xref:camel-kamelets::index.adoc[Apache Kamelet Catalog]. This is a facility that will let you immediately use a wide set of connector-style resources to interact with any event source and sink.
 
-NOTE: the version we bundle depends directly on the default Camel version used. For instance, in Camel K version 2, the default runtime we use is Camel K Runtime 2.16.0 which depends on Camel version 3.20.1. The Kamelet version we use is the one distributed as link:https://github.com/apache/camel-kamelets/releases/tag/v3.20.1.1[v3.20.1].
+NOTE: the version we bundle depends directly on the default Camel version used. For instance, in Camel K version 2, the default runtime we use is Camel Quarkus 2.16.0 which depends on Camel version 3.20.1. The Kamelet version we use is the one distributed as link:https://github.com/apache/camel-kamelets/releases/tag/v3.20.1.1[v3.20.1].
 
 As development of Kamelet is very fast, make sure to use some version which is compatible with the Camel runtime you're going to use.
 

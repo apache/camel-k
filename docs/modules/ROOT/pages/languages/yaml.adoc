@@ -149,15 +149,6 @@ To define an endpoint with the YAML dsl you have three options:
           authorizationToken: "XXX"
 ----
 
-[WARNING]
-====
-Support for the Endpoint DSL with YAML is experimental and subject to changes.
-====
-[NOTE]
-====
-Support for Endpoint DSL auto completion https://github.com/apache/camel-k-runtime/issues/485[is not yet available].
-====
-
 == Defining beans
 
 In addition to the general support for creating beans provided by xref:{camel-docs-version}@components:others:main.adoc#_specifying_custom_beans[Camel Main], the YAML DSL provide a convenient syntax to define and configure them:

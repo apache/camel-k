@@ -657,7 +657,7 @@ spec:
                           type: string
                         type: array
                       runtimeVersion:
-                        description: The camel-k-runtime version to use for the integration.
+                        description: The camel-quarkus version to use for the integration.
                           It overrides the default version set in the Integration
                           Platform.
                         type: string
@@ -2548,7 +2548,7 @@ spec:
                           type: string
                         type: array
                       runtimeVersion:
-                        description: The camel-k-runtime version to use for the integration.
+                        description: The camel-quarkus version to use for the integration.
                           It overrides the default version set in the Integration
                           Platform.
                         type: string

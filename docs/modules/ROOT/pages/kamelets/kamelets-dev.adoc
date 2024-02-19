@@ -1013,7 +1013,7 @@ The Kamelet is now ready to be used!
 
 === Trying it out
 
-You can install the Kamelet on your Kubernetes instance to see if it can be picked up and used by the Camel K runtime.
+You can install the Kamelet on your Kubernetes instance to see if it can be picked up and used by the Camel runtime.
 
 We assume that you're connected to a Kubernetes cluster and working on a namespace where the Camel K operator is allowed to materialize integrations.
 

@@ -708,7 +708,7 @@ spec:
                                 Quarkus
                               type: string
                             version:
-                              description: Camel K Runtime version
+                              description: Camel runtime version
                               type: string
                           required:
                           - applicationClass
@@ -1523,7 +1523,7 @@ spec:
                                 Quarkus
                               type: string
                             version:
-                              description: Camel K Runtime version
+                              description: Camel runtime version
                               type: string
                           required:
                           - applicationClass

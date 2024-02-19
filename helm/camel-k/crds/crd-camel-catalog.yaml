@@ -440,7 +440,7 @@ spec:
                     description: Camel main application provider, ie, Camel Quarkus
                     type: string
                   version:
-                    description: Camel K Runtime version
+                    description: Camel runtime version
                     type: string
                 required:
                 - applicationClass

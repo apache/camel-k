@@ -189,7 +189,7 @@ func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) e
 		return fmt.Errorf("source (%s) and destination (%s) Camel K operator versions are not compatible", source["Version"], dest["Version"])
 	}
 	if !compatibleVersions(source["Runtime Version"], dest["Runtime Version"], cmd) {
-		return fmt.Errorf("source (%s) and destination (%s) Camel K runtime versions are not compatible", source["Runtime Version"], dest["Runtime Version"])
+		return fmt.Errorf("source (%s) and destination (%s) Camel runtime versions are not compatible", source["Runtime Version"], dest["Runtime Version"])
 	}
 	if source["Registry Address"] != dest["Registry Address"] {
 		return fmt.Errorf("source (%s) and destination (%s) Camel K container images registries are not the same", source["Registry Address"], dest["Registry Address"])

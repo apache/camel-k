@@ -22,7 +22,7 @@ NOTE: we suggest a controlled approach and rebuild one integration after another
 [[maintain-runtime-integrations]]
 == Stick runtime version
 
-Since Camel K version 2, we're able to run any Camel K runtime version from the same operator. However, if you upgrade and you rebuild an Integration, this one will be rebuilt using the default runtime version of the new operator. In order to stick to a runtime fixed version you need to use the `Camel` trait and the `runtime-version` property, which pin the exact runtime version to use, regardless the default one used by the operator:
+Since Camel K version 2, we're able to run any Camel Quarkus runtime version from the same operator. However, if you upgrade and you rebuild an Integration, this one will be rebuilt using the default runtime version of the new operator. In order to stick to a runtime fixed version you need to use the `Camel` trait and the `runtime-version` property, which pin the exact runtime version to use, regardless the default one used by the operator:
 
 ----
 kamel run /tmp/Test.java -t camel.runtime-version=1.17.0

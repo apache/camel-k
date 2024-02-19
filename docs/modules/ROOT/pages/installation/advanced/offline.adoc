@@ -48,7 +48,7 @@ The script is available in https://github.com/apache/camel-k[Camel K github repo
 You can run:
 
 ```bash
-./script/offline_dependencies.sh <camel-k-runtime-version> --with <path/to/maven/version/matching/target>
+./script/offline_dependencies.sh <camel-quarkus-version> --with <path/to/maven/version/matching/target>
 ```
 
 After some time (up to 1 hour time), all the packaged dependencies will be available in a _tar.gz_ file in _/build/_ directory. It's a big file as it contains all the transitive dependencies required by *all Camel components*.

@@ -42,7 +42,6 @@ home: https://camel.apache.org/camel-k/latest/
 
 sources:
   - https://github.com/apache/camel-k
-  - https://github.com/apache/camel-k-runtime
   - https://github.com/apache/camel-quarkus
   - https://github.com/apache/camel
 
