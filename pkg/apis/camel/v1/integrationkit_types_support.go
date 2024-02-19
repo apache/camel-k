@@ -101,11 +101,6 @@ func (in *IntegrationKit) HasHigherPriorityThan(kit *IntegrationKit) bool {
 	return p1 > p2
 }
 
-// IsExternal returns true for external IntegrationKits (integration kit not created by the operator).
-func (in *IntegrationKit) IsExternal() bool {
-	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeExternal
-}
-
 // GetCondition returns the condition with the provided type.
 func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionType) *IntegrationKitCondition {
 	for i := range in.Conditions {

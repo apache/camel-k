@@ -69,12 +69,10 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 			return false, newIntegrationConditionPlatformDisabledWithMessage("quarkus native build"), nil
 		}
 	}
-
-	if e.IntegrationKit != nil && e.IntegrationKit.IsExternal() {
-		if pointer.BoolDeref(t.Enabled, false) {
-			return true, NewIntegrationConditionUserEnabledWithMessage("integration kit was not created via Camel K operator"), nil
-		} else {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("integration kit was not created via Camel K operator"), nil
+	// The JVM trait must be disabled if it's a user based build (for which we do not control the way to handle JVM parameters)
+	if ct := e.Catalog.GetTrait(containerTraitID); ct != nil {
+		if ct, ok := ct.(*containerTrait); ok && ct.hasUserProvidedImage() {
+			return false, newIntegrationConditionPlatformDisabledWithMessage("container image was not built via Camel K operator"), nil
 		}
 	}
 
@@ -115,7 +113,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		classpath.Add(artifact.Target)
 	}
 
-	if kit.IsExternal() {
+	if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypeExternal {
 		// In case of an external created kit, we do not have any information about
 		// the classpath, so we assume the all jars in /deployments/dependencies/ have
 		// to be taken into account.

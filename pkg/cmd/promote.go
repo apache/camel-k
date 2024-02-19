@@ -38,7 +38,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -469,12 +468,6 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration 
 		dst.Spec.Traits.Container = &traitv1.ContainerTrait{}
 	}
 	dst.Spec.Traits.Container.Image = contImage
-	if dst.Spec.Traits.JVM == nil {
-		dst.Spec.Traits.JVM = &traitv1.JVMTrait{}
-	}
-	if dst.Spec.Traits.JVM.Enabled == nil {
-		dst.Spec.Traits.JVM.Enabled = pointer.Bool(true)
-	}
 	return &dst
 }
 
@@ -520,12 +513,6 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration) *v1.Pipe {
 		dst.Spec.Integration.Traits.Container = &traitv1.ContainerTrait{}
 	}
 	dst.Spec.Integration.Traits.Container.Image = contImage
-	if dst.Spec.Integration.Traits.JVM == nil {
-		dst.Spec.Integration.Traits.JVM = &traitv1.JVMTrait{}
-	}
-	if dst.Spec.Integration.Traits.JVM.Enabled == nil {
-		dst.Spec.Integration.Traits.JVM.Enabled = pointer.Bool(true)
-	}
 	if dst.Spec.Source.Ref != nil {
 		dst.Spec.Source.Ref.Namespace = o.To
 	}

@@ -101,8 +101,6 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
 status:
   traits: {}
 `, output)
@@ -144,8 +142,6 @@ spec:
     traits:
       container:
         image: my-special-image
-      jvm:
-        enabled: true
   sink: {}
   source: {}
 status: {}
@@ -202,8 +198,6 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
 status:
   traits: {}
 `, output)
@@ -249,8 +243,6 @@ spec:
     traits:
       container:
         image: my-special-image
-      jvm:
-        enabled: true
   sink: {}
   source: {}
 status: {}
@@ -326,8 +318,6 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
 status:
   traits: {}
 `, output)
@@ -351,8 +341,6 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
 status:
   traits: {}
 `, output)

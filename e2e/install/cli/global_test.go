@@ -155,7 +155,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				}
 				Expect(TestClient().Create(TestContext, &externalKit)).Should(BeNil())
 
-				Expect(KamelRun(ns5, "files/Java.java", "--name", "ext", "--kit", "external", "-t", "jvm.enabled=true").Execute()).To(Succeed())
+				Expect(KamelRun(ns5, "files/Java.java", "--name", "ext", "--kit", "external").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns5, "ext"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns5, "ext"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(IntegrationKit(ns5, "ext")()).Should(Equal("external"))

@@ -28,7 +28,6 @@ import (
 const (
 	traitConfigurationReason = "TraitConfiguration"
 	userDisabledMessage      = "explicitly disabled by the user"
-	userEnabledMessage       = "explicitly enabled by the user"
 	platformDisabledMessage  = "explicitly disabled by the platform"
 )
 
@@ -53,10 +52,6 @@ func NewIntegrationCondition(ict v1.IntegrationConditionType, cs corev1.Conditio
 
 func NewIntegrationConditionUserDisabled() *TraitCondition {
 	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, userDisabledMessage)
-}
-
-func NewIntegrationConditionUserEnabledWithMessage(message string) *TraitCondition {
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", userEnabledMessage, message))
 }
 
 func newIntegrationConditionPlatformDisabledWithMessage(message string) *TraitCondition {
