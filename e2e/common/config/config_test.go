@@ -113,10 +113,8 @@ func TestRunConfigExamples(t *testing.T) {
 		secData["my-message"] = "my-secret-external-value"
 		CreatePlainTextSecret(ns, "my-sec-inlined", secData)
 
-		// TODO: remove jvm.options trait as soon as CAMEL-20054 gets fixed
 		Expect(KamelRunWithID(operatorID, ns, "./files/property-secret-route.groovy",
 			"-t", "mount.configs=secret:my-sec-inlined",
-			"-t", "jvm.options=-Dcamel.k.mount-path.secrets=/etc/camel/conf.d/_secrets",
 		).Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "property-secret-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationConditionStatus(ns, "property-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
