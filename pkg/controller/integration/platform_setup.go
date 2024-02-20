@@ -63,7 +63,7 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
 	} else if pl != nil {
-		profile, err := determineBestProfile(action.client, integration, pl)
+		profile, err := determineBestTraitProfile(action.client, integration, pl)
 		if err != nil {
 			return nil, err
 		}
@@ -80,8 +80,8 @@ func (action *platformSetupAction) Handle(ctx context.Context, integration *v1.I
 	return integration, nil
 }
 
-// DetermineBestProfile tries to detect the best trait profile for the integration.
-func determineBestProfile(c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) (v1.TraitProfile, error) {
+// determineBestTraitProfile tries to detect the best trait profile for the integration.
+func determineBestTraitProfile(c client.Client, integration *v1.Integration, p *v1.IntegrationPlatform) (v1.TraitProfile, error) {
 	if integration.Spec.Profile != "" {
 		return integration.Spec.Profile, nil
 	}
@@ -102,5 +102,5 @@ func determineBestProfile(c client.Client, integration *v1.Integration, p *v1.In
 	} else if ok {
 		return v1.TraitProfileKnative, nil
 	}
-	return platform.GetProfile(p), nil
+	return platform.GetTraitProfile(p), nil
 }

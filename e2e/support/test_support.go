@@ -1053,7 +1053,7 @@ func IntegrationVersion(ns string, name string) func() string {
 	}
 }
 
-func IntegrationProfile(ns string, name string) func() v1.TraitProfile {
+func IntegrationTraitProfile(ns string, name string) func() v1.TraitProfile {
 	return func() v1.TraitProfile {
 		it := Integration(ns, name)()
 		if it == nil {
