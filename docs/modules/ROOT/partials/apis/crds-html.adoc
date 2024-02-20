@@ -2818,14 +2818,14 @@ string
 <div>
 <p>IntegrationPlatformConditionType &ndash;</p>
 </div>
-<h3 id="camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">IntegrationPlatformKameletRepositorySpec
+<h3 id="camel.apache.org/v1.KameletRepositorySpec">KameletRepositorySpec
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#camel.apache.org/v1.IntegrationPlatformKameletSpec">IntegrationPlatformKameletSpec</a>)
 </p>
 <div>
-<p>IntegrationPlatformKameletRepositorySpec &ndash;</p>
+<p>KameletRepositorySpec &ndash;</p>
 </div>
 <table>
 <thead>
@@ -2868,8 +2868,8 @@ string
 <td>
 <code>repositories</code><br/>
 <em>
-<a href="#camel.apache.org/v1.IntegrationPlatformKameletRepositorySpec">
-[]IntegrationPlatformKameletRepositorySpec
+<a href="#camel.apache.org/v1.KameletRepositorySpec">
+[]KameletRepositorySpec
 </a>
 </em>
 </td>

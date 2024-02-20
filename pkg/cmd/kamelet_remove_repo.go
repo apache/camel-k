@@ -88,7 +88,7 @@ func (o *kameletRemoveRepoCommandOptions) run(cmd *cobra.Command, args []string)
 	return c.Update(o.Context, platform)
 }
 
-func getURIIndex(uri string, repositories []v1.IntegrationPlatformKameletRepositorySpec) (int, error) {
+func getURIIndex(uri string, repositories []v1.KameletRepositorySpec) (int, error) {
 	for i, repo := range repositories {
 		if repo.URI == uri {
 			return i, nil

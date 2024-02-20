@@ -358,7 +358,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 
 	if len(p.Status.Kamelet.Repositories) == 0 {
 		log.Debugf("Integration Platform %s [%s]: setting kamelet repositories", p.Name, p.Namespace)
-		p.Status.Kamelet.Repositories = append(p.Status.Kamelet.Repositories, v1.IntegrationPlatformKameletRepositorySpec{
+		p.Status.Kamelet.Repositories = append(p.Status.Kamelet.Repositories, v1.KameletRepositorySpec{
 			URI: repository.DefaultRemoteRepository,
 		})
 	}
