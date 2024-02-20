@@ -124,8 +124,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.IntegrationPlatformBuildSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformCondition"):
 		return &camelv1.IntegrationPlatformConditionApplyConfiguration{}
-	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformKameletRepositorySpec"):
-		return &camelv1.IntegrationPlatformKameletRepositorySpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformKameletSpec"):
 		return &camelv1.IntegrationPlatformKameletSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformSpec"):
@@ -150,6 +148,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.KameletConditionApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletProperty"):
 		return &camelv1.KameletPropertyApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("KameletRepositorySpec"):
+		return &camelv1.KameletRepositorySpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletSpec"):
 		return &camelv1.KameletSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletStatus"):

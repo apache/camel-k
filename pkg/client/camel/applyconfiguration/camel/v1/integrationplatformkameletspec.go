@@ -22,7 +22,7 @@ package v1
 // IntegrationPlatformKameletSpecApplyConfiguration represents an declarative configuration of the IntegrationPlatformKameletSpec type for use
 // with apply.
 type IntegrationPlatformKameletSpecApplyConfiguration struct {
-	Repositories []IntegrationPlatformKameletRepositorySpecApplyConfiguration `json:"repositories,omitempty"`
+	Repositories []KameletRepositorySpecApplyConfiguration `json:"repositories,omitempty"`
 }
 
 // IntegrationPlatformKameletSpecApplyConfiguration constructs an declarative configuration of the IntegrationPlatformKameletSpec type for use with
@@ -34,7 +34,7 @@ func IntegrationPlatformKameletSpec() *IntegrationPlatformKameletSpecApplyConfig
 // WithRepositories adds the given value to the Repositories field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Repositories field.
-func (b *IntegrationPlatformKameletSpecApplyConfiguration) WithRepositories(values ...*IntegrationPlatformKameletRepositorySpecApplyConfiguration) *IntegrationPlatformKameletSpecApplyConfiguration {
+func (b *IntegrationPlatformKameletSpecApplyConfiguration) WithRepositories(values ...*KameletRepositorySpecApplyConfiguration) *IntegrationPlatformKameletSpecApplyConfiguration {
 	for i := range values {
 		if values[i] == nil {
 			panic("nil value passed to WithRepositories")

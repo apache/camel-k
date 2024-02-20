@@ -120,7 +120,7 @@ type IntegrationPlatformBuildSpec struct {
 	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
 	// a base image that can be used as base layer for all images.
-	// It can be useful if you want to provide some custom base image with further utility softwares
+	// It can be useful if you want to provide some custom base image with further utility software
 	BaseImage string `json:"baseImage,omitempty"`
 	// the image registry used to push/pull Integration images
 	Registry RegistrySpec `json:"registry,omitempty"`
@@ -140,13 +140,7 @@ type IntegrationPlatformBuildSpec struct {
 // IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
 type IntegrationPlatformKameletSpec struct {
 	// remote repository used to retrieve Kamelet catalog
-	Repositories []IntegrationPlatformKameletRepositorySpec `json:"repositories,omitempty"`
-}
-
-// IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use.
-type IntegrationPlatformKameletRepositorySpec struct {
-	// the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
-	URI string `json:"uri,omitempty"`
+	Repositories []KameletRepositorySpec `json:"repositories,omitempty"`
 }
 
 // IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image.

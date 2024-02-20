@@ -105,6 +105,12 @@ var BuildOrderStrategies = []BuildOrderStrategy{
 	BuildOrderStrategySequential,
 }
 
+// KameletRepositorySpec defines the location of the Kamelet catalog to use.
+type KameletRepositorySpec struct {
+	// the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
+	URI string `json:"uri,omitempty"`
+}
+
 // ConfigurationSpec represents a generic configuration specification.
 type ConfigurationSpec struct {
 	// represents the type of configuration, ie: property, configmap, secret, ...

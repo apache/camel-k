@@ -95,7 +95,7 @@ spec:
                   baseImage:
                     description: a base image that can be used as base layer for all
                       images. It can be useful if you want to provide some custom
-                      base image with further utility softwares
+                      base image with further utility software
                     type: string
                   buildCatalogToolTimeout:
                     description: 'the timeout (in seconds) to use when creating the
@@ -434,8 +434,8 @@ spec:
                   repositories:
                     description: remote repository used to retrieve Kamelet catalog
                     items:
-                      description: IntegrationPlatformKameletRepositorySpec defines
-                        the location of the Kamelet catalog to use.
+                      description: KameletRepositorySpec defines the location of the
+                        Kamelet catalog to use.
                       properties:
                         uri:
                           description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
@@ -1915,7 +1915,7 @@ spec:
                   baseImage:
                     description: a base image that can be used as base layer for all
                       images. It can be useful if you want to provide some custom
-                      base image with further utility softwares
+                      base image with further utility software
                     type: string
                   buildCatalogToolTimeout:
                     description: 'the timeout (in seconds) to use when creating the
@@ -2294,8 +2294,8 @@ spec:
                   repositories:
                     description: remote repository used to retrieve Kamelet catalog
                     items:
-                      description: IntegrationPlatformKameletRepositorySpec defines
-                        the location of the Kamelet catalog to use.
+                      description: KameletRepositorySpec defines the location of the
+                        Kamelet catalog to use.
                       properties:
                         uri:
                           description: the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER

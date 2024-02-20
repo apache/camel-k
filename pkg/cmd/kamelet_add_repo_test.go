@@ -67,7 +67,7 @@ func TestKameletAddRepoNonExistingFlag(t *testing.T) {
 }
 
 func TestKameletAddRepoInvalidRepositoryURI(t *testing.T) {
-	repositories := []v1.IntegrationPlatformKameletRepositorySpec{}
+	repositories := []v1.KameletRepositorySpec{}
 	assert.NotNil(t, checkURI("foo", repositories))
 	assert.NotNil(t, checkURI("github", repositories))
 	assert.NotNil(t, checkURI("github:", repositories))
@@ -76,7 +76,7 @@ func TestKameletAddRepoInvalidRepositoryURI(t *testing.T) {
 }
 
 func TestKameletAddRepoValidRepositoryURI(t *testing.T) {
-	repositories := []v1.IntegrationPlatformKameletRepositorySpec{}
+	repositories := []v1.KameletRepositorySpec{}
 	assert.Nil(t, checkURI("github:foo/bar", repositories))
 	assert.Nil(t, checkURI("github:foo/bar/some/path", repositories))
 	assert.Nil(t, checkURI("github:foo/bar@1.0", repositories))
@@ -84,7 +84,7 @@ func TestKameletAddRepoValidRepositoryURI(t *testing.T) {
 }
 
 func TestKameletAddRepoDuplicateRepositoryURI(t *testing.T) {
-	repositories := []v1.IntegrationPlatformKameletRepositorySpec{{URI: "github:foo/bar"}}
+	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar"}}
 	assert.NotNil(t, checkURI("github:foo/bar", repositories))
 	assert.Nil(t, checkURI("github:foo/bar2", repositories))
 }

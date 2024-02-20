@@ -2694,7 +2694,7 @@ string
 
 
 a base image that can be used as base layer for all images.
-It can be useful if you want to provide some custom base image with further utility softwares
+It can be useful if you want to provide some custom base image with further utility software
 
 |`registry` +
 *xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
@@ -2821,30 +2821,6 @@ A human-readable message indicating details about the transition.
 IntegrationPlatformConditionType defines the type of condition.
 
 
-[#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec]
-=== IntegrationPlatformKameletRepositorySpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
-
-IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`uri` +
-string
-|
-
-
-the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
-
-
-|===
-
 [#_camel_apache_org_v1_IntegrationPlatformKameletSpec]
 === IntegrationPlatformKameletSpec
 
@@ -2860,7 +2836,7 @@ IntegrationPlatformKameletSpec define the behavior for all the Kamelets controll
 |Description
 
 |`repositories` +
-*xref:#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec[[\]IntegrationPlatformKameletRepositorySpec]*
+*xref:#_camel_apache_org_v1_KameletRepositorySpec[[\]KameletRepositorySpec]*
 |
 
 
@@ -3720,6 +3696,30 @@ string
 
 
 the default value of the property (if any)
+
+
+|===
+
+[#_camel_apache_org_v1_KameletRepositorySpec]
+=== KameletRepositorySpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
+
+KameletRepositorySpec defines the location of the Kamelet catalog to use.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`uri` +
+string
+|
+
+
+the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
 
 
 |===

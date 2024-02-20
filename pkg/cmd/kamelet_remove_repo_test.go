@@ -67,19 +67,19 @@ func TestKameletRemoveRepoNonExistingFlag(t *testing.T) {
 }
 
 func TestKameletRemoveRepoURINotFoundEmpty(t *testing.T) {
-	repositories := []v1.IntegrationPlatformKameletRepositorySpec{}
+	repositories := []v1.KameletRepositorySpec{}
 	_, err := getURIIndex("foo", repositories)
 	assert.NotNil(t, err)
 }
 
 func TestKameletRemoveRepoURINotFoundNotEmpty(t *testing.T) {
-	repositories := []v1.IntegrationPlatformKameletRepositorySpec{{URI: "github:foo/bar"}}
+	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar"}}
 	_, err := getURIIndex("foo", repositories)
 	assert.NotNil(t, err)
 }
 
 func TestKameletRemoveRepoURIFound(t *testing.T) {
-	repositories := []v1.IntegrationPlatformKameletRepositorySpec{{URI: "github:foo/bar1"}, {URI: "github:foo/bar2"}, {URI: "github:foo/bar3"}}
+	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar1"}, {URI: "github:foo/bar2"}, {URI: "github:foo/bar3"}}
 	i, err := getURIIndex("github:foo/bar2", repositories)
 	assert.Nil(t, err)
 	assert.Equal(t, 1, i)
