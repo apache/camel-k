@@ -70,11 +70,10 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		if err != nil {
 			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
 				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
-
 		}
 
 		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
-			match, err := integrationMatches(integration, kit)
+			match, err := integrationMatches(ctx, action.client, integration, kit)
 			if err != nil {
 				return nil, fmt.Errorf("unable to match any integration kit with integration %s/%s: %w",
 					integration.Namespace, integration.Name, err)

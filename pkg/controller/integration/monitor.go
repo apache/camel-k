@@ -70,7 +70,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return action.checkDigestAndRebuild(ctx, integration, nil)
 	}
 
-	// At that staged the Integration must have a Kit
+	// At this stage the Integration must have a Kit
 	if integration.Status.IntegrationKit == nil {
 		return nil, fmt.Errorf("no kit set on integration %s", integration.Name)
 	}
@@ -105,6 +105,7 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	if err != nil {
 		return nil, err
 	}
+
 	kits, err := lookupKitsForIntegration(ctx, action.client, integration, ctrl.MatchingLabelsSelector{
 		Selector: labels.NewSelector().Add(*withHigherPriority),
 	})
@@ -236,11 +237,7 @@ func (action *monitorAction) checkDigestAndRebuild(ctx context.Context, integrat
 	if hash != integration.Status.Digest {
 		action.L.Info("Monitor: Integration needs a rebuild")
 
-		if kit != nil &&
-			v1.GetOperatorIDAnnotation(integration) != "" &&
-			v1.GetOperatorIDAnnotation(integration) != v1.GetOperatorIDAnnotation(kit) {
-			// Operator to reconcile the integration has changed. Reset integration kit
-			// so new operator can handle the kit reference
+		if isIntegrationKitResetRequired(integration, kit) {
 			integration.SetIntegrationKit(nil)
 		}
 
@@ -251,6 +248,35 @@ func (action *monitorAction) checkDigestAndRebuild(ctx context.Context, integrat
 	}
 
 	return nil, nil
+}
+
+func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.IntegrationKit) bool {
+	if kit == nil {
+		return false
+	}
+
+	if v1.GetOperatorIDAnnotation(integration) != "" &&
+		v1.GetOperatorIDAnnotation(integration) != v1.GetOperatorIDAnnotation(kit) {
+		// Operator to reconcile the integration has changed. Reset integration kit
+		// so new operator can handle the kit reference
+		return true
+	}
+
+	if v1.GetIntegrationProfileAnnotation(integration) != "" &&
+		v1.GetIntegrationProfileAnnotation(integration) != v1.GetIntegrationProfileAnnotation(kit) {
+		// Integration profile for the integration has changed. Reset integration kit
+		// so new profile can be applied
+		return true
+	}
+
+	if v1.GetIntegrationProfileNamespaceAnnotation(integration) != "" &&
+		v1.GetIntegrationProfileNamespaceAnnotation(integration) != v1.GetIntegrationProfileNamespaceAnnotation(kit) {
+		// Integration profile namespace for the integration has changed. Reset integration kit
+		// so new profile can be applied
+		return true
+	}
+
+	return false
 }
 
 func getIntegrationSecretsAndConfigmaps(ctx context.Context, client client.Client, integration *v1.Integration) ([]*corev1.Secret, []*corev1.ConfigMap) {

@@ -44,6 +44,17 @@ func GetIntegrationPlatform(context context.Context, client ctrl.Reader, name st
 	return &platform, nil
 }
 
+func GetIntegrationProfile(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.IntegrationProfile, error) {
+	integrationProfile := v1.NewIntegrationProfile(namespace, name)
+	log.Debugf("Integration Profile [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&integrationProfile))
+	if err := client.Get(context, ctrl.ObjectKeyFromObject(&integrationProfile), &integrationProfile); err != nil {
+		log.Debugf("Integration profile Error: %v", err)
+		return nil, err
+	}
+
+	return &integrationProfile, nil
+}
+
 func GetCamelCatalog(context context.Context, client ctrl.Reader, name string, namespace string) (*v1.CamelCatalog, error) {
 	catalog := v1.NewCamelCatalog(namespace, name)
 	log.Debugf("Camel Catalog [name: %s], [namespace: %s], [objectkey: %s]", name, namespace, ctrl.ObjectKeyFromObject(&catalog))

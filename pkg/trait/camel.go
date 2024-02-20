@@ -225,6 +225,9 @@ func determineRuntimeVersion(e *Environment) (string, error) {
 	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
 		return e.IntegrationKit.Status.RuntimeVersion, nil
 	}
+	if e.IntegrationProfile != nil && e.IntegrationProfile.Status.Build.RuntimeVersion != "" {
+		return e.IntegrationProfile.Status.Build.RuntimeVersion, nil
+	}
 	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
 		return e.Platform.Status.Build.RuntimeVersion, nil
 	}

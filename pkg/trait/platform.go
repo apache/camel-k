@@ -109,7 +109,7 @@ func (t *platformTrait) Apply(e *Environment) error {
 }
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
-	pl, err := platform.GetOrFindForResource(e.Ctx, t.Client, e.Integration, false)
+	pl, err := platform.GetForResource(e.Ctx, t.Client, e.Integration)
 	if err != nil && apierrors.IsNotFound(err) && pointer.BoolDeref(t.CreateDefault, false) {
 		platformName := e.Integration.Status.Platform
 		if platformName == "" {

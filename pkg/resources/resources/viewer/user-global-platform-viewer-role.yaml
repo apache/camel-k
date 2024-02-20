@@ -17,7 +17,7 @@
 
 #
 # Role installed in the operator namespace
-# to allow access to operator installed integrationplatforms
+# to allow access to operator installed integrationplatforms and integrationprofiles
 #
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -30,6 +30,7 @@ rules:
   - "camel.apache.org"
   resources:
   - integrationplatforms
+  - integrationprofiles
   verbs:
   - get
   - list

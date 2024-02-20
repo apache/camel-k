@@ -113,7 +113,7 @@ func IsNamespaceLocked(ctx context.Context, c ctrl.Reader, namespace string) (bo
 		return false, nil
 	}
 
-	platforms, err := ListPrimaryPlatforms(ctx, c, namespace)
+	platforms, err := ListPlatforms(ctx, c, namespace)
 	if err != nil {
 		return true, err
 	}
@@ -265,10 +265,21 @@ func (f FilteringFuncs) Update(e event.UpdateEvent) bool {
 	if !IsOperatorHandler(e.ObjectNew) {
 		return false
 	}
-	if e.ObjectOld != nil && e.ObjectNew != nil &&
-		camelv1.GetOperatorIDAnnotation(e.ObjectOld) != camelv1.GetOperatorIDAnnotation(e.ObjectNew) {
-		// Always force reconciliation when the object becomes managed by the current operator
-		return true
+	if e.ObjectOld != nil && e.ObjectNew != nil {
+		if camelv1.GetOperatorIDAnnotation(e.ObjectOld) != camelv1.GetOperatorIDAnnotation(e.ObjectNew) {
+			// Always force reconciliation when the object becomes managed by the current operator
+			return true
+		}
+
+		if camelv1.GetIntegrationProfileAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileAnnotation(e.ObjectNew) {
+			// Always force reconciliation when the object gets attached to a new integration profile
+			return true
+		}
+
+		if camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectOld) != camelv1.GetIntegrationProfileNamespaceAnnotation(e.ObjectNew) {
+			// Always force reconciliation when the object gets attached to a new integration profile
+			return true
+		}
 	}
 	if f.UpdateFunc != nil {
 		return f.UpdateFunc(e)

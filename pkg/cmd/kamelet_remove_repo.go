@@ -45,7 +45,7 @@ func newKameletRemoveRepoCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *k
 		},
 	}
 
-	cmd.Flags().StringP("operator-id", "x", "", "Id of the Operator to update. If not set, the active primary Integration Platform is updated.")
+	cmd.Flags().StringP("operator-id", "x", "", "Id of the Operator to update. If not set, the default active Integration Platform is updated.")
 
 	return &cmd, &options
 }

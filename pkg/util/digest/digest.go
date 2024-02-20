@@ -59,6 +59,14 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 		return "", err
 	}
 
+	// Integration profile is relevant
+	if _, err := hash.Write([]byte(v1.GetIntegrationProfileAnnotation(integration))); err != nil {
+		return "", err
+	}
+	if _, err := hash.Write([]byte(v1.GetIntegrationProfileNamespaceAnnotation(integration))); err != nil {
+		return "", err
+	}
+
 	// Integration Kit is relevant
 	if integration.Spec.IntegrationKit != nil {
 		if _, err := hash.Write([]byte(fmt.Sprintf("%s/%s", integration.Spec.IntegrationKit.Namespace, integration.Spec.IntegrationKit.Name))); err != nil {

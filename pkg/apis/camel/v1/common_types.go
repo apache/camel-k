@@ -29,10 +29,12 @@ const (
 	TraitAnnotationPrefix = "trait.camel.apache.org/"
 	// OperatorIDAnnotation operator id annotation label.
 	OperatorIDAnnotation = "camel.apache.org/operator.id"
-	// SecondaryPlatformAnnotation secondary platform annotation label.
-	SecondaryPlatformAnnotation = "camel.apache.org/secondary.platform"
 	// PlatformSelectorAnnotation platform id annotation label.
 	PlatformSelectorAnnotation = "camel.apache.org/platform.id"
+	// IntegrationProfileAnnotation integration profile id annotation label.
+	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
+	// IntegrationProfileNamespaceAnnotation integration profile id annotation label.
+	IntegrationProfileNamespaceAnnotation = "camel.apache.org/integration-profile.namespace"
 )
 
 // BuildConfiguration represent the configuration required to build the runtime.

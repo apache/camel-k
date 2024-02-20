@@ -130,6 +130,18 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.IntegrationPlatformSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationPlatformStatus"):
 		return &camelv1.IntegrationPlatformStatusApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("IntegrationProfile"):
+		return &camelv1.IntegrationProfileApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("IntegrationProfileBuildSpec"):
+		return &camelv1.IntegrationProfileBuildSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("IntegrationProfileCondition"):
+		return &camelv1.IntegrationProfileConditionApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("IntegrationProfileKameletSpec"):
+		return &camelv1.IntegrationProfileKameletSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("IntegrationProfileSpec"):
+		return &camelv1.IntegrationProfileSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("IntegrationProfileStatus"):
+		return &camelv1.IntegrationProfileStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationSpec"):
 		return &camelv1.IntegrationSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("IntegrationStatus"):

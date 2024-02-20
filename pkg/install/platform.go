@@ -23,7 +23,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 )
 
-// IntegrationPlatformViewerRole installs the role that allows any user to access integrationplatforms in the global namespace.
+// IntegrationPlatformViewerRole installs the role that allows any user to access integrationplatforms and integrationprofiles in the global namespace.
 func IntegrationPlatformViewerRole(ctx context.Context, c client.Client, namespace string) error {
 	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/resources/viewer/user-global-platform-viewer-role.yaml"); err != nil {
 		return err

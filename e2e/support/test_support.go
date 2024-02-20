@@ -1914,21 +1914,7 @@ func Platform(ns string) func() *v1.IntegrationPlatform {
 			return nil
 		}
 		if len(lst.Items) > 1 {
-			var pl *v1.IntegrationPlatform
-			for _, p := range lst.Items {
-				p := p
-				if platform.IsSecondary(&p) {
-					continue
-				}
-				if pl != nil {
-					failTest(fmt.Errorf("multiple primary integration platforms found in namespace %q", ns))
-				}
-				pl = &p
-			}
-			if pl == nil {
-				failTest(fmt.Errorf("multiple integration platforms found in namespace %q but no one is primary", ns))
-			}
-			return pl
+			failTest(fmt.Errorf("multiple integration platforms found in namespace %q", ns))
 		}
 		return &lst.Items[0]
 	}
@@ -1967,6 +1953,21 @@ func CopyCamelCatalog(ns, operatorID string) error {
 	return nil
 }
 
+func IntegrationProfileByName(ns string, name string) func() *v1.IntegrationProfile {
+	return func() *v1.IntegrationProfile {
+		lst := v1.NewIntegrationProfileList()
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(err)
+		}
+		for _, pc := range lst.Items {
+			if pc.Name == name {
+				return &pc
+			}
+		}
+		return nil
+	}
+}
+
 func CamelCatalog(ns, name string) func() *v1.CamelCatalog {
 	return func() *v1.CamelCatalog {
 		cat := v1.CamelCatalog{}
@@ -1981,6 +1982,43 @@ func CamelCatalog(ns, name string) func() *v1.CamelCatalog {
 		}
 		return &cat
 	}
+}
+
+func IntegrationProfile(ns string) func() *v1.IntegrationProfile {
+	return func() *v1.IntegrationProfile {
+		lst := v1.NewIntegrationProfileList()
+		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+			failTest(err)
+		}
+		if len(lst.Items) == 0 {
+			return nil
+		}
+		if len(lst.Items) > 1 {
+			failTest(fmt.Errorf("multiple integration profiles found in namespace %q", ns))
+		}
+		return &lst.Items[0]
+	}
+}
+
+func CreateIntegrationProfile(profile *v1.IntegrationProfile) error {
+	return TestClient().Create(TestContext, profile)
+}
+
+func UpdateIntegrationProfile(ns string, upd func(ipr *v1.IntegrationProfile)) error {
+	ipr := IntegrationProfile(ns)()
+	if ipr == nil {
+		return fmt.Errorf("unable to locate Integration Profile in %s", ns)
+	}
+	target := ipr.DeepCopy()
+	upd(target)
+	// For some reason, full patch fails on some clusters
+	p, err := patch.MergePatch(ipr, target)
+	if err != nil {
+		return err
+	} else if len(p) == 0 {
+		return nil
+	}
+	return TestClient().Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
 func CreateCamelCatalog(catalog *v1.CamelCatalog) func() error {
@@ -2101,6 +2139,16 @@ func SelectedPlatformPhase(ns string, name string) func() v1.IntegrationPlatform
 	}
 }
 
+func SelectedIntegrationProfilePhase(ns string, name string) func() v1.IntegrationProfilePhase {
+	return func() v1.IntegrationProfilePhase {
+		pc := IntegrationProfileByName(ns, name)()
+		if pc == nil {
+			return ""
+		}
+		return pc.Status.Phase
+	}
+}
+
 func PlatformHas(ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
 	return func() bool {
 		pl := Platform(ns)()
@@ -2165,20 +2213,6 @@ func AssignPlatformToOperator(ns, operator string) error {
 
 	pl.SetOperatorID(operator)
 	return TestClient().Update(TestContext, pl)
-}
-
-func ConfigureSecondaryPlatformWith(ns string, customizer func(pl *v1.IntegrationPlatform)) error {
-	pl := Platform(ns)()
-	if pl == nil {
-		return errors.New("cannot find primary platform")
-	}
-
-	v1.SetAnnotation(&pl.ObjectMeta, v1.SecondaryPlatformAnnotation, "true")
-	pl.ObjectMeta.ResourceVersion = ""
-	pl.Name = ""
-	pl.Status = v1.IntegrationPlatformStatus{}
-	customizer(pl)
-	return TestClient().Create(TestContext, pl)
 }
 
 func CRDs() func() []metav1.APIResource {
