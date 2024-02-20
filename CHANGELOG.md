@@ -37,12 +37,17 @@
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
+- Remove duplication of the default platform creation [\#3433](https://github.com/apache/camel-k/issues/3433)
 - Use `go:embed` instead of vfsgen for embedded resources handling [\#3384](https://github.com/apache/camel-k/issues/3384)
 - Use build-tags to configure what feature are included in a camel-k build [\#2801](https://github.com/apache/camel-k/issues/2801)
 - shipwright.io builder [\#1673](https://github.com/apache/camel-k/issues/1673)
 
 **Merged pull requests:**
 
+- fix\(\#3433\): Deprecate platform trait create default option [\#5170](https://github.com/apache/camel-k/pull/5170) ([christophd](https://github.com/christophd))
+- Move KameletRepositorySpec to common types [\#5168](https://github.com/apache/camel-k/pull/5168) ([christophd](https://github.com/christophd))
+- chore: Rename trait profile funcs [\#5167](https://github.com/apache/camel-k/pull/5167) ([christophd](https://github.com/christophd))
+- Fix CamelCatalog create test [\#5166](https://github.com/apache/camel-k/pull/5166) ([christophd](https://github.com/christophd))
 - chore\(deps\): bump github.com/prometheus/client\_model from 0.5.0 to 0.6.0 [\#5162](https://github.com/apache/camel-k/pull/5162) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(ci\): go:embed usage [\#5160](https://github.com/apache/camel-k/pull/5160) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.46.0 to 0.47.0 [\#5159](https://github.com/apache/camel-k/pull/5159) ([dependabot[bot]](https://github.com/apps/dependabot))
