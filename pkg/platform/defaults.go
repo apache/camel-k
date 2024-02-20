@@ -190,21 +190,14 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 
 func applyGlobalPlatformDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
 	operatorNamespace := GetOperatorNamespace()
-	if operatorNamespace != "" && operatorNamespace != p.Namespace {
+	if operatorNamespace != "" {
 		operatorID := defaults.OperatorID()
-		if operatorID != "" {
-			if globalPlatform, err := get(ctx, c, operatorNamespace, operatorID); err != nil && !k8serrors.IsNotFound(err) {
+		if operatorNamespace != p.Namespace || (operatorID != "" && p.Name != operatorID) {
+			if globalPlatform, err := findLocal(ctx, c, operatorNamespace); err != nil && !k8serrors.IsNotFound(err) {
 				return err
 			} else if globalPlatform != nil {
 				applyPlatformSpec(globalPlatform, p)
-				return nil
 			}
-		}
-
-		if globalPlatform, err := findLocal(ctx, c, operatorNamespace, true); err != nil && !k8serrors.IsNotFound(err) {
-			return err
-		} else if globalPlatform != nil {
-			applyPlatformSpec(globalPlatform, p)
 		}
 	}
 

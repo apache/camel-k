@@ -221,6 +221,49 @@ Refer to the Kubernetes API documentation for the fields of the `metadata` field
 
 |===
 
+[#_camel_apache_org_v1_IntegrationProfile]
+=== IntegrationProfile
+
+IntegrationProfile is the resource used to apply user defined settings to the Camel K operator behavior.
+It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`apiVersion` +
+string
+|`camel.apache.org/v1`
+
+|`kind` +
+string
+|`IntegrationProfile`
+|`metadata` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+|
+
+
+
+
+Refer to the Kubernetes API documentation for the fields of the `metadata` field.
+|`spec` +
+*xref:#_camel_apache_org_v1_IntegrationProfileSpec[IntegrationProfileSpec]*
+|
+
+
+
+
+|`status` +
+*xref:#_camel_apache_org_v1_IntegrationProfileStatus[IntegrationProfileStatus]*
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_Kamelet]
 === Kamelet
 
@@ -2980,6 +3023,254 @@ generic information related to the build of Camel K operator software
 
 |===
 
+[#_camel_apache_org_v1_IntegrationProfileBuildSpec]
+=== IntegrationProfileBuildSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
+
+IntegrationProfileBuildSpec contains profile related build information.
+This configuration can be used to tune the behavior of the Integration/IntegrationKit image builds.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`runtimeVersion` +
+string
+|
+
+
+the Camel K Runtime dependency version
+
+|`runtimeProvider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+
+|`baseImage` +
+string
+|
+
+
+a base image that can be used as base layer for all images.
+It can be useful if you want to provide some custom base image with further utility software
+
+|`registry` +
+*xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
+|
+
+
+the image registry used to push/pull Integration images
+
+|`timeout` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+|
+
+
+how much time to wait before time out the pipeline process
+
+|`maven` +
+*xref:#_camel_apache_org_v1_MavenSpec[MavenSpec]*
+|
+
+
+Maven configuration used to build the Camel/Camel-Quarkus applications
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationProfileCondition]
+=== IntegrationProfileCondition
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationProfileStatus, IntegrationProfileStatus>>
+
+IntegrationProfileCondition describes the state of a resource at a certain point.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`type` +
+*xref:#_camel_apache_org_v1_IntegrationProfileConditionType[IntegrationProfileConditionType]*
+|
+
+
+Type of integration condition.
+
+|`status` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+|
+
+
+Status of the condition, one of True, False, Unknown.
+
+|`lastUpdateTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+The last time this condition was updated.
+
+|`lastTransitionTime` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+|
+
+
+Last time the condition transitioned from one status to another.
+
+|`reason` +
+string
+|
+
+
+The reason for the condition's last transition.
+
+|`message` +
+string
+|
+
+
+A human-readable message indicating details about the transition.
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationProfileConditionType]
+=== IntegrationProfileConditionType(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationProfileCondition, IntegrationProfileCondition>>
+
+IntegrationProfileConditionType defines the type of condition.
+
+
+[#_camel_apache_org_v1_IntegrationProfileKameletSpec]
+=== IntegrationProfileKameletSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
+
+IntegrationProfileKameletSpec define the behavior for all the Kamelets controller by the IntegrationProfile.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`repositories` +
+*xref:#_camel_apache_org_v1_KameletRepositorySpec[[\]KameletRepositorySpec]*
+|
+
+
+remote repository used to retrieve Kamelet catalog
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationProfilePhase]
+=== IntegrationProfilePhase(`string` alias)
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationProfileStatus, IntegrationProfileStatus>>
+
+IntegrationProfilePhase is the phase of an IntegrationProfile.
+
+
+[#_camel_apache_org_v1_IntegrationProfileSpec]
+=== IntegrationProfileSpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationProfile, IntegrationProfile>>
+* <<#_camel_apache_org_v1_IntegrationProfileStatus, IntegrationProfileStatus>>
+
+IntegrationProfileSpec applies user defined settings to the IntegrationProfile.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`build` +
+*xref:#_camel_apache_org_v1_IntegrationProfileBuildSpec[IntegrationProfileBuildSpec]*
+|
+
+
+specify how to build the Integration/IntegrationKits
+
+|`traits` +
+*xref:#_camel_apache_org_v1_Traits[Traits]*
+|
+
+
+list of traits to be executed for all the Integration/IntegrationKits built from this IntegrationProfile
+
+|`kamelet` +
+*xref:#_camel_apache_org_v1_IntegrationProfileKameletSpec[IntegrationProfileKameletSpec]*
+|
+
+
+configuration to be executed to all Kamelets controlled by this IntegrationProfile
+
+
+|===
+
+[#_camel_apache_org_v1_IntegrationProfileStatus]
+=== IntegrationProfileStatus
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationProfile, IntegrationProfile>>
+
+IntegrationProfileStatus defines the observed state of IntegrationProfile.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`IntegrationProfileSpec` +
+*xref:#_camel_apache_org_v1_IntegrationProfileSpec[IntegrationProfileSpec]*
+|(Members of `IntegrationProfileSpec` are embedded into this type.)
+
+
+
+
+|`observedGeneration` +
+int64
+|
+
+
+ObservedGeneration is the most recent generation observed for this IntegrationProfile.
+
+|`phase` +
+*xref:#_camel_apache_org_v1_IntegrationProfilePhase[IntegrationProfilePhase]*
+|
+
+
+defines in what phase the IntegrationProfile is found
+
+|`conditions` +
+*xref:#_camel_apache_org_v1_IntegrationProfileCondition[[\]IntegrationProfileCondition]*
+|
+
+
+which are the conditions met (particularly useful when in ERROR phase)
+
+
+|===
+
 [#_camel_apache_org_v1_IntegrationSpec]
 === IntegrationSpec
 
@@ -3706,6 +3997,7 @@ the default value of the property (if any)
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
+* <<#_camel_apache_org_v1_IntegrationProfileKameletSpec, IntegrationProfileKameletSpec>>
 
 KameletRepositorySpec defines the location of the Kamelet catalog to use.
 
@@ -4022,6 +4314,7 @@ Servers (auth)
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_IntegrationProfileBuildSpec, IntegrationProfileBuildSpec>>
 * <<#_camel_apache_org_v1_MavenBuildSpec, MavenBuildSpec>>
 
 MavenSpec --.
@@ -4751,6 +5044,7 @@ be used to delay JSON decoding or precompute a JSON encoding.
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_IntegrationProfileBuildSpec, IntegrationProfileBuildSpec>>
 * <<#_camel_apache_org_v1_PublishTask, PublishTask>>
 
 RegistrySpec provides the configuration for the container registry.
@@ -4904,6 +5198,7 @@ ResourceCondition is a common type for all conditions.
 
 * <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
+* <<#_camel_apache_org_v1_IntegrationProfileBuildSpec, IntegrationProfileBuildSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
@@ -5369,6 +5664,7 @@ TraitConfiguration parameters configuration
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
+* <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 

@@ -141,7 +141,7 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	targetLog := rlog.ForBuild(target)
 
 	var actions []Action
-	ip, err := platform.GetOrFindForResource(ctx, r.client, &instance, true)
+	ip, err := platform.GetForResource(ctx, r.client, &instance)
 	if err != nil {
 		rlog.Error(err, "Could not find a platform bound to this Build")
 		return reconcile.Result{}, err

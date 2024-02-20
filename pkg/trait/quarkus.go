@@ -263,6 +263,18 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 		v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
 	}
 
+	if v, ok := integration.Annotations[v1.IntegrationProfileAnnotation]; ok {
+		v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileAnnotation, v)
+
+		if v, ok := e.Integration.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
+			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, v)
+		} else {
+			// set integration profile namespace to the integration namespace.
+			// this is because the kit may live in another namespace and needs to resolve the integration profile from the integration namespace.
+			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
+		}
+	}
+
 	for k, v := range integration.Annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			v1.SetAnnotation(&kit.ObjectMeta, k, v)
@@ -287,25 +299,45 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 }
 
 func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
-	traits := e.Integration.Spec.Traits
-	kitTraits := v1.IntegrationKitTraits{
+	kitTraits := v1.IntegrationKitTraits{}
+
+	if e.Platform != nil {
+		propagate(fmt.Sprintf("platform %q", e.Platform.Name), e.Platform.Status.Traits, &kitTraits, e)
+	}
+
+	if e.IntegrationProfile != nil {
+		propagate(fmt.Sprintf("integration profile %q", e.IntegrationProfile.Name), e.IntegrationProfile.Status.Traits, &kitTraits, e)
+	}
+
+	propagate(fmt.Sprintf("integration %q", e.Integration.Name), e.Integration.Spec.Traits, &kitTraits, e)
+
+	return kitTraits
+}
+
+func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKitTraits, e *Environment) {
+	ikt := v1.IntegrationKitTraits{
 		Builder:  traits.Builder.DeepCopy(),
 		Camel:    traits.Camel.DeepCopy(),
 		Quarkus:  traits.Quarkus.DeepCopy(),
 		Registry: traits.Registry.DeepCopy(),
 	}
 
+	if err := kitTraits.Merge(ikt); err != nil {
+		log.Errorf(err, "Unable to propagate traits from %s to the integration kit", traitSource)
+	}
+
 	// propagate addons that influence kits too
 	if len(traits.Addons) > 0 {
-		kitTraits.Addons = make(map[string]v1.AddonTrait)
+		if kitTraits.Addons == nil {
+			kitTraits.Addons = make(map[string]v1.AddonTrait)
+		}
+
 		for id, addon := range traits.Addons {
 			if t := e.Catalog.GetTrait(id); t != nil && t.InfluencesKit() {
 				kitTraits.Addons[id] = *addon.DeepCopy()
 			}
 		}
 	}
-
-	return kitTraits
 }
 
 func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {

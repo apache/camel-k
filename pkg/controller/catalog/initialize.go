@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -45,7 +46,7 @@ func (action *initializeAction) CanHandle(catalog *v1.CamelCatalog) bool {
 func (action *initializeAction) Handle(ctx context.Context, catalog *v1.CamelCatalog) (*v1.CamelCatalog, error) {
 	action.L.Info("Initializing CamelCatalog")
 
-	platform, err := platformutil.GetOrFindLocal(ctx, action.client, catalog.Namespace)
+	platform, err := platformutil.GetForName(ctx, action.client, catalog.Namespace, defaults.OperatorID())
 
 	if err != nil {
 		return catalog, err

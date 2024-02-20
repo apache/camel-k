@@ -207,6 +207,8 @@ type Environment struct {
 	Client client.Client
 	// The active Platform
 	Platform *v1.IntegrationPlatform
+	// The active IntegrationProfile
+	IntegrationProfile *v1.IntegrationProfile
 	// The current Integration
 	Integration *v1.Integration
 	// The IntegrationKit associated to the Integration

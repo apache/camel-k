@@ -170,6 +170,12 @@ func installCRDs(ctx context.Context, c client.Client, collection *kubernetes.Co
 		return err
 	}
 
+	// Install CRD for Integration Profile (if needed)
+	if err := installCRD(ctx, c, "IntegrationProfile", "v1", "camel.apache.org_integrationprofiles.yaml",
+		v1beta1Customizer, collection, force); err != nil {
+		return err
+	}
+
 	// Install CRD for Integration Kit (if needed)
 	if err := installCRD(ctx, c, "IntegrationKit", "v1", "camel.apache.org_integrationkits.yaml",
 		v1beta1Customizer, collection, force); err != nil {
@@ -292,6 +298,11 @@ func WaitForAllCrdInstallation(ctx context.Context, clientProvider client.Provid
 func areAllCrdInstalled(c client.Client) (int, error) {
 	if ok, err := isCrdInstalled(c, "IntegrationPlatform", "v1"); err != nil {
 		return 1, fmt.Errorf("error installing IntegrationPlatform CRDs: %w", err)
+	} else if !ok {
+		return 1, nil
+	}
+	if ok, err := isCrdInstalled(c, "IntegrationProfile", "v1"); err != nil {
+		return 1, fmt.Errorf("error installing IntegrationProfile CRDs: %w", err)
 	} else if !ok {
 		return 1, nil
 	}

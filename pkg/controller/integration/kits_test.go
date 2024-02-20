@@ -35,6 +35,16 @@ import (
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 	c, err := test.NewFakeClient(
+		&v1.IntegrationPlatform{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationPlatformKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "camel-k",
+			},
+		},
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -112,6 +122,16 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 
 func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T) {
 	c, err := test.NewFakeClient(
+		&v1.IntegrationPlatform{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationPlatformKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "camel-k",
+			},
+		},
 		// Should be discarded because it does not contain the required traits
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -472,7 +492,7 @@ func TestHasNotMatchingSources(t *testing.T) {
 }
 
 func integrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) (bool, error) {
-	itOpts, err := trait.NewStatusTraitsOptionsForIntegration(i1)
+	itOpts, err := trait.NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}

@@ -56,6 +56,13 @@ const (
 	// ReasonIntegrationPlatformError --.
 	ReasonIntegrationPlatformError = "IntegrationPlatformError"
 
+	// ReasonIntegrationProfilePhaseUpdated --.
+	ReasonIntegrationProfilePhaseUpdated = "IntegrationProfilePhaseUpdated"
+	// ReasonIntegrationProfileConditionChanged --.
+	ReasonIntegrationProfileConditionChanged = "IntegrationProfileConditionChanged"
+	// ReasonIntegrationProfileError --.
+	ReasonIntegrationProfileError = "IntegrationProfileError"
+
 	// ReasonBuildPhaseUpdated --.
 	ReasonBuildPhaseUpdated = "BuildPhaseUpdated"
 	// ReasonBuildConditionChanged --.
@@ -166,6 +173,35 @@ func NotifyIntegrationPlatformError(ctx context.Context, c client.Client, record
 		return
 	}
 	recorder.Eventf(p, corev1.EventTypeWarning, ReasonIntegrationPlatformError, "Cannot reconcile Integration Platform %s: %v", p.Name, err)
+}
+
+// NotifyIntegrationProfileUpdated automatically generates events when a integration profile changes.
+func NotifyIntegrationProfileUpdated(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.IntegrationProfile) {
+	if newResource == nil {
+		return
+	}
+	oldPhase := ""
+	var oldConditions []v1.ResourceCondition
+	if old != nil {
+		oldPhase = string(old.Status.Phase)
+		oldConditions = old.Status.GetConditions()
+	}
+	if newResource.Status.Phase != v1.IntegrationProfilePhaseNone {
+		notifyIfConditionUpdated(recorder, newResource, oldConditions, newResource.Status.GetConditions(), "Integration Profile", newResource.Name, ReasonIntegrationProfileConditionChanged)
+	}
+	notifyIfPhaseUpdated(ctx, c, recorder, newResource, oldPhase, string(newResource.Status.Phase), "Integration Profile", newResource.Name, ReasonIntegrationProfilePhaseUpdated, "")
+}
+
+// NotifyIntegrationProfileError automatically generates error events when the integration Platform reconcile cycle phase has an error.
+func NotifyIntegrationProfileError(ctx context.Context, c client.Client, recorder record.EventRecorder, old, newResource *v1.IntegrationProfile, err error) {
+	p := old
+	if newResource != nil {
+		p = newResource
+	}
+	if p == nil {
+		return
+	}
+	recorder.Eventf(p, corev1.EventTypeWarning, ReasonIntegrationProfileError, "Cannot reconcile Integration Profile %s: %v", p.Name, err)
 }
 
 // NotifyCamelCatalogUpdated automatically generates events when a CamelCatalog changes.

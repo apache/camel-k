@@ -101,6 +101,44 @@ func (t *Traits) Merge(other Traits) error {
 	return nil
 }
 
+// Merge merges the given IntegrationKitTraits into the receiver.
+func (t *IntegrationKitTraits) Merge(other IntegrationKitTraits) error {
+	// marshal both
+	data1, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	data2, err := json.Marshal(other)
+	if err != nil {
+		return err
+	}
+
+	// merge them
+	map1 := make(map[string]interface{})
+	if err := json.Unmarshal(data1, &map1); err != nil {
+		return err
+	}
+	map2 := make(map[string]interface{})
+	if err := json.Unmarshal(data2, &map2); err != nil {
+		return err
+	}
+	// values from merged trait take precedence over the original ones
+	if err := mergo.Merge(&map1, map2, mergo.WithOverride); err != nil {
+		return err
+	}
+
+	// unmarshal it
+	data, err := json.Marshal(map1)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(data, &t); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // MarshalJSON returns m as the JSON encoding of m.
 func (m RawMessage) MarshalJSON() ([]byte, error) {
 	if m == nil {
@@ -135,12 +173,27 @@ var _ json.Unmarshaler = (*RawMessage)(nil)
 
 // GetOperatorIDAnnotation to safely get the operator id annotation value.
 func GetOperatorIDAnnotation(obj metav1.Object) string {
+	return GetAnnotation(OperatorIDAnnotation, obj)
+}
+
+// GetIntegrationProfileAnnotation to safely get the integration profile annotation value.
+func GetIntegrationProfileAnnotation(obj metav1.Object) string {
+	return GetAnnotation(IntegrationProfileAnnotation, obj)
+}
+
+// GetIntegrationProfileNamespaceAnnotation to safely get the integration profile namespace annotation value.
+func GetIntegrationProfileNamespaceAnnotation(obj metav1.Object) string {
+	return GetAnnotation(IntegrationProfileNamespaceAnnotation, obj)
+}
+
+// GetAnnotation safely get the annotation value.
+func GetAnnotation(name string, obj metav1.Object) string {
 	if obj == nil || obj.GetAnnotations() == nil {
 		return ""
 	}
 
-	if operatorID, ok := obj.GetAnnotations()[OperatorIDAnnotation]; ok {
-		return operatorID
+	if annotation, ok := obj.GetAnnotations()[name]; ok {
+		return annotation
 	}
 
 	return ""

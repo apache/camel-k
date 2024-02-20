@@ -87,11 +87,24 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
-		// Upgrade CRDs with kustomize
+		// Delete CRDs with kustomize
 		ExpectExecSucceed(t,
 			exec.Command(
 				"kubectl",
-				"replace",
+				"delete",
+				"--ignore-not-found",
+				"-f",
+				"../../../helm/camel-k/crds/",
+				"-n",
+				ns,
+			),
+		)
+
+		// Re-Create CRDs with kustomize
+		ExpectExecSucceed(t,
+			exec.Command(
+				"kubectl",
+				"create",
 				"-f",
 				"../../../helm/camel-k/crds/",
 				"-n",

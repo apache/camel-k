@@ -117,6 +117,11 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 		return nil, err
 	}
 
+	ipr, err := platform.ApplyIntegrationProfile(ctx, c, pl, obj)
+	if err != nil {
+		return nil, err
+	}
+
 	if kit == nil {
 		kit, err = getIntegrationKit(ctx, c, integration)
 		if err != nil {
@@ -131,6 +136,7 @@ func newEnvironment(ctx context.Context, c client.Client, integration *v1.Integr
 	env := Environment{
 		Ctx:                   ctx,
 		Platform:              pl,
+		IntegrationProfile:    ipr,
 		Client:                c,
 		IntegrationKit:        kit,
 		Integration:           integration,
@@ -153,6 +159,7 @@ func NewSyntheticEnvironment(ctx context.Context, c client.Client, integration *
 	env := Environment{
 		Ctx:                   ctx,
 		Platform:              nil,
+		IntegrationProfile:    nil,
 		Client:                c,
 		IntegrationKit:        kit,
 		Integration:           integration,

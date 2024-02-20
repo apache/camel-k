@@ -93,6 +93,74 @@ func TestTraitsMerge(t *testing.T) {
 		t1.Addons["telemetry"])
 }
 
+func TestIntegrationKitTraitsMerge(t *testing.T) {
+	t1 := IntegrationKitTraits{
+		Builder: &trait.BuilderTrait{
+			Properties: []string{
+				"b1=value_b1",
+			},
+		},
+		Camel: &trait.CamelTrait{
+			RuntimeVersion: "0.99.0",
+			Properties: []string{
+				"c1=value_c1",
+			},
+		},
+		Addons: map[string]AddonTrait{
+			"master": toAddonTrait(t, map[string]interface{}{
+				"resourceName": "test-lock",
+			}),
+			"telemetry": toAddonTrait(t, map[string]interface{}{
+				"enabled": true,
+			}),
+		},
+	}
+	t2 := IntegrationKitTraits{
+		Builder: &trait.BuilderTrait{
+			Properties: []string{
+				"b2=value_b2",
+			},
+		},
+		Quarkus: &trait.QuarkusTrait{
+			NativeBaseImage: "quay.io/quarkus/quarkus-micro-image:2.0",
+		},
+		Addons: map[string]AddonTrait{
+			"telemetry": toAddonTrait(t, map[string]interface{}{
+				"serviceName": "test-integration",
+			}),
+		},
+	}
+
+	err := t1.Merge(t2)
+
+	require.NoError(t, err)
+
+	assert.NotNil(t, t1.Builder)
+	assert.Equal(t, 1, len(t1.Builder.Properties))
+	assert.Equal(t, "b2=value_b2", t1.Builder.Properties[0])
+
+	assert.NotNil(t, t1.Camel)
+	assert.Equal(t, "0.99.0", t1.Camel.RuntimeVersion)
+	assert.Equal(t, 1, len(t1.Camel.Properties))
+	assert.Equal(t, "c1=value_c1", t1.Camel.Properties[0])
+
+	assert.NotNil(t, t1.Quarkus)
+	assert.Equal(t, "quay.io/quarkus/quarkus-micro-image:2.0", t1.Quarkus.NativeBaseImage)
+
+	assert.NotNil(t, t1.Addons)
+	assert.Equal(t,
+		toAddonTrait(t, map[string]interface{}{
+			"resourceName": "test-lock",
+		}),
+		t1.Addons["master"])
+	assert.Equal(t,
+		toAddonTrait(t, map[string]interface{}{
+			"enabled":     true,
+			"serviceName": "test-integration",
+		}),
+		t1.Addons["telemetry"])
+}
+
 func TestDecodeValueSourceValid(t *testing.T) {
 	res, err := DecodeValueSource("configmap:my-configmap", "defaultkey", "errorMessage")
 	require.NoError(t, err)

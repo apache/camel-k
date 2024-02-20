@@ -94,6 +94,15 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		if v, ok := kit.Annotations[v1.PlatformSelectorAnnotation]; ok {
 			annotations[v1.PlatformSelectorAnnotation] = v
 		}
+
+		if v, ok := kit.Annotations[v1.IntegrationProfileAnnotation]; ok {
+			annotations[v1.IntegrationProfileAnnotation] = v
+
+			if v, ok := kit.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
+				annotations[v1.IntegrationProfileNamespaceAnnotation] = v
+			}
+		}
+
 		operatorID := defaults.OperatorID()
 		if operatorID != "" {
 			annotations[v1.OperatorIDAnnotation] = operatorID

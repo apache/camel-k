@@ -112,6 +112,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
 	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this integration.")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
+	cmd.Flags().String("integration-profile", "", "Integration profile used for deployment")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
@@ -134,38 +135,39 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 }
 
 type runCmdOptions struct {
-	*RootCmdOptions `json:"-"`
-	Compression     bool     `mapstructure:"compression" yaml:",omitempty"`
-	Wait            bool     `mapstructure:"wait" yaml:",omitempty"`
-	Logs            bool     `mapstructure:"logs" yaml:",omitempty"`
-	Sync            bool     `mapstructure:"sync" yaml:",omitempty"`
-	Dev             bool     `mapstructure:"dev" yaml:",omitempty"`
-	UseFlows        bool     `mapstructure:"use-flows" yaml:",omitempty"`
-	Save            bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
-	IntegrationKit  string   `mapstructure:"kit" yaml:",omitempty"`
-	IntegrationName string   `mapstructure:"name" yaml:",omitempty"`
-	ContainerImage  string   `mapstructure:"image" yaml:",omitempty"`
-	Profile         string   `mapstructure:"profile" yaml:",omitempty"`
-	OperatorID      string   `mapstructure:"operator-id" yaml:",omitempty"`
-	OutputFormat    string   `mapstructure:"output" yaml:",omitempty"`
-	PodTemplate     string   `mapstructure:"pod-template" yaml:",omitempty"`
-	ServiceAccount  string   `mapstructure:"service-account" yaml:",omitempty"`
-	Connects        []string `mapstructure:"connects" yaml:",omitempty"`
-	Resources       []string `mapstructure:"resources" yaml:",omitempty"`
-	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
-	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
-	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
-	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
-	Configs         []string `mapstructure:"configs" yaml:",omitempty"`
-	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
-	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
-	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
-	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
-	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
-	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
-	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
-	RegistryOptions url.Values
-	Force           bool `mapstructure:"force" yaml:",omitempty"`
+	*RootCmdOptions    `json:"-"`
+	Compression        bool     `mapstructure:"compression" yaml:",omitempty"`
+	Wait               bool     `mapstructure:"wait" yaml:",omitempty"`
+	Logs               bool     `mapstructure:"logs" yaml:",omitempty"`
+	Sync               bool     `mapstructure:"sync" yaml:",omitempty"`
+	Dev                bool     `mapstructure:"dev" yaml:",omitempty"`
+	UseFlows           bool     `mapstructure:"use-flows" yaml:",omitempty"`
+	Save               bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	IntegrationKit     string   `mapstructure:"kit" yaml:",omitempty"`
+	IntegrationName    string   `mapstructure:"name" yaml:",omitempty"`
+	ContainerImage     string   `mapstructure:"image" yaml:",omitempty"`
+	Profile            string   `mapstructure:"profile" yaml:",omitempty"`
+	IntegrationProfile string   `mapstructure:"integration-profile" yaml:",omitempty"`
+	OperatorID         string   `mapstructure:"operator-id" yaml:",omitempty"`
+	OutputFormat       string   `mapstructure:"output" yaml:",omitempty"`
+	PodTemplate        string   `mapstructure:"pod-template" yaml:",omitempty"`
+	ServiceAccount     string   `mapstructure:"service-account" yaml:",omitempty"`
+	Connects           []string `mapstructure:"connects" yaml:",omitempty"`
+	Resources          []string `mapstructure:"resources" yaml:",omitempty"`
+	OpenAPIs           []string `mapstructure:"open-apis" yaml:",omitempty"`
+	Dependencies       []string `mapstructure:"dependencies" yaml:",omitempty"`
+	Properties         []string `mapstructure:"properties" yaml:",omitempty"`
+	BuildProperties    []string `mapstructure:"build-properties" yaml:",omitempty"`
+	Configs            []string `mapstructure:"configs" yaml:",omitempty"`
+	Repositories       []string `mapstructure:"maven-repositories" yaml:",omitempty"`
+	Traits             []string `mapstructure:"traits" yaml:",omitempty"`
+	Volumes            []string `mapstructure:"volumes" yaml:",omitempty"`
+	EnvVars            []string `mapstructure:"envs" yaml:",omitempty"`
+	Labels             []string `mapstructure:"labels" yaml:",omitempty"`
+	Annotations        []string `mapstructure:"annotations" yaml:",omitempty"`
+	Sources            []string `mapstructure:"sources" yaml:",omitempty"`
+	RegistryOptions    url.Values
+	Force              bool `mapstructure:"force" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -666,6 +668,17 @@ func (o *runCmdOptions) applyAnnotations(cmd *cobra.Command, c client.Client, it
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
 	it.SetOperatorID(strings.TrimSpace(o.OperatorID))
 
+	// --integration-profile={id} is a syntax sugar for '--annotation camel.apache.org/integration-profile.id={id}'
+	if o.IntegrationProfile != "" {
+		if strings.Contains(o.IntegrationProfile, "/") {
+			namespacedName := strings.SplitN(o.IntegrationProfile, "/", 2)
+			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, namespacedName[0])
+			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, namespacedName[1])
+		} else {
+			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, o.IntegrationProfile)
+		}
+	}
+
 	for _, annotation := range o.Annotations {
 		parts := strings.SplitN(annotation, "=", 2)
 		if len(parts) == 2 {
@@ -856,7 +869,7 @@ func (o *runCmdOptions) getPlatform(cmd *cobra.Command, c client.Client, it *v1.
 	if !contains(o.Traits, "registry.enabled=false") {
 		o.Traits = append(o.Traits, "registry.enabled=true")
 	}
-	pl, err := platform.GetOrFindForResource(o.Context, c, it, true)
+	pl, err := platform.GetForResource(o.Context, c, it)
 	if err != nil {
 		return nil, err
 	}

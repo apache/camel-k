@@ -32,6 +32,7 @@ rules:
   - camelcatalogs
   - integrationkits
   - integrationplatforms
+  - integrationprofiles
   - integrations
   - pipes
   # Deprecated: kameletbindings CR
@@ -53,6 +54,7 @@ rules:
   - camelcatalogs/status
   - integrationkits/status
   - integrationplatforms/status
+  - integrationprofiles/status
   - integrations/scale
   - integrations/status
   - pipes/scale

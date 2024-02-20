@@ -57,11 +57,12 @@ func TestUninstallSkipFlags(t *testing.T) {
 
 	kamelTestPostAddCommandInit(t, cmd)
 
-	_, err := test.ExecuteCommand(cmd, "uninstall", "--skip-crd", "--skip-cluster-roles", "--skip-integration-platform")
+	_, err := test.ExecuteCommand(cmd, "uninstall", "--skip-crd", "--skip-cluster-roles", "--skip-integration-platform", "--skip-integration-profile")
 	assert.Nil(t, err)
 	assert.True(t, uninstallCmdOptions.SkipCrd)
 	assert.True(t, uninstallCmdOptions.SkipClusterRoles)
 	assert.True(t, uninstallCmdOptions.SkipIntegrationPlatform)
+	assert.True(t, uninstallCmdOptions.SkipIntegrationProfile)
 }
 
 func TestUninstallAllFlag(t *testing.T) {
@@ -76,4 +77,5 @@ func TestUninstallAllFlag(t *testing.T) {
 	assert.True(t, uninstallCmdOptions.SkipCrd)
 	assert.True(t, uninstallCmdOptions.SkipClusterRoles)
 	assert.False(t, uninstallCmdOptions.SkipIntegrationPlatform)
+	assert.False(t, uninstallCmdOptions.SkipIntegrationProfile)
 }

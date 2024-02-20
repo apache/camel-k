@@ -36,9 +36,8 @@ import (
 
 func TestOperatorIDCamelCatalogReconciliation(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
-		operator1 := "operator-1"
-		Expect(CopyCamelCatalog(ns, operator1)).To(Succeed())
-		Expect(KamelInstallWithID(operator1, ns, "--global", "--force").Execute()).To(Succeed())
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		Expect(KamelInstallWithID(operatorID, ns, "--global", "--force").Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		Eventually(DefaultCamelCatalogPhase(ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 	})
@@ -49,13 +48,14 @@ func TestOperatorIDFiltering(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		WithNewTestNamespace(t, func(nsop1 string) {
-			WithNewTestNamespace(t, func(nsop2 string) {
-				operator1 := "operator-1"
-				Expect(CopyCamelCatalog(ns, operator1)).To(Succeed())
-				Expect(KamelInstallWithIDAndKameletCatalog(operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
-				Eventually(PlatformPhase(nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+			operator1 := "operator-1"
+			Expect(CopyCamelCatalog(nsop1, operator1)).To(Succeed())
+			Expect(KamelInstallWithIDAndKameletCatalog(operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
+			Eventually(PlatformPhase(nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
+			WithNewTestNamespace(t, func(nsop2 string) {
 				operator2 := "operator-2"
+				Expect(CopyCamelCatalog(nsop2, operator2)).To(Succeed())
 				Expect(KamelInstallWithIDAndKameletCatalog(operator2, nsop2, "--global", "--force").Execute()).To(Succeed())
 				Eventually(PlatformPhase(nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
