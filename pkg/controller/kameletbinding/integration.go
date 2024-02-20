@@ -86,7 +86,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1alpha
 		it.Spec.Replicas = &replicas
 	}
 
-	profile, err := determineProfile(ctx, c, binding)
+	profile, err := determineTraitProfile(ctx, c, binding)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func configureKameletBinding(integration *v1.Integration, bindings ...*bindings.
 	return nil
 }
 
-func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.KameletBinding) (v1.TraitProfile, error) {
+func determineTraitProfile(ctx context.Context, c client.Client, binding *v1alpha1.KameletBinding) (v1.TraitProfile, error) {
 	if binding.Spec.Integration != nil && binding.Spec.Integration.Profile != "" {
 		return binding.Spec.Integration.Profile, nil
 	}
@@ -255,7 +255,7 @@ func determineProfile(ctx context.Context, c client.Client, binding *v1alpha1.Ka
 	}
 	if pl != nil {
 		// Determine profile from cluster type
-		plProfile := platform.GetProfile(pl)
+		plProfile := platform.GetTraitProfile(pl)
 		if plProfile != "" {
 			return plProfile, nil
 		}
