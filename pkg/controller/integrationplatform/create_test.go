@@ -59,21 +59,26 @@ func TestCreate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, list.Items)
 
-	items, err := resources.WithPrefix("/camel-catelog-")
+	items, err := resources.WithPrefix("/resources/camel-catalog-")
 	assert.Nil(t, err)
 
+	foundOverall := 0
 	for _, k := range items {
 		found := false
 
 		for _, c := range list.Items {
 			n := strings.TrimSuffix(k, ".yaml")
+			n = strings.TrimPrefix(n, "resources/")
 			n = strings.ToLower(n)
 
 			if c.Name == n {
 				found = true
+				foundOverall++
 			}
 		}
 
 		assert.True(t, found)
 	}
+
+	assert.Equal(t, 1, foundOverall)
 }
