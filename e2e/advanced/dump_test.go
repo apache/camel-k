@@ -24,6 +24,7 @@ package advanced
 
 import (
 	"fmt"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -48,6 +49,8 @@ func TestKamelCLIDump(t *testing.T) {
 			operatorID := fmt.Sprintf("camel-k-%s", ns)
 			Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 			Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+			Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "yaml")).Should(ContainSubstring("Magicstring!"))

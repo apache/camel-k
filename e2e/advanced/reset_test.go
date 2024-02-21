@@ -29,6 +29,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestKamelReset(t *testing.T) {
@@ -36,6 +37,8 @@ func TestKamelReset(t *testing.T) {
 		operatorID := "camel-k-cli-reset"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+
+		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("Reset the whole platform", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml1")
