@@ -37,6 +37,7 @@
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
+- Remove duplication of the default platform creation [\#3433](https://github.com/apache/camel-k/issues/3433)
 - Use `go:embed` instead of vfsgen for embedded resources handling [\#3384](https://github.com/apache/camel-k/issues/3384)
 - Use build-tags to configure what feature are included in a camel-k build [\#2801](https://github.com/apache/camel-k/issues/2801)
 - shipwright.io builder [\#1673](https://github.com/apache/camel-k/issues/1673)
