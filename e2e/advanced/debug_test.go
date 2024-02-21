@@ -29,9 +29,11 @@ import (
 	"testing"
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
+
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
-	v1 "k8s.io/api/core/v1"
 )
 
 func TestKamelCLIDebug(t *testing.T) {
@@ -42,9 +44,11 @@ func TestKamelCLIDebug(t *testing.T) {
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
+		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 		t.Run("debug local default port check", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Expect(portIsInUse("127.0.0.1", "5005")()).To(BeFalse())
 
 			debugTestContext, cancel := context.WithCancel(TestContext)
@@ -57,7 +61,7 @@ func TestKamelCLIDebug(t *testing.T) {
 
 		t.Run("debug local port check", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			Expect(portIsInUse("127.0.0.1", "5006")()).To(BeFalse())
 
 			debugTestContext, cancel := context.WithCancel(TestContext)
@@ -70,7 +74,7 @@ func TestKamelCLIDebug(t *testing.T) {
 
 		t.Run("debug logs check", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 			debugTestContext, cancel := context.WithCancel(TestContext)
 			defer cancelAndWait(cancel)
@@ -82,7 +86,7 @@ func TestKamelCLIDebug(t *testing.T) {
 
 		t.Run("Pod config test", func(t *testing.T) {
 			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 			debugTestContext, cancel := context.WithCancel(TestContext)
 			defer cancelAndWait(cancel)

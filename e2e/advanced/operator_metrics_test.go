@@ -63,6 +63,8 @@ func TestMetrics(t *testing.T) {
 		operatorID := "camel-k-metrics"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns, "--log-level", "debug").Execute()).To(Succeed())
+		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "prometheus.enabled=true",

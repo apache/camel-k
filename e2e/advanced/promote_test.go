@@ -41,6 +41,7 @@ func TestKamelCLIPromote(t *testing.T) {
 		operatorDevID := "camel-k-cli-promote-dev"
 		Expect(CopyCamelCatalog(nsDev, operatorDevID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorDevID, nsDev).Execute()).To(Succeed())
+		Eventually(SelectedPlatformPhase(nsDev, operatorDevID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Dev content configmap
 		var cmData = make(map[string]string)

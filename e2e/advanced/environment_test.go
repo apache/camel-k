@@ -71,6 +71,8 @@ func TestEnvironmentTrait(t *testing.T) {
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
 		).Execute()).To(Succeed())
 
+		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
 		t.Run("Run integration with default environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-default")
 			Expect(KamelRunWithID(operatorID, ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
