@@ -30,6 +30,7 @@
 - Data type Kamelet hardcoded [\#5014](https://github.com/apache/camel-k/issues/5014)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
+- unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
 - Pipe using simple language expressions causing failure [\#4777](https://github.com/apache/camel-k/issues/4777)
@@ -44,6 +45,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump go.uber.org/zap from 1.26.0 to 1.27.0 [\#5171](https://github.com/apache/camel-k/pull/5171) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(\#3433\): Deprecate platform trait create default option [\#5170](https://github.com/apache/camel-k/pull/5170) ([christophd](https://github.com/christophd))
 - Move KameletRepositorySpec to common types [\#5168](https://github.com/apache/camel-k/pull/5168) ([christophd](https://github.com/christophd))
 - chore: Rename trait profile funcs [\#5167](https://github.com/apache/camel-k/pull/5167) ([christophd](https://github.com/christophd))
@@ -59,6 +61,7 @@
 - chore\(deps\): bump golang.org/x/term from 0.16.0 to 0.17.0 [\#5148](https://github.com/apache/camel-k/pull/5148) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(test\): add apache-snapshot repository as the test may run agains a camel-k-runtime snaphost release [\#5147](https://github.com/apache/camel-k/pull/5147) ([claudio4j](https://github.com/claudio4j))
 - fix\(controller\): filter confimap/secret watches [\#5144](https://github.com/apache/camel-k/pull/5144) ([squakez](https://github.com/squakez))
+- chore\(e2e-tests\): Improve E2E tests [\#5139](https://github.com/apache/camel-k/pull/5139) ([christophd](https://github.com/christophd))
 - chore\(ci\): upgrade setup-go action [\#5132](https://github.com/apache/camel-k/pull/5132) ([gansheer](https://github.com/gansheer))
 - fix\(github actions\): restircted image-pull-policy-always patch apply … [\#5128](https://github.com/apache/camel-k/pull/5128) ([valdar](https://github.com/valdar))
 - fix\(doc\): Add warning on cron trait for native build [\#5127](https://github.com/apache/camel-k/pull/5127) ([gansheer](https://github.com/gansheer))
