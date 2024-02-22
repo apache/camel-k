@@ -628,6 +628,13 @@ func IntegrationPods(ns string, name string) func() []corev1.Pod {
 	}
 }
 
+func IntegrationPodsNumbers(ns string, name string) func() *int32 {
+	return func() *int32 {
+		i := int32(len(IntegrationPods(ns, name)()))
+		return &i
+	}
+}
+
 func IntegrationSpecReplicas(ns string, name string) func() *int32 {
 	return func() *int32 {
 		it := Integration(ns, name)()
