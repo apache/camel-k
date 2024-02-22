@@ -20,7 +20,6 @@ package integration
 import (
 	"context"
 	"fmt"
-	"github.com/apache/camel-k/v2/pkg/metrics"
 
 	"reflect"
 	"time"
@@ -96,6 +95,7 @@ func integrationUpdateFunc(old *v1.Integration, it *v1.Integration) bool {
 		timeToFirstReadiness.Observe(duration.Seconds())
 	}
 
+	updateIntegrationPhase(it.Name, string(it.Status.Phase))
 	// If traits have changed, the reconciliation loop must kick in as
 	// traits may have impact
 	sameTraits, err := trait.IntegrationsHaveSameTraits(old, it)
@@ -535,8 +535,6 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 			break
 		}
 	}
-
-	metrics.UpdateIntegrationPhase(instance.Name, string(instance.Status.Phase))
 
 	return reconcile.Result{}, nil
 }

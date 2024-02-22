@@ -59,6 +59,8 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1
 )
 
+require gotest.tools v2.2.0+incompatible
+
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2 // indirect

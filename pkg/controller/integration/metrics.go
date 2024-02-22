@@ -18,6 +18,7 @@ limitations under the License.
 package integration
 
 import (
+	"strings"
 	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -25,21 +26,45 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var timeToFirstReadiness = prometheus.NewHistogram(
-	prometheus.HistogramOpts{
-		Name: "camel_k_integration_first_readiness_seconds",
-		Help: "Camel K integration time to first readiness",
-		Buckets: []float64{
-			5 * time.Second.Seconds(),
-			10 * time.Second.Seconds(),
-			30 * time.Second.Seconds(),
-			1 * time.Minute.Seconds(),
-			2 * time.Minute.Seconds(),
+var (
+	timeToFirstReadiness = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name: "camel_k_integration_first_readiness_seconds",
+			Help: "Camel K integration time to first readiness",
+			Buckets: []float64{
+				5 * time.Second.Seconds(),
+				10 * time.Second.Seconds(),
+				30 * time.Second.Seconds(),
+				1 * time.Minute.Seconds(),
+				2 * time.Minute.Seconds(),
+			},
 		},
-	},
+	)
+
+	integration = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "camel_k_integration_phase",
+			Help: "Number of integration processed",
+		}, []string{
+			"phase",
+			"id",
+		},
+	)
 )
 
 func init() {
 	// Register custom metrics with the global prometheus registry
-	metrics.Registry.MustRegister(timeToFirstReadiness)
+	metrics.Registry.MustRegister(timeToFirstReadiness, integration)
+}
+
+func updateIntegrationPhase(iId string, p string) {
+	phase := strings.Replace(strings.ToLower(p), " ", "_", -1)
+
+	if phase != "" && iId != "" {
+		labels := prometheus.Labels{
+			"id":    iId,
+			"phase": phase,
+		}
+		integration.With(labels).Inc()
+	}
 }
