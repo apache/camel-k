@@ -123,7 +123,7 @@ func TestKnativeService(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("knative"))
-	assert.Equal(t, 5, environment.Resources.Size())
+	assert.Equal(t, 4, environment.Resources.Size())
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName
@@ -133,8 +133,8 @@ func TestKnativeService(t *testing.T) {
 
 	spec := s.Spec.ConfigurationSpec.Template.Spec
 
-	assert.Len(t, spec.Containers[0].VolumeMounts, 6)
-	assert.Len(t, spec.Volumes, 6)
+	assert.Len(t, spec.Containers[0].VolumeMounts, 5)
+	assert.Len(t, spec.Volumes, 5)
 
 	assert.Condition(t, func() bool {
 		for _, v := range spec.Containers[0].VolumeMounts {
