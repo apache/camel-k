@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Debug Integrations failing [\#5161](https://github.com/apache/camel-k/issues/5161)
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
 - Integrations remain in Initialization loop when referenced config map has owner references [\#5114](https://github.com/apache/camel-k/issues/5114)
@@ -45,6 +46,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/prometheus/common from 0.47.0 to 0.48.0 [\#5177](https://github.com/apache/camel-k/pull/5177) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(ctrl\): calculate digest on spec traits [\#5176](https://github.com/apache/camel-k/pull/5176) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump go.uber.org/zap from 1.26.0 to 1.27.0 [\#5171](https://github.com/apache/camel-k/pull/5171) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(\#3433\): Deprecate platform trait create default option [\#5170](https://github.com/apache/camel-k/pull/5170) ([christophd](https://github.com/christophd))
 - Move KameletRepositorySpec to common types [\#5168](https://github.com/apache/camel-k/pull/5168) ([christophd](https://github.com/christophd))
