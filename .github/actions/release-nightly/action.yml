@@ -118,7 +118,7 @@ runs:
 
     - name: Create Release
       id: create_release
-      uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
+      uses: ncipollo/release-action@1e3e9c6637e5566e185b7ab66f187539c5a76da7
       with:
         artifacts: "./camel-k-client*.tar.gz,sbom.json"
         body: |
