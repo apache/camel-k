@@ -298,6 +298,8 @@ func addDependenciesFromCatalog(project *maven.Project, catalog *RuntimeCatalog)
 				md := maven.Dependency{
 					GroupID:    dep.GroupID,
 					ArtifactID: dep.ArtifactID,
+					Type:       dep.Type,
+					Classifier: dep.Classifier,
 				}
 
 				project.AddDependency(md)

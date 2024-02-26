@@ -8,7 +8,7 @@ NOTE: dear contributor, please, keep this organization as clean as you can, upda
 
 * builder
 * common
-* commonwithcustominstall
+* advanced
 * install
 * knative
 * native
@@ -23,7 +23,7 @@ Contains a basic set of tests required to validate each builder strategy we offe
 
 Full set of test to validate the main project feature. This test will assume the presence of a namespaced operator (installation provided by the same test execution suite). Insert here any test that has to validate any new feature required.
 
-### Commonwithcustominstall
+### Advanced
 
 Additional set of test that cover the main common features but that requires some particular operator configuration. In this test suite you must take care of installing the operator as well.
 

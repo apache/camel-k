@@ -23,7 +23,7 @@ runs:
   steps:
     - id: install-cluster
       name: Install Cluster
-      uses: container-tools/kind-action@v2.0.2
+      uses: container-tools/kind-action@v2.0.3
       if: ${{ env.CLUSTER_KIND_CONFIGURED != 'true' }}
       with:
         version: v0.19.0
@@ -70,3 +70,6 @@ outputs:
   cluster-has-olm:
     description: "Does the cluster have OLM"
     value: ${{ steps.extract-config.outputs.cluster-has-olm }}
+  cluster-global-operator-namespace:
+    description: "Namespace to install a global operator"
+    value: ${{ steps.extract-config.outputs.cluster-global-operator-namespace}}

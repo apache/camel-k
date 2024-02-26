@@ -30,6 +30,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -66,7 +67,7 @@ func TestBuilderTrait(t *testing.T) {
 	})
 
 	t.Run("Run build order strategy dependencies", func(t *testing.T) {
-		name := RandomizedSuffixName("java-fifo-strategy")
+		name := RandomizedSuffixName("java-dependencies-strategy")
 		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "builder.order-strategy=dependencies").Execute()).To(Succeed())
@@ -87,6 +88,14 @@ func TestBuilderTrait(t *testing.T) {
 		Eventually(BuildConfig(integrationKitNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
 
 		Eventually(BuilderPod(integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
+
+		// check integration schema does not contains unwanted default trait value.
+		Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
+		unstructuredIntegration := UnstructuredIntegration(ns, name)()
+		builderTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "builder")
+		Expect(builderTrait).NotTo(BeNil())
+		Expect(len(builderTrait)).To(Equal(1))
+		Expect(builderTrait["orderStrategy"]).To(Equal("dependencies"))
 
 		// We need to remove the kit as well
 		Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())

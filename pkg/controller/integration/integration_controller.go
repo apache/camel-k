@@ -38,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"knative.dev/serving/pkg/apis/serving"
@@ -377,7 +378,11 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 					return []reconcile.Request{}
 				}
 				return configmapEnqueueRequestsFromMapFunc(ctx, c, cm)
-			})).
+			}),
+			builder.WithPredicates(predicate.NewPredicateFuncs(func(object ctrl.Object) bool {
+				return object.GetLabels()["camel.apache.org/integration"] != ""
+			})),
+		).
 		Watches(&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
 				secret, ok := a.(*corev1.Secret)
@@ -386,7 +391,11 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 					return []reconcile.Request{}
 				}
 				return secretEnqueueRequestsFromMapFunc(ctx, c, secret)
-			})).
+			}),
+			builder.WithPredicates(predicate.NewPredicateFuncs(func(object ctrl.Object) bool {
+				return object.GetLabels()["camel.apache.org/integration"] != ""
+			})),
+		).
 		// Watch for the Integration Pods belonging to managed Integrations
 		Watches(&corev1.Pod{},
 			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {

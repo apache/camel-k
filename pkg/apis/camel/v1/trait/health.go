@@ -26,10 +26,8 @@ type HealthTrait struct {
 	Trait `property:",squash" json:",inline"`
 
 	// Configures the liveness probe for the integration container (default `false`).
-	// +kubebuilder:default=false
 	LivenessProbeEnabled *bool `property:"liveness-probe-enabled" json:"livenessProbeEnabled,omitempty"`
 	// Scheme to use when connecting to the liveness probe (default `HTTP`).
-	// +kubebuilder:default="HTTP"
 	LivenessScheme string `property:"liveness-scheme" json:"livenessScheme,omitempty"`
 	// Number of seconds after the container has started before the liveness probe is initiated.
 	LivenessInitialDelay int32 `property:"liveness-initial-delay" json:"livenessInitialDelay,omitempty"`
@@ -43,10 +41,8 @@ type HealthTrait struct {
 	LivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
 
 	// Configures the readiness probe for the integration container (default `true`).
-	// +kubebuilder:default=true
 	ReadinessProbeEnabled *bool `property:"readiness-probe-enabled" json:"readinessProbeEnabled,omitempty"`
 	// Scheme to use when connecting to the readiness probe (default `HTTP`).
-	// +kubebuilder:default="HTTP"
 	ReadinessScheme string `property:"readiness-scheme" json:"readinessScheme,omitempty"`
 	// Number of seconds after the container has started before the readiness probe is initiated.
 	ReadinessInitialDelay int32 `property:"readiness-initial-delay" json:"readinessInitialDelay,omitempty"`
@@ -60,10 +56,8 @@ type HealthTrait struct {
 	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
 
 	// Configures the startup probe for the integration container (default `false`).
-	// +kubebuilder:default=false
 	StartupProbeEnabled *bool `property:"startup-probe-enabled" json:"startupProbeEnabled,omitempty"`
 	// Scheme to use when connecting to the startup probe (default `HTTP`).
-	// +kubebuilder:default="HTTP"
 	StartupScheme string `property:"startup-scheme" json:"startupScheme,omitempty"`
 	// Number of seconds after the container has started before the startup probe is initiated.
 	StartupInitialDelay int32 `property:"startup-initial-delay" json:"startupInitialDelay,omitempty"`

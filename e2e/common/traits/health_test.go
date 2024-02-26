@@ -36,6 +36,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -71,6 +72,14 @@ func TestHealthTrait(t *testing.T) {
 			Should(gstruct.PointTo(BeNumerically("==", 3)))
 		// Finally check the readiness condition becomes truthy back
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+
+		// check integration schema does not contains unwanted default trait value.
+		Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
+		unstructuredIntegration := UnstructuredIntegration(ns, name)()
+		healthTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "health")
+		Expect(healthTrait).ToNot(BeNil())
+		Expect(len(healthTrait)).To(Equal(1))
+		Expect(healthTrait["enabled"]).To(Equal(true))
 
 		pods := IntegrationPods(ns, name)()
 

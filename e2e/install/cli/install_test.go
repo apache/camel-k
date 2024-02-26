@@ -220,18 +220,3 @@ func TestInstallDebugLogging(t *testing.T) {
 		Eventually(OperatorEnvVarValue(ns, "LOG_LEVEL"), TestTimeoutLong).Should(Equal("debug"))
 	})
 }
-
-func TestInstallWithPublishStrategyOptions(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(operatorID, ns, "--build-publish-strategy", "Kaniko", "--build-publish-strategy-option", "KanikoExecutorImage=foo", "--build-publish-strategy-option", "KanikoWarmerImage=bar").Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(func() map[string]string {
-			return Platform(ns)().Spec.Build.PublishStrategyOptions
-		}).Should(HaveKeyWithValue("KanikoExecutorImage", "foo"))
-		Eventually(func() map[string]string {
-			return Platform(ns)().Spec.Build.PublishStrategyOptions
-		}).Should(HaveKeyWithValue("KanikoWarmerImage", "bar"))
-	})
-}

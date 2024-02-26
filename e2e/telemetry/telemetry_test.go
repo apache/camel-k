@@ -29,6 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
@@ -66,6 +67,15 @@ func TestTelemetryTrait(t *testing.T) {
 		// Ensured logs in opentelemetrycollector pod are present
 		Eventually(TailedLogs(pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.target: Str(/customers/%s)", name)))
 		Eventually(TailedLogs(pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.url: Str(http://rest-consumer/customers/%s)", name)))
+
+		// check integration schema does not contains unwanted default trait value.
+		Eventually(UnstructuredIntegration(ns, "rest-consumer")).ShouldNot(BeNil())
+		unstructuredIntegration := UnstructuredIntegration(ns, "rest-consumer")()
+		builderTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "addons", "telemetry")
+		Expect(builderTrait).NotTo(BeNil())
+		Expect(len(builderTrait)).To(Equal(2))
+		Expect(builderTrait["enabled"]).To(Equal(true))
+		Expect(builderTrait["endpoint"]).To(Equal("http://opentelemetrycollector.otlp.svc.cluster.local:4317"))
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())

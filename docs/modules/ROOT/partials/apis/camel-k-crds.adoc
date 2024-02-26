@@ -608,6 +608,13 @@ map[string]string
 
 The node selector for the builder pod. Only used for `pod` strategy
 
+|`annotations` +
+map[string]string
+|
+
+
+Annotation to use for the builder pod. Only used for `pod` strategy
+
 
 |===
 
@@ -2552,6 +2559,13 @@ the Camel K operator version for which this kit was configured
 
 a list of conditions which happened for the events related the kit
 
+|`traits` +
+*xref:#_camel_apache_org_v1_IntegrationKitTraits[IntegrationKitTraits]*
+|
+
+
+generated traits executed by the kit
+
 
 |===
 
@@ -2561,6 +2575,7 @@ a list of conditions which happened for the events related the kit
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 
 IntegrationKitTraits defines traits assigned to an `IntegrationKit`.
 
@@ -2679,7 +2694,7 @@ string
 
 
 a base image that can be used as base layer for all images.
-It can be useful if you want to provide some custom base image with further utility softwares
+It can be useful if you want to provide some custom base image with further utility software
 
 |`registry` +
 *xref:#_camel_apache_org_v1_RegistrySpec[RegistrySpec]*
@@ -2806,30 +2821,6 @@ A human-readable message indicating details about the transition.
 IntegrationPlatformConditionType defines the type of condition.
 
 
-[#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec]
-=== IntegrationPlatformKameletRepositorySpec
-
-*Appears on:*
-
-* <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
-
-IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use.
-
-[cols="2,2a",options="header"]
-|===
-|Field
-|Description
-
-|`uri` +
-string
-|
-
-
-the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
-
-
-|===
-
 [#_camel_apache_org_v1_IntegrationPlatformKameletSpec]
 === IntegrationPlatformKameletSpec
 
@@ -2845,7 +2836,7 @@ IntegrationPlatformKameletSpec define the behavior for all the Kamelets controll
 |Description
 
 |`repositories` +
-*xref:#_camel_apache_org_v1_IntegrationPlatformKameletRepositorySpec[[\]IntegrationPlatformKameletRepositorySpec]*
+*xref:#_camel_apache_org_v1_KameletRepositorySpec[[\]KameletRepositorySpec]*
 |
 
 
@@ -3222,6 +3213,13 @@ label selector
 
 
 features offered by the Integration
+
+|`traits` +
+*xref:#_camel_apache_org_v1_Traits[Traits]*
+|
+
+
+the traits generated and executed for this Integration
 
 |`lastInitTimestamp` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
@@ -3702,6 +3700,30 @@ the default value of the property (if any)
 
 |===
 
+[#_camel_apache_org_v1_KameletRepositorySpec]
+=== KameletRepositorySpec
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationPlatformKameletSpec, IntegrationPlatformKameletSpec>>
+
+KameletRepositorySpec defines the location of the Kamelet catalog to use.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`uri` +
+string
+|
+
+
+the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
+
+
+|===
+
 [#_camel_apache_org_v1_KameletSpec]
 === KameletSpec
 
@@ -3911,7 +3933,7 @@ Language represents a supported language (Camel DSL).
 * <<#_camel_apache_org_v1_MavenSpec, MavenSpec>>
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-MavenArtifact defines a GAV (Group:Artifact:Version) Maven artifact.
+MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier) Maven artifact.
 
 [cols="2,2a",options="header"]
 |===
@@ -3932,12 +3954,26 @@ string
 
 Maven Artifact
 
+|`type` +
+string
+|
+
+
+Maven Type
+
 |`version` +
 string
 |
 
 
 Maven Version
+
+|`classifier` +
+string
+|
+
+
+Maven Classifier
 
 
 |===
@@ -5206,7 +5242,7 @@ a PackageTask, used to package the project
 
 
 a BuildahTask, for Buildah strategy
-Deprecated: use spectrum, jib or s2i instead
+Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
@@ -5214,7 +5250,7 @@ Deprecated: use spectrum, jib or s2i instead
 
 
 a KanikoTask, for Kaniko strategy
-Deprecated: use spectrum, jib or s2i instead
+Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
@@ -5334,6 +5370,7 @@ TraitConfiguration parameters configuration
 
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
 Traits represents the collection of trait configurations.
 
@@ -5817,6 +5854,7 @@ bool
 
 
 Enable verbose logging on build components that support it (e.g. Kaniko build pod).
+Deprecated no longer in use
 
 |`properties` +
 []string
@@ -5944,6 +5982,13 @@ map[string]string
 
 
 Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
+
+|`annotations` +
+map[string]string
+|
+
+
+When using `pod` strategy, annotation to use for the builder pod.
 
 
 |===
@@ -6148,6 +6193,8 @@ For such tasks, the cron trait can materialize the integration as a Kubernetes C
 in order to save resources when the integration does not need to be executed.
 
 Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
+
+WARNING: In case of native build-mode defined in xref:traits:quarkus.adoc[quarkus] trait, the component can't be customized.
 
 The rules for using a Kubernetes CronJob are the following:
 
@@ -6789,11 +6836,11 @@ Forces the value for labels `sidecar.istio.io/inject`. By default the label is s
 
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-The JVM trait is used to configure the JVM that runs the Integration. This trait can be configured only for Integration and related IntegrationKits
+The JVM trait is used to configure the JVM that runs the Integration. This trait is configured only for Integration and related IntegrationKits
 (bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
 trait is disabled by the platform.
 
-NOTE: the platform will skip the trait configuration for those container image matching `camel-k-kit-` name.
+WARNING: you can still enable the trait explicitly even when it is disabled by the platform but you should be aware that some configurations could fail.
 
 
 [cols="2,2a",options="header"]
@@ -7361,7 +7408,8 @@ bool
 |
 
 
-Enable "hot reload" when a secret/configmap mounted is edited (default `false`)
+Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
+marked with `camel.apache.org/integration` label to be taken in account.
 
 
 |===
@@ -7556,6 +7604,7 @@ bool
 
 
 To create a default (empty) platform when the platform is missing.
+Deprecated: Platform is auto generated by the operator install procedure - maintained for backward compatibility
 
 |`global` +
 bool
@@ -7563,13 +7612,15 @@ bool
 
 
 Indicates if the platform should be created globally in the case of global operator (default true).
+Deprecated: Platform is auto generated by the operator install procedure - maintained for backward compatibility
 
 |`auto` +
 bool
 |
 
 
-To automatically detect from the environment if a default platform can be created (it will be created on OpenShift only).
+To automatically detect from the environment if a default platform can be created (it will be created on OpenShift or when a registry address is set).
+Deprecated: Platform is auto generated by the operator install procedure - maintained for backward compatibility
 
 
 |===

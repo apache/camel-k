@@ -26,6 +26,8 @@ package trait
 //
 // Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
 //
+// WARNING: In case of native build-mode defined in xref:traits:quarkus.adoc[quarkus] trait, the component can't be customized.
+//
 // The rules for using a Kubernetes CronJob are the following:
 //
 //   - `timer`: when period is set in milliseconds with no remaining seconds, for example 120000. If there is any second left as in 121000 (120s and 1s) or the presence of any of these parameters (delay, repeatCount, time) then a CronJob  won't be created, but a standard deployment.
@@ -68,10 +70,8 @@ type CronTrait struct {
 	// Specifies the duration in seconds, relative to the start time, that the job
 	// may be continuously active before it is considered to be failed.
 	// It defaults to 60s.
-	// +kubebuilder:default=60
 	ActiveDeadlineSeconds *int64 `property:"active-deadline-seconds" json:"activeDeadlineSeconds,omitempty"`
 	// Specifies the number of retries before marking the job failed.
 	// It defaults to 2.
-	// +kubebuilder:default=2
 	BackoffLimit *int32 `property:"backoff-limit" json:"backoffLimit,omitempty"`
 }

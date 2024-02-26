@@ -47,7 +47,8 @@ Syntax: [configmap\|secret]:name[/key][@path], where name represents the resourc
 
 | mount.hot-reload
 | bool
-| Enable "hot reload" when a secret/configmap mounted is edited (default `false`)
+| Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
+marked with `camel.apache.org/integration` label to be taken in account.
 
 |===
 

@@ -54,6 +54,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -269,21 +270,7 @@ func KamelInstallWithIDAndKameletCatalog(operatorID string, namespace string, ar
 func kamelInstallWithContext(ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) *cobra.Command {
 	var installArgs []string
 
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if globalTest {
-		fmt.Printf("Executing as global test\n")
-
-		if err := verifyGlobalOperator(); err != nil {
-			failTest(err)
-		}
-
-		// Have a global operator pod watching all namespaces
-		// so ensure an integration platform is installed in target namespace
-		installArgs = []string{"install", "--skip-operator-setup", "-n", namespace}
-	} else {
-		// NOT global so proceed with local namespaced kamel install using the operator id
-		installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
-	}
+	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
 
 	if skipKameletCatalog {
 		installArgs = append(installArgs, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false")
@@ -354,20 +341,7 @@ func KamelCommandWithContext(ctx context.Context, command string, operatorID str
 	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	var cmdArgs []string
 
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if globalTest {
-		fmt.Printf("Running as globally managed resource\n")
-
-		if err := verifyGlobalOperator(); err != nil {
-			failTest(err)
-		}
-
-		// Have a global operator reconciling the integration
-		cmdArgs = []string{command, "-n", namespace}
-	} else {
-		// NOT global so proceed with local namespaced operator reconciling the integration
-		cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
-	}
+	cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
 
 	cmdArgs = append(cmdArgs, args...)
 	return KamelWithContext(ctx, cmdArgs...)
@@ -376,7 +350,7 @@ func KamelCommandWithContext(ctx context.Context, command string, operatorID str
 func verifyGlobalOperator() error {
 	opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
 	if opns == "" {
-		return errors.New("No operator namespace defined in CAMEL_K_GLOBAL_OPERATOR_NS")
+		return errors.New("no operator namespace defined in CAMEL_K_GLOBAL_OPERATOR_NS")
 	}
 
 	oppod := OperatorPod(opns)()
@@ -651,6 +625,13 @@ func IntegrationPods(ns string, name string) func() []corev1.Pod {
 			failTest(err)
 		}
 		return lst.Items
+	}
+}
+
+func IntegrationPodsNumbers(ns string, name string) func() *int32 {
+	return func() *int32 {
+		i := int32(len(IntegrationPods(ns, name)()))
+		return &i
 	}
 }
 
@@ -1020,6 +1001,28 @@ func Integration(ns string, name string) func() *v1.Integration {
 	}
 }
 
+func UnstructuredIntegration(ns string, name string) func() *unstructured.Unstructured {
+	return func() *unstructured.Unstructured {
+		gvk := schema.GroupVersionKind{Group: v1.SchemeGroupVersion.Group, Version: v1.SchemeGroupVersion.Version, Kind: v1.IntegrationKind}
+		return UnstructuredObject(ns, name, gvk)()
+	}
+}
+
+func UnstructuredObject(ns string, name string, gvk schema.GroupVersionKind) func() *unstructured.Unstructured {
+	return func() *unstructured.Unstructured {
+		object := &unstructured.Unstructured{}
+		object.SetNamespace(ns)
+		object.SetName(name)
+		object.SetGroupVersionKind(gvk)
+		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(object), object); err != nil && !k8serrors.IsNotFound(err) {
+			failTest(err)
+		} else if err != nil && k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return object
+	}
+}
+
 func IntegrationVersion(ns string, name string) func() string {
 	return func() string {
 		it := Integration(ns, name)()
@@ -1030,7 +1033,7 @@ func IntegrationVersion(ns string, name string) func() string {
 	}
 }
 
-func IntegrationProfile(ns string, name string) func() v1.TraitProfile {
+func IntegrationTraitProfile(ns string, name string) func() v1.TraitProfile {
 	return func() v1.TraitProfile {
 		it := Integration(ns, name)()
 		if it == nil {
@@ -1583,7 +1586,7 @@ func CreatePlainTextConfigmapWithLabels(ns string, name string, data map[string]
 	return TestClient().Create(TestContext, &cm)
 }
 
-func UpdatePlainTextConfigmap(ns string, name string, data map[string]string) error {
+func CreatePlainTextConfigmapWithOwnerRefWithLabels(ns string, name string, data map[string]string, orname string, uid types.UID, labels map[string]string) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1592,6 +1595,36 @@ func UpdatePlainTextConfigmap(ns string, name string, data map[string]string) er
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion:         v1.SchemeGroupVersion.String(),
+				Kind:               "Integration",
+				Name:               orname,
+				UID:                uid,
+				Controller:         pointer.Bool(true),
+				BlockOwnerDeletion: pointer.Bool(true),
+			},
+			},
+			Labels: labels,
+		},
+		Data: data,
+	}
+	return TestClient().Create(TestContext, &cm)
+}
+
+func UpdatePlainTextConfigmap(ns string, name string, data map[string]string) error {
+	return UpdatePlainTextConfigmapWithLabels(ns, name, data, nil)
+}
+
+func UpdatePlainTextConfigmapWithLabels(ns string, name string, data map[string]string, labels map[string]string) error {
+	cm := corev1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+			Labels:    labels,
 		},
 		Data: data,
 	}
@@ -1632,6 +1665,10 @@ func CreatePlainTextSecret(ns string, name string, data map[string]string) error
 }
 
 func UpdatePlainTextSecret(ns string, name string, data map[string]string) error {
+	return UpdatePlainTextSecretWithLabels(ns, name, data, nil)
+}
+
+func UpdatePlainTextSecretWithLabels(ns string, name string, data map[string]string, labels map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -1640,6 +1677,7 @@ func UpdatePlainTextSecret(ns string, name string, data map[string]string) error
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
+			Labels:    labels,
 		},
 		StringData: data,
 	}
@@ -1911,6 +1949,24 @@ func PlatformByName(ns string, name string) func() *v1.IntegrationPlatform {
 	}
 }
 
+func CopyCamelCatalog(ns, operatorID string) error {
+	catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
+	defaultCatalog := CamelCatalog("default", catalogName)()
+	if defaultCatalog != nil {
+		catalog := v1.CamelCatalog{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: ns,
+				Name:      catalogName,
+			},
+			Spec: *defaultCatalog.Spec.DeepCopy(),
+		}
+		v1.SetAnnotation(&catalog.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
+		return CreateCamelCatalog(&catalog)()
+	}
+
+	return nil
+}
+
 func CamelCatalog(ns, name string) func() *v1.CamelCatalog {
 	return func() *v1.CamelCatalog {
 		cat := v1.CamelCatalog{}
@@ -2179,15 +2235,6 @@ func ConsoleCLIDownload(name string) func() *consoleV1.ConsoleCLIDownload {
 }
 
 func OperatorPod(ns string) func() *corev1.Pod {
-	namespace := ns
-
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-	if globalTest && len(opns) > 0 {
-		// Use the global operator pod instead of given namespace
-		namespace = opns
-	}
-
 	return func() *corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -2196,7 +2243,7 @@ func OperatorPod(ns string) func() *corev1.Pod {
 			},
 		}
 		if err := TestClient().List(TestContext, &lst,
-			ctrl.InNamespace(namespace),
+			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"camel.apache.org/component": "operator",
 			}); err != nil {
@@ -2396,7 +2443,7 @@ func ClusterDomainName() (string, error) {
 */
 
 func CreateOperatorServiceAccount(ns string) error {
-	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/manager/operator-service-account.yaml")
+	return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/manager/operator-service-account.yaml")
 }
 
 func CreateOperatorRole(ns string) (err error) {
@@ -2410,12 +2457,12 @@ func CreateOperatorRole(ns string) (err error) {
 		// This should ideally be removed from the common RBAC manifest.
 		customizer = install.RemoveIngressRoleCustomizer
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/rbac/namespaced/operator-role.yaml")
+	err = install.Resource(TestContext, TestClient(), ns, true, customizer, "/config/rbac/namespaced/operator-role.yaml")
 	if err != nil {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/namespaced/operator-role-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-openshift.yaml")
 	}
 	return nil
 }
@@ -2425,12 +2472,12 @@ func CreateOperatorRoleBinding(ns string) error {
 	if err != nil {
 		failTest(err)
 	}
-	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/namespaced/operator-role-binding.yaml")
+	err = install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/rbac/namespaced/operator-role-binding.yaml")
 	if err != nil {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/rbac/openshift/namespaced/operator-role-binding-openshift.yaml")
+		return install.Resource(TestContext, TestClient(), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-binding-openshift.yaml")
 	}
 	return nil
 }
@@ -2651,13 +2698,13 @@ func userCleanup(t *testing.T) {
 }
 
 func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-
-	defer func(isGlobal bool) {
+	defer func() {
 		DumpNamespace(t, ns)
 
+		osns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
+
 		// Try to clean up namespace
-		if !isGlobal && HasPlatform(ns)() {
+		if ns != osns && HasPlatform(ns)() {
 			t.Logf("Clean up test namespace: %s", ns)
 
 			if err := Kamel("uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute(); err != nil {
@@ -2666,7 +2713,7 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 
 			t.Logf("Successfully cleaned up test namespace: %s", ns)
 		}
-	}(globalTest)
+	}()
 
 	gomega.RegisterTestingT(t)
 	doRun(ns)
@@ -2937,15 +2984,6 @@ func DeleteCIProcessID() {
 	err := os.Remove(ciPID)
 	if err != nil {
 		panic(err)
-	}
-}
-
-func GetOperatorNamespace(testNamespace string) string {
-	globalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if globalTest {
-		return os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-	} else {
-		return testNamespace
 	}
 }
 

@@ -42,6 +42,7 @@ var (
 	endpointTypeSinkContext   = bindings.EndpointContext{Type: v1.EndpointTypeSink}
 )
 
+// CreateIntegrationFor creates and Integration from a Pipe.
 func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe) (*v1.Integration, error) {
 	controller := true
 	blockOwnerDeletion := true
@@ -87,7 +88,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 		it.Spec.Replicas = &replicas
 	}
 
-	profile, err := determineProfile(ctx, c, binding)
+	profile, err := determineTraitProfile(ctx, c, binding)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +103,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 		Client:    c,
 		Namespace: it.Namespace,
 		Profile:   profile,
+		Metadata:  it.Annotations,
 	}
 
 	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, binding.Spec.Source)
@@ -233,7 +235,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 	return nil
 }
 
-func determineProfile(ctx context.Context, c client.Client, binding *v1.Pipe) (v1.TraitProfile, error) {
+func determineTraitProfile(ctx context.Context, c client.Client, binding *v1.Pipe) (v1.TraitProfile, error) {
 	if binding.Spec.Integration != nil && binding.Spec.Integration.Profile != "" {
 		return binding.Spec.Integration.Profile, nil
 	}
@@ -256,7 +258,7 @@ func determineProfile(ctx context.Context, c client.Client, binding *v1.Pipe) (v
 	}
 	if pl != nil {
 		// Determine profile from cluster type
-		plProfile := platform.GetProfile(pl)
+		plProfile := platform.GetTraitProfile(pl)
 		if plProfile != "" {
 			return plProfile, nil
 		}

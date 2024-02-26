@@ -33,6 +33,8 @@ const (
 	KameletTypeLabel = "camel.apache.org/kamelet.type"
 	// KameletGroupLabel label used to group Kamelets.
 	KameletGroupLabel = "camel.apache.org/kamelet.group"
+	// KameletDataTypeLabel label used to override the default Kamelet action data type.
+	KameletDataTypeLabel = "camel.apache.org/kamelet.data.type"
 
 	// KameletTypeSink type Sink.
 	KameletTypeSink = "sink"

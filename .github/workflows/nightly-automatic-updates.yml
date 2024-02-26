@@ -38,7 +38,7 @@ jobs:
     name: Automatic updates on ${{ matrix.ref-branch }} branch
     steps:
     - name: "Checkout code"
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: ${{ matrix.ref-branch }}
         persist-credentials: false
@@ -49,3 +49,5 @@ jobs:
         branch-ref: ${{ matrix.ref-branch }}
         secretGithubToken: ${{ secrets.GITHUB_TOKEN }}
         goVersionFile: "go.mod"
+        javaVersion: "17"
+        javaDistribution: "temurin"

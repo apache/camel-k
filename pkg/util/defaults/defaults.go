@@ -28,12 +28,6 @@ const (
 	// DefaultRuntimeVersion --
 	DefaultRuntimeVersion = "3.2.3"
 
-	// BuildahVersion --
-	BuildahVersion = "1.30.0"
-
-	// KanikoVersion --
-	KanikoVersion = "1.9.1"
-
 	// baseImage --
 	baseImage = "eclipse-temurin:17"
 
@@ -42,6 +36,9 @@ const (
 
 	// ImageName --
 	ImageName = "docker.io/apache/camel-k"
+
+	// OpenShiftRegistryAddress --
+	OpenShiftRegistryAddress = "image-registry.openshift-image-registry.svc:5000"
 
 	// installDefaultKamelets --
 	installDefaultKamelets = true

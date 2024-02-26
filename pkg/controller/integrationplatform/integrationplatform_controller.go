@@ -155,9 +155,9 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 
 	actions := []Action{
 		NewInitializeAction(),
-		NewWarmAction(r.reader),
 		NewCreateAction(),
 		NewMonitorAction(),
+		NewCreateCatalogAction(),
 	}
 
 	var targetPhase v1.IntegrationPlatformPhase

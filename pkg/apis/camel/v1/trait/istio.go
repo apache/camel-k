@@ -24,7 +24,6 @@ package trait
 type IstioTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// Configures a (comma-separated) list of CIDR subnets that should not be intercepted by the Istio proxy (`10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` by default).
-	// +kubebuilder:default="10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
 	Allow string `property:"allow" json:"allow,omitempty"`
 	// Forces the value for labels `sidecar.istio.io/inject`. By default the label is set to `true` on deployment and not set on Knative Service.
 	Inject *bool `property:"inject" json:"inject,omitempty"`

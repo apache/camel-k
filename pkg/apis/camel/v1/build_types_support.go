@@ -104,19 +104,8 @@ func ConfigurationTasksByName(tasks []Task, name string) *BuildConfiguration {
 		if t.Jib != nil && t.Jib.Name == name {
 			return &t.Jib.Configuration
 		}
-		if t.Buildah != nil && t.Buildah.Name == name {
-			return &t.Buildah.Configuration
-		}
-		if t.Kaniko != nil && t.Kaniko.Name == name {
-			return &t.Kaniko.Configuration
-		}
 	}
 	return &BuildConfiguration{}
-}
-
-// SetBuilderConfiguration set the configuration required for this Build.
-func (build *Build) SetBuilderConfiguration(conf *BuildConfiguration) {
-	SetBuilderConfigurationTasks(build.Spec.Tasks, conf)
 }
 
 // SetBuilderConfigurationTasks set the configuration required for the builder in the list of tasks.

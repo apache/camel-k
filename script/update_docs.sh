@@ -20,7 +20,7 @@ location=$(dirname $0)
 echo "Scraping information from Makefile"
 RUNTIME_VERSION=$(grep '^DEFAULT_RUNTIME_VERSION := ' Makefile | sed 's/^.* \?= //')
 
-CATALOG="$location/../resources/camel-catalog-$RUNTIME_VERSION.yaml"
+CATALOG="$location/../pkg/resources/resources/camel-catalog-$RUNTIME_VERSION.yaml"
 # This script requires the catalog to be available (via make build-resources for instance)
 if [ ! -f $CATALOG ]; then
     echo "❗ catalog not available. Make sure to download it before calling this script."
@@ -40,18 +40,12 @@ else
     fi
     KAMELETS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
 fi
-BUILDAH_VERSION=$(grep '^BUILDAH_VERSION := ' Makefile | sed 's/^.* \?= //')
-KANIKO_VERSION=$(grep '^KANIKO_VERSION := ' Makefile | sed 's/^.* \?= //')
 KUSTOMIZE_VERSION=$(grep '^KUSTOMIZE_VERSION := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')
 
 echo "Camel K Runtime version: $RUNTIME_VERSION"
 echo "Kamelets version: $KAMELETS_VERSION"
-echo "Buildah version: $BUILDAH_VERSION"
-echo "Kaniko version: $KANIKO_VERSION"
 echo "Kustomize version: $KUSTOMIZE_VERSION"
 
-yq -i ".asciidoc.attributes.buildah-version = \"$BUILDAH_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.kaniko-version = \"$KANIKO_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.kustomize-version = \"$KUSTOMIZE_VERSION\"" $location/../docs/antora.yml
 
 echo "Scraping information from catalog available at: $CATALOG"

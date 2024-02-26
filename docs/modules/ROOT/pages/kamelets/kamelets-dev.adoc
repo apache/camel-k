@@ -419,7 +419,9 @@ spec:
 The very same concept of data types can also be used on Kamelet sinks and input data types.
 As soon as the user chooses a specific input data type for a Kamelet the Pipe processing will try to resolve a matching transformer implementation and apply its logic.
 
-You may also use a `data-type-action` Kamelet in your Pipe binding in order to apply a specific data type transformation at any step.
+NOTE: by default, the operator will use a `data-type-action` Kamelet that has to be an available Kamelet in the catalog. This is provided out of the box installing bundled Apache Kamelet catalog. It will fail if the Kamelet is not available. You can also override the Kamelet action to use adding the `camel.apache.org/kamelet.data.type` annotation to the Pipe specification.
+
+You may also use the `data-type-action` Kamelet in your Pipe binding in order to apply a specific data type transformation at any step.
 
 .my-sample-source-binding.yaml
 [source,yaml]

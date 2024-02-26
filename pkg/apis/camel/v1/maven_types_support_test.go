@@ -140,3 +140,65 @@ func TestMarshalPluginPropertiesWithNestedProps(t *testing.T) {
 	assert.Contains(t, result, "<prop2>baz</prop2>")
 	assert.Contains(t, result, "<v2>bar</v2>")
 }
+
+func TestArtifactToString(t *testing.T) {
+	a1 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact", a1.GetDependencyID())
+
+	a2 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+		Type:       "jar",
+		Version:    "1.2",
+		Classifier: "foo",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact:jar:1.2:foo", a2.GetDependencyID())
+
+	a3 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+		Version:    "1.2",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact:1.2", a3.GetDependencyID())
+
+	a4 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+		Type:       "jar",
+		Classifier: "foo",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact:jar::foo", a4.GetDependencyID())
+
+	a5 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+		Classifier: "foo",
+		Version:    "1.2",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact::1.2:foo", a5.GetDependencyID())
+
+	a6 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+		Type:       "bar",
+		Version:    "2.2",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact:bar:2.2", a6.GetDependencyID())
+
+	a7 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+		Classifier: "foo",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact:::foo", a7.GetDependencyID())
+
+	a8 := MavenArtifact{
+		GroupID:    "org.mygroup",
+		ArtifactID: "my-artifact",
+		Type:       "jar",
+	}
+	assert.Equal(t, "mvn:org.mygroup:my-artifact:jar", a8.GetDependencyID())
+}

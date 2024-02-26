@@ -44,7 +44,8 @@ func newPlatformTrait() Trait {
 }
 
 func (t *platformTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil {
+	if e.Integration == nil || e.Integration.IsSynthetic() {
+		// Don't run this trait for a synthetic integration
 		return false, nil, nil
 	}
 
@@ -52,29 +53,25 @@ func (t *platformTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		return false, nil, nil
 	}
 
-	if !pointer.BoolDeref(t.Auto, false) {
-		if e.Platform == nil {
-			if t.CreateDefault == nil {
-				// Calculate if the platform should be automatically created when missing.
-				if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
-					return false, nil, err
-				} else if ocp {
-					t.CreateDefault = &ocp
-				} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
-					return false, nil, err
-				} else if addr != nil {
-					t.CreateDefault = pointer.Bool(true)
-				}
-			}
-			if t.Global == nil {
-				globalOperator := platform.IsCurrentOperatorGlobal()
-				t.Global = &globalOperator
-			}
+	if t.CreateDefault == nil && pointer.BoolDeref(t.Auto, false) && e.Platform == nil {
+		// Calculate if the platform should be automatically created when missing.
+		if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
+			return false, nil, err
+		} else if ocp {
+			t.CreateDefault = pointer.Bool(true)
+		} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
+			return false, nil, err
+		} else if addr != nil {
+			t.CreateDefault = pointer.Bool(true)
 		}
 	}
 
-	// Don't run this trait for a synthetic Integration
-	return e.Integration == nil || !e.Integration.IsSynthetic(), nil, nil
+	if t.Global == nil {
+		globalOperator := platform.IsCurrentOperatorGlobal()
+		t.Global = &globalOperator
+	}
+
+	return true, nil, nil
 }
 
 func (t *platformTrait) Apply(e *Environment) error {

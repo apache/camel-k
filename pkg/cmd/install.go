@@ -43,7 +43,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/builder"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -162,53 +161,52 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 
 type installCmdOptions struct {
 	*RootCmdOptions
-	Wait                        bool `mapstructure:"wait"`
-	ClusterSetupOnly            bool `mapstructure:"cluster-setup"`
-	SkipOperatorSetup           bool `mapstructure:"skip-operator-setup"`
-	SkipClusterSetup            bool `mapstructure:"skip-cluster-setup"`
-	SkipRegistrySetup           bool `mapstructure:"skip-registry-setup"`
-	SkipDefaultKameletsSetup    bool `mapstructure:"skip-default-kamelets-setup"`
-	ExampleSetup                bool `mapstructure:"example"`
-	Global                      bool `mapstructure:"global"`
-	Save                        bool `mapstructure:"save" kamel:"omitsave"`
-	Force                       bool `mapstructure:"force"`
-	Olm                         bool `mapstructure:"olm"`
-	olmOptions                  olm.Options
-	ClusterType                 string   `mapstructure:"cluster-type"`
-	OutputFormat                string   `mapstructure:"output"`
-	RuntimeVersion              string   `mapstructure:"runtime-version"`
-	BaseImage                   string   `mapstructure:"base-image"`
-	OperatorID                  string   `mapstructure:"operator-id"`
-	OperatorImage               string   `mapstructure:"operator-image"`
-	OperatorImagePullPolicy     string   `mapstructure:"operator-image-pull-policy"`
-	BuildStrategy               string   `mapstructure:"build-strategy"`
-	BuildOrderStrategy          string   `mapstructure:"build-order-strategy"`
-	BuildPublishStrategy        string   `mapstructure:"build-publish-strategy"`
-	BuildPublishStrategyOptions []string `mapstructure:"build-publish-strategy-options"`
-	BuildTimeout                string   `mapstructure:"build-timeout"`
-	MavenExtensions             []string `mapstructure:"maven-extensions"`
-	MavenLocalRepository        string   `mapstructure:"maven-local-repository"`
-	MavenProperties             []string `mapstructure:"maven-properties"`
-	MavenRepositories           []string `mapstructure:"maven-repositories"`
-	MavenSettings               string   `mapstructure:"maven-settings"`
-	MavenCASecret               string   `mapstructure:"maven-ca-secret"`
-	MavenCLIOptions             []string `mapstructure:"maven-cli-options"`
-	HealthPort                  int32    `mapstructure:"health-port"`
-	MaxRunningBuilds            int32    `mapstructure:"max-running-pipelines"`
-	Monitoring                  bool     `mapstructure:"monitoring"`
-	MonitoringPort              int32    `mapstructure:"monitoring-port"`
-	Debugging                   bool     `mapstructure:"debugging"`
-	DebuggingPort               int32    `mapstructure:"debugging-port"`
-	DebuggingPath               string   `mapstructure:"debugging-path"`
-	TraitProfile                string   `mapstructure:"trait-profile"`
-	Tolerations                 []string `mapstructure:"tolerations"`
-	NodeSelectors               []string `mapstructure:"node-selectors"`
-	ResourcesRequirements       []string `mapstructure:"operator-resources"`
-	LogLevel                    string   `mapstructure:"log-level"`
-	EnvVars                     []string `mapstructure:"operator-env-vars"`
-	registry                    v1.RegistrySpec
-	registryAuth                registry.Auth
-	RegistryAuthFile            string `mapstructure:"registry-auth-file"`
+	Wait                     bool `mapstructure:"wait"`
+	ClusterSetupOnly         bool `mapstructure:"cluster-setup"`
+	SkipOperatorSetup        bool `mapstructure:"skip-operator-setup"`
+	SkipClusterSetup         bool `mapstructure:"skip-cluster-setup"`
+	SkipRegistrySetup        bool `mapstructure:"skip-registry-setup"`
+	SkipDefaultKameletsSetup bool `mapstructure:"skip-default-kamelets-setup"`
+	ExampleSetup             bool `mapstructure:"example"`
+	Global                   bool `mapstructure:"global"`
+	Save                     bool `mapstructure:"save" kamel:"omitsave"`
+	Force                    bool `mapstructure:"force"`
+	Olm                      bool `mapstructure:"olm"`
+	olmOptions               olm.Options
+	ClusterType              string   `mapstructure:"cluster-type"`
+	OutputFormat             string   `mapstructure:"output"`
+	RuntimeVersion           string   `mapstructure:"runtime-version"`
+	BaseImage                string   `mapstructure:"base-image"`
+	OperatorID               string   `mapstructure:"operator-id"`
+	OperatorImage            string   `mapstructure:"operator-image"`
+	OperatorImagePullPolicy  string   `mapstructure:"operator-image-pull-policy"`
+	BuildStrategy            string   `mapstructure:"build-strategy"`
+	BuildOrderStrategy       string   `mapstructure:"build-order-strategy"`
+	BuildPublishStrategy     string   `mapstructure:"build-publish-strategy"`
+	BuildTimeout             string   `mapstructure:"build-timeout"`
+	MavenExtensions          []string `mapstructure:"maven-extensions"`
+	MavenLocalRepository     string   `mapstructure:"maven-local-repository"`
+	MavenProperties          []string `mapstructure:"maven-properties"`
+	MavenRepositories        []string `mapstructure:"maven-repositories"`
+	MavenSettings            string   `mapstructure:"maven-settings"`
+	MavenCASecret            string   `mapstructure:"maven-ca-secret"`
+	MavenCLIOptions          []string `mapstructure:"maven-cli-options"`
+	HealthPort               int32    `mapstructure:"health-port"`
+	MaxRunningBuilds         int32    `mapstructure:"max-running-pipelines"`
+	Monitoring               bool     `mapstructure:"monitoring"`
+	MonitoringPort           int32    `mapstructure:"monitoring-port"`
+	Debugging                bool     `mapstructure:"debugging"`
+	DebuggingPort            int32    `mapstructure:"debugging-port"`
+	DebuggingPath            string   `mapstructure:"debugging-path"`
+	TraitProfile             string   `mapstructure:"trait-profile"`
+	Tolerations              []string `mapstructure:"tolerations"`
+	NodeSelectors            []string `mapstructure:"node-selectors"`
+	ResourcesRequirements    []string `mapstructure:"operator-resources"`
+	LogLevel                 string   `mapstructure:"log-level"`
+	EnvVars                  []string `mapstructure:"operator-env-vars"`
+	registry                 v1.RegistrySpec
+	registryAuth             registry.Auth
+	RegistryAuthFile         string `mapstructure:"registry-auth-file"`
 }
 
 func (o *installCmdOptions) install(cmd *cobra.Command, _ []string) error {
@@ -591,11 +589,6 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 			}
 		}
 	}
-	if len(o.BuildPublishStrategyOptions) > 0 {
-		if err = o.addBuildPublishStrategyOptions(&platform.Spec.Build); err != nil {
-			return nil, err
-		}
-	}
 	// Always create a platform in the namespace where the operator is located
 	err = install.ObjectOrCollect(o.Context, c, namespace, output, o.Force, platform)
 	if err != nil {
@@ -790,37 +783,6 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	}
 
 	return result
-}
-
-// addBuildPublishStrategyOptions parses and adds all the build publish strategy options to the given IntegrationPlatformBuildSpec.
-func (o *installCmdOptions) addBuildPublishStrategyOptions(pipeline *v1.IntegrationPlatformBuildSpec) error {
-	for _, option := range o.BuildPublishStrategyOptions {
-		kv := strings.Split(option, "=")
-		if len(kv) == 2 {
-			key := kv[0]
-			if builder.IsSupportedPublishStrategyOption(pipeline.PublishStrategy, key) {
-				pipeline.AddOption(key, kv[1])
-			} else {
-				return fmt.Errorf("build publish strategy option '%s' not supported. %s", option, supportedOptionsAsString(pipeline.PublishStrategy))
-			}
-		} else {
-			return fmt.Errorf("build publish strategy option '%s' not in the expected format (name=value)", option)
-		}
-	}
-	return nil
-}
-
-// supportedOptionsAsString provides all the supported options for the given strategy as string.
-func supportedOptionsAsString(strategy v1.IntegrationPlatformBuildPublishStrategy) string {
-	options := builder.GetSupportedPublishStrategyOptions(strategy)
-	if len(options) == 0 {
-		return fmt.Sprintf("no options are supported for the strategy '%s'.", strategy)
-	}
-	var sb strings.Builder
-	for _, supportedOption := range builder.GetSupportedPublishStrategyOptions(strategy) {
-		sb.WriteString(fmt.Sprintf("* %s\n", supportedOption.ToString()))
-	}
-	return fmt.Sprintf("\n\nSupported options for the strategy '%s':\n\n%s", strategy, sb.String())
 }
 
 func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {

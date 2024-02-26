@@ -93,7 +93,7 @@ func (o *kameletAddRepoCommandOptions) run(cmd *cobra.Command, args []string) er
 		if err := checkURI(uri, platform.Spec.Kamelet.Repositories); err != nil {
 			return err
 		}
-		platform.Spec.Kamelet.Repositories = append(platform.Spec.Kamelet.Repositories, v1.IntegrationPlatformKameletRepositorySpec{
+		platform.Spec.Kamelet.Repositories = append(platform.Spec.Kamelet.Repositories, v1.KameletRepositorySpec{
 			URI: uri,
 		})
 	}
@@ -134,7 +134,7 @@ func (o *kameletUpdateRepoCommandOptions) findIntegrationPlatform(cmd *cobra.Com
 	return nil, nil
 }
 
-func checkURI(uri string, repositories []v1.IntegrationPlatformKameletRepositorySpec) error {
+func checkURI(uri string, repositories []v1.KameletRepositorySpec) error {
 	if !kameletRepositoryURIRegexp.MatchString(uri) {
 		return fmt.Errorf("malformed Kamelet repository uri %s, the expected format is github:owner/repo[/path_to_kamelets_folder][@version]", uri)
 	}

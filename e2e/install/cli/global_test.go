@@ -24,15 +24,12 @@ package cli
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,20 +37,9 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 func TestRunGlobalInstall(t *testing.T) {
-	forceGlobalTest := os.Getenv("CAMEL_K_FORCE_GLOBAL_TEST") == "true"
-	if !forceGlobalTest {
-		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
-		if ocp {
-			t.Skip("Prefer not to run on OpenShift to avoid giving more permissions to the user running tests")
-			return
-		}
-	}
-
 	RegisterTestingT(t)
 
 	WithGlobalOperatorNamespace(t, func(operatorNamespace string) {
@@ -155,7 +141,7 @@ func TestRunGlobalInstall(t *testing.T) {
 				}
 				Expect(TestClient().Create(TestContext, &externalKit)).Should(BeNil())
 
-				Expect(KamelRun(ns5, "files/Java.java", "--name", "ext", "--kit", "external").Execute()).To(Succeed())
+				Expect(KamelRun(ns5, "files/Java.java", "--name", "ext", "--kit", "external", "-t", "jvm.enabled=true").Execute()).To(Succeed())
 				Eventually(IntegrationPodPhase(ns5, "ext"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				Eventually(IntegrationLogs(ns5, "ext"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				Expect(IntegrationKit(ns5, "ext")()).Should(Equal("external"))

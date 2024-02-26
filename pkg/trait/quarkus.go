@@ -210,6 +210,10 @@ func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
 		kit := t.newIntegrationKit(e, packageType(t.Modes[0]))
 		e.IntegrationKits = append(e.IntegrationKits, *kit)
 	default:
+		// execute jvm mode before native mode
+		sort.Slice(t.Modes, func(i, j int) bool {
+			return t.Modes[i] != traitv1.NativeQuarkusMode
+		})
 		for _, md := range t.Modes {
 			kit := t.newIntegrationKit(e, packageType(md))
 			if kit.Spec.Traits.Quarkus == nil {

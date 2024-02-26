@@ -28,6 +28,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -53,7 +54,15 @@ func TestNativeIntegrations(t *testing.T) {
 			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionKitAvailable)).
 				Should(Equal(corev1.ConditionFalse))
 
-				// Clean up
+			// check integration schema does not contains unwanted default trait value.
+			Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(ns, name)()
+			quarkusTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "quarkus")
+			Expect(quarkusTrait).ToNot(BeNil())
+			Expect(len(quarkusTrait)).To(Equal(1))
+			Expect(quarkusTrait["buildMode"]).ToNot(BeNil())
+
+			// Clean up
 			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 

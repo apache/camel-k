@@ -50,13 +50,13 @@ $ kubectl kustomize --load-restrictor LoadRestrictionsNone setup-cluster/ | kube
 
 ```
 $ kubectl apply -k setup
-$ kubectl apply -k config/rbac/namespaced
+$ kubectl apply -k pkg/resources/config/rbac/namespaced
 # For openshift
-$ kubectl apply -k config/rbac/openshift
-$ kubectl apply -k config/rbac/openshift/namespaced
+$ kubectl apply -k pkg/resources/config/rbac/openshift
+$ kubectl apply -k pkg/resources/config/rbac/openshift/namespaced
 ```
 
-Should you want your operator operator to watch all namespaces (global operator), you will replace `config/rbac/namespaced` by `config/rbac/descoped` and `config/rbac/openshift/namespaced` by `config/rbac/openshift/descoped`.
+Should you want your operator operator to watch all namespaces (global operator), you will replace `pkg/resources/config/rbac/namespaced` by `pkg/resources/config/rbac/descoped` and `pkg/resources/config/rbac/openshift/namespaced` by `pkg/resources/config/rbac/openshift/descoped`.
 
 **Finally the operator can be deployed**
 

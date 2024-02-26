@@ -43,13 +43,13 @@ runs:
   steps:
 
     - name: Set up JDK ${{ inputs.javaVersion }}
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: ${{ inputs.javaVersion }}
         distribution: "temurin"
 
     - name: Install Go ${{ inputs.goVersionFile }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version-file: ${{ inputs.goVersionFile }}
         check-latest: true
@@ -98,10 +98,10 @@ runs:
         sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     - name: Set up QEMU (required by multi platform build)
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
 
     - name: Login to Container Registry
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         username: ${{ inputs.secretDockerHubUser }}
         password: ${{ inputs.secretDockerHubPassword }}

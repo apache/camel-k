@@ -24,8 +24,6 @@ VERSION ?= 2.3.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.2.0
 DEFAULT_RUNTIME_VERSION := 3.2.3
-BUILDAH_VERSION := 1.30.0
-KANIKO_VERSION := 1.9.1
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.27.4
 OPERATOR_SDK_VERSION := v1.28.0
@@ -51,13 +49,14 @@ METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
-LINT_GOGC := 10
+LINT_GOGC := 20
 LINT_DEADLINE := 10m
 DEBUG_MODE ?= false
+OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 
 # olm bundle vars
-MANAGER := config/manager
-MANIFESTS := config/manifests
+MANAGER := pkg/resources/config/manager
+MANIFESTS := pkg/resources/config/manifests
 DEFAULT_CHANNEL ?= $(shell echo "stable-v$(word 1,$(subst ., ,$(lastword $(OPERATOR_VERSION))))")
 CHANNELS ?= $(DEFAULT_CHANNEL),latest
 PACKAGE := camel-k
@@ -180,12 +179,6 @@ codegen:
 	@echo "  // DefaultRuntimeVersion -- " >> $(VERSIONFILE)
 	@echo "  DefaultRuntimeVersion = \"$(DEFAULT_RUNTIME_VERSION)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
-	@echo "  // BuildahVersion -- " >> $(VERSIONFILE)
-	@echo "  BuildahVersion = \"$(BUILDAH_VERSION)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
-	@echo "  // KanikoVersion -- " >> $(VERSIONFILE)
-	@echo "  KanikoVersion = \"$(KANIKO_VERSION)\"" >> $(VERSIONFILE)
-	@echo "" >> $(VERSIONFILE)
 	@echo "  // baseImage -- " >> $(VERSIONFILE)
 	@echo "  baseImage = \"$(BASE_IMAGE)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
@@ -194,6 +187,9 @@ codegen:
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // ImageName -- " >> $(VERSIONFILE)
 	@echo "  ImageName = \"$(CUSTOM_IMAGE)\"" >> $(VERSIONFILE)
+	@echo "" >> $(VERSIONFILE)
+	@echo "  // OpenShiftRegistryAddress -- " >> $(VERSIONFILE)
+	@echo "  OpenShiftRegistryAddress = \"$(OPENSHIFT_REGISTRY)\"" >> $(VERSIONFILE)
 	@echo "" >> $(VERSIONFILE)
 	@echo "  // installDefaultKamelets -- " >> $(VERSIONFILE)
 	@echo "  installDefaultKamelets = $(INSTALL_DEFAULT_KAMELETS)" >> $(VERSIONFILE)
@@ -287,9 +283,9 @@ test-smoke: do-build
 #
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
-test-common-with-custom-install: do-build
+test-advanced: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/commonwithcustominstall -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 90m -v ./e2e/advanced -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
@@ -362,7 +358,6 @@ build-kamel:
 
 build-resources:
 	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
-	go generate ./pkg/...
 
 bundle-kamelets:
 	@echo "Preparing Kamelets bundle resource..."
@@ -412,10 +407,10 @@ OS_LOWER := $(shell echo $(OS) | tr '[:upper:]' '[:lower:]')
 endif
 
 lint:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --verbose
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --deadline $(LINT_DEADLINE) --verbose
 
 lint-fix:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format tab --deadline $(LINT_DEADLINE) --fix
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --deadline $(LINT_DEADLINE) --fix
 
 dir-licenses:
 	./script/vendor-license-directory.sh
@@ -457,7 +452,7 @@ ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-	docker build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
+	docker buildx build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
 
 # Mainly used for internal CI purposes
 image-push:
@@ -612,10 +607,10 @@ $(BUNDLE_CAMEL_APIS): operator-sdk
 	@# Remove the camel directory and re-copy only the required api
 	rm -rf api_$@/camel/* && cp -rf pkg/apis/camel/$@ api_$@/camel/
 	@# operator-sdk generate ... cannot execute across separate modules so need to temporarily move api
-	$(OPERATOR_SDK) generate kustomize manifests --apis-dir $(addprefix api_, $@) -q
+	$(OPERATOR_SDK) generate kustomize manifests --apis-dir $(addprefix api_, $@) -q --input-dir $(MANIFESTS) --output-dir $(MANIFESTS)
 	@# Adds the licence header to the csv file.
-	./script/add_license.sh config/manifests/bases ./script/headers/yaml.txt
-	./script/add_createdAt.sh config/manifests/bases
+	./script/add_license.sh $(MANIFESTS)/bases ./script/headers/yaml.txt
+	./script/add_createdAt.sh $(MANIFESTS)/bases
 	@# Clean up temporary working api directories
 	rm -rf api_*
 
@@ -652,12 +647,12 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 	@# Display BUNDLE_METADATA_OPTS for debugging
 	$(info BUNDLE_METADATA_OPTS=$(BUNDLE_METADATA_OPTS))
 	@# Sets the operator image to the preferred image:tag
-	@cd config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+	@cd pkg/resources/config/manifests && $(KUSTOMIZE) edit set image $(IMAGE_NAME)=$(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@# Build kustomize manifests
-	@$(KUSTOMIZE) build config/manifests | \
+	@$(KUSTOMIZE) build pkg/resources/config/manifests | \
 		$(OPERATOR_SDK) generate bundle \
 			-q --overwrite --version $(OPERATOR_VERSION) \
-			--kustomize-dir config/manifests $(BUNDLE_METADATA_OPTS)
+			--kustomize-dir pkg/resources/config/manifests $(BUNDLE_METADATA_OPTS)
 	@# Move the dockerfile into the bundle directory
 	@mv bundle.Dockerfile bundle/Dockerfile && sed -i 's/bundle\///g' bundle/Dockerfile
 	@# Adds the licence headers to the csv file

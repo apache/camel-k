@@ -120,7 +120,7 @@ type IntegrationPlatformBuildSpec struct {
 	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
 	// a base image that can be used as base layer for all images.
-	// It can be useful if you want to provide some custom base image with further utility softwares
+	// It can be useful if you want to provide some custom base image with further utility software
 	BaseImage string `json:"baseImage,omitempty"`
 	// the image registry used to push/pull Integration images
 	Registry RegistrySpec `json:"registry,omitempty"`
@@ -140,27 +140,13 @@ type IntegrationPlatformBuildSpec struct {
 // IntegrationPlatformKameletSpec define the behavior for all the Kamelets controller by the IntegrationPlatform.
 type IntegrationPlatformKameletSpec struct {
 	// remote repository used to retrieve Kamelet catalog
-	Repositories []IntegrationPlatformKameletRepositorySpec `json:"repositories,omitempty"`
-}
-
-// IntegrationPlatformKameletRepositorySpec defines the location of the Kamelet catalog to use.
-type IntegrationPlatformKameletRepositorySpec struct {
-	// the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
-	URI string `json:"uri,omitempty"`
+	Repositories []KameletRepositorySpec `json:"repositories,omitempty"`
 }
 
 // IntegrationPlatformBuildPublishStrategy defines the strategy used to package and publish an Integration base image.
 type IntegrationPlatformBuildPublishStrategy string
 
 const (
-	// IntegrationPlatformBuildPublishStrategyBuildah uses Buildah project (https://buildah.io/)
-	// in order to push the incremental images to the image repository. It can be used with `pod` BuildStrategy.
-	// Deprecated: use Spectrum, Jib or S2I instead.
-	IntegrationPlatformBuildPublishStrategyBuildah IntegrationPlatformBuildPublishStrategy = "Buildah"
-	// IntegrationPlatformBuildPublishStrategyKaniko uses Kaniko project (https://github.com/GoogleContainerTools/kaniko)
-	// in order to push the incremental images to the image repository. It can be used with `pod` BuildStrategy.
-	// Deprecated: use Spectrum, Jib or S2I instead.
-	IntegrationPlatformBuildPublishStrategyKaniko IntegrationPlatformBuildPublishStrategy = "Kaniko"
 	// IntegrationPlatformBuildPublishStrategyS2I uses the Source to Images (S2I) feature
 	// (https://docs.openshift.com/container-platform/4.9/openshift_images/create-images.html#images-create-s2i_create-images)
 	// provided by an OpenShift cluster in order to create and push the images to the registry. It is the default choice on OpenShift cluster.
@@ -175,8 +161,6 @@ const (
 
 // IntegrationPlatformBuildPublishStrategies the list of all available publish strategies.
 var IntegrationPlatformBuildPublishStrategies = []IntegrationPlatformBuildPublishStrategy{
-	IntegrationPlatformBuildPublishStrategyBuildah,
-	IntegrationPlatformBuildPublishStrategyKaniko,
 	IntegrationPlatformBuildPublishStrategyS2I,
 	IntegrationPlatformBuildPublishStrategySpectrum,
 	IntegrationPlatformBuildPublishStrategyJib,
@@ -197,11 +181,14 @@ const (
 	// IntegrationPlatformPhaseCreating when the IntegrationPlatform is under creation process.
 	IntegrationPlatformPhaseCreating IntegrationPlatformPhase = "Creating"
 	// IntegrationPlatformPhaseWarming when the IntegrationPlatform is warming (ie, creating Kaniko cache).
+	// Deprecated no longer in use.
 	IntegrationPlatformPhaseWarming IntegrationPlatformPhase = "Warming"
 	// IntegrationPlatformPhaseReady when the IntegrationPlatform is ready.
 	IntegrationPlatformPhaseReady IntegrationPlatformPhase = "Ready"
 	// IntegrationPlatformPhaseError when the IntegrationPlatform had some error (see Conditions).
 	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
+	// IntegrationPlatformPhaseCreateCatalog when the IntegrationPlatform creates a new CamelCatalog.
+	IntegrationPlatformPhaseCreateCatalog IntegrationPlatformPhase = "CreateCatalog"
 	// IntegrationPlatformPhaseDuplicate when the IntegrationPlatform is duplicated.
 	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 
@@ -214,8 +201,15 @@ const (
 	// IntegrationPlatformConditionTypeRegistryAvailable is the condition for the availability of a container registry.
 	IntegrationPlatformConditionTypeRegistryAvailable IntegrationPlatformConditionType = "RegistryAvailable"
 
+	// IntegrationPlatformConditionCamelCatalogAvailable is the condition for the availability of a container registry.
+	IntegrationPlatformConditionCamelCatalogAvailable IntegrationPlatformConditionType = "CamelCatalogAvailable"
+
 	// IntegrationPlatformConditionCreatedReason represents the reason that the IntegrationPlatform is created.
 	IntegrationPlatformConditionCreatedReason = "IntegrationPlatformCreated"
+	// IntegrationPlatformConditionTypeRegistryAvailableReason represents the reason that the IntegrationPlatform Registry is available.
+	IntegrationPlatformConditionTypeRegistryAvailableReason = "IntegrationPlatformRegistryAvailable"
+	// IntegrationPlatformConditionCamelCatalogAvailableReason represents the reason that the IntegrationPlatform is created.
+	IntegrationPlatformConditionCamelCatalogAvailableReason = "IntegrationPlatformCamelCatalogAvailable"
 )
 
 // IntegrationPlatformCondition describes the state of a resource at a certain point.

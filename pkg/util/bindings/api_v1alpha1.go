@@ -45,6 +45,7 @@ type V1alpha1BindingContext struct {
 	Client    client.Client
 	Namespace string
 	Profile   v1.TraitProfile
+	Metadata  map[string]string
 }
 
 // V1alpha1EndpointContext --

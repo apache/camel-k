@@ -11,8 +11,6 @@ The `routine` strategy (default) is in general faster as it does not require Kub
 
 The `pod` strategy is **always** used when running a Quarkus native build (as it requires certain tools not available in the operator container). You can also use this strategy when you want to have a higher level of concurrency. Although a bit slower (it requires Kubernetes to spin off a new Pod), this strategy will guarantee the execution of each parallel build in a timely manner.
 
-NOTE: the `pod` strategy was also required when using the now deprecated Buildah or Kaniko publishing strategy.
-
 Beside the build strategy, there are other configuration you can fine tune for each single build (via builder trait) or in the `.spec.build.buildConfiguration` of the IntegrationPlatform if you want to apply such configuration to all your builds. See the Builder trait page for more information.
 
 The most relevant are the `resource` and `limit` parameters which can be used to control how much resources to give to builder Pods. Then you can configure the `orderStrategy`, setting a `sequential` (single build), `fifo` (parallel build started in FIFO order) or `dependencies` (parallel build holding those applications which may depends on other because of xref:architecture/incremental-image.adoc[incremental image]). Finally you can include any `mavenProfile` to the build in order to influence the behavior of the build (ie, adding any plugin or configuration you can use when xref:pipeline/pipeline.adoc[running a pipeline]).

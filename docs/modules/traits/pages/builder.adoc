@@ -31,6 +31,7 @@ The following configuration options are available:
 | builder.verbose
 | bool
 | Enable verbose logging on build components that support it (e.g. Kaniko build pod).
+Deprecated no longer in use
 
 | builder.properties
 | []string
@@ -107,6 +108,10 @@ if you need to execute them. Useful only with `pod` strategy.
 | builder.node-selector
 | map[string]string
 | Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
+
+| builder.annotations
+| map[string]string
+| When using `pod` strategy, annotation to use for the builder pod.
 
 |===
 

@@ -349,25 +349,11 @@ func Equals(i1 Options, i2 Options) bool {
 
 // IntegrationsHaveSameTraits return if traits are the same.
 func IntegrationsHaveSameTraits(i1 *v1.Integration, i2 *v1.Integration) (bool, error) {
-	c1, err := NewTraitsOptionsForIntegration(i1)
+	c1, err := NewStatusTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewTraitsOptionsForIntegration(i2)
-	if err != nil {
-		return false, err
-	}
-
-	return Equals(c1, c2), nil
-}
-
-// IntegrationKitsHaveSameTraits return if traits are the same.
-func IntegrationKitsHaveSameTraits(i1 *v1.IntegrationKit, i2 *v1.IntegrationKit) (bool, error) {
-	c1, err := NewTraitsOptionsForIntegrationKit(i1)
-	if err != nil {
-		return false, err
-	}
-	c2, err := NewTraitsOptionsForIntegrationKit(i2)
+	c2, err := NewStatusTraitsOptionsForIntegration(i2)
 	if err != nil {
 		return false, err
 	}
@@ -408,7 +394,7 @@ func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.Kam
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
 func IntegrationAndPipeSameTraits(i1 *v1.Integration, i2 *v1.Pipe) (bool, error) {
-	itOpts, err := NewTraitsOptionsForIntegration(i1)
+	itOpts, err := NewStatusTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
@@ -432,7 +418,7 @@ func IntegrationAndPipeSameTraits(i1 *v1.Integration, i2 *v1.Pipe) (bool, error)
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
 // Deprecated.
 func IntegrationAndKameletBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.KameletBinding) (bool, error) {
-	itOpts, err := NewTraitsOptionsForIntegration(i1)
+	itOpts, err := NewStatusTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
@@ -451,54 +437,43 @@ func IntegrationAndKameletBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.Kam
 	return Equals(klbOpts, toCompare), nil
 }
 
-// IntegrationAndKitHaveSameTraits return if traits are the same.
-func IntegrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) (bool, error) {
-	itOpts, err := NewTraitsOptionsForIntegration(i1)
-	if err != nil {
-		return false, err
-	}
-	ikOpts, err := NewTraitsOptionsForIntegrationKit(i2)
-	if err != nil {
-		return false, err
-	}
-
-	return Equals(ikOpts, itOpts), nil
-}
-
-func NewTraitsOptionsForIntegration(i *v1.Integration) (Options, error) {
-	m1, err := ToTraitMap(i.Spec.Traits)
-	if err != nil {
-		return nil, err
-	}
-
-	m2, err := FromAnnotations(&i.ObjectMeta)
+func newTraitsOptions(opts Options, objectMeta *metav1.ObjectMeta) (Options, error) {
+	m2, err := FromAnnotations(objectMeta)
 	if err != nil {
 		return nil, err
 	}
 
 	for k, v := range m2 {
-		m1[k] = v
+		opts[k] = v
 	}
 
-	return m1, nil
+	return opts, nil
 }
 
-func NewTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
-	m1, err := ToTraitMap(i.Spec.Traits)
+func NewStatusTraitsOptionsForIntegration(i *v1.Integration) (Options, error) {
+	m1, err := ToTraitMap(i.Status.Traits)
 	if err != nil {
 		return nil, err
 	}
 
-	m2, err := FromAnnotations(&i.ObjectMeta)
+	return newTraitsOptions(m1, &i.ObjectMeta)
+}
+
+func newTraitsOptionsForIntegrationKit(i *v1.IntegrationKit, traits v1.IntegrationKitTraits) (Options, error) {
+	m1, err := ToTraitMap(traits)
 	if err != nil {
 		return nil, err
 	}
 
-	for k, v := range m2 {
-		m1[k] = v
-	}
+	return newTraitsOptions(m1, &i.ObjectMeta)
+}
 
-	return m1, nil
+func NewStatusTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
+	return newTraitsOptionsForIntegrationKit(i, i.Status.Traits)
+}
+
+func NewSpecTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
+	return newTraitsOptionsForIntegrationKit(i, i.Spec.Traits)
 }
 
 func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options, error) {
@@ -507,16 +482,7 @@ func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options,
 		return nil, err
 	}
 
-	m2, err := FromAnnotations(&i.ObjectMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	for k, v := range m2 {
-		m1[k] = v
-	}
-
-	return m1, nil
+	return newTraitsOptions(m1, &i.ObjectMeta)
 }
 
 func NewTraitsOptionsForPipe(i *v1.Pipe) (Options, error) {

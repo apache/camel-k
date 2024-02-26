@@ -190,9 +190,9 @@ func createTestContext(uris ...string) []runtime.Object {
 		},
 	}
 	if len(uris) > 0 {
-		repos := make([]v1.IntegrationPlatformKameletRepositorySpec, 0, len(uris))
+		repos := make([]v1.KameletRepositorySpec, 0, len(uris))
 		for _, uri := range uris {
-			repos = append(repos, v1.IntegrationPlatformKameletRepositorySpec{
+			repos = append(repos, v1.KameletRepositorySpec{
 				URI: uri,
 			})
 		}

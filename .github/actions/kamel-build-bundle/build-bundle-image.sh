@@ -96,7 +96,7 @@ fi
 # Use kustomize to patch the deployment resource
 #
 pushd config/manager > /dev/null
-kustomize edit add patch --path patch-image-pull-policy-always.yaml --kind Deployment
+kustomize edit add patch --path patch-image-pull-policy-always.yaml --kind Deployment --name camel-k-operator
 popd
 
 #

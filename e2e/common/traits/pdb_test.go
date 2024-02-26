@@ -33,6 +33,7 @@ import (
 	policyv1 "k8s.io/api/policy/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -54,6 +55,15 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+	// check integration schema does not contains unwanted default trait value.
+	Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
+	unstructuredIntegration := UnstructuredIntegration(ns, name)()
+	pdbTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "pdb")
+	Expect(pdbTrait).ToNot(BeNil())
+	Expect(len(pdbTrait)).To(Equal(2))
+	Expect(pdbTrait["enabled"]).To(Equal(true))
+	Expect(pdbTrait["minAvailable"]).To(Equal("2"))
 
 	// Check PodDisruptionBudget
 	Eventually(podDisruptionBudget(ns, name), TestTimeoutShort).ShouldNot(BeNil())

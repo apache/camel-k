@@ -46,10 +46,12 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	// Prepare maven wrapper helps when running the builder as Pod as it makes
-	// the builder container, Maven agnostic
-	if err := c.prepareMavenWrapper(ctx); err != nil {
-		return err
+	if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
+		// Prepare maven wrapper helps when running the builder as Pod as it makes
+		// the builder container, Maven agnostic
+		if err := c.prepareMavenWrapper(ctx); err != nil {
+			return err
+		}
 	}
 
 	mvnCmd := "./mvnw"
@@ -143,7 +145,7 @@ func (c *Command) Do(ctx context.Context) error {
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
 	// generate maven file
-	if err := generateMavenContext(c.context.Path, args); err != nil {
+	if err := generateMavenContext(c.context.Path, args, mavenOptions); err != nil {
 		return err
 	}
 
@@ -255,39 +257,45 @@ func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 //
 // The artifact id is in the form of:
 //
-//	<groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
+//	<groupId>:<artifactId>[:<packagingType>]:(<version>)[:<classifier>]
 func ParseGAV(gav string) (Dependency, error) {
-	// <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')
 	dep := Dependency{}
-	rex := regexp.MustCompile("([^: ]+):([^: ]+)(:([^: ]*)(:([^: ]+))?)?(:([^: ]+))?")
-	res := rex.FindStringSubmatch(gav)
-
-	if res == nil || len(res) < 9 {
-		return Dependency{}, errors.New("GAV must match <groupId>:<artifactId>[:<packagingType>[:<classifier>]]:(<version>|'?')")
+	res := strings.Split(gav, ":")
+	count := len(res)
+	if res == nil || count < 2 {
+		return Dependency{}, errors.New("GAV must match <groupId>:<artifactId>[:<packagingType>]:(<version>)[:<classifier>]")
 	}
-
-	dep.GroupID = res[1]
-	dep.ArtifactID = res[2]
-
-	cnt := strings.Count(gav, ":")
-	switch cnt {
-	case 2:
-		dep.Version = res[4]
-	case 3:
-		dep.Type = res[4]
-		dep.Version = res[6]
-	default:
-		dep.Type = res[4]
-		dep.Classifier = res[6]
-		dep.Version = res[8]
+	dep.GroupID = res[0]
+	dep.ArtifactID = res[1]
+	switch {
+	case count == 3:
+		// gav is: org:artifact:<type:version>
+		numeric := regexp.MustCompile(`\d`)
+		if numeric.MatchString(res[2]) {
+			dep.Version = res[2]
+		} else {
+			dep.Type = res[2]
+		}
+	case count == 4:
+		// gav is: org:artifact:type:version
+		dep.Type = res[2]
+		dep.Version = res[3]
+	case count == 5:
+		// gav is: org:artifact:<type>:<version>:classifier
+		dep.Type = res[2]
+		dep.Version = res[3]
+		dep.Classifier = res[4]
 	}
-
 	return dep, nil
 }
 
 // Create a MAVEN_CONTEXT file containing all arguments for a maven command.
-func generateMavenContext(path string, args []string) error {
+func generateMavenContext(path string, args []string, options string) error {
 	// TODO refactor maven code to avoid creating a file to pass command args
+	return util.WriteToFile(filepath.Join(path, "MAVEN_CONTEXT"), getMavenContext(args, options))
+}
+
+func getMavenContext(args []string, options string) string {
 	commandArgs := make([]string, 0)
 	for _, arg := range args {
 		if arg != "package" && len(strings.TrimSpace(arg)) != 0 {
@@ -295,5 +303,10 @@ func generateMavenContext(path string, args []string) error {
 		}
 	}
 
-	return util.WriteToFile(filepath.Join(path, "MAVEN_CONTEXT"), strings.Join(commandArgs, " "))
+	mavenContext := strings.Join(commandArgs, " ")
+	if options != "" {
+		mavenContext += " " + options
+	}
+
+	return mavenContext
 }

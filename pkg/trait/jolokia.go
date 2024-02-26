@@ -55,16 +55,6 @@ func (t *jolokiaTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 func (t *jolokiaTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityJolokia)
-
-		// Deprecated
-		// remove dependencies after Camel K Runtime > 2.16.0 and no longer supported or LTS
-		if e.CamelCatalog.Runtime.Provider == v1.RuntimeProviderQuarkus {
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel-quarkus:management")
-			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "camel:jaxb")
-		}
-		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, "mvn:org.jolokia:jolokia-jvm")
-		//
-
 		return nil
 	}
 
@@ -124,7 +114,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 
 	jolokiaFilepath := ""
 	for _, ar := range e.IntegrationKit.Status.Artifacts {
-		if strings.HasPrefix(ar.ID, "org.jolokia.jolokia-jvm") {
+		if strings.HasPrefix(ar.ID, "org.jolokia.jolokia-agent-jvm") || strings.HasPrefix(ar.ID, "org.jolokia.jolokia-jvm") {
 			jolokiaFilepath = ar.Target
 			break
 		}

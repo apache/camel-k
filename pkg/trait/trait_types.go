@@ -318,7 +318,7 @@ func (e *Environment) DetermineProfile() v1.TraitProfile {
 	}
 
 	if e.Platform != nil {
-		return platform.GetProfile(e.Platform)
+		return platform.GetTraitProfile(e.Platform)
 	}
 
 	return v1.DefaultTraitProfile

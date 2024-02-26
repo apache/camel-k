@@ -148,7 +148,7 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 				"kubectl",
 				"delete",
 				"-k",
-				"../../../config/crd/",
+				"../../../pkg/resources/config/crd/",
 				"-n",
 				ns,
 			),

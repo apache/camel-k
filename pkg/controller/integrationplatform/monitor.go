@@ -23,6 +23,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	corev1 "k8s.io/api/core/v1"
@@ -52,6 +53,8 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		action.L.Info("IntegrationPlatform version updated", "version", platform.Status.Version)
 	}
 
+	platformPhase := v1.IntegrationPlatformPhaseReady
+
 	// Refresh applied configuration
 	if err := platformutil.ConfigureDefaults(ctx, action.client, platform, false); err != nil {
 		return nil, err
@@ -66,26 +69,59 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		platform.Status.SetCondition(
 			v1.IntegrationPlatformConditionTypeRegistryAvailable,
 			corev1.ConditionFalse,
-			"IntegrationPlatformRegistryAvailable",
+			v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
 			"registry not available because provided by Openshift")
 	} else {
 		if platform.Status.Build.Registry.Address == "" {
 			// error, we need a registry if we're not on Openshift
-			platform.Status.Phase = v1.IntegrationPlatformPhaseError
+			platformPhase = v1.IntegrationPlatformPhaseError
 			platform.Status.SetCondition(
 				v1.IntegrationPlatformConditionTypeRegistryAvailable,
 				corev1.ConditionFalse,
-				"IntegrationPlatformRegistryAvailable",
+				v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
 				"registry address not available, you need to set one")
 		} else {
-			platform.Status.Phase = v1.IntegrationPlatformPhaseReady
 			platform.Status.SetCondition(
 				v1.IntegrationPlatformConditionTypeRegistryAvailable,
 				corev1.ConditionTrue,
-				"IntegrationPlatformRegistryAvailable",
+				v1.IntegrationPlatformConditionTypeRegistryAvailableReason,
 				fmt.Sprintf("registry available at %s", platform.Status.Build.Registry.Address))
 		}
 	}
+
+	if platformPhase == v1.IntegrationPlatformPhaseReady {
+		// Camel catalog condition
+		runtimeSpec := v1.RuntimeSpec{
+			Version:  platform.Status.Build.RuntimeVersion,
+			Provider: v1.RuntimeProviderQuarkus,
+		}
+		if catalog, err := camel.LoadCatalog(ctx, action.client, platform.Namespace, runtimeSpec); err != nil {
+			action.L.Error(err, "IntegrationPlatform unable to load Camel catalog",
+				"runtime-version", runtimeSpec.Version, "runtime-provider", runtimeSpec.Provider)
+		} else if catalog == nil {
+			if platform.Status.Phase != v1.IntegrationPlatformPhaseError {
+				platformPhase = v1.IntegrationPlatformPhaseCreateCatalog
+			} else {
+				// IntegrationPlatform is in error phase for some reason - that error state must be resolved before we move into create catalog phase
+				// avoids to run into endless loop of error and catalog creation phase ping pong
+				platformPhase = v1.IntegrationPlatformPhaseError
+			}
+
+			platform.Status.SetCondition(
+				v1.IntegrationPlatformConditionCamelCatalogAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
+				fmt.Sprintf("camel catalog %s not available, please review given runtime version", runtimeSpec.Version))
+		} else {
+			platform.Status.SetCondition(
+				v1.IntegrationPlatformConditionCamelCatalogAvailable,
+				corev1.ConditionTrue,
+				v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
+				fmt.Sprintf("camel catalog %s available", runtimeSpec.Version))
+		}
+	}
+
+	platform.Status.Phase = platformPhase
 
 	return platform, nil
 }

@@ -55,6 +55,8 @@ type BuildConfiguration struct {
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
 	// The node selector for the builder pod. Only used for `pod` strategy
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
+	// Annotation to use for the builder pod. Only used for `pod` strategy
+	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 }
 
 // BuildStrategy specifies how the Build should be executed.
@@ -101,6 +103,12 @@ var BuildOrderStrategies = []BuildOrderStrategy{
 	BuildOrderStrategyFIFO,
 	BuildOrderStrategyDependencies,
 	BuildOrderStrategySequential,
+}
+
+// KameletRepositorySpec defines the location of the Kamelet catalog to use.
+type KameletRepositorySpec struct {
+	// the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
+	URI string `json:"uri,omitempty"`
 }
 
 // ConfigurationSpec represents a generic configuration specification.

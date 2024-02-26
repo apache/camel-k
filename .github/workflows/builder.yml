@@ -27,6 +27,7 @@ on:
       - "release-*"
     paths-ignore:
       - 'docs/**'
+      - 'java/**'
       - 'proposals/**'
       - '**.adoc'
       - '**.md'
@@ -39,6 +40,7 @@ on:
       - "release-*"
     paths-ignore:
       - 'docs/**'
+      - 'java/**'
       - 'proposals/**'
       - '**.adoc'
       - '**.md'
@@ -74,11 +76,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        publisher: ["Spectrum", "Jib"]
+        publisher: ["Jib", "Spectrum"]
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         persist-credentials: false
         submodules: recursive

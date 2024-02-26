@@ -29,7 +29,6 @@ type DeploymentTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// The maximum time in seconds for the deployment to make progress before it
 	// is considered to be failed. It defaults to `60s`.
-	// +kubebuilder:default=60
 	ProgressDeadlineSeconds *int32 `property:"progress-deadline-seconds" json:"progressDeadlineSeconds,omitempty"`
 	// The deployment strategy to use to replace existing pods with new ones.
 	// +kubebuilder:validation:Enum=Recreate;RollingUpdate
@@ -39,7 +38,6 @@ type DeploymentTrait struct {
 	// Absolute number is calculated from percentage by rounding down.
 	// This can not be 0 if MaxSurge is 0.
 	// Defaults to `25%`.
-	// +kubebuilder:default=25
 	RollingUpdateMaxUnavailable *int `property:"rolling-update-max-unavailable" json:"rollingUpdateMaxUnavailable,omitempty"`
 	// The maximum number of pods that can be scheduled above the desired number of
 	// pods.
@@ -47,6 +45,5 @@ type DeploymentTrait struct {
 	// This can not be 0 if MaxUnavailable is 0.
 	// Absolute number is calculated from percentage by rounding up.
 	// Defaults to `25%`.
-	// +kubebuilder:default=25
 	RollingUpdateMaxSurge *int `property:"rolling-update-max-surge" json:"rollingUpdateMaxSurge,omitempty"`
 }

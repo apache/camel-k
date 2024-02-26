@@ -28,6 +28,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
@@ -90,6 +91,15 @@ func TestServiceTrait(t *testing.T) {
 		// sometimes being created first and being given the root name
 		//
 		Eventually(ServicesByType(ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
+
+		// check integration schema does not contains unwanted default trait value.
+		Eventually(UnstructuredIntegration(ns, "platform-http-server")).ShouldNot(BeNil())
+		unstructuredIntegration := UnstructuredIntegration(ns, "platform-http-server")()
+		serviceTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "service")
+		Expect(serviceTrait).ToNot(BeNil())
+		Expect(len(serviceTrait)).To(Equal(2))
+		Expect(serviceTrait["enabled"]).To(Equal(true))
+		Expect(serviceTrait["type"]).To(Equal("ClusterIP"))
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})

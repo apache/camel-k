@@ -18,8 +18,6 @@ limitations under the License.
 package v1
 
 import (
-	"strconv"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -171,19 +169,6 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 	}
 
 	in.Conditions = newConditions
-}
-
-// IsOptionEnabled tells if provided option key is present in PublishStrategyOptions and enabled.
-func (b IntegrationPlatformBuildSpec) IsOptionEnabled(option string) bool {
-	// Key defined in builder/kaniko.go
-	if enabled, ok := b.PublishStrategyOptions[option]; ok {
-		res, err := strconv.ParseBool(enabled)
-		if err != nil {
-			return false
-		}
-		return res
-	}
-	return false
 }
 
 // AddOption add a publish strategy option.

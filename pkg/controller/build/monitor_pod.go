@@ -72,16 +72,13 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		switch build.Status.Phase {
 
 		case v1.BuildPhasePending:
-			if pod, err = newBuildPod(ctx, action.reader, action.client, build); err != nil {
-				return nil, err
-			}
-
+			pod = newBuildPod(ctx, action.client, build)
 			// If the Builder Pod is in the Build namespace, we can set the ownership to it. If not (global operator mode)
 			// we set the ownership to the Operator Pod instead
 			var owner metav1.Object
 			owner = build
 			if build.Namespace != pod.Namespace {
-				operatorPod := platform.GetOperatorPod(ctx, action.reader, pod.Namespace)
+				operatorPod := platform.GetOperatorPod(ctx, action.client, pod.Namespace)
 				if operatorPod != nil {
 					owner = operatorPod
 				}
@@ -364,10 +361,6 @@ func publishTaskImageName(tasks []v1.Task) string {
 		return t.Spectrum.Image
 	case t.Jib != nil:
 		return t.Jib.Image
-	case t.Buildah != nil:
-		return t.Buildah.Image
-	case t.Kaniko != nil:
-		return t.Kaniko.Image
 	}
 
 	return ""
@@ -385,10 +378,6 @@ func publishTaskName(tasks []v1.Task) string {
 		return t.Spectrum.Name
 	case t.Jib != nil:
 		return t.Jib.Name
-	case t.Buildah != nil:
-		return t.Buildah.Name
-	case t.Kaniko != nil:
-		return t.Kaniko.Name
 	}
 
 	return ""

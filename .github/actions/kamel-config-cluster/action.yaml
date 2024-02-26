@@ -86,6 +86,7 @@ runs:
           # Does not require global operator name or namespace ... yet
           ./.github/actions/kamel-config-cluster/output-config.sh \
             -a "${{ steps.execute-kind.outputs.cluster-kube-admin-user-ctx }}" \
+            -g "${{ steps.execute-kind.outputs.cluster-global-operator-namespace }}" \
             -n "${{ steps.execute-kind.outputs.cluster-image-namespace }}" \
             -o "${{ steps.execute-kind.outputs.cluster-has-olm }}" \
             -p "${{ steps.execute-kind.outputs.cluster-image-registry-push-host }}" \

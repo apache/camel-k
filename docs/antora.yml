@@ -37,8 +37,6 @@ asciidoc:
     camel-quarkus-version: 3.2.3
     camel-quarkus-docs-version: 3.2.x
     quarkus-version: 3.2.9.Final
-    buildah-version: 1.30.0
-    kaniko-version: 1.9.1
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.27.7
     operator-fwk-api-version: 0.20.0

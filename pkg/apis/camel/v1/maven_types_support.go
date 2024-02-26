@@ -22,12 +22,22 @@ import (
 )
 
 func (in *MavenArtifact) GetDependencyID() string {
-	switch {
-	case in.Version == "":
-		return "mvn:" + in.GroupID + ":" + in.ArtifactID
-	default:
-		return "mvn:" + in.GroupID + ":" + in.ArtifactID + ":" + in.Version
+	mvn := "mvn:" + in.GroupID + ":" + in.ArtifactID
+	if in.Classifier != "" {
+		if in.Version != "" {
+			mvn = mvn + ":" + in.Type + ":" + in.Version + ":" + in.Classifier
+		} else {
+			mvn = mvn + ":" + in.Type + "::" + in.Classifier
+		}
+	} else {
+		if in.Type != "" {
+			mvn = mvn + ":" + in.Type
+		}
+		if in.Version != "" {
+			mvn = mvn + ":" + in.Version
+		}
 	}
+	return mvn
 }
 
 // nolint: musttag // the name of the xml is dynamic

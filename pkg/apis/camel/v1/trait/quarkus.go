@@ -39,10 +39,8 @@ type QuarkusTrait struct {
 	// The Quarkus mode to run: either `jvm` or `native` (default `jvm`).
 	// In case both `jvm` and `native` are specified, two `IntegrationKit` resources are created,
 	// with the `native` kit having precedence over the `jvm` one once ready.
-	// +kubebuilder:default={"jvm"}
 	Modes []QuarkusMode `property:"build-mode" json:"buildMode,omitempty"`
 	// The base image to use when running a native build (default `quay.io/quarkus/quarkus-micro-image:2.0`)
-	// +kubebuilder:default="quay.io/quarkus/quarkus-micro-image:2.0"
 	NativeBaseImage string `property:"native-base-image" json:"nativeBaseImage,omitempty"`
 	// The image containing the tooling required for a native build (by default it will use the one provided in the runtime catalog)
 	NativeBuilderImage string `property:"native-builder-image" json:"nativeBuilderImage,omitempty"`

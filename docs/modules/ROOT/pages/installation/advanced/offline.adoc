@@ -23,14 +23,6 @@ We cannot provide any specific guideline on how to preload images in the cluster
 
 The last one is the image used in the Camel K Runtime 2.16.0 version (the default one at the time of writing). Make sure to identify in the catalog (`.spec.runtime.metadata.quarkus.native-builder-image`) the one required in your installation.
 
-If you also plan to use Buildah or Kaniko strategy, you need to provide those images as well:
-
-* `quay.io/buildah/stable`
-* `gcr.io/kaniko-project/executor`
-* `gcr.io/kaniko-project/warmer`
-
-Same thing if you are planning to use any xref:pipeline/pipeline.adoc[custom pipeline]. You need to upload the expected image ahead of time.
-
 If all the above is set, then, you should be ready to pull and push from the container registry in Camel K as well.
 
 [[maven]]

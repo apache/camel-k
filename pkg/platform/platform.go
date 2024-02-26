@@ -205,8 +205,8 @@ func IsSecondary(p *v1.IntegrationPlatform) bool {
 	return false
 }
 
-// GetProfile returns the current profile of the platform (if present) or returns the default one for the cluster.
-func GetProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
+// GetTraitProfile returns the current profile of the platform (if present) or returns the default one for the cluster.
+func GetTraitProfile(p *v1.IntegrationPlatform) v1.TraitProfile {
 	if p.Status.Profile != "" {
 		return p.Status.Profile
 	} else if p.Spec.Profile != "" {

@@ -39,6 +39,7 @@ type IntegrationKitStatusApplyConfiguration struct {
 	Platform           *string                                     `json:"platform,omitempty"`
 	Version            *string                                     `json:"version,omitempty"`
 	Conditions         []IntegrationKitConditionApplyConfiguration `json:"conditions,omitempty"`
+	Traits             *IntegrationKitTraitsApplyConfiguration     `json:"traits,omitempty"`
 }
 
 // IntegrationKitStatusApplyConfiguration constructs an declarative configuration of the IntegrationKitStatus type for use with
@@ -158,5 +159,13 @@ func (b *IntegrationKitStatusApplyConfiguration) WithConditions(values ...*Integ
 		}
 		b.Conditions = append(b.Conditions, *values[i])
 	}
+	return b
+}
+
+// WithTraits sets the Traits field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Traits field is set to the value of the last call.
+func (b *IntegrationKitStatusApplyConfiguration) WithTraits(value *IntegrationKitTraitsApplyConfiguration) *IntegrationKitStatusApplyConfiguration {
+	b.Traits = value
 	return b
 }

@@ -27,17 +27,29 @@ inputs:
   goVersionFile:
     required: true
     type: string
+  javaVersion:
+    description: "Java version"
+    required: true
+  javaDistribution:
+    description: "Java distribution"
+    required: true
 
 runs:
   using: "composite"
   steps:
-  
+
     - name: Install Go ${{ inputs.goVersionFile }}
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version-file: ${{ inputs.goVersionFile }}
         check-latest: true
-        
+
+    - name: Set up JDK ${{ inputs.javaVersion }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ inputs.javaDistribution }}
+        java-version: ${{ inputs.javaVersion }}
+
     - name: Generate changelog
       uses: ./.github/actions/changelog
       with:

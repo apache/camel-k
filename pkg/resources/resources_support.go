@@ -19,9 +19,9 @@ package resources
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -31,24 +31,16 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
-// ResourceAsString returns the named resource content as string.
-// Warning : do not remove the go:generate line as it is used to update the resources file in case of CRD changes.
-//
-//go:generate go run ../../cmd/util/vfs-gen resources config
-func ResourceAsString(name string) (string, error) {
-	data, err := Resource(name)
-	return string(data), err
-}
+//go:embed config/* resources/*
+var resources embed.FS
 
 // Resource provides an easy way to access to embedded assets.
 func Resource(name string) ([]byte, error) {
 	name = strings.Trim(name, " ")
 	name = filepath.ToSlash(name)
-	if !strings.HasPrefix(name, "/") {
-		name = "/" + name
-	}
+	name = strings.TrimPrefix(name, "/")
 
-	file, err := openAsset(name)
+	file, err := resources.Open(name)
 	if err != nil {
 		return nil, fmt.Errorf("cannot access resource file %s: %w", name, err)
 	}
@@ -60,6 +52,12 @@ func Resource(name string) ([]byte, error) {
 	}
 
 	return data, file.Close()
+}
+
+// ResourceAsString returns the named resource content as string.
+func ResourceAsString(name string) (string, error) {
+	data, err := Resource(name)
+	return string(data), err
 }
 
 // TemplateResource loads a file resource as go template and processes it using the given parameters.
@@ -87,7 +85,7 @@ func TemplateResource(name string, params interface{}) (string, error) {
 
 // DirExists tells if a directory exists and can be listed for files.
 func DirExists(dirName string) bool {
-	if _, err := openAsset(dirName); err != nil {
+	if _, err := resources.Open(dirName); err != nil {
 		return false
 	}
 	return true
@@ -96,13 +94,12 @@ func DirExists(dirName string) bool {
 // WithPrefix lists all file names that begins with the give path prefix
 // If pathPrefix is a path of directories then be sure to end it with a '/'.
 func WithPrefix(pathPrefix string) ([]string, error) {
+	pathPrefix = strings.TrimPrefix(pathPrefix, "/")
 	dirPath := filepath.Dir(pathPrefix)
-
 	paths, err := Resources(dirPath)
 	if err != nil {
 		return nil, err
 	}
-
 	var res []string
 	for i := range paths {
 		path := filepath.ToSlash(paths[i])
@@ -114,10 +111,13 @@ func WithPrefix(pathPrefix string) ([]string, error) {
 	return res, nil
 }
 
-// Resources lists all file names in the given path (starts with '/').
+// Resources lists all file names in the given path.
 func Resources(dirName string) ([]string, error) {
 	dirName = filepath.ToSlash(dirName)
-	dir, err := openAsset(dirName)
+	dirName = strings.TrimPrefix(dirName, "/")
+	dirName = strings.TrimSuffix(dirName, "/")
+
+	dir, err := resources.Open(dirName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -125,7 +125,6 @@ func Resources(dirName string) ([]string, error) {
 
 		return nil, fmt.Errorf("error while listing resource files %s: %w", dirName, err)
 	}
-
 	info, err := dir.Stat()
 	if err != nil {
 		return nil, dir.Close()
@@ -134,13 +133,11 @@ func Resources(dirName string) ([]string, error) {
 		util.CloseQuietly(dir)
 		return nil, fmt.Errorf("location %s is not a directory: %w", dirName, err)
 	}
-
-	files, err := dir.Readdir(-1)
+	files, err := resources.ReadDir(dirName)
 	if err != nil {
 		util.CloseQuietly(dir)
 		return nil, fmt.Errorf("error while listing files on directory %s: %w", dirName, err)
 	}
-
 	var res []string
 	for _, f := range files {
 		if !f.IsDir() {
@@ -149,8 +146,4 @@ func Resources(dirName string) ([]string, error) {
 	}
 
 	return res, dir.Close()
-}
-
-func openAsset(path string) (http.File, error) {
-	return assets.Open(filepath.ToSlash(path))
 }

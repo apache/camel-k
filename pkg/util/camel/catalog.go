@@ -45,7 +45,7 @@ func QuarkusCatalog() (*RuntimeCatalog, error) {
 func catalogForRuntimeProvider(provider v1.RuntimeProvider) (*RuntimeCatalog, error) {
 	catalogs := make([]v1.CamelCatalog, 0)
 
-	names, err := resources.WithPrefix("/camel-catalog-")
+	names, err := resources.WithPrefix("resources/camel-catalog-")
 	if err != nil {
 		return nil, err
 	}

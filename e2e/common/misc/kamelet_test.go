@@ -27,6 +27,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
@@ -119,6 +120,14 @@ spec:
 			"-d", "camel:timer").Execute()).To(Succeed())
 		Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
+
+		// check integration schema does not contains unwanted default trait value.
+		Eventually(UnstructuredIntegration(ns, "timer-kamelet-integration")).ShouldNot(BeNil())
+		unstructuredIntegration := UnstructuredIntegration(ns, "timer-kamelet-integration")()
+		kameletsTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "kamelets")
+		Expect(kameletsTrait).ToNot(BeNil())
+		Expect(len(kameletsTrait)).To(Equal(1))
+		Expect(kameletsTrait["enabled"]).To(Equal(false))
 	})
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
