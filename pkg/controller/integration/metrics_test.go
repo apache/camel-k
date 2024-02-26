@@ -1,9 +1,10 @@
 package integration
 
 import (
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
-	"gotest.tools/assert"
 	"testing"
 )
 
@@ -37,6 +38,8 @@ func collect(col prometheus.Collector, do func(*dto.Metric)) {
 }
 
 func Test_updateIntegrationPhase(t *testing.T) {
+	RegisterFailHandler(Fail)
+
 	type args struct {
 		iId      string
 		p        string
@@ -75,7 +78,7 @@ func Test_updateIntegrationPhase(t *testing.T) {
 			labels := map[string]string{"phase": tt.args.p, "id": tt.args.iId}
 			if i, err := integration.GetMetricWith(labels); err == nil {
 				val := getMetricValue(i)
-				assert.Equal(t, val, tt.args.expected)
+				Expect(val).To(Equal(tt.args.expected))
 			}
 		})
 	}
