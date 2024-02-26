@@ -108,27 +108,13 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 	// Calculation logic prior to 1.10.0 (the new Traits API schema) is maintained
 	// in order to keep consistency in the digest calculated from the same set of
 	// Trait configurations for backward compatibility.
-	traitsMap, err := toMap(integration.Spec.Traits)
-	if err != nil {
+	if err := computeForTraits(hash, integration.Spec.Traits); err != nil {
 		return "", err
 	}
-	for _, name := range sortedTraitsMapKeys(traitsMap) {
-		if name != "addons" {
-			if err := computeForTrait(hash, name, traitsMap[name]); err != nil {
-				return "", err
-			}
-		} else {
-			// Addons
-			addons := traitsMap["addons"]
-			for _, name := range util.SortedMapKeys(addons) {
-				if addon, ok := addons[name].(map[string]interface{}); ok {
-					if err := computeForTrait(hash, name, addon); err != nil {
-						return "", err
-					}
-				}
-			}
-		}
+	if err := computeForTraits(hash, integration.Status.Traits); err != nil {
+		return "", err
 	}
+
 	// Integration traits as annotations
 	for _, k := range sortedTraitAnnotationsKeys(integration) {
 		v := integration.Annotations[k]
@@ -202,6 +188,31 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 	// Add a letter at the beginning and use URL safe encoding
 	digest := "v" + base64.RawURLEncoding.EncodeToString(hash.Sum(nil))
 	return digest, nil
+}
+
+func computeForTraits(hash hash.Hash, traits v1.Traits) error {
+	specTraitsMap, err := toMap(traits)
+	if err != nil {
+		return err
+	}
+	for _, name := range sortedTraitsMapKeys(specTraitsMap) {
+		if name != "addons" {
+			if err := computeForTrait(hash, name, specTraitsMap[name]); err != nil {
+				return err
+			}
+		} else {
+			// Addons
+			addons := specTraitsMap["addons"]
+			for _, name := range util.SortedMapKeys(addons) {
+				if addon, ok := addons[name].(map[string]interface{}); ok {
+					if err := computeForTrait(hash, name, addon); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func computeForTrait(hash hash.Hash, name string, trait map[string]interface{}) error {

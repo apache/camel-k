@@ -138,3 +138,66 @@ func TestDigestUsesSecret(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEqual(t, digest2, digest3)
 }
+
+func TestDigestMatchingTraitsUpdated(t *testing.T) {
+	it := v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Camel: &trait.CamelTrait{
+					Properties: []string{"hello=world"},
+				},
+			},
+		},
+	}
+
+	itSpecOnlyTraitUpdated := v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Camel: &trait.CamelTrait{
+					Properties: []string{"hello=world2"},
+				},
+			},
+		},
+	}
+
+	itStatusOnlyTraitUpdated := v1.Integration{
+		Spec: v1.IntegrationSpec{},
+		Status: v1.IntegrationStatus{
+			Traits: v1.Traits{
+				Camel: &trait.CamelTrait{
+					Properties: []string{"hello=world2"},
+				},
+			},
+		},
+	}
+
+	itDigest, err := ComputeForIntegration(&it, nil, nil)
+	assert.Nil(t, err)
+	itSpecOnlyTraitUpdatedDigest, err := ComputeForIntegration(&itSpecOnlyTraitUpdated, nil, nil)
+	assert.Nil(t, err)
+	itStatusOnlyTraitUpdatedDigest, err := ComputeForIntegration(&itStatusOnlyTraitUpdated, nil, nil)
+	assert.Nil(t, err)
+
+	assert.NotEqual(t, itSpecOnlyTraitUpdatedDigest, itDigest, "Digests must not be equal")
+	assert.NotEqual(t, itStatusOnlyTraitUpdatedDigest, itDigest, "Digests must not be equal")
+	assert.Equal(t, itSpecOnlyTraitUpdatedDigest, itStatusOnlyTraitUpdatedDigest, "Digests must be equal")
+}
+
+func TestSpecStatusDrift(t *testing.T) {
+	it := v1.Integration{}
+	it.Spec.Traits.Camel = &trait.CamelTrait{}
+	it.Status.Traits.Camel = &trait.CamelTrait{}
+
+	it.Spec.Traits.Camel.Properties = []string{"hello=world1"}
+	d1, err := ComputeForIntegration(&it, nil, nil)
+	assert.Nil(t, err)
+	it.Status.Traits.Camel.Properties = []string{"hello=world2"}
+	d2, err := ComputeForIntegration(&it, nil, nil)
+	assert.Nil(t, err)
+	it.Spec.Traits.Camel.Properties = []string{"hello=world3"}
+	d3, err := ComputeForIntegration(&it, nil, nil)
+	assert.Nil(t, err)
+
+	assert.NotEqual(t, d2, d1, "d2 must not be equal to d1")
+	assert.NotEqual(t, d3, d2, "d3 must not be equal to d2")
+}
