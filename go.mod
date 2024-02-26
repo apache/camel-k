@@ -57,7 +57,7 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1
 )
 
-require github.com/onsi/ginkgo/v2 v2.13.0
+require github.com/onsi/ginkgo/v2 v2.15.0
 
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
