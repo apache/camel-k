@@ -49,7 +49,7 @@ func TestKnativePlatformDetection(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-knative"
-		// Install withouth profile (should automatically detect the presence of KNative)
+		// Install without profile (should automatically detect the presence of Knative)
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		Eventually(PlatformProfile(ns), TestTimeoutShort).Should(Equal(v1.TraitProfile("")))
@@ -60,7 +60,7 @@ func TestKnativePlatformDetection(t *testing.T) {
 			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			Eventually(IntegrationTraitProfile(ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfile(string(cluster))))
-			// Change something in the integration to produce a redeploy
+			// Change something in the integration to produce a redeployment
 			Expect(UpdateIntegration(ns, "yaml", func(it *v1.Integration) {
 				it.Spec.Profile = ""
 				content, err := dsl.ToYamlDSL(it.Spec.Flows)

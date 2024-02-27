@@ -34,20 +34,21 @@ import (
 )
 
 func TestErrorHandlerTrait(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	t.Run("Run errored integration with error handler", func(t *testing.T) {
-		name := RandomizedSuffixName("error-handler")
-		Expect(KamelRunWithID(operatorID, ns, "files/ErroredRoute.java",
-			"--name", name,
-			"-t", "error-handler.enabled=true",
-			"-t", "error-handler.ref=defaultErrorHandler",
-			"-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder",
-			"-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false",
-		).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).ShouldNot(ContainSubstring("InvalidPayloadException"))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my-special-error-handler-in-place"))
+		t.Run("Run errored integration with error handler", func(t *testing.T) {
+			name := RandomizedSuffixName("error-handler")
+			Expect(KamelRunWithID(operatorID, ns, "files/ErroredRoute.java",
+				"--name", name,
+				"-t", "error-handler.enabled=true",
+				"-t", "error-handler.ref=defaultErrorHandler",
+				"-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder",
+				"-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false",
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).ShouldNot(ContainSubstring("InvalidPayloadException"))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my-special-error-handler-in-place"))
+		})
 	})
 }

@@ -38,6 +38,7 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 		operatorID := "camel-k-failing-deploy"
 		nsRestr := "restr"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns, "--global", "--force").Execute()).To(Succeed())
 		// Create restricted namespace
 		ExpectExecSucceed(t,

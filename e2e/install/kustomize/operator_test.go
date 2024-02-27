@@ -41,7 +41,8 @@ func TestOperatorBasic(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	RegisterTestingT(t)
+	Expect(UninstallAll()).To(Succeed())
 
 	// Return the cluster to previous state
 	defer Cleanup()
@@ -84,7 +85,8 @@ func TestOperatorKustomizeAlternativeImage(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	RegisterTestingT(t)
+	Expect(UninstallAll()).To(Succeed())
 
 	// Return the cluster to previous state
 	defer Cleanup()
@@ -115,7 +117,8 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	RegisterTestingT(t)
+	Expect(UninstallAll()).To(Succeed())
 
 	// Return the cluster to previous state
 	defer Cleanup()

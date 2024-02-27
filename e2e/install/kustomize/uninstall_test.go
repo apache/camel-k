@@ -31,6 +31,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	testutil "github.com/apache/camel-k/v2/e2e/support/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	. "github.com/onsi/gomega"
 )
 
@@ -40,7 +41,7 @@ func TestKustomizeUninstallBasic(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	Expect(UninstallAll()).To(Succeed())
 	Eventually(CRDs()).Should(HaveLen(0))
 
 	// Return the cluster to previous state
@@ -69,7 +70,7 @@ func TestKustomizeUninstallBasic(t *testing.T) {
 		Eventually(Role(ns)).Should(BeNil())
 		Eventually(ClusterRole()).Should(BeNil())
 		// CRDs should be still there
-		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
+		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
 		// Do uninstall all
 		ExpectExecSucceed(t, Make("uninstall", namespaceArg, "UNINSTALL_ALL=true"))
@@ -85,7 +86,7 @@ func TestUninstallGlobal(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	Expect(UninstallAll()).To(Succeed())
 	Eventually(CRDs()).Should(HaveLen(0))
 
 	// Return the cluster to previous state
@@ -112,7 +113,7 @@ func TestUninstallGlobal(t *testing.T) {
 		Eventually(Role(ns)).Should(BeNil())
 		Eventually(ClusterRole()).Should(BeNil())
 		// CRDs should be still there
-		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
+		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
 		// Do uninstall all
 		ExpectExecSucceed(t, Make("uninstall", namespaceArg, "UNINSTALL_ALL=true"))

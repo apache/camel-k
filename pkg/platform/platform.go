@@ -135,7 +135,7 @@ func findAny(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.Int
 
 // findLocal returns the currently installed platform or any platform existing in local namespace.
 func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
-	log.Debug("Finding available platforms")
+	log.Debugf("Finding available platforms in namespace %s", namespace)
 
 	operatorNamespace := GetOperatorNamespace()
 	if namespace == operatorNamespace {
@@ -168,7 +168,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 		return fallback, nil
 	}
 
-	log.Debugf("Unable to find integration platform")
+	log.Debugf("Unable to find integration platform in namespace %s", namespace)
 	return nil, k8serrors.NewNotFound(v1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 

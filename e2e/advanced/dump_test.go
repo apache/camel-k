@@ -48,6 +48,7 @@ func TestKamelCLIDump(t *testing.T) {
 		t.Run("dump non-empty namespace", func(t *testing.T) {
 			operatorID := fmt.Sprintf("camel-k-%s", ns)
 			Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+			Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 			Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 			Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 

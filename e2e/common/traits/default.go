@@ -20,7 +20,10 @@ limitations under the License.
 
 package traits
 
-import "github.com/apache/camel-k/v2/e2e/support"
+import (
+	"github.com/apache/camel-k/v2/e2e/support"
+	"github.com/apache/camel-k/v2/pkg/platform"
+)
 
-var ns = support.GetEnvOrDefault("CAMEL_K_TEST_NAMESPACE", support.GetCIProcessID())
-var operatorID = support.GetEnvOrDefault("CAMEL_K_OPERATOR_ID", support.GetCIProcessID())
+var ns = support.GetEnvOrDefault("CAMEL_K_TEST_NAMESPACE", support.TestDefaultNamespace)
+var operatorID = support.GetEnvOrDefault("CAMEL_K_OPERATOR_ID", platform.DefaultPlatformName)

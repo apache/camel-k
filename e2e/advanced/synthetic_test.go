@@ -40,6 +40,7 @@ func TestSyntheticIntegrationOff(t *testing.T) {
 		// Install Camel K without synthetic Integration feature variable (default)
 		operatorID := "camel-k-synthetic-env-off"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -62,6 +63,7 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 		// Install Camel K with the synthetic Integration feature variable
 		operatorID := "camel-k-synthetic-env"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--operator-env-vars", "CAMEL_K_SYNTHETIC_INTEGRATIONS=true",
 		).Execute()).To(Succeed())

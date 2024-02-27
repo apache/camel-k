@@ -35,86 +35,89 @@ import (
 )
 
 func TestConfigmapHotReload(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	name := RandomizedSuffixName("config-configmap-route")
+		name := RandomizedSuffixName("config-configmap-route")
 
-	var cmData = make(map[string]string)
-	cmData["my-configmap-key"] = "my configmap content"
-	CreatePlainTextConfigmapWithLabels(ns, "my-hot-cm", cmData, map[string]string{"camel.apache.org/integration": "test"})
+		var cmData = make(map[string]string)
+		cmData["my-configmap-key"] = "my configmap content"
+		CreatePlainTextConfigmapWithLabels(ns, "my-hot-cm", cmData, map[string]string{"camel.apache.org/integration": "test"})
 
-	Expect(KamelRunWithID(operatorID, ns,
-		"./files/config-configmap-route.groovy",
-		"--config",
-		"configmap:my-hot-cm",
-		"-t",
-		"mount.hot-reload=true",
-		"--name",
-		name,
-	).Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content"))
+		Expect(KamelRunWithID(operatorID, ns,
+			"./files/config-configmap-route.groovy",
+			"--config",
+			"configmap:my-hot-cm",
+			"-t",
+			"mount.hot-reload=true",
+			"--name",
+			name,
+		).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content"))
 
-	cmData["my-configmap-key"] = "my configmap content updated"
-	UpdatePlainTextConfigmapWithLabels(ns, "my-hot-cm", cmData, map[string]string{"camel.apache.org/integration": "test"})
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content updated"))
+		cmData["my-configmap-key"] = "my configmap content updated"
+		UpdatePlainTextConfigmapWithLabels(ns, "my-hot-cm", cmData, map[string]string{"camel.apache.org/integration": "test"})
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content updated"))
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }
 
 func TestConfigmapHotReloadDefault(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	name := RandomizedSuffixName("config-configmap-route")
+		name := RandomizedSuffixName("config-configmap-route")
 
-	var cmData = make(map[string]string)
-	cmData["my-configmap-key"] = "my configmap content"
-	CreatePlainTextConfigmapWithLabels(ns, "my-hot-cm-2", cmData, map[string]string{"camel.apache.org/integration": "test"})
+		var cmData = make(map[string]string)
+		cmData["my-configmap-key"] = "my configmap content"
+		CreatePlainTextConfigmapWithLabels(ns, "my-hot-cm-2", cmData, map[string]string{"camel.apache.org/integration": "test"})
 
-	Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
-		"--config",
-		"configmap:my-hot-cm-2",
-		"--name",
-		name,
-	).Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content"))
+		Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
+			"--config",
+			"configmap:my-hot-cm-2",
+			"--name",
+			name,
+		).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my configmap content"))
 
-	cmData["my-configmap-key"] = "my configmap content updated"
-	UpdatePlainTextConfigmapWithLabels(ns, "my-hot-cm-2", cmData, map[string]string{"camel.apache.org/integration": "test"})
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(Not(ContainSubstring("my configmap content updated")))
+		cmData["my-configmap-key"] = "my configmap content updated"
+		UpdatePlainTextConfigmapWithLabels(ns, "my-hot-cm-2", cmData, map[string]string{"camel.apache.org/integration": "test"})
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(Not(ContainSubstring("my configmap content updated")))
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }
 
 func TestSecretHotReload(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	name := RandomizedSuffixName("config-secret-route")
+		name := RandomizedSuffixName("config-secret-route")
 
-	var secData = make(map[string]string)
-	secData["my-secret-key"] = "very top secret"
-	CreatePlainTextSecretWithLabels(ns, "my-hot-sec", secData, map[string]string{"camel.apache.org/integration": "test"})
+		var secData = make(map[string]string)
+		secData["my-secret-key"] = "very top secret"
+		CreatePlainTextSecretWithLabels(ns, "my-hot-sec", secData, map[string]string{"camel.apache.org/integration": "test"})
 
-	Expect(KamelRunWithID(operatorID, ns, "./files/config-secret-route.groovy",
-		"--config",
-		"secret:my-hot-sec",
-		"-t",
-		"mount.hot-reload=true",
-		"--name",
-		name,
-	).Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret"))
+		Expect(KamelRunWithID(operatorID, ns, "./files/config-secret-route.groovy",
+			"--config",
+			"secret:my-hot-sec",
+			"-t",
+			"mount.hot-reload=true",
+			"--name",
+			name,
+		).Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret"))
 
-	secData["my-secret-key"] = "very top secret updated"
-	UpdatePlainTextSecretWithLabels(ns, "my-hot-sec", secData, map[string]string{"camel.apache.org/integration": "test"})
-	Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret updated"))
+		secData["my-secret-key"] = "very top secret updated"
+		UpdatePlainTextSecretWithLabels(ns, "my-hot-sec", secData, map[string]string{"camel.apache.org/integration": "test"})
+		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret updated"))
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }
 
 func TestConfigmapWithOwnerRefHotReloadDefault(t *testing.T) {
@@ -126,31 +129,32 @@ func TestConfigmapWithOwnerRefHotReload(t *testing.T) {
 }
 
 func CheckConfigmapWithOwnerRef(t *testing.T, hotreload bool) {
-	RegisterTestingT(t)
-	name := RandomizedSuffixName("config-configmap-route")
-	cmName := RandomizedSuffixName("my-hot-cm-")
-	Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
-		"--config",
-		"configmap:"+cmName,
-		"--name",
-		name,
-		"-t",
-		"mount.hot-reload="+strconv.FormatBool(hotreload),
-	).Execute()).To(Succeed())
+	WithNewTestNamespace(t, func(ns string) {
 
-	Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
-	var cmData = make(map[string]string)
-	cmData["my-configmap-key"] = "my configmap content"
-	CreatePlainTextConfigmapWithOwnerRefWithLabels(ns, cmName, cmData, name, Integration(ns, name)().UID, map[string]string{"camel.apache.org/integration": "test"})
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content"))
-	cmData["my-configmap-key"] = "my configmap content updated"
-	UpdatePlainTextConfigmapWithLabels(ns, cmName, cmData, map[string]string{"camel.apache.org/integration": "test"})
-	if hotreload {
-		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content updated"))
-	} else {
-		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(Not(ContainSubstring("my configmap content updated")))
-	}
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	DeleteConfigmap(ns, cmName)
+		name := RandomizedSuffixName("config-configmap-route")
+		cmName := RandomizedSuffixName("my-hot-cm-")
+		Expect(KamelRunWithID(operatorID, ns, "./files/config-configmap-route.groovy",
+			"--config",
+			"configmap:"+cmName,
+			"--name",
+			name,
+			"-t",
+			"mount.hot-reload="+strconv.FormatBool(hotreload),
+		).Execute()).To(Succeed())
+
+		Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+		var cmData = make(map[string]string)
+		cmData["my-configmap-key"] = "my configmap content"
+		CreatePlainTextConfigmapWithOwnerRefWithLabels(ns, cmName, cmData, name, Integration(ns, name)().UID, map[string]string{"camel.apache.org/integration": "test"})
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content"))
+		cmData["my-configmap-key"] = "my configmap content updated"
+		UpdatePlainTextConfigmapWithLabels(ns, cmName, cmData, map[string]string{"camel.apache.org/integration": "test"})
+		if hotreload {
+			Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(ContainSubstring("my configmap content updated"))
+		} else {
+			Eventually(IntegrationLogs(ns, name), TestTimeoutLong).Should(Not(ContainSubstring("my configmap content updated")))
+		}
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }

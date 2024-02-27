@@ -39,30 +39,30 @@ import (
 )
 
 func TestKamelCLIConfig(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
+		t.Run("check default namespace", func(t *testing.T) {
+			_, err := os.Stat(cmd.DefaultConfigLocation)
+			assert.True(t, os.IsNotExist(err), "No file at "+cmd.DefaultConfigLocation+" was expected")
+			t.Cleanup(func() { os.Remove(cmd.DefaultConfigLocation) })
+			Expect(Kamel("config", "--default-namespace", ns).Execute()).To(Succeed())
+			_, err = os.Stat(cmd.DefaultConfigLocation)
+			require.NoError(t, err, "A file at "+cmd.DefaultConfigLocation+" was expected")
+			Expect(Kamel("run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
 
-	t.Run("check default namespace", func(t *testing.T) {
-		_, err := os.Stat(cmd.DefaultConfigLocation)
-		assert.True(t, os.IsNotExist(err), "No file at "+cmd.DefaultConfigLocation+" was expected")
-		t.Cleanup(func() { os.Remove(cmd.DefaultConfigLocation) })
-		Expect(Kamel("config", "--default-namespace", ns).Execute()).To(Succeed())
-		_, err = os.Stat(cmd.DefaultConfigLocation)
-		require.NoError(t, err, "A file at "+cmd.DefaultConfigLocation+" was expected")
-		Expect(Kamel("run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			// first line of the integration logs
+			logs := strings.Split(IntegrationLogs(ns, "yaml")(), "\n")[0]
+			podName := IntegrationPod(ns, "yaml")().Name
 
-		// first line of the integration logs
-		logs := strings.Split(IntegrationLogs(ns, "yaml")(), "\n")[0]
-		podName := IntegrationPod(ns, "yaml")().Name
+			logsCLI := GetOutputStringAsync(Kamel("log", "yaml"))
+			Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
+			Eventually(logsCLI).Should(ContainSubstring(logs))
+		})
 
-		logsCLI := GetOutputStringAsync(Kamel("log", "yaml"))
-		Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-		Eventually(logsCLI).Should(ContainSubstring(logs))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all").Execute()).To(Succeed())
 }

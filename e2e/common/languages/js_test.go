@@ -34,14 +34,15 @@ import (
 )
 
 func TestRunSimpleJavaScriptExamples(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	t.Run("run js", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/js.js").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "js", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		t.Run("run js", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/js.js").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "js"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "js", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "js"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

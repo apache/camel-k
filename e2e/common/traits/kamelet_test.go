@@ -34,34 +34,35 @@ import (
 )
 
 func TestKameletTrait(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	t.Run("discover kamelet capabilities", func(t *testing.T) {
-		template := map[string]interface{}{
-			"from": map[string]interface{}{
-				"uri": "platform-http:///webhook",
-				"steps": []map[string]interface{}{
-					{
-						"to": "kamelet:sink",
+		t.Run("discover kamelet capabilities", func(t *testing.T) {
+			template := map[string]interface{}{
+				"from": map[string]interface{}{
+					"uri": "platform-http:///webhook",
+					"steps": []map[string]interface{}{
+						{
+							"to": "kamelet:sink",
+						},
 					},
 				},
-			},
-		}
-		Expect(CreateKamelet(ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
+			}
+			Expect(CreateKamelet(ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
 
-		name := RandomizedSuffixName("webhook")
-		Expect(KamelRunWithID(operatorID, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Started capabilities-webhook-source-1 (platform-http:///webhook)"))
-		// Verify Integration capabilities
-		Eventually(IntegrationStatusCapabilities(ns, name), TestTimeoutShort).Should(ContainElements("platform-http"))
-		// Verify expected resources from Kamelet (Service in this case)
-		service := Service(ns, name)
-		Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
+			name := RandomizedSuffixName("webhook")
+			Expect(KamelRunWithID(operatorID, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Started capabilities-webhook-source-1 (platform-http:///webhook)"))
+			// Verify Integration capabilities
+			Eventually(IntegrationStatusCapabilities(ns, name), TestTimeoutShort).Should(ContainElements("platform-http"))
+			// Verify expected resources from Kamelet (Service in this case)
+			service := Service(ns, name)
+			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
+		})
+
+		// Clean-up
+		Expect(DeleteKamelet(ns, "capabilities-webhook-source")).To(Succeed())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	// Clean-up
-	Expect(DeleteKamelet(ns, "capabilities-webhook-source")).To(Succeed())
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

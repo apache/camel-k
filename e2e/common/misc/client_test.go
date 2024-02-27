@@ -39,31 +39,32 @@ import (
 )
 
 func TestClientFunctionalities(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	cfg, err := config.GetConfig()
-	require.NoError(t, err)
-	camel, err := versioned.NewForConfig(cfg)
-	require.NoError(t, err)
+		cfg, err := config.GetConfig()
+		require.NoError(t, err)
+		camel, err := versioned.NewForConfig(cfg)
+		require.NoError(t, err)
 
-	lst, err := camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
-	require.NoError(t, err)
-	assert.Empty(t, lst.Items)
+		lst, err := camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
+		require.NoError(t, err)
+		assert.Empty(t, lst.Items)
 
-	integration, err := camel.CamelV1().Integrations(ns).Create(TestContext, &v1.Integration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "dummy",
-		},
-	}, metav1.CreateOptions{})
-	require.NoError(t, err)
+		integration, err := camel.CamelV1().Integrations(ns).Create(TestContext, &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "dummy",
+			},
+		}, metav1.CreateOptions{})
+		require.NoError(t, err)
 
-	lst, err = camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
-	require.NoError(t, err)
-	assert.NotEmpty(t, lst.Items)
-	assert.Equal(t, lst.Items[0].Name, integration.Name)
+		lst, err = camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
+		require.NoError(t, err)
+		assert.NotEmpty(t, lst.Items)
+		assert.Equal(t, lst.Items[0].Name, integration.Name)
 
-	err = camel.CamelV1().Integrations(ns).Delete(TestContext, "dummy", metav1.DeleteOptions{})
-	require.NoError(t, err)
+		err = camel.CamelV1().Integrations(ns).Delete(TestContext, "dummy", metav1.DeleteOptions{})
+		require.NoError(t, err)
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }

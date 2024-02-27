@@ -38,7 +38,6 @@ import (
 )
 
 func TestImageRegistryIsAMavenRepository(t *testing.T) {
-	RegisterTestingT(t)
 	ocp, err := openshift.IsOpenShift(TestClient())
 	require.NoError(t, err)
 	if ocp {
@@ -124,6 +123,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
 	})
+
 	t.Run("dependency can be used at build time", func(t *testing.T) {
 		// Create integration that should run an Xslt transformation whose template needs to be present at build time
 		name := RandomizedSuffixName("xslt")

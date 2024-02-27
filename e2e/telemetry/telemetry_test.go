@@ -59,12 +59,12 @@ func TestTelemetryTrait(t *testing.T) {
 		Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
 		Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
 
-		// Find opentelemetrycollector pod : the exporter is configured to log traces with detailed verborsity.
+		// Find opentelemetry collector pod : the exporter is configured to log traces with detailed verbosity.
 		pod, err := Pod("otlp", "opentelemetrycollector")()
 		Expect(err).To(BeNil())
 		Expect(pod).NotTo(BeNil())
 
-		// Ensured logs in opentelemetrycollector pod are present
+		// Ensured logs in opentelemetry collector pod are present
 		Eventually(TailedLogs(pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.target: Str(/customers/%s)", name)))
 		Eventually(TailedLogs(pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.url: Str(http://rest-consumer/customers/%s)", name)))
 

@@ -50,7 +50,7 @@ func TestEnvironmentTrait(t *testing.T) {
 		}
 
 		// Retrieve the Kubernetes Service ClusterIPs to populate the NO_PROXY environment variable
-		svc := Service("default", "kubernetes")()
+		svc := Service(TestDefaultNamespace, "kubernetes")()
 		Expect(svc).NotTo(BeNil())
 
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
@@ -66,6 +66,7 @@ func TestEnvironmentTrait(t *testing.T) {
 		// Install Camel K with the HTTP proxy environment variable
 		operatorID := "camel-k-trait-environment"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns,
 			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy),
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),

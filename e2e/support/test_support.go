@@ -98,10 +98,10 @@ const kubeConfigEnvVar = "KUBECONFIG"
 const ciPID = "/tmp/ci-k8s-pid"
 
 // v1.Build,          v1.Integration
-// v1.IntegrationKit, v1.IntegrationPlatform
+// v1.IntegrationKit, v1.IntegrationPlatform, v1.IntegrationProfile
 // v1.Kamelet,  v1.Pipe,
 // v1alpha1.Kamelet, v1alpha1.KameletBinding
-const ExpectedCRDs = 8
+const ExpectedCRDs = 9
 
 // camel-k-operator,
 // camel-k-operator-events,
@@ -123,6 +123,8 @@ const ExpectedOSPromoteRoles = 1
 
 // camel-k-operator-console-openshift
 const ExpectedOSClusterRoles = 1
+
+var TestDefaultNamespace = "default"
 
 var TestTimeoutShort = 1 * time.Minute
 var TestTimeoutMedium = 5 * time.Minute
@@ -345,20 +347,6 @@ func KamelCommandWithContext(ctx context.Context, command string, operatorID str
 
 	cmdArgs = append(cmdArgs, args...)
 	return KamelWithContext(ctx, cmdArgs...)
-}
-
-func verifyGlobalOperator() error {
-	opns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-	if opns == "" {
-		return errors.New("no operator namespace defined in CAMEL_K_GLOBAL_OPERATOR_NS")
-	}
-
-	oppod := OperatorPod(opns)()
-	if oppod == nil {
-		return fmt.Errorf("no operator pod detected in namespace %s. Operator install is a pre-requisite of the test", opns)
-	}
-
-	return nil
 }
 
 func KamelWithContext(ctx context.Context, args ...string) *cobra.Command {
@@ -1945,10 +1933,48 @@ func PlatformByName(ns string, name string) func() *v1.IntegrationPlatform {
 	}
 }
 
+func CopyIntegrationKits(ns, operatorID string) error {
+	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
+
+	lst := v1.NewIntegrationKitList()
+	if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(opns)); err != nil {
+		failTest(err)
+	}
+	for _, kit := range lst.Items {
+		if kit.Status.Image != "" {
+			copyKit := v1.IntegrationKit{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: ns,
+					Name:      kit.Name,
+				},
+				Spec: *kit.Spec.DeepCopy(),
+			}
+
+			if copyKit.Labels == nil {
+				copyKit.Labels = make(map[string]string)
+			}
+
+			copyKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
+			copyKit.Spec.Image = kit.Status.Image
+
+			v1.SetAnnotation(&copyKit.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
+			fmt.Printf("Copy integration kit %s from namespace %s\n", kit.Name, opns)
+			if err := CreateIntegrationKit(&copyKit)(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func CopyCamelCatalog(ns, operatorID string) error {
 	catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
-	defaultCatalog := CamelCatalog("default", catalogName)()
+	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
+
+	defaultCatalog := CamelCatalog(opns, catalogName)()
 	if defaultCatalog != nil {
+		fmt.Printf("Copy catalog %s from namespace %s\n", catalogName, opns)
 		catalog := v1.CamelCatalog{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: ns,
@@ -2034,6 +2060,12 @@ func UpdateIntegrationProfile(ns string, upd func(ipr *v1.IntegrationProfile)) e
 func CreateCamelCatalog(catalog *v1.CamelCatalog) func() error {
 	return func() error {
 		return TestClient().Create(TestContext, catalog)
+	}
+}
+
+func CreateIntegrationKit(kit *v1.IntegrationKit) func() error {
+	return func() error {
+		return TestClient().Create(TestContext, kit)
 	}
 }
 
@@ -2225,6 +2257,17 @@ func AssignPlatformToOperator(ns, operator string) error {
 	return TestClient().Update(TestContext, pl)
 }
 
+func GetExpectedCRDs(releaseVersion string) int {
+	switch releaseVersion {
+	case "2.2.0":
+		return 8
+	case defaults.Version:
+		return ExpectedCRDs
+	}
+
+	return ExpectedCRDs
+}
+
 func CRDs() func() []metav1.APIResource {
 	return func() []metav1.APIResource {
 
@@ -2233,6 +2276,7 @@ func CRDs() func() []metav1.APIResource {
 			reflect.TypeOf(v1.Integration{}).Name(),
 			reflect.TypeOf(v1.IntegrationKit{}).Name(),
 			reflect.TypeOf(v1.IntegrationPlatform{}).Name(),
+			reflect.TypeOf(v1.IntegrationProfile{}).Name(),
 			reflect.TypeOf(v1.Kamelet{}).Name(),
 			reflect.TypeOf(v1.Pipe{}).Name(),
 			reflect.TypeOf(v1alpha1.KameletBinding{}).Name(),
@@ -2789,7 +2833,7 @@ func deleteKnativeBroker(ns metav1.Object) {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns.GetName(),
-			Name:      "default",
+			Name:      TestDefaultNamespace,
 		},
 	}
 	if err := TestClient().Delete(TestContext, &broker); err != nil {
