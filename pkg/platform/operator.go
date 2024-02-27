@@ -94,25 +94,9 @@ func GetOperatorNamespace() string {
 	return ""
 }
 
-// GetPlatformControllerNamespace returns the namespace where the current platform controller is located (if set).
-func GetPlatformControllerNamespace() string {
-	if podNamespace, envSet := os.LookupEnv(platformControllerNamespaceEnvVariable); envSet {
-		return podNamespace
-	}
-	return ""
-}
-
 // GetOperatorPodName returns the pod that is running the current operator (if any).
 func GetOperatorPodName() string {
 	if podName, envSet := os.LookupEnv(operatorPodNameEnvVariable); envSet {
-		return podName
-	}
-	return ""
-}
-
-// GetPlatformControllerPodName returns the pod that is running the current platform controller (if any).
-func GetPlatformControllerPodName() string {
-	if podName, envSet := os.LookupEnv(platformControllerPodNameEnvVariable); envSet {
 		return podName
 	}
 	return ""

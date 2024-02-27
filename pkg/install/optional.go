@@ -28,11 +28,7 @@ import (
 
 // OperatorStartupOptionalTools tries to install optional tools at operator startup and warns if something goes wrong.
 func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespace string, operatorNamespace string, log logutil.Logger) {
-	// Try to register the OpenShift CLI Download link if possible
-	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
-		log.Info("Cannot install OpenShift CLI download link: skipping.")
-		log.Debug("Error while installing OpenShift CLI download link", "error", err)
-	}
+	TryRegisterOpenShiftConsoleDownloadLink(ctx, c, log)
 
 	// Try to install Kamelet Catalog automatically
 	var kameletNamespace string
@@ -61,5 +57,13 @@ func OperatorStartupOptionalTools(ctx context.Context, c client.Client, namespac
 				log.Debug("Error while installing global Kamelet viewer role", "error", err)
 			}
 		}
+	}
+}
+
+func TryRegisterOpenShiftConsoleDownloadLink(ctx context.Context, c client.Client, log logutil.Logger) {
+	// Try to register the OpenShift CLI Download link if possible
+	if err := OpenShiftConsoleDownloadLink(ctx, c); err != nil {
+		log.Info("Cannot install OpenShift CLI download link: skipping.")
+		log.Debug("Error while installing OpenShift CLI download link", "error", err)
 	}
 }

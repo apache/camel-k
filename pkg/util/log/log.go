@@ -19,12 +19,18 @@ package log
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"k8s.io/klog/v2"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	zapctrl "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 // Log --.
@@ -36,9 +42,51 @@ func init() {
 	}
 }
 
+// LoggerSetup setup a common logging for operators.
+func LoggerSetup(log *Logger) (string, error) {
+	// The logger instantiated here can be changed to any logger
+	// implementing the logr.Logger interface. This logger will
+	// be propagated through the whole operator, generating
+	// uniform and structured logs.
+
+	// The constants specified here are zap specific
+	var logLevel zapcore.Level
+	logLevelVal, ok := os.LookupEnv("LOG_LEVEL")
+	if ok {
+		switch strings.ToLower(logLevelVal) {
+		case "error":
+			logLevel = zapcore.ErrorLevel
+		case "info":
+			logLevel = zapcore.InfoLevel
+		case "debug":
+			logLevel = zapcore.DebugLevel
+		default:
+			customLevel, err := strconv.Atoi(strings.ToLower(logLevelVal))
+			if err != nil {
+				return "Invalid log-level", err
+			}
+			// Need to multiply by -1 to turn logr expected level into zap level
+			logLevel = zapcore.Level(int8(customLevel) * -1)
+		}
+	} else {
+		logLevel = zapcore.InfoLevel
+	}
+
+	// Use and set atomic level that all following log events are compared with
+	// in order to evaluate if a given log level on the event is enabled.
+	logf.SetLogger(zapctrl.New(func(o *zapctrl.Options) {
+		o.Development = false
+		o.Level = zap.NewAtomicLevelAt(logLevel)
+	}))
+
+	klog.SetLogger(log.AsLogger())
+
+	return "Invalid log-level", nil
+}
+
 // InitForCmd is required to avoid nil pointer exceptions from command line.
 func InitForCmd() {
-	logf.SetLogger(zap.New(zap.UseDevMode(true)))
+	logf.SetLogger(zapctrl.New(zapctrl.UseDevMode(true)))
 }
 
 // Injectable identifies objects that can receive a Logger.
