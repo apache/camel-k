@@ -25,7 +25,7 @@ metadata:
     name: camel-k-platformcontroller
     app.kubernetes.io/component: platformcontroller
     app.kubernetes.io/name: camel-k-platformcontroller
-    app.kubernetes.io/version: "2.3.0-SNAPSHOT"
+    app.kubernetes.io/version: "2.4.0-SNAPSHOT"
 spec:
   replicas: 1
   strategy:
@@ -41,12 +41,12 @@ spec:
         app: "camel-k"
         app.kubernetes.io/component: platformcontroller
         app.kubernetes.io/name: camel-k-platformcontroller
-        app.kubernetes.io/version: "2.3.0-SNAPSHOT"
+        app.kubernetes.io/version: "2.4.0-SNAPSHOT"
     spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-platformcontroller
-          image: docker.io/apache/camel-k:2.3.0-SNAPSHOT
+          image: docker.io/apache/camel-k:2.4.0-SNAPSHOT
           imagePullPolicy: IfNotPresent
           command:
             - kamel
