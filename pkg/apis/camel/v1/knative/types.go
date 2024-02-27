@@ -38,6 +38,7 @@ type CamelServiceDefinition struct {
 	URL         string            `json:"url,omitempty"`
 	Path        string            `json:"path,omitempty"`
 	Metadata    map[string]string `json:"metadata,omitempty"`
+	SinkBinding bool              `json:"sinkBinding,omitempty"`
 }
 
 // CamelEndpointKind -- .
