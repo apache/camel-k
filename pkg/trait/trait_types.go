@@ -35,7 +35,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -45,6 +44,11 @@ import (
 const (
 	True  = "true"
 	False = "false"
+
+	sourceLanguageAnnotation    = "camel.apache.org/source.language"
+	sourceLoaderAnnotation      = "camel.apache.org/source.loader"
+	sourceNameAnnotation        = "camel.apache.org/source.name"
+	sourceCompressionAnnotation = "camel.apache.org/source.compression"
 )
 
 // Identifiable represent an identifiable type.
@@ -420,7 +424,7 @@ func (e *Environment) computeApplicationProperties() (*corev1.ConfigMap, error) 
 				Labels: map[string]string{
 					v1.IntegrationLabel:                e.Integration.Name,
 					"camel.apache.org/properties.type": "application",
-					kubernetes.ConfigMapTypeLabel:      "camel-properties",
+					kubernetes.ConfigMapTypeLabel:      CamelPropertiesType,
 				},
 			},
 			Data: map[string]string{
@@ -513,8 +517,9 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	// Resources (likely application properties or kamelets)
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
-			// Camel properties
-			if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "camel-properties" {
+			switch configMap.Labels[kubernetes.ConfigMapTypeLabel] {
+			case CamelPropertiesType:
+				// Camel properties
 				propertiesType := configMap.Labels["camel.apache.org/properties.type"]
 				resName := propertiesType + ".properties"
 
@@ -536,10 +541,10 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 				} else {
 					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
 				}
-			} else if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "kamelets-bundle" {
+			case KameletBundleType:
 				// Kamelets bundle configmap
 				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
-				refName := "kamelets-bundle"
+				refName := KameletBundleType
 				vol := getVolume(refName, "configmap", configMap.Name, "", "")
 				mnt := getMount(refName, kameletMountPoint, "", true)
 
@@ -730,17 +735,4 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	return nil
-}
-
-// nolint: unused
-func (e *Environment) getAllInterceptors() []string {
-	res := make([]string, 0)
-	util.StringSliceUniqueConcat(&res, e.Interceptors)
-
-	if e.Integration != nil {
-		for _, s := range e.Integration.AllSources() {
-			util.StringSliceUniqueConcat(&res, s.Interceptors)
-		}
-	}
-	return res
 }

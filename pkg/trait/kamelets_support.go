@@ -27,6 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const KameletBundleType = "kamelets-bundle"
+
 type kameletBundle struct {
 	kamelets []*v1.Kamelet
 }
@@ -76,11 +78,11 @@ func newBundleConfigmap(name, namespace string, id int) *corev1.ConfigMap {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("kamelets-bundle-%s-%03d", name, id),
+			Name:      fmt.Sprintf("%s-%s-%03d", KameletBundleType, name, id),
 			Namespace: namespace,
 			Labels: map[string]string{
 				v1.IntegrationLabel:           name,
-				kubernetes.ConfigMapTypeLabel: "kamelets-bundle",
+				kubernetes.ConfigMapTypeLabel: KameletBundleType,
 			},
 			Annotations: map[string]string{
 				kubernetes.ConfigMapAutogenLabel: "true",
