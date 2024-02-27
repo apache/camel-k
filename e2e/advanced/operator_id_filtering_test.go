@@ -50,12 +50,14 @@ func TestOperatorIDFiltering(t *testing.T) {
 		WithNewTestNamespace(t, func(nsop1 string) {
 			operator1 := "operator-1"
 			Expect(CopyCamelCatalog(nsop1, operator1)).To(Succeed())
+			Expect(CopyIntegrationKits(nsop1, operator1)).To(Succeed())
 			Expect(KamelInstallWithIDAndKameletCatalog(operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
 			Eventually(PlatformPhase(nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			WithNewTestNamespace(t, func(nsop2 string) {
 				operator2 := "operator-2"
 				Expect(CopyCamelCatalog(nsop2, operator2)).To(Succeed())
+				Expect(CopyIntegrationKits(nsop2, operator2)).To(Succeed())
 				Expect(KamelInstallWithIDAndKameletCatalog(operator2, nsop2, "--global", "--force").Execute()).To(Succeed())
 				Eventually(PlatformPhase(nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 

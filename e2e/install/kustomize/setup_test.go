@@ -29,6 +29,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	testutil "github.com/apache/camel-k/v2/e2e/support/util"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	. "github.com/onsi/gomega"
 )
 
@@ -38,7 +39,7 @@ func TestSetupKustomizeBasic(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	Expect(UninstallAll()).To(Succeed())
 	Eventually(CRDs()).Should(HaveLen(0))
 
 	// Return the cluster to previous state
@@ -47,7 +48,7 @@ func TestSetupKustomizeBasic(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
 		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
+		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
 		ExpectExecSucceed(t, Make("setup", namespaceArg))
 
@@ -70,7 +71,8 @@ func TestSetupKustomizeGlobal(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	RegisterTestingT(t)
+	Expect(UninstallAll()).To(Succeed())
 	Eventually(CRDs()).Should(HaveLen(0))
 
 	// Return the cluster to previous state
@@ -79,7 +81,7 @@ func TestSetupKustomizeGlobal(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
 		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		Eventually(CRDs()).Should(HaveLen(ExpectedCRDs))
+		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
 		ExpectExecSucceed(t, Make("setup", "GLOBAL=true", namespaceArg))
 

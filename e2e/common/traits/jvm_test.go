@@ -37,33 +37,34 @@ import (
 )
 
 func TestJVMTrait(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	// Store a configmap holding a jar
-	var cmData = make(map[string][]byte)
-	// We calculate the expected content
-	source, err := os.ReadFile("./files/jvm/sample-1.0.jar")
-	require.NoError(t, err)
-	cmData["sample-1.0.jar"] = source
-	err = CreateBinaryConfigmap(ns, "my-deps", cmData)
-	require.NoError(t, err)
+		// Store a configmap holding a jar
+		var cmData = make(map[string][]byte)
+		// We calculate the expected content
+		source, err := os.ReadFile("./files/jvm/sample-1.0.jar")
+		require.NoError(t, err)
+		cmData["sample-1.0.jar"] = source
+		err = CreateBinaryConfigmap(ns, "my-deps", cmData)
+		require.NoError(t, err)
 
-	t.Run("JVM trait classpath", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "./files/jvm/Classpath.java",
-			"--resource", "configmap:my-deps",
-			"-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar",
-		).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
+		t.Run("JVM trait classpath", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "./files/jvm/Classpath.java",
+				"--resource", "configmap:my-deps",
+				"-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar",
+			).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
 
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, "classpath")).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, "classpath")()
-		jvmTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jvm")
-		Expect(jvmTrait).ToNot(BeNil())
-		Expect(len(jvmTrait)).To(Equal(1))
-		Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources/my-deps/sample-1.0.jar"))
+			// check integration schema does not contains unwanted default trait value.
+			Eventually(UnstructuredIntegration(ns, "classpath")).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(ns, "classpath")()
+			jvmTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jvm")
+			Expect(jvmTrait).ToNot(BeNil())
+			Expect(len(jvmTrait)).To(Equal(1))
+			Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources/my-deps/sample-1.0.jar"))
+		})
 
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})

@@ -135,7 +135,7 @@ func TestMavenProxy(t *testing.T) {
 			}),
 		))
 
-		svc := Service("default", "kubernetes")()
+		svc := Service(TestDefaultNamespace, "kubernetes")()
 		Expect(svc).NotTo(BeNil())
 
 		// It may be needed to populate the values from the cluster, machine and service network CIDRs
@@ -149,7 +149,8 @@ func TestMavenProxy(t *testing.T) {
 		// Install Camel K with the HTTP proxy
 		operatorID := "camel-k-maven-proxy"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		olm, olmErr := olm.IsAPIAvailable(TestContext, TestClient(), ns)
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
+		olm, olmErr := olm.IsAPIAvailable(TestClient())
 		installed, inErr := kubernetes.IsAPIResourceInstalled(TestClient(), configv1.GroupVersion.String(), reflect.TypeOf(configv1.Proxy{}).Name())
 		permission, pErr := kubernetes.CheckPermission(TestContext, TestClient(), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
 		olmInstall := pErr == nil && olmErr == nil && inErr == nil && olm && installed && permission

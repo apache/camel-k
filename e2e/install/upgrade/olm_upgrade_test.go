@@ -32,6 +32,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/require"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -72,7 +73,7 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 
 		if ocp {
 			// Wait for pull secret to be created in namespace
-			// eg. test-camel-k-source-dockercfg-zlltn
+			// e.g. test-camel-k-source-dockercfg-zlltn
 			secretPrefix := fmt.Sprintf("%s-dockercfg-", catalogSourceName)
 			Eventually(SecretByName(ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
 		}
@@ -82,6 +83,15 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
+
+		if len(CRDs()()) > 0 {
+			// Clean up old installation - maybe leftover from another test
+			if err := UninstallAll(); err != nil && !kerrors.IsNotFound(err) {
+				t.Error(err)
+				t.FailNow()
+			}
+		}
+		Eventually(CRDs()).Should(HaveLen(0))
 
 		args := []string{
 			"install",
@@ -241,6 +251,8 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 
 			// Clean up
 			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			// Delete Integration Platform as it does not get removed with uninstall and might cause next tests to fail
+			DeletePlatform(ns)()
 			Expect(Kamel("uninstall", "-n", ns).Execute()).To(Succeed())
 			// Clean up cluster-wide resources that are not removed by OLM
 			Expect(Kamel("uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())

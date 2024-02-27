@@ -37,6 +37,7 @@ func TestLocalPlatform(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-platform-local"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns, "--global", "--force").Execute()).To(Succeed())
 		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 

@@ -277,7 +277,7 @@ func (o *installCmdOptions) tryInstallViaOLM(
 	if err != nil {
 		return false, err
 	}
-	if olmAvailable, err := olm.IsAPIAvailable(o.Context, olmClient, o.Namespace); err != nil {
+	if olmAvailable, err := olm.IsAPIAvailable(olmClient); err != nil {
 		return false, fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
 
 	} else if !olmAvailable {

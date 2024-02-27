@@ -46,7 +46,7 @@ func TestBasicUninstall(t *testing.T) {
 		// Roles only removed in non-olm use-case
 		uninstallViaOLM := false
 		var err error
-		if uninstallViaOLM, err = olm.IsAPIAvailable(TestContext, TestClient(), ns); err != nil {
+		if uninstallViaOLM, err = olm.IsAPIAvailable(TestClient()); err != nil {
 			t.Error(err)
 			t.FailNow()
 		}

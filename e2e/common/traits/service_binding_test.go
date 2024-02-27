@@ -36,73 +36,74 @@ import (
 )
 
 func TestServiceBindingTrait(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	t.Run("Integration Service Binding", func(t *testing.T) {
-		// Create our mock service config
-		host := "hostname"
-		port := "12324"
-		service := &corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "mock-service-config-it",
-				Namespace: ns,
-				Annotations: map[string]string{
-					"service.binding/host": "path={.data.service-host}",
-					"service.binding/port": "path={.data.service-port}",
+		t.Run("Integration Service Binding", func(t *testing.T) {
+			// Create our mock service config
+			host := "hostname"
+			port := "12324"
+			service := &corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
 				},
-			},
-			Data: map[string]string{
-				"service-host": host,
-				"service-port": port,
-			},
-		}
-		serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
-		Expect(TestClient().Create(TestContext, service)).To(Succeed())
-		// Create integration and bind it to our service
-		name := RandomizedSuffixName("service-binding")
-		Expect(KamelRunWithID(operatorID, ns, "files/ServiceBinding.java",
-			"--name", name,
-			"--connect", serviceRef,
-		).Execute()).To(Succeed())
-
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s:%s", host, port)))
-	})
-
-	t.Run("Binding Service Binding", func(t *testing.T) {
-		// Create our mock service config
-		message := "hello"
-		service := &corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "mock-service-config-kb",
-				Namespace: ns,
-				Annotations: map[string]string{
-					"service.binding/message": "path={.data.message}",
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "mock-service-config-it",
+					Namespace: ns,
+					Annotations: map[string]string{
+						"service.binding/host": "path={.data.service-host}",
+						"service.binding/port": "path={.data.service-port}",
+					},
 				},
-			},
-			Data: map[string]string{
-				"message": message,
-			},
-		}
-		serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
-		Expect(TestClient().Create(TestContext, service)).To(Succeed())
-		Expect(CreateTimerKamelet(ns, "my-timer-source")()).To(Succeed())
-		Expect(KamelBindWithID(operatorID, ns, "my-timer-source", "log:info",
-			"-p", "source.message=Hello+world",
-			"--connect", serviceRef).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "my-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "my-timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
-	})
+				Data: map[string]string{
+					"service-host": host,
+					"service-port": port,
+				},
+			}
+			serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
+			Expect(TestClient().Create(TestContext, service)).To(Succeed())
+			// Create integration and bind it to our service
+			name := RandomizedSuffixName("service-binding")
+			Expect(KamelRunWithID(operatorID, ns, "files/ServiceBinding.java",
+				"--name", name,
+				"--connect", serviceRef,
+			).Execute()).To(Succeed())
 
-	// Clean up
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s:%s", host, port)))
+		})
+
+		t.Run("Binding Service Binding", func(t *testing.T) {
+			// Create our mock service config
+			message := "hello"
+			service := &corev1.ConfigMap{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "ConfigMap",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "mock-service-config-kb",
+					Namespace: ns,
+					Annotations: map[string]string{
+						"service.binding/message": "path={.data.message}",
+					},
+				},
+				Data: map[string]string{
+					"message": message,
+				},
+			}
+			serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
+			Expect(TestClient().Create(TestContext, service)).To(Succeed())
+			Expect(CreateTimerKamelet(ns, "my-timer-source")()).To(Succeed())
+			Expect(KamelBindWithID(operatorID, ns, "my-timer-source", "log:info",
+				"-p", "source.message=Hello+world",
+				"--connect", serviceRef).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "my-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(ns, "my-timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
+		})
+
+		// Clean up
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }

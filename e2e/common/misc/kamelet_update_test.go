@@ -35,17 +35,18 @@ import (
 const customLabel = "custom-label"
 
 func TestBundleKameletUpdate(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	Expect(createBundleKamelet(ns, "my-http-sink")()).To(Succeed()) // Going to be replaced
-	Expect(createUserKamelet(ns, "user-sink")()).To(Succeed())      // Left intact by the operator
+		Expect(createBundleKamelet(ns, "my-http-sink")()).To(Succeed()) // Going to be replaced
+		Expect(createUserKamelet(ns, "user-sink")()).To(Succeed())      // Left intact by the operator
 
-	Eventually(Kamelet("my-http-sink", ns)).
-		Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
-	Consistently(Kamelet("user-sink", ns), 5*time.Second, 1*time.Second).
-		Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
+		Eventually(Kamelet("my-http-sink", ns)).
+			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
+		Consistently(Kamelet("user-sink", ns), 5*time.Second, 1*time.Second).
+			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }
 
 func createBundleKamelet(ns string, name string) func() error {

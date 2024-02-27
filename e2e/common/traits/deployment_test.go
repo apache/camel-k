@@ -38,68 +38,70 @@ import (
 )
 
 func TestRecreateDeploymentStrategyTrait(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	t.Run("Run with Recreate Deployment Strategy", func(t *testing.T) {
-		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-t", "deployment.strategy="+string(appsv1.RecreateDeploymentStrategyType)).
-			Execute()).To(Succeed())
+		t.Run("Run with Recreate Deployment Strategy", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+				"--name", name,
+				"-t", "deployment.strategy="+string(appsv1.RecreateDeploymentStrategyType)).
+				Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		Eventually(Deployment(ns, name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
-			Fields{
-				"Spec": MatchFields(IgnoreExtras,
-					Fields{
-						"Strategy": MatchFields(IgnoreExtras,
-							Fields{
-								"Type": Equal(appsv1.RecreateDeploymentStrategyType),
-							}),
-					}),
-			}),
-		))
+			Eventually(Deployment(ns, name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+				Fields{
+					"Spec": MatchFields(IgnoreExtras,
+						Fields{
+							"Strategy": MatchFields(IgnoreExtras,
+								Fields{
+									"Type": Equal(appsv1.RecreateDeploymentStrategyType),
+								}),
+						}),
+				}),
+			))
 
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, name)()
-		deploymentTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "deployment")
-		Expect(deploymentTrait).ToNot(BeNil())
-		Expect(len(deploymentTrait)).To(Equal(1))
-		Expect(deploymentTrait["strategy"]).To(Equal(string(appsv1.RecreateDeploymentStrategyType)))
+			// check integration schema does not contains unwanted default trait value.
+			Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(ns, name)()
+			deploymentTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "deployment")
+			Expect(deploymentTrait).ToNot(BeNil())
+			Expect(len(deploymentTrait)).To(Equal(1))
+			Expect(deploymentTrait["strategy"]).To(Equal(string(appsv1.RecreateDeploymentStrategyType)))
 
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }
 
 func TestRollingUpdateDeploymentStrategyTrait(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	t.Run("Run with RollingUpdate Deployment Strategy", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"-t", "deployment.strategy="+string(appsv1.RollingUpdateDeploymentStrategyType)).
-			Execute()).To(Succeed())
+		t.Run("Run with RollingUpdate Deployment Strategy", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+				"-t", "deployment.strategy="+string(appsv1.RollingUpdateDeploymentStrategyType)).
+				Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		Eventually(Deployment(ns, "java"), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
-			Fields{
-				"Spec": MatchFields(IgnoreExtras,
-					Fields{
-						"Strategy": MatchFields(IgnoreExtras,
-							Fields{
-								"Type": Equal(appsv1.RollingUpdateDeploymentStrategyType),
-							}),
-					}),
-			}),
-		))
+			Eventually(Deployment(ns, "java"), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+				Fields{
+					"Spec": MatchFields(IgnoreExtras,
+						Fields{
+							"Strategy": MatchFields(IgnoreExtras,
+								Fields{
+									"Type": Equal(appsv1.RollingUpdateDeploymentStrategyType),
+								}),
+						}),
+				}),
+			))
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

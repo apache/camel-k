@@ -40,6 +40,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
 		Eventually(Platform(ns)).ShouldNot(BeNil())

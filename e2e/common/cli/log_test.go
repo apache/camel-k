@@ -32,24 +32,26 @@ import (
 )
 
 func TestKamelCLILog(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
+		t.Run("check integration log", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", "log-yaml").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "log-yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			// first line of the integration logs
+			firstLine := strings.Split(IntegrationLogs(ns, "log-yaml")(), "\n")[0]
+			podName := IntegrationPod(ns, "log-yaml")().Name
 
-	t.Run("check integration log", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", "log-yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "log-yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		// first line of the integration logs
-		firstLine := strings.Split(IntegrationLogs(ns, "log-yaml")(), "\n")[0]
-		podName := IntegrationPod(ns, "log-yaml")().Name
+			logsCLI := GetOutputStringAsync(Kamel("log", "log-yaml", "-n", ns))
+			Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
+			Eventually(logsCLI).Should(ContainSubstring(firstLine))
 
-		logsCLI := GetOutputStringAsync(Kamel("log", "log-yaml", "-n", ns))
-		Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-		Eventually(logsCLI).Should(ContainSubstring(firstLine))
+			logs := strings.Split(IntegrationLogs(ns, "log-yaml")(), "\n")
+			lastLine := logs[len(logs)-1]
 
-		logs := strings.Split(IntegrationLogs(ns, "log-yaml")(), "\n")
-		lastLine := logs[len(logs)-1]
+			logsCLI = GetOutputStringAsync(Kamel("log", "log-yaml", "-n", ns, "--tail", "5"))
+			Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
+			Eventually(logsCLI).Should(ContainSubstring(lastLine))
+		})
 
-		logsCLI = GetOutputStringAsync(Kamel("log", "log-yaml", "-n", ns, "--tail", "5"))
-		Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-		Eventually(logsCLI).Should(ContainSubstring(lastLine))
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

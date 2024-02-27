@@ -30,6 +30,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -50,6 +51,15 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
+
+		if len(CRDs()()) > 0 {
+			// Clean up old installation - maybe leftover from another test
+			if err := UninstallAll(); err != nil && !kerrors.IsNotFound(err) {
+				t.Error(err)
+				t.FailNow()
+			}
+		}
+		Eventually(CRDs()).Should(HaveLen(0))
 
 		// Should both install the CRDs and kamel in the given namespace
 		Expect(Kamel(
@@ -126,6 +136,8 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 
 		// Clean up
 		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		// Delete Integration Platform as it does not get removed with uninstall and might cause next tests to fail
+		DeletePlatform(ns)()
 		Expect(Kamel("uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
 	})
 }

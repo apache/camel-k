@@ -23,6 +23,7 @@ limitations under the License.
 package support
 
 import (
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"os"
 	"os/exec"
 	"strings"
@@ -77,7 +78,7 @@ func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
-// Expect a command error with an exit code of 1
+// ExpectExecError Expect a command error with an exit code of 1
 func ExpectExecError(t *testing.T, command *exec.Cmd) {
 	t.Helper()
 
@@ -98,16 +99,20 @@ func ExpectExecError(t *testing.T, command *exec.Cmd) {
 	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
-// Clean up the cluster ready for the next set of tests
+// Cleanup Clean up the cluster ready for the next set of tests
 func Cleanup() {
 	// Remove the locally installed operator
-	UninstallAll()
+	if err := UninstallAll(); err != nil {
+		log.Error(err, "Failed to uninstall Camel K")
+	}
 
 	// Ensure the CRDs & ClusterRoles are reinstalled if not already
-	Kamel("install", "--olm=false", "--cluster-setup").Execute()
+	if err := Kamel("install", "--olm=false", "--cluster-setup").Execute(); err != nil {
+		log.Error(err, "Failed to perform Camel K cluster setup")
+	}
 }
 
-// Removes all items
-func UninstallAll() {
-	Kamel("uninstall", "--olm=false", "--all").Execute()
+// UninstallAll Removes all items
+func UninstallAll() error {
+	return Kamel("uninstall", "--olm=false", "--all").Execute()
 }

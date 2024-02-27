@@ -35,31 +35,33 @@ import (
 )
 
 func TestStructuredLogs(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	name := RandomizedSuffixName("java")
-	Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-		"--name", name,
-		"-t", "logging.format=json").Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		name := RandomizedSuffixName("java")
+		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			"--name", name,
+			"-t", "logging.format=json").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-	pod := OperatorPod(ns)()
-	Expect(pod).NotTo(BeNil())
+		opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
+		pod := OperatorPod(opns)()
+		Expect(pod).NotTo(BeNil())
 
-	// pod.Namespace could be different from ns if using global operator
-	fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
-	logOptions := &corev1.PodLogOptions{
-		Container: "camel-k-operator",
-	}
-	logs, err := StructuredLogs(pod.Namespace, pod.Name, logOptions, false)
-	Expect(err).To(BeNil())
-	Expect(logs).NotTo(BeEmpty())
+		// pod.Namespace could be different from ns if using global operator
+		fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
+		logOptions := &corev1.PodLogOptions{
+			Container: "camel-k-operator",
+		}
+		logs, err := StructuredLogs(pod.Namespace, pod.Name, logOptions, false)
+		Expect(err).To(BeNil())
+		Expect(logs).NotTo(BeEmpty())
 
-	it := Integration(ns, name)()
-	Expect(it).NotTo(BeNil())
-	build := Build(IntegrationKitNamespace(ns, name)(), IntegrationKit(ns, name)())()
-	Expect(build).NotTo(BeNil())
+		it := Integration(ns, name)()
+		Expect(it).NotTo(BeNil())
+		build := Build(IntegrationKitNamespace(ns, name)(), IntegrationKit(ns, name)())()
+		Expect(build).NotTo(BeNil())
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
 }

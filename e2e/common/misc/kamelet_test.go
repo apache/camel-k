@@ -33,11 +33,11 @@ import (
 )
 
 func TestKameletClasspathLoading(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ns string) {
 
-	// Store a configmap on the cluster
-	var cmData = make(map[string]string)
-	cmData["my-timer-source.kamelet.yaml"] = `
+		// Store a configmap on the cluster
+		var cmData = make(map[string]string)
+		cmData["my-timer-source.kamelet.yaml"] = `
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -108,27 +108,28 @@ spec:
             constant: "{{contentType}}"
         - to: kamelet:sink
 `
-	CreatePlainTextConfigmap(ns, "my-kamelet-cm", cmData)
+		CreatePlainTextConfigmap(ns, "my-kamelet-cm", cmData)
 
-	// Basic
-	t.Run("test basic case", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
-			"--resource", "configmap:my-kamelet-cm@/kamelets",
-			"-p camel.component.kamelet.location=file:/kamelets",
-			"-d", "camel:yaml-dsl",
-			// kamelet dependencies
-			"-d", "camel:timer").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
+		// Basic
+		t.Run("test basic case", func(t *testing.T) {
+			Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
+				"--resource", "configmap:my-kamelet-cm@/kamelets",
+				"-p camel.component.kamelet.location=file:/kamelets",
+				"-d", "camel:yaml-dsl",
+				// kamelet dependencies
+				"-d", "camel:timer").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
 
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, "timer-kamelet-integration")).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, "timer-kamelet-integration")()
-		kameletsTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "kamelets")
-		Expect(kameletsTrait).ToNot(BeNil())
-		Expect(len(kameletsTrait)).To(Equal(1))
-		Expect(kameletsTrait["enabled"]).To(Equal(false))
+			// check integration schema does not contains unwanted default trait value.
+			Eventually(UnstructuredIntegration(ns, "timer-kamelet-integration")).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(ns, "timer-kamelet-integration")()
+			kameletsTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "kamelets")
+			Expect(kameletsTrait).ToNot(BeNil())
+			Expect(len(kameletsTrait)).To(Equal(1))
+			Expect(kameletsTrait["enabled"]).To(Equal(false))
+		})
+
+		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

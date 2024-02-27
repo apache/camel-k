@@ -146,7 +146,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	uninstallViaOLM := false
 	if o.OlmEnabled {
 		var err error
-		if uninstallViaOLM, err = olm.IsAPIAvailable(o.Context, c, o.Namespace); err != nil {
+		if uninstallViaOLM, err = olm.IsAPIAvailable(c); err != nil {
 			return fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
 		}
 

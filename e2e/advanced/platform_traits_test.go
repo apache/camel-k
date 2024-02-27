@@ -39,6 +39,7 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-platform-trait-test"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 
 		containerTestName := "testname"

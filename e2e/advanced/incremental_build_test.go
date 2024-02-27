@@ -39,6 +39,7 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-incremental-build"
 		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
 		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
 		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
