@@ -19,6 +19,7 @@ package knative
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 )
 
@@ -39,6 +40,46 @@ func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, se
 	}
 
 	return definition, nil
+}
+
+// SetSinkBinding marks one of the service as SinkBinding.
+func (env *CamelEnvironment) SetSinkBinding(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType, apiVersion, kind string) {
+	for i, svc := range env.Services {
+		svc := svc
+		if svc.Name == name &&
+			svc.Metadata[CamelMetaEndpointKind] == string(endpointKind) &&
+			svc.ServiceType == serviceType &&
+			(apiVersion == "" || svc.Metadata[CamelMetaKnativeAPIVersion] == apiVersion) &&
+			(kind == "" || svc.Metadata[CamelMetaKnativeKind] == kind) {
+			svc.SinkBinding = true
+			env.Services[i] = svc
+		}
+	}
+}
+
+// ToCamelProperties returns the application properties representation of the services.
+func (env *CamelEnvironment) ToCamelProperties() map[string]string {
+	mappedServices := make(map[string]string)
+	for i, service := range env.Services {
+		resource := fmt.Sprintf("camel.component.knative.environment.resources[%d]", i)
+		mappedServices[fmt.Sprintf("%s.name", resource)] = service.Name
+		mappedServices[fmt.Sprintf("%s.type", resource)] = string(service.ServiceType)
+		mappedServices[fmt.Sprintf("%s.objectKind", resource)] = service.Metadata[CamelMetaKnativeKind]
+		mappedServices[fmt.Sprintf("%s.objectApiVersion", resource)] = service.Metadata[CamelMetaKnativeAPIVersion]
+		mappedServices[fmt.Sprintf("%s.endpointKind", resource)] = service.Metadata[CamelMetaEndpointKind]
+		mappedServices[fmt.Sprintf("%s.reply", resource)] = service.Metadata[CamelMetaKnativeReply]
+		if service.ServiceType == CamelServiceTypeEvent {
+			mappedServices[fmt.Sprintf("%s.objectName", resource)] = service.Metadata[CamelMetaKnativeName]
+		}
+		if service.SinkBinding {
+			mappedServices[fmt.Sprintf("%s.url", resource)] = "${K_SINK}"
+			mappedServices[fmt.Sprintf("%s.ceOverrides", resource)] = "${K_CE_OVERRIDES}"
+		} else {
+			mappedServices[fmt.Sprintf("%s.url", resource)] = service.URL
+			mappedServices[fmt.Sprintf("%s.path", resource)] = service.Path
+		}
+	}
+	return mappedServices
 }
 
 // Serialize serializes a CamelEnvironment.
