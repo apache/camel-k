@@ -13,7 +13,7 @@ This is the default. As the default Camel K runtime is Quarkus, then, every Came
 If you want to go Quarkus native, then you need to familiarize with the xref:traits:quarkus.adoc[Quarkus trait]. This trait is used to configure any aspect related to Quarkus build. The most straightforward way is to use `quarkus.build-mode=native` parameter:
 
 [source,console]
-$ kamel run quarkus.build-mode=native ...
+$ kamel run -t quarkus.build-mode=native ...
 
 This one will trigger a native compilation on your cluster. Mind that a native compilation require quite certain amount of memory and specific tooling (GraalVM). For this reason, any native build will be forced to execute with `pod` build strategy, meaning that a new Kubernetes Pod is scheduled to perform such operation. We calculate certain sensible values for Kubernetes resource such as memory and CPU (4Gi and 1000 millicores). However, depending on the complexity of your Camel application, then, you may require to adjust them. For this reason you may need to configure your xref:pipeline/pipeline.adoc#build-pipeline-trait[build pipeline resources].
 
