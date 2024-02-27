@@ -17,7 +17,10 @@ limitations under the License.
 
 package platform
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 const (
 	PlatformControllerWatchNamespaceEnvVariable = "WATCH_NAMESPACE"
@@ -28,6 +31,22 @@ const (
 const PlatformControllerLockName = "camel-k-platform-controller-lock"
 
 var PlatformControllerImage string
+
+// GetPlatformControllerNamespace returns the namespace where the current platform controller is located (if set).
+func GetPlatformControllerNamespace() string {
+	if podNamespace, envSet := os.LookupEnv(platformControllerNamespaceEnvVariable); envSet {
+		return podNamespace
+	}
+	return ""
+}
+
+// GetPlatformControllerPodName returns the pod that is running the current platform controller (if any).
+func GetPlatformControllerPodName() string {
+	if podName, envSet := os.LookupEnv(platformControllerPodNameEnvVariable); envSet {
+		return podName
+	}
+	return ""
+}
 
 // GetPlatformControllerLockName returns the name of the lock lease that is electing a leader on the particular namespace.
 func GetPlatformControllerLockName(platformControllerID string) string {
