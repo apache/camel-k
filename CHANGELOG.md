@@ -31,7 +31,6 @@
 - Data type Kamelet hardcoded [\#5014](https://github.com/apache/camel-k/issues/5014)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
-- unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
 - Pipe using simple language expressions causing failure [\#4777](https://github.com/apache/camel-k/issues/4777)
@@ -46,6 +45,10 @@
 
 **Merged pull requests:**
 
+- update quarkus-native.adoc [\#5190](https://github.com/apache/camel-k/pull/5190) ([bvahdat](https://github.com/bvahdat))
+- chore\(knative\): configure via properties [\#5186](https://github.com/apache/camel-k/pull/5186) ([squakez](https://github.com/squakez))
+- chore\(cmd\): deprecate -d file feature [\#5185](https://github.com/apache/camel-k/pull/5185) ([squakez](https://github.com/squakez))
+- fix\(trait\): service binding [\#5184](https://github.com/apache/camel-k/pull/5184) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.47.0 to 0.48.0 [\#5177](https://github.com/apache/camel-k/pull/5177) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ctrl\): calculate digest on spec traits [\#5176](https://github.com/apache/camel-k/pull/5176) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump go.uber.org/zap from 1.26.0 to 1.27.0 [\#5171](https://github.com/apache/camel-k/pull/5171) ([dependabot[bot]](https://github.com/apps/dependabot))
