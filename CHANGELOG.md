@@ -31,7 +31,6 @@
 - Data type Kamelet hardcoded [\#5014](https://github.com/apache/camel-k/issues/5014)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
-- unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
 - Pipe using simple language expressions causing failure [\#4777](https://github.com/apache/camel-k/issues/4777)
