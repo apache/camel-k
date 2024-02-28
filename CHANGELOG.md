@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Get environment variable value is empty in properties file [\#5178](https://github.com/apache/camel-k/issues/5178)
 - Debug Integrations failing [\#5161](https://github.com/apache/camel-k/issues/5161)
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
@@ -45,10 +46,15 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.18.0 to 1.19.0 [\#5193](https://github.com/apache/camel-k/pull/5193) ([dependabot[bot]](https://github.com/apps/dependabot))
 - update quarkus-native.adoc [\#5190](https://github.com/apache/camel-k/pull/5190) ([bvahdat](https://github.com/bvahdat))
+- chore: use constants for config types [\#5189](https://github.com/apache/camel-k/pull/5189) ([squakez](https://github.com/squakez))
+- fix\(builder\): strenghten matching dependencies heuristic [\#5187](https://github.com/apache/camel-k/pull/5187) ([squakez](https://github.com/squakez))
 - chore\(knative\): configure via properties [\#5186](https://github.com/apache/camel-k/pull/5186) ([squakez](https://github.com/squakez))
 - chore\(cmd\): deprecate -d file feature [\#5185](https://github.com/apache/camel-k/pull/5185) ([squakez](https://github.com/squakez))
 - fix\(trait\): service binding [\#5184](https://github.com/apache/camel-k/pull/5184) ([squakez](https://github.com/squakez))
+- chore\(ci\): upgrade release-action action [\#5182](https://github.com/apache/camel-k/pull/5182) ([gansheer](https://github.com/gansheer))
+- fix\(ctrl\): address changes during phase transition [\#5180](https://github.com/apache/camel-k/pull/5180) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.47.0 to 0.48.0 [\#5177](https://github.com/apache/camel-k/pull/5177) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ctrl\): calculate digest on spec traits [\#5176](https://github.com/apache/camel-k/pull/5176) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump go.uber.org/zap from 1.26.0 to 1.27.0 [\#5171](https://github.com/apache/camel-k/pull/5171) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -59,6 +65,7 @@
 - chore\(deps\): bump github.com/prometheus/client\_model from 0.5.0 to 0.6.0 [\#5162](https://github.com/apache/camel-k/pull/5162) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(ci\): go:embed usage [\#5160](https://github.com/apache/camel-k/pull/5160) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.46.0 to 0.47.0 [\#5159](https://github.com/apache/camel-k/pull/5159) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(build\): Add Build waiting condition [\#5157](https://github.com/apache/camel-k/pull/5157) ([gansheer](https://github.com/gansheer))
 - Reduce write to hash, prepare string from secret, configmap [\#5155](https://github.com/apache/camel-k/pull/5155) ([lfabriko](https://github.com/lfabriko))
 - feat\(traits\): persist generated status [\#5153](https://github.com/apache/camel-k/pull/5153) ([squakez](https://github.com/squakez))
 - fix\(core\): Externally built Integrations run command configuration from jvm trait [\#5151](https://github.com/apache/camel-k/pull/5151) ([gansheer](https://github.com/gansheer))
@@ -68,6 +75,7 @@
 - fix\(test\): add apache-snapshot repository as the test may run agains a camel-k-runtime snaphost release [\#5147](https://github.com/apache/camel-k/pull/5147) ([claudio4j](https://github.com/claudio4j))
 - fix\(controller\): filter confimap/secret watches [\#5144](https://github.com/apache/camel-k/pull/5144) ([squakez](https://github.com/squakez))
 - chore\(e2e-tests\): Improve E2E tests [\#5139](https://github.com/apache/camel-k/pull/5139) ([christophd](https://github.com/christophd))
+- fix\(\#5097\): Remove secondary IntegrationPlatform in favor of using IntegrationProfile [\#5138](https://github.com/apache/camel-k/pull/5138) ([christophd](https://github.com/christophd))
 - chore\(ci\): upgrade setup-go action [\#5132](https://github.com/apache/camel-k/pull/5132) ([gansheer](https://github.com/gansheer))
 - fix\(github actions\): restircted image-pull-policy-always patch apply … [\#5128](https://github.com/apache/camel-k/pull/5128) ([valdar](https://github.com/valdar))
 - fix\(doc\): Add warning on cron trait for native build [\#5127](https://github.com/apache/camel-k/pull/5127) ([gansheer](https://github.com/gansheer))
