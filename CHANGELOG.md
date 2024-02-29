@@ -46,6 +46,7 @@
 
 **Merged pull requests:**
 
+- fix\(trait\): catalog to drive dependencies [\#5199](https://github.com/apache/camel-k/pull/5199) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.18.0 to 1.19.0 [\#5193](https://github.com/apache/camel-k/pull/5193) ([dependabot[bot]](https://github.com/apps/dependabot))
 - update quarkus-native.adoc [\#5190](https://github.com/apache/camel-k/pull/5190) ([bvahdat](https://github.com/bvahdat))
 - chore: use constants for config types [\#5189](https://github.com/apache/camel-k/pull/5189) ([squakez](https://github.com/squakez))
