@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Get environment variable value is empty in properties file [\#5178](https://github.com/apache/camel-k/issues/5178)
 - Debug Integrations failing [\#5161](https://github.com/apache/camel-k/issues/5161)
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
