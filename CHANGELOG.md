@@ -6,6 +6,9 @@
 
 **Closed issues:**
 
+- Route parameters are ignored for `path` parameters [\#5203](https://github.com/apache/camel-k/issues/5203)
+- Builder property failure when using non xml tag characters [\#5195](https://github.com/apache/camel-k/issues/5195)
+- Error configuring property: camel.component.test\[00001\]port\[80\]tcp.addr because cannot find component with name test\[00001\]port\[80\]tcp. [\#5179](https://github.com/apache/camel-k/issues/5179)
 - Get environment variable value is empty in properties file [\#5178](https://github.com/apache/camel-k/issues/5178)
 - Debug Integrations failing [\#5161](https://github.com/apache/camel-k/issues/5161)
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
@@ -46,7 +49,10 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): stricter pipe test check [\#5202](https://github.com/apache/camel-k/pull/5202) ([squakez](https://github.com/squakez))
+- fix\(trait\): deprecate operator inspecting secrets [\#5201](https://github.com/apache/camel-k/pull/5201) ([squakez](https://github.com/squakez))
 - fix\(trait\): catalog to drive dependencies [\#5199](https://github.com/apache/camel-k/pull/5199) ([squakez](https://github.com/squakez))
+- fix\(quarkus\): build time properties into file [\#5198](https://github.com/apache/camel-k/pull/5198) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.18.0 to 1.19.0 [\#5193](https://github.com/apache/camel-k/pull/5193) ([dependabot[bot]](https://github.com/apps/dependabot))
 - update quarkus-native.adoc [\#5190](https://github.com/apache/camel-k/pull/5190) ([bvahdat](https://github.com/bvahdat))
 - chore: use constants for config types [\#5189](https://github.com/apache/camel-k/pull/5189) ([squakez](https://github.com/squakez))
