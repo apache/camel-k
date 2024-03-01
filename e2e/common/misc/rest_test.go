@@ -38,37 +38,39 @@ import (
 )
 
 func TestRunRest(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
-		ocp, err := openshift.IsOpenShift(TestClient())
+		ocp, err := openshift.IsOpenShift(TestClient(t))
 		require.NoError(t, err)
 
-		Expect(KamelRunWithID(operatorID, ns, "files/rest-consumer.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Expect(KamelRunWithID(t, operatorID, ns, "files/rest-consumer.yaml").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(t, ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 		t.Run("Service works", func(t *testing.T) {
 			name := RandomizedSuffixName("John")
-			service := Service(ns, "rest-consumer")
+			service := Service(t, ns, "rest-consumer")
 			Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
-			Expect(KamelRunWithID(operatorID, ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
-			Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
+			Expect(KamelRunWithID(t, operatorID, ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, "rest-producer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+			Eventually(IntegrationLogs(t, ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
 		})
 
 		if ocp {
 			t.Run("Route works", func(t *testing.T) {
 				name := RandomizedSuffixName("Peter")
-				route := Route(ns, "rest-consumer")
+				route := Route(t, ns, "rest-consumer")
 				Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
-				Eventually(RouteStatus(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal("True"))
+				Eventually(RouteStatus(t, ns, "rest-consumer"), TestTimeoutMedium).Should(Equal("True"))
 				url := fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name)
 				Eventually(httpRequest(url), TestTimeoutMedium).Should(Equal(fmt.Sprintf("%s Doe", name)))
-				Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+				Eventually(IntegrationLogs(t, ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
 			})
 		}
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

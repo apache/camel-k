@@ -34,16 +34,18 @@ import (
 )
 
 func TestRunPolyglotExamples(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		t.Run("run polyglot", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "--name", "polyglot", "files/js-polyglot.js", "files/yaml-polyglot.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "polyglot"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "polyglot", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-yaml"))
-			Eventually(IntegrationLogs(ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-js"))
+			Expect(KamelRunWithID(t, operatorID, ns, "--name", "polyglot", "files/js-polyglot.js", "files/yaml-polyglot.yaml").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, "polyglot"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, "polyglot", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-yaml"))
+			Eventually(IntegrationLogs(t, ns, "polyglot"), TestTimeoutShort).Should(ContainSubstring("Magicpolyglot-js"))
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

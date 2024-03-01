@@ -49,15 +49,23 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Test fast setup failed! - %s\n", message)
 	})
 
-	g.Expect(KamelRunWithID(operatorID, ns, "testdata/Java.java").Execute()).To(Succeed())
-	g.Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	g.Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	g.Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	var t *testing.T
+	g.Expect(TestClient(t)).ShouldNot(BeNil())
+	g.Expect(UpdatePlatform(t, ns, operatorID, func(pl *v1.IntegrationPlatform) {
+		// Adjust global operator integration platform settings
+		// Tests are run in parallel so need to choose a proper build order strategy
+		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyDependencies
+	})).To(Succeed())
 
-	g.Expect(KamelRunWithID(operatorID, ns, "testdata/yaml.yaml").Execute()).To(Succeed())
-	g.Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	g.Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	g.Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	g.Expect(KamelRunWithID(t, operatorID, ns, "testdata/Java.java").Execute()).To(Succeed())
+	g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	g.Eventually(IntegrationConditionStatus(t, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	g.Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+	g.Expect(KamelRunWithID(t, operatorID, ns, "testdata/yaml.yaml").Execute()).To(Succeed())
+	g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	g.Eventually(IntegrationConditionStatus(t, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	g.Eventually(IntegrationLogs(t, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 	os.Exit(m.Run())
 }

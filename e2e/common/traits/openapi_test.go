@@ -35,32 +35,34 @@ import (
 )
 
 func TestOpenAPI(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		openapiContent, err := ioutil.ReadFile("./files/openapi/petstore-api.yaml")
 		require.NoError(t, err)
 		var cmDataProps = make(map[string]string)
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
-		CreatePlainTextConfigmap(ns, "my-openapi", cmDataProps)
+		CreatePlainTextConfigmap(t, ns, "my-openapi", cmDataProps)
 
-		Expect(KamelRunWithID(operatorID, ns,
+		Expect(KamelRunWithID(t, operatorID, ns,
 			"--name", "petstore",
 			"--open-api", "configmap:my-openapi",
 			"files/openapi/petstore.groovy",
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, "petstore"), TestTimeoutLong).
+		Eventually(IntegrationPodPhase(t, ns, "petstore"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
-		Eventually(DeploymentWithIntegrationLabel(ns, "petstore"), TestTimeoutLong).
+		Eventually(DeploymentWithIntegrationLabel(t, ns, "petstore"), TestTimeoutLong).
 			Should(Not(BeNil()))
 
-		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+		Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+		Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-		Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+		Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

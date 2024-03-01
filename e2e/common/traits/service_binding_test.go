@@ -36,6 +36,8 @@ import (
 )
 
 func TestServiceBindingTrait(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		t.Run("Integration Service Binding", func(t *testing.T) {
@@ -61,17 +63,17 @@ func TestServiceBindingTrait(t *testing.T) {
 				},
 			}
 			serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
-			Expect(TestClient().Create(TestContext, service)).To(Succeed())
+			Expect(TestClient(t).Create(TestContext, service)).To(Succeed())
 			// Create integration and bind it to our service
 			name := RandomizedSuffixName("service-binding")
-			Expect(KamelRunWithID(operatorID, ns, "files/ServiceBinding.java",
+			Expect(KamelRunWithID(t, operatorID, ns, "files/ServiceBinding.java",
 				"--name", name,
 				"--connect", serviceRef,
 			).Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s:%s", host, port)))
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s:%s", host, port)))
 		})
 
 		t.Run("Binding Service Binding", func(t *testing.T) {
@@ -94,16 +96,16 @@ func TestServiceBindingTrait(t *testing.T) {
 				},
 			}
 			serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
-			Expect(TestClient().Create(TestContext, service)).To(Succeed())
-			Expect(CreateTimerKamelet(ns, "my-timer-source")()).To(Succeed())
-			Expect(KamelBindWithID(operatorID, ns, "my-timer-source", "log:info",
+			Expect(TestClient(t).Create(TestContext, service)).To(Succeed())
+			Expect(CreateTimerKamelet(t, ns, "my-timer-source")()).To(Succeed())
+			Expect(KamelBindWithID(t, operatorID, ns, "my-timer-source", "log:info",
 				"-p", "source.message=Hello+world",
 				"--connect", serviceRef).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "my-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "my-timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
+			Eventually(IntegrationPodPhase(t, ns, "my-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, "my-timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
 		})
 
 		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

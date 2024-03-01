@@ -34,39 +34,39 @@ import (
 )
 
 func TestKameletFromCustomRepository(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		kameletName := "timer-custom-source"
-		removeKamelet(kameletName, ns)
+		removeKamelet(t, kameletName, ns)
 
-		Eventually(Kamelet(kameletName, ns)).Should(BeNil())
+		Eventually(Kamelet(t, kameletName, ns)).Should(BeNil())
 		// Add the custom repository
-		Expect(Kamel("kamelet", "add-repo",
+		Expect(Kamel(t, "kamelet", "add-repo",
 			"github:squakez/ck-kamelet-test-repo/kamelets",
 			"-n", ns,
 			"-x", operatorID).Execute()).To(Succeed())
 
-		Expect(KamelRunWithID(operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
+		Expect(KamelRunWithID(t, operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
+		Eventually(IntegrationPodPhase(t, ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
+		Eventually(IntegrationLogs(t, ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
 
 		// Remove the custom repository
-		Expect(Kamel("kamelet", "remove-repo",
+		Expect(Kamel(t, "kamelet", "remove-repo",
 			"github:squakez/ck-kamelet-test-repo/kamelets",
 			"-n", ns,
 			"-x", operatorID).Execute()).To(Succeed())
 	})
 }
 
-func removeKamelet(name string, ns string) {
-	kamelet := Kamelet(name, ns)()
-	TestClient().Delete(TestContext, kamelet)
+func removeKamelet(t *testing.T, name string, ns string) {
+	kamelet := Kamelet(t, name, ns)()
+	TestClient(t).Delete(TestContext, kamelet)
 }

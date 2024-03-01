@@ -41,41 +41,41 @@ func TestKustomizeUninstallBasic(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	Expect(UninstallAll()).To(Succeed())
-	Eventually(CRDs()).Should(HaveLen(0))
+	Expect(UninstallAll(t)).To(Succeed())
+	Eventually(CRDs(t)).Should(HaveLen(0))
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg))
-		ExpectExecSucceed(t, Make("platform", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "platform", namespaceArg))
 		// Skip default kamelets installation for faster test runs
-		ExpectExecSucceed(t, Make("operator", namespaceArg, "INSTALL_DEFAULT_KAMELETS=false"))
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		ExpectExecSucceed(t, Make(t, "operator", namespaceArg, "INSTALL_DEFAULT_KAMELETS=false"))
+		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Do uninstall
-		ExpectExecSucceed(t, Make("uninstall", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "uninstall", namespaceArg))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		Eventually(OperatorPod(ns)).Should(BeNil())
-		Eventually(Platform(ns)).Should(BeNil())
+		Eventually(OperatorPod(t, ns)).Should(BeNil())
+		Eventually(Platform(t, ns)).Should(BeNil())
 		// The operator can dynamically create a for its builders
 		// so, in case there is a build strategy "pod", expect this to have 1 role
-		Eventually(Role(ns)).Should(BeNil())
-		Eventually(ClusterRole()).Should(BeNil())
+		Eventually(Role(t, ns)).Should(BeNil())
+		Eventually(ClusterRole(t)).Should(BeNil())
 		// CRDs should be still there
-		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
+		Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
 		// Do uninstall all
-		ExpectExecSucceed(t, Make("uninstall", namespaceArg, "UNINSTALL_ALL=true"))
+		ExpectExecSucceed(t, Make(t, "uninstall", namespaceArg, "UNINSTALL_ALL=true"))
 
-		Eventually(CRDs()).Should(BeNil())
+		Eventually(CRDs(t)).Should(BeNil())
 	})
 
 }
@@ -86,38 +86,38 @@ func TestUninstallGlobal(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	Expect(UninstallAll()).To(Succeed())
-	Eventually(CRDs()).Should(HaveLen(0))
+	Expect(UninstallAll(t)).To(Succeed())
+	Eventually(CRDs(t)).Should(HaveLen(0))
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg, "GLOBAL=true"))
-		ExpectExecSucceed(t, Make("platform", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup", namespaceArg, "GLOBAL=true"))
+		ExpectExecSucceed(t, Make(t, "platform", namespaceArg))
 		// Skip default kamelets installation for faster test runs
-		ExpectExecSucceed(t, Make("operator", namespaceArg, "GLOBAL=true", "INSTALL_DEFAULT_KAMELETS=false"))
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		ExpectExecSucceed(t, Make(t, "operator", namespaceArg, "GLOBAL=true", "INSTALL_DEFAULT_KAMELETS=false"))
+		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Do uninstall
-		ExpectExecSucceed(t, Make("uninstall", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "uninstall", namespaceArg))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		Eventually(OperatorPod(ns)).Should(BeNil())
-		Eventually(Platform(ns)).Should(BeNil())
-		Eventually(Role(ns)).Should(BeNil())
-		Eventually(ClusterRole()).Should(BeNil())
+		Eventually(OperatorPod(t, ns)).Should(BeNil())
+		Eventually(Platform(t, ns)).Should(BeNil())
+		Eventually(Role(t, ns)).Should(BeNil())
+		Eventually(ClusterRole(t)).Should(BeNil())
 		// CRDs should be still there
-		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
+		Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
 		// Do uninstall all
-		ExpectExecSucceed(t, Make("uninstall", namespaceArg, "UNINSTALL_ALL=true"))
+		ExpectExecSucceed(t, Make(t, "uninstall", namespaceArg, "UNINSTALL_ALL=true"))
 
-		Eventually(CRDs()).Should(BeNil())
+		Eventually(CRDs(t)).Should(BeNil())
 	})
 }

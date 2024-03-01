@@ -100,19 +100,19 @@ func ExpectExecError(t *testing.T, command *exec.Cmd) {
 }
 
 // Cleanup Clean up the cluster ready for the next set of tests
-func Cleanup() {
+func Cleanup(t *testing.T) {
 	// Remove the locally installed operator
-	if err := UninstallAll(); err != nil {
+	if err := UninstallAll(t); err != nil {
 		log.Error(err, "Failed to uninstall Camel K")
 	}
 
 	// Ensure the CRDs & ClusterRoles are reinstalled if not already
-	if err := Kamel("install", "--olm=false", "--cluster-setup").Execute(); err != nil {
+	if err := Kamel(t, "install", "--olm=false", "--cluster-setup").Execute(); err != nil {
 		log.Error(err, "Failed to perform Camel K cluster setup")
 	}
 }
 
 // UninstallAll Removes all items
-func UninstallAll() error {
-	return Kamel("uninstall", "--olm=false", "--all").Execute()
+func UninstallAll(t *testing.T) error {
+	return Kamel(t, "uninstall", "--olm=false", "--all").Execute()
 }

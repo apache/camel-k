@@ -42,37 +42,37 @@ func TestOperatorBasic(t *testing.T) {
 
 	// Ensure no CRDs are already installed
 	RegisterTestingT(t)
-	Expect(UninstallAll()).To(Succeed())
+	Expect(UninstallAll(t)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup", namespaceArg))
 		// Skip default kamelets installation for faster test runs
-		ExpectExecSucceed(t, Make("operator",
+		ExpectExecSucceed(t, Make(t, "operator",
 			namespaceArg,
 			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Check if restricted security context has been applyed
-		operatorPod := OperatorPod(ns)()
+		operatorPod := OperatorPod(t, ns)()
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
-		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(Platform(t, ns)).ShouldNot(BeNil())
 		registry := os.Getenv("KIND_REGISTRY")
 		if registry != "" {
-			platform := Platform(ns)()
+			platform := Platform(t, ns)()
 			Expect(platform.Status.Build.Registry).ShouldNot(BeNil())
 			Expect(platform.Status.Build.Registry.Address).To(Equal(registry))
 		}
@@ -86,29 +86,29 @@ func TestOperatorKustomizeAlternativeImage(t *testing.T) {
 
 	// Ensure no CRDs are already installed
 	RegisterTestingT(t)
-	Expect(UninstallAll()).To(Succeed())
+	Expect(UninstallAll(t)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup", namespaceArg))
 
 		// Skip default kamelets installation for faster test runs
 		newImage := "quay.io/kameltest/kamel-operator"
 		newTag := "1.1.1"
-		ExpectExecSucceed(t, Make("operator",
+		ExpectExecSucceed(t, Make(t, "operator",
 			fmt.Sprintf("CUSTOM_IMAGE=%s", newImage),
 			fmt.Sprintf("CUSTOM_VERSION=%s", newTag),
 			namespaceArg,
 			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		Eventually(OperatorImage(ns)).Should(Equal(fmt.Sprintf("%s:%s", newImage, newTag)))
+		Eventually(OperatorImage(t, ns)).Should(Equal(fmt.Sprintf("%s:%s", newImage, newTag)))
 	})
 }
 
@@ -118,28 +118,28 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 
 	// Ensure no CRDs are already installed
 	RegisterTestingT(t)
-	Expect(UninstallAll()).To(Succeed())
+	Expect(UninstallAll(t)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg, "GLOBAL=true"))
+		ExpectExecSucceed(t, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup", namespaceArg, "GLOBAL=true"))
 
 		// Skip default kamelets installation for faster test runs
-		ExpectExecSucceed(t, Make("operator",
+		ExpectExecSucceed(t, Make(t, "operator",
 			namespaceArg,
 			"GLOBAL=true",
 			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		podFunc := OperatorPod(ns)
+		podFunc := OperatorPod(t, ns)
 		Eventually(podFunc).ShouldNot(BeNil())
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		pod := podFunc()
 
 		containers := pod.Spec.Containers
@@ -158,6 +158,6 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 		}
 		Expect(found).To(BeTrue())
 
-		Eventually(Platform(ns)).ShouldNot(BeNil())
+		Eventually(Platform(t, ns)).ShouldNot(BeNil())
 	})
 }

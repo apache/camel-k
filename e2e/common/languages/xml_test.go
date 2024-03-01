@@ -34,15 +34,17 @@ import (
 )
 
 func TestRunSimpleXmlExamples(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		t.Run("run xml", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/xml.xml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "xml"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "xml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "xml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRunWithID(t, operatorID, ns, "files/xml.xml").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, "xml"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, "xml", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, "xml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

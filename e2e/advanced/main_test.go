@@ -49,20 +49,22 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Test fast setup failed! - %s\n", message)
 	})
 
-	g.Expect(KamelRunWithID(operatorID, ns, "files/Java.java").Execute()).To(Succeed())
-	g.Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	g.Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	g.Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	var t *testing.T
+	g.Expect(TestClient(t)).ShouldNot(BeNil())
+	g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java").Execute()).To(Succeed())
+	g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	g.Eventually(IntegrationConditionStatus(t, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	g.Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-	g.Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-	g.Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	g.Eventually(IntegrationConditionStatus(ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	g.Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+	g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	g.Eventually(IntegrationConditionStatus(t, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	g.Eventually(IntegrationLogs(t, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-	g.Expect(KamelRunWithID(operatorID, ns, "files/timer-source.groovy").Execute()).To(Succeed())
-	g.Eventually(IntegrationPodPhase(ns, "timer-source"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	g.Eventually(IntegrationConditionStatus(ns, "timer-source", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	g.Eventually(IntegrationLogs(ns, "timer-source"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	g.Expect(KamelRunWithID(t, operatorID, ns, "files/timer-source.groovy").Execute()).To(Succeed())
+	g.Eventually(IntegrationPodPhase(t, ns, "timer-source"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	g.Eventually(IntegrationConditionStatus(t, ns, "timer-source", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	g.Eventually(IntegrationLogs(t, ns, "timer-source"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 	os.Exit(m.Run())
 }

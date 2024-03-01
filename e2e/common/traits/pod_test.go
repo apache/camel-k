@@ -34,6 +34,8 @@ import (
 )
 
 func TestPodTrait(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		tc := []struct {
@@ -47,10 +49,10 @@ func TestPodTrait(t *testing.T) {
 				//nolint: thelper
 				assertions: func(t *testing.T, ns string, name string) {
 					// check that integrations is working and reading data created by sidecar container
-					Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
+					Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
 					// check that env var is injected
-					Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
-					pod := IntegrationPod(ns, name)()
+					Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
+					pod := IntegrationPod(t, ns, name)()
 
 					// check if ENV variable is applied
 					envValue := getEnvVar("TEST_VARIABLE", pod.Spec)
@@ -62,7 +64,7 @@ func TestPodTrait(t *testing.T) {
 				templateName: "files/template-with-supplemental-groups.yaml",
 				//nolint: thelper
 				assertions: func(t *testing.T, ns string, name string) {
-					Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
+					Eventually(IntegrationPodHas(t, ns, name, func(pod *corev1.Pod) bool {
 						if pod.Spec.SecurityContext == nil {
 							return false
 						}
@@ -83,23 +85,23 @@ func TestPodTrait(t *testing.T) {
 			test := tc[i]
 
 			t.Run(test.name, func(t *testing.T) {
-				Expect(KamelRunWithID(operatorID, ns, "files/PodTest.groovy",
+				Expect(KamelRunWithID(t, operatorID, ns, "files/PodTest.groovy",
 					"--name", name,
 					"--pod-template", test.templateName,
 				).Execute()).To(Succeed())
 
 				// check integration is deployed
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+				Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 				test.assertions(t, ns, name)
 
 				// Clean up
-				Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+				Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 			})
 		}
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

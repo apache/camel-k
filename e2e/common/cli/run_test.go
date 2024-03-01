@@ -43,34 +43,34 @@ func TestKamelCLIRun(t *testing.T) {
 
 		t.Run("Examples from GitHub", func(t *testing.T) {
 			t.Run("Java", func(t *testing.T) {
-				Expect(KamelRunWithID(operatorID, ns,
+				Expect(KamelRunWithID(t, operatorID, ns,
 					"github:apache/camel-k-examples/generic-examples/languages/Sample.java").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
+				Eventually(IntegrationPodPhase(t, ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			t.Run("Java (RAW)", func(t *testing.T) {
-				Expect(KamelRunWithID(operatorID, ns,
+				Expect(KamelRunWithID(t, operatorID, ns,
 					"https://raw.githubusercontent.com/apache/camel-k-examples/main/generic-examples/languages/Sample.java").Execute()).
 					To(Succeed())
-				Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
+				Eventually(IntegrationPodPhase(t, ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			t.Run("Java (branch)", func(t *testing.T) {
-				Expect(KamelRunWithID(operatorID, ns,
+				Expect(KamelRunWithID(t, operatorID, ns,
 					"github:apache/camel-k-examples/generic-examples/languages/Sample.java?branch=main").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
+				Eventually(IntegrationPodPhase(t, ns, "sample"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, "sample", v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, "sample"), TestTimeoutShort).Should(ContainSubstring("Hello Camel K!"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			// GIST does not like GITHUB_TOKEN apparently, we must temporarily remove it
@@ -79,26 +79,26 @@ func TestKamelCLIRun(t *testing.T) {
 
 			t.Run("Gist (ID)", func(t *testing.T) {
 				name := RandomizedSuffixName("github-gist-id")
-				Expect(KamelRunWithID(operatorID, ns, "--name", name,
+				Expect(KamelRunWithID(t, operatorID, ns, "--name", name,
 					"gist:e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			t.Run("Gist (URL)", func(t *testing.T) {
 				name := RandomizedSuffixName("github-gist-url")
-				Expect(KamelRunWithID(operatorID, ns, "--name", name,
+				Expect(KamelRunWithID(t, operatorID, ns, "--name", name,
 					"https://gist.github.com/lburgazzoli/e2c3f9a5fd0d9e79b21b04809786f17a").Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Tick!"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			// Revert GITHUB TOKEN
@@ -106,76 +106,76 @@ func TestKamelCLIRun(t *testing.T) {
 			os.Unsetenv("GITHUB_TOKEN_TMP")
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+			Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 		})
 
 		t.Run("Run and update", func(t *testing.T) {
 			name := RandomizedSuffixName("run")
-			Expect(KamelRunWithID(operatorID, ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			Expect(KamelRunWithID(t, operatorID, ns, "files/run.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magic default"))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magic default"))
 
 			// Re-run the Integration with an updated configuration
-			Expect(KamelRunWithID(operatorID, ns, "files/run.yaml", "--name", name, "-p", "property=value").Execute()).
+			Expect(KamelRunWithID(t, operatorID, ns, "files/run.yaml", "--name", name, "-p", "property=value").Execute()).
 				To(Succeed())
 
 			// Check the Deployment has progressed successfully
-			Eventually(DeploymentCondition(ns, name, appsv1.DeploymentProgressing), TestTimeoutShort).
+			Eventually(DeploymentCondition(t, ns, name, appsv1.DeploymentProgressing), TestTimeoutShort).
 				Should(MatchFields(IgnoreExtras, Fields{
 					"Status": Equal(corev1.ConditionTrue),
 					"Reason": Equal("NewReplicaSetAvailable"),
 				}))
 
 			// Check the new configuration is taken into account
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magic value"))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magic value"))
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+			Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 		})
 
 		t.Run("Run with glob patterns", func(t *testing.T) {
 			t.Run("YAML", func(t *testing.T) {
 				name := RandomizedSuffixName("run")
-				Expect(KamelRunWithID(operatorID, ns, "files/glob/run*", "--name", name).Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Expect(KamelRunWithID(t, operatorID, ns, "files/glob/run*", "--name", name).Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 1 default"))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 2 default"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 1 default"))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 2 default"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			t.Run("Java", func(t *testing.T) {
 				name := RandomizedSuffixName("java")
-				Expect(KamelRunWithID(operatorID, ns, "files/glob/Java*", "--name", name).Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Expect(KamelRunWithID(t, operatorID, ns, "files/glob/Java*", "--name", name).Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 1 default"))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 2 default"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 1 default"))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 2 default"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			t.Run("All", func(t *testing.T) {
 				name := RandomizedSuffixName("java")
-				Expect(KamelRunWithID(operatorID, ns, "files/glob/*", "--name", name).Execute()).To(Succeed())
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Expect(KamelRunWithID(t, operatorID, ns, "files/glob/*", "--name", name).Execute()).To(Succeed())
+				Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 1 default"))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 2 default"))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 1 default"))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 2 default"))
-				Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 1 default"))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello run 2 default"))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 1 default"))
+				Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello java 2 default"))
+				Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 			})
 
 			// Clean up
-			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+			Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 		})
 	})
 
@@ -192,15 +192,15 @@ func TestKamelCLIRun(t *testing.T) {
 			}
 			// Requires a local integration platform in order to resolve the insecure registry
 			// Install platform (use the installer to get staging if present)
-			Expect(KamelInstallWithID("local-platform", ns, "--skip-operator-setup").Execute()).To(Succeed())
+			Expect(KamelInstallWithID(t, "local-platform", ns, "--skip-operator-setup").Execute()).To(Succeed())
 
-			Expect(KamelRunWithID(operatorID, ns, "../traits/files/jvm/Classpath.java",
+			Expect(KamelRunWithID(t, operatorID, ns, "../traits/files/jvm/Classpath.java",
 				"-d", sampleJar,
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
-			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+			Eventually(IntegrationPodPhase(t, ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
+			Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 		})
 	})
 
@@ -217,18 +217,18 @@ func TestKamelCLIRun(t *testing.T) {
 			}
 			// Requires a local integration platform in order to resolve the insecure registry
 			// Install platform (use the installer to get staging if present)
-			Expect(KamelInstallWithID("local-platform", ns, "--skip-operator-setup").Execute()).To(Succeed())
+			Expect(KamelInstallWithID(t, "local-platform", ns, "--skip-operator-setup").Execute()).To(Succeed())
 
-			Expect(KamelRunWithID(operatorID, ns, "../traits/files/jvm/Classpath.java",
+			Expect(KamelRunWithID(t, operatorID, ns, "../traits/files/jvm/Classpath.java",
 				"-d", sampleJar,
 				"-d", "https://raw.githubusercontent.com/apache/camel-k-examples/main/generic-examples/languages/Sample.java|targetPath=/tmp/foo",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
-			Eventually(DeleteIntegrations(ns), TestTimeoutLong).Should(Equal(0))
+			Eventually(IntegrationPodPhase(t, ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
+			Eventually(DeleteIntegrations(t, ns), TestTimeoutLong).Should(Equal(0))
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

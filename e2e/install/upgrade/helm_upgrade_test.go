@@ -58,14 +58,14 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 		t.Logf("Unable to set makefile directory envvar - %s", err.Error())
 	}
 
-	if len(CRDs()()) > 0 {
+	if len(CRDs(t)()) > 0 {
 		// Clean up old installation - maybe leftover from another test
-		if err := UninstallAll(); err != nil && !kerrors.IsNotFound(err) {
+		if err := UninstallAll(t); err != nil && !kerrors.IsNotFound(err) {
 			t.Error(err)
 			t.FailNow()
 		}
 	}
-	Eventually(CRDs()).Should(HaveLen(0))
+	Eventually(CRDs(t)).Should(HaveLen(0))
 
 	WithNewTestNamespace(t, func(ns string) {
 		// Install operator in last released version
@@ -84,16 +84,16 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorImage(ns)).Should(ContainSubstring(releaseVersion))
-		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(releaseVersion)))
+		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		Eventually(OperatorImage(t, ns)).Should(ContainSubstring(releaseVersion))
+		Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(releaseVersion)))
 
 		// Test a simple route
 		t.Run("simple route", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRun(ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRun(t, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
 		// Delete CRDs with kustomize
@@ -122,8 +122,8 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 		)
 
 		// Upgrade operator to current version
-		ExpectExecSucceed(t, Make(fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
-		ExpectExecSucceed(t, Make("release-helm"))
+		ExpectExecSucceed(t, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
+		ExpectExecSucceed(t, Make(t, "release-helm"))
 		ExpectExecSucceed(t,
 			exec.Command(
 				"helm",
@@ -140,22 +140,22 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorImage(ns)).Should(ContainSubstring(defaults.Version))
+		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		Eventually(OperatorImage(t, ns)).Should(ContainSubstring(defaults.Version))
 
 		// Test again a simple route
 		t.Run("simple route upgraded", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRun(ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRun(t, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
 		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 
 		// Delete Integration Platform as it does not get removed with uninstall and might cause next tests to fail
-		DeletePlatform(ns)()
+		DeletePlatform(t, ns)()
 
 		// Uninstall with helm
 		ExpectExecSucceed(t,
@@ -167,10 +167,10 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 				ns,
 			),
 		)
-		Eventually(OperatorPod(ns)).Should(BeNil())
+		Eventually(OperatorPod(t, ns)).Should(BeNil())
 
 		//  helm does not remove the CRDs
-		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
+		Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 		ExpectExecSucceed(t,
 			exec.Command(
 				"kubectl",
@@ -181,6 +181,6 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 				ns,
 			),
 		)
-		Eventually(CRDs()).Should(HaveLen(0))
+		Eventually(CRDs(t)).Should(HaveLen(0))
 	})
 }

@@ -33,60 +33,62 @@ import (
 )
 
 func TestKamelReset(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-cli-reset"
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
 
-		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("Reset the whole platform", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml1")
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Eventually(Kit(ns, IntegrationKit(ns, name)())).Should(Not(BeNil()))
-			Eventually(Integration(ns, name)).Should(Not(BeNil()))
+			Eventually(Kit(t, ns, IntegrationKit(t, ns, name)())).Should(Not(BeNil()))
+			Eventually(Integration(t, ns, name)).Should(Not(BeNil()))
 
-			Expect(Kamel("reset", "-n", ns).Execute()).To(Succeed())
+			Expect(Kamel(t, "reset", "-n", ns).Execute()).To(Succeed())
 
-			Expect(Integration(ns, name)()).To(BeNil())
-			Expect(Kits(ns)()).To(HaveLen(0))
+			Expect(Integration(t, ns, name)()).To(BeNil())
+			Expect(Kits(t, ns)()).To(HaveLen(0))
 		})
 
 		t.Run("Reset skip-integrations", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml2")
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Eventually(Kit(ns, IntegrationKit(ns, name)())).Should(Not(BeNil()))
-			Eventually(Integration(ns, name)).Should(Not(BeNil()))
+			Eventually(Kit(t, ns, IntegrationKit(t, ns, name)())).Should(Not(BeNil()))
+			Eventually(Integration(t, ns, name)).Should(Not(BeNil()))
 
-			Expect(Kamel("reset", "-n", ns, "--skip-integrations").Execute()).To(Succeed())
+			Expect(Kamel(t, "reset", "-n", ns, "--skip-integrations").Execute()).To(Succeed())
 
-			Expect(Integration(ns, name)()).To(Not(BeNil()))
-			Expect(Kits(ns)()).To(HaveLen(0))
+			Expect(Integration(t, ns, name)()).To(Not(BeNil()))
+			Expect(Kits(t, ns)()).To(HaveLen(0))
 		})
 
 		t.Run("Reset skip-kits", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml3")
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			kitName := IntegrationKit(ns, name)()
-			Eventually(Kit(ns, kitName)).Should(Not(BeNil()))
-			Eventually(Integration(ns, name)).Should(Not(BeNil()))
+			kitName := IntegrationKit(t, ns, name)()
+			Eventually(Kit(t, ns, kitName)).Should(Not(BeNil()))
+			Eventually(Integration(t, ns, name)).Should(Not(BeNil()))
 
-			Expect(Kamel("reset", "-n", ns, "--skip-kits").Execute()).To(Succeed())
+			Expect(Kamel(t, "reset", "-n", ns, "--skip-kits").Execute()).To(Succeed())
 
-			Expect(Integration(ns, name)()).To(BeNil())
-			Expect(Kit(ns, kitName)()).To(Not(BeNil()))
+			Expect(Integration(t, ns, name)()).To(BeNil())
+			Expect(Kit(t, ns, kitName)()).To(Not(BeNil()))
 		})
 		// Clean up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
