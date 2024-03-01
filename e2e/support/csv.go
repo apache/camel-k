@@ -25,6 +25,7 @@ package support
 import (
 	"fmt"
 	"strings"
+	"testing"
 	"time"
 	"unsafe"
 
@@ -40,10 +41,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
-func ClusterServiceVersion(conditions func(olm.ClusterServiceVersion) bool, ns string) func() *olm.ClusterServiceVersion {
+func ClusterServiceVersion(t *testing.T, conditions func(olm.ClusterServiceVersion) bool, ns string) func() *olm.ClusterServiceVersion {
 	return func() *olm.ClusterServiceVersion {
 		lst := olm.ClusterServiceVersionList{}
-		if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
 			panic(err)
 		}
 		for _, s := range lst.Items {
@@ -55,16 +56,16 @@ func ClusterServiceVersion(conditions func(olm.ClusterServiceVersion) bool, ns s
 	}
 }
 
-func ClusterServiceVersionPhase(conditions func(olm.ClusterServiceVersion) bool, ns string) func() olm.ClusterServiceVersionPhase {
+func ClusterServiceVersionPhase(t *testing.T, conditions func(olm.ClusterServiceVersion) bool, ns string) func() olm.ClusterServiceVersionPhase {
 	return func() olm.ClusterServiceVersionPhase {
-		if csv := ClusterServiceVersion(conditions, ns)(); csv != nil && unsafe.Sizeof(csv.Status) > 0 {
+		if csv := ClusterServiceVersion(t, conditions, ns)(); csv != nil && unsafe.Sizeof(csv.Status) > 0 {
 			return csv.Status.Phase
 		}
 		return ""
 	}
 }
 
-func CreateOrUpdateCatalogSource(ns, name, image string) error {
+func CreateOrUpdateCatalogSource(t *testing.T, ns, name, image string) error {
 	catalogSource := &olm.CatalogSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
@@ -72,7 +73,7 @@ func CreateOrUpdateCatalogSource(ns, name, image string) error {
 		},
 	}
 
-	_, err := ctrlutil.CreateOrUpdate(TestContext, TestClient(), catalogSource, func() error {
+	_, err := ctrlutil.CreateOrUpdate(TestContext, TestClient(t), catalogSource, func() error {
 		catalogSource.Spec = olm.CatalogSourceSpec{
 			Image:       image,
 			SourceType:  "grpc",
@@ -85,7 +86,7 @@ func CreateOrUpdateCatalogSource(ns, name, image string) error {
 	return err
 }
 
-func CatalogSource(ns, name string) func() *olm.CatalogSource {
+func CatalogSource(t *testing.T, ns, name string) func() *olm.CatalogSource {
 	return func() *olm.CatalogSource {
 		cs := &olm.CatalogSource{
 			TypeMeta: metav1.TypeMeta{
@@ -97,7 +98,7 @@ func CatalogSource(ns, name string) func() *olm.CatalogSource {
 				Name:      name,
 			},
 		}
-		if err := TestClient().Get(TestContext, ctrl.ObjectKeyFromObject(cs), cs); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(TestContext, ctrl.ObjectKeyFromObject(cs), cs); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Errorf(err, "Error while retrieving CatalogSource %s", name)
@@ -107,18 +108,18 @@ func CatalogSource(ns, name string) func() *olm.CatalogSource {
 	}
 }
 
-func CatalogSourcePhase(ns, name string) func() string {
+func CatalogSourcePhase(t *testing.T, ns, name string) func() string {
 	return func() string {
-		if source := CatalogSource(ns, name)(); source != nil && source.Status.GRPCConnectionState != nil {
-			return CatalogSource(ns, name)().Status.GRPCConnectionState.LastObservedState
+		if source := CatalogSource(t, ns, name)(); source != nil && source.Status.GRPCConnectionState != nil {
+			return CatalogSource(t, ns, name)().Status.GRPCConnectionState.LastObservedState
 		}
 		return ""
 	}
 }
 
-func CatalogSourcePod(ns, csName string) func() *corev1.Pod {
+func CatalogSourcePod(t *testing.T, ns, csName string) func() *corev1.Pod {
 	return func() *corev1.Pod {
-		podList, err := TestClient().CoreV1().Pods(ns).List(TestContext, metav1.ListOptions{})
+		podList, err := TestClient(t).CoreV1().Pods(ns).List(TestContext, metav1.ListOptions{})
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
@@ -139,8 +140,8 @@ func CatalogSourcePod(ns, csName string) func() *corev1.Pod {
 	}
 }
 
-func CatalogSourcePodRunning(ns, csName string) error {
-	podFunc := CatalogSourcePod(ns, csName)
+func CatalogSourcePodRunning(t *testing.T, ns, csName string) error {
+	podFunc := CatalogSourcePod(t, ns, csName)
 
 	for i := 1; i < 5; i++ {
 		csPod := podFunc()
@@ -150,7 +151,7 @@ func CatalogSourcePodRunning(ns, csName string) error {
 
 		if i == 2 {
 			fmt.Println("Catalog Source Pod still not ready so delete & allow it to be redeployed ...")
-			if err := TestClient().Delete(TestContext, csPod); err != nil {
+			if err := TestClient(t).Delete(TestContext, csPod); err != nil {
 				return err
 			}
 		}
@@ -162,9 +163,9 @@ func CatalogSourcePodRunning(ns, csName string) error {
 	return fmt.Errorf("Catalog Source Pod failed to reach a 'running' state")
 }
 
-func GetSubscription(ns string) (*olm.Subscription, error) {
+func GetSubscription(t *testing.T, ns string) (*olm.Subscription, error) {
 	lst := olm.SubscriptionList{}
-	if err := TestClient().List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+	if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
 		return nil, err
 	}
 	for _, s := range lst.Items {

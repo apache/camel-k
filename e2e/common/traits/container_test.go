@@ -35,11 +35,13 @@ import (
 )
 
 func TestContainerTrait(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		t.Run("Container image pull policy and resources configuration", func(t *testing.T) {
 			name := RandomizedSuffixName("java1")
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"-t", "container.image-pull-policy=Always",
 				"-t", "container.request-cpu=0.005",
 				"-t", "container.request-memory=100Mi",
@@ -47,17 +49,17 @@ func TestContainerTrait(t *testing.T) {
 				"-t", "container.limit-memory=500Mi",
 				"--name", name,
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodHas(t, ns, name, func(pod *corev1.Pod) bool {
 				if len(pod.Spec.Containers) != 1 {
 					return false
 				}
 				imagePullPolicy := pod.Spec.Containers[0].ImagePullPolicy
 				return imagePullPolicy == "Always"
 			}), TestTimeoutShort).Should(BeTrue())
-			Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
+			Eventually(IntegrationPodHas(t, ns, name, func(pod *corev1.Pod) bool {
 				if len(pod.Spec.Containers) != 1 {
 					return false
 				}
@@ -65,7 +67,7 @@ func TestContainerTrait(t *testing.T) {
 				requestsCpu := pod.Spec.Containers[0].Resources.Requests.Cpu()
 				return limitsCpu != nil && limitsCpu.String() == "200m" && requestsCpu != nil && requestsCpu.String() == "5m"
 			}), TestTimeoutShort).Should(BeTrue())
-			Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
+			Eventually(IntegrationPodHas(t, ns, name, func(pod *corev1.Pod) bool {
 				if len(pod.Spec.Containers) != 1 {
 					return false
 				}
@@ -79,14 +81,14 @@ func TestContainerTrait(t *testing.T) {
 		t.Run("Container name", func(t *testing.T) {
 			name := RandomizedSuffixName("java2")
 			containerName := "my-container-name"
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"-t", "container.name="+containerName,
 				"--name", name,
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodHas(t, ns, name, func(pod *corev1.Pod) bool {
 				if len(pod.Spec.Containers) != 1 {
 					return false
 				}
@@ -95,8 +97,8 @@ func TestContainerTrait(t *testing.T) {
 			}), TestTimeoutShort).Should(BeTrue())
 
 			// check integration schema does not contains unwanted default trait value.
-			Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(ns, name)()
+			Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(t, ns, name)()
 			containerTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "container")
 			Expect(containerTrait).ToNot(BeNil())
 			Expect(len(containerTrait)).To(Equal(1))
@@ -105,6 +107,6 @@ func TestContainerTrait(t *testing.T) {
 		})
 
 		// Clean-up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

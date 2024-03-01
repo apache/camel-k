@@ -48,7 +48,9 @@ func TestDuplicateParameters(t *testing.T) {
 	comm, _, _ := cmd.NewKamelWithModelineCommand(ctx, cmdParams)
 
 	// the command is executed inside GetOutputString function
-	commOutput := GetOutputString(comm)
+	commOutput := GetOutputString(&KamelCLI{
+		Command: comm,
+	})
 
 	outParams :=
 		`"traits":{"affinity":{"enabled":true},"camel":{"properties":["prop1 = true","prop2 = true","foo = bar"]},"pull-secret":{"enabled":true},"addons":{"telemetry":{"enabled":true}}}`

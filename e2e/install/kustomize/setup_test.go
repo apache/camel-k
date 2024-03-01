@@ -39,29 +39,29 @@ func TestSetupKustomizeBasic(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	Expect(UninstallAll()).To(Succeed())
-	Eventually(CRDs()).Should(HaveLen(0))
+	Expect(UninstallAll(t)).To(Succeed())
+	Eventually(CRDs(t)).Should(HaveLen(0))
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
+		ExpectExecSucceed(t, Make(t, "setup-cluster", namespaceArg))
+		Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
-		ExpectExecSucceed(t, Make("setup", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup", namespaceArg))
 
 		kpRoles := ExpectedKubePromoteRoles
 		opRoles := kpRoles + ExpectedOSPromoteRoles
-		Eventually(Role(ns)).Should(Or(HaveLen(kpRoles), HaveLen(opRoles)))
+		Eventually(Role(t, ns)).Should(Or(HaveLen(kpRoles), HaveLen(opRoles)))
 
 		kcRoles := ExpectedKubeClusterRoles
 		ocRoles := kcRoles + ExpectedOSClusterRoles
-		Eventually(ClusterRole()).Should(Or(HaveLen(kcRoles), HaveLen(ocRoles)))
+		Eventually(ClusterRole(t)).Should(Or(HaveLen(kcRoles), HaveLen(ocRoles)))
 
 		// Tidy up to ensure next test works
-		Expect(Kamel("uninstall", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "uninstall", "-n", ns).Execute()).To(Succeed())
 	})
 
 }
@@ -72,23 +72,23 @@ func TestSetupKustomizeGlobal(t *testing.T) {
 
 	// Ensure no CRDs are already installed
 	RegisterTestingT(t)
-	Expect(UninstallAll()).To(Succeed())
-	Eventually(CRDs()).Should(HaveLen(0))
+	Expect(UninstallAll(t)).To(Succeed())
+	Eventually(CRDs(t)).Should(HaveLen(0))
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
 	WithNewTestNamespace(t, func(ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		Eventually(CRDs()).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
+		ExpectExecSucceed(t, Make(t, "setup-cluster", namespaceArg))
+		Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
-		ExpectExecSucceed(t, Make("setup", "GLOBAL=true", namespaceArg))
+		ExpectExecSucceed(t, Make(t, "setup", "GLOBAL=true", namespaceArg))
 
-		Eventually(Role(ns)).Should(HaveLen(0))
+		Eventually(Role(t, ns)).Should(HaveLen(0))
 
 		kcpRoles := ExpectedKubeClusterRoles + ExpectedKubePromoteRoles
 		ocpRoles := kcpRoles + ExpectedOSClusterRoles + ExpectedOSPromoteRoles
-		Eventually(ClusterRole()).Should(Or(HaveLen(kcpRoles), HaveLen(ocpRoles)))
+		Eventually(ClusterRole(t)).Should(Or(HaveLen(kcpRoles), HaveLen(ocpRoles)))
 	})
 }

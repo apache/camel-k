@@ -45,8 +45,8 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 
 	WithNewTestNamespace(t, func(ns string) {
-		ExpectExecSucceed(t, Make(fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
-		ExpectExecSucceed(t, Make("release-helm"))
+		ExpectExecSucceed(t, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
+		ExpectExecSucceed(t, Make(t, "release-helm"))
 		ExpectExecSucceed(t,
 			exec.Command(
 				"helm",
@@ -62,10 +62,10 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
 
 		// Check if restricted security context has been applyed
-		operatorPod := OperatorPod(ns)()
+		operatorPod := OperatorPod(t, ns)()
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
 		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
@@ -74,9 +74,9 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 		//Test a simple route
 		t.Run("simple route", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRun(ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRun(t, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
 		ExpectExecSucceed(t,
@@ -89,6 +89,6 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).Should(BeNil())
+		Eventually(OperatorPod(t, ns)).Should(BeNil())
 	})
 }

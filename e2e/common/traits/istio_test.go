@@ -35,26 +35,28 @@ import (
 )
 
 func TestIstioTrait(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		t.Run("Run Java with Istio", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "istio.enabled=true").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(ns, name)()
+			pod := IntegrationPod(t, ns, name)()
 			Expect(pod.ObjectMeta.Annotations).NotTo(BeNil())
 			annotations := pod.ObjectMeta.Annotations
 			Expect(annotations["sidecar.istio.io/inject"]).To(Equal("true"))
 			Expect(annotations["traffic.sidecar.istio.io/includeOutboundIPRanges"]).To(Equal("10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"))
 
 			// check integration schema does not contains unwanted default trait value.
-			Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(ns, name)()
+			Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(t, ns, name)()
 			istioTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "istio")
 			Expect(istioTrait).ToNot(BeNil())
 			Expect(len(istioTrait)).To(Equal(1))
@@ -62,6 +64,6 @@ func TestIstioTrait(t *testing.T) {
 
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

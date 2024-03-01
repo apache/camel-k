@@ -38,23 +38,23 @@ func TestOpenAPIService(t *testing.T) {
 	require.NoError(t, err)
 	var cmDataProps = make(map[string]string)
 	cmDataProps["petstore-api.yaml"] = string(openapiContent)
-	CreatePlainTextConfigmap(ns, "my-openapi-knative", cmDataProps)
+	CreatePlainTextConfigmap(t, ns, "my-openapi-knative", cmDataProps)
 
-	Expect(KamelRunWithID(operatorID, ns,
+	Expect(KamelRunWithID(t, operatorID, ns,
 		"--name", "petstore",
 		"--open-api", "configmap:my-openapi-knative",
 		"files/petstore.groovy",
 	).Execute()).To(Succeed())
 
-	Eventually(KnativeService(ns, "petstore"), TestTimeoutLong).
+	Eventually(KnativeService(t, ns, "petstore"), TestTimeoutLong).
 		Should(Not(BeNil()))
 
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+	Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
 		Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+	Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
 		Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
+	Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
 		Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

@@ -34,15 +34,17 @@ import (
 )
 
 func TestRunSimpleJavaExamples(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 
 		t.Run("run java", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java").Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, "java", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

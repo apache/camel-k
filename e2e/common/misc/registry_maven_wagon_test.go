@@ -38,7 +38,9 @@ import (
 )
 
 func TestImageRegistryIsAMavenRepository(t *testing.T) {
-	ocp, err := openshift.IsOpenShift(TestClient())
+	t.Parallel()
+
+	ocp, err := openshift.IsOpenShift(TestClient(t))
 	require.NoError(t, err)
 	if ocp {
 		t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
@@ -53,59 +55,59 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		pom, err := filepath.Abs("files/registry/sample-decryption-1.0.pom")
 		require.NoError(t, err)
 
-		Expect(KamelRunWithID(operatorID, ns, "files/registry/FoobarDecryption.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/registry/FoobarDecryption.java",
 			"--name", name,
 			"-d", fmt.Sprintf("file://%s", jar),
 			"-d", fmt.Sprintf("file://%s", pom),
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
+		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
 	})
 
 	t.Run("local files are mounted in the integration container at the default path", func(t *testing.T) {
 		name := RandomizedSuffixName("laughing-route-default-path")
 
-		Expect(KamelRunWithID(operatorID, ns, "files/registry/LaughingRoute.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/registry/LaughingRoute.java",
 			"--name", name,
 			"-p", "location=/deployments/?filename=laugh.txt",
 			"-d", "file://files/registry/laugh.txt",
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
 	})
 
 	t.Run("local files are mounted in the integration container at a custom path", func(t *testing.T) {
 		name := RandomizedSuffixName("laughing-route-custom-path")
 		customPath := "this/is/a/custom/path/"
 
-		Expect(KamelRunWithID(operatorID, ns, "files/registry/LaughingRoute.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/registry/LaughingRoute.java",
 			"--name", name,
 			"-p", fmt.Sprintf("location=%s", customPath),
 			"-d", fmt.Sprintf("file://files/registry/laugh.txt?targetPath=%slaugh.txt", customPath),
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
 	})
 
 	t.Run("local directory is mounted in the integration container", func(t *testing.T) {
 		name := RandomizedSuffixName("laughing-route-directory")
 
-		Expect(KamelRunWithID(operatorID, ns, "files/registry/LaughingRoute.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/registry/LaughingRoute.java",
 			"--name", name,
 			"-p", "location=files/registry/",
 			"-d", fmt.Sprintf("file://files/registry/laughs/?targetPath=files/registry/"),
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hehe"))
+		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("haha"))
+		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("hehe"))
 	})
 
 	t.Run("pom file is extracted from JAR", func(t *testing.T) {
@@ -114,28 +116,28 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		jar, err := filepath.Abs("files/registry/sample-decryption-1.0.jar")
 		require.NoError(t, err)
 
-		Expect(KamelRunWithID(operatorID, ns, "files/registry/FoobarDecryption.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/registry/FoobarDecryption.java",
 			"--name", name,
 			"-d", fmt.Sprintf("file://%s", jar),
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
+		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("foobar"))
 	})
 
 	t.Run("dependency can be used at build time", func(t *testing.T) {
 		// Create integration that should run an Xslt transformation whose template needs to be present at build time
 		name := RandomizedSuffixName("xslt")
-		Expect(KamelRunWithID(operatorID, ns, "files/registry/classpath/Xslt.java", "--name", name,
+		Expect(KamelRunWithID(t, operatorID, ns, "files/registry/classpath/Xslt.java", "--name", name,
 			"-d", "file://files/registry/classpath/cheese.xsl?targetPath=xslt/cheese.xsl&classpath=true",
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("<cheese><item>A</item></cheese>"))
+		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("<cheese><item>A</item></cheese>"))
 	})
 
 	// Clean up
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

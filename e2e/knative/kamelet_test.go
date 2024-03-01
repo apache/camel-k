@@ -44,14 +44,14 @@ func TestKameletChange(t *testing.T) {
 	knChannel := "test-kamelet-messages"
 	knChannelConf := fmt.Sprintf("%s:InMemoryChannel:%s", messaging.SchemeGroupVersion.String(), knChannel)
 	timerSource := "my-timer-source"
-	Expect(CreateTimerKamelet(ns, timerSource)()).To(Succeed())
-	Expect(CreateKnativeChannel(ns, knChannel)()).To(Succeed())
+	Expect(CreateTimerKamelet(t, ns, timerSource)()).To(Succeed())
+	Expect(CreateKnativeChannel(t, ns, knChannel)()).To(Succeed())
 	// Consumer route that will read from the KNative channel
-	Expect(KamelRunWithID(operatorID, ns, "files/test-kamelet-display.groovy", "-w").Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, "test-kamelet-display")).Should(Equal(corev1.PodRunning))
+	Expect(KamelRunWithID(t, operatorID, ns, "files/test-kamelet-display.groovy", "-w").Execute()).To(Succeed())
+	Eventually(IntegrationPodPhase(t, ns, "test-kamelet-display")).Should(Equal(corev1.PodRunning))
 
 	// Create the Pipe
-	Expect(KamelBindWithID(operatorID, ns,
+	Expect(KamelBindWithID(t, operatorID, ns,
 		timerSource,
 		knChannelConf,
 		"-p", "source.message=HelloKNative!",
@@ -59,19 +59,19 @@ func TestKameletChange(t *testing.T) {
 		"--annotation", "trait.camel.apache.org/health.readiness-initial-delay=10",
 		"--name", timerPipe,
 	).Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, timerPipe)).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	Eventually(IntegrationPodPhase(t, ns, timerPipe)).Should(Equal(corev1.PodRunning))
+	Eventually(IntegrationConditionStatus(t, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 	// Consume the message
-	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("HelloKNative!"))
+	Eventually(IntegrationLogs(t, ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("HelloKNative!"))
 
-	Eventually(PipeCondition(ns, timerPipe, v1.PipeConditionReady), TestTimeoutMedium).Should(And(
+	Eventually(PipeCondition(t, ns, timerPipe, v1.PipeConditionReady), TestTimeoutMedium).Should(And(
 		WithTransform(PipeConditionStatusExtract, Equal(corev1.ConditionTrue)),
 		WithTransform(PipeConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
 		WithTransform(PipeConditionMessage, Equal(fmt.Sprintf("1/1 ready replicas"))),
 	))
 
 	// Update the Pipe
-	Expect(KamelBindWithID(operatorID, ns,
+	Expect(KamelBindWithID(t, operatorID, ns,
 		timerSource,
 		knChannelConf,
 		"-p", "source.message=message is Hi",
@@ -80,16 +80,16 @@ func TestKameletChange(t *testing.T) {
 		"--name", timerPipe,
 	).Execute()).To(Succeed())
 
-	Eventually(IntegrationPodPhase(ns, timerPipe), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
+	Eventually(IntegrationPodPhase(t, ns, timerPipe), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	Eventually(IntegrationConditionStatus(t, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	Eventually(IntegrationLogs(t, ns, "test-kamelet-display"), TestTimeoutShort).Should(ContainSubstring("message is Hi"))
 
-	Eventually(PipeCondition(ns, timerPipe, v1.PipeConditionReady), TestTimeoutMedium).
+	Eventually(PipeCondition(t, ns, timerPipe, v1.PipeConditionReady), TestTimeoutMedium).
 		Should(And(
 			WithTransform(PipeConditionStatusExtract, Equal(corev1.ConditionTrue)),
 			WithTransform(PipeConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
 			WithTransform(PipeConditionMessage, Equal("1/1 ready replicas")),
 		))
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

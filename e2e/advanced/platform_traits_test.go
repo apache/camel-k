@@ -36,36 +36,38 @@ import (
 )
 
 func TestTraitOnIntegrationPlatform(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-platform-trait-test"
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
+		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
 
 		containerTestName := "testname"
 
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		ip := Platform(ns)()
+		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		ip := Platform(t, ns)()
 		ip.Spec.Traits = v1.Traits{Logging: &trait.LoggingTrait{Level: "DEBUG"}, Container: &trait.ContainerTrait{Name: containerTestName}}
 
-		if err := TestClient().Update(TestContext, ip); err != nil {
+		if err := TestClient(t).Update(TestContext, ip); err != nil {
 			t.Fatal("Can't create IntegrationPlatform", err)
 		}
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("java")
 		t.Run("Run integration with platform traits", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(IntegrationPod(ns, name)().Spec.Containers[0].Name).To(BeEquivalentTo(containerTestName))
+			Expect(IntegrationPod(t, ns, name)().Spec.Containers[0].Name).To(BeEquivalentTo(containerTestName))
 
 			found := false
-			for _, env := range IntegrationPod(ns, name)().Spec.Containers[0].Env {
+			for _, env := range IntegrationPod(t, ns, name)().Spec.Containers[0].Env {
 				if env.Name == "QUARKUS_LOG_LEVEL" {
 					Expect(env.Value).To(BeEquivalentTo("DEBUG"))
 					found = true
@@ -73,9 +75,9 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 				}
 			}
 			Expect(found).To(BeTrue(), "Can't find QUARKUS_LOG_LEVEL ENV variable")
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("DEBUG"))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("DEBUG"))
 
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 	})
 }

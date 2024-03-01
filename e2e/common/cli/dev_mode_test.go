@@ -60,7 +60,7 @@ func TestRunDevMode(t *testing.T) {
 			file := util.MakeTempCopy(t, "files/yaml.yaml")
 			name := RandomizedSuffixName("yaml")
 
-			kamelRun := KamelRunWithContext(ctx, operatorID, ns, file, "--name", name, "--dev")
+			kamelRun := KamelRunWithContext(t, ctx, operatorID, ns, file, "--name", name, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!", "Magicjordan!")
@@ -89,7 +89,7 @@ func TestRunDevMode(t *testing.T) {
 
 			remoteFile := "https://raw.githubusercontent.com/apache/camel-k/b29333f0a878d5d09fb3965be8fe586d77dd95d0/e2e/common/files/yaml.yaml"
 			name := RandomizedSuffixName("yaml")
-			kamelRun := KamelRunWithContext(ctx, operatorID, ns, remoteFile, "--name", name, "--dev")
+			kamelRun := KamelRunWithContext(t, ctx, operatorID, ns, remoteFile, "--name", name, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
@@ -117,12 +117,12 @@ func TestRunDevMode(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
 
 			// First run (warm up)
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-			Eventually(Integration(ns, name)).Should(BeNil())
-			Eventually(IntegrationPod(ns, name), TestTimeoutMedium).Should(BeNil())
+			Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
+			Eventually(Integration(t, ns, name)).Should(BeNil())
+			Eventually(IntegrationPod(t, ns, name), TestTimeoutMedium).Should(BeNil())
 
 			// Second run (rebuild)
 			ctx, cancel := context.WithCancel(TestContext)
@@ -133,7 +133,7 @@ func TestRunDevMode(t *testing.T) {
 
 			file := util.MakeTempCopy(t, "files/yaml.yaml")
 
-			kamelRun := KamelRunWithContext(ctx, operatorID, ns, file, "--name", name, "--dev")
+			kamelRun := KamelRunWithContext(t, ctx, operatorID, ns, file, "--name", name, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!")
@@ -151,6 +151,6 @@ func TestRunDevMode(t *testing.T) {
 			Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
 		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

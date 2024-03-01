@@ -35,80 +35,82 @@ import (
 )
 
 func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-build-order-deps"
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns,
+		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		Expect(KamelInstallWithID(t, operatorID, ns,
 			"--max-running-pipelines", "4",
 			"--build-order-strategy", string(v1.BuildOrderStrategyDependencies)).Execute()).To(Succeed())
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
+		Expect(CreateTimerKamelet(t, ns, "timer-source")()).To(Succeed())
 
 		integrationA := RandomizedSuffixName("java-a")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"--name", integrationA,
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationKit(ns, integrationA), TestTimeoutMedium).ShouldNot(BeEmpty())
-		integrationKitNameA := IntegrationKit(ns, integrationA)()
-		Eventually(Build(ns, integrationKitNameA), TestTimeoutMedium).ShouldNot(BeNil())
+		Eventually(IntegrationKit(t, ns, integrationA), TestTimeoutMedium).ShouldNot(BeEmpty())
+		integrationKitNameA := IntegrationKit(t, ns, integrationA)()
+		Eventually(Build(t, ns, integrationKitNameA), TestTimeoutMedium).ShouldNot(BeNil())
 
 		integrationB := RandomizedSuffixName("java-b")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"--name", integrationB,
 			"-d", "camel:cron",
 		).Execute()).To(Succeed())
 
 		integrationC := RandomizedSuffixName("java-c")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"--name", integrationC,
 			"-d", "camel:cron",
 			"-d", "camel:zipfile",
 		).Execute()).To(Succeed())
 
 		integrationZ := RandomizedSuffixName("groovy-z")
-		Expect(KamelRunWithID(operatorID, ns, "files/timer-source.groovy",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/timer-source.groovy",
 			"--name", integrationZ,
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationKit(ns, integrationB), TestTimeoutMedium).ShouldNot(BeEmpty())
-		Eventually(IntegrationKit(ns, integrationC), TestTimeoutMedium).ShouldNot(BeEmpty())
-		Eventually(IntegrationKit(ns, integrationZ), TestTimeoutMedium).ShouldNot(BeEmpty())
+		Eventually(IntegrationKit(t, ns, integrationB), TestTimeoutMedium).ShouldNot(BeEmpty())
+		Eventually(IntegrationKit(t, ns, integrationC), TestTimeoutMedium).ShouldNot(BeEmpty())
+		Eventually(IntegrationKit(t, ns, integrationZ), TestTimeoutMedium).ShouldNot(BeEmpty())
 
-		integrationKitNameB := IntegrationKit(ns, integrationB)()
-		integrationKitNameC := IntegrationKit(ns, integrationC)()
-		integrationKitNameZ := IntegrationKit(ns, integrationZ)()
+		integrationKitNameB := IntegrationKit(t, ns, integrationB)()
+		integrationKitNameC := IntegrationKit(t, ns, integrationC)()
+		integrationKitNameZ := IntegrationKit(t, ns, integrationZ)()
 
-		Eventually(BuildPhase(ns, integrationKitNameA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(IntegrationPodPhase(ns, integrationA), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, integrationA, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, integrationA), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Kit(ns, integrationKitNameA)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		Eventually(BuildPhase(t, ns, integrationKitNameA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(IntegrationPodPhase(t, ns, integrationA), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, integrationA, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, integrationA), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(Kit(t, ns, integrationKitNameA)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
-		Eventually(BuildPhase(ns, integrationKitNameB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(IntegrationPodPhase(ns, integrationB), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, integrationB, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, integrationB), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Kit(ns, integrationKitNameB)().Status.BaseImage).Should(ContainSubstring(integrationKitNameA))
+		Eventually(BuildPhase(t, ns, integrationKitNameB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(IntegrationPodPhase(t, ns, integrationB), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, integrationB, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, integrationB), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(Kit(t, ns, integrationKitNameB)().Status.BaseImage).Should(ContainSubstring(integrationKitNameA))
 
-		Eventually(BuildPhase(ns, integrationKitNameC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(IntegrationPodPhase(ns, integrationC), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, integrationC, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, integrationC), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Kit(ns, integrationKitNameC)().Status.BaseImage).Should(ContainSubstring(integrationKitNameB))
+		Eventually(BuildPhase(t, ns, integrationKitNameC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(IntegrationPodPhase(t, ns, integrationC), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, integrationC, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, integrationC), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(Kit(t, ns, integrationKitNameC)().Status.BaseImage).Should(ContainSubstring(integrationKitNameB))
 
-		Eventually(BuildPhase(ns, integrationKitNameZ), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(IntegrationPodPhase(ns, integrationZ), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, integrationZ, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, integrationZ), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Kit(ns, integrationKitNameZ)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		Eventually(BuildPhase(t, ns, integrationKitNameZ), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(IntegrationPodPhase(t, ns, integrationZ), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, integrationZ, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, integrationZ), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(Kit(t, ns, integrationKitNameZ)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
-		buildA := Build(ns, integrationKitNameA)()
-		buildB := Build(ns, integrationKitNameB)()
-		buildC := Build(ns, integrationKitNameC)()
-		buildZ := Build(ns, integrationKitNameZ)()
+		buildA := Build(t, ns, integrationKitNameA)()
+		buildB := Build(t, ns, integrationKitNameB)()
+		buildC := Build(t, ns, integrationKitNameC)()
+		buildZ := Build(t, ns, integrationKitNameZ)()
 
 		Expect(buildA.Status.StartedAt.Before(buildB.Status.StartedAt)).Should(BeTrue())
 		Expect(buildA.Status.StartedAt.Before(buildC.Status.StartedAt)).Should(BeTrue())
@@ -116,7 +118,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		Expect(buildZ.Status.StartedAt.Before(buildB.Status.StartedAt)).Should(BeTrue())
 		Expect(buildZ.Status.StartedAt.Before(buildC.Status.StartedAt)).Should(BeTrue())
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
@@ -124,60 +126,60 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := "camel-k-build-order-fifo"
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns, "--build-order-strategy", string(v1.BuildOrderStrategyFIFO)).Execute()).To(Succeed())
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		Expect(KamelInstallWithID(t, operatorID, ns, "--build-order-strategy", string(v1.BuildOrderStrategyFIFO)).Execute()).To(Succeed())
+		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		Expect(CreateTimerKamelet(ns, "timer-source")()).To(Succeed())
+		Expect(CreateTimerKamelet(t, ns, "timer-source")()).To(Succeed())
 
 		integrationA := RandomizedSuffixName("java-a")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"--name", integrationA,
 		).Execute()).To(Succeed())
-		Eventually(IntegrationPhase(ns, integrationA)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+		Eventually(IntegrationPhase(t, ns, integrationA)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 
 		integrationB := RandomizedSuffixName("java-b")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"--name", integrationB,
 			"-d", "camel:joor",
 		).Execute()).To(Succeed())
 
 		integrationZ := RandomizedSuffixName("groovy-z")
-		Expect(KamelRunWithID(operatorID, ns, "files/timer-source.groovy",
+		Expect(KamelRunWithID(t, operatorID, ns, "files/timer-source.groovy",
 			"--name", integrationZ,
 		).Execute()).To(Succeed())
 
-		integrationKitNameA := IntegrationKit(ns, integrationA)()
-		Eventually(BuildPhase(ns, integrationKitNameA), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
+		integrationKitNameA := IntegrationKit(t, ns, integrationA)()
+		Eventually(BuildPhase(t, ns, integrationKitNameA), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
-		Eventually(IntegrationPhase(ns, integrationB)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-		integrationKitNameB := IntegrationKit(ns, integrationB)()
-		Eventually(BuildPhase(ns, integrationKitNameB), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
+		Eventually(IntegrationPhase(t, ns, integrationB)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+		integrationKitNameB := IntegrationKit(t, ns, integrationB)()
+		Eventually(BuildPhase(t, ns, integrationKitNameB), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
-		Eventually(IntegrationPhase(ns, integrationZ)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-		integrationKitNameZ := IntegrationKit(ns, integrationZ)()
-		Eventually(BuildPhase(ns, integrationKitNameZ), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
+		Eventually(IntegrationPhase(t, ns, integrationZ)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+		integrationKitNameZ := IntegrationKit(t, ns, integrationZ)()
+		Eventually(BuildPhase(t, ns, integrationKitNameZ), TestTimeoutShort).Should(Equal(v1.BuildPhaseRunning))
 
-		Eventually(BuildPhase(ns, integrationKitNameA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(IntegrationPodPhase(ns, integrationA), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, integrationA, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, integrationA), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Kit(ns, integrationKitNameA)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		Eventually(BuildPhase(t, ns, integrationKitNameA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(IntegrationPodPhase(t, ns, integrationA), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, integrationA, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, integrationA), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(Kit(t, ns, integrationKitNameA)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
-		Eventually(BuildPhase(ns, integrationKitNameB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(IntegrationPodPhase(ns, integrationB), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, integrationB, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, integrationB), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Kit(ns, integrationKitNameB)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		Eventually(BuildPhase(t, ns, integrationKitNameB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(IntegrationPodPhase(t, ns, integrationB), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, integrationB, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, integrationB), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(Kit(t, ns, integrationKitNameB)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
-		Eventually(BuildPhase(ns, integrationKitNameZ), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(IntegrationPodPhase(ns, integrationZ), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, integrationZ, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, integrationZ), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Kit(ns, integrationKitNameZ)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		Eventually(BuildPhase(t, ns, integrationKitNameZ), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		Eventually(IntegrationPodPhase(t, ns, integrationZ), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		Eventually(IntegrationConditionStatus(t, ns, integrationZ, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		Eventually(IntegrationLogs(t, ns, integrationZ), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		Eventually(Kit(t, ns, integrationKitNameZ)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 */

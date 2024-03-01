@@ -36,50 +36,52 @@ import (
 )
 
 func TestBuilderTimeout(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
+		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 
-		pl := Platform(ns)()
+		pl := Platform(t, ns)()
 		// set a short timeout to simulate the build timeout
 		pl.Spec.Build.Timeout = &metav1.Duration{
 			Duration: 10 * time.Second,
 		}
-		TestClient().Update(TestContext, pl)
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformTimeout(ns)).Should(Equal(
+		TestClient(t).Update(TestContext, pl)
+		Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		Eventually(PlatformTimeout(t, ns)).Should(Equal(
 			&metav1.Duration{
 				Duration: 10 * time.Second,
 			},
 		))
 
-		operatorPod := OperatorPod(ns)()
+		operatorPod := OperatorPod(t, ns)()
 		operatorPodImage := operatorPod.Spec.Containers[0].Image
 
 		t.Run("run yaml", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml",
+			Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml",
 				"--name", name,
 				"-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
-			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-			integrationKitName := IntegrationKit(ns, name)()
+			Eventually(IntegrationPhase(t, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+			integrationKitName := IntegrationKit(t, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			Eventually(BuilderPodPhase(ns, builderKitName)).Should(Equal(corev1.PodPending))
-			Eventually(BuildPhase(ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
-			Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
-			Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
+			Eventually(BuilderPodPhase(t, ns, builderKitName)).Should(Equal(corev1.PodPending))
+			Eventually(BuildPhase(t, ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
+			Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
+			Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
 			// After a few minutes (5 max retries), this has to be in error state
-			Eventually(BuildPhase(ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
-			Eventually(IntegrationPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
-			Eventually(BuildFailureRecovery(ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
-			Eventually(BuilderPodPhase(ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
+			Eventually(BuildPhase(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
+			Eventually(IntegrationPhase(t, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+			Eventually(BuildFailureRecovery(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
+			Eventually(BuilderPodPhase(t, ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
 		})
 	})
 }
