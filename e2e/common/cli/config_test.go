@@ -39,30 +39,30 @@ import (
 )
 
 func TestKamelCLIConfig(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		t.Run("check default namespace", func(t *testing.T) {
 			_, err := os.Stat(cmd.DefaultConfigLocation)
 			assert.True(t, os.IsNotExist(err), "No file at "+cmd.DefaultConfigLocation+" was expected")
 			t.Cleanup(func() { os.Remove(cmd.DefaultConfigLocation) })
-			Expect(Kamel(t, "config", "--default-namespace", ns).Execute()).To(Succeed())
+			g.Expect(Kamel(t, "config", "--default-namespace", ns).Execute()).To(Succeed())
 			_, err = os.Stat(cmd.DefaultConfigLocation)
 			require.NoError(t, err, "A file at "+cmd.DefaultConfigLocation+" was expected")
-			Expect(Kamel(t, "run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(Kamel(t, "run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationLogs(t, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			// first line of the integration logs
 			logs := strings.Split(IntegrationLogs(t, ns, "yaml")(), "\n")[0]
 			podName := IntegrationPod(t, ns, "yaml")().Name
 
 			logsCLI := GetOutputStringAsync(Kamel(t, "log", "yaml"))
-			Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
-			Eventually(logsCLI).Should(ContainSubstring(logs))
+			g.Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
+			g.Eventually(logsCLI).Should(ContainSubstring(logs))
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

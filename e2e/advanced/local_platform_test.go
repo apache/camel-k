@@ -36,29 +36,29 @@ import (
 func TestLocalPlatform(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-platform-local"
-		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
-		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		Expect(UpdatePlatform(t, ns, operatorID, func(pl *v1.IntegrationPlatform) {
+		g.Expect(UpdatePlatform(t, ns, operatorID, func(pl *v1.IntegrationPlatform) {
 			pl.Spec.Build.Maven.Properties = make(map[string]string)
 			pl.Spec.Build.Maven.Properties["build-global-prop1"] = "build-global-value1"
 			// set maximum number of running builds
 			pl.Spec.Build.MaxRunningBuilds = 1
 		})).To(Succeed())
 
-		Eventually(PlatformHas(t, ns, func(pl *v1.IntegrationPlatform) bool {
+		g.Eventually(PlatformHas(t, ns, func(pl *v1.IntegrationPlatform) bool {
 			return pl.Status.Build.MaxRunningBuilds == 1
 		}), TestTimeoutMedium).Should(BeTrue())
 
-		WithNewTestNamespace(t, func(ns1 string) {
+		WithNewTestNamespace(t, func(g *WithT, ns1 string) {
 			// Install platform (use the installer to get staging if present)
-			Expect(KamelInstallWithID(t, "local-platform", ns1, "--skip-operator-setup").Execute()).To(Succeed())
+			g.Expect(KamelInstallWithID(t, "local-platform", ns1, "--skip-operator-setup").Execute()).To(Succeed())
 
-			Expect(UpdatePlatform(t, ns1, "local-platform", func(pl *v1.IntegrationPlatform) {
+			g.Expect(UpdatePlatform(t, ns1, "local-platform", func(pl *v1.IntegrationPlatform) {
 				pl.Spec.Build.Maven.Properties = make(map[string]string)
 				pl.Spec.Build.Maven.Properties["build-local-prop1"] = "build-local-value1"
 				pl.SetOperatorID(operatorID)
@@ -68,30 +68,30 @@ func TestLocalPlatform(t *testing.T) {
 				}
 			})).To(Succeed())
 
-			Eventually(PlatformPhase(t, ns1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-			Eventually(PlatformHas(t, ns1, func(pl *v1.IntegrationPlatform) bool {
+			g.Eventually(PlatformPhase(t, ns1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+			g.Eventually(PlatformHas(t, ns1, func(pl *v1.IntegrationPlatform) bool {
 				return pl.Status.Cluster != ""
 			}), TestTimeoutShort).Should(BeTrue())
 
-			Eventually(PlatformHas(t, ns1, func(pl *v1.IntegrationPlatform) bool {
+			g.Eventually(PlatformHas(t, ns1, func(pl *v1.IntegrationPlatform) bool {
 				return pl.Status.Build.MaxRunningBuilds == 1
 			}), TestTimeoutShort).Should(BeTrue())
 
 			pl := PlatformByName(t, ns, operatorID)()
 			local := Platform(t, ns1)()
-			Expect(local.Status.Build.PublishStrategy).To(Equal(pl.Status.Build.PublishStrategy))
-			Expect(local.Status.Build.BuildConfiguration.Strategy).To(Equal(pl.Status.Build.BuildConfiguration.Strategy))
-			Expect(local.Status.Build.BuildConfiguration.OrderStrategy).To(Equal(pl.Status.Build.BuildConfiguration.OrderStrategy))
-			Expect(local.Status.Build.Maven.LocalRepository).To(Equal(pl.Status.Build.Maven.LocalRepository))
-			Expect(local.Status.Build.Maven.CLIOptions).To(ContainElements(pl.Status.Build.Maven.CLIOptions))
-			Expect(local.Status.Build.Maven.Extension).To(BeEmpty())
-			Expect(local.Status.Build.Maven.Properties).To(HaveLen(2))
-			Expect(local.Status.Build.Maven.Properties["build-global-prop1"]).To(Equal("build-global-value1"))
-			Expect(local.Status.Build.Maven.Properties["build-local-prop1"]).To(Equal("build-local-value1"))
+			g.Expect(local.Status.Build.PublishStrategy).To(Equal(pl.Status.Build.PublishStrategy))
+			g.Expect(local.Status.Build.BuildConfiguration.Strategy).To(Equal(pl.Status.Build.BuildConfiguration.Strategy))
+			g.Expect(local.Status.Build.BuildConfiguration.OrderStrategy).To(Equal(pl.Status.Build.BuildConfiguration.OrderStrategy))
+			g.Expect(local.Status.Build.Maven.LocalRepository).To(Equal(pl.Status.Build.Maven.LocalRepository))
+			g.Expect(local.Status.Build.Maven.CLIOptions).To(ContainElements(pl.Status.Build.Maven.CLIOptions))
+			g.Expect(local.Status.Build.Maven.Extension).To(BeEmpty())
+			g.Expect(local.Status.Build.Maven.Properties).To(HaveLen(2))
+			g.Expect(local.Status.Build.Maven.Properties["build-global-prop1"]).To(Equal("build-global-value1"))
+			g.Expect(local.Status.Build.Maven.Properties["build-local-prop1"]).To(Equal("build-local-value1"))
 
-			Expect(KamelRunWithID(t, operatorID, ns1, "--name", "local-integration", "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPod(t, ns1, "local-integration"), TestTimeoutMedium).Should(Not(BeNil()))
-			Eventually(IntegrationPodHas(t, ns1, "local-integration", func(pod *corev1.Pod) bool {
+			g.Expect(KamelRunWithID(t, operatorID, ns1, "--name", "local-integration", "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPod(t, ns1, "local-integration"), TestTimeoutMedium).Should(Not(BeNil()))
+			g.Eventually(IntegrationPodHas(t, ns1, "local-integration", func(pod *corev1.Pod) bool {
 				if len(pod.Spec.Containers) != 1 {
 					return false
 				}
@@ -100,7 +100,7 @@ func TestLocalPlatform(t *testing.T) {
 			}), TestTimeoutShort).Should(BeTrue())
 
 			// Clean up
-			Expect(Kamel(t, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
 		})
 	})
 }

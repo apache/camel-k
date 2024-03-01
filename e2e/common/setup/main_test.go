@@ -50,12 +50,8 @@ func TestMain(m *testing.M) {
 	})
 
 	var t *testing.T
+
 	g.Expect(TestClient(t)).ShouldNot(BeNil())
-	g.Expect(UpdatePlatform(t, ns, operatorID, func(pl *v1.IntegrationPlatform) {
-		// Adjust global operator integration platform settings
-		// Tests are run in parallel so need to choose a proper build order strategy
-		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyDependencies
-	})).To(Succeed())
 
 	g.Expect(KamelRunWithID(t, operatorID, ns, "testdata/Java.java").Execute()).To(Succeed())
 	g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

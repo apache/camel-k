@@ -138,33 +138,9 @@ var NoOlmOperatorImage string
 
 var TestContext context.Context
 var testClient client.Client
-var clientMutex = sync.RWMutex{}
+var clientMutex = sync.Mutex{}
 
-var kamelCLIMutex = sync.RWMutex{}
-
-type KamelCLI struct {
-	Command *cobra.Command
-}
-
-func (k *KamelCLI) Execute() error {
-	// make sure to use cobra command with synchronization as it otherwise leads to concurrency errors
-	kamelCLIMutex.Lock()
-	err := k.Command.Execute()
-	kamelCLIMutex.Unlock()
-	return err
-}
-
-func (k *KamelCLI) ExecuteContext(ctx context.Context) error {
-	// make sure to use cobra command with synchronization as it otherwise leads to concurrency errors
-	kamelCLIMutex.Lock()
-	err := k.Command.ExecuteContext(ctx)
-	kamelCLIMutex.Unlock()
-	return err
-}
-
-func (k *KamelCLI) SetOut(newOut io.Writer) {
-	k.Command.SetOut(newOut)
-}
+var kamelCLIMutex = sync.Mutex{}
 
 // Only panic the test if absolutely necessary and there is
 // no test locus. In most cases, the test should fail gracefully
@@ -180,28 +156,30 @@ func failTest(t *testing.T, err error) {
 }
 
 func TestClient(t *testing.T) client.Client {
+	clientMutex.Lock()
+	defer clientMutex.Unlock()
+
 	if testClient != nil {
 		return testClient
 	}
 
 	var err error
-	clientMutex.Lock()
 	testClient, err = NewTestClient()
 	if err != nil {
 		failTest(t, err)
 	}
-	clientMutex.Unlock()
 	return testClient
 }
 
 func RefreshClient(t *testing.T) client.Client {
-	var err error
 	clientMutex.Lock()
+	defer clientMutex.Unlock()
+
+	var err error
 	testClient, err = NewTestClient()
 	if err != nil {
 		failTest(t, err)
 	}
-	clientMutex.Unlock()
 	return testClient
 }
 
@@ -280,23 +258,23 @@ func NewTestClient() (client.Client, error) {
 	return client.NewOutOfClusterClient(os.Getenv(kubeConfigEnvVar))
 }
 
-func Kamel(t *testing.T, args ...string) *KamelCLI {
+func Kamel(t *testing.T, args ...string) *cobra.Command {
 	return KamelWithContext(t, TestContext, args...)
 }
 
-func KamelInstall(t *testing.T, namespace string, args ...string) *KamelCLI {
+func KamelInstall(t *testing.T, namespace string, args ...string) *cobra.Command {
 	return KamelInstallWithID(t, platform.DefaultPlatformName, namespace, args...)
 }
 
-func KamelInstallWithID(t *testing.T, operatorID string, namespace string, args ...string) *KamelCLI {
+func KamelInstallWithID(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
 	return kamelInstallWithContext(t, TestContext, operatorID, namespace, true, args...)
 }
 
-func KamelInstallWithIDAndKameletCatalog(t *testing.T, operatorID string, namespace string, args ...string) *KamelCLI {
+func KamelInstallWithIDAndKameletCatalog(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
 	return kamelInstallWithContext(t, TestContext, operatorID, namespace, false, args...)
 }
 
-func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) *KamelCLI {
+func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) *cobra.Command {
 	var installArgs []string
 
 	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
@@ -341,31 +319,31 @@ func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID strin
 	return KamelWithContext(t, ctx, installArgs...)
 }
 
-func KamelRun(t *testing.T, namespace string, args ...string) *KamelCLI {
+func KamelRun(t *testing.T, namespace string, args ...string) *cobra.Command {
 	return KamelRunWithID(t, platform.DefaultPlatformName, namespace, args...)
 }
 
-func KamelRunWithID(t *testing.T, operatorID string, namespace string, args ...string) *KamelCLI {
+func KamelRunWithID(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
 	return KamelRunWithContext(t, TestContext, operatorID, namespace, args...)
 }
 
-func KamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *KamelCLI {
+func KamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
 	return KamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
 }
 
-func KamelBind(t *testing.T, namespace string, args ...string) *KamelCLI {
+func KamelBind(t *testing.T, namespace string, args ...string) *cobra.Command {
 	return KamelBindWithID(t, platform.DefaultPlatformName, namespace, args...)
 }
 
-func KamelBindWithID(t *testing.T, operatorID string, namespace string, args ...string) *KamelCLI {
+func KamelBindWithID(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
 	return KamelBindWithContext(t, TestContext, operatorID, namespace, args...)
 }
 
-func KamelBindWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *KamelCLI {
+func KamelBindWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
 	return KamelCommandWithContext(t, ctx, "bind", operatorID, namespace, args...)
 }
 
-func KamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *KamelCLI {
+func KamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
 	// This line prevents controller-runtime from complaining about log.SetLogger never being called
 	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	var cmdArgs []string
@@ -376,7 +354,11 @@ func KamelCommandWithContext(t *testing.T, ctx context.Context, command string, 
 	return KamelWithContext(t, ctx, cmdArgs...)
 }
 
-func KamelWithContext(t *testing.T, ctx context.Context, args ...string) *KamelCLI {
+func KamelWithContext(t *testing.T, ctx context.Context, args ...string) *cobra.Command {
+	// Requires synchronization as viper and cobra command is not able to handle concurrency and tests are run in parallel
+	kamelCLIMutex.Lock()
+	defer kamelCLIMutex.Unlock()
+
 	var c *cobra.Command
 	var err error
 
@@ -391,7 +373,6 @@ func KamelWithContext(t *testing.T, ctx context.Context, args ...string) *KamelC
 	args = append(kamelDefaultArgs, args...)
 
 	kamelBin := os.Getenv("KAMEL_BIN")
-	kamelCLIMutex.Lock()
 	if kamelBin != "" {
 		if _, e := os.Stat(kamelBin); e != nil && os.IsNotExist(e) {
 			failTest(t, e)
@@ -433,7 +414,6 @@ func KamelWithContext(t *testing.T, ctx context.Context, args ...string) *KamelC
 		// Use modeline CLI as it's closer to the real usage
 		c, args, err = cmd.NewKamelWithModelineCommand(ctx, append([]string{"kamel"}, args...))
 	}
-	kamelCLIMutex.Unlock()
 
 	if err != nil {
 		failTest(t, err)
@@ -442,9 +422,7 @@ func KamelWithContext(t *testing.T, ctx context.Context, args ...string) *KamelC
 		args = hook(args)
 	}
 	c.SetArgs(args)
-	return &KamelCLI{
-		Command: c,
-	}
+	return c
 }
 
 func Make(t *testing.T, rule string, args ...string) *exec.Cmd {
@@ -2788,7 +2766,7 @@ func Pods(t *testing.T, ns string) func() []corev1.Pod {
 	}
 }
 
-func WithNewTestNamespace(t *testing.T, doRun func(string)) {
+func WithNewTestNamespace(t *testing.T, doRun func(*gomega.WithT, string)) {
 	ns := NewTestNamespace(t, false)
 	defer deleteTestNamespace(t, ns)
 	defer userCleanup(t)
@@ -2796,7 +2774,7 @@ func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 	invokeUserTestCode(t, ns.GetName(), doRun)
 }
 
-func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
+func WithGlobalOperatorNamespace(t *testing.T, test func(*gomega.WithT, string)) {
 	ocp, err := openshift.IsOpenShift(TestClient(t))
 	require.NoError(t, err)
 	if ocp {
@@ -2808,7 +2786,7 @@ func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
 	}
 }
 
-func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(string)) {
+func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(*gomega.WithT, string)) {
 	ns := NewTestNamespace(t, true)
 	defer deleteTestNamespace(t, ns)
 	defer deleteKnativeBroker(t, ns)
@@ -2833,7 +2811,7 @@ func userCleanup(t *testing.T) {
 	}
 }
 
-func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
+func invokeUserTestCode(t *testing.T, ns string, doRun func(*gomega.WithT, string)) {
 	defer func() {
 		DumpNamespace(t, ns)
 
@@ -2851,8 +2829,8 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(string)) {
 		}
 	}()
 
-	gomega.RegisterTestingT(t)
-	doRun(ns)
+	g := gomega.NewWithT(t)
+	doRun(g, ns)
 }
 
 func deleteKnativeBroker(t *testing.T, ns metav1.Object) {
@@ -3059,7 +3037,7 @@ func NewTestNamespace(t *testing.T, injectKnativeBroker bool) ctrl.Object {
 	return nil
 }
 
-func GetOutputString(command *KamelCLI) string {
+func GetOutputString(command *cobra.Command) string {
 	var buf bytes.Buffer
 
 	command.SetOut(&buf)
@@ -3068,7 +3046,7 @@ func GetOutputString(command *KamelCLI) string {
 	return buf.String()
 }
 
-func GetOutputStringAsync(cmd *KamelCLI) func() string {
+func GetOutputStringAsync(cmd *cobra.Command) func() string {
 	var buffer bytes.Buffer
 	stdout := bufio.NewWriter(&buffer)
 

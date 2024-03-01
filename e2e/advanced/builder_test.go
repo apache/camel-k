@@ -38,14 +38,14 @@ import (
 func TestBuilderTimeout(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
-		Eventually(Platform(t, ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 
 		pl := Platform(t, ns)()
@@ -54,8 +54,8 @@ func TestBuilderTimeout(t *testing.T) {
 			Duration: 10 * time.Second,
 		}
 		TestClient(t).Update(TestContext, pl)
-		Eventually(Platform(t, ns)).ShouldNot(BeNil())
-		Eventually(PlatformTimeout(t, ns)).Should(Equal(
+		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformTimeout(t, ns)).Should(Equal(
 			&metav1.Duration{
 				Duration: 10 * time.Second,
 			},
@@ -66,22 +66,22 @@ func TestBuilderTimeout(t *testing.T) {
 
 		t.Run("run yaml", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml",
 				"--name", name,
 				"-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
-			Eventually(IntegrationPhase(t, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+			g.Eventually(IntegrationPhase(t, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 			integrationKitName := IntegrationKit(t, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			Eventually(BuilderPodPhase(t, ns, builderKitName)).Should(Equal(corev1.PodPending))
-			Eventually(BuildPhase(t, ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
-			Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
-			Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
+			g.Eventually(BuilderPodPhase(t, ns, builderKitName)).Should(Equal(corev1.PodPending))
+			g.Eventually(BuildPhase(t, ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
+			g.Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
+			g.Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
 			// After a few minutes (5 max retries), this has to be in error state
-			Eventually(BuildPhase(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
-			Eventually(IntegrationPhase(t, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
-			Eventually(BuildFailureRecovery(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
-			Eventually(BuilderPodPhase(t, ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
+			g.Eventually(BuildPhase(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
+			g.Eventually(IntegrationPhase(t, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(BuildFailureRecovery(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
+			g.Eventually(BuilderPodPhase(t, ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
 		})
 	})
 }

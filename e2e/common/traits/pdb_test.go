@@ -45,35 +45,35 @@ import (
 func TestPodDisruptionBudgetTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"--name", name,
 			"-t", "pdb.enabled=true",
 			"-t", "pdb.min-available=2",
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
+		g.Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
 		unstructuredIntegration := UnstructuredIntegration(t, ns, name)()
 		pdbTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "pdb")
-		Expect(pdbTrait).ToNot(BeNil())
-		Expect(len(pdbTrait)).To(Equal(2))
-		Expect(pdbTrait["enabled"]).To(Equal(true))
-		Expect(pdbTrait["minAvailable"]).To(Equal("2"))
+		g.Expect(pdbTrait).ToNot(BeNil())
+		g.Expect(len(pdbTrait)).To(Equal(2))
+		g.Expect(pdbTrait["enabled"]).To(Equal(true))
+		g.Expect(pdbTrait["minAvailable"]).To(Equal("2"))
 
 		// Check PodDisruptionBudget
-		Eventually(podDisruptionBudget(t, ns, name), TestTimeoutShort).ShouldNot(BeNil())
+		g.Eventually(podDisruptionBudget(t, ns, name), TestTimeoutShort).ShouldNot(BeNil())
 		pdb := podDisruptionBudget(t, ns, name)()
 		// Assert PDB Spec
-		Expect(pdb.Spec.MinAvailable).To(PointTo(Equal(intstr.FromInt(2))))
+		g.Expect(pdb.Spec.MinAvailable).To(PointTo(Equal(intstr.FromInt(2))))
 		// Assert PDB Status
-		Eventually(podDisruptionBudget(t, ns, name), TestTimeoutShort).
+		g.Eventually(podDisruptionBudget(t, ns, name), TestTimeoutShort).
 			Should(MatchFieldsP(IgnoreExtras, Fields{
 				"Status": MatchFields(IgnoreExtras, Fields{
 					"ObservedGeneration": BeNumerically("==", 1),
@@ -85,17 +85,17 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 			}))
 
 		// Scale Integration
-		Expect(ScaleIntegration(t, ns, name, 2)).To(Succeed())
-		Eventually(IntegrationPods(t, ns, name), TestTimeoutMedium).Should(HaveLen(2))
-		Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
+		g.Expect(ScaleIntegration(t, ns, name, 2)).To(Succeed())
+		g.Eventually(IntegrationPods(t, ns, name), TestTimeoutMedium).Should(HaveLen(2))
+		g.Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
 			Should(PointTo(BeNumerically("==", 2)))
-		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Check PodDisruptionBudget
 		pdb = podDisruptionBudget(t, ns, name)()
-		Expect(pdb).NotTo(BeNil())
+		g.Expect(pdb).NotTo(BeNil())
 		// Assert PDB Status according to the scale change
-		Eventually(podDisruptionBudget(t, ns, name), TestTimeoutShort).
+		g.Eventually(podDisruptionBudget(t, ns, name), TestTimeoutShort).
 			Should(MatchFieldsP(IgnoreExtras, Fields{
 				"Status": MatchFields(IgnoreExtras, Fields{
 					"ObservedGeneration": BeNumerically("==", 1),
@@ -108,13 +108,13 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 
 		// Eviction attempt
 		pods := IntegrationPods(t, ns, name)()
-		Expect(pods).To(HaveLen(2))
+		g.Expect(pods).To(HaveLen(2))
 		err := TestClient(t).CoreV1().Pods(ns).EvictV1(TestContext, &policyv1.Eviction{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: pods[0].Name,
 			},
 		})
-		Expect(err).To(MatchError(&k8serrors.StatusError{
+		g.Expect(err).To(MatchError(&k8serrors.StatusError{
 			ErrStatus: metav1.Status{
 				Status:  "Failure",
 				Message: "Cannot evict pod as it would violate the pod's disruption budget.",
@@ -133,22 +133,22 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 
 		// Scale Integration to Scale > PodDisruptionBudgetSpec.MinAvailable
 		// for the eviction request to succeed once replicas are ready
-		Expect(ScaleIntegration(t, ns, name, 3)).To(Succeed())
-		Eventually(IntegrationPods(t, ns, name), TestTimeoutMedium).Should(HaveLen(3))
-		Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
+		g.Expect(ScaleIntegration(t, ns, name, 3)).To(Succeed())
+		g.Eventually(IntegrationPods(t, ns, name), TestTimeoutMedium).Should(HaveLen(3))
+		g.Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
 			Should(PointTo(BeNumerically("==", 3)))
-		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		pods = IntegrationPods(t, ns, name)()
-		Expect(pods).To(HaveLen(3))
-		Expect(TestClient(t).CoreV1().Pods(ns).EvictV1(TestContext, &policyv1.Eviction{
+		g.Expect(pods).To(HaveLen(3))
+		g.Expect(TestClient(t).CoreV1().Pods(ns).EvictV1(TestContext, &policyv1.Eviction{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: pods[0].Name,
 			},
 		})).To(Succeed())
 
 		// Clean up
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

@@ -35,14 +35,14 @@ import (
 func TestTektonLikeBehavior(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateOperatorServiceAccount(t, ns)).To(Succeed())
-		Expect(CreateOperatorRole(t, ns)).To(Succeed())
-		Expect(CreateOperatorRoleBinding(t, ns)).To(Succeed())
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		g.Expect(CreateOperatorServiceAccount(t, ns)).To(Succeed())
+		g.Expect(CreateOperatorRole(t, ns)).To(Succeed())
+		g.Expect(CreateOperatorRoleBinding(t, ns)).To(Succeed())
 
-		Eventually(OperatorPod(t, ns)).Should(BeNil())
-		Expect(CreateKamelPod(t, ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
+		g.Eventually(OperatorPod(t, ns)).Should(BeNil())
+		g.Expect(CreateKamelPod(t, ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
 
-		Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
 	})
 }

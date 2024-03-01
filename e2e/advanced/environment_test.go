@@ -41,7 +41,7 @@ import (
 func TestEnvironmentTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		// HTTP proxy configuration
 		httpProxy := "http://proxy"
 		noProxy := []string{
@@ -53,37 +53,37 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		// Retrieve the Kubernetes Service ClusterIPs to populate the NO_PROXY environment variable
 		svc := Service(t, TestDefaultNamespace, "kubernetes")()
-		Expect(svc).NotTo(BeNil())
+		g.Expect(svc).NotTo(BeNil())
 
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
 		// Retrieve the internal container registry to populate the NO_PROXY environment variable
 		if registry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY"); ok {
 			domain := RegistryRegexp.FindString(registry)
-			Expect(domain).NotTo(BeNil())
+			g.Expect(domain).NotTo(BeNil())
 			domain = strings.Split(domain, ":")[0]
 			noProxy = append(noProxy, domain)
 		}
 
 		// Install Camel K with the HTTP proxy environment variable
 		operatorID := "camel-k-trait-environment"
-		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(t, operatorID, ns,
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns,
 			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy),
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
 		).Execute()).To(Succeed())
 
-		Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("Run integration with default environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-default")
-			Expect(KamelRunWithID(t, operatorID, ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRunWithID(t, operatorID, ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(IntegrationPod(t, ns, name)()).To(WithTransform(podEnvVars, And(
+			g.Expect(IntegrationPod(t, ns, name)()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
@@ -104,15 +104,15 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		t.Run("Run integration with custom environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-custom-proxy")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "environment.vars=HTTP_PROXY=http://custom.proxy",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(IntegrationPod(t, ns, name)()).To(WithTransform(podEnvVars, And(
+			g.Expect(IntegrationPod(t, ns, name)()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
@@ -133,15 +133,15 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		t.Run("Run integration without default HTTP proxy environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-no-proxy")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "environment.http-proxy=false",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Expect(IntegrationPod(t, ns, name)()).To(WithTransform(podEnvVars, And(
+			g.Expect(IntegrationPod(t, ns, name)()).To(WithTransform(podEnvVars, And(
 				ContainElement(corev1.EnvVar{Name: "CAMEL_K_VERSION", Value: defaults.Version}),
 				ContainElement(corev1.EnvVar{Name: "NAMESPACE", ValueFrom: &corev1.EnvVarSource{
 					FieldRef: &corev1.ObjectFieldSelector{
@@ -160,15 +160,15 @@ func TestEnvironmentTrait(t *testing.T) {
 			)))
 
 			// check integration schema does not contains unwanted default trait value.
-			Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
+			g.Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
 			unstructuredIntegration := UnstructuredIntegration(t, ns, name)()
 			envTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "environment")
-			Expect(envTrait).ToNot(BeNil())
-			Expect(len(envTrait)).To(Equal(1))
-			Expect(envTrait["httpProxy"]).To(Equal(false))
+			g.Expect(envTrait).ToNot(BeNil())
+			g.Expect(len(envTrait)).To(Equal(1))
+			g.Expect(envTrait["httpProxy"]).To(Equal(false))
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

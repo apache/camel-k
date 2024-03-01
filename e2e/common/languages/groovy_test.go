@@ -36,15 +36,15 @@ import (
 func TestRunSimpleGroovyExamples(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		t.Run("run groovy", func(t *testing.T) {
-			Expect(KamelRunWithID(t, operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, "groovy", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, "groovy", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

@@ -37,17 +37,17 @@ const customLabel = "custom-label"
 func TestBundleKameletUpdate(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
-		Expect(createBundleKamelet(t, ns, "my-http-sink")()).To(Succeed()) // Going to be replaced
-		Expect(createUserKamelet(t, ns, "user-sink")()).To(Succeed())      // Left intact by the operator
+		g.Expect(createBundleKamelet(t, ns, "my-http-sink")()).To(Succeed()) // Going to be replaced
+		g.Expect(createUserKamelet(t, ns, "user-sink")()).To(Succeed())      // Left intact by the operator
 
-		Eventually(Kamelet(t, "my-http-sink", ns)).
+		g.Eventually(Kamelet(t, "my-http-sink", ns)).
 			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
-		Consistently(Kamelet(t, "user-sink", ns), 5*time.Second, 1*time.Second).
+		g.Consistently(Kamelet(t, "user-sink", ns), 5*time.Second, 1*time.Second).
 			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
