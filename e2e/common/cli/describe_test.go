@@ -36,21 +36,21 @@ import (
 )
 
 func TestKamelCliDescribe(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
-		Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 		t.Run("Test kamel describe integration", func(t *testing.T) {
 			integration := GetOutputString(Kamel(t, "describe", "integration", "yaml", "-n", ns))
 			r, _ := regexp.Compile("(?sm).*Name:\\s+yaml.*")
-			Expect(integration).To(MatchRegexp(r.String()))
+			g.Expect(integration).To(MatchRegexp(r.String()))
 
 			r, _ = regexp.Compile("(?sm).*Phase:\\s+Running.*")
-			Expect(integration).To(MatchRegexp(r.String()))
+			g.Expect(integration).To(MatchRegexp(r.String()))
 
-			Expect(integration).To(ContainSubstring("Dependencies:"))
-			Expect(integration).To(ContainSubstring("Conditions:"))
+			g.Expect(integration).To(ContainSubstring("Dependencies:"))
+			g.Expect(integration).To(ContainSubstring("Conditions:"))
 		})
 
 		t.Run("Test kamel describe integration kit", func(t *testing.T) {
@@ -59,29 +59,29 @@ func TestKamelCliDescribe(t *testing.T) {
 			kit := GetOutputString(Kamel(t, "describe", "kit", kitName, "-n", kitNamespace))
 
 			r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + kitNamespace + ".*")
-			Expect(kit).To(MatchRegexp(r.String()))
+			g.Expect(kit).To(MatchRegexp(r.String()))
 
 			r, _ = regexp.Compile("(?sm).*Runtime Version:\\s+" + defaults.DefaultRuntimeVersion + ".*")
-			Expect(kit).To(MatchRegexp(r.String()))
+			g.Expect(kit).To(MatchRegexp(r.String()))
 
-			Expect(kit).To(ContainSubstring("camel-quarkus-core"))
+			g.Expect(kit).To(ContainSubstring("camel-quarkus-core"))
 
-			Expect(kit).To(ContainSubstring("Artifacts:"))
-			Expect(kit).To(ContainSubstring("Dependencies:"))
+			g.Expect(kit).To(ContainSubstring("Artifacts:"))
+			g.Expect(kit).To(ContainSubstring("Dependencies:"))
 		})
 
 		t.Run("Test kamel describe integration platform", func(t *testing.T) {
 			opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
 			platform := GetOutputString(Kamel(t, "describe", "platform", operatorID, "-n", opns))
-			Expect(platform).To(ContainSubstring(fmt.Sprintf("Name:	%s", operatorID)))
+			g.Expect(platform).To(ContainSubstring(fmt.Sprintf("Name:	%s", operatorID)))
 
 			r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + opns + ".*")
-			Expect(platform).To(MatchRegexp(r.String()))
+			g.Expect(platform).To(MatchRegexp(r.String()))
 
 			r, _ = regexp.Compile("(?sm).*Runtime Version:\\s+" + defaults.DefaultRuntimeVersion + ".*")
-			Expect(platform).To(MatchRegexp(r.String()))
+			g.Expect(platform).To(MatchRegexp(r.String()))
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

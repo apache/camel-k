@@ -313,7 +313,14 @@ func (o *installCmdOptions) tryInstallViaOLM(
 }
 
 func (o *installCmdOptions) installOperator(cmd *cobra.Command, output *kubernetes.Collection, olm bool) error {
-	operatorID, err := getOperatorID(o.EnvVars)
+	var operatorID string
+	var err error
+	if o.OperatorID != "" {
+		operatorID = o.OperatorID
+	} else {
+		operatorID, err = getOperatorID(o.EnvVars)
+	}
+
 	if err != nil {
 		return err
 	}

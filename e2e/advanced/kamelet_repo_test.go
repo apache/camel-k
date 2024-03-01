@@ -36,30 +36,30 @@ import (
 func TestKameletFromCustomRepository(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		kameletName := "timer-custom-source"
 		removeKamelet(t, kameletName, ns)
 
-		Eventually(Kamelet(t, kameletName, ns)).Should(BeNil())
+		g.Eventually(Kamelet(t, kameletName, ns)).Should(BeNil())
 		// Add the custom repository
-		Expect(Kamel(t, "kamelet", "add-repo",
+		g.Expect(Kamel(t, "kamelet", "add-repo",
 			"github:squakez/ck-kamelet-test-repo/kamelets",
 			"-n", ns,
 			"-x", operatorID).Execute()).To(Succeed())
 
-		Expect(KamelRunWithID(t, operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(t, ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(t, ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
+		g.Eventually(IntegrationLogs(t, ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
 
 		// Remove the custom repository
-		Expect(Kamel(t, "kamelet", "remove-repo",
+		g.Expect(Kamel(t, "kamelet", "remove-repo",
 			"github:squakez/ck-kamelet-test-repo/kamelets",
 			"-n", ns,
 			"-x", operatorID).Execute()).To(Succeed())

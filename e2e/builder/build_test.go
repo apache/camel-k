@@ -42,8 +42,8 @@ type kitOptions struct {
 }
 
 func TestKitMaxBuildLimit(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		createOperator(t, ns, "8m0s", "--global", "--force")
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		createOperator(t, g, ns, "8m0s", "--global", "--force")
 
 		pl := Platform(t, ns)()
 		// set maximum number of running builds and order strategy
@@ -58,8 +58,8 @@ func TestKitMaxBuildLimit(t *testing.T) {
 		buildB := "integration-b"
 		buildC := "integration-c"
 
-		WithNewTestNamespace(t, func(ns1 string) {
-			WithNewTestNamespace(t, func(ns2 string) {
+		WithNewTestNamespace(t, func(g *WithT, ns1 string) {
+			WithNewTestNamespace(t, func(g *WithT, ns2 string) {
 				pl1 := v1.NewIntegrationPlatform(ns1, fmt.Sprintf("camel-k-%s", ns))
 				pl.Spec.DeepCopyInto(&pl1.Spec)
 				pl1.Spec.Build.Maven.Settings = v1.ValueSource{}
@@ -69,7 +69,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 					t.FailNow()
 				}
 
-				Eventually(PlatformPhase(t, ns1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+				g.Eventually(PlatformPhase(t, ns1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				pl2 := v1.NewIntegrationPlatform(ns2, fmt.Sprintf("camel-k-%s", ns))
 				pl.Spec.DeepCopyInto(&pl2.Spec)
@@ -80,9 +80,9 @@ func TestKitMaxBuildLimit(t *testing.T) {
 					t.FailNow()
 				}
 
-				Eventually(PlatformPhase(t, ns2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+				g.Eventually(PlatformPhase(t, ns2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-				doKitBuildInNamespace(t, buildA, ns, TestTimeoutShort, kitOptions{
+				doKitBuildInNamespace(t, g, buildA, ns, TestTimeoutShort, kitOptions{
 					operatorID: fmt.Sprintf("camel-k-%s", ns),
 					dependencies: []string{
 						"camel:timer", "camel:log",
@@ -92,7 +92,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 					},
 				}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-				doKitBuildInNamespace(t, buildB, ns1, TestTimeoutShort, kitOptions{
+				doKitBuildInNamespace(t, g, buildB, ns1, TestTimeoutShort, kitOptions{
 					operatorID: fmt.Sprintf("camel-k-%s", ns),
 					dependencies: []string{
 						"camel:timer", "camel:log",
@@ -102,7 +102,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 					},
 				}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-				doKitBuildInNamespace(t, buildC, ns2, TestTimeoutShort, kitOptions{
+				doKitBuildInNamespace(t, g, buildC, ns2, TestTimeoutShort, kitOptions{
 					operatorID: fmt.Sprintf("camel-k-%s", ns),
 					dependencies: []string{
 						"camel:timer", "camel:log",
@@ -119,7 +119,7 @@ func TestKitMaxBuildLimit(t *testing.T) {
 				limit := 0
 				for limit < 5 && BuildPhase(t, ns, buildA)() == v1.BuildPhaseRunning {
 					// verify that number of running builds does not exceed max build limit
-					Consistently(BuildsRunning(BuildPhase(t, ns, buildA), BuildPhase(t, ns1, buildB), BuildPhase(t, ns2, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
+					g.Consistently(BuildsRunning(BuildPhase(t, ns, buildA), BuildPhase(t, ns1, buildB), BuildPhase(t, ns2, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
 					limit++
 				}
 
@@ -130,22 +130,22 @@ func TestKitMaxBuildLimit(t *testing.T) {
 				}
 
 				// verify that all builds are successful
-				Eventually(BuildPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-				Eventually(KitPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+				g.Eventually(BuildPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+				g.Eventually(KitPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 
-				Eventually(BuildPhase(t, ns1, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-				Eventually(KitPhase(t, ns1, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+				g.Eventually(BuildPhase(t, ns1, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+				g.Eventually(KitPhase(t, ns1, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 
-				Eventually(BuildPhase(t, ns2, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-				Eventually(KitPhase(t, ns2, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+				g.Eventually(BuildPhase(t, ns2, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+				g.Eventually(KitPhase(t, ns2, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 			})
 		})
 	})
 }
 
 func TestKitMaxBuildLimitFIFOStrategy(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		createOperator(t, ns, "8m0s", "--global", "--force")
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		createOperator(t, g, ns, "8m0s", "--global", "--force")
 
 		pl := Platform(t, ns)()
 		// set maximum number of running builds and order strategy
@@ -160,7 +160,7 @@ func TestKitMaxBuildLimitFIFOStrategy(t *testing.T) {
 		buildB := "integration-b"
 		buildC := "integration-c"
 
-		doKitBuildInNamespace(t, buildA, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildA, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:timer", "camel:log",
@@ -170,7 +170,7 @@ func TestKitMaxBuildLimitFIFOStrategy(t *testing.T) {
 			},
 		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-		doKitBuildInNamespace(t, buildB, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildB, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:timer", "camel:log",
@@ -180,7 +180,7 @@ func TestKitMaxBuildLimitFIFOStrategy(t *testing.T) {
 			},
 		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-		doKitBuildInNamespace(t, buildC, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildC, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:timer", "camel:log",
@@ -197,7 +197,7 @@ func TestKitMaxBuildLimitFIFOStrategy(t *testing.T) {
 		limit := 0
 		for limit < 5 && BuildPhase(t, ns, buildA)() == v1.BuildPhaseRunning {
 			// verify that number of running builds does not exceed max build limit
-			Consistently(BuildsRunning(BuildPhase(t, ns, buildA), BuildPhase(t, ns, buildB), BuildPhase(t, ns, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
+			g.Consistently(BuildsRunning(BuildPhase(t, ns, buildA), BuildPhase(t, ns, buildB), BuildPhase(t, ns, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
 			limit++
 		}
 
@@ -208,18 +208,18 @@ func TestKitMaxBuildLimitFIFOStrategy(t *testing.T) {
 		}
 
 		// verify that all builds are successful
-		Eventually(BuildPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-		Eventually(BuildPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-		Eventually(BuildPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(BuildPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		g.Eventually(KitPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(BuildPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		g.Eventually(KitPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(BuildPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		g.Eventually(KitPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 	})
 }
 
 func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		createOperator(t, ns, "8m0s", "--global", "--force")
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		createOperator(t, g, ns, "8m0s", "--global", "--force")
 
 		pl := Platform(t, ns)()
 		// set maximum number of running builds and order strategy
@@ -234,7 +234,7 @@ func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
 		buildB := "integration-b"
 		buildC := "integration-c"
 
-		doKitBuildInNamespace(t, buildA, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildA, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:timer", "camel:log",
@@ -244,7 +244,7 @@ func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
 			},
 		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-		doKitBuildInNamespace(t, buildB, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildB, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:cron", "camel:log", "camel:joor",
@@ -254,7 +254,7 @@ func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
 			},
 		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-		doKitBuildInNamespace(t, buildC, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildC, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:timer", "camel:log", "camel:joor", "camel:http",
@@ -271,7 +271,7 @@ func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
 		limit := 0
 		for limit < 5 && BuildPhase(t, ns, buildA)() == v1.BuildPhaseRunning {
 			// verify that number of running builds does not exceed max build limit
-			Consistently(BuildsRunning(BuildPhase(t, ns, buildA), BuildPhase(t, ns, buildB), BuildPhase(t, ns, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
+			g.Consistently(BuildsRunning(BuildPhase(t, ns, buildA), BuildPhase(t, ns, buildB), BuildPhase(t, ns, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
 			limit++
 		}
 
@@ -282,18 +282,18 @@ func TestKitMaxBuildLimitDependencyMatchingStrategy(t *testing.T) {
 		}
 
 		// verify that all builds are successful
-		Eventually(BuildPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-		Eventually(BuildPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
-		Eventually(BuildPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(BuildPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		g.Eventually(KitPhase(t, ns, buildA), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(BuildPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		g.Eventually(KitPhase(t, ns, buildB), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(BuildPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		g.Eventually(KitPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 	})
 }
 
 func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		createOperator(t, ns, "8m0s", "--global", "--force")
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		createOperator(t, g, ns, "8m0s", "--global", "--force")
 
 		pl := Platform(t, ns)()
 		// set maximum number of running builds and order strategy
@@ -308,7 +308,7 @@ func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
 		buildB := "integration-b"
 		buildC := "integration-c"
 
-		doKitBuildInNamespace(t, buildA, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildA, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:timer", "camel:log",
@@ -318,7 +318,7 @@ func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
 			},
 		}, v1.BuildPhaseRunning, v1.IntegrationKitPhaseBuildRunning)
 
-		doKitBuildInNamespace(t, buildB, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildB, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:cron", "camel:log", "camel:joor",
@@ -328,7 +328,7 @@ func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
 			},
 		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
 
-		doKitBuildInNamespace(t, buildC, ns, TestTimeoutShort, kitOptions{
+		doKitBuildInNamespace(t, g, buildC, ns, TestTimeoutShort, kitOptions{
 			operatorID: fmt.Sprintf("camel-k-%s", ns),
 			dependencies: []string{
 				"camel:timer", "camel:log", "camel:joor", "camel:http",
@@ -339,23 +339,23 @@ func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
 		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
 
 		// verify that last build is waiting
-		Eventually(BuildConditions(t, ns, buildC), TestTimeoutMedium).ShouldNot(BeNil())
-		Eventually(
+		g.Eventually(BuildConditions(t, ns, buildC), TestTimeoutMedium).ShouldNot(BeNil())
+		g.Eventually(
 			BuildCondition(t, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Status,
 			TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		Eventually(
+		g.Eventually(
 			BuildCondition(t, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Reason,
 			TestTimeoutShort).Should(Equal(v1.BuildConditionWaitingReason))
 
 		// verify that last build is scheduled
-		Eventually(BuildPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
-		Eventually(KitPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
+		g.Eventually(BuildPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
+		g.Eventually(KitPhase(t, ns, buildC), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 
-		Eventually(BuildConditions(t, ns, buildC), TestTimeoutLong).ShouldNot(BeNil())
-		Eventually(
+		g.Eventually(BuildConditions(t, ns, buildC), TestTimeoutLong).ShouldNot(BeNil())
+		g.Eventually(
 			BuildCondition(t, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Status,
 			TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(
+		g.Eventually(
 			BuildCondition(t, ns, buildC, v1.BuildConditionType(v1.BuildConditionScheduled))().Reason,
 			TestTimeoutShort).Should(Equal(v1.BuildConditionReadyReason))
 	})
@@ -392,22 +392,22 @@ func doKitFullBuild(t *testing.T, name string, buildTimeout string, testTimeout 
 	options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
 	t.Helper()
 
-	WithNewTestNamespace(t, func(ns string) {
-		createOperator(t, ns, buildTimeout)
-		doKitBuildInNamespace(t, name, ns, testTimeout, options, buildPhase, kitPhase)
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		createOperator(t, g, ns, buildTimeout)
+		doKitBuildInNamespace(t, g, name, ns, testTimeout, options, buildPhase, kitPhase)
 	})
 }
 
-func createOperator(t *testing.T, ns string, buildTimeout string, installArgs ...string) {
+func createOperator(t *testing.T, g *WithT, ns string, buildTimeout string, installArgs ...string) {
 	args := []string{"--build-timeout", buildTimeout}
 	args = append(args, installArgs...)
 
 	operatorID := fmt.Sprintf("camel-k-%s", ns)
-	Expect(KamelInstallWithID(t, operatorID, ns, args...).Execute()).To(Succeed())
-	Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+	g.Expect(KamelInstallWithID(t, operatorID, ns, args...).Execute()).To(Succeed())
+	g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 }
 
-func doKitBuildInNamespace(t *testing.T, name string, ns string, testTimeout time.Duration, options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
+func doKitBuildInNamespace(t *testing.T, g *WithT, name string, ns string, testTimeout time.Duration, options kitOptions, buildPhase v1.BuildPhase, kitPhase v1.IntegrationKitPhase) {
 
 	buildKitArgs := []string{"kit", "create", name, "-n", ns}
 	for _, dependency := range options.dependencies {
@@ -423,13 +423,13 @@ func doKitBuildInNamespace(t *testing.T, name string, ns string, testTimeout tim
 		buildKitArgs = append(buildKitArgs, "--operator-id", fmt.Sprintf("camel-k-%s", ns))
 	}
 
-	Expect(Kamel(t, buildKitArgs...).Execute()).To(Succeed())
+	g.Expect(Kamel(t, buildKitArgs...).Execute()).To(Succeed())
 
-	Eventually(Build(t, ns, name), testTimeout).ShouldNot(BeNil())
+	g.Eventually(Build(t, ns, name), testTimeout).ShouldNot(BeNil())
 	if buildPhase != v1.BuildPhaseNone {
-		Eventually(BuildPhase(t, ns, name), testTimeout).Should(Equal(buildPhase))
+		g.Eventually(BuildPhase(t, ns, name), testTimeout).Should(Equal(buildPhase))
 	}
 	if kitPhase != v1.IntegrationKitPhaseNone {
-		Eventually(KitPhase(t, ns, name), testTimeout).Should(Equal(kitPhase))
+		g.Eventually(KitPhase(t, ns, name), testTimeout).Should(Equal(kitPhase))
 	}
 }

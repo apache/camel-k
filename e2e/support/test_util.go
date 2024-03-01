@@ -58,7 +58,7 @@ func GetEnvOrDefault(key string, deflt string) string {
 	}
 }
 
-func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
+func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
 	t.Helper()
 
 	var cmdOut strings.Builder
@@ -71,15 +71,16 @@ func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
 		}
 	}()
 
+	RegisterTestingT(t)
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
-	Eventually(session).Should(gexec.Exit(0))
+	g.Eventually(session).Should(gexec.Exit(0))
 	require.NoError(t, err)
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
 // ExpectExecError Expect a command error with an exit code of 1
-func ExpectExecError(t *testing.T, command *exec.Cmd) {
+func ExpectExecError(t *testing.T, g *WithT, command *exec.Cmd) {
 	t.Helper()
 
 	var cmdOut strings.Builder
@@ -94,7 +95,7 @@ func ExpectExecError(t *testing.T, command *exec.Cmd) {
 
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
-	Eventually(session).ShouldNot(gexec.Exit(0))
+	g.Eventually(session).ShouldNot(gexec.Exit(0))
 	require.NoError(t, err)
 	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }

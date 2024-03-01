@@ -36,37 +36,37 @@ import (
 func TestCamelTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		t.Run("properties changes should not rebuild", func(t *testing.T) {
 
-			Expect(Kamel(t, "reset", "-n", ns).Execute()).To(Succeed())
+			g.Expect(Kamel(t, "reset", "-n", ns).Execute()).To(Succeed())
 
 			name := RandomizedSuffixName("java")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 			).Execute()).To(Succeed())
 
 			// checking the integration status
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			integrationKit := IntegrationKit(t, ns, name)()
 
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-p", "a=1",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Eventually(IntegrationKit(t, ns, name)).Should(Equal(integrationKit))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationKit(t, ns, name)).Should(Equal(integrationKit))
 
-			Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
-			Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
+			g.Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
 		})
 
 		// Clean-up
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

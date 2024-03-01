@@ -40,20 +40,20 @@ import (
 func TestRecreateDeploymentStrategyTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		t.Run("Run with Recreate Deployment Strategy", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "deployment.strategy="+string(appsv1.RecreateDeploymentStrategyType)).
 				Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Eventually(Deployment(t, ns, name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+			g.Eventually(Deployment(t, ns, name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
 				Fields{
 					"Spec": MatchFields(IgnoreExtras,
 						Fields{
@@ -66,32 +66,32 @@ func TestRecreateDeploymentStrategyTrait(t *testing.T) {
 			))
 
 			// check integration schema does not contains unwanted default trait value.
-			Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
+			g.Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
 			unstructuredIntegration := UnstructuredIntegration(t, ns, name)()
 			deploymentTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "deployment")
-			Expect(deploymentTrait).ToNot(BeNil())
-			Expect(len(deploymentTrait)).To(Equal(1))
-			Expect(deploymentTrait["strategy"]).To(Equal(string(appsv1.RecreateDeploymentStrategyType)))
+			g.Expect(deploymentTrait).ToNot(BeNil())
+			g.Expect(len(deploymentTrait)).To(Equal(1))
+			g.Expect(deploymentTrait["strategy"]).To(Equal(string(appsv1.RecreateDeploymentStrategyType)))
 
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
 func TestRollingUpdateDeploymentStrategyTrait(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		t.Run("Run with RollingUpdate Deployment Strategy", func(t *testing.T) {
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"-t", "deployment.strategy="+string(appsv1.RollingUpdateDeploymentStrategyType)).
 				Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			Eventually(Deployment(t, ns, "java"), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+			g.Eventually(Deployment(t, ns, "java"), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
 				Fields{
 					"Spec": MatchFields(IgnoreExtras,
 						Fields{
@@ -104,6 +104,6 @@ func TestRollingUpdateDeploymentStrategyTrait(t *testing.T) {
 			))
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

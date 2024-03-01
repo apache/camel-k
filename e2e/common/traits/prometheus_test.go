@@ -45,27 +45,27 @@ import (
 
 func TestPrometheusTrait(t *testing.T) {
 	// test not able to run in parallel
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		ocp, err := openshift.IsOpenShift(TestClient(t))
 		require.NoError(t, err)
 		// Do not create PodMonitor for the time being as CI test runs on OCP 3.11
 		createPodMonitor := false
-		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"-t", "prometheus.enabled=true",
 			"-t", fmt.Sprintf("prometheus.pod-monitor=%v", createPodMonitor)).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(t, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(t, ns, "java")).ShouldNot(BeNil())
+		g.Eventually(UnstructuredIntegration(t, ns, "java")).ShouldNot(BeNil())
 		unstructuredIntegration := UnstructuredIntegration(t, ns, "java")()
 		prometheusTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "prometheus")
-		Expect(prometheusTrait).ToNot(BeNil())
-		Expect(len(prometheusTrait)).To(Equal(2))
-		Expect(prometheusTrait["enabled"]).To(Equal(true))
-		Expect(prometheusTrait["podMonitor"]).ToNot(BeNil())
+		g.Expect(prometheusTrait).ToNot(BeNil())
+		g.Expect(len(prometheusTrait)).To(Equal(2))
+		g.Expect(prometheusTrait["enabled"]).To(Equal(true))
+		g.Expect(prometheusTrait["podMonitor"]).ToNot(BeNil())
 		t.Run("Metrics endpoint works", func(t *testing.T) {
 			pod := IntegrationPod(t, ns, "java")
 			response, err := TestClient(t).CoreV1().RESTClient().Get().
@@ -79,11 +79,11 @@ func TestPrometheusTrait(t *testing.T) {
 		if ocp && createPodMonitor {
 			t.Run("PodMonitor is created", func(t *testing.T) {
 				sm := podMonitor(t, ns, "java")
-				Eventually(sm, TestTimeoutShort).ShouldNot(BeNil())
+				g.Eventually(sm, TestTimeoutShort).ShouldNot(BeNil())
 			})
 		}
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

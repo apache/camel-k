@@ -41,94 +41,93 @@ import (
 func TestIntegrationScale(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		t.Run("Update integration scale spec", func(t *testing.T) {
-			RegisterTestingT(t)
-			Expect(ScaleIntegration(t, ns, name, 3)).To(Succeed())
+			g.Expect(ScaleIntegration(t, ns, name, 3)).To(Succeed())
 			// Check the readiness condition becomes falsy
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 			// Check the scale cascades into the Deployment scale
-			Eventually(IntegrationPods(t, ns, name), TestTimeoutShort).Should(HaveLen(3))
+			g.Eventually(IntegrationPods(t, ns, name), TestTimeoutShort).Should(HaveLen(3))
 			// Check it also cascades into the Integration scale subresource Status field
-			Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 3)))
 			// Finally check the readiness condition becomes truthy back
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 		})
 
 		t.Run("Scale integration with polymorphic client", func(t *testing.T) {
 			scaleClient, err := TestClient(t).ScalesClient()
-			Expect(err).To(BeNil())
+			g.Expect(err).To(BeNil())
 
 			// Patch the integration scale subresource
 			patch := "{\"spec\":{\"replicas\":2}}"
 			_, err = scaleClient.Scales(ns).Patch(TestContext, v1.SchemeGroupVersion.WithResource("integrations"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
-			Expect(err).To(BeNil())
+			g.Expect(err).To(BeNil())
 
 			// Check the readiness condition is still truthy as down-scaling
-			Expect(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
+			g.Expect(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
 			// Check the Integration scale subresource Spec field
-			Eventually(IntegrationSpecReplicas(t, ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationSpecReplicas(t, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 2)))
 			// Then check it cascades into the Deployment scale
-			Eventually(IntegrationPods(t, ns, name), TestTimeoutShort).Should(HaveLen(2))
+			g.Eventually(IntegrationPods(t, ns, name), TestTimeoutShort).Should(HaveLen(2))
 			// Finally check it cascades into the Integration scale subresource Status field
-			Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 2)))
 		})
 
 		t.Run("Scale integration with Camel K client", func(t *testing.T) {
 			camel, err := versioned.NewForConfig(TestClient(t).GetConfig())
-			Expect(err).To(BeNil())
+			g.Expect(err).To(BeNil())
 
 			// Getter
 			integrationScale, err := camel.CamelV1().Integrations(ns).GetScale(TestContext, name, metav1.GetOptions{})
-			Expect(err).To(BeNil())
-			Expect(integrationScale.Spec.Replicas).To(BeNumerically("==", 2))
-			Expect(integrationScale.Status.Replicas).To(BeNumerically("==", 2))
+			g.Expect(err).To(BeNil())
+			g.Expect(integrationScale.Spec.Replicas).To(BeNumerically("==", 2))
+			g.Expect(integrationScale.Status.Replicas).To(BeNumerically("==", 2))
 
 			// Setter
 			integrationScale.Spec.Replicas = 1
 			integrationScale, err = camel.CamelV1().Integrations(ns).UpdateScale(TestContext, name, integrationScale, metav1.UpdateOptions{})
-			Expect(err).To(BeNil())
+			g.Expect(err).To(BeNil())
 
 			// Check the readiness condition is still truthy as down-scaling
-			Expect(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
+			g.Expect(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
 			// Check the Integration scale subresource Spec field
-			Eventually(IntegrationSpecReplicas(t, ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationSpecReplicas(t, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
 			// Then check it cascades into the Deployment scale
-			Eventually(IntegrationPods(t, ns, name), TestTimeoutShort).Should(HaveLen(1))
+			g.Eventually(IntegrationPods(t, ns, name), TestTimeoutShort).Should(HaveLen(1))
 			// Finally check it cascades into the Integration scale subresource Status field
-			Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationStatusReplicas(t, ns, name), TestTimeoutShort).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
 		})
 
 		t.Run("Scale integration with external image", func(t *testing.T) {
 			image := IntegrationPodImage(t, ns, name)()
-			Expect(image).NotTo(BeEmpty())
+			g.Expect(image).NotTo(BeEmpty())
 			// Save resources by deleting the integration
-			Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
 
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
-			Eventually(IntegrationPhase(t, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-			Eventually(IntegrationPodPhase(t, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Expect(ScaleIntegration(t, ns, "pre-built", 0)).To(Succeed())
-			Eventually(IntegrationPod(t, ns, "pre-built"), TestTimeoutMedium).Should(BeNil())
-			Expect(ScaleIntegration(t, ns, "pre-built", 1)).To(Succeed())
-			Eventually(IntegrationPhase(t, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-			Eventually(IntegrationPodPhase(t, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+			g.Eventually(IntegrationPhase(t, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationPodPhase(t, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Expect(ScaleIntegration(t, ns, "pre-built", 0)).To(Succeed())
+			g.Eventually(IntegrationPod(t, ns, "pre-built"), TestTimeoutMedium).Should(BeNil())
+			g.Expect(ScaleIntegration(t, ns, "pre-built", 1)).To(Succeed())
+			g.Eventually(IntegrationPhase(t, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationPodPhase(t, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-			Expect(Kamel(t, "delete", "pre-built", "-n", ns).Execute()).To(Succeed())
+			g.Expect(Kamel(t, "delete", "pre-built", "-n", ns).Execute()).To(Succeed())
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

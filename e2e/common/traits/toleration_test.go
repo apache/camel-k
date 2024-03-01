@@ -38,23 +38,23 @@ import (
 func TestTolerationTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		t.Run("Run Java with node toleration operation exists", func(t *testing.T) {
 			name := RandomizedSuffixName("java1")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "toleration.enabled=true",
 				"-t", "toleration.taints=camel.apache.org/master:NoExecute:300",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(t, ns, name)()
-			Expect(pod.Spec.Tolerations).NotTo(BeNil())
+			g.Expect(pod.Spec.Tolerations).NotTo(BeNil())
 
-			Expect(pod.Spec.Tolerations).To(ContainElement(corev1.Toleration{
+			g.Expect(pod.Spec.Tolerations).To(ContainElement(corev1.Toleration{
 				Key:               "camel.apache.org/master",
 				Operator:          corev1.TolerationOpExists,
 				Effect:            corev1.TaintEffectNoExecute,
@@ -64,19 +64,19 @@ func TestTolerationTrait(t *testing.T) {
 
 		t.Run("Run Java with node toleration operation equals", func(t *testing.T) {
 			name := RandomizedSuffixName("java2")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				"-t", "toleration.enabled=true",
 				"-t", "toleration.taints=camel.apache.org/master=test:NoExecute:300",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(t, ns, name)()
-			Expect(pod.Spec.Tolerations).NotTo(BeNil())
+			g.Expect(pod.Spec.Tolerations).NotTo(BeNil())
 
-			Expect(pod.Spec.Tolerations).To(ContainElement(corev1.Toleration{
+			g.Expect(pod.Spec.Tolerations).To(ContainElement(corev1.Toleration{
 				Key:      "camel.apache.org/master",
 				Operator: corev1.TolerationOpEqual,
 				Value:    "test", Effect: corev1.TaintEffectNoExecute,
@@ -90,7 +90,7 @@ func TestTolerationTrait(t *testing.T) {
 			}
 
 			name := RandomizedSuffixName("java3")
-			Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
 				// Use the affinity trait to force the scheduling of the Integration pod onto a master node
 				"-t", "affinity.enabled=true",
@@ -100,23 +100,23 @@ func TestTolerationTrait(t *testing.T) {
 				"-t", "toleration.taints=node-role.kubernetes.io/master:NoSchedule",
 			).Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			pod := IntegrationPod(t, ns, name)()
-			Expect(pod).NotTo(BeNil())
+			g.Expect(pod).NotTo(BeNil())
 
 			// Check the Integration pod contains the toleration
-			Expect(pod.Spec.Tolerations).To(ContainElement(corev1.Toleration{
+			g.Expect(pod.Spec.Tolerations).To(ContainElement(corev1.Toleration{
 				Key:      "node-role.kubernetes.io/master",
 				Operator: corev1.TolerationOpExists,
 				Effect:   corev1.TaintEffectNoSchedule,
 			}))
 
 			// Check the Integration pod is running on a master node
-			Expect(Node(t, pod.Spec.NodeName)()).NotTo(BeNil())
-			Expect(Node(t, pod.Spec.NodeName)()).To(PointTo(MatchFields(IgnoreExtras, Fields{
+			g.Expect(Node(t, pod.Spec.NodeName)()).NotTo(BeNil())
+			g.Expect(Node(t, pod.Spec.NodeName)()).To(PointTo(MatchFields(IgnoreExtras, Fields{
 				"Spec": MatchFields(IgnoreExtras, Fields{
 					"Taints": ContainElement(corev1.Taint{
 						Key:    "node-role.kubernetes.io/master",
@@ -127,6 +127,6 @@ func TestTolerationTrait(t *testing.T) {
 		})
 
 		// Clean up
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

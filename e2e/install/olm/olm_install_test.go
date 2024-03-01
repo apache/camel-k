@@ -53,8 +53,8 @@ func TestOLMInstallation(t *testing.T) {
 		t.Skip("OLM fresh install test requires the CAMEL_K_NEW_IIB environment variable")
 	}
 
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateOrUpdateCatalogSource(t, ns, installCatalogSourceName, newIIB)).To(Succeed())
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		g.Expect(CreateOrUpdateCatalogSource(t, ns, installCatalogSourceName, newIIB)).To(Succeed())
 
 		ocp, err := openshift.IsOpenShift(TestClient(t))
 		require.NoError(t, err)
@@ -63,11 +63,11 @@ func TestOLMInstallation(t *testing.T) {
 			// Wait for pull secret to be created in namespace
 			// eg. test-camel-k-source-dockercfg-zlltn
 			secretPrefix := fmt.Sprintf("%s-dockercfg-", installCatalogSourceName)
-			Eventually(SecretByName(t, ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
+			g.Eventually(SecretByName(t, ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
 		}
 
-		Eventually(CatalogSourcePodRunning(t, ns, installCatalogSourceName), TestTimeoutMedium).Should(BeNil())
-		Eventually(CatalogSourcePhase(t, ns, installCatalogSourceName), TestTimeoutLong).Should(Equal("READY"))
+		g.Eventually(CatalogSourcePodRunning(t, ns, installCatalogSourceName), TestTimeoutMedium).Should(BeNil())
+		g.Eventually(CatalogSourcePhase(t, ns, installCatalogSourceName), TestTimeoutLong).Should(Equal("READY"))
 
 		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", installCatalogSourceName, "--olm-source-namespace", ns}
 
@@ -75,13 +75,13 @@ func TestOLMInstallation(t *testing.T) {
 			args = append(args, "--olm-channel", newUpdateChannel)
 		}
 
-		Expect(Kamel(t, args...).Execute()).To(Succeed())
+		g.Expect(Kamel(t, args...).Execute()).To(Succeed())
 
 		// Find the only one Camel K CSV
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
 			return true
 		}
-		Eventually(ClusterServiceVersionPhase(t, noAdditionalConditions, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseSucceeded))
+		g.Eventually(ClusterServiceVersionPhase(t, noAdditionalConditions, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseSucceeded))
 
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
@@ -91,23 +91,23 @@ func TestOLMInstallation(t *testing.T) {
 		t.Logf("CSV Version installed: %s", csvVersion.Version.String())
 
 		// Check the operator pod is running
-		Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(OperatorImage(t, ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
+		g.Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorImage(t, ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
 
 		// Check the IntegrationPlatform has been reconciled
-		Eventually(PlatformVersion(t, ns)).Should(ContainSubstring(ipVersionPrefix))
+		g.Eventually(PlatformVersion(t, ns)).Should(ContainSubstring(ipVersionPrefix))
 
 		// Check if restricted security context has been applyed
 		operatorPod := OperatorPod(t, ns)()
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		// Clean up
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-		Expect(Kamel(t, "uninstall", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "uninstall", "-n", ns).Execute()).To(Succeed())
 		// Clean up cluster-wide resources that are not removed by OLM
-		Expect(Kamel(t, "uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
+		g.Expect(Kamel(t, "uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
 	})
 }

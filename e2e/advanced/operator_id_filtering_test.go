@@ -37,91 +37,91 @@ import (
 func TestOperatorIDCamelCatalogReconciliation(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
-		Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		Eventually(DefaultCamelCatalogPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(DefaultCamelCatalogPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 	})
 }
 
 func TestOperatorIDFiltering(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
-		WithNewTestNamespace(t, func(nsop1 string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		WithNewTestNamespace(t, func(g *WithT, nsop1 string) {
 			operator1 := "operator-1"
-			Expect(CopyCamelCatalog(t, nsop1, operator1)).To(Succeed())
-			Expect(CopyIntegrationKits(t, nsop1, operator1)).To(Succeed())
-			Expect(KamelInstallWithIDAndKameletCatalog(t, operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
-			Eventually(PlatformPhase(t, nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+			g.Expect(CopyCamelCatalog(t, nsop1, operator1)).To(Succeed())
+			g.Expect(CopyIntegrationKits(t, nsop1, operator1)).To(Succeed())
+			g.Expect(KamelInstallWithIDAndKameletCatalog(t, operator1, nsop1, "--global", "--force").Execute()).To(Succeed())
+			g.Eventually(PlatformPhase(t, nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-			WithNewTestNamespace(t, func(nsop2 string) {
+			WithNewTestNamespace(t, func(g *WithT, nsop2 string) {
 				operator2 := "operator-2"
-				Expect(CopyCamelCatalog(t, nsop2, operator2)).To(Succeed())
-				Expect(CopyIntegrationKits(t, nsop2, operator2)).To(Succeed())
-				Expect(KamelInstallWithIDAndKameletCatalog(t, operator2, nsop2, "--global", "--force").Execute()).To(Succeed())
-				Eventually(PlatformPhase(t, nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+				g.Expect(CopyCamelCatalog(t, nsop2, operator2)).To(Succeed())
+				g.Expect(CopyIntegrationKits(t, nsop2, operator2)).To(Succeed())
+				g.Expect(KamelInstallWithIDAndKameletCatalog(t, operator2, nsop2, "--global", "--force").Execute()).To(Succeed())
+				g.Eventually(PlatformPhase(t, nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
-					Expect(KamelRunWithID(t, "operator-x", ns, "files/yaml.yaml", "--name", "untouched", "--force").Execute()).To(Succeed())
-					Consistently(IntegrationPhase(t, ns, "untouched"), 10*time.Second).Should(BeEmpty())
+					g.Expect(KamelRunWithID(t, "operator-x", ns, "files/yaml.yaml", "--name", "untouched", "--force").Execute()).To(Succeed())
+					g.Consistently(IntegrationPhase(t, ns, "untouched"), 10*time.Second).Should(BeEmpty())
 				})
 
 				t.Run("Operators run scoped integrations", func(t *testing.T) {
-					Expect(KamelRunWithID(t, "operator-x", ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
-					Expect(AssignIntegrationToOperator(t, ns, "moving", operator1)).To(Succeed())
-					Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-					Eventually(IntegrationPodPhase(t, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-					Eventually(IntegrationLogs(t, ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+					g.Expect(KamelRunWithID(t, "operator-x", ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
+					g.Expect(AssignIntegrationToOperator(t, ns, "moving", operator1)).To(Succeed())
+					g.Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+					g.Eventually(IntegrationPodPhase(t, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+					g.Eventually(IntegrationLogs(t, ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				})
 
 				t.Run("Operators can handoff scoped integrations", func(t *testing.T) {
-					Expect(AssignIntegrationToOperator(t, ns, "moving", operator2)).To(Succeed())
-					Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildingKit))
-					Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-					Eventually(IntegrationPodPhase(t, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-					Eventually(IntegrationLogs(t, ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+					g.Expect(AssignIntegrationToOperator(t, ns, "moving", operator2)).To(Succeed())
+					g.Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseBuildingKit))
+					g.Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+					g.Eventually(IntegrationPodPhase(t, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+					g.Eventually(IntegrationLogs(t, ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				})
 
 				t.Run("Operators can be deactivated after completely handing off scoped integrations", func(t *testing.T) {
-					Expect(ScaleOperator(t, nsop1, 0)).To(Succeed())
-					Expect(Kamel(t, "rebuild", "-n", ns, "moving").Execute()).To(Succeed())
-					Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-					Eventually(IntegrationPodPhase(t, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-					Eventually(IntegrationLogs(t, ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-					Expect(ScaleOperator(t, nsop1, 1)).To(Succeed())
+					g.Expect(ScaleOperator(t, nsop1, 0)).To(Succeed())
+					g.Expect(Kamel(t, "rebuild", "-n", ns, "moving").Execute()).To(Succeed())
+					g.Eventually(IntegrationPhase(t, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+					g.Eventually(IntegrationPodPhase(t, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+					g.Eventually(IntegrationLogs(t, ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+					g.Expect(ScaleOperator(t, nsop1, 1)).To(Succeed())
 				})
 
 				t.Run("Operators can run scoped integrations with fixed image", func(t *testing.T) {
 					image := IntegrationPodImage(t, ns, "moving")()
-					Expect(image).NotTo(BeEmpty())
+					g.Expect(image).NotTo(BeEmpty())
 					// Save resources by deleting "moving" integration
-					Expect(Kamel(t, "delete", "moving", "-n", ns).Execute()).To(Succeed())
+					g.Expect(Kamel(t, "delete", "moving", "-n", ns).Execute()).To(Succeed())
 
-					Expect(KamelRunWithID(t, "operator-x", ns, "files/yaml.yaml", "--name", "pre-built", "--force",
+					g.Expect(KamelRunWithID(t, "operator-x", ns, "files/yaml.yaml", "--name", "pre-built", "--force",
 						"-t", fmt.Sprintf("container.image=%s", image), "-t", "jvm.enabled=true").Execute()).To(Succeed())
-					Consistently(IntegrationPhase(t, ns, "pre-built"), 10*time.Second).Should(BeEmpty())
-					Expect(AssignIntegrationToOperator(t, ns, "pre-built", operator2)).To(Succeed())
-					Eventually(IntegrationPhase(t, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-					Eventually(IntegrationPodPhase(t, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-					Eventually(IntegrationLogs(t, ns, "pre-built"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-					Expect(Kamel(t, "delete", "pre-built", "-n", ns).Execute()).To(Succeed())
+					g.Consistently(IntegrationPhase(t, ns, "pre-built"), 10*time.Second).Should(BeEmpty())
+					g.Expect(AssignIntegrationToOperator(t, ns, "pre-built", operator2)).To(Succeed())
+					g.Eventually(IntegrationPhase(t, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+					g.Eventually(IntegrationPodPhase(t, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+					g.Eventually(IntegrationLogs(t, ns, "pre-built"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+					g.Expect(Kamel(t, "delete", "pre-built", "-n", ns).Execute()).To(Succeed())
 				})
 
 				t.Run("Operators can run scoped Pipes", func(t *testing.T) {
-					Expect(KamelBindWithID(t, "operator-x", ns, "timer-source?message=Hello", "log-sink",
+					g.Expect(KamelBindWithID(t, "operator-x", ns, "timer-source?message=Hello", "log-sink",
 						"--name", "klb", "--force").Execute()).To(Succeed())
-					Consistently(Integration(t, ns, "klb"), 10*time.Second).Should(BeNil())
+					g.Consistently(Integration(t, ns, "klb"), 10*time.Second).Should(BeNil())
 
-					Expect(AssignPipeToOperator(t, ns, "klb", operator1)).To(Succeed())
-					Eventually(Integration(t, ns, "klb"), TestTimeoutShort).ShouldNot(BeNil())
-					Eventually(IntegrationPhase(t, ns, "klb"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-					Eventually(IntegrationPodPhase(t, ns, "klb"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+					g.Expect(AssignPipeToOperator(t, ns, "klb", operator1)).To(Succeed())
+					g.Eventually(Integration(t, ns, "klb"), TestTimeoutShort).ShouldNot(BeNil())
+					g.Eventually(IntegrationPhase(t, ns, "klb"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+					g.Eventually(IntegrationPodPhase(t, ns, "klb"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				})
 			})
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

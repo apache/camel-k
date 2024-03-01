@@ -39,7 +39,7 @@ import (
 func TestJVMTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		// Store a configmap holding a jar
 		var cmData = make(map[string][]byte)
@@ -51,23 +51,23 @@ func TestJVMTrait(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("JVM trait classpath", func(t *testing.T) {
-			Expect(KamelRunWithID(t, operatorID, ns, "./files/jvm/Classpath.java",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "./files/jvm/Classpath.java",
 				"--resource", "configmap:my-deps",
 				"-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar",
 			).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(t, ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(t, ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
+			g.Eventually(IntegrationPodPhase(t, ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
 
 			// check integration schema does not contains unwanted default trait value.
-			Eventually(UnstructuredIntegration(t, ns, "classpath")).ShouldNot(BeNil())
+			g.Eventually(UnstructuredIntegration(t, ns, "classpath")).ShouldNot(BeNil())
 			unstructuredIntegration := UnstructuredIntegration(t, ns, "classpath")()
 			jvmTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jvm")
-			Expect(jvmTrait).ToNot(BeNil())
-			Expect(len(jvmTrait)).To(Equal(1))
-			Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources/my-deps/sample-1.0.jar"))
+			g.Expect(jvmTrait).ToNot(BeNil())
+			g.Expect(len(jvmTrait)).To(Equal(1))
+			g.Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources/my-deps/sample-1.0.jar"))
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

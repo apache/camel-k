@@ -36,22 +36,22 @@ import (
 func TestRunExtraRepository(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 			"--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat",
 			"--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001",
 			"--name", name,
 		).Execute()).To(Succeed())
 
-		Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(Integration(t, ns, name)).Should(WithTransform(IntegrationSpec, And(
+		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(Integration(t, ns, name)).Should(WithTransform(IntegrationSpec, And(
 			HaveExistingField("Repositories"),
 			HaveField("Repositories", ContainElements("https://maven.repository.redhat.com/ga@id=redhat")),
 		)))
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

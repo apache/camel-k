@@ -37,7 +37,7 @@ import (
 )
 
 func TestRunDevMode(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		/*
 		 * TODO
 		 * The changing of the yaml file constant from "string" to "magic" is not being
@@ -50,7 +50,6 @@ func TestRunDevMode(t *testing.T) {
 		}
 
 		t.Run("run yaml dev mode", func(t *testing.T) {
-			RegisterTestingT(t)
 			ctx, cancel := context.WithCancel(TestContext)
 			defer cancel()
 			piper, pipew := io.Pipe()
@@ -71,16 +70,15 @@ func TestRunDevMode(t *testing.T) {
 			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
 			go kamelRun.Execute()
 
-			Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), TestTimeoutMedium).Should(BeTrue())
-			Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
-			Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
+			g.Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), TestTimeoutMedium).Should(BeTrue())
+			g.Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+			g.Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
 
 			util.ReplaceInFile(t, file, "string!", "jordan!")
-			Eventually(logScanner.IsFound("Magicjordan!"), TestTimeoutMedium).Should(BeTrue())
+			g.Eventually(logScanner.IsFound("Magicjordan!"), TestTimeoutMedium).Should(BeTrue())
 		})
 
 		t.Run("run yaml remote dev mode", func(t *testing.T) {
-			RegisterTestingT(t)
 			ctx, cancel := context.WithCancel(TestContext)
 			defer cancel()
 			piper, pipew := io.Pipe()
@@ -101,7 +99,7 @@ func TestRunDevMode(t *testing.T) {
 
 			go kamelRun.Execute()
 
-			Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+			g.Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
 		})
 
 		// This test makes sure that `kamel run --dev` runs in seconds after initial build is
@@ -113,16 +111,15 @@ func TestRunDevMode(t *testing.T) {
 			 * why it does not finish in a few seconds and remove the bottlenecks which are lagging
 			 * the integration startup.
 			 */
-			RegisterTestingT(t)
 			name := RandomizedSuffixName("yaml")
 
 			// First run (warm up)
-			Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
-			Eventually(Integration(t, ns, name)).Should(BeNil())
-			Eventually(IntegrationPod(t, ns, name), TestTimeoutMedium).Should(BeNil())
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ns, name)).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ns, name), TestTimeoutMedium).Should(BeNil())
 
 			// Second run (rebuild)
 			ctx, cancel := context.WithCancel(TestContext)
@@ -147,10 +144,10 @@ func TestRunDevMode(t *testing.T) {
 
 			// Second run should start up within a few seconds
 			timeout := 10 * time.Second
-			Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), timeout).Should(BeTrue())
-			Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
+			g.Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), timeout).Should(BeTrue())
+			g.Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
 		})
 
-		Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
