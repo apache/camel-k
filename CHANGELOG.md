@@ -6,6 +6,9 @@
 
 **Closed issues:**
 
+- Route parameters are ignored for `path` parameters [\#5203](https://github.com/apache/camel-k/issues/5203)
+- Builder property failure when using non xml tag characters [\#5195](https://github.com/apache/camel-k/issues/5195)
+- Error configuring property: camel.component.test\[00001\]port\[80\]tcp.addr because cannot find component with name test\[00001\]port\[80\]tcp. [\#5179](https://github.com/apache/camel-k/issues/5179)
 - Get environment variable value is empty in properties file [\#5178](https://github.com/apache/camel-k/issues/5178)
 - Debug Integrations failing [\#5161](https://github.com/apache/camel-k/issues/5161)
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
