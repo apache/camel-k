@@ -83,7 +83,7 @@ func TestCreateCatalog(t *testing.T) {
 	ip.Status.Phase = v1.IntegrationPlatformPhaseCreateCatalog
 	ip.Spec.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 	if strings.Contains(ip.Spec.Build.RuntimeVersion, "SNAPSHOT") {
-		maven.DefaultMavenRepositories = "https://repo.maven.apache.org/maven2@id=central,https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
+		maven.DefaultMavenRepositories += ",https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
 	}
 
 	c, err := test.NewFakeClient(&ip)
