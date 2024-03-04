@@ -237,10 +237,9 @@ func TestBuilderTrait(t *testing.T) {
 		t.Run("Run maven profile", func(t *testing.T) {
 			name := RandomizedSuffixName("java-maven-profile")
 
-			opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
-			mavenProfile1Cm := newMavenProfileConfigMap(opns, "maven-profile-owasp", "owasp-profile")
+			mavenProfile1Cm := newMavenProfileConfigMap(operatorNS, "maven-profile-owasp", "owasp-profile")
 			g.Expect(TestClient(t).Create(TestContext, mavenProfile1Cm)).To(Succeed())
-			mavenProfile2Cm := newMavenProfileConfigMap(opns, "maven-profile-dependency", "dependency-profile")
+			mavenProfile2Cm := newMavenProfileConfigMap(operatorNS, "maven-profile-dependency", "dependency-profile")
 			g.Expect(TestClient(t).Create(TestContext, mavenProfile2Cm)).To(Succeed())
 
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",

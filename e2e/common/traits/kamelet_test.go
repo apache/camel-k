@@ -49,7 +49,7 @@ func TestKameletTrait(t *testing.T) {
 					},
 				},
 			}
-			g.Expect(CreateKamelet(t, ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
+			g.Expect(CreateKamelet(t, operatorID, ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
 
 			name := RandomizedSuffixName("webhook")
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())

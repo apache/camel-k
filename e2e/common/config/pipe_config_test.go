@@ -37,8 +37,8 @@ func TestPipeConfig(t *testing.T) {
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		t.Run("test custom source/sink pipe", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, ns, "my-pipe-timer-source")()).To(Succeed())
-			g.Expect(CreateLogKamelet(t, ns, "my-pipe-log-sink")()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, operatorID, ns, "my-pipe-timer-source")()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, operatorID, ns, "my-pipe-log-sink")()).To(Succeed())
 			t.Run("run test default config using properties", func(t *testing.T) {
 				name := RandomizedSuffixName("my-pipe-with-properties")
 

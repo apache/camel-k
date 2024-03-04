@@ -25,5 +25,5 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
-var ns = support.GetEnvOrDefault("CAMEL_K_TEST_NAMESPACE", support.TestDefaultNamespace)
-var operatorID = support.GetEnvOrDefault("CAMEL_K_OPERATOR_ID", platform.DefaultPlatformName)
+var operatorNS = support.TestDefaultNamespace + "-config"
+var operatorID = platform.DefaultPlatformName + "-config"

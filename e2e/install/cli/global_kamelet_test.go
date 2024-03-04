@@ -40,7 +40,7 @@ func TestRunGlobalKamelet(t *testing.T) {
 
 			// NS2: namespace without operator
 			WithNewTestNamespace(t, func(g *WithT, ns2 string) {
-				g.Expect(CreateTimerKamelet(t, ns2, "my-own-timer-source")()).To(Succeed())
+				g.Expect(CreateTimerKamelet(t, operatorID, ns2, "my-own-timer-source")()).To(Succeed())
 
 				g.Expect(KamelInstallWithID(t, operatorID, ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
 
@@ -53,7 +53,7 @@ func TestRunGlobalKamelet(t *testing.T) {
 
 		t.Run("Global operator + global kamelet test", func(t *testing.T) {
 
-			g.Expect(CreateTimerKamelet(t, operatorNamespace, "my-own-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, operatorID, operatorNamespace, "my-own-timer-source")()).To(Succeed())
 
 			// NS3: namespace without operator
 			WithNewTestNamespace(t, func(g *WithT, ns3 string) {

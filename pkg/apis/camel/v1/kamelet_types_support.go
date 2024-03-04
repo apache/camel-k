@@ -214,3 +214,8 @@ func NewKameletList() KameletList {
 		},
 	}
 }
+
+// SetOperatorID sets the given operator id as an annotation.
+func (k *Kamelet) SetOperatorID(operatorID string) {
+	SetAnnotation(&k.ObjectMeta, OperatorIDAnnotation, operatorID)
+}
