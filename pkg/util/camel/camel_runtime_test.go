@@ -20,11 +20,13 @@ package camel
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,6 +44,9 @@ func TestCreateCatalog(t *testing.T) {
 	_, ok := os.LookupEnv("MAVEN_CMD")
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
+	}
+	if strings.Contains(defaults.DefaultRuntimeVersion, "SNAPSHOT") {
+		maven.DefaultMavenRepositories += ",https://repository.apache.org/content/repositories/snapshots-group@snapshots@id=apache-snapshots"
 	}
 	catalog, err := CreateCatalog(
 		context.TODO(),

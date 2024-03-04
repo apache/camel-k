@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -121,6 +122,23 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 			},
 		},
 	}
+	if strings.Contains(defaults.DefaultRuntimeVersion, "SNAPSHOT") {
+		builderContext.Build.Maven.Repositories = []v1.Repository{
+			{
+				ID:   "APACHE-SNAPSHOT",
+				Name: "Apache Snapshot",
+				URL:  "https://repository.apache.org/content/repositories/snapshots-group",
+				Snapshots: v1.RepositoryPolicy{
+					Enabled:        true,
+					UpdatePolicy:   "always",
+					ChecksumPolicy: "ignore",
+				},
+				Releases: v1.RepositoryPolicy{
+					Enabled: false,
+				},
+			},
+		}
+	}
 
 	err = generateQuarkusProject(&builderContext)
 	assert.Nil(t, err)
@@ -175,6 +193,23 @@ func TestBuildQuarkusRunner(t *testing.T) {
 			},
 			Dependencies: []string{"mvn:org.apache.camel.k:camel-k-runtime"},
 		},
+	}
+	if strings.Contains(defaults.DefaultRuntimeVersion, "SNAPSHOT") {
+		builderContext.Build.Maven.Repositories = []v1.Repository{
+			{
+				ID:   "APACHE-SNAPSHOT",
+				Name: "Apache Snapshot",
+				URL:  "https://repository.apache.org/content/repositories/snapshots-group",
+				Snapshots: v1.RepositoryPolicy{
+					Enabled:        true,
+					UpdatePolicy:   "always",
+					ChecksumPolicy: "ignore",
+				},
+				Releases: v1.RepositoryPolicy{
+					Enabled: false,
+				},
+			},
+		}
 	}
 	err = generateQuarkusProject(&builderContext)
 	assert.Nil(t, err)
