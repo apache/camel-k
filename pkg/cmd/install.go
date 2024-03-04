@@ -676,6 +676,11 @@ func (o *installCmdOptions) postRun(cmd *cobra.Command, _ []string) error {
 
 func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	path := pathToRoot(cmd)
+
+	// Requires synchronization as viper bind flag is not able to handle concurrency
+	m.Lock()
+	defer m.Unlock()
+
 	if err := decodeKey(o, path); err != nil {
 		return err
 	}

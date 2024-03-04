@@ -25,7 +25,6 @@ import (
 	"log"
 	"reflect"
 	"strings"
-	"sync"
 
 	"github.com/mitchellh/mapstructure"
 
@@ -44,9 +43,6 @@ import (
 const (
 	offlineCommandLabel = "camel.apache.org/cmd.offline"
 )
-
-// Mutex to synchronize flag operations as viper library is not able to handle concurrency.
-var m = sync.Mutex{}
 
 // DeleteIntegration --.
 func DeleteIntegration(ctx context.Context, c client.Client, name string, namespace string) error {
@@ -78,10 +74,6 @@ func bindPFlagsHierarchy(cmd *cobra.Command) error {
 }
 
 func bindPFlags(cmd *cobra.Command) error {
-	// Requires synchronization as viper bind flag is not able to handle concurrency
-	m.Lock()
-	defer m.Unlock()
-
 	prefix := pathToRoot(cmd)
 	pl := p.NewClient()
 
@@ -122,10 +114,6 @@ func pathToRoot(cmd *cobra.Command) string {
 }
 
 func decodeKey(target interface{}, key string) error {
-	// Requires synchronization as viper all settings is not able to handle concurrency
-	m.Lock()
-	defer m.Unlock()
-
 	nodes := strings.Split(key, ".")
 	settings := viper.AllSettings()
 
@@ -168,6 +156,10 @@ func decodeKey(target interface{}, key string) error {
 
 func decode(target interface{}) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
+		// Requires synchronization as viper bind flag is not able to handle concurrency
+		m.Lock()
+		defer m.Unlock()
+
 		path := pathToRoot(cmd)
 		if err := decodeKey(target, path); err != nil {
 			return err

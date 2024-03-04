@@ -187,6 +187,11 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 
 	// load from kamel.run (1)
 	pathToRoot := pathToRoot(cmd)
+
+	// Requires synchronization as viper bind flag is not able to handle concurrency
+	m.Lock()
+	defer m.Unlock()
+
 	if err := decodeKey(o, pathToRoot); err != nil {
 		return err
 	}
