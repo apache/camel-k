@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,6 +39,9 @@ import (
 const kamelCommandLongDescription = `Apache Camel K is a lightweight integration platform, born on Kubernetes, with serverless
 superpowers.
 `
+
+// Mutex to synchronize flag operations as viper library is not able to handle concurrency.
+var m = sync.Mutex{}
 
 // RootCmdOptions --.
 // nolint: containedctx
@@ -93,6 +97,10 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 }
 
 func kamelPostAddCommandInit(cmd *cobra.Command) error {
+	// Requires synchronization as viper bind flag is not able to handle concurrency
+	m.Lock()
+	defer m.Unlock()
+
 	if err := bindPFlagsHierarchy(cmd); err != nil {
 		return err
 	}
