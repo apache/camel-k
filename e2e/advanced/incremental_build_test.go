@@ -98,6 +98,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 		operatorID := "camel-k-incremental-build-pod"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
@@ -141,7 +142,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 			integrationIncrementalKitName := IntegrationKit(t, ns, nameIncremental)()
 			// the container comes in a format like
 			// 10.108.177.66/test-d7cad110-bb1d-4e79-8a0e-ebd44f6fe5d4/camel-k-kit-c8357r4k5tp6fn1idm60@sha256:d49716f0429ad8b23a1b8d20a357d64b1aa42a67c1a2a534ebd4c54cd598a18d
-			// we should be save just to check the substring is contained
+			// we should be saving just to check the substring is contained
 			g.Eventually(Kit(t, ns, integrationIncrementalKitName)().Status.BaseImage).Should(ContainSubstring(integrationKitName))
 			g.Eventually(Kit(t, ns, integrationIncrementalKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 			g.Eventually(BuilderPodsCount(t, ns)).Should(Equal(2))
@@ -158,6 +159,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		operatorID := "camel-k-standard-build"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
@@ -209,6 +211,7 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 		operatorID := "camel-k-incremental-different-base"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",

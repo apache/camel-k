@@ -44,7 +44,7 @@ func TestKameletChange(t *testing.T) {
 	knChannel := "test-kamelet-messages"
 	knChannelConf := fmt.Sprintf("%s:InMemoryChannel:%s", messaging.SchemeGroupVersion.String(), knChannel)
 	timerSource := "my-timer-source"
-	g.Expect(CreateTimerKamelet(t, ns, timerSource)()).To(Succeed())
+	g.Expect(CreateTimerKamelet(t, operatorID, ns, timerSource)()).To(Succeed())
 	g.Expect(CreateKnativeChannel(t, ns, knChannel)()).To(Succeed())
 	// Consumer route that will read from the KNative channel
 	g.Expect(KamelRunWithID(t, operatorID, ns, "files/test-kamelet-display.groovy", "-w").Execute()).To(Succeed())

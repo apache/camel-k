@@ -80,6 +80,8 @@ func TestRecreateDeploymentStrategyTrait(t *testing.T) {
 }
 
 func TestRollingUpdateDeploymentStrategyTrait(t *testing.T) {
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 
 		t.Run("Run with RollingUpdate Deployment Strategy", func(t *testing.T) {

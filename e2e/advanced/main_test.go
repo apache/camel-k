@@ -37,6 +37,11 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", "false")
+	if justCompile == "true" {
+		os.Exit(m.Run())
+	}
+
 	fastSetup := GetEnvOrDefault("CAMEL_K_E2E_FAST_SETUP", "false")
 	if fastSetup != "true" {
 		os.Exit(m.Run())

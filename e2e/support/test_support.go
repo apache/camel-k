@@ -2668,7 +2668,7 @@ func CreateKnativeBroker(t *testing.T, ns string, name string) func() error {
 	Kamelets
 */
 
-func CreateKamelet(t *testing.T, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(t *testing.T, operatorID string, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
 		kamelet := v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -2683,11 +2683,13 @@ func CreateKamelet(t *testing.T, ns string, name string, template map[string]int
 				Template: asTemplate(t, template),
 			},
 		}
+
+		kamelet.SetOperatorID(operatorID)
 		return TestClient(t).Create(TestContext, &kamelet)
 	}
 }
 
-func CreateTimerKamelet(t *testing.T, ns string, name string) func() error {
+func CreateTimerKamelet(t *testing.T, operatorID string, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -2710,7 +2712,7 @@ func CreateTimerKamelet(t *testing.T, ns string, name string) func() error {
 		},
 	}
 
-	return CreateKamelet(t, ns, name, flow, props, nil)
+	return CreateKamelet(t, operatorID, ns, name, flow, props, nil)
 }
 
 func DeleteKamelet(t *testing.T, ns string, name string) error {
@@ -2869,7 +2871,7 @@ func deleteKnativeBroker(t *testing.T, ns metav1.Object) {
 
 func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 	value, saveNS := os.LookupEnv("CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE")
-	if t.Failed() && saveNS && value == "true" {
+	if t != nil && t.Failed() && saveNS && value == "true" {
 		t.Logf("Warning: retaining failed test project %q", ns.GetName())
 		return
 	}
@@ -2946,12 +2948,10 @@ func DeleteNamespace(t *testing.T, ns string) error {
 }
 
 func NewTestNamespace(t *testing.T, injectKnativeBroker bool) ctrl.Object {
-	brokerLabel := "eventing.knative.dev/injection"
 	name := os.Getenv("CAMEL_K_TEST_NS")
 	if name == "" {
 		name = "test-" + uuid.New().String()
 	}
-	c := TestClient(t)
 
 	if exists, err := testNamespaceExists(t, name); err != nil {
 		failTest(t, err)
@@ -2959,6 +2959,13 @@ func NewTestNamespace(t *testing.T, injectKnativeBroker bool) ctrl.Object {
 		fmt.Println("Warning: namespace ", name, " already exists so using different namespace name")
 		name = fmt.Sprintf("%s-%d", name, time.Now().Second())
 	}
+
+	return NewNamedTestNamespace(t, name, injectKnativeBroker)
+}
+
+func NewNamedTestNamespace(t *testing.T, name string, injectKnativeBroker bool) ctrl.Object {
+	brokerLabel := "eventing.knative.dev/injection"
+	c := TestClient(t)
 
 	if oc, err := openshift.IsOpenShift(TestClient(t)); err != nil {
 		failTest(t, err)
@@ -3058,7 +3065,7 @@ func GetOutputStringAsync(cmd *cobra.Command) func() string {
 	}
 }
 
-func CreateLogKamelet(t *testing.T, ns string, name string) func() error {
+func CreateLogKamelet(t *testing.T, operatorID string, ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -3076,7 +3083,7 @@ func CreateLogKamelet(t *testing.T, ns string, name string) func() error {
 		},
 	}
 
-	return CreateKamelet(t, ns, name, flow, props, nil)
+	return CreateKamelet(t, operatorID, ns, name, flow, props, nil)
 }
 
 func GetCIProcessID() string {

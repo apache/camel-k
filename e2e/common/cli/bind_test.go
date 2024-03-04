@@ -35,7 +35,7 @@ import (
 func TestKamelCLIBind(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		kameletName := "test-timer-source"
-		g.Expect(CreateTimerKamelet(t, ns, kameletName)()).To(Succeed())
+		g.Expect(CreateTimerKamelet(t, operatorID, ns, kameletName)()).To(Succeed())
 
 		t.Run("bind timer to log", func(t *testing.T) {
 			g.Expect(KamelBindWithID(t, operatorID, ns, kameletName, "log:info", "-p", "source.message=helloTest").Execute()).To(Succeed())

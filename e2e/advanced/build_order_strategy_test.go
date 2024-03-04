@@ -46,7 +46,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 			"--build-order-strategy", string(v1.BuildOrderStrategyDependencies)).Execute()).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		g.Expect(CreateTimerKamelet(t, ns, "timer-source")()).To(Succeed())
+		g.Expect(CreateTimerKamelet(t, operatorID, ns, "timer-source")()).To(Succeed())
 
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",

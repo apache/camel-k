@@ -252,8 +252,8 @@ func TestHealthTrait(t *testing.T) {
 			source := RandomizedSuffixName("my-health-timer-source")
 			sink := RandomizedSuffixName("my-health-log-sink")
 
-			g.Expect(CreateTimerKamelet(t, ns, source)()).To(Succeed())
-			g.Expect(CreateLogKamelet(t, ns, sink)()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, operatorID, ns, source)()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, operatorID, ns, sink)()).To(Succeed())
 
 			g.Expect(KamelBindWithID(t, operatorID, ns,
 				source,

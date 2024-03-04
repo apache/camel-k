@@ -117,3 +117,8 @@ func Cleanup(t *testing.T) {
 func UninstallAll(t *testing.T) error {
 	return Kamel(t, "uninstall", "--olm=false", "--all").Execute()
 }
+
+// UninstallFromNamespace Removes operator from given namespace
+func UninstallFromNamespace(t *testing.T, ns string) error {
+	return Kamel(t, "uninstall", "--olm=false", "-n", ns).Execute()
+}

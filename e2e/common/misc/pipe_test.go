@@ -41,8 +41,8 @@ func TestPipe(t *testing.T) {
 
 		// Error Handler testing
 		t.Run("test error handler", func(t *testing.T) {
-			g.Expect(createErrorProducerKamelet(t, ns, "my-own-error-producer-source")()).To(Succeed())
-			g.Expect(CreateLogKamelet(t, ns, "my-own-log-sink")()).To(Succeed())
+			g.Expect(createErrorProducerKamelet(t, operatorID, ns, "my-own-error-producer-source")()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, operatorID, ns, "my-own-log-sink")()).To(Succeed())
 
 			t.Run("throw error test", func(t *testing.T) {
 				g.Expect(KamelBindWithID(t, operatorID, ns,
@@ -85,7 +85,7 @@ func TestPipe(t *testing.T) {
 
 		//Pipe with traits testing
 		t.Run("test Pipe with trait", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, ns, "my-own-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, operatorID, ns, "my-own-timer-source")()).To(Succeed())
 			// Log sink kamelet exists from previous test
 
 			g.Expect(KamelBindWithID(t, operatorID, ns,
@@ -122,7 +122,7 @@ func TestPipe(t *testing.T) {
 	})
 }
 
-func createErrorProducerKamelet(t *testing.T, ns string, name string) func() error {
+func createErrorProducerKamelet(t *testing.T, operatorID string, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -150,5 +150,5 @@ func createErrorProducerKamelet(t *testing.T, ns string, name string) func() err
 		},
 	}
 
-	return CreateKamelet(t, ns, name, flow, props, nil)
+	return CreateKamelet(t, operatorID, ns, name, flow, props, nil)
 }

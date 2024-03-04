@@ -250,13 +250,7 @@ test: do-build
 #
 test-common: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 10m -v ./e2e/common/setup -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/languages -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/cli -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/config -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/misc -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 60m -v ./e2e/common/traits -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 20m -v ./e2e/common/runtimes -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 90m -v ./e2e/common/... -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
@@ -264,7 +258,6 @@ test-common: do-build
 #
 test-smoke: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 10m -v ./e2e/common/setup -tags=integration $(TEST_COMMON_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/languages -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v \
 		./e2e/common/misc/default.go \
@@ -370,6 +363,7 @@ endif
 
 build-compile-integration-tests:
 	@echo "####### Compiling integration tests..."
+	export CAMEL_K_E2E_JUST_COMPILE="true" ;\
 	go test -run nope -tags="integration" ./e2e/...
 
 clean:

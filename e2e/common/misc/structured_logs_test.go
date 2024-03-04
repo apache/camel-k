@@ -46,8 +46,7 @@ func TestStructuredLogs(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-		opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
-		pod := OperatorPod(t, opns)()
+		pod := OperatorPod(t, operatorNS)()
 		g.Expect(pod).NotTo(BeNil())
 
 		// pod.Namespace could be different from ns if using global operator
