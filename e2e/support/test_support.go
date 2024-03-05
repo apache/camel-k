@@ -277,10 +277,10 @@ func KamelInstallWithIDAndKameletCatalog(t *testing.T, operatorID string, namesp
 func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) *cobra.Command {
 	var installArgs []string
 
-	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
+	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID, "--skip-cluster-setup"}
 
 	if skipKameletCatalog {
-		installArgs = append(installArgs, "--operator-env-vars", "KAMEL_INSTALL_DEFAULT_KAMELETS=false")
+		installArgs = append(installArgs, "--skip-default-kamelets-setup")
 	}
 
 	logLevel := os.Getenv("CAMEL_K_TEST_LOG_LEVEL")
