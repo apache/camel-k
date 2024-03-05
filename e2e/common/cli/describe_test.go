@@ -71,11 +71,10 @@ func TestKamelCliDescribe(t *testing.T) {
 		})
 
 		t.Run("Test kamel describe integration platform", func(t *testing.T) {
-			opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
-			platform := GetOutputString(Kamel(t, "describe", "platform", operatorID, "-n", opns))
+			platform := GetOutputString(Kamel(t, "describe", "platform", operatorID, "-n", ns))
 			g.Expect(platform).To(ContainSubstring(fmt.Sprintf("Name:	%s", operatorID)))
 
-			r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + opns + ".*")
+			r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + ns + ".*")
 			g.Expect(platform).To(MatchRegexp(r.String()))
 
 			r, _ = regexp.Compile("(?sm).*Runtime Version:\\s+" + defaults.DefaultRuntimeVersion + ".*")

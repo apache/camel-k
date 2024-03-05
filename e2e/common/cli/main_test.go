@@ -20,17 +20,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package languages
+package cli
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestMain(m *testing.M) {
@@ -47,10 +47,10 @@ func TestMain(m *testing.M) {
 
 	g.Expect(TestClient(t)).ShouldNot(BeNil())
 
-	// Install global operator for tests in this package, all tests must use this operatorID so tests can run in parallel and gain execution speed
+	// Install global operator for tests in this package, all tests must use this operatorID
 	g.Expect(NewNamedTestNamespace(t, operatorNS, false)).ShouldNot(BeNil())
 	g.Expect(CopyCamelCatalog(t, operatorNS, operatorID)).To(Succeed())
-	g.Expect(KamelInstallWithID(t, operatorID, operatorNS, "--global", "--force").Execute()).To(Succeed())
+	g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, operatorNS, "--global", "--force").Execute()).To(Succeed())
 	g.Eventually(SelectedPlatformPhase(t, operatorNS, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 	exitCode := m.Run()

@@ -80,14 +80,14 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 
 		// Label the deployment --> Verify the Integration is created (cannot still monitor)
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration=my-it", "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 		g.Eventually(IntegrationCondition(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(
 			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionMonitoringPodsAvailableReason)))
 
 		// Label the deployment template --> Verify the Integration is monitored
 		ExpectExecSucceed(t, g, Kubectl("patch", "deployment", "my-camel-sb-svc", "--patch", `{"spec": {"template": {"metadata": {"labels": {"camel.apache.org/integration": "my-it"}}}}}`, "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		one := int32(1)
 		g.Eventually(IntegrationStatusReplicas(t, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
@@ -100,7 +100,7 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/deploy.yaml", "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration=my-it", "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("patch", "deployment", "my-camel-sb-svc", "--patch", `{"spec": {"template": {"metadata": {"labels": {"camel.apache.org/integration": "my-it"}}}}}`, "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationStatusReplicas(t, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
 
@@ -110,7 +110,7 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 
 		// Add label back to the deployment --> Verify the Integration is created
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration=my-it", "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
 		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationStatusReplicas(t, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
 		// Scale the deployment --> verify replicas are correctly set

@@ -41,6 +41,12 @@ func TestRecreateDeploymentStrategyTrait(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-traits-deployment"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("Run with Recreate Deployment Strategy", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
@@ -72,7 +78,6 @@ func TestRecreateDeploymentStrategyTrait(t *testing.T) {
 			g.Expect(deploymentTrait).ToNot(BeNil())
 			g.Expect(len(deploymentTrait)).To(Equal(1))
 			g.Expect(deploymentTrait["strategy"]).To(Equal(string(appsv1.RecreateDeploymentStrategyType)))
-
 		})
 
 		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -83,6 +88,12 @@ func TestRollingUpdateDeploymentStrategyTrait(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-traits-deployment-rolling"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("Run with RollingUpdate Deployment Strategy", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",

@@ -20,17 +20,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package common
 
 import (
 	"fmt"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
 func TestMain(m *testing.M) {
@@ -39,6 +41,9 @@ func TestMain(m *testing.M) {
 		os.Exit(m.Run())
 	}
 
+	operatorID := platform.DefaultPlatformName
+	ns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
+
 	g := NewGomega(func(message string, callerSkip ...int) {
 		fmt.Printf("Test setup failed! - %s\n", message)
 	})
@@ -46,17 +51,15 @@ func TestMain(m *testing.M) {
 	var t *testing.T
 
 	g.Expect(TestClient(t)).ShouldNot(BeNil())
+	g.Expect(KamelRunWithID(t, operatorID, ns, "languages/files/Java.java").Execute()).To(Succeed())
+	g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	g.Eventually(IntegrationConditionStatus(t, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	g.Eventually(IntegrationLogs(t, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-	// Install global operator for tests in this package, all tests must use this operatorID so tests can run in parallel and gain execution speed
-	g.Expect(NewNamedTestNamespace(t, operatorNS, false)).ShouldNot(BeNil())
-	g.Expect(CopyCamelCatalog(t, operatorNS, operatorID)).To(Succeed())
-	g.Expect(KamelInstallWithID(t, operatorID, operatorNS, "--global", "--force").Execute()).To(Succeed())
-	g.Eventually(SelectedPlatformPhase(t, operatorNS, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+	g.Expect(KamelRunWithID(t, operatorID, ns, "languages/files/yaml.yaml").Execute()).To(Succeed())
+	g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	g.Eventually(IntegrationConditionStatus(t, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+	g.Eventually(IntegrationLogs(t, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-	exitCode := m.Run()
-
-	g.Expect(UninstallFromNamespace(t, operatorNS))
-	g.Expect(DeleteNamespace(t, operatorNS)).To(Succeed())
-
-	os.Exit(exitCode)
+	os.Exit(m.Run())
 }
