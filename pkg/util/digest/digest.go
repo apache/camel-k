@@ -35,7 +35,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
-	corev1 "k8s.io/api/core/v1"
 
 	"fmt"
 )
@@ -47,7 +46,7 @@ const (
 
 // ComputeForIntegration a digest of the fields that are relevant for the deployment
 // Produces a digest that can be used as docker image tag.
-func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.ConfigMap, secrets []*corev1.Secret) (string, error) {
+func ComputeForIntegration(integration *v1.Integration, configmapVersions []string, secretVersions []string) (string, error) {
 	hash := sha256.New()
 	// Integration version is relevant
 	if _, err := hash.Write([]byte(integration.Status.Version)); err != nil {
@@ -131,63 +130,19 @@ func ComputeForIntegration(integration *v1.Integration, configmaps []*corev1.Con
 		}
 	}
 
-	// Configmap content
-	for _, cm := range configmaps {
-		if cm != nil {
-			// prepare string from cm
-			var cmToString strings.Builder
-			// name, ns
-			cmToString.WriteString(fmt.Sprintf("%s/%s", cm.Name, cm.Namespace))
-			// Data with sorted keys
-			if cm.Data != nil {
-				// sort keys
-				keys := make([]string, 0, len(cm.Data))
-				for k := range cm.Data {
-					keys = append(keys, k)
-				}
-				sort.Strings(keys)
-				for _, k := range keys {
-					cmToString.WriteString(fmt.Sprintf("%s=%v,", k, cm.Data[k]))
-				}
-			}
-			// BinaryData with sorted keys
-			if cm.BinaryData != nil {
-				keys := make([]string, 0, len(cm.BinaryData))
-				for k := range cm.BinaryData {
-					keys = append(keys, k)
-				}
-				sort.Strings(keys)
-				for _, k := range keys {
-					cmToString.WriteString(fmt.Sprintf("%s=%v,", k, cm.BinaryData[k]))
-				}
-			}
-			// write prepared string to hash
-			if _, err := hash.Write([]byte(cmToString.String())); err != nil {
+	// Configmap versions
+	for _, cm := range configmapVersions {
+		if cm != "" {
+			if _, err := hash.Write([]byte(cm)); err != nil {
 				return "", err
 			}
 		}
 	}
 
-	// Secret content
-	for _, s := range secrets {
-		if s != nil {
-			// prepare string from secret
-			var secretToString strings.Builder
-			// name, ns
-			secretToString.WriteString(fmt.Sprintf("%s/%s", s.Name, s.Namespace))
-			// Data with sorted keys
-			if s.Data != nil {
-				keys := make([]string, 0, len(s.Data))
-				for k := range s.Data {
-					keys = append(keys, k)
-				}
-				sort.Strings(keys)
-				for _, k := range keys {
-					secretToString.WriteString(fmt.Sprintf("%s=%v,", k, s.Data[k]))
-				}
-			}
-			// write prepared secret to hash
-			if _, err := hash.Write([]byte(secretToString.String())); err != nil {
+	// Secret versions
+	for _, s := range secretVersions {
+		if s != "" {
+			if _, err := hash.Write([]byte(s)); err != nil {
 				return "", err
 			}
 		}

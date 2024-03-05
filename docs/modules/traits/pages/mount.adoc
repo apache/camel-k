@@ -48,7 +48,8 @@ Syntax: [configmap\|secret]:name[/key][@path], where name represents the resourc
 | mount.hot-reload
 | bool
 | Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
-marked with `camel.apache.org/integration` label to be taken in account.
+marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
+changes in metadata.
 
 | mount.scan-kamelets-implicit-label-secrets
 | bool
