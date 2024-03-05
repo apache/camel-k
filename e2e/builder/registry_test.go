@@ -48,8 +48,7 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 			"--organization", user,
 			"--registry-auth-username", user,
 			"--registry-auth-password", pass,
-			"--cluster-type", "kubernetes").
-			Execute()).To(Succeed())
+			"--cluster-type", "kubernetes")).To(Succeed())
 
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
@@ -76,8 +75,7 @@ func TestRunWithGithubPackagesRegistry(t *testing.T) {
 			"--organization", repo,
 			"--registry-auth-username", user,
 			"--registry-auth-password", pass,
-			"--cluster-type", "kubernetes").
-			Execute()).To(Succeed())
+			"--cluster-type", "kubernetes")).To(Succeed())
 
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))

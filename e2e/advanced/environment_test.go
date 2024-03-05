@@ -72,7 +72,7 @@ func TestEnvironmentTrait(t *testing.T) {
 		g.Expect(KamelInstallWithID(t, operatorID, ns,
 			"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy),
 			"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
-		).Execute()).To(Succeed())
+		)).To(Succeed())
 
 		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 

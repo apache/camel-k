@@ -49,7 +49,7 @@ import (
 func TestBasicInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
 		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
 		g.Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
@@ -108,7 +108,7 @@ func TestBasicInstallation(t *testing.T) {
 func TestAlternativeImageInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--olm=false", "--operator-image", "x/y:latest").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--olm=false", "--operator-image", "x/y:latest")).To(Succeed())
 		g.Eventually(OperatorImage(t, ns)).Should(Equal("x/y:latest"))
 	})
 }
@@ -116,7 +116,7 @@ func TestAlternativeImageInstallation(t *testing.T) {
 func TestKitMainInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 		g.Expect(Kamel(t, "kit", "create", "timer", "-d", "camel:timer", "-x", operatorID, "-n", ns).Execute()).To(Succeed())
 		g.Eventually(Build(t, ns, "timer"), TestTimeoutMedium).ShouldNot(BeNil())
 	})
@@ -125,7 +125,7 @@ func TestKitMainInstallation(t *testing.T) {
 func TestMavenRepositoryInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--maven-repository", "https://my.repo.org/public/").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--maven-repository", "https://my.repo.org/public/")).To(Succeed())
 		configmapName := fmt.Sprintf("%s-maven-settings", operatorID)
 		g.Eventually(Configmap(t, ns, configmapName)).Should(Not(BeNil()))
 		g.Eventually(func() string {
@@ -141,7 +141,7 @@ func TestMavenRepositoryInstallation(t *testing.T) {
 func TestSkipRegistryInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--skip-registry-setup").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--skip-registry-setup")).To(Succeed())
 		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
 		g.Eventually(func() v1.RegistrySpec {
 			return Platform(t, ns)().Spec.Build.Registry
@@ -181,7 +181,7 @@ func TestConsoleCliDownload(t *testing.T) {
 		}
 
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 		g.Eventually(ConsoleCLIDownload(t, name), TestTimeoutMedium).Should(Not(BeNil()))
 
 		cliDownload = ConsoleCLIDownload(t, name)()
@@ -206,7 +206,7 @@ func TestConsoleCliDownload(t *testing.T) {
 func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, ns, "--skip-default-kamelets-setup").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, ns, "--skip-default-kamelets-setup")).To(Succeed())
 		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
 		g.Expect(KameletList(t, ns)()).Should(BeEmpty())
 	})
@@ -215,7 +215,7 @@ func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
 func TestInstallDebugLogging(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "-z", "debug").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "-z", "debug")).To(Succeed())
 
 		g.Eventually(OperatorEnvVarValue(t, ns, "LOG_LEVEL"), TestTimeoutLong).Should(Equal("debug"))
 	})

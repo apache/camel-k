@@ -36,7 +36,7 @@ func TestNativeBinding(t *testing.T) {
 		g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, ns,
 			"--build-timeout", "90m0s",
 			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g",
-		).Execute()).To(Succeed())
+		)).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		message := "Magicstring!"
 		t.Run("binding with native build", func(t *testing.T) {

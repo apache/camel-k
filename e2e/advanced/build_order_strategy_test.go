@@ -43,7 +43,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns,
 			"--max-running-pipelines", "4",
-			"--build-order-strategy", string(v1.BuildOrderStrategyDependencies)).Execute()).To(Succeed())
+			"--build-order-strategy", string(v1.BuildOrderStrategyDependencies))).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		g.Expect(CreateTimerKamelet(t, operatorID, ns, "timer-source")()).To(Succeed())

@@ -181,7 +181,7 @@ func TestMavenProxy(t *testing.T) {
 			}()
 
 			// ENV values should be injected by the OLM
-			g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+			g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 		} else {
 			g.Expect(KamelInstallWithID(t, operatorID, ns,
 				"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
@@ -189,7 +189,7 @@ func TestMavenProxy(t *testing.T) {
 				// "--operator-env-vars", fmt.Sprintf("HTTPS_PROXY=https://%s", hostname),
 				// "--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 				"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
-			).Execute()).To(Succeed())
+			)).To(Succeed())
 		}
 
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))

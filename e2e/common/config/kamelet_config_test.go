@@ -42,7 +42,7 @@ func TestKameletImplicitConfigDefaultUserProperty(t *testing.T) {
 		operatorID := "camel-k-config-kamelet-user-property"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 
 		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -60,22 +60,9 @@ func TestKameletImplicitConfigDefaultUserProperty(t *testing.T) {
 			g.Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
 			g.Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "iconfig01-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletImplicitConfigDefaultMountedSecret(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-secret-mount"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test default config using mounted secret", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "iconfig03-timer-source")()).To(Succeed())
@@ -99,22 +86,9 @@ func TestKameletImplicitConfigDefaultMountedSecret(t *testing.T) {
 			g.Expect(DeleteSecret(t, ns, secretName)).To(Succeed())
 			g.Eventually(SecretByName(t, ns, secretName), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "iconfig03-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletImplicitConfigDefaultMountedConfigmap(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-configmap-mount"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test default config using mounted configmap", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "iconfig04-timer-source")()).To(Succeed())
@@ -136,22 +110,9 @@ func TestKameletImplicitConfigDefaultMountedConfigmap(t *testing.T) {
 			g.Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteConfigmap(t, ns, cmName)).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "iconfig04-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletImplicitConfigNamedUserProperty(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-named-property"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test named config using properties", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "iconfig05-timer-source")()).To(Succeed())
@@ -167,22 +128,9 @@ func TestKameletImplicitConfigNamedUserProperty(t *testing.T) {
 			g.Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
 			g.Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "iconfig05-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletImplicitConfigNamedLabeledSecret(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-secret-labeled-named"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test named config using labeled secret", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "iconfig06-timer-source")()).To(Succeed())
@@ -209,22 +157,9 @@ func TestKameletImplicitConfigNamedLabeledSecret(t *testing.T) {
 			g.Expect(DeleteSecret(t, ns, secretName)).To(Succeed())
 			g.Eventually(SecretByName(t, ns, secretName), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "iconfig06-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletImplicitConfigNamedMountedSecret(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-secret-mount-named"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test named config using mounted secret", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "iconfig07-timer-source")()).To(Succeed())
@@ -249,22 +184,9 @@ func TestKameletImplicitConfigNamedMountedSecret(t *testing.T) {
 			g.Expect(DeleteSecret(t, ns, secretName)).To(Succeed())
 			g.Eventually(SecretByName(t, ns, secretName), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "iconfig07-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletImplicitConfigNamedMountedConfigmap(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-configmap-mount-named"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test named config using mounted configmap", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "iconfig08-timer-source")()).To(Succeed())
@@ -287,22 +209,9 @@ func TestKameletImplicitConfigNamedMountedConfigmap(t *testing.T) {
 			g.Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteConfigmap(t, ns, cmName)).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "iconfig08-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletImplicitConfigDefaultLabeledSecret(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-secret-labeled"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test default config using labeled secret", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "iconfig09-timer-source")()).To(Succeed())
@@ -327,24 +236,9 @@ func TestKameletImplicitConfigDefaultLabeledSecret(t *testing.T) {
 			g.Expect(DeleteSecret(t, ns, secretName)).To(Succeed())
 			g.Eventually(SecretByName(t, ns, secretName), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "iconfig09-timer-source")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-// Tests on integration with kamelets containing configuration from properties and secrets with parameters inside the integration.
-
-func TestKameletConfigInlinedUserProperty(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-user-property-inlined"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test default config inlined properties", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, operatorID, ns, "config01-timer-source")()).To(Succeed())
@@ -362,22 +256,9 @@ func TestKameletConfigInlinedUserProperty(t *testing.T) {
 			g.Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "config01-timer-source")).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "config01-log-sink")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletConfigDefaultParamUserProperty(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-user-property-param"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test default config parameters properties", func(t *testing.T) {
 
@@ -398,22 +279,9 @@ func TestKameletConfigDefaultParamUserProperty(t *testing.T) {
 			g.Eventually(Integration(t, ns, name), TestTimeoutLong).Should(BeNil())
 			g.Expect(DeleteKamelet(t, ns, "config02-timer-source")).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "config02-log-sink")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletConfigDefaultParamMountedSecret(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-secret-mount-param"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test default config secret properties", func(t *testing.T) {
 
@@ -440,22 +308,9 @@ func TestKameletConfigDefaultParamMountedSecret(t *testing.T) {
 			g.Expect(DeleteSecret(t, ns, secretName)).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "config03-timer-source")).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "config03-log-sink")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-}
-
-func TestKameletConfigDefaultParamMountedConfigmap(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config-kamelet-configmap-mount-param"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("run test default config configmap properties", func(t *testing.T) {
 
@@ -482,8 +337,9 @@ func TestKameletConfigDefaultParamMountedConfigmap(t *testing.T) {
 			g.Expect(DeleteConfigmap(t, ns, cmName)).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "config04-timer-source")).To(Succeed())
 			g.Expect(DeleteKamelet(t, ns, "config04-log-sink")).To(Succeed())
+
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

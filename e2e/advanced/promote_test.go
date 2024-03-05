@@ -43,7 +43,7 @@ func TestKamelCLIPromote(t *testing.T) {
 		operatorDevID := "camel-k-cli-promote-dev"
 		g.Expect(CopyCamelCatalog(t, nsDev, operatorDevID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, nsDev, operatorDevID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorDevID, nsDev).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorDevID, nsDev)).To(Succeed())
 		g.Eventually(SelectedPlatformPhase(t, nsDev, operatorDevID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Dev content configmap
@@ -86,7 +86,7 @@ func TestKamelCLIPromote(t *testing.T) {
 			operatorProdID := "camel-k-cli-promote-prod"
 			g.Expect(CopyCamelCatalog(t, nsProd, operatorProdID)).To(Succeed())
 			g.Expect(CopyIntegrationKits(t, nsProd, operatorProdID)).To(Succeed())
-			g.Expect(KamelInstallWithID(t, operatorProdID, nsProd).Execute()).To(Succeed())
+			g.Expect(KamelInstallWithID(t, operatorProdID, nsProd)).To(Succeed())
 			g.Eventually(PlatformPhase(t, nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			t.Run("no configmap in destination", func(t *testing.T) {

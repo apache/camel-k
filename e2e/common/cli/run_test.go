@@ -192,7 +192,7 @@ func TestKamelCLIRun(t *testing.T) {
 			}
 			// Requires a local integration platform in order to resolve the insecure registry
 			// Install platform (use the installer to get staging if present)
-			g.Expect(KamelInstallWithID(t, operatorID, ns, "--skip-operator-setup").Execute()).To(Succeed())
+			g.Expect(KamelInstallWithID(t, operatorID, ns, "--skip-operator-setup")).To(Succeed())
 			g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			g.Expect(KamelRunWithID(t, operatorID, ns, "../traits/files/jvm/Classpath.java",
@@ -219,7 +219,7 @@ func TestKamelCLIRun(t *testing.T) {
 			}
 			// Requires a local integration platform in order to resolve the insecure registry
 			// Install platform (use the installer to get staging if present)
-			g.Expect(KamelInstallWithID(t, operatorID, ns, "--skip-operator-setup").Execute()).To(Succeed())
+			g.Expect(KamelInstallWithID(t, operatorID, ns, "--skip-operator-setup")).To(Succeed())
 			g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			g.Expect(KamelRunWithID(t, operatorID, ns, "../traits/files/jvm/Classpath.java",
