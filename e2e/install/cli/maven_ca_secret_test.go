@@ -427,7 +427,7 @@ ProxyPreserveHost On
 			"--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
 			// Active batch mode to assert dependencies download
 			"--maven-cli-option", "--batch-mode",
-		).Execute()).To(Succeed())
+		)).To(Succeed())
 
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 

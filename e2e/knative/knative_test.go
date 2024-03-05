@@ -139,7 +139,7 @@ func TestKnative(t *testing.T) {
 func TestRunBroker(t *testing.T) {
 	WithNewTestNamespaceWithKnativeBroker(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--trait-profile", "knative").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--trait-profile", "knative")).To(Succeed())
 
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/knativeevt1.groovy").Execute()).To(Succeed())
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/knativeevt2.groovy").Execute()).To(Succeed())

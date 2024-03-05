@@ -40,7 +40,7 @@ func TestLocalPlatform(t *testing.T) {
 		operatorID := "camel-k-platform-local"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		g.Expect(UpdatePlatform(t, ns, operatorID, func(pl *v1.IntegrationPlatform) {
@@ -56,7 +56,7 @@ func TestLocalPlatform(t *testing.T) {
 
 		WithNewTestNamespace(t, func(g *WithT, ns1 string) {
 			// Install platform (use the installer to get staging if present)
-			g.Expect(KamelInstallWithID(t, "local-platform", ns1, "--skip-operator-setup").Execute()).To(Succeed())
+			g.Expect(KamelInstallWithID(t, "local-platform", ns1, "--skip-operator-setup")).To(Succeed())
 
 			g.Expect(UpdatePlatform(t, ns1, "local-platform", func(pl *v1.IntegrationPlatform) {
 				pl.Spec.Build.Maven.Properties = make(map[string]string)

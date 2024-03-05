@@ -42,7 +42,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
 		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
 		g.Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).

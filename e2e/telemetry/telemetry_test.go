@@ -37,7 +37,7 @@ import (
 func TestTelemetryTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-trait-telemetry"
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 
 		// Check service is available
 		g.Eventually(ServicesByType(t, "otlp", corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())

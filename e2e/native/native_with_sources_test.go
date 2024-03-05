@@ -38,7 +38,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 		g.Expect(KamelInstallWithID(t, operatorID, ns,
 			"--build-timeout", "90m0s",
 			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=9g",
-		).Execute()).To(Succeed())
+		)).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		javaNativeName := RandomizedSuffixName("java-native")

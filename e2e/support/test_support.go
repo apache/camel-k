@@ -141,6 +141,7 @@ var testClient client.Client
 var clientMutex = sync.Mutex{}
 
 var kamelCLIMutex = sync.Mutex{}
+var kamelInstallMutex = sync.Mutex{}
 
 // Only panic the test if absolutely necessary and there is
 // no test locus. In most cases, the test should fail gracefully
@@ -262,19 +263,22 @@ func Kamel(t *testing.T, args ...string) *cobra.Command {
 	return KamelWithContext(t, TestContext, args...)
 }
 
-func KamelInstall(t *testing.T, namespace string, args ...string) *cobra.Command {
+func KamelInstall(t *testing.T, namespace string, args ...string) error {
 	return KamelInstallWithID(t, platform.DefaultPlatformName, namespace, args...)
 }
 
-func KamelInstallWithID(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
+func KamelInstallWithID(t *testing.T, operatorID string, namespace string, args ...string) error {
 	return kamelInstallWithContext(t, TestContext, operatorID, namespace, true, args...)
 }
 
-func KamelInstallWithIDAndKameletCatalog(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
+func KamelInstallWithIDAndKameletCatalog(t *testing.T, operatorID string, namespace string, args ...string) error {
 	return kamelInstallWithContext(t, TestContext, operatorID, namespace, false, args...)
 }
 
-func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) *cobra.Command {
+func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) error {
+	kamelInstallMutex.Lock()
+	defer kamelInstallMutex.Unlock()
+
 	var installArgs []string
 
 	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID, "--skip-cluster-setup"}
@@ -316,7 +320,8 @@ func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID strin
 	}
 
 	installArgs = append(installArgs, args...)
-	return KamelWithContext(t, ctx, installArgs...)
+	installCommand := KamelWithContext(t, ctx, installArgs...)
+	return installCommand.Execute()
 }
 
 func KamelRun(t *testing.T, namespace string, args ...string) *cobra.Command {

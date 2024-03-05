@@ -42,7 +42,7 @@ func TestSyntheticIntegrationOff(t *testing.T) {
 		operatorID := "camel-k-synthetic-env-off"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Run the external deployment
@@ -68,7 +68,7 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns,
 			"--operator-env-vars", "CAMEL_K_SYNTHETIC_INTEGRATIONS=true",
-		).Execute()).To(Succeed())
+		)).To(Succeed())
 
 		// Run the external deployment
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/deploy.yaml", "-n", ns))

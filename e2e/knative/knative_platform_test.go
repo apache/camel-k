@@ -50,7 +50,7 @@ func TestKnativePlatformDetection(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-knative"
 		// Install without profile (should automatically detect the presence of Knative)
-		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		g.Eventually(PlatformProfile(t, ns), TestTimeoutShort).Should(Equal(v1.TraitProfile("")))
 		cluster := Platform(t, ns)().Status.Cluster

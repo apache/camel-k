@@ -41,7 +41,7 @@ import (
 
 func TestRunGlobalInstall(t *testing.T) {
 	WithGlobalOperatorNamespace(t, func(g *WithT, operatorNamespace string) {
-		g.Expect(KamelInstall(t, operatorNamespace, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(KamelInstall(t, operatorNamespace, "--global", "--force")).To(Succeed())
 		g.Eventually(OperatorPodPhase(t, operatorNamespace), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		t.Run("Global CamelCatalog reconciliation", func(t *testing.T) {
@@ -56,7 +56,7 @@ func TestRunGlobalInstall(t *testing.T) {
 		t.Run("Global test on namespace with platform", func(t *testing.T) {
 			WithNewTestNamespace(t, func(g *WithT, ns2 string) {
 				// Creating namespace local platform
-				g.Expect(KamelInstall(t, ns2, "--skip-operator-setup", "--olm=false").Execute()).To(Succeed())
+				g.Expect(KamelInstall(t, ns2, "--skip-operator-setup", "--olm=false")).To(Succeed())
 				g.Eventually(Platform(t, ns2)).ShouldNot(BeNil())
 
 				// Run with global operator id
@@ -77,9 +77,9 @@ func TestRunGlobalInstall(t *testing.T) {
 			WithNewTestNamespace(t, func(g *WithT, ns3 string) {
 				operatorID := "camel-k-local-ns3"
 				if NoOlmOperatorImage != "" {
-					g.Expect(KamelInstallWithID(t, operatorID, ns3, "--olm=false", "--operator-image", NoOlmOperatorImage).Execute()).To(Succeed())
+					g.Expect(KamelInstallWithID(t, operatorID, ns3, "--olm=false", "--operator-image", NoOlmOperatorImage)).To(Succeed())
 				} else {
-					g.Expect(KamelInstallWithID(t, operatorID, ns3, "--olm=false").Execute()).To(Succeed())
+					g.Expect(KamelInstallWithID(t, operatorID, ns3, "--olm=false")).To(Succeed())
 				}
 				g.Eventually(OperatorPodPhase(t, ns3), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				g.Expect(KamelRunWithID(t, operatorID, ns3, "files/Java.java").Execute()).To(Succeed())

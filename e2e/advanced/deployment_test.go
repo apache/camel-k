@@ -41,7 +41,7 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 		nsRestr := "restr"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
 		// Create restricted namespace
 		ExpectExecSucceed(t, g,
 			exec.Command(

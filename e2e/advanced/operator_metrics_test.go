@@ -62,7 +62,7 @@ func TestMetrics(t *testing.T) {
 		name := RandomizedSuffixName("java")
 		operatorID := "camel-k-metrics"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--log-level", "debug").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--log-level", "debug")).To(Succeed())
 		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",

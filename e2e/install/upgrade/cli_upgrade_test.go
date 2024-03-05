@@ -95,7 +95,7 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		g.Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
 
 		// Upgrade the operator by installing the current version
-		g.Expect(KamelInstall(t, ns, "--olm=false", "--force", "--operator-image", image, "--base-image", defaults.BaseImage()).Execute()).To(Succeed())
+		g.Expect(KamelInstall(t, ns, "--olm=false", "--force", "--operator-image", image, "--base-image", defaults.BaseImage())).To(Succeed())
 
 		// Check the operator image is the current built one
 		g.Eventually(OperatorImage(t, ns)).Should(Equal(image))

@@ -40,7 +40,7 @@ func TestIntegrationProfile(t *testing.T) {
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-integration-profile"
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
@@ -128,7 +128,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-ipr-kit"
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
@@ -173,7 +173,7 @@ func TestPropagateIntegrationProfileChanges(t *testing.T) {
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-ipr-changes"
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
 		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "debug-profile")

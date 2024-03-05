@@ -403,7 +403,7 @@ func createOperator(t *testing.T, g *WithT, ns string, buildTimeout string, inst
 	args = append(args, installArgs...)
 
 	operatorID := fmt.Sprintf("camel-k-%s", ns)
-	g.Expect(KamelInstallWithID(t, operatorID, ns, args...).Execute()).To(Succeed())
+	g.Expect(KamelInstallWithID(t, operatorID, ns, args...)).To(Succeed())
 	g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 }
 

@@ -50,7 +50,7 @@ func TestMain(m *testing.M) {
 	// Install global operator for tests in this package, all tests must use this operatorID
 	g.Expect(NewNamedTestNamespace(t, operatorNS, false)).ShouldNot(BeNil())
 	g.Expect(CopyCamelCatalog(t, operatorNS, operatorID)).To(Succeed())
-	g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, operatorNS, "--global", "--force").Execute()).To(Succeed())
+	g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, operatorNS, "--global", "--force")).To(Succeed())
 	g.Eventually(SelectedPlatformPhase(t, operatorNS, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 	exitCode := m.Run()
