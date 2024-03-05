@@ -49,6 +49,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/oauth2 from 0.17.0 to 0.18.0 [\#5214](https://github.com/apache/camel-k/pull/5214) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(ci\): add snapshot repo [\#5209](https://github.com/apache/camel-k/pull/5209) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/stretchr/testify from 1.8.4 to 1.9.0 [\#5208](https://github.com/apache/camel-k/pull/5208) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): stricter pipe test check [\#5202](https://github.com/apache/camel-k/pull/5202) ([squakez](https://github.com/squakez))
 - fix\(trait\): deprecate operator inspecting secrets [\#5201](https://github.com/apache/camel-k/pull/5201) ([squakez](https://github.com/squakez))
