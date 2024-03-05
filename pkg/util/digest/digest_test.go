@@ -24,7 +24,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -81,19 +80,13 @@ func TestDigestUsesConfigmap(t *testing.T) {
 
 	digest1, err := ComputeForIntegration(&it, nil, nil)
 	require.NoError(t, err)
-
-	cm := corev1.ConfigMap{
-		Data: map[string]string{
-			"foo": "bar",
-		},
-	}
-	cms := []*corev1.ConfigMap{&cm}
+	cms := []string{"123456"}
 
 	digest2, err := ComputeForIntegration(&it, cms, nil)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest2)
 
-	cm.Data["foo"] = "bar updated"
+	cms = []string{"1234567"}
 	digest3, err := ComputeForIntegration(&it, cms, nil)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest2, digest3)
@@ -117,23 +110,12 @@ func TestDigestUsesSecret(t *testing.T) {
 
 	digest1, err := ComputeForIntegration(&it, nil, nil)
 	require.NoError(t, err)
-
-	sec := corev1.Secret{
-		Data: map[string][]byte{
-			"foo": []byte("bar"),
-		},
-		StringData: map[string]string{
-			"foo2": "bar2",
-		},
-	}
-
-	secrets := []*corev1.Secret{&sec}
-
+	secrets := []string{"123456"}
 	digest2, err := ComputeForIntegration(&it, nil, secrets)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest2)
 
-	sec.Data["foo"] = []byte("bar updated")
+	secrets = []string{"1234567"}
 	digest3, err := ComputeForIntegration(&it, nil, secrets)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest2, digest3)
