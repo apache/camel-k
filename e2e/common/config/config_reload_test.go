@@ -23,6 +23,7 @@ limitations under the License.
 package config
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -38,6 +39,12 @@ func TestConfigmapHotReload(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-config-hot-reload"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("config-configmap-route")
 
@@ -68,6 +75,12 @@ func TestConfigmapHotReload(t *testing.T) {
 
 func TestConfigmapHotReloadDefault(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-config-hot-reload-default"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("config-configmap-route")
 
@@ -95,6 +108,12 @@ func TestConfigmapHotReloadDefault(t *testing.T) {
 
 func TestSecretHotReload(t *testing.T) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-secret-hot-reload"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("config-secret-route")
 
@@ -132,6 +151,12 @@ func TestConfigmapWithOwnerRefHotReload(t *testing.T) {
 
 func CheckConfigmapWithOwnerRef(t *testing.T, hotreload bool) {
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := fmt.Sprintf("camel-k-config-owner-ref-%s", strconv.FormatBool(hotreload))
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("config-configmap-route")
 		cmName := RandomizedSuffixName("my-hot-cm-")

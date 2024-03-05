@@ -38,6 +38,12 @@ func TestStructuredLogs(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-structured-logs"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
@@ -46,7 +52,7 @@ func TestStructuredLogs(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-		pod := OperatorPod(t, operatorNS)()
+		pod := OperatorPod(t, ns)()
 		g.Expect(pod).NotTo(BeNil())
 
 		// pod.Namespace could be different from ns if using global operator

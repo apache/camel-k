@@ -23,7 +23,6 @@ limitations under the License.
 package traits
 
 import (
-	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -39,7 +38,7 @@ func TestIstioTrait(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		operatorID := "camel-k-traits-istio"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())

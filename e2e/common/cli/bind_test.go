@@ -46,8 +46,7 @@ func TestKamelCLIBind(t *testing.T) {
 		})
 
 		t.Run("unsuccessful binding, no property", func(t *testing.T) {
-			opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
-			g.Expect(KamelBindWithID(t, operatorID, ns, opns+"/timer-source", "log:info").Execute()).NotTo(Succeed())
+			g.Expect(KamelBindWithID(t, operatorID, ns, "timer-source", "log:info").Execute()).NotTo(Succeed())
 		})
 
 		t.Run("bind uris", func(t *testing.T) {

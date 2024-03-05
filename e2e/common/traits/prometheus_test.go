@@ -44,8 +44,15 @@ import (
 )
 
 func TestPrometheusTrait(t *testing.T) {
-	// test not able to run in parallel
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-traits-prometheus"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns).Execute()).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		ocp, err := openshift.IsOpenShift(TestClient(t))
 		require.NoError(t, err)
