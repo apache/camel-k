@@ -503,3 +503,37 @@ func integrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) 
 
 	return trait.Equals(ikOpts, itOpts), nil
 }
+
+func TestHasMathchingTraitsEmpty(t *testing.T) {
+	opt1 := trait.Options{
+		"builder": {},
+		"camel": {
+			"runtimeVersion": "1.2.3",
+		},
+		"quarkus": {},
+	}
+	opt2 := trait.Options{
+		"camel": {
+			"runtimeVersion": "1.2.3",
+		},
+	}
+	opt3 := trait.Options{
+		"camel": {
+			"runtimeVersion": "1.2.3",
+		},
+	}
+	opt4 := trait.Options{
+		"camel": {
+			"runtimeVersion": "3.2.1",
+		},
+	}
+	b1, err := hasMatchingTraits(opt1, opt2)
+	assert.Nil(t, err)
+	assert.True(t, b1)
+	b2, err := hasMatchingTraits(opt1, opt4)
+	assert.Nil(t, err)
+	assert.False(t, b2)
+	b3, err := hasMatchingTraits(opt2, opt3)
+	assert.Nil(t, err)
+	assert.True(t, b3)
+}

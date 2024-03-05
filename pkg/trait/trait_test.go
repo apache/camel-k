@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
@@ -33,6 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
@@ -547,4 +549,122 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 
 func NewTraitTestCatalog() *Catalog {
 	return NewCatalog(nil)
+}
+
+func TestIntegrationStatusTraitApply(t *testing.T) {
+	platform := &v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				RuntimeVersion: defaults.DefaultRuntimeVersion,
+			},
+		},
+		Status: v1.IntegrationPlatformStatus{
+			Phase: v1.IntegrationPlatformPhaseReady,
+		},
+	}
+	catalog := &v1.CamelCatalog{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default",
+		},
+		Spec: v1.CamelCatalogSpec{
+			Runtime: v1.RuntimeSpec{
+				Version:  defaults.DefaultRuntimeVersion,
+				Provider: v1.RuntimeProviderQuarkus,
+			},
+		},
+	}
+	client, _ := test.NewFakeClient(platform, catalog)
+	ctx := context.TODO()
+	it := &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default",
+		},
+		Spec: v1.IntegrationSpec{
+			Profile: v1.TraitProfileKubernetes,
+			Traits: v1.Traits{
+				Camel: &traitv1.CamelTrait{
+					Properties: []string{"hello=world"},
+				},
+			},
+		},
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: defaults.DefaultRuntimeVersion,
+		},
+	}
+
+	// The camel trait uses to determine runtime version
+	// setting a parameter that we must expect in the status
+	expectedStatusTrait := &traitv1.CamelTrait{
+		RuntimeVersion: defaults.DefaultRuntimeVersion,
+		Properties:     []string{"hello=world"},
+	}
+
+	e, err := Apply(ctx, client, it, nil)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedStatusTrait, e.Integration.Status.Traits.Camel)
+}
+
+func TestIntegrationKitStatusTraitApply(t *testing.T) {
+	platform := &v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default",
+		},
+		Spec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				RuntimeVersion: defaults.DefaultRuntimeVersion,
+			},
+		},
+		Status: v1.IntegrationPlatformStatus{
+			Phase: v1.IntegrationPlatformPhaseReady,
+		},
+	}
+	catalog := &v1.CamelCatalog{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default",
+		},
+		Spec: v1.CamelCatalogSpec{
+			Runtime: v1.RuntimeSpec{
+				Version:  defaults.DefaultRuntimeVersion,
+				Provider: v1.RuntimeProviderQuarkus,
+			},
+		},
+	}
+	client, _ := test.NewFakeClient(platform, catalog)
+	ctx := context.TODO()
+	ik := &v1.IntegrationKit{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "default",
+		},
+		Spec: v1.IntegrationKitSpec{
+			Profile: v1.TraitProfileKubernetes,
+			Traits: v1.IntegrationKitTraits{
+				Camel: &traitv1.CamelTrait{
+					Properties: []string{"hello=world"},
+				},
+			},
+		},
+		Status: v1.IntegrationKitStatus{
+			RuntimeVersion: defaults.DefaultRuntimeVersion,
+		},
+	}
+
+	// The camel trait uses to determine runtime version
+	// setting a parameter that we must expect in the status
+	expectedStatusTrait := &traitv1.CamelTrait{
+		RuntimeVersion: defaults.DefaultRuntimeVersion,
+		Properties:     []string{"hello=world"},
+	}
+
+	e, err := Apply(ctx, client, nil, ik)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedStatusTrait, e.IntegrationKit.Status.Traits.Camel)
 }

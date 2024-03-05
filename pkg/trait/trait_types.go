@@ -19,6 +19,7 @@ package trait
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -252,6 +253,43 @@ func (e *Environment) GetTrait(id ID) Trait {
 	}
 
 	return nil
+}
+
+// executedIntegrationTraits returns the executed traits as v1.Traits struct (likely used by Integration).
+func (e *Environment) executedIntegrationTraits() (*v1.Traits, error) {
+	serialized, err := e.serializeExecutedTraits()
+	if err != nil {
+		return nil, err
+	}
+	var traits v1.Traits
+	if err = json.Unmarshal(serialized, &traits); err != nil {
+		return nil, err
+	}
+
+	return &traits, nil
+}
+
+// serializeExecutedTraits serializes in json the traits executed by the Environment.
+func (e *Environment) serializeExecutedTraits() ([]byte, error) {
+	mappedTraits := make(map[ID]interface{})
+	for _, t := range e.ExecutedTraits {
+		mappedTraits[t.ID()] = t
+	}
+	return json.Marshal(mappedTraits)
+}
+
+// executedIntegrationTraits returns the executed traits as v1.IntegrationKitTraits struct (likely used by IntegrationKit).
+func (e *Environment) executedIntegrationKitTraits() (*v1.IntegrationKitTraits, error) {
+	serialized, err := e.serializeExecutedTraits()
+	if err != nil {
+		return nil, err
+	}
+	var traits v1.IntegrationKitTraits
+	if err = json.Unmarshal(serialized, &traits); err != nil {
+		return nil, err
+	}
+
+	return &traits, nil
 }
 
 func (e *Environment) IntegrationInPhase(phases ...v1.IntegrationPhase) bool {

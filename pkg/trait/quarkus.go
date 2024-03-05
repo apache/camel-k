@@ -308,7 +308,7 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 		propagate(fmt.Sprintf("integration profile %q", e.IntegrationProfile.Name), e.IntegrationProfile.Status.Traits, &kitTraits, e)
 	}
 
-	propagate(fmt.Sprintf("integration %q", e.Integration.Name), e.Integration.Spec.Traits, &kitTraits, e)
+	propagate(fmt.Sprintf("integration %q", e.Integration.Name), e.Integration.Status.Traits, &kitTraits, e)
 
 	return kitTraits
 }

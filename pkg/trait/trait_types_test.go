@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 func TestMultilinePropertiesHandled(t *testing.T) {
@@ -152,4 +153,76 @@ func TestVolumeWithKeyOnly(t *testing.T) {
 	assert.Equal(t, 1, len(items))
 	assert.Equal(t, "SomeKey", items[0].Key)
 	assert.Equal(t, "SomeKey", items[0].Path)
+}
+
+func TestSerializeExecutedIntegrationTraits(t *testing.T) {
+	e := Environment{
+		ExecutedTraits: []Trait{
+			&camelTrait{
+				BasePlatformTrait: NewBasePlatformTrait("camel", 200),
+				CamelTrait: traitv1.CamelTrait{
+					RuntimeVersion: "1.2.3",
+				},
+			},
+			&quarkusTrait{
+				BasePlatformTrait: NewBasePlatformTrait("quarkus", 500),
+				QuarkusTrait: traitv1.QuarkusTrait{
+					Modes: []traitv1.QuarkusMode{
+						traitv1.JvmQuarkusMode,
+					},
+				},
+			},
+		},
+	}
+
+	expectedSerializedTraits := &v1.Traits{
+		Camel: &traitv1.CamelTrait{
+			RuntimeVersion: "1.2.3",
+		},
+		Quarkus: &traitv1.QuarkusTrait{
+			Modes: []traitv1.QuarkusMode{
+				traitv1.JvmQuarkusMode,
+			},
+		},
+	}
+
+	execTraits, err := e.executedIntegrationTraits()
+	assert.Nil(t, err)
+	assert.Equal(t, expectedSerializedTraits, execTraits)
+}
+
+func TestSerializeExecutedIntegrationKitTraits(t *testing.T) {
+	e := Environment{
+		ExecutedTraits: []Trait{
+			&camelTrait{
+				BasePlatformTrait: NewBasePlatformTrait("camel", 200),
+				CamelTrait: traitv1.CamelTrait{
+					RuntimeVersion: "1.2.3",
+				},
+			},
+			&quarkusTrait{
+				BasePlatformTrait: NewBasePlatformTrait("quarkus", 500),
+				QuarkusTrait: traitv1.QuarkusTrait{
+					Modes: []traitv1.QuarkusMode{
+						traitv1.JvmQuarkusMode,
+					},
+				},
+			},
+		},
+	}
+
+	expectedSerializedTraits := &v1.IntegrationKitTraits{
+		Camel: &traitv1.CamelTrait{
+			RuntimeVersion: "1.2.3",
+		},
+		Quarkus: &traitv1.QuarkusTrait{
+			Modes: []traitv1.QuarkusMode{
+				traitv1.JvmQuarkusMode,
+			},
+		},
+	}
+
+	execTraits, err := e.executedIntegrationKitTraits()
+	assert.Nil(t, err)
+	assert.Equal(t, expectedSerializedTraits, execTraits)
 }

@@ -450,7 +450,7 @@ func newTraitsOptions(opts Options, objectMeta *metav1.ObjectMeta) (Options, err
 	return opts, nil
 }
 
-func NewSpecTraitsOptionsForIntegrationAndPlatform(i *v1.Integration, pl *v1.IntegrationPlatform) (Options, error) {
+func NewStatusTraitsOptionsForIntegrationAndPlatform(i *v1.Integration, pl *v1.IntegrationPlatform) (Options, error) {
 	var options Options
 	var err error
 	if pl != nil {
@@ -462,7 +462,7 @@ func NewSpecTraitsOptionsForIntegrationAndPlatform(i *v1.Integration, pl *v1.Int
 		options = Options{}
 	}
 
-	m1, err := ToTraitMap(i.Spec.Traits)
+	m1, err := ToTraitMap(i.Status.Traits)
 	if err != nil {
 		return nil, err
 	}

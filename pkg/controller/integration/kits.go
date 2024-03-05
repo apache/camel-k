@@ -123,7 +123,7 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 		return false, err
 	}
 
-	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(integration, pl)
+	itc, err := trait.NewStatusTraitsOptionsForIntegrationAndPlatform(integration, pl)
 	if err != nil {
 		return false, err
 	}
@@ -217,7 +217,7 @@ func hasMatchingTraits(traitMap trait.Options, kitTraitMap trait.Options) (bool,
 		it, ok1 := traitMap.Get(id)
 		kt, ok2 := kitTraitMap.Get(id)
 
-		if !ok1 && !ok2 {
+		if (!ok1 || len(it) == 0) && (!ok2 || len(kt) == 0) {
 			continue
 		}
 

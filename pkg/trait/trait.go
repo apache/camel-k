@@ -87,12 +87,20 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 		ilog.Debug("Applied traits to Integration", "integration", integration.Name, "namespace", integration.Namespace)
 		// The spec.traits may have been altered by other traits execution. We can save here the status for future
 		// reference
-		integration.Status.Traits = integration.Spec.Traits
+		execItTraits, err := environment.executedIntegrationTraits()
+		if err != nil {
+			return environment, err
+		}
+		integration.Status.Traits = *execItTraits
 	case kit != nil:
 		ilog.Debug("Applied traits to Integration kit", "integration kit", kit.Name, "namespace", kit.Namespace)
 		// The spec.traits may have been altered by other traits execution We can save here the status for future
 		// reference
-		kit.Status.Traits = kit.Spec.Traits
+		execIkTraits, err := environment.executedIntegrationKitTraits()
+		if err != nil {
+			return environment, err
+		}
+		kit.Status.Traits = *execIkTraits
 	default:
 		ilog.Debug("Applied traits")
 	}

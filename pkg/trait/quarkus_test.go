@@ -224,3 +224,21 @@ func TestGetLanguageSettingsWithLoaders(t *testing.T) {
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageKotlin))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 }
+
+func TestPropagateStatusTraits(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.IntegrationKit = nil
+	environment.Integration = &v1.Integration{
+		Spec: v1.IntegrationSpec{},
+		Status: v1.IntegrationStatus{
+			Traits: v1.Traits{
+				Camel: &traitv1.CamelTrait{
+					RuntimeVersion: "1.2.3",
+				},
+			},
+		},
+	}
+
+	newKit := quarkusTrait.newIntegrationKit(environment, fastJarPackageType)
+	assert.Equal(t, "1.2.3", newKit.Spec.Traits.Camel.RuntimeVersion)
+}
