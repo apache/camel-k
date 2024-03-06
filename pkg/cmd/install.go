@@ -785,10 +785,6 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	return result
 }
 
-func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
-	return v1.DecodeValueSource(mavenSettings, "settings.xml", "illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
-}
-
 func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error) {
 	r := regexp.MustCompile(`^([a-zA-Z0-9-]*)/([a-zA-Z0-9].*)$`)
 
