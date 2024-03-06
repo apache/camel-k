@@ -7919,7 +7919,8 @@ spec:
                             type: array
                         type: object
                       registry:
-                        description: The configuration of Registry trait
+                        description: 'Deprecated: use jvm trait or read documentation.
+                          The configuration of Registry trait'
                         properties:
                           configuration:
                             description: 'Legacy trait configuration parameters. Deprecated:
