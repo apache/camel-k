@@ -64,7 +64,7 @@ func TestNewHealthCheck(t *testing.T) {
 		}
 	`)
 	health, err := NewHealthCheck(body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, camelv1.HealthCheckStatusDown, health.Status)
 	assert.Len(t, health.Checks, 3)
 	assert.Equal(t, "camel-routes", health.Checks[0].Name)

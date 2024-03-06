@@ -59,5 +59,5 @@ func TestCopyDir(t *testing.T) {
 	require.NoError(t, err)
 	fmt.Println(destDir)
 	err = CopyDir(srcDir, destDir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

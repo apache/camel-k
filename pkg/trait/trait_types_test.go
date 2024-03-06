@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
@@ -33,7 +34,7 @@ func TestMultilinePropertiesHandled(t *testing.T) {
 		Integration: &v1.Integration{},
 	}
 	cm, err := e.computeApplicationProperties()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cm)
 	assert.Equal(t, "prop = multi\\nline\n", cm.Data["application.properties"])
 }

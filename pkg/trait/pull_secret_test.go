@@ -86,7 +86,7 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	assert.True(t, *trait.ImagePullerDelegation)
 
 	err = trait.Apply(e)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var roleBinding rbacv1.RoleBinding
 	roleBindingKey := client.ObjectKey{
@@ -94,7 +94,7 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 		Name:      "camel-k-puller-test-default",
 	}
 	err = e.Client.Get(e.Ctx, roleBindingKey, &roleBinding)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, roleBinding.Subjects, 1)
 }
 
@@ -128,7 +128,7 @@ func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment
 	var err error
 	e.Ctx = context.TODO()
 	e.Client, err = test.NewFakeClient(e.Integration, &deployment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return e, &deployment
 }

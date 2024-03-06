@@ -33,6 +33,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -72,7 +73,7 @@ func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
 	Eventually(session).Should(gexec.Exit(0))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
@@ -93,7 +94,7 @@ func ExpectExecError(t *testing.T, command *exec.Cmd) {
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
 	Eventually(session).ShouldNot(gexec.Exit(0))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 

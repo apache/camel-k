@@ -31,7 +31,7 @@ import (
 
 func TestCreateIntegrationForPipe(t *testing.T) {
 	client, err := test.NewFakeClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe")
 	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
@@ -56,7 +56,7 @@ func TestCreateIntegrationForPipe(t *testing.T) {
 
 func TestCreateIntegrationForPipeDataType(t *testing.T) {
 	client, err := test.NewFakeClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe-data-type")
 	pipe.Spec.Sink.DataTypes = map[v1.TypeSlot]v1.DataTypeReference{
@@ -73,7 +73,7 @@ func TestCreateIntegrationForPipeDataType(t *testing.T) {
 
 func TestCreateIntegrationForPipeDataTypeOverridden(t *testing.T) {
 	client, err := test.NewFakeClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pipe := nominalPipe("my-pipe-data-type")
 	pipe.Spec.Sink.DataTypes = map[v1.TypeSlot]v1.DataTypeReference{

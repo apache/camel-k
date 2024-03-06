@@ -104,7 +104,7 @@ func TestURIParse(t *testing.T) {
 			if test.error {
 				assert.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				switch r := test.repository.(type) {
 				case *githubKameletRepository:
 					gc, ok := catalog.(*githubKameletRepository)

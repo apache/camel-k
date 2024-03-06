@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -36,10 +37,10 @@ func TestPlatformHttpCapabilities(t *testing.T) {
 	}
 
 	catalog, err := camel.DefaultCatalog()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	meta, err := Extract(catalog, code)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.ElementsMatch(
 		t,

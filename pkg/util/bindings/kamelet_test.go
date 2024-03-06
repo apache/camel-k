@@ -28,6 +28,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBindingConverter(t *testing.T) {
@@ -81,7 +82,7 @@ func TestBindingConverter(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			endpoint := v1.Endpoint{
 				Ref: &corev1.ObjectReference{
@@ -108,7 +109,7 @@ func TestBindingConverter(t *testing.T) {
 				},
 				endpoint)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.step, binding.Step)
 			assert.Equal(t, tc.uri, binding.URI)
@@ -243,7 +244,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			endpoint := v1.Endpoint{
 				Ref: &corev1.ObjectReference{
@@ -286,7 +287,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 				},
 				endpoint)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.step, binding.Step)
 			assert.Equal(t, tc.uri, binding.URI)
@@ -336,7 +337,7 @@ func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			endpoint := v1.Endpoint{
 				Ref: &corev1.ObjectReference{
@@ -382,7 +383,7 @@ func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
 				},
 				endpoint)
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.step, binding.Step)
 			assert.Equal(t, tc.uri, binding.URI)

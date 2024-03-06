@@ -22,15 +22,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEmptyRepository(t *testing.T) {
 	ctx := context.Background()
 	repo := newEmptyKameletRepository()
 	list, err := repo.List(ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, list, 0)
 	k, err := repo.Get(ctx, "non-existing")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, k)
 }

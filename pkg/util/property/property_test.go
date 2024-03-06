@@ -21,14 +21,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPropertyEncoding(t *testing.T) {
 	enc, err := EncodePropertyFileEntry("a", "b")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "a = b", enc)
 	enc, err = EncodePropertyFileEntry("c", "d\ne")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "c = d\\ne", enc)
 }
 
@@ -38,7 +39,7 @@ func TestPropertyFileEncoding(t *testing.T) {
 		"a": "b",
 	}
 	enc, err := EncodePropertyFile(props)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "a = b\nc = d\\ne\n", enc)
 }
 

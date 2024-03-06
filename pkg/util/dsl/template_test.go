@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTemplateReadWrite(t *testing.T) {
@@ -47,7 +48,7 @@ func TestTemplateReadWrite(t *testing.T) {
 	}
 
 	yamlBytes, err := TemplateToYamlDSL(templateJSON, "myid")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	yaml := string(yamlBytes)
 	expected := `- routeTemplate:
     beans:

@@ -32,13 +32,13 @@ import (
 func TestDigestUsesAnnotations(t *testing.T) {
 	it := v1.Integration{}
 	digest1, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	it.Annotations = map[string]string{
 		"another.annotation": "hello",
 	}
 	digest2, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, digest1, digest2)
 
 	it.Annotations = map[string]string{
@@ -46,7 +46,7 @@ func TestDigestUsesAnnotations(t *testing.T) {
 		"trait.camel.apache.org/cron.fallback": "true",
 	}
 	digest3, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest3)
 }
 
@@ -61,7 +61,7 @@ func TestDigestSHA1FromTempFile(t *testing.T) {
 	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
 
 	sha1, err := ComputeSHA1(tmpFile.Name())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "OXPdxTeLf5rqnsqvTi0CgmWoN/0=", sha1)
 }
 

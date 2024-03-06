@@ -49,7 +49,7 @@ func TestServiceWithDefaults(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -149,7 +149,7 @@ func TestService(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -335,7 +335,7 @@ func TestServiceWithNodePort(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	serviceType := traitv1.ServiceTypeNodePort
 	environment := Environment{
@@ -432,7 +432,7 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -523,7 +523,7 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -602,7 +602,7 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
