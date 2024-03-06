@@ -18,8 +18,8 @@
 linters-settings:
   lll:
     line-length: 170
-  goconst:
-    ignore-tests: true
+run:
+  tests: false
 linters:
   enable-all: true
   disable:
