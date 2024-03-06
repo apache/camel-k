@@ -27,7 +27,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 )
 
@@ -35,7 +35,7 @@ func TestOpenAPIService(t *testing.T) {
 	RegisterTestingT(t)
 
 	openapiContent, err := ioutil.ReadFile("./files/petstore-api.yaml")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	var cmDataProps = make(map[string]string)
 	cmDataProps["petstore-api.yaml"] = string(openapiContent)
 	CreatePlainTextConfigmap(ns, "my-openapi-knative", cmDataProps)

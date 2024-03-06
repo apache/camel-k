@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const cmdOperator = "operator"
@@ -57,7 +58,7 @@ func addTestOperatorCmd(options RootCmdOptions, rootCmd *cobra.Command) *operato
 func TestOperatorNoFlag(t *testing.T) {
 	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdOperator)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// Check default expected values
 	assert.Equal(t, int32(8081), operatorCmdOptions.HealthPort)
 	assert.Equal(t, int32(8080), operatorCmdOptions.MonitoringPort)
@@ -72,13 +73,13 @@ func TestOperatorNonExistingFlag(t *testing.T) {
 func TestOperatorHealthPortFlag(t *testing.T) {
 	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdOperator, "--health-port", "7171")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int32(7171), operatorCmdOptions.HealthPort)
 }
 
 func TestOperatorMonitoringPortFlag(t *testing.T) {
 	operatorCmdOptions, rootCmd, _ := initializeOperatorCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdOperator, "--monitoring-port", "7172")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, int32(7172), operatorCmdOptions.MonitoringPort)
 }

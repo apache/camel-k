@@ -21,13 +21,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDigestUsesAnnotations(t *testing.T) {
@@ -154,11 +153,11 @@ func TestDigestMatchingTraitsUpdated(t *testing.T) {
 	}
 
 	itDigest, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	itSpecOnlyTraitUpdatedDigest, err := ComputeForIntegration(&itSpecOnlyTraitUpdated, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	itStatusOnlyTraitUpdatedDigest, err := ComputeForIntegration(&itStatusOnlyTraitUpdated, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.NotEqual(t, itSpecOnlyTraitUpdatedDigest, itDigest, "Digests must not be equal")
 	assert.NotEqual(t, itStatusOnlyTraitUpdatedDigest, itDigest, "Digests must not be equal")
@@ -172,13 +171,13 @@ func TestSpecStatusDrift(t *testing.T) {
 
 	it.Spec.Traits.Camel.Properties = []string{"hello=world1"}
 	d1, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	it.Status.Traits.Camel.Properties = []string{"hello=world2"}
 	d2, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	it.Spec.Traits.Camel.Properties = []string{"hello=world3"}
 	d3, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.NotEqual(t, d2, d1, "d2 must not be equal to d1")
 	assert.NotEqual(t, d3, d2, "d3 must not be equal to d2")

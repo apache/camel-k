@@ -524,7 +524,7 @@ func TestServiceAnnotation(t *testing.T) {
 	traitsCatalog := environment.Catalog
 	_, err := traitsCatalog.apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	service := environment.Resources.GetKnativeService(func(s *serving.Service) bool {
 		return s.Name == KnativeServiceTestName

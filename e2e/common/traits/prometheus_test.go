@@ -28,6 +28,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -46,7 +47,7 @@ func TestPrometheusTrait(t *testing.T) {
 	RegisterTestingT(t)
 
 	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// Do not create PodMonitor for the time being as CI test runs on OCP 3.11
 	createPodMonitor := false
 	Expect(KamelRunWithID(operatorID, ns, "files/Java.java",

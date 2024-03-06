@@ -22,13 +22,14 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoadKamelet(t *testing.T) {
 	kamelet, err := loadKamelet("testdata/timer-source.kamelet.yaml", "some-namespace")
 
 	assert.NotNil(t, kamelet)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "timer-source", kamelet.GetName())
 	assert.Equal(t, "some-namespace", kamelet.GetNamespace())
 	assert.Equal(t, 3, len(kamelet.GetLabels()))

@@ -25,11 +25,12 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRestDslTraitApplicability(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := &Environment{
 		CamelCatalog: catalog,
@@ -37,7 +38,7 @@ func TestRestDslTraitApplicability(t *testing.T) {
 
 	trait, _ := newOpenAPITrait().(*openAPITrait)
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 
@@ -47,20 +48,20 @@ func TestRestDslTraitApplicability(t *testing.T) {
 		},
 	}
 	enabled, condition, err = trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 
 	trait.Configmaps = []string{"my-configmap"}
 
 	enabled, condition, err = trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 	enabled, condition, err = trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 }

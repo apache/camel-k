@@ -29,7 +29,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -57,7 +57,7 @@ func TestOLMInstallation(t *testing.T) {
 		Expect(CreateOrUpdateCatalogSource(ns, installCatalogSourceName, newIIB)).To(Succeed())
 
 		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		if ocp {
 			// Wait for pull secret to be created in namespace

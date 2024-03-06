@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/rs/xid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -46,7 +47,7 @@ func TestCanHandlePhaseReadyOrError(t *testing.T) {
 	ip.Status.Phase = v1.IntegrationPlatformPhaseReady
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewMonitorAction()
 	action.InjectLogger(log.Log)
@@ -77,17 +78,17 @@ func TestMonitor(t *testing.T) {
 	catalog.Spec.Runtime.Provider = v1.RuntimeProviderQuarkus
 
 	c, err := test.NewFakeClient(&ip, &catalog)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewMonitorAction()
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 
 	answer, err := action.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
@@ -106,17 +107,17 @@ func TestMonitorTransitionToCreateCatalog(t *testing.T) {
 	ip.Spec.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewMonitorAction()
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 
 	answer, err := action.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseCreateCatalog, answer.Status.Phase)
@@ -139,17 +140,17 @@ func TestMonitorRetainErrorState(t *testing.T) {
 	ip.Status.Phase = v1.IntegrationPlatformPhaseError
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewMonitorAction()
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 
 	answer, err := action.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)
@@ -171,17 +172,17 @@ func TestMonitorMissingRegistryError(t *testing.T) {
 	catalog.Spec.Runtime.Provider = v1.RuntimeProviderQuarkus
 
 	c, err := test.NewFakeClient(&ip, &catalog)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewMonitorAction()
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 
 	answer, err := action.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)

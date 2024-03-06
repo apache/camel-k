@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseConfigOption(t *testing.T) {
@@ -29,11 +30,11 @@ func TestParseConfigOption(t *testing.T) {
 	notValid := "someprotocol:wrong"
 
 	configmap, err := ParseConfig(validConfigMap)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeConfigmap, configmap.storageType)
 	assert.Equal(t, "my-config_map", configmap.Name())
 	secret, err := ParseConfig(validSecret)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeSecret, secret.storageType)
 	assert.Equal(t, "my-secret", secret.Name())
 	_, err = ParseConfig(notValid)
@@ -51,56 +52,56 @@ func TestParseConfigOptionAllParams(t *testing.T) {
 	sec4 := "secret:sec"
 
 	parsedCm1, err := ParseConfig(cm1)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeConfigmap, parsedCm1.StorageType())
 	assert.Equal(t, "my-config_map", parsedCm1.Name())
 	assert.Equal(t, "key", parsedCm1.Key())
 	assert.Equal(t, "/tmp/my", parsedCm1.DestinationPath())
 
 	parsedCm2, err := ParseConfig(cm2)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeConfigmap, parsedCm2.StorageType())
 	assert.Equal(t, "my-config_map", parsedCm2.Name())
 	assert.Equal(t, "key", parsedCm2.Key())
 	assert.Equal(t, "", parsedCm2.DestinationPath())
 
 	parsedCm3, err := ParseConfig(cm3)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeConfigmap, parsedCm3.StorageType())
 	assert.Equal(t, "my-config_map", parsedCm3.Name())
 	assert.Equal(t, "", parsedCm3.Key())
 	assert.Equal(t, "/tmp/my", parsedCm3.DestinationPath())
 
 	parsedCm4, err := ParseConfig(cm4)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeConfigmap, parsedCm4.StorageType())
 	assert.Equal(t, "my-config_map", parsedCm4.Name())
 	assert.Equal(t, "", parsedCm4.Key())
 	assert.Equal(t, "", parsedCm4.DestinationPath())
 
 	parsedSec1, err := ParseConfig(sec1)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeSecret, parsedSec1.StorageType())
 	assert.Equal(t, "sec", parsedSec1.Name())
 	assert.Equal(t, "key", parsedSec1.Key())
 	assert.Equal(t, "/tmp/sec", parsedSec1.DestinationPath())
 
 	parsedSec2, err := ParseConfig(sec2)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeSecret, parsedSec2.StorageType())
 	assert.Equal(t, "sec", parsedSec2.Name())
 	assert.Equal(t, "key", parsedSec2.Key())
 	assert.Equal(t, "", parsedSec2.DestinationPath())
 
 	parsedSec3, err := ParseConfig(sec3)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeSecret, parsedSec3.StorageType())
 	assert.Equal(t, "sec", parsedSec3.Name())
 	assert.Equal(t, "", parsedSec3.Key())
 	assert.Equal(t, "/tmp/sec", parsedSec3.DestinationPath())
 
 	parsedSec4, err := ParseConfig(sec4)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, StorageTypeSecret, parsedSec4.StorageType())
 	assert.Equal(t, "sec", parsedSec4.Name())
 	assert.Equal(t, "", parsedSec4.Key())

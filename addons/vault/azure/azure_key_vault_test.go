@@ -31,6 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -44,12 +45,12 @@ func TestAzureKeyVaultTraitApply(t *testing.T) {
 	secrets.ClientSecret = "secret"
 	secrets.VaultName = "my-vault"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "client-id", e.ApplicationProperties["camel.vault.azure.clientId"])
 	assert.Equal(t, "secret", e.ApplicationProperties["camel.vault.azure.clientSecret"])
@@ -87,12 +88,12 @@ func TestAzureKeyVaultTraitApplyWithConfigmapAndRefresh(t *testing.T) {
 	secrets.BlobAccountName = "camel-k"
 	secrets.BlobContainerName = "camel-k-container"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "client-id", e.ApplicationProperties["camel.vault.azure.clientId"])
 	assert.Equal(t, "my-secret-key", e.ApplicationProperties["camel.vault.azure.clientSecret"])
@@ -134,12 +135,12 @@ func TestAzureKeyVaultTraitApplyWithSecretAndRefresh(t *testing.T) {
 	secrets.BlobAccountName = "camel-k"
 	secrets.BlobContainerName = "camel-k-container"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "client-id", e.ApplicationProperties["camel.vault.azure.clientId"])
 	assert.Equal(t, "my-secret-key", e.ApplicationProperties["camel.vault.azure.clientSecret"])
@@ -156,7 +157,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 
 	catalog, err := catalogGen()
 	client, _ := test.NewFakeClient(objects...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,

@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -37,7 +38,7 @@ func TestConfigurePdbTraitDoesSucceed(t *testing.T) {
 	configured, condition, err := pdbTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -79,7 +80,7 @@ func pdbCreatedCheck(t *testing.T, pdbTrait *pdbTrait, environment *Environment)
 	t.Helper()
 
 	err := pdbTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	pdb := findPdb(environment.Resources)
 
 	assert.NotNil(t, pdb)

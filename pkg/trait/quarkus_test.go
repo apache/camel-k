@@ -23,6 +23,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/builder"
@@ -37,11 +38,11 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	configured, condition, err := quarkusTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	build := getBuilderTask(environment.Pipeline)
 	assert.NotNil(t, t, build)
@@ -58,11 +59,11 @@ func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 
 	configured, condition, err := quarkusTrait.Configure(environment)
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.IntegrationKits, 1)
 	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
 }
@@ -75,11 +76,11 @@ func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
 
 	configured, condition, err := quarkusTrait.Configure(environment)
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.IntegrationKits, 1)
 	assert.Equal(t, v1.IntegrationKitLayoutFastJar, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel])
 	assert.Equal(t, "camel-k", environment.IntegrationKits[0].Annotations[v1.TraitAnnotationPrefix+"quarkus.foo"])
@@ -97,7 +98,7 @@ func TestQuarkusTraitBuildModeOrder(t *testing.T) {
 	}
 
 	err := quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.IntegrationKits, 2)
 	// assure jvm mode is executed before native mode
 	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)

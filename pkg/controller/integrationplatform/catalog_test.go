@@ -34,6 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/rs/xid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -54,7 +55,7 @@ func TestCanHandlePhaseCreateCatalog(t *testing.T) {
 	ip.Status.Phase = v1.IntegrationPlatformPhaseCreateCatalog
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewCreateCatalogAction()
 	action.InjectLogger(log.Log)
@@ -87,7 +88,7 @@ func TestCreateCatalog(t *testing.T) {
 	}
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", "false")
@@ -106,14 +107,14 @@ func TestCreateCatalog(t *testing.T) {
 	})
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewCreateCatalogAction()
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 
 	answer, err := action.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase, "Error", answer.Status.Conditions[0].Message)
@@ -122,11 +123,11 @@ func TestCreateCatalog(t *testing.T) {
 	list := v1.NewCamelCatalogList()
 	err = c.List(context.TODO(), &list, k8sclient.InNamespace(ip.Namespace))
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, list.Items)
 
 	items, err := resources.WithPrefix("/camel-catelog-")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	for _, k := range items {
 		found := false
@@ -159,17 +160,17 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 	catalog.Spec.Runtime.Provider = v1.RuntimeProviderQuarkus
 
 	c, err := test.NewFakeClient(&ip, &catalog)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewMonitorAction()
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 
 	answer, err := action.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
@@ -190,7 +191,7 @@ func TestCreateCatalogError(t *testing.T) {
 	ip.Spec.Build.RuntimeVersion = "0.0.0"
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", "false")
@@ -209,14 +210,14 @@ func TestCreateCatalogError(t *testing.T) {
 	})
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	action := NewCreateCatalogAction()
 	action.InjectLogger(log.Log)
 	action.InjectClient(c)
 
 	answer, err := action.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseError, answer.Status.Phase)

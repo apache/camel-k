@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -40,7 +41,7 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 	t.Helper()
 	client, _ := test.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	env := Environment{
 		Catalog:      NewEnvironmentTestCatalog(),
@@ -100,7 +101,7 @@ func TestIstioInject(t *testing.T) {
 
 	env := NewIstioTestEnv(t, &d, &s, true)
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.Empty(t, s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.NotEmpty(t, d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
@@ -125,7 +126,7 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 	env.Integration.Spec.Traits.Istio.Inject = pointer.Bool(true)
 
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.Equal(t, "true", s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, "true", d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
@@ -150,7 +151,7 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 	env.Integration.Spec.Traits.Istio.Inject = pointer.Bool(false)
 
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.Equal(t, "false", s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, "false", d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
@@ -173,7 +174,7 @@ func TestIstioDisabled(t *testing.T) {
 	env := NewIstioTestEnv(t, &d, &s, false)
 
 	conditions, err := env.Catalog.apply(&env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotContains(t, env.ExecutedTraits, "istio")
 }

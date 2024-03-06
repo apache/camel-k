@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -41,7 +42,7 @@ func TestFindIntegrationProfile(t *testing.T) {
 	profile.ResyncStatusFullConfig()
 
 	c, err := test.NewFakeClient(&profile)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	integration := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
@@ -57,7 +58,7 @@ func TestFindIntegrationProfile(t *testing.T) {
 	}
 
 	found, err := findIntegrationProfile(context.TODO(), c, &integration)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, found)
 }
 
@@ -72,7 +73,7 @@ func TestFindIntegrationProfileWithNamespace(t *testing.T) {
 	profile.ResyncStatusFullConfig()
 
 	c, err := test.NewFakeClient(&profile)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	integration := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
@@ -89,7 +90,7 @@ func TestFindIntegrationProfileWithNamespace(t *testing.T) {
 	}
 
 	found, err := findIntegrationProfile(context.TODO(), c, &integration)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, found)
 }
 
@@ -104,7 +105,7 @@ func TestFindIntegrationProfileInOperatorNamespace(t *testing.T) {
 	profile.ResyncStatusFullConfig()
 
 	c, err := test.NewFakeClient(&profile)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	t.Setenv(operatorNamespaceEnvVariable, "operator-namespace")
 
@@ -122,7 +123,7 @@ func TestFindIntegrationProfileInOperatorNamespace(t *testing.T) {
 	}
 
 	found, err := findIntegrationProfile(context.TODO(), c, &integration)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, found)
 }
 
@@ -163,7 +164,7 @@ func TestApplyIntegrationProfile(t *testing.T) {
 	profile.ResyncStatusFullConfig()
 
 	c, err := test.NewFakeClient(&profile)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ip := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
@@ -185,7 +186,7 @@ func TestApplyIntegrationProfile(t *testing.T) {
 	ip.ResyncStatusFullConfig()
 
 	err = ConfigureDefaults(context.TODO(), c, &ip, true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	integration := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
@@ -251,7 +252,7 @@ func TestApplyIntegrationProfileAndRetainPlatformSpec(t *testing.T) {
 	profile.ResyncStatusFullConfig()
 
 	c, err := test.NewFakeClient(&profile)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ip := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
@@ -285,7 +286,7 @@ func TestApplyIntegrationProfileAndRetainPlatformSpec(t *testing.T) {
 	ip.ResyncStatusFullConfig()
 
 	err = ConfigureDefaults(context.TODO(), c, &ip, true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	integration := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{

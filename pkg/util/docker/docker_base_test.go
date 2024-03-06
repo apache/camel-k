@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBuildImageArgs(t *testing.T) {
@@ -37,7 +38,7 @@ func TestBuildImageArgs(t *testing.T) {
 func TestRunImageArgs(t *testing.T) {
 
 	args, err := RunImageArgs("imagePath")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "run", args[0])
 	assert.Equal(t, "--network="+NetworkName, args[1])
 	assert.Equal(t, "-t", args[2])

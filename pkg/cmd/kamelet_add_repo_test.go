@@ -22,6 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -57,7 +58,7 @@ func addTestKameletAddRepoCmd(options RootCmdOptions, rootCmd *cobra.Command) *k
 func TestKameletAddRepoNoFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletAddRepoCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdKameletAddRepo, "foo")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestKameletAddRepoNonExistingFlag(t *testing.T) {

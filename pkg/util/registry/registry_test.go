@@ -25,6 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -35,7 +36,7 @@ func TestAuth_GenerateDockerConfig(t *testing.T) {
 		Registry: "docker.io",
 	}
 	conf, err := a.GenerateDockerConfig()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, string(conf), `"https://index.docker.io/v1/":{"auth":"bmljOg=="}`)
 	assert.Contains(t, string(conf), `"docker.io":{"auth":"bmljOg=="}`)
 
@@ -45,7 +46,7 @@ func TestAuth_GenerateDockerConfig(t *testing.T) {
 		Registry: "quay.io",
 	}
 	conf, err = a.GenerateDockerConfig()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `{"auths":{"quay.io":{"auth":"bmljOnBhc3M="}}}`, string(conf))
 
 	a = Auth{
@@ -55,7 +56,7 @@ func TestAuth_GenerateDockerConfig(t *testing.T) {
 		Registry: "docker.io",
 	}
 	conf, err = a.GenerateDockerConfig()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `{"auths":{"quay.io":{"auth":"bmljOnBhc3M="}}}`, string(conf))
 }
 
@@ -99,10 +100,10 @@ func TestMountSecretRegistryConfig(t *testing.T) {
 	}
 
 	c, err := test.NewFakeClient(&namespace, &secret)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, c)
 	registryConfigDir, err := MountSecretRegistryConfig(ctx, c, "test", "prefix-", "my-secret1")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, registryConfigDir)
 	dockerfileExists, _ := util.FileExists(registryConfigDir + "/config.json")
 	assert.True(t, dockerfileExists)

@@ -30,8 +30,7 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -42,7 +41,7 @@ func TestRunRest(t *testing.T) {
 	RegisterTestingT(t)
 
 	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	Expect(KamelRunWithID(operatorID, ns, "files/rest-consumer.yaml").Execute()).To(Succeed())
 	Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

@@ -40,7 +40,7 @@ import (
 	"time"
 
 	consoleV1 "github.com/openshift/api/console/v1"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
@@ -2705,7 +2705,7 @@ func WithNewTestNamespace(t *testing.T, doRun func(string)) {
 func WithGlobalOperatorNamespace(t *testing.T, test func(string)) {
 	setTestLocus(t)
 	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	if ocp {
 		// global operators are always installed in the openshift-operators namespace
 		invokeUserTestCode(t, "openshift-operators", test)

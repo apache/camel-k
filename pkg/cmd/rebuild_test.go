@@ -23,6 +23,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const cmdRebuild = "rebuild"
@@ -61,6 +62,6 @@ func TestRebuildNonExistingFlag(t *testing.T) {
 func TestRebuildAllFlag(t *testing.T) {
 	rebuildCmdOptions, rootCmd, _ := initializeRebuildCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRebuild, "--all")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, rebuildCmdOptions.RebuildAll)
 }

@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -43,10 +43,10 @@ func TestJVMTrait(t *testing.T) {
 	var cmData = make(map[string][]byte)
 	// We calculate the expected content
 	source, err := os.ReadFile("./files/jvm/sample-1.0.jar")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	cmData["sample-1.0.jar"] = source
 	err = CreateBinaryConfigmap(ns, "my-deps", cmData)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	t.Run("JVM trait classpath", func(t *testing.T) {
 		Expect(KamelRunWithID(operatorID, ns, "./files/jvm/Classpath.java",

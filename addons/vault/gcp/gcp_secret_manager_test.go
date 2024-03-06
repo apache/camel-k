@@ -28,6 +28,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGcpSecretManagerTraitApply(t *testing.T) {
@@ -39,12 +40,12 @@ func TestGcpSecretManagerTraitApply(t *testing.T) {
 	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "project-gcp", e.ApplicationProperties["camel.vault.gcp.projectId"])
 	assert.Equal(t, "file:////usr/local/serviceaccount.json", e.ApplicationProperties["camel.vault.gcp.serviceAccountKey"])
@@ -60,12 +61,12 @@ func TestGcpSecretManagerTraitNoDefaultCreds(t *testing.T) {
 	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "project-gcp", e.ApplicationProperties["camel.vault.gcp.projectId"])
 	assert.Equal(t, "file:////usr/local/serviceaccount.json", e.ApplicationProperties["camel.vault.gcp.serviceAccountKey"])
@@ -76,7 +77,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 	t.Helper()
 
 	catalog, err := catalogGen()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,

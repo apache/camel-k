@@ -33,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullSecret(t *testing.T) {
@@ -41,12 +42,12 @@ func TestPullSecret(t *testing.T) {
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.SecretName = "xxxy"
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
 	err = trait.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, deployment.Spec.Template.Spec.ImagePullSecrets, corev1.LocalObjectReference{Name: "xxxy"})
 }
 
@@ -56,7 +57,7 @@ func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 
 	trait := newPullSecretTrait()
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 }
@@ -67,7 +68,7 @@ func TestPullSecretAuto(t *testing.T) {
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = pointer.Bool(false)
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 }
@@ -79,7 +80,7 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	trait.Auto = pointer.Bool(false)
 	trait.ImagePullerDelegation = pointer.Bool(true)
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 	assert.True(t, *trait.ImagePullerDelegation)

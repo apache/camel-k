@@ -105,7 +105,7 @@ func addTestRunCmdWithOutput(options RootCmdOptions, rootCmd *cobra.Command) *ru
 func TestRunNoFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// Check default expected values
 	assert.Equal(t, false, runCmdOptions.Wait)
 	assert.Equal(t, false, runCmdOptions.Logs)
@@ -125,7 +125,7 @@ func TestRunNonExistingFlag(t *testing.T) {
 func TestRunCompressionFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--compression", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, runCmdOptions.Compression)
 }
 
@@ -136,7 +136,7 @@ func TestRunDependencyFlag(t *testing.T) {
 		"--dependency", "dependency2",
 		"--dependency", "dependency3",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Dependencies, 3)
 	assert.Equal(t, "dependency1", runCmdOptions.Dependencies[0])
 	assert.Equal(t, "dependency2", runCmdOptions.Dependencies[1])
@@ -146,7 +146,7 @@ func TestRunDependencyFlag(t *testing.T) {
 func TestRunDevFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--dev", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, runCmdOptions.Dev)
 }
 
@@ -166,7 +166,7 @@ func TestRunEnvFlag(t *testing.T) {
 		"--env", "env1",
 		"--env", "env2",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.EnvVars, 2)
 	assert.Equal(t, "env1", runCmdOptions.EnvVars[0])
 	assert.Equal(t, "env2", runCmdOptions.EnvVars[1])
@@ -175,7 +175,7 @@ func TestRunEnvFlag(t *testing.T) {
 func TestRunKitFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--kit", "myKit", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "myKit", runCmdOptions.IntegrationKit)
 }
 
@@ -186,7 +186,7 @@ func TestRunLabelFlag(t *testing.T) {
 		"--label", "label2=l2",
 		"--label", "label3=l3",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Labels, 3)
 	assert.Equal(t, "label1=l1", runCmdOptions.Labels[0])
 	assert.Equal(t, "label2=l2", runCmdOptions.Labels[1])
@@ -202,7 +202,7 @@ func TestRunLabelWrongFormatFlag(t *testing.T) {
 func TestRunLogsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--logs", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, runCmdOptions.Logs)
 }
 
@@ -213,7 +213,7 @@ func TestRunMavenRepositoryFlag(t *testing.T) {
 		"--maven-repository", "repo2",
 		"--maven-repository", "repo3",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Repositories, 3)
 	assert.Equal(t, "repo1", runCmdOptions.Repositories[0])
 	assert.Equal(t, "repo2", runCmdOptions.Repositories[1])
@@ -223,7 +223,7 @@ func TestRunMavenRepositoryFlag(t *testing.T) {
 func TestRunNameFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", "myIntegration", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "myIntegration", runCmdOptions.IntegrationName)
 }
 
@@ -232,7 +232,7 @@ func TestRunOpenApiFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdRun,
 		"--open-api", "configmap:oapi2",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.OpenAPIs, 1)
 	assert.Equal(t, "configmap:oapi2", runCmdOptions.OpenAPIs[0])
 }
@@ -249,14 +249,14 @@ func TestRunOpenApiInvalidFlag(t *testing.T) {
 func TestRunOutputFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "-o", "yaml", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 }
 
 func TestRunProfileFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--profile", "myProfile", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "myProfile", runCmdOptions.Profile)
 }
 
@@ -267,7 +267,7 @@ func TestRunPropertyFlag(t *testing.T) {
 		"--property", "property2",
 		"--property", "property3",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Properties, 3)
 	assert.Equal(t, "property1", runCmdOptions.Properties[0])
 	assert.Equal(t, "property2", runCmdOptions.Properties[1])
@@ -290,7 +290,7 @@ func TestExtractProperties_SingleKeyValue(t *testing.T) {
 	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
 	for _, val := range correctValues {
 		prop, err := runCmdOptions.extractProperties(nil, val)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		value, ok := prop.Get("key")
 		assert.True(t, ok)
 		assert.Equal(t, "val", value)
@@ -312,7 +312,7 @@ func TestExtractProperties_FromFile(t *testing.T) {
 	`), 0o400))
 	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
 	props, err := runCmdOptions.extractProperties(nil, "file:"+tmpFile1.Name())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 2, props.Len())
 	for _, prop := range props.Keys() {
 		value, ok := props.Get(prop)
@@ -338,7 +338,7 @@ func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
 	properties := []string{"key=override", "file:" + tmpFile1.Name(), "my.key = override"}
 	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
 	props, err := runCmdOptions.mergePropertiesWithPrecedence(nil, properties)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 2, props.Len())
 	val, ok := props.Get("key")
 	assert.True(t, ok)
@@ -360,7 +360,7 @@ func TestAddPropertyFile(t *testing.T) {
 
 	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
 	properties, err := runCmdOptions.convertToTraitParameter(nil, "file:"+tmpFile.Name(), "trait.properties")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 3, len(properties))
 	assert.Equal(t, `trait.properties=a = b`, properties[0])
 	assert.Equal(t, `trait.properties=f = g:h`, properties[1])
@@ -370,7 +370,7 @@ func TestAddPropertyFile(t *testing.T) {
 func TestRunProperty(t *testing.T) {
 	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
 	properties, err := runCmdOptions.convertToTraitParameter(nil, `key=value\nnewline`, "trait.properties")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 1, len(properties))
 	assert.Equal(t, `trait.properties=key = value\nnewline`, properties[0])
 }
@@ -381,7 +381,7 @@ func TestRunResourceFlag(t *testing.T) {
 		"--resource", "res1",
 		"--resource", "res2",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Resources, 2)
 	assert.Equal(t, "res1", runCmdOptions.Resources[0])
 	assert.Equal(t, "res2", runCmdOptions.Resources[1])
@@ -390,14 +390,14 @@ func TestRunResourceFlag(t *testing.T) {
 func TestRunSaveFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--save", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, runCmdOptions.Save)
 }
 
 func TestRunSourceFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--source", "source1", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Sources, 1)
 	assert.Equal(t, "source1", runCmdOptions.Sources[0])
 }
@@ -405,7 +405,7 @@ func TestRunSourceFlag(t *testing.T) {
 func TestRunSyncFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--sync", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, runCmdOptions.Sync)
 }
 
@@ -415,7 +415,7 @@ func TestRunExistingTraitFlag(t *testing.T) {
 		"--trait", "jvm.enabled",
 		"--trait", "logging.enabled",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Traits, 2)
 	assert.Equal(t, "jvm.enabled", runCmdOptions.Traits[0])
 	assert.Equal(t, "logging.enabled", runCmdOptions.Traits[1])
@@ -452,9 +452,9 @@ func TestConfigureTraits(t *testing.T) {
 	traits := v1.Traits{}
 	err = configureTraits(runCmdOptions.Traits, &traits, catalog)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	traitMap, err := trait.ToTraitMap(traits)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, traitMap, 4)
 	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
@@ -472,7 +472,7 @@ func assertTraitConfiguration(t *testing.T, trait interface{}, expected interfac
 func TestRunUseFlowsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--use-flows=false", integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, false, runCmdOptions.UseFlows)
 }
 
@@ -482,7 +482,7 @@ func TestRunVolumeFlag(t *testing.T) {
 		"-v", "pvcname:/container1/path",
 		"-v", "pvcname:/container2/path",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.Volumes, 2)
 	assert.Equal(t, "pvcname:/container1/path", runCmdOptions.Volumes[0])
 	assert.Equal(t, "pvcname:/container2/path", runCmdOptions.Volumes[1])
@@ -503,7 +503,7 @@ func TestRunBuildPropertyFlag(t *testing.T) {
 		"--build-property", "build-prop1=val1",
 		"--build-property", "build-prop2=val2",
 		integrationSource)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, runCmdOptions.BuildProperties, 2)
 	assert.Equal(t, "build-prop1=val1", runCmdOptions.BuildProperties[0])
 	assert.Equal(t, "build-prop2=val2", runCmdOptions.BuildProperties[1])
@@ -514,7 +514,7 @@ func TestRunValidateArgs(t *testing.T) {
 
 	args := []string{"run_test.go"}
 	err := runCmdOptions.validateArgs(rootCmd, args)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	args = []string{"missing_file"}
 	err = runCmdOptions.validateArgs(rootCmd, args)
@@ -540,7 +540,7 @@ volumes:
 
 	integrationSpec := v1.IntegrationSpec{}
 	err := resolvePodTemplate(context.TODO(), rootCmd, templateText, &integrationSpec)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.Equal(t, 1, len(integrationSpec.PodTemplate.Spec.Containers))
 	// assert.Equal(t, 1,len(integrationSpec.PodTemplate.Spec.Containers[0].VolumeMounts))
@@ -553,7 +553,7 @@ func TestResolveJsonPodTemplate(t *testing.T) {
 
 	err := resolvePodTemplate(context.TODO(), rootCmd, minifiedYamlTemplate, &integrationSpec)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.Equal(t, 2, len(integrationSpec.PodTemplate.Spec.Containers))
 }
@@ -593,7 +593,7 @@ func TestOutputYaml(t *testing.T) {
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
@@ -628,7 +628,7 @@ func TestTrait(t *testing.T) {
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "mount.configs=configmap:my-cm", "--connect", "my-service-binding")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf(`apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:
@@ -680,7 +680,7 @@ securityContext:
 `
 	integrationSpec := v1.IntegrationSpec{}
 	err := resolvePodTemplate(context.TODO(), rootCmd, templateText, &integrationSpec)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
 	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
@@ -695,7 +695,7 @@ func TestResolveJsonPodTemplateWithSupplementalGroups(t *testing.T) {
 
 	integrationSpec := v1.IntegrationSpec{}
 	err := resolvePodTemplate(context.TODO(), rootCmd, minifiedYamlTemplate, &integrationSpec)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, integrationSpec.PodTemplate)
 	assert.NotNil(t, integrationSpec.PodTemplate.Spec)
 	assert.NotNil(t, integrationSpec.PodTemplate.Spec.SecurityContext)
@@ -717,7 +717,7 @@ func TestIntegrationServiceAccountName(t *testing.T) {
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "--service-account", "my-service-account")
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, output, "serviceAccountName: my-service-account")
 }
 
@@ -747,7 +747,7 @@ func TestFileProperties(t *testing.T) {
 		"-p", "file:"+tmpFile1.Name(),
 		"-o", "yaml",
 	)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotContains(t, output, "#key2")
 	assert.Contains(t, output, "my.key = value")
 	assert.Contains(t, output, "key = ${value}")
@@ -779,7 +779,7 @@ func TestPropertyShouldNotExpand(t *testing.T) {
 		"--build-property", "buildProp=${value}",
 		"-p", "file:"+tmpFile1.Name(),
 	)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, output, "runtimeProp = ${value}")
 	assert.Contains(t, output, "buildProp = ${value}")
 	assert.Contains(t, output, "key = ${value}")
@@ -800,17 +800,17 @@ func TestRunOutput(t *testing.T) {
 	output, err := test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
 	_, fileName := filepath.Split(tmpFile1.Name())
 	integrationName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 
 	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" unchanged\n", integrationName), output)
 
 	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(strings.Replace(yamlIntegration, "Hello", "Hi", 1)), 0o400))
 	assert.Nil(t, tmpFile1.Sync())
 	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
 }
 
@@ -845,7 +845,7 @@ func TestRunGlob(t *testing.T) {
 	file := fmt.Sprintf("%s%c%s*", dir, os.PathSeparator, "camel-k-*") // = dir/camel-k-*
 
 	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 }
 
@@ -880,7 +880,7 @@ func TestRunGlobAllFiles(t *testing.T) {
 	file := fmt.Sprintf("%s%c*", dir, os.PathSeparator) // = dir/*
 
 	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 }
 
@@ -907,11 +907,11 @@ func TestRunGlobChange(t *testing.T) {
 	file := fmt.Sprintf("%s%c%s", dir, os.PathSeparator, "camel-k-*")
 
 	output, err := test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" created\n", integrationName), output)
 
 	output, err = test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" unchanged\n", integrationName), output)
 
 	tmpFile2, err := os.CreateTemp(dir, pattern)
@@ -923,7 +923,7 @@ func TestRunGlobChange(t *testing.T) {
 	assert.Nil(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
 
 	output, err = test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" updated\n", integrationName), output)
 }
 
@@ -943,7 +943,7 @@ func TestSourceLessIntegration(t *testing.T) {
 	output, err := test.ExecuteCommand(runCmd, cmdRun, "--image", "docker.io/my-org/my-app:1.0.0", "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Integration
 metadata:

@@ -371,7 +371,7 @@ func TestKameletConfigLookup(t *testing.T) {
 	assert.Equal(t, []configurationKey{newConfigurationKey("timer", "")}, trait.getConfigurationKeys())
 
 	list, err := trait.listConfigurationSecrets(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, list, "my-secret", "my-secret3")
 	assert.NotContains(t, list, "my-secret2")
 }
@@ -436,7 +436,7 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 	}, trait.getConfigurationKeys())
 
 	list, err := trait.listConfigurationSecrets(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, list, "my-secret", "my-secret2")
 	assert.NotContains(t, list, "my-secret3")
 }

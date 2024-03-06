@@ -28,6 +28,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -49,7 +50,7 @@ func TestGenerateQuarkusProjectCommon(t *testing.T) {
 
 func TestLoadCamelQuarkusCatalogMissing(t *testing.T) {
 	c, err := test.NewFakeClient()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	builderContext := builderContext{
 		Client:    c,
 		C:         context.TODO(),
@@ -81,7 +82,7 @@ func TestLoadCamelQuarkusCatalogOk(t *testing.T) {
 			Runtime: runtimeCatalog,
 		},
 	})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	builderContext := builderContext{
 		Client:    c,
 		C:         context.TODO(),
@@ -94,15 +95,15 @@ func TestLoadCamelQuarkusCatalogOk(t *testing.T) {
 		},
 	}
 	err = loadCamelQuarkusCatalog(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, runtimeCatalog, builderContext.Catalog.Runtime)
 }
 
 func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus-with-props")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	defaultCatalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	mavenProps := v1.Properties{}
 	mavenProps.Add("quarkus.camel.hello", "world")
@@ -141,7 +142,7 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 	}
 
 	err = generateQuarkusProject(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", "false")
 	_, ok := os.LookupEnv("MAVEN_CMD")
@@ -149,23 +150,23 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
 	err = buildQuarkusRunner(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, string(appProps), "quarkus.camel.hello=world\n")
 	assert.Contains(t, string(appProps), "quarkus.camel.\"shouldnt\"=fail\n")
 	assert.Contains(t, string(appProps), "my-build-time-var=my-build-time-val\n")
 	assert.Contains(t, string(appProps), "my-build-time\var2=my-build-time-val2\n")
 	// At this stage a maven project should have been executed. Verify the package was created.
 	_, err = os.Stat(filepath.Join(tmpDir, "maven", "target", "camel-k-integration-"+defaults.Version+".jar"))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestBuildQuarkusRunner(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	defaultCatalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	c, err := test.NewFakeClient(&v1.CamelCatalog{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "default",
@@ -175,7 +176,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 			Runtime: defaultCatalog.Runtime,
 		},
 	})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	mavenProps := v1.Properties{}
 	mavenProps.Add("camel.hello", "world")
 	builderContext := builderContext{
@@ -212,11 +213,11 @@ func TestBuildQuarkusRunner(t *testing.T) {
 		}
 	}
 	err = generateQuarkusProject(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = injectDependencies(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	err = sanitizeDependencies(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", "false")
 	_, ok := os.LookupEnv("MAVEN_CMD")
@@ -224,22 +225,22 @@ func TestBuildQuarkusRunner(t *testing.T) {
 		t.Setenv("MAVEN_CMD", "mvn")
 	}
 	err = buildQuarkusRunner(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// Verify default application properties
 	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, string(appProps), "camel.hello=world\n")
 	assert.Contains(t, string(appProps), "quarkus.banner.enabled=false\n")
 	assert.Contains(t, string(appProps), "quarkus.camel.service.discovery.include-patterns=META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*\n")
 	assert.Contains(t, string(appProps), "quarkus.class-loading.parent-first-artifacts=org.graalvm.regex:regex\n")
 	// At this stage a maven project should have been executed. Verify the package was created.
 	_, err = os.Stat(filepath.Join(tmpDir, "maven", "target", "camel-k-integration-"+defaults.Version+".jar"))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// We use this same unit test to verify dependencies generated
 	// (and spare some build time to avoid running another maven process)
 	err = computeQuarkusDependencies(&builderContext)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, builderContext.Artifacts)
 	camelRuntimeDepFound := false
 	expectedArtifact := fmt.Sprintf("org.apache.camel.k.camel-k-runtime-%s.jar", defaults.DefaultRuntimeVersion)

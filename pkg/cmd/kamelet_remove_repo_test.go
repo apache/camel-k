@@ -22,6 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -57,7 +58,7 @@ func addTestKameletRemoveRepoCmd(options RootCmdOptions, rootCmd *cobra.Command)
 func TestKameletRemoveRepoNoFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletRemoveRepoCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "foo")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestKameletRemoveRepoNonExistingFlag(t *testing.T) {
@@ -81,6 +82,6 @@ func TestKameletRemoveRepoURINotFoundNotEmpty(t *testing.T) {
 func TestKameletRemoveRepoURIFound(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar1"}, {URI: "github:foo/bar2"}, {URI: "github:foo/bar3"}}
 	i, err := getURIIndex("github:foo/bar2", repositories)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 1, i)
 }

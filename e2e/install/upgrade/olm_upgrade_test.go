@@ -31,7 +31,7 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -68,7 +68,7 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 
 		Expect(CreateOrUpdateCatalogSource(ns, catalogSourceName, prevIIB)).To(Succeed())
 		ocp, err := openshift.IsOpenShift(TestClient())
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		if ocp {
 			// Wait for pull secret to be created in namespace

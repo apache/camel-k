@@ -26,6 +26,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
@@ -63,15 +64,15 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 
 			var err error
 			trait.Client, err = test.NewFakeClient()
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			enabled, condition, err := trait.Configure(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.True(t, enabled)
 			assert.Nil(t, condition)
 
 			err = trait.Apply(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 			assert.Empty(t, e.Resources.Items())
@@ -98,15 +99,15 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 
 	var err error
 	trait.Client, err = test.NewFakeClient()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	enabled, condition, err := trait.Configure(&e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
 	err = trait.Apply(&e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 	assert.Equal(t, 1, len(e.Resources.Items()))
@@ -156,15 +157,15 @@ func TestPlatformTraitExisting(t *testing.T) {
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")
 			existingPlatform.Status.Phase = input.platformPhase
 			trait.Client, err = test.NewFakeClient(&existingPlatform)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			enabled, condition, err := trait.Configure(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.True(t, enabled)
 			assert.Nil(t, condition)
 
 			err = trait.Apply(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, input.expectedPhase, e.Integration.Status.Phase)
 			assert.Empty(t, e.Resources.Items())

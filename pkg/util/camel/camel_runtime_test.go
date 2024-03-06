@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,7 +39,7 @@ func TestCreateCatalog(t *testing.T) {
 		Duration: 5 * time.Minute,
 	}
 	c, err := test.NewFakeClient()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// use local Maven executable in tests
 	t.Setenv("MAVEN_WRAPPER", "false")
 	_, ok := os.LookupEnv("MAVEN_CMD")
@@ -54,7 +55,7 @@ func TestCreateCatalog(t *testing.T) {
 		"",
 		&ip,
 		v1.RuntimeSpec{Provider: v1.RuntimeProviderQuarkus, Version: defaults.DefaultRuntimeVersion})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, catalog)
 	assert.Equal(t, defaults.DefaultRuntimeVersion, catalog.Runtime.Version)
 	assert.Equal(t, v1.RuntimeProviderQuarkus, catalog.Runtime.Provider)

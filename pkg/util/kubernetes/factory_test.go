@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -43,7 +44,7 @@ func TestValidTolerations(t *testing.T) {
 	}
 	for _, vd := range validTolerations {
 		_, err := NewTolerations(vd)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -72,7 +73,7 @@ func TestValueTolerations(t *testing.T) {
 		"existKey:NoSchedule:120",
 	}
 	toleration, err := NewTolerations(tolerations)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 4, len(toleration))
 
 	assert.Equal(t, "key", toleration[0].Key)
@@ -108,7 +109,7 @@ func TestValidNodeSelectors(t *testing.T) {
 	}
 	for _, vds := range validNodeSelectors {
 		_, err := NewNodeSelectors(vds)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -130,7 +131,7 @@ func TestValueNodeSelectors(t *testing.T) {
 		"kubernetes.io/hostname=worker0",
 	}
 	nodeSelectors, err := NewNodeSelectors(nodeSelectorsArray)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 2, len(nodeSelectors))
 
 	assert.Equal(t, "value", nodeSelectors["key"])
@@ -140,7 +141,7 @@ func TestValueNodeSelectors(t *testing.T) {
 func TestAllResourceRequirements(t *testing.T) {
 	resReq := "limits.memory=256Mi,requests.memory=128Mi,limits.cpu=1000m,requests.cpu=500m"
 	resourceRequirements, err := NewResourceRequirements(strings.Split(resReq, ","))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, resource.MustParse("256Mi"), *resourceRequirements.Limits.Memory())
 	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Requests.Memory())
@@ -151,7 +152,7 @@ func TestAllResourceRequirements(t *testing.T) {
 func TestSomeResourceRequirements(t *testing.T) {
 	resReq := "limits.memory=128Mi,requests.cpu=500m"
 	resourceRequirements, err := NewResourceRequirements(strings.Split(resReq, ","))
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Limits.Memory())
 	assert.Equal(t, true, resourceRequirements.Requests.Memory().IsZero())
@@ -174,10 +175,10 @@ func TestMissingResourceRequirements(t *testing.T) {
 func TestConfigureResources(t *testing.T) {
 	requestsList := make(v1.ResourceList)
 	requestsList, err := ConfigureResource("500m", requestsList, v1.ResourceCPU)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "500m", requestsList.Cpu().String())
 	requestsList, err = ConfigureResource("5Gi", requestsList, v1.ResourceMemory)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "5Gi", requestsList.Memory().String())
 	requestsList, err = ConfigureResource("5ss", requestsList, v1.ResourceCPU)
 	assert.NotNil(t, err)

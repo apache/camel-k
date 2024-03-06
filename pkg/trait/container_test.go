@@ -23,6 +23,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +41,7 @@ import (
 
 func TestContainerWithDefaults(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -87,7 +88,7 @@ func TestContainerWithDefaults(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -102,7 +103,7 @@ func TestContainerWithDefaults(t *testing.T) {
 
 func TestContainerWithOpenshift(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// Integration is in another constrained namespace
 	constrainedIntNamespace := &corev1.Namespace{
@@ -168,7 +169,7 @@ func TestContainerWithOpenshift(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -185,7 +186,7 @@ func TestContainerWithOpenshift(t *testing.T) {
 
 func TestContainerWithCustomName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -236,7 +237,7 @@ func TestContainerWithCustomName(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -253,7 +254,7 @@ func TestContainerWithCustomName(t *testing.T) {
 
 func TestContainerWithCustomImage(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -302,7 +303,7 @@ func TestContainerWithCustomImage(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 
 	for _, postAction := range environment.PostActions {
@@ -321,7 +322,7 @@ func TestContainerWithCustomImage(t *testing.T) {
 	}
 
 	err = client.Get(context.TODO(), key, &ikt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, environment.Integration.ObjectMeta.UID, ikt.ObjectMeta.OwnerReferences[0].UID)
 
 	trait := environment.Integration.Spec.Traits.Container
@@ -330,7 +331,7 @@ func TestContainerWithCustomImage(t *testing.T) {
 
 func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -389,7 +390,7 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 
 func TestContainerWithImagePullPolicy(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -426,7 +427,7 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 
 	container := environment.GetIntegrationContainer()
@@ -477,7 +478,7 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 	}
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 	conditions := environment.Integration.Status.Conditions
