@@ -6682,7 +6682,7 @@ is considered to be failed. It defaults to `60s`.
 The deployment strategy to use to replace existing pods with new ones.
 
 |`rollingUpdateMaxUnavailable` +
-int
+k8s.io/apimachinery/pkg/util/intstr.IntOrString
 |
 
 
@@ -6693,7 +6693,7 @@ This can not be 0 if MaxSurge is 0.
 Defaults to `25%`.
 
 |`rollingUpdateMaxSurge` +
-int
+k8s.io/apimachinery/pkg/util/intstr.IntOrString
 |
 
 

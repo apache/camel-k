@@ -163,12 +163,12 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			var maxUnavailable *intstr.IntOrString
 
 			if t.RollingUpdateMaxSurge != nil {
-				v := intstr.FromInt(*t.RollingUpdateMaxSurge)
-				maxSurge = &v
+				v := t.RollingUpdateMaxSurge
+				maxSurge = v
 			}
 			if t.RollingUpdateMaxUnavailable != nil {
-				v := intstr.FromInt(*t.RollingUpdateMaxUnavailable)
-				maxUnavailable = &v
+				v := t.RollingUpdateMaxUnavailable
+				maxUnavailable = v
 			}
 
 			deployment.Spec.Strategy.RollingUpdate = &appsv1.RollingUpdateDeployment{
