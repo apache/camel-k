@@ -85,14 +85,14 @@ type Trait interface {
 	RequiresIntegrationPlatform() bool
 
 	// IsAllowedInProfile tells if the trait supports the given profile
-	IsAllowedInProfile(v1.TraitProfile) bool
+	IsAllowedInProfile(traitProfile v1.TraitProfile) bool
 
 	// Order is the order in which the trait should be executed in the normal flow
 	Order() int
 }
 
 type Comparable interface {
-	Matches(Trait) bool
+	Matches(trait Trait) bool
 }
 
 type ComparableTrait interface {
@@ -194,7 +194,7 @@ func (trait *BasePlatformTrait) IsPlatformTrait() bool {
 // ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
 type ControllerStrategySelector interface {
 	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
-	SelectControllerStrategy(*Environment) (*ControllerStrategy, error)
+	SelectControllerStrategy(env *Environment) (*ControllerStrategy, error)
 	// ControllerStrategySelectorOrder returns the order (priority) of the controller strategy selector
 	ControllerStrategySelectorOrder() int
 }

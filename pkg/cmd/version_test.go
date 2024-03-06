@@ -72,14 +72,14 @@ func TestVersionOperatorFlag(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdVersion, "--operator")
 	require.NoError(t, err)
-	assert.Equal(t, true, versionCmdOptions.Operator)
+	assert.True(t, versionCmdOptions.Operator)
 }
 
 func TestVersionClientVerbose(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
 	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v")
 	require.NoError(t, err)
-	assert.Equal(t, true, versionCmdOptions.Verbose)
+	assert.True(t, versionCmdOptions.Verbose)
 	assert.Equal(t, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit), output)
 }
 
@@ -100,7 +100,7 @@ func TestOperatorVersionVerbose(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t, &platform, &catalog)
 	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v", "--operator")
 	require.NoError(t, err)
-	assert.Equal(t, true, versionCmdOptions.Verbose)
+	assert.True(t, versionCmdOptions.Verbose)
 	assert.Contains(t, output, fmt.Sprintf("Camel K Operator %s\n", defaults.Version))
 	assert.Contains(t, output, fmt.Sprintf("Camel version: %s\n", catalog.Spec.GetCamelVersion()))
 	assert.Contains(t, output, fmt.Sprintf("Camel Quarkus version: %s\n", catalog.Spec.GetCamelQuarkusVersion()))
@@ -109,17 +109,17 @@ func TestOperatorVersionVerbose(t *testing.T) {
 
 func TestCompatibleVersions(t *testing.T) {
 	_, rootCmd, _ := initializeVersionCmdOptions(t)
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0", rootCmd))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.1", rootCmd))
-	assert.Equal(t, true, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT", rootCmd))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "1.2.0", rootCmd))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "2.3.0", rootCmd))
-	assert.Equal(t, false, compatibleVersions("1.3.0", "dsadsa", rootCmd))
-	assert.Equal(t, false, compatibleVersions("dsadsa", "1.3.4", rootCmd))
+	assert.True(t, compatibleVersions("1.3.0", "1.3.0", rootCmd))
+	assert.True(t, compatibleVersions("1.3.0", "1.3.1", rootCmd))
+	assert.True(t, compatibleVersions("1.3.0", "1.3.0-SNAPSHOT", rootCmd))
+	assert.False(t, compatibleVersions("1.3.0", "1.2.0", rootCmd))
+	assert.False(t, compatibleVersions("1.3.0", "2.3.0", rootCmd))
+	assert.False(t, compatibleVersions("1.3.0", "dsadsa", rootCmd))
+	assert.False(t, compatibleVersions("dsadsa", "1.3.4", rootCmd))
 }
 
 func TestCompatibleVersionsNonSemver(t *testing.T) {
 	_, rootCmd, _ := initializeVersionCmdOptions(t)
-	assert.Equal(t, true, compatibleVersions("1.3.0.special-version", "1.3.0.special-version", rootCmd))
-	assert.Equal(t, false, compatibleVersions("1.3.1.special-version", "1.3.0.special-version", rootCmd))
+	assert.True(t, compatibleVersions("1.3.0.special-version", "1.3.0.special-version", rootCmd))
+	assert.False(t, compatibleVersions("1.3.1.special-version", "1.3.0.special-version", rootCmd))
 }

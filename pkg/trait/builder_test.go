@@ -186,7 +186,7 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 	assert.NotNil(t, customTask)
 	assert.NotNil(t, packageTask)
 	assert.NotNil(t, publisherTask)
-	assert.Equal(t, 4, len(env.Pipeline))
+	assert.Len(t, env.Pipeline, 4)
 	assert.Equal(t, "test", customTask.Custom.Name)
 	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
 	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
@@ -204,7 +204,7 @@ func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 
 	customTask := findCustomTaskByName(env.Pipeline, "test")
 
-	assert.Equal(t, 4, len(env.Pipeline))
+	assert.Len(t, env.Pipeline, 4)
 	assert.Equal(t, "test", customTask.Custom.Name)
 	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
 	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
@@ -219,8 +219,8 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 
 	// The error will be reported to IntegrationKits
 	require.NoError(t, err)
-	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
 }
 
@@ -234,8 +234,8 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 
 	// The error will be reported to IntegrationKits
 	require.NoError(t, err)
-	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
 }
 
@@ -275,8 +275,8 @@ func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
 
 	// The error will be reported to IntegrationKits
 	require.NoError(t, err)
-	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Contains(t, env.IntegrationKit.Status.Conditions[0].Message, "fakeprofile")
 }
 
@@ -306,7 +306,7 @@ func TestBuilderCustomTasks(t *testing.T) {
 	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
 	require.NoError(t, err)
-	assert.Equal(t, 2, len(tasks))
+	assert.Len(t, tasks, 2)
 	assert.Equal(t, "test", tasks[0].Custom.Name)
 	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
 	assert.Equal(t, "ls", tasks[0].Custom.ContainerCommands[0])
@@ -334,7 +334,7 @@ func TestBuilderCustomTasksBashScript(t *testing.T) {
 	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
 	require.NoError(t, err)
-	assert.Equal(t, 1, len(tasks))
+	assert.Len(t, tasks, 1)
 	assert.Equal(t, "test", tasks[0].Custom.Name)
 	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
 	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
@@ -349,7 +349,7 @@ func TestBuilderCustomTasksSecurityContextScript(t *testing.T) {
 	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
 	require.NoError(t, err)
-	assert.Equal(t, 1, len(tasks))
+	assert.Len(t, tasks, 1)
 	assert.Equal(t, "test", tasks[0].Custom.Name)
 	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
 	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])

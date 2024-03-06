@@ -64,7 +64,7 @@ type Task interface {
 type Step interface {
 	ID() string
 	Phase() int32
-	execute(*builderContext) error
+	execute(context *builderContext) error
 }
 
 type resource struct {

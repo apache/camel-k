@@ -58,7 +58,7 @@ func TestDigestSHA1FromTempFile(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
 
 	sha1, err := ComputeSHA1(tmpFile.Name())
 	require.NoError(t, err)

@@ -107,13 +107,13 @@ func TestRunNoFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, integrationSource)
 	require.NoError(t, err)
 	// Check default expected values
-	assert.Equal(t, false, runCmdOptions.Wait)
-	assert.Equal(t, false, runCmdOptions.Logs)
-	assert.Equal(t, false, runCmdOptions.Sync)
-	assert.Equal(t, false, runCmdOptions.Dev)
-	assert.Equal(t, true, runCmdOptions.UseFlows)
-	assert.Equal(t, false, runCmdOptions.Compression)
-	assert.Equal(t, false, runCmdOptions.Save)
+	assert.False(t, runCmdOptions.Wait)
+	assert.False(t, runCmdOptions.Logs)
+	assert.False(t, runCmdOptions.Sync)
+	assert.False(t, runCmdOptions.Dev)
+	assert.True(t, runCmdOptions.UseFlows)
+	assert.False(t, runCmdOptions.Compression)
+	assert.False(t, runCmdOptions.Save)
 }
 
 func TestRunNonExistingFlag(t *testing.T) {
@@ -126,7 +126,7 @@ func TestRunCompressionFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--compression", integrationSource)
 	require.NoError(t, err)
-	assert.Equal(t, true, runCmdOptions.Compression)
+	assert.True(t, runCmdOptions.Compression)
 }
 
 func TestRunDependencyFlag(t *testing.T) {
@@ -147,13 +147,13 @@ func TestRunDevFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--dev", integrationSource)
 	require.NoError(t, err)
-	assert.Equal(t, true, runCmdOptions.Dev)
+	assert.True(t, runCmdOptions.Dev)
 }
 
 func TestRunDevModeOutputFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--dev", "-o", "yaml", integrationSource)
-	assert.Equal(t, true, runCmdOptions.Dev)
+	assert.True(t, runCmdOptions.Dev)
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 	require.Error(t, err)
 	assert.Equal(t, "cannot use --dev with -o/--output option",
@@ -203,7 +203,7 @@ func TestRunLogsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--logs", integrationSource)
 	require.NoError(t, err)
-	assert.Equal(t, true, runCmdOptions.Logs)
+	assert.True(t, runCmdOptions.Logs)
 }
 
 func TestRunMavenRepositoryFlag(t *testing.T) {
@@ -304,8 +304,8 @@ func TestExtractProperties_FromFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	require.NoError(t, tmpFile1.Close())
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
 	key=value
 	#key2=value2
 	my.key=value
@@ -328,8 +328,8 @@ func TestExtractPropertiesFromFileAndSingleValue(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	require.NoError(t, tmpFile1.Close())
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
 	key=value
 	#key2=value2
 	my.key=value
@@ -355,8 +355,8 @@ func TestAddPropertyFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
+	require.NoError(t, tmpFile.Close())
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestPropertyFileContent), 0o400))
 
 	runCmdOptions, _, _ := initializeRunCmdOptionsWithOutput(t)
 	properties, err := runCmdOptions.convertToTraitParameter(nil, "file:"+tmpFile.Name(), "trait.properties")
@@ -391,7 +391,7 @@ func TestRunSaveFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--save", integrationSource)
 	require.NoError(t, err)
-	assert.Equal(t, true, runCmdOptions.Save)
+	assert.True(t, runCmdOptions.Save)
 }
 
 func TestRunSourceFlag(t *testing.T) {
@@ -406,7 +406,7 @@ func TestRunSyncFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--sync", integrationSource)
 	require.NoError(t, err)
-	assert.Equal(t, true, runCmdOptions.Sync)
+	assert.True(t, runCmdOptions.Sync)
 }
 
 func TestRunExistingTraitFlag(t *testing.T) {
@@ -473,7 +473,7 @@ func TestRunUseFlowsFlag(t *testing.T) {
 	runCmdOptions, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--use-flows=false", integrationSource)
 	require.NoError(t, err)
-	assert.Equal(t, false, runCmdOptions.UseFlows)
+	assert.False(t, runCmdOptions.UseFlows)
 }
 
 func TestRunVolumeFlag(t *testing.T) {
@@ -562,8 +562,8 @@ func TestFilterBuildPropertyFiles(t *testing.T) {
 	inputValues := []string{"file:/tmp/test", "key=val"}
 	outputValues := filterBuildPropertyFiles(inputValues)
 
-	assert.Equal(t, len(outputValues), 1)
-	assert.Equal(t, outputValues[0], "/tmp/test")
+	assert.Len(t, outputValues, 1)
+	assert.Equal(t, "/tmp/test", outputValues[0])
 }
 
 const TestSrcContent = `
@@ -586,7 +586,7 @@ func TestOutputYaml(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	fileName := filepath.Base(tmpFile.Name())
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
@@ -621,7 +621,7 @@ func TestTrait(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	fileName := filepath.Base(tmpFile.Name())
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
@@ -662,7 +662,7 @@ func TestMissingTrait(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "bogus.fail=i-must-fail")
@@ -712,7 +712,7 @@ func TestIntegrationServiceAccountName(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "--service-account", "my-service-account")
@@ -729,7 +729,7 @@ func TestFileProperties(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
 	key=${value}
 	#key2=value2
 	my.key=value
@@ -741,7 +741,7 @@ func TestFileProperties(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
 		"-p", "file:"+tmpFile1.Name(),
@@ -761,7 +761,7 @@ func TestPropertyShouldNotExpand(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile1.Close())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(`
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(`
 	key=${value}
 	`), 0o400))
 
@@ -771,7 +771,7 @@ func TestPropertyShouldNotExpand(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(TestSrcContent), 0o400))
 	_, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(),
 		"-o", "yaml",
@@ -794,7 +794,7 @@ func TestRunOutput(t *testing.T) {
 	defer tmpFile1.Close()
 
 	assert.Nil(t, tmpFile1.Sync())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
 
 	_, rootCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
@@ -807,7 +807,7 @@ func TestRunOutput(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Integration \"%s\" unchanged\n", integrationName), output)
 
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(strings.Replace(yamlIntegration, "Hello", "Hi", 1)), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(strings.Replace(yamlIntegration, "Hello", "Hi", 1)), 0o400))
 	assert.Nil(t, tmpFile1.Sync())
 	output, err = test.ExecuteCommand(rootCmd, cmdRun, tmpFile1.Name())
 	require.NoError(t, err)
@@ -828,7 +828,7 @@ func TestRunGlob(t *testing.T) {
 	}
 	defer tmpFile1.Close()
 	assert.Nil(t, tmpFile1.Sync())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
 
 	tmpFile2, err := os.CreateTemp(dir, pattern)
 	if err != nil {
@@ -836,7 +836,7 @@ func TestRunGlob(t *testing.T) {
 	}
 	defer tmpFile2.Close()
 	assert.Nil(t, tmpFile2.Sync())
-	assert.Nil(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
 
 	integrationName := "myname"
 
@@ -863,7 +863,7 @@ func TestRunGlobAllFiles(t *testing.T) {
 	}
 	defer tmpFile1.Close()
 	assert.Nil(t, tmpFile1.Sync())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
 
 	tmpFile2, err := os.CreateTemp(dir, pattern)
 	if err != nil {
@@ -871,7 +871,7 @@ func TestRunGlobAllFiles(t *testing.T) {
 	}
 	defer tmpFile2.Close()
 	assert.Nil(t, tmpFile2.Sync())
-	assert.Nil(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
 
 	integrationName := "myname"
 
@@ -898,7 +898,7 @@ func TestRunGlobChange(t *testing.T) {
 	}
 	defer tmpFile1.Close()
 	assert.Nil(t, tmpFile1.Sync())
-	assert.Nil(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile1.Name(), []byte(yamlIntegration), 0o400))
 
 	integrationName := "myname"
 
@@ -920,7 +920,7 @@ func TestRunGlobChange(t *testing.T) {
 	}
 	defer tmpFile2.Close()
 	assert.Nil(t, tmpFile2.Sync())
-	assert.Nil(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile2.Name(), []byte(yamlIntegration), 0o400))
 
 	output, err = test.ExecuteCommand(rootCmd, cmdRun, "--name", integrationName, file)
 	require.NoError(t, err)

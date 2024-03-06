@@ -30,7 +30,7 @@ func TestEmptyRepository(t *testing.T) {
 	repo := newEmptyKameletRepository()
 	list, err := repo.List(ctx)
 	require.NoError(t, err)
-	assert.Len(t, list, 0)
+	assert.Empty(t, list)
 	k, err := repo.Get(ctx, "non-existing")
 	require.NoError(t, err)
 	assert.Nil(t, k)

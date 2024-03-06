@@ -164,7 +164,7 @@ var (
 
 // Inspector is the common interface for language specific inspector implementations.
 type Inspector interface {
-	Extract(v1.SourceSpec, *Metadata) error
+	Extract(spec v1.SourceSpec, metadata *Metadata) error
 }
 
 // InspectorForLanguage is the factory function to return a new inspector for the given language

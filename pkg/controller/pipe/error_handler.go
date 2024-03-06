@@ -105,7 +105,7 @@ func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHa
 		errorHandlerBinding.ApplicationProperties[key] = fmt.Sprintf("%v", value)
 	}
 	if errorHandler.Type() == v1.ErrorHandlerTypeSink && errorHandlerBinding.URI != "" {
-		errorHandlerBinding.ApplicationProperties[fmt.Sprintf("%s.deadLetterUri", v1.ErrorHandlerAppPropertiesPrefix)] = fmt.Sprintf("%v", errorHandlerBinding.URI)
+		errorHandlerBinding.ApplicationProperties[fmt.Sprintf("%s.deadLetterUri", v1.ErrorHandlerAppPropertiesPrefix)] = errorHandlerBinding.URI
 	}
 	return nil
 }

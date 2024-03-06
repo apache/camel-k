@@ -41,8 +41,8 @@ func TestRawBinaryContentType(t *testing.T) {
 	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
+	require.NoError(t, tmpFile.Close())
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte{1, 2, 3, 4, 5, 6}, 0o400))
 
 	data, contentType, err := LoadRawContent(context.Background(), tmpFile.Name())
 	require.NoError(t, err)
@@ -56,8 +56,8 @@ func TestRawApplicationContentType(t *testing.T) {
 	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	require.NoError(t, tmpFile.Close())
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, err := LoadRawContent(context.Background(), tmpFile.Name())
 	require.NoError(t, err)
@@ -71,8 +71,8 @@ func TestTextContentType(t *testing.T) {
 	if tmpFile, err = os.CreateTemp("", "camel-k-*.json"); err != nil {
 		t.Error(err)
 	}
-	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	require.NoError(t, tmpFile.Close())
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := LoadTextContent(context.Background(), tmpFile.Name(), false)
 	require.NoError(t, err)
@@ -88,7 +88,7 @@ func TestTextCompressed(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte(`{"hello":"world"}`), 0o400))
 
 	data, contentType, compressed, err := LoadTextContent(context.Background(), tmpFile.Name(), true)
 	require.NoError(t, err)

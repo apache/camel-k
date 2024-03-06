@@ -275,8 +275,8 @@ func TestYAMLRouteAndFromEquivalence(t *testing.T) {
 		sourceContent := content
 		t.Run(name, func(t *testing.T) {
 			assertExtractYAML(t, inspector, sourceContent, func(meta *Metadata) {
-				assert.Equal(t, meta.FromURIs, []string{"timer:tick?period=5000"})
-				assert.Equal(t, meta.ToURIs, []string{"log:info"})
+				assert.Equal(t, []string{"timer:tick?period=5000"}, meta.FromURIs)
+				assert.Equal(t, []string{"log:info"}, meta.ToURIs)
 				assert.True(t, meta.Dependencies.Has("camel:log"))
 				assert.True(t, meta.Dependencies.Has("camel:timer"))
 			})
@@ -607,7 +607,7 @@ func TestYAMLRouteWithPropertyPlaceholder(t *testing.T) {
 				for _, k := range test.toURIs {
 					assert.Contains(t, meta.ToURIs, k)
 				}
-				assert.Equal(t, meta.Dependencies.Size(), 2)
+				assert.Equal(t, 2, meta.Dependencies.Size())
 				assert.True(t, meta.Dependencies.Has("camel:core"))
 				assert.True(t, meta.Dependencies.Has("camel:timer"))
 			})

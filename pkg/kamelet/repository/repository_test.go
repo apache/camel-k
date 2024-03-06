@@ -149,7 +149,7 @@ func TestNewRepositoryWithCamelKamelets(t *testing.T) {
 	require.NoError(t, err)
 	list, err := repo.List(ctx)
 	require.NoError(t, err)
-	assert.True(t, len(list) > 2)
+	assert.Greater(t, len(list), 2)
 	k1, err := repo.Get(ctx, "kamelet1")
 	require.NoError(t, err)
 	assert.Equal(t, "kamelet1", k1.Name)

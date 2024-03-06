@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDefaultBaseImage(t *testing.T) {
@@ -34,29 +35,29 @@ func TestOverriddenBaseImage(t *testing.T) {
 	env := "RELATED_IMAGE_BASE"
 	oldEnvVal := os.Getenv(env)
 	overriddenImage := "xxx"
-	assert.NoError(t, os.Setenv(env, overriddenImage))
+	require.NoError(t, os.Setenv(env, overriddenImage))
 	assert.Equal(t, overriddenImage, BaseImage())
 	assert.False(t, IsBaseImageDefault())
-	assert.NoError(t, os.Setenv(env, oldEnvVal))
+	require.NoError(t, os.Setenv(env, oldEnvVal))
 }
 
 func TestOverriddenInstallDefaultKamelets(t *testing.T) {
 	env := "KAMEL_INSTALL_DEFAULT_KAMELETS"
 	oldEnvVal := os.Getenv(env)
-	assert.NoError(t, os.Setenv(env, strconv.FormatBool(false)))
+	require.NoError(t, os.Setenv(env, strconv.FormatBool(false)))
 	assert.False(t, InstallDefaultKamelets())
-	assert.NoError(t, os.Setenv(env, strconv.FormatBool(true)))
+	require.NoError(t, os.Setenv(env, strconv.FormatBool(true)))
 	assert.True(t, InstallDefaultKamelets())
-	assert.NoError(t, os.Setenv(env, "wrongval"))
+	require.NoError(t, os.Setenv(env, "wrongval"))
 	assert.False(t, InstallDefaultKamelets())
-	assert.NoError(t, os.Setenv(env, oldEnvVal))
+	require.NoError(t, os.Setenv(env, oldEnvVal))
 }
 
 func TestOverriddenOperatorID(t *testing.T) {
 	env := "KAMEL_OPERATOR_ID"
 	oldEnvVal := os.Getenv(env)
 	overriddenID := "operator-1"
-	assert.NoError(t, os.Setenv(env, overriddenID))
+	require.NoError(t, os.Setenv(env, overriddenID))
 	assert.Equal(t, overriddenID, OperatorID())
-	assert.NoError(t, os.Setenv(env, oldEnvVal))
+	require.NoError(t, os.Setenv(env, oldEnvVal))
 }

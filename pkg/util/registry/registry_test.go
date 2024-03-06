@@ -61,15 +61,15 @@ func TestAuth_GenerateDockerConfig(t *testing.T) {
 }
 
 func TestAuth_Validate(t *testing.T) {
-	assert.NotNil(t, Auth{
+	require.Error(t, Auth{
 		Username: "nic",
 	}.validate())
 
-	assert.NotNil(t, Auth{
+	require.Error(t, Auth{
 		Server: "quay.io",
 	}.validate())
 
-	assert.Nil(t, Auth{
+	require.NoError(t, Auth{
 		Username: "nic",
 		Server:   "quay.io",
 	}.validate())

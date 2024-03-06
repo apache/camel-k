@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -69,23 +68,23 @@ func TestKameletAddRepoNonExistingFlag(t *testing.T) {
 
 func TestKameletAddRepoInvalidRepositoryURI(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{}
-	assert.NotNil(t, checkURI("foo", repositories))
-	assert.NotNil(t, checkURI("github", repositories))
-	assert.NotNil(t, checkURI("github:", repositories))
-	assert.NotNil(t, checkURI("github:foo", repositories))
-	assert.NotNil(t, checkURI("github:foo/", repositories))
+	require.Error(t, checkURI("foo", repositories))
+	require.Error(t, checkURI("github", repositories))
+	require.Error(t, checkURI("github:", repositories))
+	require.Error(t, checkURI("github:foo", repositories))
+	require.Error(t, checkURI("github:foo/", repositories))
 }
 
 func TestKameletAddRepoValidRepositoryURI(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{}
-	assert.Nil(t, checkURI("github:foo/bar", repositories))
-	assert.Nil(t, checkURI("github:foo/bar/some/path", repositories))
-	assert.Nil(t, checkURI("github:foo/bar@1.0", repositories))
-	assert.Nil(t, checkURI("github:foo/bar/some/path@1.0", repositories))
+	require.NoError(t, checkURI("github:foo/bar", repositories))
+	require.NoError(t, checkURI("github:foo/bar/some/path", repositories))
+	require.NoError(t, checkURI("github:foo/bar@1.0", repositories))
+	require.NoError(t, checkURI("github:foo/bar/some/path@1.0", repositories))
 }
 
 func TestKameletAddRepoDuplicateRepositoryURI(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar"}}
-	assert.NotNil(t, checkURI("github:foo/bar", repositories))
-	assert.Nil(t, checkURI("github:foo/bar2", repositories))
+	require.Error(t, checkURI("github:foo/bar", repositories))
+	require.NoError(t, checkURI("github:foo/bar2", repositories))
 }

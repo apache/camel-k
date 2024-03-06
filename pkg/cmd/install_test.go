@@ -60,16 +60,16 @@ func TestInstallNoFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall)
 	require.NoError(t, err)
 	// Check default expected values
-	assert.Equal(t, false, installCmdOptions.Wait)
-	assert.Equal(t, false, installCmdOptions.ClusterSetupOnly)
-	assert.Equal(t, false, installCmdOptions.SkipOperatorSetup)
-	assert.Equal(t, false, installCmdOptions.SkipClusterSetup)
-	assert.Equal(t, false, installCmdOptions.SkipDefaultKameletsSetup)
-	assert.Equal(t, false, installCmdOptions.ExampleSetup)
-	assert.Equal(t, false, installCmdOptions.Global)
-	assert.Equal(t, false, installCmdOptions.Save)
-	assert.Equal(t, false, installCmdOptions.Force)
-	assert.Equal(t, true, installCmdOptions.Olm)
+	assert.False(t, installCmdOptions.Wait)
+	assert.False(t, installCmdOptions.ClusterSetupOnly)
+	assert.False(t, installCmdOptions.SkipOperatorSetup)
+	assert.False(t, installCmdOptions.SkipClusterSetup)
+	assert.False(t, installCmdOptions.SkipDefaultKameletsSetup)
+	assert.False(t, installCmdOptions.ExampleSetup)
+	assert.False(t, installCmdOptions.Global)
+	assert.False(t, installCmdOptions.Save)
+	assert.False(t, installCmdOptions.Force)
+	assert.True(t, installCmdOptions.Olm)
 	assert.Equal(t, "", installCmdOptions.olmOptions.OperatorName)
 	assert.Equal(t, "", installCmdOptions.olmOptions.Package)
 	assert.Equal(t, "", installCmdOptions.olmOptions.Channel)
@@ -77,7 +77,7 @@ func TestInstallNoFlag(t *testing.T) {
 	assert.Equal(t, "", installCmdOptions.olmOptions.SourceNamespace)
 	assert.Equal(t, "", installCmdOptions.olmOptions.GlobalNamespace)
 	assert.Equal(t, int32(8081), installCmdOptions.HealthPort)
-	assert.Equal(t, false, installCmdOptions.Monitoring)
+	assert.False(t, installCmdOptions.Monitoring)
 	assert.Equal(t, int32(8080), installCmdOptions.MonitoringPort)
 }
 
@@ -126,7 +126,7 @@ func TestInstallClusterSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--cluster-setup")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.ClusterSetupOnly)
+	assert.True(t, installCmdOptions.ClusterSetupOnly)
 }
 
 func TestInstallClusterTypeFlag(t *testing.T) {
@@ -140,21 +140,21 @@ func TestInstallExampleFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--example")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.ExampleSetup)
+	assert.True(t, installCmdOptions.ExampleSetup)
 }
 
 func TestInstallForceFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--force")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.Force)
+	assert.True(t, installCmdOptions.Force)
 }
 
 func TestInstallGlobalFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--global")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.Global)
+	assert.True(t, installCmdOptions.Global)
 }
 
 func TestInstallHealthFlag(t *testing.T) {
@@ -194,7 +194,7 @@ func TestInstallMonitoringFlag(t *testing.T) {
 		"--monitoring",
 		"--monitoring-port", "7777")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.Monitoring)
+	assert.True(t, installCmdOptions.Monitoring)
 	assert.Equal(t, int32(7777), installCmdOptions.MonitoringPort)
 }
 
@@ -202,7 +202,7 @@ func TestInstallOlmFalseFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--olm=false")
 	require.NoError(t, err)
-	assert.Equal(t, false, installCmdOptions.Olm)
+	assert.False(t, installCmdOptions.Olm)
 }
 
 func TestInstallOlmTrueNonDefaultFlag(t *testing.T) {
@@ -216,7 +216,7 @@ func TestInstallOlmTrueNonDefaultFlag(t *testing.T) {
 		"--olm-source-namespace", "olmSourceNamespace",
 		"--olm-starting-csv", "olmStartingCSV")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.Olm)
+	assert.True(t, installCmdOptions.Olm)
 	assert.Equal(t, "olmChannel", installCmdOptions.olmOptions.Channel)
 	assert.Equal(t, "olmGlobalNamespace", installCmdOptions.olmOptions.GlobalNamespace)
 	assert.Equal(t, "olmOperatorName", installCmdOptions.olmOptions.OperatorName)
@@ -267,7 +267,7 @@ func TestInstallRegistryFlag(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "registry", installCmdOptions.registry.Address)
 	assert.Equal(t, "organization", installCmdOptions.registry.Organization)
-	assert.Equal(t, true, installCmdOptions.registry.Insecure)
+	assert.True(t, installCmdOptions.registry.Insecure)
 	assert.Equal(t, "secret", installCmdOptions.registry.Secret)
 }
 
@@ -294,35 +294,35 @@ func TestInstallSaveFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--save")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.Save)
+	assert.True(t, installCmdOptions.Save)
 }
 
 func TestInstallSkipClusterSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-cluster-setup")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.SkipClusterSetup)
+	assert.True(t, installCmdOptions.SkipClusterSetup)
 }
 
 func TestInstallSkipOperatorSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-operator-setup")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.SkipOperatorSetup)
+	assert.True(t, installCmdOptions.SkipOperatorSetup)
 }
 
 func TestInstallSkipRegistrySetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-registry-setup")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.SkipRegistrySetup)
+	assert.True(t, installCmdOptions.SkipRegistrySetup)
 }
 
 func TestInstallSkipDefaultKameletsSetupFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--skip-default-kamelets-setup")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.SkipDefaultKameletsSetup)
+	assert.True(t, installCmdOptions.SkipDefaultKameletsSetup)
 }
 
 func TestInstallTraitProfileFlag(t *testing.T) {
@@ -336,7 +336,7 @@ func TestInstallWaitFlag(t *testing.T) {
 	installCmdOptions, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--wait")
 	require.NoError(t, err)
-	assert.Equal(t, true, installCmdOptions.Wait)
+	assert.True(t, installCmdOptions.Wait)
 }
 
 func TestDecodeMavenSettings(t *testing.T) {

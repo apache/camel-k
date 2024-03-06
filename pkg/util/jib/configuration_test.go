@@ -82,7 +82,7 @@ func TestJibConfigMap(t *testing.T) {
 	cm := &corev1.ConfigMap{}
 	err = c.Get(ctx, key, cm)
 	require.NoError(t, err)
-	assert.Equal(t, cm.OwnerReferences[0].Name, "test")
+	assert.Equal(t, "test", cm.OwnerReferences[0].Name)
 	assert.Equal(t, cm.OwnerReferences[0].UID, types.UID("8dc44a2b-063c-490e-ae02-1fab285ac70a"))
 	assert.NotNil(t, cm.Data["profile.xml"])
 	assert.True(t, strings.Contains(cm.Data["profile.xml"], "awesome"))

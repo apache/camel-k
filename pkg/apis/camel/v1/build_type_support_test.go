@@ -116,13 +116,13 @@ func TestMatchingBuildsPending(t *testing.T) {
 
 	// buildA is completed, no need to check it
 	matches, buildMatch := buildList.HasMatchingBuild(&buildB)
-	assert.Equal(t, true, matches)
+	assert.True(t, matches)
 	assert.Equal(t, buildA.Name, buildMatch.Name)
 	matches, buildMatch = buildList.HasMatchingBuild(&buildC)
-	assert.Equal(t, true, matches)
+	assert.True(t, matches)
 	// The matching logic is returning the first matching build found
 	assert.True(t, buildMatch.Name == buildA.Name || buildMatch.Name == buildB.Name)
 	matches, buildMatch = buildList.HasMatchingBuild(&buildZ)
-	assert.Equal(t, false, matches)
+	assert.False(t, matches)
 	assert.Nil(t, buildMatch)
 }
