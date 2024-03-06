@@ -38,7 +38,7 @@ is considered to be failed. It defaults to `60s`.
 | The deployment strategy to use to replace existing pods with new ones.
 
 | deployment.rolling-update-max-unavailable
-| int
+| k8s.io/apimachinery/pkg/util/intstr.IntOrString
 | The maximum number of pods that can be unavailable during the update.
 Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
 Absolute number is calculated from percentage by rounding down.
@@ -46,7 +46,7 @@ This can not be 0 if MaxSurge is 0.
 Defaults to `25%`.
 
 | deployment.rolling-update-max-surge
-| int
+| k8s.io/apimachinery/pkg/util/intstr.IntOrString
 | The maximum number of pods that can be scheduled above the desired number of
 pods.
 Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).

@@ -26,6 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -137,7 +138,7 @@ func TestApplyDeploymentTraitWithProgressDeadline(t *testing.T) {
 
 func TestApplyDeploymentTraitWitRecresteStrategy(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
-	maxSurge := 10
+	maxSurge := intstr.FromInt(10)
 
 	deploymentTrait.Strategy = appsv1.RecreateDeploymentStrategyType
 	deploymentTrait.RollingUpdateMaxSurge = &maxSurge
@@ -177,7 +178,7 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 	t.Run("with surge", func(t *testing.T) {
 		deploymentTrait, environment := createNominalDeploymentTest()
 
-		maxSurge := 10
+		maxSurge := intstr.FromInt(10)
 
 		deploymentTrait.Strategy = appsv1.RollingUpdateDeploymentStrategyType
 		deploymentTrait.RollingUpdateMaxSurge = &maxSurge
@@ -194,14 +195,14 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 		assert.Equal(t, appsv1.RollingUpdateDeploymentStrategyType, deployment.Spec.Strategy.Type)
 		assert.NotNil(t, deployment.Spec.Strategy.RollingUpdate)
 		assert.Nil(t, deployment.Spec.Strategy.RollingUpdate.MaxUnavailable)
-		assert.Equal(t, maxSurge, deployment.Spec.Strategy.RollingUpdate.MaxSurge.IntValue())
+		assert.Equal(t, maxSurge, *deployment.Spec.Strategy.RollingUpdate.MaxSurge)
 	})
 
 	t.Run("with surge and unavailable", func(t *testing.T) {
 		deploymentTrait, environment := createNominalDeploymentTest()
 
-		maxSurge := 10
-		maxUnavailable := 11
+		maxSurge := intstr.FromInt(10)
+		maxUnavailable := intstr.FromInt(11)
 
 		deploymentTrait.Strategy = appsv1.RollingUpdateDeploymentStrategyType
 		deploymentTrait.RollingUpdateMaxSurge = &maxSurge
@@ -218,9 +219,35 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 		assert.Equal(t, "integration-name", deployment.Name)
 		assert.Equal(t, appsv1.RollingUpdateDeploymentStrategyType, deployment.Spec.Strategy.Type)
 		assert.NotNil(t, deployment.Spec.Strategy.RollingUpdate)
-		assert.Equal(t, maxUnavailable, deployment.Spec.Strategy.RollingUpdate.MaxUnavailable.IntValue())
-		assert.Equal(t, maxSurge, deployment.Spec.Strategy.RollingUpdate.MaxSurge.IntValue())
+		assert.Equal(t, maxUnavailable, *deployment.Spec.Strategy.RollingUpdate.MaxUnavailable)
+		assert.Equal(t, maxSurge, *deployment.Spec.Strategy.RollingUpdate.MaxSurge)
 	})
+
+	t.Run("with surge and unavailable in percentage values", func(t *testing.T) {
+		deploymentTrait, environment := createNominalDeploymentTest()
+
+		maxSurge := intstr.FromString("10%")
+		maxUnavailable := intstr.FromString("11%")
+
+		deploymentTrait.Strategy = appsv1.RollingUpdateDeploymentStrategyType
+		deploymentTrait.RollingUpdateMaxSurge = &maxSurge
+		deploymentTrait.RollingUpdateMaxUnavailable = &maxUnavailable
+
+		environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
+
+		err := deploymentTrait.Apply(environment)
+
+		assert.Nil(t, err)
+
+		deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
+		assert.NotNil(t, deployment)
+		assert.Equal(t, "integration-name", deployment.Name)
+		assert.Equal(t, appsv1.RollingUpdateDeploymentStrategyType, deployment.Spec.Strategy.Type)
+		assert.NotNil(t, deployment.Spec.Strategy.RollingUpdate)
+		assert.Equal(t, maxUnavailable, *deployment.Spec.Strategy.RollingUpdate.MaxUnavailable)
+		assert.Equal(t, maxSurge, *deployment.Spec.Strategy.RollingUpdate.MaxSurge)
+	})
+
 }
 
 func createNominalDeploymentTest() (*deploymentTrait, *Environment) {
