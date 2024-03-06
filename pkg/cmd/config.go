@@ -51,7 +51,7 @@ func newCmdConfig(rootCmdOptions *RootCmdOptions) (*cobra.Command, *configCmdOpt
 	cmd := cobra.Command{
 		Use:     "config",
 		Short:   "Configure the default settings",
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, rootCmdOptions.Flags),
 		Args:    options.validateArgs,
 		RunE:    options.run,
 	}

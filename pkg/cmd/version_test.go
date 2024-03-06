@@ -42,7 +42,7 @@ func initializeVersionCmdOptions(t *testing.T, initObjs ...runtime.Object) (*ver
 	require.NoError(t, err)
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	versionCmdOptions := addTestVersionCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return versionCmdOptions, rootCmd, *options
 }

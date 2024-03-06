@@ -38,7 +38,7 @@ func initializeConfigCmdOptions(t *testing.T, mock bool) (*configCmdOptions, *co
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	configCmdOptions := addTestConfigCmd(*options, rootCmd, mock)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return configCmdOptions, rootCmd, *options
 }

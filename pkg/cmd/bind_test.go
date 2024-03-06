@@ -40,7 +40,7 @@ func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, Ro
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	bindCmdOptions := addTestBindCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return bindCmdOptions, rootCmd, *options
 }

@@ -38,7 +38,7 @@ func newKitDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitDelete
 	cmd := cobra.Command{
 		Use:     "delete [integration kit1] [integration kit2] ...",
 		Short:   "Delete integration kits deployed on Kubernetes",
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err

@@ -42,7 +42,7 @@ func newCmdGet(rootCmdOptions *RootCmdOptions) (*cobra.Command, *getCmdOptions) 
 		Use:     "get [integration]",
 		Short:   "Get integrations deployed on Kubernetes",
 		Long:    `Get the status of integrations deployed on Kubernetes.`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE:    options.run,
 	}
 

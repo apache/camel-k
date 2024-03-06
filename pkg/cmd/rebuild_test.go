@@ -34,7 +34,7 @@ func initializeRebuildCmdOptions(t *testing.T) (*rebuildCmdOptions, *cobra.Comma
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	rebuildCmdOptions := addTestRebuildCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return rebuildCmdOptions, rootCmd, *options
 }

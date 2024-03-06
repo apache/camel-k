@@ -34,7 +34,7 @@ func initializeKitCreateCmdOptions(t *testing.T) (*kitCreateCommandOptions, *cob
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	kitCreateCmdOptions := addTestKitCreateCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return kitCreateCmdOptions, rootCmd, *options
 }

@@ -50,7 +50,7 @@ func newCmdVersion(rootCmdOptions *RootCmdOptions) (*cobra.Command, *versionCmdO
 		Use:               "version",
 		Short:             "Display client version",
 		Long:              `Display Camel K client version.`,
-		PersistentPreRunE: decode(&options),
+		PersistentPreRunE: decode(&options, options.Flags),
 		PreRunE:           options.preRunE,
 		RunE:              options.run,
 		Annotations:       make(map[string]string),

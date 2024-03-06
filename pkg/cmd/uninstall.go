@@ -24,8 +24,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -108,17 +106,13 @@ var defaultListOptions = metav1.ListOptions{
 func (o *uninstallCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	path := pathToRoot(cmd)
 
-	// Requires synchronization as viper bind flag is not able to handle concurrency
-	m.Lock()
-	defer m.Unlock()
-
-	if err := decodeKey(o, path); err != nil {
+	if err := decodeKey(o, path, o.Flags.AllSettings()); err != nil {
 		return err
 	}
 
-	o.OlmOptions.OperatorName = viper.GetString(path + ".olm-operator-name")
-	o.OlmOptions.Package = viper.GetString(path + ".olm-package")
-	o.OlmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
+	o.OlmOptions.OperatorName = o.Flags.GetString(path + ".olm-operator-name")
+	o.OlmOptions.Package = o.Flags.GetString(path + ".olm-package")
+	o.OlmOptions.GlobalNamespace = o.Flags.GetString(path + ".olm-global-namespace")
 
 	return nil
 }

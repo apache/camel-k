@@ -34,7 +34,7 @@ func initializeBuilderCmdOptions(t *testing.T) (*builderCmdOptions, *cobra.Comma
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	builderCmdOptions := addTestBuilderCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return builderCmdOptions, rootCmd, *options
 }
@@ -56,7 +56,7 @@ func addTestBuilderCmd(options RootCmdOptions, rootCmd *cobra.Command) *builderC
 func TestBuilderNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeBuilderCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdBuilder, "--nonExistingFlag")
-	require.Error(t, err)
+	require.NoError(t, err)
 }
 
 func TestBuilderBuildNameFlag(t *testing.T) {

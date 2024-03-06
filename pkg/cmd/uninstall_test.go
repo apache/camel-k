@@ -43,7 +43,7 @@ func TestUninstallOlmFlags(t *testing.T) {
 
 	uninstallCmdOptions := addTestUninstallCmd(options, cmd)
 
-	kamelTestPostAddCommandInit(t, cmd)
+	kamelTestPostAddCommandInit(t, cmd, options)
 
 	_, err := test.ExecuteCommand(cmd, "uninstall", "--olm=false", "--olm-operator-name", "my-operator")
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestUninstallSkipFlags(t *testing.T) {
 
 	uninstallCmdOptions := addTestUninstallCmd(options, cmd)
 
-	kamelTestPostAddCommandInit(t, cmd)
+	kamelTestPostAddCommandInit(t, cmd, options)
 
 	_, err := test.ExecuteCommand(cmd, "uninstall", "--skip-crd", "--skip-cluster-roles", "--skip-integration-platform", "--skip-integration-profile")
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestUninstallAllFlag(t *testing.T) {
 
 	uninstallCmdOptions := addTestUninstallCmd(options, cmd)
 
-	kamelTestPostAddCommandInit(t, cmd)
+	kamelTestPostAddCommandInit(t, cmd, options)
 
 	_, err := test.ExecuteCommand(cmd, "uninstall", "--all")
 	require.NoError(t, err)

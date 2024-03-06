@@ -18,16 +18,15 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/apache/camel-k/v2/pkg/cmd/operator"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/spf13/cobra"
-
-	"github.com/apache/camel-k/v2/pkg/cmd/operator"
 )
 
 const operatorCommand = "operator"
 
-func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
+func newCmdOperator(rootCmdOptions *RootCmdOptions) (*cobra.Command, *operatorCmdOptions) {
 	options := operatorCmdOptions{}
 
 	cmd := cobra.Command{
@@ -35,7 +34,7 @@ func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
 		Short:   "Run the Camel K operator",
 		Long:    `Run the Camel K operator`,
 		Hidden:  true,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, rootCmdOptions.Flags),
 		Run:     options.run,
 	}
 

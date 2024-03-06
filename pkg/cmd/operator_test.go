@@ -35,7 +35,7 @@ func initializeOperatorCmdOptions(t *testing.T) (*operatorCmdOptions, *cobra.Com
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	operatorCmdOptions := addTestOperatorCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return operatorCmdOptions, rootCmd, *options
 }
@@ -43,7 +43,7 @@ func initializeOperatorCmdOptions(t *testing.T) (*operatorCmdOptions, *cobra.Com
 // nolint: unparam
 func addTestOperatorCmd(options RootCmdOptions, rootCmd *cobra.Command) *operatorCmdOptions {
 	// add a testing version of operator Command
-	operatorCmd, operatorOptions := newCmdOperator()
+	operatorCmd, operatorOptions := newCmdOperator(&options)
 	operatorCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}

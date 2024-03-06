@@ -53,7 +53,7 @@ func newCmdPromote(rootCmdOptions *RootCmdOptions) (*cobra.Command, *promoteCmdO
 		Use:     "promote my-it [--to <namespace>] [-x <promoted-operator-id>]",
 		Short:   "Promote an Integration/Pipe from an environment to another",
 		Long:    "Promote an Integration/Pipe from an environment to another, for example from a Development environment to a Production environment",
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE:    options.run,
 	}
 

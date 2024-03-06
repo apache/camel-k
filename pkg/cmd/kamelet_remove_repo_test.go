@@ -36,7 +36,7 @@ func initializeKameletRemoveRepoCmdOptions(t *testing.T) (*kameletRemoveRepoComm
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	kameletRemoveRepoCommandOptions := addTestKameletRemoveRepoCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return kameletRemoveRepoCommandOptions, rootCmd, *options
 }

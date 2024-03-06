@@ -94,7 +94,7 @@ KAMELET_CATALOG_REPO_TAG := v4.0.1
 DO_TEST_PREBUILD ?= true
 TEST_PREBUILD = build
 # Tests may run in parallel to each other. This count sets the amount of tests run in parallel. (default value usually is GOMAXPROCS)
-TEST_COMMON_PARALLEL_COUNT ?= 2
+TEST_COMMON_PARALLEL_COUNT ?= 4
 TEST_ADVANCED_PARALLEL_COUNT ?= 4
 
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time

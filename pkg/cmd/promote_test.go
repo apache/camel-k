@@ -41,7 +41,7 @@ func initializePromoteCmdOptions(t *testing.T, initObjs ...runtime.Object) (*pro
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	options.Namespace = "default"
 	promoteCmdOptions := addTestPromoteCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return promoteCmdOptions, rootCmd, *options
 }
