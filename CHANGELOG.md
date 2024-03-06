@@ -36,6 +36,7 @@
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
 - Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
+- Upgrade to Go 1.21 [\#4795](https://github.com/apache/camel-k/issues/4795)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
 - Pipe using simple language expressions causing failure [\#4777](https://github.com/apache/camel-k/issues/4777)
 - 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
@@ -49,6 +50,9 @@
 
 **Merged pull requests:**
 
+- chore\(traits\): deprecate registry [\#5222](https://github.com/apache/camel-k/pull/5222) ([squakez](https://github.com/squakez))
+- feat\(ci\): upgrade golang to 1.21 [\#5221](https://github.com/apache/camel-k/pull/5221) ([squakez](https://github.com/squakez))
+- fix\(trait\): watch for resource versions... [\#5218](https://github.com/apache/camel-k/pull/5218) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.17.0 to 0.18.0 [\#5214](https://github.com/apache/camel-k/pull/5214) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ci\): add snapshot repo [\#5209](https://github.com/apache/camel-k/pull/5209) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/stretchr/testify from 1.8.4 to 1.9.0 [\#5208](https://github.com/apache/camel-k/pull/5208) ([dependabot[bot]](https://github.com/apps/dependabot))
