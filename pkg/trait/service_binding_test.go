@@ -22,6 +22,7 @@ import (
 
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -36,13 +37,13 @@ func TestServiceBinding(t *testing.T) {
 	configured, condition, err := sbTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	// Required for local testing purposes only
 	handlers = []pipeline.Handler{}
 	err = sbTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	// TODO we should make the service binding trait to easily work with fake client
 	// and test the apply result in the environment accordingly.
 }

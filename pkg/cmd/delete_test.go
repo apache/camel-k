@@ -23,6 +23,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const cmdDelete = "delete"
@@ -61,6 +62,6 @@ func TestDeleteNonExistingFlag(t *testing.T) {
 func TestDeleteAllFlag(t *testing.T) {
 	deleteCmdOptions, rootCmd, _ := initializeDeleteCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdDelete, "--all")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, deleteCmdOptions.DeleteAll)
 }

@@ -22,13 +22,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestJSONFormat(t *testing.T) {
 	logLine := `{"level":"info","ts":"2023-08-30T08:07:19Z","logger":"camel-k.cmd","msg":"maxprocs: Leaving GOMAXPROCS=[2]: CPU quota undefined"}`
 	entry := LogEntry{}
 	err := json.Unmarshal([]byte(logLine), &entry)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "2023-08-30 08:07:19 +0000 UTC", entry.Timestamp.String())
 	assert.Equal(t, "maxprocs: Leaving GOMAXPROCS=[2]: CPU quota undefined", entry.Message)
 }

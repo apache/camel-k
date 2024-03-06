@@ -27,7 +27,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gstruct"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,7 +43,7 @@ func TestPipeScale(t *testing.T) {
 	RegisterTestingT(t)
 
 	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	if ocp {
 		t.Skip("TODO: Temporarily disabled as this test is flaky on OpenShift 3")
 		return

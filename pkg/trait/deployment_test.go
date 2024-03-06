@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -44,7 +45,7 @@ func TestConfigureDeploymentTraitWhileIntegrationIsRunningDoesSucceed(t *testing
 
 	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -53,7 +54,7 @@ func TestConfigureDeploymentTraitDoesSucceed(t *testing.T) {
 
 	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -63,7 +64,7 @@ func TestConfigureDeploymentTraitWhileBuildingKitDoesNotSucceed(t *testing.T) {
 
 	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.False(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -74,7 +75,7 @@ func TestConfigureDeploymentTraitWhileWaitingPlatformDoesNotSucceed(t *testing.T
 
 	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.False(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -84,14 +85,14 @@ func TestApplyDeploymentTraitWhileResolvingKitDoesNotSucceed(t *testing.T) {
 
 	configured, condition, err := deploymentTrait.Configure(environment)
 	assert.False(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
 func TestApplyDeploymentTraitWhileDeployingIntegrationDoesSucceed(t *testing.T) {
 	deploymentTrait, environment := createNominalDeploymentTest()
 	err := deploymentTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 	assert.NotNil(t, deployment)
@@ -109,7 +110,7 @@ func TestApplyDeploymentTraitWhileRunningIntegrationDoesSucceed(t *testing.T) {
 
 	err := deploymentTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 	assert.NotNil(t, deployment)
@@ -126,7 +127,7 @@ func TestApplyDeploymentTraitWithProgressDeadline(t *testing.T) {
 
 	err := deploymentTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 	assert.NotNil(t, deployment)
@@ -145,7 +146,7 @@ func TestApplyDeploymentTraitWitRecresteStrategy(t *testing.T) {
 
 	err := deploymentTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 	assert.NotNil(t, deployment)
@@ -164,7 +165,7 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 
 		err := deploymentTrait.Apply(environment)
 
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 		assert.NotNil(t, deployment)
@@ -185,7 +186,7 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 
 		err := deploymentTrait.Apply(environment)
 
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 		assert.NotNil(t, deployment)
@@ -210,7 +211,7 @@ func TestApplyDeploymentTraitWitRollingUpdateStrategy(t *testing.T) {
 
 		err := deploymentTrait.Apply(environment)
 
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool { return true })
 		assert.NotNil(t, deployment)

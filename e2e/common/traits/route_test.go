@@ -37,8 +37,7 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -79,7 +78,7 @@ func TestRunRoutes(t *testing.T) {
 		t.Skip("This test requires route object which is available on OpenShift only.")
 		return
 	}
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	operatorID := "camel-k-trait-route"
 	Expect(KamelInstallWithID(operatorID, ns, "--trait-profile=openshift").Execute()).To(Succeed())
@@ -87,7 +86,7 @@ func TestRunRoutes(t *testing.T) {
 	// create a test secret of type tls with certificates
 	// this secret is used to setupt the route TLS object across diferent tests
 	secret, err := createSecret(ns)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	// they refer to the certificates create in the secret and are reused the different tests
 	refKey := secretName + "/" + corev1.TLSPrivateKeyKey

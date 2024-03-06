@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -38,7 +38,7 @@ func TestOpenAPI(t *testing.T) {
 	RegisterTestingT(t)
 
 	openapiContent, err := ioutil.ReadFile("./files/openapi/petstore-api.yaml")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	var cmDataProps = make(map[string]string)
 	cmDataProps["petstore-api.yaml"] = string(openapiContent)
 	CreatePlainTextConfigmap(ns, "my-openapi", cmDataProps)

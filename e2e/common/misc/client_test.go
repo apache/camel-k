@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -41,12 +42,12 @@ func TestClientFunctionalities(t *testing.T) {
 	RegisterTestingT(t)
 
 	cfg, err := config.GetConfig()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	camel, err := versioned.NewForConfig(cfg)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	lst, err := camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, lst.Items)
 
 	integration, err := camel.CamelV1().Integrations(ns).Create(TestContext, &v1.Integration{
@@ -54,15 +55,15 @@ func TestClientFunctionalities(t *testing.T) {
 			Name: "dummy",
 		},
 	}, metav1.CreateOptions{})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	lst, err = camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, lst.Items)
 	assert.Equal(t, lst.Items[0].Name, integration.Name)
 
 	err = camel.CamelV1().Integrations(ns).Delete(TestContext, "dummy", metav1.DeleteOptions{})
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

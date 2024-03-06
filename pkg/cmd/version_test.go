@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const cmdVersion = "version"
@@ -38,7 +39,7 @@ func initializeVersionCmdOptions(t *testing.T, initObjs ...runtime.Object) (*ver
 	t.Helper()
 
 	fakeClient, err := test.NewFakeClient(initObjs...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	versionCmdOptions := addTestVersionCmd(*options, rootCmd)
 	kamelTestPostAddCommandInit(t, rootCmd)
@@ -63,21 +64,21 @@ func TestVersionNonExistingFlag(t *testing.T) {
 func TestVersionClient(t *testing.T) {
 	_, rootCmd, _ := initializeVersionCmdOptions(t)
 	output, err := test.ExecuteCommand(rootCmd, cmdVersion)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Camel K Client %s\n", defaults.Version), output)
 }
 
 func TestVersionOperatorFlag(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdVersion, "--operator")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, versionCmdOptions.Operator)
 }
 
 func TestVersionClientVerbose(t *testing.T) {
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t)
 	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, versionCmdOptions.Verbose)
 	assert.Equal(t, fmt.Sprintf("Camel K Client %s\nGit Commit: %s\n", defaults.Version, defaults.GitCommit), output)
 }
@@ -98,7 +99,7 @@ func TestOperatorVersionVerbose(t *testing.T) {
 
 	versionCmdOptions, rootCmd, _ := initializeVersionCmdOptions(t, &platform, &catalog)
 	output, err := test.ExecuteCommand(rootCmd, cmdVersion, "-v", "--operator")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, true, versionCmdOptions.Verbose)
 	assert.Contains(t, output, fmt.Sprintf("Camel K Operator %s\n", defaults.Version))
 	assert.Contains(t, output, fmt.Sprintf("Camel version: %s\n", catalog.Spec.GetCamelVersion()))

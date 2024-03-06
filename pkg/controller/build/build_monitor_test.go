@@ -26,6 +26,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -155,7 +156,7 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 
 			c, err := test.NewFakeClient(initObjs...)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			bm := Monitor{
 				maxRunningBuilds:   3,
@@ -170,7 +171,7 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 
 			allowed, condition, err := bm.canSchedule(context.TODO(), c, tc.build)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tc.allowed, allowed)
 			assert.Equal(t, tc.condition.Type, condition.Type)
 			assert.Equal(t, tc.condition.Status, condition.Status)
@@ -183,7 +184,7 @@ func TestMonitorSequentialBuilds(t *testing.T) {
 func TestAllowBuildRequeue(t *testing.T) {
 	c, err := test.NewFakeClient()
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	bm := Monitor{
 		maxRunningBuilds:   3,
@@ -200,7 +201,7 @@ func TestAllowBuildRequeue(t *testing.T) {
 	build := newBuild("ns", "my-build")
 	allowed, condition, err := bm.canSchedule(context.TODO(), c, build)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, allowed)
 	assert.Equal(t, corev1.ConditionFalse, condition.Status)
 
@@ -208,7 +209,7 @@ func TestAllowBuildRequeue(t *testing.T) {
 
 	allowed, condition, err = bm.canSchedule(context.TODO(), c, build)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, allowed)
 	assert.Equal(t, corev1.ConditionTrue, condition.Status)
 }
@@ -367,7 +368,7 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 
 			c, err := test.NewFakeClient(initObjs...)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			bm := Monitor{
 				maxRunningBuilds:   3,
@@ -382,7 +383,7 @@ func TestMonitorFIFOBuilds(t *testing.T) {
 
 			allowed, condition, err := bm.canSchedule(context.TODO(), c, tc.build)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tc.allowed, allowed)
 			assert.Equal(t, tc.condition.Type, condition.Type)
 			assert.Equal(t, tc.condition.Status, condition.Status)
@@ -607,7 +608,7 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 
 			c, err := test.NewFakeClient(initObjs...)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			bm := Monitor{
 				maxRunningBuilds:   3,
@@ -622,7 +623,7 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 
 			allowed, condition, err := bm.canSchedule(context.TODO(), c, tc.build)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, tc.allowed, allowed)
 			assert.Equal(t, tc.condition.Type, condition.Type)
 			assert.Equal(t, tc.condition.Status, condition.Status)

@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCorrectFileValuesButNotFound(t *testing.T) {
@@ -34,9 +35,9 @@ func TestCorrectFileValuesButNotFound(t *testing.T) {
 	value2, err2 := IsLocalAndFileExists("path/to/file")
 
 	// they are all not found, but it must not panic
-	assert.Nil(t, err1)
+	require.NoError(t, err1)
 	assert.False(t, value1)
-	assert.Nil(t, err2)
+	require.NoError(t, err2)
 	assert.False(t, value2)
 }
 
@@ -51,15 +52,15 @@ func TestPermissionDenied(t *testing.T) {
 	}
 
 	dir, err := os.MkdirTemp("/tmp", "camel-k-")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	filename := filepath.Join(dir, "file.txt")
 	f, err := os.Create(filename)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	defer f.Close()
 
 	err = os.Chmod(dir, 0000)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	value, err := IsLocalAndFileExists(filename)
 	// must not panic because a permission error
@@ -73,19 +74,19 @@ func TestSupportedScheme(t *testing.T) {
 	httpValue, err3 := IsLocalAndFileExists("http://some/http/resource")
 	httpsValue, err4 := IsLocalAndFileExists("https://some/https/resource")
 
-	assert.Nil(t, err1)
+	require.NoError(t, err1)
 	assert.False(t, gistValue)
-	assert.Nil(t, err2)
+	require.NoError(t, err2)
 	assert.False(t, githubValue)
-	assert.Nil(t, err3)
+	require.NoError(t, err3)
 	assert.False(t, httpValue)
-	assert.Nil(t, err4)
+	require.NoError(t, err4)
 	assert.False(t, httpsValue)
 }
 
 func TestUnSupportedScheme(t *testing.T) {
 	value, err := IsLocalAndFileExists("bad_scheme:some/bad/resource")
 	// must not report an error
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, value)
 }

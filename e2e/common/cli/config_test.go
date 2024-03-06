@@ -31,6 +31,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -46,7 +47,7 @@ func TestKamelCLIConfig(t *testing.T) {
 		t.Cleanup(func() { os.Remove(cmd.DefaultConfigLocation) })
 		Expect(Kamel("config", "--default-namespace", ns).Execute()).To(Succeed())
 		_, err = os.Stat(cmd.DefaultConfigLocation)
-		assert.Nil(t, err, "A file at "+cmd.DefaultConfigLocation+" was expected")
+		require.NoError(t, err, "A file at "+cmd.DefaultConfigLocation+" was expected")
 		Expect(Kamel("run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
 
 		Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

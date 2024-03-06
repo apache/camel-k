@@ -24,6 +24,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const expectedPom = `<?xml version="1.0" encoding="UTF-8"?>
@@ -134,7 +135,7 @@ func TestPomGeneration(t *testing.T) {
 
 	pom, err := util.EncodeXML(project)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, pom)
 
 	assert.Equal(t, expectedPom, string(pom))
@@ -142,7 +143,7 @@ func TestPomGeneration(t *testing.T) {
 
 func TestParseGAV(t *testing.T) {
 	dep, err := ParseGAV("org.apache.camel:camel-core:2.21.1")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Empty(t, dep.Type)
@@ -150,7 +151,7 @@ func TestParseGAV(t *testing.T) {
 	assert.Empty(t, dep.Classifier)
 
 	dep, err = ParseGAV("org.apache.camel:camel-core:war:2.21.1")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Equal(t, dep.Type, "war")
@@ -158,7 +159,7 @@ func TestParseGAV(t *testing.T) {
 	assert.Empty(t, dep.Classifier)
 
 	dep, err = ParseGAV("org.apache.camel:camel-core:war:2.21.1:test")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Equal(t, dep.Type, "war")
@@ -166,7 +167,7 @@ func TestParseGAV(t *testing.T) {
 	assert.Equal(t, dep.Classifier, "test")
 
 	dep, err = ParseGAV("org.apache.camel:camel-core")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-core")
 	assert.Empty(t, dep.Type)
@@ -174,7 +175,7 @@ func TestParseGAV(t *testing.T) {
 	assert.Empty(t, dep.Classifier)
 
 	dep, err = ParseGAV("org.apache.camel:camel-k-core:jar::custom")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-k-core")
 	assert.Equal(t, dep.Type, "jar")
@@ -182,7 +183,7 @@ func TestParseGAV(t *testing.T) {
 	assert.Equal(t, dep.Classifier, "custom")
 	//
 	dep, err = ParseGAV("org.apache.camel:camel-k-core::1.2.3:foo")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-k-core")
 	assert.Empty(t, dep.Type)
@@ -190,7 +191,7 @@ func TestParseGAV(t *testing.T) {
 	assert.Equal(t, dep.Classifier, "foo")
 
 	dep, err = ParseGAV("org.apache.camel:camel-k-core:::custom")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-k-core")
 	assert.Empty(t, dep.Type)
@@ -198,7 +199,7 @@ func TestParseGAV(t *testing.T) {
 	assert.Equal(t, dep.Classifier, "custom")
 
 	dep, err = ParseGAV("org.apache.camel:camel-k-core:jar")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, dep.GroupID, "org.apache.camel")
 	assert.Equal(t, dep.ArtifactID, "camel-k-core")
 	assert.Equal(t, dep.Type, "jar")

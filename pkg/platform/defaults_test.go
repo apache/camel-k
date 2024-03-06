@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -40,10 +41,10 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 	}
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfile(""), ip.Status.Profile)
@@ -90,10 +91,10 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	}
 
 	c, err := test.NewFakeClient(&global)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ip := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
@@ -137,10 +138,10 @@ func TestPlatformS2IhUpdateOverrideLocalPlatformSpec(t *testing.T) {
 	}
 
 	c, err := test.NewFakeClient(&global)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ip := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{
@@ -177,10 +178,10 @@ func TestPlatformS2IUpdateDefaultLocalPlatformSpec(t *testing.T) {
 	}
 
 	c, err := test.NewFakeClient(&global)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "overridden", global.Status.Build.BaseImage)
 
 	ip := v1.IntegrationPlatform{
@@ -236,10 +237,10 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	}
 
 	c, err := test.NewFakeClient(&global)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = ConfigureDefaults(context.TODO(), c, &global, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ip := v1.IntegrationPlatform{
 		ObjectMeta: metav1.ObjectMeta{

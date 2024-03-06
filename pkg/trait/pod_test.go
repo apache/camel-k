@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
 
@@ -40,13 +41,13 @@ func TestConfigurePodTraitDoesSucceed(t *testing.T) {
 
 	assert.True(t, configured)
 	assert.Nil(t, condition)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	configured, condition, err = trait.Configure(environment)
 
 	assert.True(t, configured)
 	assert.Nil(t, condition)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestSimpleChange(t *testing.T) {
@@ -206,11 +207,11 @@ func testPodTemplateSpec(t *testing.T, template string) corev1.PodTemplateSpec {
 	trait, environment, _ := createPodTest(template)
 
 	_, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	deployment := environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool {
 		return deployment.Name == "pod-template-test-integration"

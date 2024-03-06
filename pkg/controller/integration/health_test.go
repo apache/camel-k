@@ -25,6 +25,7 @@ import (
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewHealthCheck(t *testing.T) {
@@ -94,7 +95,7 @@ func raw2map(t *testing.T, in camelv1.RawMessage) map[string]interface{} {
 	answer := make(map[string]interface{})
 
 	err := json.Unmarshal(in, &answer)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	return answer
 }

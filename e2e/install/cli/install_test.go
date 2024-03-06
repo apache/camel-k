@@ -32,7 +32,7 @@ import (
 	"text/template"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
@@ -156,10 +156,10 @@ type templateArgs struct {
 
 func TestConsoleCliDownload(t *testing.T) {
 	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ok, err := kubernetes.IsAPIResourceInstalled(TestClient(), "console.openshift.io/v1", reflect.TypeOf(consolev1.ConsoleCLIDownload{}).Name())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	if !ocp || !ok {
 		t.Skip("This test requires ConsoleCliDownload object which is available on OpenShift 4+ only.")
@@ -171,7 +171,7 @@ func TestConsoleCliDownload(t *testing.T) {
 
 	args := templateArgs{Version: defaults.Version}
 	templt, err := template.New("downloadLink").Parse(downloadUrlTemplate)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	WithNewTestNamespace(t, func(ns string) {
 		// make sure there is no preinstalled CliDownload resource

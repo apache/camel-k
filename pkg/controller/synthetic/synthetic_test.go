@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNonManagedUnsupported(t *testing.T) {
@@ -128,7 +129,7 @@ func TestNonManagedDeployment(t *testing.T) {
 	expectedIt.SetOwnerReferences(references)
 
 	deploymentAdapter, err := nonManagedCamelApplicationFactory(deploy)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, deploymentAdapter)
 	assert.Equal(t, expectedIt, *deploymentAdapter.Integration())
 }
@@ -187,7 +188,7 @@ func TestNonManagedCronJob(t *testing.T) {
 	}
 	expectedIt.SetOwnerReferences(references)
 	cronJobAdapter, err := nonManagedCamelApplicationFactory(cron)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cronJobAdapter)
 	assert.Equal(t, expectedIt, *cronJobAdapter.Integration())
 }
@@ -247,7 +248,7 @@ func TestNonManagedKnativeService(t *testing.T) {
 	expectedIt.SetOwnerReferences(references)
 
 	knativeServiceAdapter, err := nonManagedCamelApplicationFactory(ksvc)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, knativeServiceAdapter)
 	assert.Equal(t, expectedIt, *knativeServiceAdapter.Integration())
 }

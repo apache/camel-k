@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
@@ -65,7 +66,7 @@ func TestGetUserIdNamespaceConstrained(t *testing.T) {
 
 	uid, errUID := GetOpenshiftUser(context.Background(), kclient, "myuser")
 
-	assert.Nil(t, errUID)
+	require.NoError(t, errUID)
 	assert.Equal(t, "1000860000", uid)
 }
 
@@ -84,7 +85,7 @@ func TestGetPodSecurityContextNamespaceConstrained(t *testing.T) {
 	psc, errPsc := GetOpenshiftPodSecurityContextRestricted(context.Background(), kclient, "myuser")
 
 	expectedFsGroup := int64(1000860000)
-	assert.Nil(t, errPsc)
+	require.NoError(t, errPsc)
 	assert.NotNil(t, psc)
 	assert.Equal(t, expectedFsGroup, *psc.FSGroup)
 }
@@ -104,7 +105,7 @@ func TestGetSecurityContextNamespaceConstrained(t *testing.T) {
 	sc, errSc := GetOpenshiftSecurityContextRestricted(context.Background(), kclient, "myuser")
 
 	expectedUserID := int64(1000860000)
-	assert.Nil(t, errSc)
+	require.NoError(t, errSc)
 	assert.NotNil(t, sc)
 	assert.Equal(t, expectedUserID, *sc.RunAsUser)
 }

@@ -28,7 +28,7 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -40,7 +40,7 @@ import (
 func TestImageRegistryIsAMavenRepository(t *testing.T) {
 	RegisterTestingT(t)
 	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	if ocp {
 		t.Skip("Avoid running on OpenShift until CA and secret are injected client side")
 		return
@@ -50,9 +50,9 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		// Create integration that should decrypt an encrypted message to "foobar" and log it
 		name := RandomizedSuffixName("foobar-decryption")
 		jar, err := filepath.Abs("files/registry/sample-decryption-1.0.jar?skipPOM=true")
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		pom, err := filepath.Abs("files/registry/sample-decryption-1.0.pom")
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		Expect(KamelRunWithID(operatorID, ns, "files/registry/FoobarDecryption.java",
 			"--name", name,
@@ -113,7 +113,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 		// Create integration that should decrypt foobar and log it
 		name := RandomizedSuffixName("foobar-decryption-pom-extraction")
 		jar, err := filepath.Abs("files/registry/sample-decryption-1.0.jar")
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		Expect(KamelRunWithID(operatorID, ns, "files/registry/FoobarDecryption.java",
 			"--name", name,

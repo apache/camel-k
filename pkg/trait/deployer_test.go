@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -31,7 +32,7 @@ func TestConfigureDeployerTraitDoesSucceed(t *testing.T) {
 
 	configured, condition, err := deployerTrait.Configure(environment)
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -41,7 +42,7 @@ func TestConfigureDeployerTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 	configured, condition, err := deployerTrait.Configure(environment)
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -50,7 +51,7 @@ func TestApplyDeployerTraitDoesSucceed(t *testing.T) {
 
 	err := deployerTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.PostActions, 1)
 }
 
@@ -60,7 +61,7 @@ func TestApplyDeployerTraitInInitializationPhaseDoesSucceed(t *testing.T) {
 
 	err := deployerTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.PostActions, 1)
 }
 

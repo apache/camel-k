@@ -25,6 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -34,7 +35,7 @@ func TestCreateIntegrationForPipe(t *testing.T) {
 
 	pipe := nominalPipe("my-pipe")
 	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "my-pipe", it.Name)
 	assert.Equal(t, "default", it.Namespace)
 	assert.Equal(t, map[string]string{
@@ -49,7 +50,7 @@ func TestCreateIntegrationForPipe(t *testing.T) {
 	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
 	assert.Equal(t, "my-pipe", it.OwnerReferences[0].Name)
 	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRoute(), string(dsl))
 }
 
@@ -64,9 +65,9 @@ func TestCreateIntegrationForPipeDataType(t *testing.T) {
 		},
 	}
 	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRouteWithDataType("data-type-action"), string(dsl))
 }
 
@@ -83,9 +84,9 @@ func TestCreateIntegrationForPipeDataTypeOverridden(t *testing.T) {
 	newDataTypeKameletAction := "data-type-action-v4-2"
 	pipe.Annotations[v1.KameletDataTypeLabel] = newDataTypeKameletAction
 	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRouteWithDataType(newDataTypeKameletAction), string(dsl))
 }
 

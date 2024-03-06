@@ -31,6 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
@@ -91,7 +92,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
@@ -114,7 +115,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		},
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, kits)
 	assert.Len(t, kits, 1)
 	assert.Equal(t, "my-kit-2", kits[0].Name)
@@ -231,7 +232,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
@@ -272,7 +273,7 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 		},
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, kits)
 	assert.Len(t, kits, 1)
 	assert.Equal(t, "my-kit-3", kits[0].Name)
@@ -319,7 +320,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 	a.InjectLogger(log.Log)
 
 	ok, err := integrationAndKitHaveSameTraits(integration, kit)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, ok)
 }
 
@@ -390,7 +391,7 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 	a.InjectLogger(log.Log)
 
 	ok, err := integrationAndKitHaveSameTraits(integration, kit)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 }
 

@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -50,7 +51,7 @@ func TestConfigureJvmTraitInRightPhasesDoesSucceed(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, configured)
 	assert.Nil(t, condition)
 }
@@ -60,7 +61,7 @@ func TestConfigureJvmTraitInWrongIntegrationPhaseDoesNotSucceed(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseError
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, configured)
 	assert.Nil(t, condition)
 }
@@ -70,7 +71,7 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T)
 	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseWaitingForPlatform
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, configured)
 	assert.Nil(t, condition)
 }
@@ -86,7 +87,7 @@ func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
 		"explicitly disabled by the user",
 	)
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, configured)
 	assert.NotNil(t, condition)
 	assert.Equal(t, expectedCondition, condition)
@@ -102,7 +103,7 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseExternal(t *testing.T) {
 		"explicitly disabled by the platform: integration kit was not created via Camel K operator",
 	)
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, configured)
 	assert.NotNil(t, condition)
 	assert.Equal(t, expectedCondition, condition)
@@ -119,7 +120,7 @@ func TestConfigureJvmTraitInRightIntegrationKitPhaseExternalAndJvmEnabled(t *tes
 		"explicitly enabled by the user: integration kit was not created via Camel K operator",
 	)
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, configured)
 	assert.NotNil(t, condition)
 	assert.Equal(t, expectedCondition, condition)
@@ -151,7 +152,7 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	s := sets.NewSet()
 	s.Add("./resources", crMountPath, rdMountPath, "/mount/path")
@@ -185,7 +186,7 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	st := sets.NewSet()
 	st.Add("./resources", crMountPath, rdMountPath, "/mount/path")
@@ -227,7 +228,7 @@ func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Contains(t, d.Spec.Template.Spec.Containers[0].Args,
 		"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005",
@@ -254,7 +255,7 @@ func TestApplyJvmTraitWithExternalKitType(t *testing.T) {
 	environment.Resources.Add(&d)
 
 	err := trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	container := environment.GetIntegrationContainer()
 
@@ -295,7 +296,7 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 	environment.Resources.Add(&d)
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
 		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s", crMountPath, rdMountPath,

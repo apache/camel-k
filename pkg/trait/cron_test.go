@@ -23,6 +23,7 @@ import (
 
 	passert "github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -224,7 +225,7 @@ func TestCronFromURI(t *testing.T) {
 
 func TestCronDeps(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -281,12 +282,12 @@ func TestCronDeps(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 	conditions, err := tc.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
@@ -299,7 +300,7 @@ func TestCronDeps(t *testing.T) {
 
 func TestCronDepsFallback(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -360,13 +361,13 @@ func TestCronDepsFallback(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
 	conditions, err := tc.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
@@ -380,7 +381,7 @@ func TestCronDepsFallback(t *testing.T) {
 
 func TestCronWithActiveDeadline(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -436,7 +437,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
@@ -447,7 +448,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 		"controller strategy: cron-job",
 	)
 	conditions, err := tc.apply(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, conditions, 1)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -469,7 +470,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 
 func TestCronWithBackoffLimit(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -525,7 +526,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
@@ -536,7 +537,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 		"controller strategy: cron-job",
 	)
 	conditions, err := tc.apply(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, conditions, 1)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
