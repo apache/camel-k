@@ -178,7 +178,7 @@ func TestDependencyInexistent(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = Extract(catalog, code)
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestDependenciesQuarkus(t *testing.T) {

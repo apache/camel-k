@@ -151,6 +151,6 @@ func TestKnativeNotInstalled(t *testing.T) {
 	binding, err := KnativeRefBindingProvider{}.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
-	assert.Error(t, err, "integration referencing Knative endpoint 'default' that cannot run, because Knative is not installed on the cluster")
+	require.Error(t, err, "integration referencing Knative endpoint 'default' that cannot run, because Knative is not installed on the cluster")
 	assert.Nil(t, binding)
 }
