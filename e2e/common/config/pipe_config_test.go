@@ -37,7 +37,7 @@ func TestPipeConfig(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-config"
+		operatorID := "camel-k-pipe-config"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())

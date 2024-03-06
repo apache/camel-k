@@ -48,7 +48,7 @@ func TestImageRegistryIsAMavenRepository(t *testing.T) {
 	}
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		operatorID := "camel-k-rest"
+		operatorID := "camel-k-registry-maven-repo"
 		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())

@@ -140,6 +140,7 @@ var TestContext context.Context
 var testClient client.Client
 var clientMutex = sync.Mutex{}
 
+var testSetupMutex = sync.Mutex{}
 var kamelInstallMutex = sync.Mutex{}
 
 // Only panic the test if absolutely necessary and there is
@@ -2069,12 +2070,16 @@ func UpdateIntegrationProfile(t *testing.T, ns string, upd func(ipr *v1.Integrat
 
 func CreateCamelCatalog(t *testing.T, catalog *v1.CamelCatalog) func() error {
 	return func() error {
+		testSetupMutex.Lock()
+		defer testSetupMutex.Unlock()
 		return TestClient(t).Create(TestContext, catalog)
 	}
 }
 
 func CreateIntegrationKit(t *testing.T, kit *v1.IntegrationKit) func() error {
 	return func() error {
+		testSetupMutex.Lock()
+		defer testSetupMutex.Unlock()
 		return TestClient(t).Create(TestContext, kit)
 	}
 }

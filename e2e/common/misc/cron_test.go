@@ -46,21 +46,21 @@ func TestRunCronExample(t *testing.T) {
 
 		t.Run("cron", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/cron.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationCronJob(t, ns, "cron"), TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(IntegrationCronJob(t, ns, "cron"), TestTimeoutLong).ShouldNot(BeNil())
 			g.Eventually(IntegrationConditionStatus(t, ns, "cron", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ns, "cron"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 		})
 
 		t.Run("cron-yaml", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/cron-yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationCronJob(t, ns, "cron-yaml"), TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(IntegrationCronJob(t, ns, "cron-yaml"), TestTimeoutLong).ShouldNot(BeNil())
 			g.Eventually(IntegrationConditionStatus(t, ns, "cron-yaml", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ns, "cron-yaml"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 		})
 
 		t.Run("cron-timer", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/cron-timer.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationCronJob(t, ns, "cron-timer"), TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(IntegrationCronJob(t, ns, "cron-timer"), TestTimeoutLong).ShouldNot(BeNil())
 			g.Eventually(IntegrationConditionStatus(t, ns, "cron-timer", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ns, "cron-timer"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 		})

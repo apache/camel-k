@@ -46,7 +46,7 @@ func TestKamelCLIBind(t *testing.T) {
 		})
 
 		t.Run("unsuccessful binding, no property", func(t *testing.T) {
-			g.Expect(KamelBindWithID(t, operatorID, ns, "timer-source", "log:info").Execute()).NotTo(Succeed())
+			g.Expect(KamelBindWithID(t, operatorID, ns, operatorNS+"/timer-source", "log:info").Execute()).NotTo(Succeed())
 		})
 
 		t.Run("bind uris", func(t *testing.T) {

@@ -141,6 +141,8 @@ func TestRunBroker(t *testing.T) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		g.Expect(KamelInstallWithID(t, operatorID, ns, "--trait-profile", "knative")).To(Succeed())
 
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(camelv1.IntegrationPlatformPhaseReady))
+
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/knativeevt1.groovy").Execute()).To(Succeed())
 		g.Expect(KamelRunWithID(t, operatorID, ns, "files/knativeevt2.groovy").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ns, "knativeevt1"), TestTimeoutLong).Should(Equal(v1.PodRunning))

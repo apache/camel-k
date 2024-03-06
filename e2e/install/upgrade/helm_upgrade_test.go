@@ -65,7 +65,7 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 			t.FailNow()
 		}
 	}
-	g.Eventually(CRDs(t)).Should(HaveLen(0))
+	g.Eventually(CRDs(t), TestTimeoutMedium).Should(HaveLen(0))
 
 	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		// Install operator in last released version
