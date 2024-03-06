@@ -140,7 +140,6 @@ var TestContext context.Context
 var testClient client.Client
 var clientMutex = sync.Mutex{}
 
-var kamelCLIMutex = sync.Mutex{}
 var kamelInstallMutex = sync.Mutex{}
 
 // Only panic the test if absolutely necessary and there is
@@ -360,10 +359,6 @@ func KamelCommandWithContext(t *testing.T, ctx context.Context, command string, 
 }
 
 func KamelWithContext(t *testing.T, ctx context.Context, args ...string) *cobra.Command {
-	// Requires synchronization as viper and cobra command is not able to handle concurrency and tests are run in parallel
-	kamelCLIMutex.Lock()
-	defer kamelCLIMutex.Unlock()
-
 	var c *cobra.Command
 	var err error
 

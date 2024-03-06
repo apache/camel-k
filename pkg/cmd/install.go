@@ -30,8 +30,6 @@ import (
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"go.uber.org/multierr"
 
 	corev1 "k8s.io/api/core/v1"
@@ -677,29 +675,25 @@ func (o *installCmdOptions) postRun(cmd *cobra.Command, _ []string) error {
 func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	path := pathToRoot(cmd)
 
-	// Requires synchronization as viper bind flag is not able to handle concurrency
-	m.Lock()
-	defer m.Unlock()
-
-	if err := decodeKey(o, path); err != nil {
+	if err := decodeKey(o, path, o.Flags.AllSettings()); err != nil {
 		return err
 	}
 
-	o.registry.Address = viper.GetString(path + ".registry")
-	o.registry.Organization = viper.GetString(path + ".organization")
-	o.registry.Secret = viper.GetString(path + ".registry-secret")
-	o.registry.Insecure = viper.GetBool(path + ".registry-insecure")
-	o.registryAuth.Username = viper.GetString(path + ".registry-auth-username")
-	o.registryAuth.Password = viper.GetString(path + ".registry-auth-password")
-	o.registryAuth.Server = viper.GetString(path + ".registry-auth-server")
+	o.registry.Address = o.Flags.GetString(path + ".registry")
+	o.registry.Organization = o.Flags.GetString(path + ".organization")
+	o.registry.Secret = o.Flags.GetString(path + ".registry-secret")
+	o.registry.Insecure = o.Flags.GetBool(path + ".registry-insecure")
+	o.registryAuth.Username = o.Flags.GetString(path + ".registry-auth-username")
+	o.registryAuth.Password = o.Flags.GetString(path + ".registry-auth-password")
+	o.registryAuth.Server = o.Flags.GetString(path + ".registry-auth-server")
 
-	o.olmOptions.OperatorName = viper.GetString(path + ".olm-operator-name")
-	o.olmOptions.Package = viper.GetString(path + ".olm-package")
-	o.olmOptions.Channel = viper.GetString(path + ".olm-channel")
-	o.olmOptions.Source = viper.GetString(path + ".olm-source")
-	o.olmOptions.SourceNamespace = viper.GetString(path + ".olm-source-namespace")
-	o.olmOptions.StartingCSV = viper.GetString(path + ".olm-starting-csv")
-	o.olmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
+	o.olmOptions.OperatorName = o.Flags.GetString(path + ".olm-operator-name")
+	o.olmOptions.Package = o.Flags.GetString(path + ".olm-package")
+	o.olmOptions.Channel = o.Flags.GetString(path + ".olm-channel")
+	o.olmOptions.Source = o.Flags.GetString(path + ".olm-source")
+	o.olmOptions.SourceNamespace = o.Flags.GetString(path + ".olm-source-namespace")
+	o.olmOptions.StartingCSV = o.Flags.GetString(path + ".olm-starting-csv")
+	o.olmOptions.GlobalNamespace = o.Flags.GetString(path + ".olm-global-namespace")
 
 	return nil
 }

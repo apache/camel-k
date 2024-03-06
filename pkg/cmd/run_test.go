@@ -60,7 +60,7 @@ func initializeRunCmdOptions(t *testing.T) (*runCmdOptions, *cobra.Command, Root
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	runCmdOptions := addTestRunCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return runCmdOptions, rootCmd, *options
 }
@@ -75,7 +75,7 @@ func initializeRunCmdOptionsWithOutput(t *testing.T) (*runCmdOptions, *cobra.Com
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	runCmdOptions := addTestRunCmdWithOutput(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return runCmdOptions, rootCmd, *options
 }

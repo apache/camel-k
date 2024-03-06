@@ -36,7 +36,7 @@ func initializeInstallCmdOptions(t *testing.T) (*installCmdOptions, *cobra.Comma
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	installCmdOptions := addTestInstallCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return installCmdOptions, rootCmd, *options
 }

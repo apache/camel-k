@@ -34,7 +34,7 @@ func initializeDeleteCmdOptions(t *testing.T) (*deleteCmdOptions, *cobra.Command
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	deleteCmdOptions := addTestDeleteCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return deleteCmdOptions, rootCmd, *options
 }

@@ -46,7 +46,7 @@ func newCmdDebug(rootCmdOptions *RootCmdOptions) (*cobra.Command, *debugCmdOptio
 		Short:   "Debug an integration running on Kubernetes",
 		Long:    `Set an integration running on the Kubernetes cluster in debug mode and forward ports in order to connect a remote debugger running on the local host.`,
 		Args:    options.validateArgs,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE:    options.run,
 	}
 

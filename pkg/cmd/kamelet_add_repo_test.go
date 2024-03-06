@@ -35,7 +35,7 @@ func initializeKameletAddRepoCmdOptions(t *testing.T) (*kameletAddRepoCommandOpt
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	kameletAddRepoCommandOptions := addTestKameletAddRepoCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return kameletAddRepoCommandOptions, rootCmd, *options
 }

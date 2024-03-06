@@ -41,7 +41,7 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, 
 		Aliases: []string{"it"},
 		Short:   "Describe an Integration",
 		Long:    `Describe an Integration.`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err
