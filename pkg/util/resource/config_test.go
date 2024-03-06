@@ -38,7 +38,7 @@ func TestParseConfigOption(t *testing.T) {
 	assert.Equal(t, StorageTypeSecret, secret.storageType)
 	assert.Equal(t, "my-secret", secret.Name())
 	_, err = ParseConfig(notValid)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestParseConfigOptionAllParams(t *testing.T) {

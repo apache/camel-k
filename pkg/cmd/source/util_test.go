@@ -64,7 +64,7 @@ func TestPermissionDenied(t *testing.T) {
 
 	value, err := IsLocalAndFileExists(filename)
 	// must not panic because a permission error
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.False(t, value)
 }
 

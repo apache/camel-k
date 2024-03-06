@@ -34,7 +34,7 @@ func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
 	success, condition, err := tolerationTrait.Configure(environment)
 
 	assert.Equal(t, false, success)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -45,7 +45,7 @@ func TestApplyTolerationTraitMalformedTaint(t *testing.T) {
 
 	err := tolerationTrait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestApplyPodTolerationMissingDeployment(t *testing.T) {
@@ -55,7 +55,7 @@ func TestApplyPodTolerationMissingDeployment(t *testing.T) {
 	environment := createNominalMissingDeploymentTraitTest()
 	err := tolerationTrait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestApplyPodTolerationLabelsDefault(t *testing.T) {

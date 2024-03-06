@@ -56,7 +56,7 @@ func addTestRebuildCmd(options RootCmdOptions, rootCmd *cobra.Command) *rebuildC
 func TestRebuildNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRebuildCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRebuild, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestRebuildAllFlag(t *testing.T) {

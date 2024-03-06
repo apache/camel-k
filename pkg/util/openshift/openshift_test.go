@@ -57,7 +57,7 @@ func TestGetUserIdNamespaceWithoutLabels(t *testing.T) {
 
 	_, errUID := GetOpenshiftUser(context.Background(), kclient, "no-scc-annotations-namespace")
 
-	assert.NotNil(t, errUID)
+	require.Error(t, errUID)
 	assert.Contains(t, errUID.Error(), "annotation 'openshift.io/sa.scc.uid-range' not found")
 }
 
@@ -75,7 +75,7 @@ func TestGetPodSecurityContextNamespaceWithoutLabels(t *testing.T) {
 
 	_, errPsc := GetOpenshiftPodSecurityContextRestricted(context.Background(), kclient, "no-scc-annotations-namespace")
 
-	assert.NotNil(t, errPsc)
+	require.Error(t, errPsc)
 	assert.Contains(t, errPsc.Error(), "annotation 'openshift.io/sa.scc.uid-range' not found")
 }
 
@@ -95,7 +95,7 @@ func TestGetSecurityContextNamespaceWithoutLabels(t *testing.T) {
 
 	_, errSc := GetOpenshiftSecurityContextRestricted(context.Background(), kclient, "no-scc-annotations-namespace")
 
-	assert.NotNil(t, errSc)
+	require.Error(t, errSc)
 	assert.Contains(t, errSc.Error(), "annotation 'openshift.io/sa.scc.uid-range' not found")
 }
 

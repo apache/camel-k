@@ -25,6 +25,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRunAndLogErrorMvn(t *testing.T) {
@@ -36,6 +37,6 @@ func TestRunAndLogErrorMvn(t *testing.T) {
 	cmd := exec.CommandContext(context.Background(), mavenCmd, "package", "-B")
 	err := util.RunAndLog(context.Background(), cmd, MavenLogHandler, MavenLogHandler)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.ErrorContains(t, err, "[ERROR] The goal you specified requires a project to execute but there is no POM in this directory")
 }

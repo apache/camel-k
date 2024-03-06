@@ -67,7 +67,7 @@ func TestOperatorNoFlag(t *testing.T) {
 func TestOperatorNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeOperatorCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdOperator, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestOperatorHealthPortFlag(t *testing.T) {

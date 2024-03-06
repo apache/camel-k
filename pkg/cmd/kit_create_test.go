@@ -56,7 +56,7 @@ func addTestKitCreateCmd(options RootCmdOptions, rootCmd *cobra.Command) *kitCre
 func TestKitCreateNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKitCreateCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, subCmdKit, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKitCreateConfigMapFlag(t *testing.T) {

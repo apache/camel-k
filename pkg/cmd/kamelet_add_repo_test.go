@@ -64,7 +64,7 @@ func TestKameletAddRepoNoFlag(t *testing.T) {
 func TestKameletAddRepoNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletAddRepoCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdKameletAddRepo, "--nonExistingFlag", "foo")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKameletAddRepoInvalidRepositoryURI(t *testing.T) {

@@ -383,7 +383,7 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	conditions, err := traitCatalog.apply(&environment)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Empty(t, conditions)
 	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
 }
@@ -456,7 +456,7 @@ func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 		"integration cannot run, as knative is not installed in the cluster",
 	)
 	configured, condition, err := trait.Configure(environment)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, expectedCondition, condition)
 	assert.False(t, configured)
 }

@@ -105,6 +105,6 @@ func TestParseErrorHandlerSinkFail(t *testing.T) {
 	_, err := parseErrorHandler(
 		[]byte(`{"sink": {"ref": {"uri": "someUri"}}}`),
 	)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "missing endpoint in Error Handler Sink", err.Error())
 }

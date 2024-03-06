@@ -236,7 +236,7 @@ func TestDecodeValueSourceInvalid(t *testing.T) {
 	for i, tc := range testcases {
 		t.Run(fmt.Sprintf("test-%d-%s", i, tc.name), func(t *testing.T) {
 			res, err := DecodeValueSource(tc.input, tc.defaultKey, tc.errorMessage)
-			assert.NotNil(t, err)
+			require.Error(t, err)
 			assert.Equal(t, ValueSource{}, res)
 			assert.Equal(t, err.Error(), tc.errorMessage)
 		})

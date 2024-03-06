@@ -74,7 +74,7 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "unable to find catalog matching version requirement: runtime=Unmatchable version, provider=quarkus", err.Error())
 }
 

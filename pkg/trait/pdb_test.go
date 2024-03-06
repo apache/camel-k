@@ -48,7 +48,7 @@ func TestConfigurePdbTraitDoesNotSucceed(t *testing.T) {
 	pdbTrait.MinAvailable = "1"
 	pdbTrait.MaxUnavailable = "2"
 	configured, condition, err := pdbTrait.Configure(environment)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.False(t, configured)
 	assert.Nil(t, condition)
 }

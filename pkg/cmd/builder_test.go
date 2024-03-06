@@ -56,7 +56,7 @@ func addTestBuilderCmd(options RootCmdOptions, rootCmd *cobra.Command) *builderC
 func TestBuilderNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeBuilderCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdBuilder, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestBuilderBuildNameFlag(t *testing.T) {

@@ -58,7 +58,7 @@ func addTestVersionCmd(options RootCmdOptions, rootCmd *cobra.Command) *versionC
 func TestVersionNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeVersionCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdVersion, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestVersionClient(t *testing.T) {

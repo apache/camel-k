@@ -59,7 +59,7 @@ func addTestConfigCmd(options RootCmdOptions, rootCmd *cobra.Command, mock bool)
 func TestConfigNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeConfigCmdOptions(t, true)
 	_, err := test.ExecuteCommand(rootCmd, cmdConfig, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestConfigDefaultNamespaceFlag(t *testing.T) {

@@ -32,7 +32,7 @@ import (
 
 func TestRawContentFileMissing(t *testing.T) {
 	_, _, err := LoadRawContent(context.Background(), "dsadas")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestRawBinaryContentType(t *testing.T) {

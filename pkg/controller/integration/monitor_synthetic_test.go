@@ -67,7 +67,7 @@ func TestMonitorSyntheticIntegrationImportingKindUnavailable(t *testing.T) {
 	assert.Equal(t, "monitor-synthetic", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
 	assert.Equal(t, v1.IntegrationConditionImportingKindAvailableReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)

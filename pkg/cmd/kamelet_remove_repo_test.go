@@ -64,19 +64,19 @@ func TestKameletRemoveRepoNoFlag(t *testing.T) {
 func TestKameletRemoveRepoNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletRemoveRepoCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "--nonExistingFlag", "foo")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKameletRemoveRepoURINotFoundEmpty(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{}
 	_, err := getURIIndex("foo", repositories)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKameletRemoveRepoURINotFoundNotEmpty(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar"}}
 	_, err := getURIIndex("foo", repositories)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKameletRemoveRepoURIFound(t *testing.T) {

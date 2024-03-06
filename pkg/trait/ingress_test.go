@@ -93,7 +93,7 @@ func TestApplyIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
 
 	err := ingressTrait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "cannot Apply ingress trait: no target service", err.Error())
 	assert.Len(t, environment.Resources.Items(), 0)
 }
