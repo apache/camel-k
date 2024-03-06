@@ -171,7 +171,7 @@ func TestExpressions(t *testing.T) {
 
 			ref, err := converter.FromString(tc.name)
 			if tc.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
 				asString, err2 := converter.ToString(ref)
 				require.NoError(t, err2)

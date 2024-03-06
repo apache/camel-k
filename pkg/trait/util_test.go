@@ -142,7 +142,7 @@ func TestMigrateLegacyConfiguration_invalidConfiguration(t *testing.T) {
 
 	err := MigrateLegacyConfiguration(trait)
 
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestToTrait(t *testing.T) {

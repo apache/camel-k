@@ -470,7 +470,7 @@ func TestKameletConditionFalse(t *testing.T) {
 	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
