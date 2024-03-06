@@ -27,6 +27,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestToTraitMap(t *testing.T) {
@@ -74,7 +75,7 @@ func TestToTraitMap(t *testing.T) {
 
 	traitMap, err := ToTraitMap(traits)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, traitMap)
 }
 
@@ -101,7 +102,7 @@ func TestToPropertyMap(t *testing.T) {
 
 	propMap, err := ToPropertyMap(trait)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, propMap)
 }
 
@@ -129,7 +130,7 @@ func TestMigrateLegacyConfiguration(t *testing.T) {
 
 	err := MigrateLegacyConfiguration(trait)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, trait)
 }
 
@@ -168,7 +169,7 @@ func TestToTrait(t *testing.T) {
 	trait := traitv1.ContainerTrait{}
 	err := ToTrait(config, &trait)
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, trait)
 }
 
@@ -190,7 +191,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -219,7 +220,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -248,7 +249,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, ok)
 	})
 
@@ -273,7 +274,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -294,7 +295,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, ok)
 	})
 
@@ -319,7 +320,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, ok)
 	})
 
@@ -340,7 +341,7 @@ func TestSameTraits(t *testing.T) {
 		}
 
 		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, ok)
 	})
 }

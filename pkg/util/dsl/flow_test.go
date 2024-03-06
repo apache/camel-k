@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadWriteYaml(t *testing.T) {
@@ -37,19 +38,19 @@ func TestReadWriteYaml(t *testing.T) {
 
 	yamlReader := bytes.NewReader([]byte(yaml))
 	flows, err := FromYamlDSL(yamlReader)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, flows)
 	assert.Len(t, flows, 1)
 
 	flow := map[string]interface{}{}
 	err = json.Unmarshal(flows[0].RawMessage, &flow)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.NotNil(t, flow["from"])
 	assert.Nil(t, flow["xx"])
 
 	data, err := ToYamlDSL(flows)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, data)
 	assert.Equal(t, yaml, string(data))
 }

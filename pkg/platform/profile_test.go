@@ -202,7 +202,7 @@ func TestApplyIntegrationProfile(t *testing.T) {
 	}
 
 	_, err = ApplyIntegrationProfile(context.TODO(), c, &ip, &integration)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, v1.IntegrationPlatformClusterOpenShift, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
@@ -302,7 +302,7 @@ func TestApplyIntegrationProfileAndRetainPlatformSpec(t *testing.T) {
 	}
 
 	_, err = ApplyIntegrationProfile(context.TODO(), c, &ip, &integration)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)

@@ -24,6 +24,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -72,7 +73,7 @@ func TestKnativeRefBinding(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			bindingContext := BindingContext{
 				Ctx:       ctx,
@@ -84,7 +85,7 @@ func TestKnativeRefBinding(t *testing.T) {
 			binding, err := KnativeRefBindingProvider{}.Translate(bindingContext, EndpointContext{
 				Type: camelv1.EndpointTypeSink,
 			}, tc.endpoint)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)
 			assert.Equal(t, camelv1.Traits{}, binding.Traits)
@@ -97,7 +98,7 @@ func TestUnsupportedKnativeResource(t *testing.T) {
 	defer cancel()
 
 	client, err := test.NewFakeClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bindingContext := BindingContext{
 		Ctx:       ctx,
@@ -117,7 +118,7 @@ func TestUnsupportedKnativeResource(t *testing.T) {
 	binding, err := KnativeRefBindingProvider{}.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, binding)
 }
 
@@ -126,7 +127,7 @@ func TestKnativeNotInstalled(t *testing.T) {
 	defer cancel()
 
 	client, err := test.NewFakeClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// disable the knative eventing api
 	fakeClient := client.(*test.FakeClient) //nolint

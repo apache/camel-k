@@ -138,14 +138,14 @@ func TestTemplateResource(t *testing.T) {
 	}
 
 	data, err := TemplateResource(fmt.Sprintf("/resources/addons/master/%s", fname), templateData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	jsonSrc, err := yaml.ToJSON([]byte(data))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	uns := unstructured.Unstructured{}
 	err = uns.UnmarshalJSON(jsonSrc)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, uns.GetName(), name)
 	assert.Equal(t, uns.GetNamespace(), ns)

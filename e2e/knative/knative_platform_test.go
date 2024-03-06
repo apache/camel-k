@@ -28,8 +28,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -65,10 +64,10 @@ func TestKnativePlatformDetection(t *testing.T) {
 			Expect(UpdateIntegration(ns, "yaml", func(it *v1.Integration) {
 				it.Spec.Profile = ""
 				content, err := dsl.ToYamlDSL(it.Spec.Flows)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				newData := strings.ReplaceAll(string(content), "string!", "string!!!")
 				newFlows, err := dsl.FromYamlDSLString(newData)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				it.Spec.Flows = newFlows
 			})).To(Succeed())
 			// Spec profile should be reset by "kamel run"
