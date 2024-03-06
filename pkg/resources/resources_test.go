@@ -74,14 +74,14 @@ func ErrorBytes(t *testing.T, path string, callable func(path string) ([]byte, e
 	t.Helper()
 
 	_, err := callable(path)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 func ErrorString(t *testing.T, path string, callable func(path string) (string, error)) {
 
 	t.Helper()
 
 	_, err := callable(path)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestGetResource(t *testing.T) {

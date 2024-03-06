@@ -351,7 +351,7 @@ func TestRoute_TLS_wrong_secret(t *testing.T) {
 	conditions, err := traitsCatalog.apply(environment)
 	assert.Empty(t, conditions)
 	// there must be errors as the trait has wrong configuration
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Nil(t, environment.GetTrait("route"))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
@@ -379,7 +379,7 @@ func TestRoute_TLS_secret_wrong_key(t *testing.T) {
 	conditions, err := traitsCatalog.apply(environment)
 	assert.Empty(t, conditions)
 	// there must be errors as the trait has wrong configuration
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Nil(t, environment.GetTrait("route"))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {
@@ -407,7 +407,7 @@ func TestRoute_TLS_secret_missing_key(t *testing.T) {
 	conditions, err := traitsCatalog.apply(environment)
 	assert.Empty(t, conditions)
 	// there must be errors as the trait has wrong configuration
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Nil(t, environment.GetTrait("route"))
 
 	route := environment.Resources.GetRoute(func(r *routev1.Route) bool {

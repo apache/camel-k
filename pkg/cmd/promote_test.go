@@ -68,7 +68,7 @@ func TestIntegrationNotCompatible(t *testing.T) {
 
 	_, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &srcCatalog, &dstCatalog)
 	_, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-n", "default")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t,
 		fmt.Sprintf("could not verify operators compatibility: source (%s) and destination (0.0.1) Camel K operator versions are not compatible", defaults.Version),
 		err.Error(),

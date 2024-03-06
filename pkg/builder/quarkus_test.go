@@ -63,7 +63,7 @@ func TestLoadCamelQuarkusCatalogMissing(t *testing.T) {
 		},
 	}
 	err = loadCamelQuarkusCatalog(&builderContext)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "unable to find catalog matching version requirement: runtime=1.2.3, provider=Quarkus", err.Error())
 }
 

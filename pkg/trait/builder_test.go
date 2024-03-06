@@ -323,7 +323,7 @@ func TestBuilderCustomTasksFailure(t *testing.T) {
 
 	_, err := builderTrait.customTasks(nil, "my-kit-img")
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "provide a custom task with at least 3 arguments, ie \"my-task-name;my-image;echo 'hello'\", was test;alpine", err.Error())
 }
 
@@ -381,7 +381,7 @@ func TestBuilderCustomTasksConfigurationError(t *testing.T) {
 
 	_, err := builderTrait.parseTasksConf()
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "could not parse syntax error, expected format <task-name>:<task-resource>", err.Error())
 }
 
@@ -521,7 +521,7 @@ func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
 	builderTrait.TasksFilter = "builder,missing-task"
 
 	err := builderTrait.Apply(env)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "no task exist for missing-task name", err.Error())
 }
 
@@ -531,7 +531,7 @@ func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
 	builderTrait.TasksFilter = "builder,package"
 
 	err := builderTrait.Apply(env)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "last pipeline task is not a publishing or a user task", err.Error())
 }
 

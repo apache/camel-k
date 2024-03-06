@@ -48,7 +48,7 @@ func TestFilterFileLocation(t *testing.T) {
 func TestDownloadDependencyWithBadURL(t *testing.T) {
 	u, _ := url.Parse("http://foo")
 	_, err := downloadDependency(context.Background(), *u)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestDownloadDependencyWithFileNameInURL(t *testing.T) {

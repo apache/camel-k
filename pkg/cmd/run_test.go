@@ -119,7 +119,7 @@ func TestRunNoFlag(t *testing.T) {
 func TestRunNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--nonExistingFlag", integrationSource)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestRunCompressionFlag(t *testing.T) {
@@ -155,7 +155,7 @@ func TestRunDevModeOutputFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--dev", "-o", "yaml", integrationSource)
 	assert.Equal(t, true, runCmdOptions.Dev)
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "cannot use --dev with -o/--output option",
 		err.Error())
 }
@@ -196,7 +196,7 @@ func TestRunLabelFlag(t *testing.T) {
 func TestRunLabelWrongFormatFlag(t *testing.T) {
 	_, rootCmd, _ := initializeRunCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRun, "--label", "label1", integrationSource)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestRunLogsFlag(t *testing.T) {
@@ -243,7 +243,7 @@ func TestRunOpenApiInvalidFlag(t *testing.T) {
 		"--open-api", "secret:oapi1",
 		"--open-api", "oapi2",
 		integrationSource)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestRunOutputFlag(t *testing.T) {
@@ -426,7 +426,7 @@ func TestRunMissingTraitFlag(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, cmdRun,
 		"--trait", "bogus.missing",
 		integrationSource)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "trait bogus does not exist in catalog", err.Error())
 	assert.Len(t, runCmdOptions.Traits, 1)
 	assert.Equal(t, "bogus.missing", runCmdOptions.Traits[0])
@@ -494,7 +494,7 @@ func TestRunVolumeFlagWrongPVCFormat(t *testing.T) {
 		"-v", "pvcname",
 		"-v", "pvcname/container2/path",
 		integrationSource)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestRunBuildPropertyFlag(t *testing.T) {
@@ -518,7 +518,7 @@ func TestRunValidateArgs(t *testing.T) {
 
 	args = []string{"missing_file"}
 	err = runCmdOptions.validateArgs(rootCmd, args)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "one of the provided sources is not reachable: missing file or unsupported scheme in missing_file", err.Error())
 }
 
@@ -668,7 +668,7 @@ func TestMissingTrait(t *testing.T) {
 	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "bogus.fail=i-must-fail")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 	assert.Equal(t, "Error: trait bogus does not exist in catalog\n", output)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestResolveYamlPodTemplateWithSupplementalGroups(t *testing.T) {

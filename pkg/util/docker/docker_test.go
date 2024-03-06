@@ -141,5 +141,5 @@ func TestExtractRegistryName(t *testing.T) {
 	assert.Equal(t, expected, result)
 
 	_, err = ExtractRegistryName("imageName")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }

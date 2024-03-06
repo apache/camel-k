@@ -49,6 +49,6 @@ func TestRunAndLogInvalid(t *testing.T) {
 	cmd := exec.CommandContext(context.Background(), "go", "help", "dsa")
 	err := RunAndLog(context.Background(), cmd, loggerInfo, loggerError)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "go help dsa: unknown help topic. Run 'go help'.: exit status 2", err.Error())
 }

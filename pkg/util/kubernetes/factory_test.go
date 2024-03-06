@@ -61,7 +61,7 @@ func TestInvalidTolerations(t *testing.T) {
 	}
 	for _, vd := range validTolerations {
 		_, err := NewTolerations(vd)
-		assert.NotNil(t, err)
+		require.Error(t, err)
 	}
 }
 
@@ -121,7 +121,7 @@ func TestInvalidNodeSelectors(t *testing.T) {
 	}
 	for _, vds := range validNodeSelectors {
 		_, err := NewNodeSelectors(vds)
-		assert.NotNil(t, err)
+		require.Error(t, err)
 	}
 }
 
@@ -163,13 +163,13 @@ func TestSomeResourceRequirements(t *testing.T) {
 func TestErrorResourceRequirements(t *testing.T) {
 	resReq := "limits.memory=expectSomeError!"
 	_, err := NewResourceRequirements(strings.Split(resReq, ","))
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestMissingResourceRequirements(t *testing.T) {
 	resReq := ""
 	_, err := NewResourceRequirements(strings.Split(resReq, ","))
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestConfigureResources(t *testing.T) {
@@ -181,7 +181,7 @@ func TestConfigureResources(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "5Gi", requestsList.Memory().String())
 	requestsList, err = ConfigureResource("5ss", requestsList, v1.ResourceCPU)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	// Assert previous values haven't changed
 	assert.Equal(t, "500m", requestsList.Cpu().String())
 	assert.Equal(t, "5Gi", requestsList.Memory().String())

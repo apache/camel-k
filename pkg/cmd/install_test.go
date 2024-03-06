@@ -84,7 +84,7 @@ func TestInstallNoFlag(t *testing.T) {
 func TestInstallNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeInstallCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdInstall, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestInstallBaseImageFlag(t *testing.T) {
@@ -373,9 +373,9 @@ func TestDecodeMavenSettings(t *testing.T) {
 
 	// Errors
 	_, err = decodeMavenSettings("something:maven-settings-secret/s.xml")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	_, err = decodeMavenSettings("secret")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestInstallTolerationFlag(t *testing.T) {

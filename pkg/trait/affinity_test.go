@@ -49,7 +49,7 @@ func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 
 	assert.False(t, configured)
 	assert.Nil(t, condition)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestConfigureDisabledAffinityTraitFails(t *testing.T) {
@@ -69,7 +69,7 @@ func TestApplyAffinityMissingDeployment(t *testing.T) {
 	environment := createNominalMissingDeploymentTraitTest()
 	err := tolerationTrait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestApplyEmptyAffinityLabelsDoesSucceed(t *testing.T) {

@@ -142,7 +142,7 @@ func TestApplyJolokiaTraitWithUnparseableOptionShouldReturnError(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestSetDefaultJolokiaOptionShouldNotOverrideOptionsMap(t *testing.T) {

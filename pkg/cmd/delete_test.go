@@ -56,7 +56,7 @@ func addTestDeleteCmd(options RootCmdOptions, rootCmd *cobra.Command) *deleteCmd
 func TestDeleteNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeDeleteCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdDelete, "--nonExistingFlag")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestDeleteAllFlag(t *testing.T) {
