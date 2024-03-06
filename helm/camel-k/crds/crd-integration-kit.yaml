@@ -402,9 +402,9 @@ spec:
                         type: array
                     type: object
                   registry:
-                    description: 'Deprecated: use jvm trait or read documentation.
-                      The Registry trait sets up Maven to use the Image registry as
-                      a Maven repository.'
+                    description: 'The Registry trait sets up Maven to use the Image
+                      registry as a Maven repository. Deprecated: use jvm trait or
+                      read documentation.'
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -756,9 +756,9 @@ spec:
                         type: array
                     type: object
                   registry:
-                    description: 'Deprecated: use jvm trait or read documentation.
-                      The Registry trait sets up Maven to use the Image registry as
-                      a Maven repository.'
+                    description: 'The Registry trait sets up Maven to use the Image
+                      registry as a Maven repository. Deprecated: use jvm trait or
+                      read documentation.'
                     properties:
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
