@@ -63,5 +63,5 @@ func TestDeleteAllFlag(t *testing.T) {
 	deleteCmdOptions, rootCmd, _ := initializeDeleteCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdDelete, "--all")
 	require.NoError(t, err)
-	assert.Equal(t, true, deleteCmdOptions.DeleteAll)
+	assert.True(t, deleteCmdOptions.DeleteAll)
 }

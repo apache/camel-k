@@ -32,9 +32,9 @@ func TestLoadKamelet(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "timer-source", kamelet.GetName())
 	assert.Equal(t, "some-namespace", kamelet.GetNamespace())
-	assert.Equal(t, 3, len(kamelet.GetLabels()))
+	assert.Len(t, kamelet.GetLabels(), 3)
 	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletBundledLabel])
 	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletReadOnlyLabel])
-	assert.Equal(t, 2, len(kamelet.GetAnnotations()))
+	assert.Equal(t, kamelet.GetAnnotations(), 2)
 	assert.NotNil(t, kamelet.GetAnnotations()[kamelVersionAnnotation])
 }

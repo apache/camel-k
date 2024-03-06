@@ -35,7 +35,7 @@ func TestGithubRepository(t *testing.T) {
 	repo := newGithubKameletRepository(ctx, "apache", "camel-kamelets", "kamelets", "")
 	list, err := repo.List(ctx)
 	require.NoError(t, err)
-	require.True(t, len(list) > 0)
+	require.Greater(t, len(list), 0)
 	// Repeat multiple times to be sure cache is working and we don't hit rate limits
 	maxDistinct := 5
 	for i := 0; i < 200; i++ {

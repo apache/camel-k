@@ -307,7 +307,7 @@ func TestContainerWithCustomImage(t *testing.T) {
 	assert.Empty(t, conditions)
 
 	for _, postAction := range environment.PostActions {
-		assert.Nil(t, postAction(&environment))
+		require.NoError(t, postAction(&environment))
 	}
 
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -482,7 +482,7 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 	conditions := environment.Integration.Status.Conditions
-	assert.Len(t, conditions, 0)
+	assert.Empty(t, conditions)
 }
 
 func createEnvironment() *Environment {

@@ -52,8 +52,8 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 	assert.Equal(t, v1.BuildOrderStrategySequential, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, defaults.BaseImage(), ip.Status.Build.BaseImage)
 	assert.Equal(t, defaults.LocalRepository, ip.Status.Build.Maven.LocalRepository)
-	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
-	assert.Equal(t, 3, len(ip.Status.Build.Maven.CLIOptions))
+	assert.Equal(t, 3, ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
+	assert.Len(t, ip.Status.Build.Maven.CLIOptions, 3)
 	assert.NotNil(t, ip.Status.Traits)
 }
 
@@ -111,7 +111,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
 	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
-	assert.True(t, ip.Status.Build.MaxRunningBuilds == 3) // default for build strategy routine
+	assert.Equal(t, 3, ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
 	assert.NotNil(t, ip.Status.Traits)
@@ -120,7 +120,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)
-	assert.Equal(t, 2, len(ip.Status.Build.Maven.Properties))
+	assert.Len(t, ip.Status.Build.Maven.Properties, 2)
 	assert.Equal(t, "global_value1", ip.Status.Build.Maven.Properties["global_prop1"])
 	assert.Equal(t, "global_value2", ip.Status.Build.Maven.Properties["global_prop2"])
 }
@@ -279,7 +279,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
 	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
-	assert.True(t, ip.Status.Build.MaxRunningBuilds == 1)
+	assert.Equal(t, 1, ip.Status.Build.MaxRunningBuilds)
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
 	assert.NotNil(t, ip.Status.Traits)
@@ -288,7 +288,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	assert.NotNil(t, ip.Status.Traits.Container)
 	assert.Equal(t, corev1.PullAlways, ip.Status.Traits.Container.ImagePullPolicy)
 	assert.Equal(t, "0.1", ip.Status.Traits.Container.LimitCPU)
-	assert.Equal(t, 3, len(ip.Status.Build.Maven.Properties))
+	assert.Len(t, ip.Status.Build.Maven.Properties, 3)
 	assert.Equal(t, "global_value1", ip.Status.Build.Maven.Properties["global_prop1"])
 	assert.Equal(t, "local_value2", ip.Status.Build.Maven.Properties["global_prop2"])
 	assert.Equal(t, "local_value1", ip.Status.Build.Maven.Properties["local_prop1"])

@@ -63,5 +63,5 @@ func TestRebuildAllFlag(t *testing.T) {
 	rebuildCmdOptions, rootCmd, _ := initializeRebuildCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdRebuild, "--all")
 	require.NoError(t, err)
-	assert.Equal(t, true, rebuildCmdOptions.RebuildAll)
+	assert.True(t, rebuildCmdOptions.RebuildAll)
 }

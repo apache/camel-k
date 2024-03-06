@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -226,7 +227,7 @@ func addRegistryMavenDependency(project *maven.Project, dependency string) error
 	properties.Add("type", gav.Type)
 
 	exec := maven.Execution{
-		ID:    fmt.Sprint(len(plugin.Executions)),
+		ID:    strconv.Itoa(len(plugin.Executions)),
 		Phase: "validate",
 		Goals: []string{
 			"artifact",

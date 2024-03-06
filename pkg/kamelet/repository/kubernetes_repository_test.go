@@ -34,7 +34,7 @@ func TestKubernetesEmptyRepository(t *testing.T) {
 	repo := newKubernetesKameletRepository(fakeClient, "test")
 	list, err := repo.List(ctx)
 	require.NoError(t, err)
-	assert.Len(t, list, 0)
+	assert.Empty(t, list)
 }
 
 func TestKubernetesRepository(t *testing.T) {

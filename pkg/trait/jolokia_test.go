@@ -204,7 +204,7 @@ func TestSetDefaultBoolJolokiaOptionShouldSucceed(t *testing.T) {
 
 	trait.setDefaultJolokiaOption(options, &option, "key", true)
 
-	assert.Equal(t, true, *option)
+	assert.True(t, *option)
 }
 
 func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T) {
@@ -214,7 +214,7 @@ func TestSetDefaultBoolJolokiaOptionShouldNotOverrideExistingValue(t *testing.T)
 
 	trait.setDefaultJolokiaOption(options, &option, "key", true)
 
-	assert.Equal(t, false, *option)
+	assert.False(t, *option)
 }
 
 func TestAddStringOptionToJolokiaOptions(t *testing.T) {

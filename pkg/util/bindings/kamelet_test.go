@@ -117,7 +117,7 @@ func TestBindingConverter(t *testing.T) {
 			if len(tc.applicationProperties) > 0 {
 				assert.Equal(t, tc.applicationProperties, binding.ApplicationProperties)
 			} else {
-				assert.True(t, len(binding.ApplicationProperties) == 0)
+				assert.Empty(t, binding.ApplicationProperties)
 			}
 		})
 	}
@@ -295,7 +295,7 @@ func TestBindingConverterWithDataTypes(t *testing.T) {
 			if len(tc.applicationProperties) > 0 {
 				assert.Equal(t, tc.applicationProperties, binding.ApplicationProperties)
 			} else {
-				assert.True(t, len(binding.ApplicationProperties) == 0)
+				assert.Empty(t, binding.ApplicationProperties)
 			}
 		})
 	}
@@ -391,7 +391,7 @@ func TestBindingConverterWithDataTypesOverridden(t *testing.T) {
 			if len(tc.applicationProperties) > 0 {
 				assert.Equal(t, tc.applicationProperties, binding.ApplicationProperties)
 			} else {
-				assert.True(t, len(binding.ApplicationProperties) == 0)
+				assert.Empty(t, binding.ApplicationProperties)
 			}
 		})
 	}

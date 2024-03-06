@@ -155,8 +155,8 @@ func TestSomeResourceRequirements(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, resource.MustParse("128Mi"), *resourceRequirements.Limits.Memory())
-	assert.Equal(t, true, resourceRequirements.Requests.Memory().IsZero())
-	assert.Equal(t, true, resourceRequirements.Limits.Cpu().IsZero())
+	assert.True(t, resourceRequirements.Requests.Memory().IsZero())
+	assert.True(t, resourceRequirements.Limits.Cpu().IsZero())
 	assert.Equal(t, resource.MustParse("500m"), *resourceRequirements.Requests.Cpu())
 }
 

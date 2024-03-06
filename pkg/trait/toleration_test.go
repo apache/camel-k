@@ -33,7 +33,7 @@ func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
 
 	success, condition, err := tolerationTrait.Configure(environment)
 
-	assert.Equal(t, false, success)
+	assert.False(t, success)
 	require.Error(t, err)
 	assert.Nil(t, condition)
 }

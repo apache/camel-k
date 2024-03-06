@@ -144,10 +144,10 @@ func TestPomGeneration(t *testing.T) {
 func TestParseGAV(t *testing.T) {
 	dep, err := ParseGAV("org.apache.camel:camel-core:2.21.1")
 	require.NoError(t, err)
-	assert.Equal(t, dep.GroupID, "org.apache.camel")
-	assert.Equal(t, dep.ArtifactID, "camel-core")
+	assert.Equal(t, "org.apache.camel", dep.GroupID)
+	assert.Equal(t, "camel-core", dep.ArtifactID)
 	assert.Empty(t, dep.Type)
-	assert.Equal(t, dep.Version, "2.21.1")
+	assert.Equal(t, "2.21.1", dep.Version)
 	assert.Empty(t, dep.Classifier)
 
 	dep, err = ParseGAV("org.apache.camel:camel-core:war:2.21.1")
@@ -210,7 +210,7 @@ func TestParseGAV(t *testing.T) {
 func TestParseGAVErrorNoColumn(t *testing.T) {
 	dep, err := ParseGAV("org.apache.camel.k.camel-k-runtime-noop-0.2.1-SNAPSHOT.jar")
 
-	assert.EqualError(t, err, "GAV must match <groupId>:<artifactId>[:<packagingType>]:(<version>)[:<classifier>]")
+	require.EqualError(t, err, "GAV must match <groupId>:<artifactId>[:<packagingType>]:(<version>)[:<classifier>]")
 	assert.Equal(t, Dependency{}, dep)
 }
 

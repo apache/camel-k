@@ -44,7 +44,7 @@ func TestTimeouts_Default(t *testing.T) {
 	c, err := test.NewFakeClient(&ip)
 	require.NoError(t, err)
 
-	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+	require.NoError(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
@@ -74,7 +74,7 @@ func TestTimeouts_MavenComputedFromBuild(t *testing.T) {
 	c, err := test.NewFakeClient(&ip)
 	require.NoError(t, err)
 
-	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+	require.NoError(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
@@ -104,7 +104,7 @@ func TestTimeouts_Truncated(t *testing.T) {
 	c, err := test.NewFakeClient(&ip)
 	require.NoError(t, err)
 
-	assert.Nil(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
+	require.NoError(t, platform.ConfigureDefaults(context.TODO(), c, &ip, false))
 
 	h := NewInitializeAction()
 	h.InjectLogger(log.Log)
