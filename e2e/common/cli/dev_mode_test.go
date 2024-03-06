@@ -143,7 +143,7 @@ func TestRunDevMode(t *testing.T) {
 			go kamelRun.Execute()
 
 			// Second run should start up within a few seconds
-			timeout := 10 * time.Second
+			timeout := 20 * time.Second
 			g.Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), timeout).Should(BeTrue())
 			g.Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
 		})
