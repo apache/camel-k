@@ -35,6 +35,6 @@ func TestLoadKamelet(t *testing.T) {
 	assert.Len(t, kamelet.GetLabels(), 3)
 	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletBundledLabel])
 	assert.Equal(t, "true", kamelet.GetLabels()[v1.KameletReadOnlyLabel])
-	assert.Equal(t, kamelet.GetAnnotations(), 2)
+	assert.Len(t, kamelet.GetAnnotations(), 2)
 	assert.NotNil(t, kamelet.GetAnnotations()[kamelVersionAnnotation])
 }
