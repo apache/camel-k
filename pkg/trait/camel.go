@@ -53,9 +53,13 @@ func (t *camelTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild only when the runtime has changed.
-func (t *camelTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return this["runtimeVersion"] != prev["runtimeVersion"]
+func (t *camelTrait) Matches(trait Trait) bool {
+	otherTrait, ok := trait.(*camelTrait)
+	if !ok {
+		return false
+	}
+
+	return otherTrait.RuntimeVersion == t.RuntimeVersion
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {

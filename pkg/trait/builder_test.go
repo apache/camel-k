@@ -28,6 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -602,4 +603,54 @@ func tasksByName(tasks []v1.Task) []string {
 		}
 	}
 	return pipelineTasks
+}
+
+func TestBuilderMatches(t *testing.T) {
+	t1 := builderTrait{
+		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BuilderTrait: traitv1.BuilderTrait{
+			OrderStrategy: "dependencies",
+		},
+	}
+	t2 := builderTrait{
+		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BuilderTrait: traitv1.BuilderTrait{
+			OrderStrategy: "dependencies",
+		},
+	}
+	assert.True(t, t1.Matches(&t2))
+	// This is a property that does not influence the build
+	t2.OrderStrategy = "fifo"
+	assert.True(t, t1.Matches(&t2))
+	// Changing properties which influences build
+	t1.Properties = []string{"hello=world"}
+	assert.False(t, t1.Matches(&t2))
+	t2.Properties = []string{"hello=world"}
+	assert.True(t, t1.Matches(&t2))
+	t1.Properties = []string{"hello=world", "weare=theworld"}
+	assert.False(t, t1.Matches(&t2))
+	// should detect swap
+	t2.Properties = []string{"weare=theworld", "hello=world"}
+	assert.True(t, t1.Matches(&t2))
+}
+
+func TestBuilderMatchesTasks(t *testing.T) {
+	t1 := builderTrait{
+		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BuilderTrait:      traitv1.BuilderTrait{},
+	}
+	t2 := builderTrait{
+		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BuilderTrait: traitv1.BuilderTrait{
+			Tasks: []string{"task1;my-task;do-something"},
+		},
+	}
+	t3 := builderTrait{
+		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BuilderTrait: traitv1.BuilderTrait{
+			Tasks: []string{"task1;my-task;do-something-else"},
+		},
+	}
+	assert.False(t, t1.Matches(&t2))
+	assert.False(t, t2.Matches(&t3))
 }

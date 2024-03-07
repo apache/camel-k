@@ -109,23 +109,14 @@ func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild overrides base class method.
-func (t *quarkusTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return true
-}
-
-var _ ComparableTrait = &quarkusTrait{}
-
 func (t *quarkusTrait) Matches(trait Trait) bool {
 	qt, ok := trait.(*quarkusTrait)
 	if !ok {
 		return false
 	}
-
 	if len(t.Modes) == 0 && len(qt.Modes) != 0 && !qt.containsMode(traitv1.JvmQuarkusMode) {
 		return false
 	}
-
 	for _, md := range t.Modes {
 		if md == traitv1.JvmQuarkusMode && len(qt.Modes) == 0 {
 			continue
@@ -135,8 +126,17 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		}
 		return false
 	}
+	// We need to check if the native base image used is the same
+	thisNativeBaseImage := t.NativeBaseImage
+	if thisNativeBaseImage == "" {
+		thisNativeBaseImage = QuarkusNativeDefaultBaseImageName
+	}
+	otherNativeBaseImage := qt.NativeBaseImage
+	if otherNativeBaseImage == "" {
+		otherNativeBaseImage = QuarkusNativeDefaultBaseImageName
+	}
 
-	return true
+	return thisNativeBaseImage == otherNativeBaseImage
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
