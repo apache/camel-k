@@ -50,6 +50,9 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/cloudevents/sdk-go/v2 from 2.13.0 to 2.15.2 [\#5228](https://github.com/apache/camel-k/pull/5228) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(lint\): Update golangci-lint version to 1.55 [\#5227](https://github.com/apache/camel-k/pull/5227) ([christophd](https://github.com/christophd))
+- fix\(ci\): swap deprecation notice [\#5226](https://github.com/apache/camel-k/pull/5226) ([squakez](https://github.com/squakez))
 - chore\(traits\): deprecate registry [\#5222](https://github.com/apache/camel-k/pull/5222) ([squakez](https://github.com/squakez))
 - feat\(ci\): upgrade golang to 1.21 [\#5221](https://github.com/apache/camel-k/pull/5221) ([squakez](https://github.com/squakez))
 - fix\(trait\): watch for resource versions... [\#5218](https://github.com/apache/camel-k/pull/5218) ([squakez](https://github.com/squakez))
