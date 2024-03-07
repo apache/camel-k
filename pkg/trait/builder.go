@@ -20,6 +20,7 @@ package trait
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -56,9 +57,33 @@ func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild overrides base class method.
-func (t *builderTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return true
+func (t *builderTrait) Matches(trait Trait) bool {
+	otherTrait, ok := trait.(*builderTrait)
+	if !ok {
+		return false
+	}
+	if t.BaseImage != otherTrait.BaseImage || len(t.Properties) != len(otherTrait.Properties) || len(t.Tasks) != len(otherTrait.Tasks) {
+		return false
+	}
+	// More sofisticated check if len is the same. Sort and compare via slices equal func.
+	// Although the Matches func is used as a support for comparison, it makes sense
+	// to copy the properties and avoid possible inconsistencies caused by the sorting operation.
+	srtThisProps := make([]string, len(t.Properties))
+	srtOtheProps := make([]string, len(otherTrait.Properties))
+	copy(srtThisProps, t.Properties)
+	copy(srtOtheProps, otherTrait.Properties)
+	slices.Sort(srtThisProps)
+	slices.Sort(srtOtheProps)
+	if !slices.Equal(srtThisProps, srtOtheProps) {
+		return false
+	}
+	srtThisTasks := make([]string, len(t.Tasks))
+	srtOtheTasks := make([]string, len(otherTrait.Tasks))
+	copy(srtThisTasks, t.Tasks)
+	copy(srtOtheTasks, otherTrait.Tasks)
+	slices.Sort(srtThisTasks)
+	slices.Sort(srtOtheTasks)
+	return slices.Equal(srtThisTasks, srtOtheTasks)
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) {

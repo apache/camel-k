@@ -49,6 +49,15 @@ type Trait interface {
 	IsAllowedInProfile(v1.TraitProfile) bool
 	Order() int
 }
+
+type Comparable interface {
+	Matches(trait Trait) bool
+}
+
+type ComparableTrait interface {
+	Trait
+	Comparable
+}
 ----
 
 Each trait will implement this interface. The most important methods that will be invoked by the xref:architecture/operator.adoc[Operator] are `Configure()` and `Apply()`. Basically, the `Configure()` method will set those inputs aforementioned (each trait has its own). The method is in charge to verify also the correctness of those expected parameters, where it makes sense (i.e., a well expected `Kubernetes` resource name). The function can return a `TraitCondition` object containing any informative or warning condition to be attached to the resulting Integration (for instance, traits forcefully altered by the platform, or deprecation notices).
@@ -59,6 +68,6 @@ The `Order()` method helps in resolving the order of execution of different trai
 
 The `InfluencesKit()`, `IsPlatformTrait()` and `RequiresIntegrationPlatform()` methods are easy to understand. They are used to determine if a trait has to influence an `IntegrationKit` build/initialization, if it's a platform trait (ie, needed by the platform itself) or are requiring the presence of an `IntegrationPlatform`.
 
-The presence of `InfluencesBuild()` will let specify the level of granularity of a trait down to its properties for a rebuild. So, if you need, you can compare the traits properties coming from the `prev` (previous) Integration to decide if it is worth to rebuild an Integration or the trait can reuse the one already provided in `this` version.
+For those traits that `InfluencesKit()` you may need to provide a `Matches(trait Trait)` func in order to specify those trait parameters that influences a build. This is required by the platform to decide if it is worth to rebuild an Integration or the trait can reuse the one already provided.
 
 Finally, through the `IsAllowedInProfile()` method we can override the default behavior (allow the trait for any profile). We must specify the profile we expect for this trait to be executed properly.

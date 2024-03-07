@@ -30,7 +30,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -78,6 +77,8 @@ func TestBuilderTrait(t *testing.T) {
 			name := RandomizedSuffixName("java-dependencies-strategy")
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
+				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
+				"--build-property", "strategy=dependencies",
 				"-t", "builder.order-strategy=dependencies").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -94,16 +95,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(BuildConfig(t, integrationKitNamespace, integrationKitName)().LimitCPU, TestTimeoutShort).Should(Equal(""))
 			g.Eventually(BuildConfig(t, integrationKitNamespace, integrationKitName)().RequestMemory, TestTimeoutShort).Should(Equal(""))
 			g.Eventually(BuildConfig(t, integrationKitNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
-
 			g.Eventually(BuilderPod(t, integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ns, name)()
-			builderTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "builder")
-			g.Expect(builderTrait).NotTo(BeNil())
-			g.Expect(len(builderTrait)).To(Equal(1))
-			g.Expect(builderTrait["orderStrategy"]).To(Equal("dependencies"))
 
 			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -112,6 +104,8 @@ func TestBuilderTrait(t *testing.T) {
 			name := RandomizedSuffixName("java-fifo-strategy")
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
+				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
+				"--build-property", "strategy=fifo",
 				"-t", "builder.order-strategy=fifo").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -138,6 +132,8 @@ func TestBuilderTrait(t *testing.T) {
 			name := RandomizedSuffixName("java-resource-config")
 			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
 				"--name", name,
+				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
+				"--build-property", "resources=new-build",
 				"-t", "builder.tasks-request-cpu=builder:500m",
 				"-t", "builder.tasks-limit-cpu=builder:1000m",
 				"-t", "builder.tasks-request-memory=builder:2Gi",

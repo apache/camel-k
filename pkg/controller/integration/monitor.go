@@ -237,7 +237,7 @@ func (action *monitorAction) checkDigestAndRebuild(ctx context.Context, integrat
 	}
 
 	if hash != integration.Status.Digest {
-		action.L.Info("Integration %s digest has changed: resetting its status. Will check if it needs to be rebuilt and restarted.", integration.Name)
+		action.L.Infof("Integration %s digest has changed: resetting its status. Will check if it needs to be rebuilt and restarted.", integration.Name)
 		if isIntegrationKitResetRequired(integration, kit) {
 			integration.SetIntegrationKit(nil)
 		}

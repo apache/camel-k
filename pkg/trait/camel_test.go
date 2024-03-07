@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -207,4 +208,25 @@ func TestApplyCamelTraitWithSources(t *testing.T) {
 	assert.Equal(t, map[string]string{
 		"content": "XML Source Code",
 	}, sourceCm.Data)
+}
+
+func TestCamelMatches(t *testing.T) {
+	t1 := camelTrait{
+		BasePlatformTrait: NewBasePlatformTrait("camel", 600),
+		CamelTrait: traitv1.CamelTrait{
+			RuntimeVersion: "1.2.3",
+		},
+	}
+	t2 := camelTrait{
+		BasePlatformTrait: NewBasePlatformTrait("camel", 600),
+		CamelTrait: traitv1.CamelTrait{
+			RuntimeVersion: "1.2.3",
+		},
+	}
+
+	assert.True(t, t1.Matches(&t2))
+	t1.Properties = []string{"hello=world"}
+	assert.True(t, t1.Matches(&t2))
+	t2.RuntimeVersion = "3.2.1"
+	assert.False(t, t1.Matches(&t2))
 }
