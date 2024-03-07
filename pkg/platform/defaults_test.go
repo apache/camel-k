@@ -52,7 +52,7 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 	assert.Equal(t, v1.BuildOrderStrategySequential, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, defaults.BaseImage(), ip.Status.Build.BaseImage)
 	assert.Equal(t, defaults.LocalRepository, ip.Status.Build.Maven.LocalRepository)
-	assert.Equal(t, 3, ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
+	assert.Equal(t, int32(3), ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
 	assert.Len(t, ip.Status.Build.Maven.CLIOptions, 3)
 	assert.NotNil(t, ip.Status.Traits)
 }
@@ -111,7 +111,7 @@ func TestApplyGlobalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.TraitProfileOpenShift, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
 	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
-	assert.Equal(t, 3, ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
+	assert.Equal(t, int32(3), ip.Status.Build.MaxRunningBuilds) // default for build strategy routine
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
 	assert.NotNil(t, ip.Status.Traits)
@@ -279,7 +279,7 @@ func TestRetainLocalPlatformSpec(t *testing.T) {
 	assert.Equal(t, v1.TraitProfileKnative, ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyPod, ip.Status.Build.BuildConfiguration.Strategy)
 	assert.Equal(t, v1.BuildOrderStrategyFIFO, ip.Status.Build.BuildConfiguration.OrderStrategy)
-	assert.Equal(t, 1, ip.Status.Build.MaxRunningBuilds)
+	assert.Equal(t, int32(1), ip.Status.Build.MaxRunningBuilds)
 	assert.Equal(t, len(global.Status.Build.Maven.CLIOptions), len(ip.Status.Build.Maven.CLIOptions))
 	assert.Equal(t, global.Status.Build.Maven.CLIOptions, ip.Status.Build.Maven.CLIOptions)
 	assert.NotNil(t, ip.Status.Traits)
