@@ -104,8 +104,7 @@ spec:
       image: my-special-image
     jvm:
       enabled: true
-status:
-  traits: {}
+status: {}
 `, output)
 }
 
@@ -205,8 +204,7 @@ spec:
       image: my-special-image
     jvm:
       enabled: true
-status:
-  traits: {}
+status: {}
 `, output)
 }
 
@@ -329,8 +327,7 @@ spec:
       image: my-special-image
     jvm:
       enabled: true
-status:
-  traits: {}
+status: {}
 `, output)
 	// Verify also when the operator Id is set in the integration
 	defaultIntegration.Annotations = map[string]string{
@@ -354,7 +351,6 @@ spec:
       image: my-special-image
     jvm:
       enabled: true
-status:
-  traits: {}
+status: {}
 `, output)
 }

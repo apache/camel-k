@@ -118,8 +118,6 @@ type IntegrationStatus struct {
 	Selector string `json:"selector,omitempty"`
 	// features offered by the Integration
 	Capabilities []string `json:"capabilities,omitempty"`
-	// the traits generated and executed for this Integration
-	Traits Traits `json:"traits,omitempty"`
 	// the timestamp representing the last time when this integration was initialized.
 	InitializationTimestamp *metav1.Time `json:"lastInitTimestamp,omitempty"`
 }

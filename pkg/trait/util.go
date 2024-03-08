@@ -492,10 +492,6 @@ func newTraitsOptionsForIntegrationKit(i *v1.IntegrationKit, traits v1.Integrati
 	return newTraitsOptions(m1, &i.ObjectMeta)
 }
 
-func NewStatusTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
-	return newTraitsOptionsForIntegrationKit(i, i.Status.Traits)
-}
-
 func NewSpecTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
 	return newTraitsOptionsForIntegrationKit(i, i.Spec.Traits)
 }

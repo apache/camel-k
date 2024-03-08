@@ -118,9 +118,6 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	if err := computeForTraits(hash, integration.Spec.Traits); err != nil {
 		return "", err
 	}
-	if err := computeForTraits(hash, integration.Status.Traits); err != nil {
-		return "", err
-	}
 
 	// Integration traits as annotations
 	for _, k := range sortedTraitAnnotationsKeys(integration) {
