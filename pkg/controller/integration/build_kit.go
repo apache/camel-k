@@ -52,7 +52,7 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		return nil, err
 	}
 	if hash != integration.Status.Digest {
-		action.L.Info("Integration needs a rebuild")
+		action.L.Info("Integration %s digest has changed: resetting its status. Will check if it needs to be rebuilt and restarted.", integration.Name)
 		integration.Initialize()
 		integration.Status.Digest = hash
 		return integration, nil
