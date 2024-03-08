@@ -183,11 +183,6 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
-				Traits: v1.IntegrationKitTraits{
-					Builder: &traitv1.BuilderTrait{
-						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					},
-				},
 			},
 		},
 		// Should NOT be discarded because it contains a subset of the required traits and
@@ -220,14 +215,6 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
-				Traits: v1.IntegrationKitTraits{
-					Builder: &traitv1.BuilderTrait{
-						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-						Properties: []string{
-							"build-key1=build-value1",
-						},
-					},
-				},
 			},
 		},
 	)
@@ -262,14 +249,6 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				"camel-core",
 				"camel-irc",
 			},
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
 		},
 	})
 
@@ -290,13 +269,6 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-				},
-			},
-		},
-		Status: v1.IntegrationStatus{
 			Traits: v1.Traits{
 				Builder: &traitv1.BuilderTrait{
 					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
@@ -344,16 +316,6 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 				},
 			},
 		},
-		Status: v1.IntegrationStatus{
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
-		},
 	}
 
 	kit := &v1.IntegrationKit{
@@ -366,16 +328,6 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			Name:      "my-kit",
 		},
 		Spec: v1.IntegrationKitSpec{
-			Traits: v1.IntegrationKitTraits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
-		},
-		Status: v1.IntegrationKitStatus{
 			Traits: v1.IntegrationKitTraits{
 				Builder: &traitv1.BuilderTrait{
 					PlatformBaseTrait: traitv1.PlatformBaseTrait{},

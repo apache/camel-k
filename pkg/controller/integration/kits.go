@@ -127,7 +127,7 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 	if err != nil {
 		return false, err
 	}
-	ikc, err := trait.NewStatusTraitsOptionsForIntegrationKit(kit)
+	ikc, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
 	if err != nil {
 		return false, err
 	}
@@ -190,7 +190,7 @@ func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error)
 	if err != nil {
 		return false, err
 	}
-	c2, err := trait.NewStatusTraitsOptionsForIntegrationKit(target)
+	c2, err := trait.NewSpecTraitsOptionsForIntegrationKit(target)
 	if err != nil {
 		return false, err
 	}

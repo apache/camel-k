@@ -608,8 +608,7 @@ spec:
       {\n\t  from(\"timer:tick\")\n        .log(\"Hello Camel K!\");\n  }\n}\n"
     name: %s
   traits: {}
-status:
-  traits: {}
+status: {}
 `, fileName, fileName), output)
 }
 
@@ -649,8 +648,7 @@ spec:
     service-binding:
       services:
       - my-service-binding
-status:
-  traits: {}
+status: {}
 `, fileName, fileName), output)
 }
 
@@ -958,7 +956,6 @@ spec:
     mount:
       configs:
       - configmap:my-cm
-status:
-  traits: {}
+status: {}
 `, output)
 }
