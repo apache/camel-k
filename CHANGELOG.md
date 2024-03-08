@@ -6,12 +6,18 @@
 
 **Closed issues:**
 
+- Update buil/Dokerfile to use go 1.21 [\#5231](https://github.com/apache/camel-k/issues/5231)
+- Error java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#5225](https://github.com/apache/camel-k/issues/5225)
+- Misleading "Monitor: Integration needs a rebuild" message [\#5219](https://github.com/apache/camel-k/issues/5219)
 - Route parameters are ignored for `path` parameters [\#5203](https://github.com/apache/camel-k/issues/5203)
 - Builder property failure when using non xml tag characters [\#5195](https://github.com/apache/camel-k/issues/5195)
 - Error configuring property: camel.component.test\[00001\]port\[80\]tcp.addr because cannot find component with name test\[00001\]port\[80\]tcp. [\#5179](https://github.com/apache/camel-k/issues/5179)
 - Get environment variable value is empty in properties file [\#5178](https://github.com/apache/camel-k/issues/5178)
 - Debug Integrations failing [\#5161](https://github.com/apache/camel-k/issues/5161)
+- Multiple crons at the same Integration do not run as expected [\#5158](https://github.com/apache/camel-k/issues/5158)
+- Kamel delete KameletBinding only removes integration resource [\#5156](https://github.com/apache/camel-k/issues/5156)
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
+- Running integrations fail when the used registry has a port other than default 80 [\#5141](https://github.com/apache/camel-k/issues/5141)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
 - Integrations remain in Initialization loop when referenced config map has owner references [\#5114](https://github.com/apache/camel-k/issues/5114)
 - Externally built Integrations are deployed without a command in Camel-K 2.2.0 [\#5112](https://github.com/apache/camel-k/issues/5112)
@@ -19,6 +25,7 @@
 - Add possibility to configure annotation for the builder pods [\#5106](https://github.com/apache/camel-k/issues/5106)
 - Include the operator node-selector in the helm chart [\#5103](https://github.com/apache/camel-k/issues/5103)
 - TestCreateCatalog fail when DEFAULT\_RUNTIME\_VERSION=3.6.0-SNAPSHOT [\#5099](https://github.com/apache/camel-k/issues/5099)
+- Remove secondary IntegrationPlatform in favor of using IntegrationProfile settings [\#5097](https://github.com/apache/camel-k/issues/5097)
 - Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
@@ -50,6 +57,13 @@
 
 **Merged pull requests:**
 
+- fix\(cmd\): delete KameletBinding until they exists [\#5237](https://github.com/apache/camel-k/pull/5237) ([squakez](https://github.com/squakez))
+- fix\(ctrl\): message digest change [\#5236](https://github.com/apache/camel-k/pull/5236) ([squakez](https://github.com/squakez))
+- fix\(build\): Upgrade container image to golang 1.21 [\#5235](https://github.com/apache/camel-k/pull/5235) ([gansheer](https://github.com/gansheer))
+- \[Regression\] fix\(quarkus\): don't override application.properties [\#5234](https://github.com/apache/camel-k/pull/5234) ([squakez](https://github.com/squakez))
+- fix\(trait\): revert persisted status [\#5233](https://github.com/apache/camel-k/pull/5233) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/common from 0.48.0 to 0.50.0 [\#5232](https://github.com/apache/camel-k/pull/5232) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(trait\): Add documentation and test on multiple sources [\#5229](https://github.com/apache/camel-k/pull/5229) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/cloudevents/sdk-go/v2 from 2.13.0 to 2.15.2 [\#5228](https://github.com/apache/camel-k/pull/5228) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(lint\): Update golangci-lint version to 1.55 [\#5227](https://github.com/apache/camel-k/pull/5227) ([christophd](https://github.com/christophd))
 - fix\(ci\): swap deprecation notice [\#5226](https://github.com/apache/camel-k/pull/5226) ([squakez](https://github.com/squakez))
@@ -66,6 +80,7 @@
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.18.0 to 1.19.0 [\#5193](https://github.com/apache/camel-k/pull/5193) ([dependabot[bot]](https://github.com/apps/dependabot))
 - update quarkus-native.adoc [\#5190](https://github.com/apache/camel-k/pull/5190) ([bvahdat](https://github.com/bvahdat))
 - chore: use constants for config types [\#5189](https://github.com/apache/camel-k/pull/5189) ([squakez](https://github.com/squakez))
+- chore\(e2e\): Improve E2E tests [\#5188](https://github.com/apache/camel-k/pull/5188) ([christophd](https://github.com/christophd))
 - fix\(builder\): strenghten matching dependencies heuristic [\#5187](https://github.com/apache/camel-k/pull/5187) ([squakez](https://github.com/squakez))
 - chore\(knative\): configure via properties [\#5186](https://github.com/apache/camel-k/pull/5186) ([squakez](https://github.com/squakez))
 - chore\(cmd\): deprecate -d file feature [\#5185](https://github.com/apache/camel-k/pull/5185) ([squakez](https://github.com/squakez))
