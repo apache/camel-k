@@ -61,7 +61,7 @@ USER 1001:0
 
 ADD build/_output/bin/kamel /usr/local/bin/kamel
 
-FROM golang:1.20 as go
+FROM golang:1.21 as go
 
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
