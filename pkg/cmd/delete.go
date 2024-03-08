@@ -24,6 +24,7 @@ import (
 	"strconv"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -136,13 +137,22 @@ func getIntegration(ctx context.Context, c client.Client, name string, namespace
 }
 
 func deleteIntegration(ctx context.Context, cmd *cobra.Command, c client.Client, integration *v1.Integration) error {
-	deleted, binding, err := deletePipeIfExists(ctx, c, integration)
+	deletedPipes, pipe, err := deletePipeIfExists(ctx, c, integration)
 	if err != nil {
 		return err
 	}
-	if deleted {
+	if deletedPipes {
 		// Deleting Pipe will automatically clean up the integration
-		fmt.Fprintln(cmd.OutOrStdout(), "Pipe "+binding+" deleted")
+		fmt.Fprintln(cmd.OutOrStdout(), "Pipe "+pipe+" deleted")
+		return nil
+	}
+	deletedKameletBindings, klb, err := deleteKameletBindingIfExists(ctx, c, integration)
+	if err != nil {
+		return err
+	}
+	if deletedKameletBindings {
+		// Deleting KameletBinding will automatically clean up the integration
+		fmt.Fprintln(cmd.OutOrStdout(), "KameletBinding "+klb+" deleted")
 		return nil
 	}
 	return c.Delete(ctx, integration)
@@ -155,6 +165,30 @@ func deletePipeIfExists(ctx context.Context, c client.Client, integration *v1.In
 	}
 
 	binding := v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       kind,
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: integration.Namespace,
+			Name:      name,
+		},
+	}
+	err := c.Delete(ctx, &binding)
+	if k8errors.IsNotFound(err) {
+		// Simply skip if binding doesn't exist (could be deleted already)
+		return false, name, nil
+	}
+	return err == nil, name, err
+}
+
+func deleteKameletBindingIfExists(ctx context.Context, c client.Client, integration *v1.Integration) (bool, string, error) {
+	kind, name := findCreator(integration)
+	if kind != v1alpha1.KameletBindingKind || name == "" {
+		return false, "", nil
+	}
+
+	binding := v1alpha1.KameletBinding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       kind,
 			APIVersion: v1.SchemeGroupVersion.String(),
