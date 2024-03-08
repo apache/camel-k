@@ -221,9 +221,13 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 }
 
 func computeApplicationProperties(appPropertiesPath string, applicationProperties map[string]string) error {
-	f, err := os.OpenFile(appPropertiesPath, os.O_RDWR|os.O_CREATE, 0666)
+	f, err := os.OpenFile(appPropertiesPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return fmt.Errorf("failure while creating application.properties: %w", err)
+		return fmt.Errorf("failure while opening/creating application.properties: %w", err)
+	}
+	fstat, err := f.Stat()
+	if err != nil {
+		return err
 	}
 	if applicationProperties == nil {
 		// Default build time properties
@@ -231,12 +235,23 @@ func computeApplicationProperties(appPropertiesPath string, applicationPropertie
 	}
 	// disable quarkus banner
 	applicationProperties["quarkus.banner.enabled"] = "false"
+	// camel-quarkus does route discovery at startup, but we don't want
+	// this to happen as routes are loaded at runtime and looking for
+	// routes at build time may try to load camel-k-runtime routes builder
+	// proxies which in some case may fail.
+	applicationProperties["quarkus.camel.routes-discovery.enabled"] = "false"
 	// required for to resolve data type transformers at runtime with service discovery
 	// the different Camel runtimes use different resource paths for the service lookup
 	applicationProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"
 	// Workaround to prevent JS runtime errors, see https://github.com/apache/camel-quarkus/issues/5678
 	applicationProperties["quarkus.class-loading.parent-first-artifacts"] = "org.graalvm.regex:regex"
 	defer f.Close()
+	// Add a new line if the file is already containing some value
+	if fstat.Size() > 0 {
+		if _, err := f.WriteString("\n"); err != nil {
+			return err
+		}
+	}
 	// Fill with properties coming from user configuration
 	for k, v := range applicationProperties {
 		if _, err := f.WriteString(fmt.Sprintf("%s=%s\n", k, v)); err != nil {
