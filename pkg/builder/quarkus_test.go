@@ -162,6 +162,66 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestGenerateQuarkusProjectWithNativeSources(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus-native")
+	require.NoError(t, err)
+	defaultCatalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	builderContext := builderContext{
+		C:         context.TODO(),
+		Path:      tmpDir,
+		Namespace: "test",
+		Build: v1.BuilderTask{
+			Runtime: defaultCatalog.Runtime,
+			Maven: v1.MavenBuildSpec{
+				MavenSpec: v1.MavenSpec{},
+			},
+			Sources: []v1.SourceSpec{v1.NewSourceSpec("Test.java", "bogus, irrelevant for test", v1.LanguageJavaSource)},
+		},
+	}
+	if strings.Contains(defaults.DefaultRuntimeVersion, "SNAPSHOT") {
+		builderContext.Build.Maven.Repositories = []v1.Repository{
+			{
+				ID:   "APACHE-SNAPSHOT",
+				Name: "Apache Snapshot",
+				URL:  "https://repository.apache.org/content/repositories/snapshots-group",
+				Snapshots: v1.RepositoryPolicy{
+					Enabled:        true,
+					UpdatePolicy:   "always",
+					ChecksumPolicy: "ignore",
+				},
+				Releases: v1.RepositoryPolicy{
+					Enabled: false,
+				},
+			},
+		}
+	}
+
+	err = prepareProjectWithSources(&builderContext)
+	require.NoError(t, err)
+	err = generateQuarkusProject(&builderContext)
+	require.NoError(t, err)
+	// use local Maven executable in tests
+	t.Setenv("MAVEN_WRAPPER", "false")
+	_, ok := os.LookupEnv("MAVEN_CMD")
+	if !ok {
+		t.Setenv("MAVEN_CMD", "mvn")
+	}
+	err = buildQuarkusRunner(&builderContext)
+	require.NoError(t, err)
+	appProps, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "application.properties"))
+	require.NoError(t, err)
+	assert.Contains(t, string(appProps), "quarkus.camel.routes-discovery.enabled=false\n")
+	assert.Contains(t, string(appProps), "camel.main.routes-include-pattern = classpath:routes/Test.java\n")
+	materializedRoute, err := os.ReadFile(filepath.Join(tmpDir, "maven", "src", "main", "resources", "routes", "Test.java"))
+	require.NoError(t, err)
+	assert.Contains(t, string(materializedRoute), "bogus, irrelevant for test")
+	// At this stage a maven project should have been executed. Verify the package was created.
+	_, err = os.Stat(filepath.Join(tmpDir, "maven", "target", "camel-k-integration-"+defaults.Version+".jar"))
+	require.NoError(t, err)
+}
+
 func TestBuildQuarkusRunner(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "go-test-camel-k-quarkus")
 	require.NoError(t, err)
