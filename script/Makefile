@@ -362,7 +362,7 @@ endif
 
 build-compile-integration-tests:
 	@echo "####### Compiling integration tests..."
-	export CAMEL_K_E2E_JUST_COMPILE="true" ;\
+	export CAMEL_K_E2E_JUST_COMPILE="true"; \
 	go test -run nope -tags="integration" ./e2e/...
 
 clean:

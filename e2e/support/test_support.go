@@ -308,6 +308,16 @@ func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID strin
 		}
 	}
 
+	runtimeVersion := os.Getenv("CAMEL_K_TEST_RUNTIME_VERSION")
+	if runtimeVersion != "" {
+		fmt.Printf("Setting runtime version to %s\n", runtimeVersion)
+		installArgs = append(installArgs, "--runtime-version", runtimeVersion)
+	}
+	baseImage := os.Getenv("CAMEL_K_TEST_BASE_IMAGE")
+	if baseImage != "" {
+		fmt.Printf("Setting base image to %s\n", baseImage)
+		installArgs = append(installArgs, "--base-image", baseImage)
+	}
 	opImage := os.Getenv("CAMEL_K_TEST_OPERATOR_IMAGE")
 	if opImage != "" {
 		fmt.Printf("Setting operator image to %s\n", opImage)
