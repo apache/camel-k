@@ -165,8 +165,8 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		// in which case it's not possible to determine a namespace.
 		operatorNamespace = watchNamespace
 		if operatorNamespace == "" {
-			leaderElection = false
-			log.Info("unable to determine namespace for leader election")
+			// We cannot go forward anyhow since later on we need a namespace to create resources
+			exitOnError(fmt.Errorf("Cannot continue as we need a namespace to be defined. Use either NAMESPACE or WATCH_NAMESPACE"), "")
 		}
 	}
 
@@ -295,7 +295,8 @@ func getOperatorImage(ctx context.Context, c ctrl.Reader) (string, error) {
 	ns := platform.GetOperatorNamespace()
 	name := platform.GetOperatorPodName()
 	if ns == "" || name == "" {
-		return "", nil
+		// We are most likely running out of cluster. Let's take a chance and use the default value
+		return defaults.OperatorImage(), nil
 	}
 
 	pod := corev1.Pod{}
