@@ -258,16 +258,14 @@ test-common: do-build
 #
 test-smoke: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 30m -v ./e2e/common/main_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 10m -v ./e2e/common/main_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v ./e2e/common/languages -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v \
-		./e2e/common/misc/default.go \
 		./e2e/common/misc/cron_test.go \
 		./e2e/common/misc/kamelet_test.go \
 		./e2e/common/misc/pipe_test.go \
 	 	-tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	go test -timeout 30m -v \
-		./e2e/common/traits/default.go \
 		./e2e/common/traits/camel_test.go \
 		./e2e/common/traits/container_test.go \
 		./e2e/common/traits/openapi_test.go \
