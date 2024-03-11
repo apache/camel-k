@@ -8,6 +8,7 @@
 
 - Update buil/Dokerfile to use go 1.21 [\#5231](https://github.com/apache/camel-k/issues/5231)
 - Error java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#5225](https://github.com/apache/camel-k/issues/5225)
+- Deployment Trait maxUnavailable and maxSurge default values differ from documentation and do not support % values [\#5223](https://github.com/apache/camel-k/issues/5223)
 - Misleading "Monitor: Integration needs a rebuild" message [\#5219](https://github.com/apache/camel-k/issues/5219)
 - Route parameters are ignored for `path` parameters [\#5203](https://github.com/apache/camel-k/issues/5203)
 - Builder property failure when using non xml tag characters [\#5195](https://github.com/apache/camel-k/issues/5195)
@@ -57,6 +58,7 @@
 
 **Merged pull requests:**
 
+- chore\(e2e\): Fix smoke tests [\#5240](https://github.com/apache/camel-k/pull/5240) ([christophd](https://github.com/christophd))
 - fix\(cmd\): delete KameletBinding until they exists [\#5237](https://github.com/apache/camel-k/pull/5237) ([squakez](https://github.com/squakez))
 - fix\(ctrl\): message digest change [\#5236](https://github.com/apache/camel-k/pull/5236) ([squakez](https://github.com/squakez))
 - fix\(build\): Upgrade container image to golang 1.21 [\#5235](https://github.com/apache/camel-k/pull/5235) ([gansheer](https://github.com/gansheer))
@@ -67,6 +69,7 @@
 - chore\(deps\): bump github.com/cloudevents/sdk-go/v2 from 2.13.0 to 2.15.2 [\#5228](https://github.com/apache/camel-k/pull/5228) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(lint\): Update golangci-lint version to 1.55 [\#5227](https://github.com/apache/camel-k/pull/5227) ([christophd](https://github.com/christophd))
 - fix\(ci\): swap deprecation notice [\#5226](https://github.com/apache/camel-k/pull/5226) ([squakez](https://github.com/squakez))
+- fix\(trait\): changing data type for rollingUpdateMaxSurge and rollingU… [\#5224](https://github.com/apache/camel-k/pull/5224) ([lsergio](https://github.com/lsergio))
 - chore\(traits\): deprecate registry [\#5222](https://github.com/apache/camel-k/pull/5222) ([squakez](https://github.com/squakez))
 - feat\(ci\): upgrade golang to 1.21 [\#5221](https://github.com/apache/camel-k/pull/5221) ([squakez](https://github.com/squakez))
 - fix\(trait\): watch for resource versions... [\#5218](https://github.com/apache/camel-k/pull/5218) ([squakez](https://github.com/squakez))
