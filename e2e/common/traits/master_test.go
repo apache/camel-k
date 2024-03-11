@@ -23,6 +23,7 @@ limitations under the License.
 package traits
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -38,47 +39,36 @@ import (
 func TestMasterTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-traits-master"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("master works", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Master.java").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "master"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Master.java").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "master"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("only one integration with master runs", func(t *testing.T) {
 			nameFirst := RandomizedSuffixName("first")
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Master.java",
-				"--name", nameFirst,
-				"--label", "leader-group=same",
-				"-t", "master.label-key=leader-group",
-				"-t", "master.label-value=same",
-				"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, nameFirst), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, nameFirst), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Master.java", "--name", nameFirst, "--label", "leader-group=same", "-t", "master.label-key=leader-group", "-t", "master.label-value=same", "-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameFirst), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameFirst), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			// Start a second integration with the same lock (it should not start the route)
 			nameSecond := RandomizedSuffixName("second")
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Master.java",
-				"--name", nameSecond,
-				"--label", "leader-group=same",
-				"-t", "master.label-key=leader-group",
-				"-t", "master.label-value=same",
-				"-t", "master.resource-name=first-lock",
-				"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, nameSecond), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, nameSecond), TestTimeoutShort).Should(ContainSubstring("started in"))
-			g.Eventually(IntegrationLogs(t, ns, nameSecond), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Master.java", "--name", nameSecond, "--label", "leader-group=same", "-t", "master.label-key=leader-group", "-t", "master.label-value=same", "-t", "master.resource-name=first-lock", "-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, nameSecond), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameSecond), TestTimeoutShort).Should(ContainSubstring("started in"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameSecond), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
 
 			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ns, nameFirst)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ns, nameFirst)()
+			g.Eventually(UnstructuredIntegration(t, ctx, ns, nameFirst)).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, nameFirst)()
 			builderTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "addons", "master")
 			g.Expect(builderTrait).ToNot(BeNil())
 			g.Expect(len(builderTrait)).To(Equal(2))
@@ -86,6 +76,6 @@ func TestMasterTrait(t *testing.T) {
 			g.Expect(builderTrait["labelValue"]).To(Equal("same"))
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

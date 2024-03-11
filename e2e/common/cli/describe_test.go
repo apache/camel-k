@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"testing"
@@ -36,13 +37,12 @@ import (
 )
 
 func TestKamelCliDescribe(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-
-		g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 		t.Run("Test kamel describe integration", func(t *testing.T) {
-			integration := GetOutputString(Kamel(t, "describe", "integration", "yaml", "-n", ns))
+			integration := GetOutputString(Kamel(t, ctx, "describe", "integration", "yaml", "-n", ns))
 			r, _ := regexp.Compile("(?sm).*Name:\\s+yaml.*")
 			g.Expect(integration).To(MatchRegexp(r.String()))
 
@@ -54,9 +54,9 @@ func TestKamelCliDescribe(t *testing.T) {
 		})
 
 		t.Run("Test kamel describe integration kit", func(t *testing.T) {
-			kitName := Integration(t, ns, "yaml")().Status.IntegrationKit.Name
-			kitNamespace := Integration(t, ns, "yaml")().Status.IntegrationKit.Namespace
-			kit := GetOutputString(Kamel(t, "describe", "kit", kitName, "-n", kitNamespace))
+			kitName := Integration(t, ctx, ns, "yaml")().Status.IntegrationKit.Name
+			kitNamespace := Integration(t, ctx, ns, "yaml")().Status.IntegrationKit.Namespace
+			kit := GetOutputString(Kamel(t, ctx, "describe", "kit", kitName, "-n", kitNamespace))
 
 			r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + kitNamespace + ".*")
 			g.Expect(kit).To(MatchRegexp(r.String()))
@@ -71,7 +71,7 @@ func TestKamelCliDescribe(t *testing.T) {
 		})
 
 		t.Run("Test kamel describe integration platform", func(t *testing.T) {
-			platform := GetOutputString(Kamel(t, "describe", "platform", operatorID, "-n", operatorNS))
+			platform := GetOutputString(Kamel(t, ctx, "describe", "platform", operatorID, "-n", operatorNS))
 			g.Expect(platform).To(ContainSubstring(fmt.Sprintf("Name:	%s", operatorID)))
 
 			r, _ := regexp.Compile("(?sm).*Namespace:\\s+" + operatorNS + ".*")
@@ -81,6 +81,6 @@ func TestKamelCliDescribe(t *testing.T) {
 			g.Expect(platform).To(MatchRegexp(r.String()))
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

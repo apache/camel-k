@@ -23,6 +23,7 @@ limitations under the License.
 package kustomize
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -40,14 +41,16 @@ func TestOperatorBasic(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
+	ctx := context.TODO()
+
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)
-	g.Expect(UninstallAll(t)).To(Succeed())
+	g.Expect(UninstallAll(t, ctx)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup(t)
+	defer Cleanup(t, ctx)
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
 		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
 		ExpectExecSucceed(t, g, Make(t, "setup", namespaceArg))
@@ -59,20 +62,20 @@ func TestOperatorBasic(t *testing.T) {
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 
-		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
-		g.Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Check if restricted security context has been applyed
-		operatorPod := OperatorPod(t, ns)()
+		operatorPod := OperatorPod(t, ctx, ns)()
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
-		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		registry := os.Getenv("KIND_REGISTRY")
 		if registry != "" {
-			platform := Platform(t, ns)()
+			platform := Platform(t, ctx, ns)()
 			g.Expect(platform.Status.Build.Registry).ShouldNot(BeNil())
 			g.Expect(platform.Status.Build.Registry.Address).To(Equal(registry))
 		}
@@ -84,14 +87,16 @@ func TestOperatorKustomizeAlternativeImage(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
+	ctx := context.TODO()
+
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)
-	g.Expect(UninstallAll(t)).To(Succeed())
+	g.Expect(UninstallAll(t, ctx)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup(t)
+	defer Cleanup(t, ctx)
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
 		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
 		ExpectExecSucceed(t, g, Make(t, "setup", namespaceArg))
@@ -108,7 +113,7 @@ func TestOperatorKustomizeAlternativeImage(t *testing.T) {
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 
-		g.Eventually(OperatorImage(t, ns)).Should(Equal(fmt.Sprintf("%s:%s", newImage, newTag)))
+		g.Eventually(OperatorImage(t, ctx, ns)).Should(Equal(fmt.Sprintf("%s:%s", newImage, newTag)))
 	})
 }
 
@@ -116,14 +121,16 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
+	ctx := context.TODO()
+
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)
-	g.Expect(UninstallAll(t)).To(Succeed())
+	g.Expect(UninstallAll(t, ctx)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup(t)
+	defer Cleanup(t, ctx)
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
 		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
 		ExpectExecSucceed(t, g, Make(t, "setup", namespaceArg, "GLOBAL=true"))
@@ -137,9 +144,9 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 
-		podFunc := OperatorPod(t, ns)
+		podFunc := OperatorPod(t, ctx, ns)
 		g.Eventually(podFunc).ShouldNot(BeNil())
-		g.Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		pod := podFunc()
 
 		containers := pod.Spec.Containers
@@ -158,6 +165,6 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 		}
 		g.Expect(found).To(BeTrue())
 
-		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 	})
 }

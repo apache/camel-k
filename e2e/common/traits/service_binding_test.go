@@ -23,6 +23,7 @@ limitations under the License.
 package traits
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -38,13 +39,13 @@ import (
 func TestServiceBindingTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-traits-service-binding"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("Integration Service Binding", func(t *testing.T) {
 			// Create our mock service config
@@ -69,17 +70,14 @@ func TestServiceBindingTrait(t *testing.T) {
 				},
 			}
 			serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
-			g.Expect(TestClient(t).Create(TestContext, service)).To(Succeed())
+			g.Expect(TestClient(t).Create(ctx, service)).To(Succeed())
 			// Create integration and bind it to our service
 			name := RandomizedSuffixName("service-binding")
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/ServiceBinding.java",
-				"--name", name,
-				"--connect", serviceRef,
-			).Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/ServiceBinding.java", "--name", name, "--connect", serviceRef).Execute()).To(Succeed())
 
-			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s:%s", host, port)))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("%s:%s", host, port)))
 		})
 
 		t.Run("Binding Service Binding", func(t *testing.T) {
@@ -102,16 +100,14 @@ func TestServiceBindingTrait(t *testing.T) {
 				},
 			}
 			serviceRef := fmt.Sprintf("%s:%s/%s", service.TypeMeta.Kind, ns, service.ObjectMeta.Name)
-			g.Expect(TestClient(t).Create(TestContext, service)).To(Succeed())
-			g.Expect(CreateTimerKamelet(t, operatorID, ns, "my-timer-source")()).To(Succeed())
-			g.Expect(KamelBindWithID(t, operatorID, ns, "my-timer-source", "log:info",
-				"-p", "source.message=Hello+world",
-				"--connect", serviceRef).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "my-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, "my-timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
+			g.Expect(TestClient(t).Create(ctx, service)).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, "my-timer-source")()).To(Succeed())
+			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-timer-source", "log:info", "-p", "source.message=Hello+world", "--connect", serviceRef).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "my-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "my-timer-source-to-log")).Should(ContainSubstring("Body: Hello+world"))
 		})
 
 		// Clean up
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

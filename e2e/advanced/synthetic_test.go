@@ -23,6 +23,7 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -37,17 +38,17 @@ import (
 func TestSyntheticIntegrationOff(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Install Camel K without synthetic Integration feature variable (default)
 		operatorID := "camel-k-synthetic-env-off"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Run the external deployment
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/deploy.yaml", "-n", ns))
-		g.Eventually(DeploymentCondition(t, ns, "my-camel-sb-svc", appsv1.DeploymentProgressing), TestTimeoutShort).
+		g.Eventually(DeploymentCondition(t, ctx, ns, "my-camel-sb-svc", appsv1.DeploymentProgressing), TestTimeoutShort).
 			Should(MatchFields(IgnoreExtras, Fields{
 				"Status": Equal(corev1.ConditionTrue),
 				"Reason": Equal("NewReplicaSetAvailable"),
@@ -55,24 +56,24 @@ func TestSyntheticIntegrationOff(t *testing.T) {
 
 		// Label the deployment --> Verify the Integration is not created
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration=my-it", "-n", ns))
-		g.Eventually(Integration(t, ns, "my-it"), TestTimeoutShort).Should(BeNil())
+		g.Eventually(Integration(t, ctx, ns, "my-it"), TestTimeoutShort).Should(BeNil())
 	})
 }
 func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Install Camel K with the synthetic Integration feature variable
 		operatorID := "camel-k-synthetic-env"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns,
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns,
 			"--operator-env-vars", "CAMEL_K_SYNTHETIC_INTEGRATIONS=true",
 		)).To(Succeed())
 
 		// Run the external deployment
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/deploy.yaml", "-n", ns))
-		g.Eventually(DeploymentCondition(t, ns, "my-camel-sb-svc", appsv1.DeploymentProgressing), TestTimeoutShort).
+		g.Eventually(DeploymentCondition(t, ctx, ns, "my-camel-sb-svc", appsv1.DeploymentProgressing), TestTimeoutShort).
 			Should(MatchFields(IgnoreExtras, Fields{
 				"Status": Equal(corev1.ConditionTrue),
 				"Reason": Equal("NewReplicaSetAvailable"),
@@ -80,47 +81,47 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 
 		// Label the deployment --> Verify the Integration is created (cannot still monitor)
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration=my-it", "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		g.Eventually(IntegrationCondition(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(
+		g.Eventually(IntegrationPhase(t, ctx, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+		g.Eventually(IntegrationCondition(t, ctx, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(
 			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionMonitoringPodsAvailableReason)))
 
 		// Label the deployment template --> Verify the Integration is monitored
 		ExpectExecSucceed(t, g, Kubectl("patch", "deployment", "my-camel-sb-svc", "--patch", `{"spec": {"template": {"metadata": {"labels": {"camel.apache.org/integration": "my-it"}}}}}`, "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPhase(t, ctx, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		one := int32(1)
-		g.Eventually(IntegrationStatusReplicas(t, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
 
 		// Delete the deployment --> Verify the Integration is eventually garbage collected
 		ExpectExecSucceed(t, g, Kubectl("delete", "deploy", "my-camel-sb-svc", "-n", ns))
-		g.Eventually(Integration(t, ns, "my-it"), TestTimeoutShort).Should(BeNil())
+		g.Eventually(Integration(t, ctx, ns, "my-it"), TestTimeoutShort).Should(BeNil())
 
 		// Recreate the deployment and label --> Verify the Integration is monitored
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/deploy.yaml", "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration=my-it", "-n", ns))
 		ExpectExecSucceed(t, g, Kubectl("patch", "deployment", "my-camel-sb-svc", "--patch", `{"spec": {"template": {"metadata": {"labels": {"camel.apache.org/integration": "my-it"}}}}}`, "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationStatusReplicas(t, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
+		g.Eventually(IntegrationPhase(t, ctx, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
 
 		// Remove label from the deployment --> Verify the Integration is deleted
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration-", "-n", ns))
-		g.Eventually(Integration(t, ns, "my-it"), TestTimeoutShort).Should(BeNil())
+		g.Eventually(Integration(t, ctx, ns, "my-it"), TestTimeoutShort).Should(BeNil())
 
 		// Add label back to the deployment --> Verify the Integration is created
 		ExpectExecSucceed(t, g, Kubectl("label", "deploy", "my-camel-sb-svc", "camel.apache.org/integration=my-it", "-n", ns))
-		g.Eventually(IntegrationPhase(t, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationStatusReplicas(t, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
+		g.Eventually(IntegrationPhase(t, ctx, ns, "my-it"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "my-it", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "my-it"), TestTimeoutShort).Should(Equal(&one))
 		// Scale the deployment --> verify replicas are correctly set
 		ExpectExecSucceed(t, g, Kubectl("scale", "deploy", "my-camel-sb-svc", "--replicas", "2", "-n", ns))
 		two := int32(2)
-		g.Eventually(IntegrationStatusReplicas(t, ns, "my-it"), TestTimeoutShort).Should(Equal(&two))
+		g.Eventually(IntegrationStatusReplicas(t, ctx, ns, "my-it"), TestTimeoutShort).Should(Equal(&two))
 
 		// Delete Integration and deployments --> verify no Integration exists any longer
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		ExpectExecSucceed(t, g, Kubectl("delete", "deploy", "my-camel-sb-svc", "-n", ns))
-		g.Eventually(Integration(t, ns, "my-it"), TestTimeoutShort).Should(BeNil())
+		g.Eventually(Integration(t, ctx, ns, "my-it"), TestTimeoutShort).Should(BeNil())
 	})
 }

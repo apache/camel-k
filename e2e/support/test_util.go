@@ -23,6 +23,7 @@ limitations under the License.
 package support
 
 import (
+	"context"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"os"
 	"os/exec"
@@ -101,24 +102,24 @@ func ExpectExecError(t *testing.T, g *WithT, command *exec.Cmd) {
 }
 
 // Cleanup Clean up the cluster ready for the next set of tests
-func Cleanup(t *testing.T) {
+func Cleanup(t *testing.T, ctx context.Context) {
 	// Remove the locally installed operator
-	if err := UninstallAll(t); err != nil {
+	if err := UninstallAll(t, ctx); err != nil {
 		log.Error(err, "Failed to uninstall Camel K")
 	}
 
 	// Ensure the CRDs & ClusterRoles are reinstalled if not already
-	if err := Kamel(t, "install", "--olm=false", "--cluster-setup").Execute(); err != nil {
+	if err := Kamel(t, ctx, "install", "--olm=false", "--cluster-setup").Execute(); err != nil {
 		log.Error(err, "Failed to perform Camel K cluster setup")
 	}
 }
 
 // UninstallAll Removes all items
-func UninstallAll(t *testing.T) error {
-	return Kamel(t, "uninstall", "--olm=false", "--all").Execute()
+func UninstallAll(t *testing.T, ctx context.Context) error {
+	return Kamel(t, ctx, "uninstall", "--olm=false", "--all").Execute()
 }
 
 // UninstallFromNamespace Removes operator from given namespace
-func UninstallFromNamespace(t *testing.T, ns string) error {
-	return Kamel(t, "uninstall", "--olm=false", "-n", ns).Execute()
+func UninstallFromNamespace(t *testing.T, ctx context.Context, ns string) error {
+	return Kamel(t, ctx, "uninstall", "--olm=false", "-n", ns).Execute()
 }

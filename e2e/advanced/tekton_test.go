@@ -23,6 +23,7 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,14 +36,14 @@ import (
 func TestTektonLikeBehavior(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-		g.Expect(CreateOperatorServiceAccount(t, ns)).To(Succeed())
-		g.Expect(CreateOperatorRole(t, ns)).To(Succeed())
-		g.Expect(CreateOperatorRoleBinding(t, ns)).To(Succeed())
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		g.Expect(CreateOperatorServiceAccount(t, ctx, ns)).To(Succeed())
+		g.Expect(CreateOperatorRole(t, ctx, ns)).To(Succeed())
+		g.Expect(CreateOperatorRoleBinding(t, ctx, ns)).To(Succeed())
 
-		g.Eventually(OperatorPod(t, ns)).Should(BeNil())
-		g.Expect(CreateKamelPod(t, ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
+		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
+		g.Expect(CreateKamelPod(t, ctx, ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
 
-		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 	})
 }

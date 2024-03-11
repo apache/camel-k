@@ -136,7 +136,6 @@ var TestTimeoutVeryLong = 60 * time.Minute
 
 var NoOlmOperatorImage string
 
-var TestContext context.Context
 var testClient client.Client
 var clientMutex = sync.Mutex{}
 
@@ -203,7 +202,6 @@ func init() {
 	client.FastMapperAllowedAPIGroups["policy"] = true
 
 	var err error
-	TestContext = context.TODO()
 
 	// Defaults for testing
 	imageName := os.Getenv("CAMEL_K_TEST_IMAGE_NAME")
@@ -259,20 +257,20 @@ func NewTestClient() (client.Client, error) {
 	return client.NewOutOfClusterClient(os.Getenv(kubeConfigEnvVar))
 }
 
-func Kamel(t *testing.T, args ...string) *cobra.Command {
-	return KamelWithContext(t, TestContext, args...)
+func Kamel(t *testing.T, ctx context.Context, args ...string) *cobra.Command {
+	return KamelWithContext(t, ctx, args...)
 }
 
-func KamelInstall(t *testing.T, namespace string, args ...string) error {
-	return KamelInstallWithID(t, platform.DefaultPlatformName, namespace, args...)
+func KamelInstall(t *testing.T, ctx context.Context, namespace string, args ...string) error {
+	return KamelInstallWithID(t, ctx, platform.DefaultPlatformName, namespace, args...)
 }
 
-func KamelInstallWithID(t *testing.T, operatorID string, namespace string, args ...string) error {
-	return kamelInstallWithContext(t, TestContext, operatorID, namespace, true, args...)
+func KamelInstallWithID(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) error {
+	return kamelInstallWithContext(t, ctx, operatorID, namespace, true, args...)
 }
 
-func KamelInstallWithIDAndKameletCatalog(t *testing.T, operatorID string, namespace string, args ...string) error {
-	return kamelInstallWithContext(t, TestContext, operatorID, namespace, false, args...)
+func KamelInstallWithIDAndKameletCatalog(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) error {
+	return kamelInstallWithContext(t, ctx, operatorID, namespace, false, args...)
 }
 
 func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) error {
@@ -334,24 +332,24 @@ func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID strin
 	return installCommand.Execute()
 }
 
-func KamelRun(t *testing.T, namespace string, args ...string) *cobra.Command {
-	return KamelRunWithID(t, platform.DefaultPlatformName, namespace, args...)
+func KamelRun(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
+	return KamelRunWithID(t, ctx, platform.DefaultPlatformName, namespace, args...)
 }
 
-func KamelRunWithID(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
-	return KamelRunWithContext(t, TestContext, operatorID, namespace, args...)
+func KamelRunWithID(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+	return KamelRunWithContext(t, ctx, operatorID, namespace, args...)
 }
 
 func KamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
 	return KamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
 }
 
-func KamelBind(t *testing.T, namespace string, args ...string) *cobra.Command {
-	return KamelBindWithID(t, platform.DefaultPlatformName, namespace, args...)
+func KamelBind(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
+	return KamelBindWithID(t, ctx, platform.DefaultPlatformName, namespace, args...)
 }
 
-func KamelBindWithID(t *testing.T, operatorID string, namespace string, args ...string) *cobra.Command {
-	return KamelBindWithContext(t, TestContext, operatorID, namespace, args...)
+func KamelBindWithID(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+	return KamelBindWithContext(t, ctx, operatorID, namespace, args...)
 }
 
 func KamelBindWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
@@ -476,9 +474,9 @@ func KubectlWithContext(args ...string) *exec.Cmd {
 // Curried utility functions for testing
 // =============================================================================
 
-func IntegrationLogs(t *testing.T, ns, name string) func() string {
+func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() string {
 	return func() string {
-		pod := IntegrationPod(t, ns, name)()
+		pod := IntegrationPod(t, ctx, ns, name)()
 		if pod == nil {
 			return ""
 		}
@@ -491,24 +489,24 @@ func IntegrationLogs(t *testing.T, ns, name string) func() string {
 			options.Container = pod.Spec.Containers[0].Name
 		}
 
-		return Logs(t, ns, pod.Name, options)()
+		return Logs(t, ctx, ns, pod.Name, options)()
 	}
 }
 
 // Retrieve the Logs from the Pod defined by its name in the given namespace ns. The number of lines numLines from the end of the logs to show.
-func TailedLogs(t *testing.T, ns, name string, numLines int64) func() string {
+func TailedLogs(t *testing.T, ctx context.Context, ns, name string, numLines int64) func() string {
 	return func() string {
 		options := corev1.PodLogOptions{
 			TailLines: pointer.Int64(numLines),
 		}
 
-		return Logs(t, ns, name, options)()
+		return Logs(t, ctx, ns, name, options)()
 	}
 }
 
-func Logs(t *testing.T, ns, podName string, options corev1.PodLogOptions) func() string {
+func Logs(t *testing.T, ctx context.Context, ns, podName string, options corev1.PodLogOptions) func() string {
 	return func() string {
-		byteReader, err := TestClient(t).CoreV1().Pods(ns).GetLogs(podName, &options).Stream(TestContext)
+		byteReader, err := TestClient(t).CoreV1().Pods(ns).GetLogs(podName, &options).Stream(ctx)
 		if err != nil {
 			log.Error(err, "Error while reading container logs")
 			return ""
@@ -528,9 +526,9 @@ func Logs(t *testing.T, ns, podName string, options corev1.PodLogOptions) func()
 	}
 }
 
-func StructuredLogs(t *testing.T, ns, podName string, options *corev1.PodLogOptions, ignoreParseErrors bool) ([]util.LogEntry, error) {
+func StructuredLogs(t *testing.T, ctx context.Context, ns, podName string, options *corev1.PodLogOptions, ignoreParseErrors bool) ([]util.LogEntry, error) {
 
-	stream, err := TestClient(t).CoreV1().Pods(ns).GetLogs(podName, options).Stream(TestContext)
+	stream, err := TestClient(t).CoreV1().Pods(ns).GetLogs(podName, options).Stream(ctx)
 	if err != nil {
 		msg := "Error while reading container logs"
 		log.Error(err, msg)
@@ -577,9 +575,9 @@ func StructuredLogs(t *testing.T, ns, podName string, options *corev1.PodLogOpti
 	return entries, nil
 }
 
-func IntegrationPodPhase(t *testing.T, ns string, name string) func() corev1.PodPhase {
+func IntegrationPodPhase(t *testing.T, ctx context.Context, ns string, name string) func() corev1.PodPhase {
 	return func() corev1.PodPhase {
-		pod := IntegrationPod(t, ns, name)()
+		pod := IntegrationPod(t, ctx, ns, name)()
 		if pod == nil {
 			return ""
 		}
@@ -587,9 +585,9 @@ func IntegrationPodPhase(t *testing.T, ns string, name string) func() corev1.Pod
 	}
 }
 
-func IntegrationPodImage(t *testing.T, ns string, name string) func() string {
+func IntegrationPodImage(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
-		pod := IntegrationPod(t, ns, name)()
+		pod := IntegrationPod(t, ctx, ns, name)()
 		if pod == nil || len(pod.Spec.Containers) == 0 {
 			return ""
 		}
@@ -597,9 +595,9 @@ func IntegrationPodImage(t *testing.T, ns string, name string) func() string {
 	}
 }
 
-func IntegrationPod(t *testing.T, ns string, name string) func() *corev1.Pod {
+func IntegrationPod(t *testing.T, ctx context.Context, ns string, name string) func() *corev1.Pod {
 	return func() *corev1.Pod {
-		pods := IntegrationPods(t, ns, name)()
+		pods := IntegrationPods(t, ctx, ns, name)()
 		if len(pods) == 0 {
 			return nil
 		}
@@ -607,9 +605,9 @@ func IntegrationPod(t *testing.T, ns string, name string) func() *corev1.Pod {
 	}
 }
 
-func IntegrationPodHas(t *testing.T, ns string, name string, predicate func(pod *corev1.Pod) bool) func() bool {
+func IntegrationPodHas(t *testing.T, ctx context.Context, ns string, name string, predicate func(pod *corev1.Pod) bool) func() bool {
 	return func() bool {
-		pod := IntegrationPod(t, ns, name)()
+		pod := IntegrationPod(t, ctx, ns, name)()
 		if pod == nil {
 			return false
 		}
@@ -617,7 +615,7 @@ func IntegrationPodHas(t *testing.T, ns string, name string, predicate func(pod 
 	}
 }
 
-func IntegrationPods(t *testing.T, ns string, name string) func() []corev1.Pod {
+func IntegrationPods(t *testing.T, ctx context.Context, ns string, name string) func() []corev1.Pod {
 	return func() []corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -625,7 +623,7 @@ func IntegrationPods(t *testing.T, ns string, name string) func() []corev1.Pod {
 				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
-		err := TestClient(t).List(TestContext, &lst,
+		err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				v1.IntegrationLabel: name,
@@ -637,16 +635,16 @@ func IntegrationPods(t *testing.T, ns string, name string) func() []corev1.Pod {
 	}
 }
 
-func IntegrationPodsNumbers(t *testing.T, ns string, name string) func() *int32 {
+func IntegrationPodsNumbers(t *testing.T, ctx context.Context, ns string, name string) func() *int32 {
 	return func() *int32 {
-		i := int32(len(IntegrationPods(t, ns, name)()))
+		i := int32(len(IntegrationPods(t, ctx, ns, name)()))
 		return &i
 	}
 }
 
-func IntegrationSpecReplicas(t *testing.T, ns string, name string) func() *int32 {
+func IntegrationSpecReplicas(t *testing.T, ctx context.Context, ns string, name string) func() *int32 {
 	return func() *int32 {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return nil
 		}
@@ -654,9 +652,9 @@ func IntegrationSpecReplicas(t *testing.T, ns string, name string) func() *int32
 	}
 }
 
-func IntegrationGeneration(t *testing.T, ns string, name string) func() *int64 {
+func IntegrationGeneration(t *testing.T, ctx context.Context, ns string, name string) func() *int64 {
 	return func() *int64 {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return nil
 		}
@@ -664,9 +662,9 @@ func IntegrationGeneration(t *testing.T, ns string, name string) func() *int64 {
 	}
 }
 
-func IntegrationObservedGeneration(t *testing.T, ns string, name string) func() *int64 {
+func IntegrationObservedGeneration(t *testing.T, ctx context.Context, ns string, name string) func() *int64 {
 	return func() *int64 {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return nil
 		}
@@ -674,9 +672,9 @@ func IntegrationObservedGeneration(t *testing.T, ns string, name string) func() 
 	}
 }
 
-func IntegrationStatusReplicas(t *testing.T, ns string, name string) func() *int32 {
+func IntegrationStatusReplicas(t *testing.T, ctx context.Context, ns string, name string) func() *int32 {
 	return func() *int32 {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return nil
 		}
@@ -684,9 +682,9 @@ func IntegrationStatusReplicas(t *testing.T, ns string, name string) func() *int
 	}
 }
 
-func IntegrationStatusImage(t *testing.T, ns string, name string) func() string {
+func IntegrationStatusImage(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return ""
 		}
@@ -694,9 +692,9 @@ func IntegrationStatusImage(t *testing.T, ns string, name string) func() string 
 	}
 }
 
-func IntegrationAnnotations(t *testing.T, ns string, name string) func() map[string]string {
+func IntegrationAnnotations(t *testing.T, ctx context.Context, ns string, name string) func() map[string]string {
 	return func() map[string]string {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return map[string]string{}
 		}
@@ -704,9 +702,9 @@ func IntegrationAnnotations(t *testing.T, ns string, name string) func() map[str
 	}
 }
 
-func IntegrationCondition(t *testing.T, ns string, name string, conditionType v1.IntegrationConditionType) func() *v1.IntegrationCondition {
+func IntegrationCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.IntegrationConditionType) func() *v1.IntegrationCondition {
 	return func() *v1.IntegrationCondition {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return nil
 		}
@@ -769,9 +767,9 @@ func HealthCheckData(r *v1.HealthCheckResponse) (map[string]interface{}, error) 
 	return data, nil
 }
 
-func IntegrationConditionStatus(t *testing.T, ns string, name string, conditionType v1.IntegrationConditionType) func() corev1.ConditionStatus {
+func IntegrationConditionStatus(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.IntegrationConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
-		c := IntegrationCondition(t, ns, name, conditionType)()
+		c := IntegrationCondition(t, ctx, ns, name, conditionType)()
 		if c == nil {
 			return "Unknown"
 		}
@@ -779,14 +777,14 @@ func IntegrationConditionStatus(t *testing.T, ns string, name string, conditionT
 	}
 }
 
-func AssignIntegrationToOperator(t *testing.T, ns, name, operator string) error {
-	it := Integration(t, ns, name)()
+func AssignIntegrationToOperator(t *testing.T, ctx context.Context, ns, name, operator string) error {
+	it := Integration(t, ctx, ns, name)()
 	if it == nil {
 		return fmt.Errorf("cannot assign integration %q to operator: integration not found", name)
 	}
 
 	it.SetOperatorID(operator)
-	return TestClient(t).Update(TestContext, it)
+	return TestClient(t).Update(ctx, it)
 }
 
 func Annotations(object metav1.Object) map[string]string {
@@ -797,14 +795,14 @@ func IntegrationSpec(it *v1.Integration) *v1.IntegrationSpec {
 	return &it.Spec
 }
 
-func Lease(t *testing.T, ns string, name string) func() *coordination.Lease {
+func Lease(t *testing.T, ctx context.Context, ns string, name string) func() *coordination.Lease {
 	return func() *coordination.Lease {
 		lease := coordination.Lease{}
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		err := TestClient(t).Get(TestContext, key, &lease)
+		err := TestClient(t).Get(ctx, key, &lease)
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
@@ -814,7 +812,7 @@ func Lease(t *testing.T, ns string, name string) func() *coordination.Lease {
 	}
 }
 
-func Nodes(t *testing.T) func() []corev1.Node {
+func Nodes(t *testing.T, ctx context.Context) func() []corev1.Node {
 	return func() []corev1.Node {
 		nodes := &corev1.NodeList{
 			TypeMeta: metav1.TypeMeta{
@@ -822,14 +820,14 @@ func Nodes(t *testing.T) func() []corev1.Node {
 				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, nodes); err != nil {
+		if err := TestClient(t).List(ctx, nodes); err != nil {
 			failTest(t, err)
 		}
 		return nodes.Items
 	}
 }
 
-func Node(t *testing.T, name string) func() *corev1.Node {
+func Node(t *testing.T, ctx context.Context, name string) func() *corev1.Node {
 	return func() *corev1.Node {
 		node := &corev1.Node{
 			TypeMeta: metav1.TypeMeta{
@@ -840,7 +838,7 @@ func Node(t *testing.T, name string) func() *corev1.Node {
 				Name: name,
 			},
 		}
-		err := TestClient(t).Get(TestContext, ctrl.ObjectKeyFromObject(node), node)
+		err := TestClient(t).Get(ctx, ctrl.ObjectKeyFromObject(node), node)
 		if err != nil {
 			failTest(t, err)
 		}
@@ -848,14 +846,14 @@ func Node(t *testing.T, name string) func() *corev1.Node {
 	}
 }
 
-func Service(t *testing.T, ns string, name string) func() *corev1.Service {
+func Service(t *testing.T, ctx context.Context, ns string, name string) func() *corev1.Service {
 	return func() *corev1.Service {
 		svc := corev1.Service{}
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		err := TestClient(t).Get(TestContext, key, &svc)
+		err := TestClient(t).Get(ctx, key, &svc)
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
@@ -865,9 +863,9 @@ func Service(t *testing.T, ns string, name string) func() *corev1.Service {
 	}
 }
 
-func ServiceType(t *testing.T, ns string, name string) func() corev1.ServiceType {
+func ServiceType(t *testing.T, ctx context.Context, ns string, name string) func() corev1.ServiceType {
 	return func() corev1.ServiceType {
-		svc := Service(t, ns, name)()
+		svc := Service(t, ctx, ns, name)()
 		if svc == nil {
 			return ""
 		}
@@ -876,11 +874,11 @@ func ServiceType(t *testing.T, ns string, name string) func() corev1.ServiceType
 }
 
 // Find the service in the given namespace with the given type
-func ServicesByType(t *testing.T, ns string, svcType corev1.ServiceType) func() []corev1.Service {
+func ServicesByType(t *testing.T, ctx context.Context, ns string, svcType corev1.ServiceType) func() []corev1.Service {
 	return func() []corev1.Service {
 		svcs := []corev1.Service{}
 
-		svcList, err := TestClient(t).CoreV1().Services(ns).List(TestContext, metav1.ListOptions{})
+		svcList, err := TestClient(t).CoreV1().Services(ns).List(ctx, metav1.ListOptions{})
 		if err != nil && k8serrors.IsNotFound(err) {
 			return svcs
 		} else if err != nil {
@@ -901,14 +899,14 @@ func ServicesByType(t *testing.T, ns string, svcType corev1.ServiceType) func() 
 	}
 }
 
-func Route(t *testing.T, ns string, name string) func() *routev1.Route {
+func Route(t *testing.T, ctx context.Context, ns string, name string) func() *routev1.Route {
 	return func() *routev1.Route {
 		route := routev1.Route{}
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		err := TestClient(t).Get(TestContext, key, &route)
+		err := TestClient(t).Get(ctx, key, &route)
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
@@ -918,7 +916,7 @@ func Route(t *testing.T, ns string, name string) func() *routev1.Route {
 	}
 }
 
-func RouteFull(t *testing.T, ns string, name string) func() *routev1.Route {
+func RouteFull(t *testing.T, ctx context.Context, ns string, name string) func() *routev1.Route {
 	return func() *routev1.Route {
 		answer := routev1.Route{
 			TypeMeta: metav1.TypeMeta{
@@ -934,7 +932,7 @@ func RouteFull(t *testing.T, ns string, name string) func() *routev1.Route {
 			Namespace: ns,
 			Name:      name,
 		}
-		err := TestClient(t).Get(TestContext, key, &answer)
+		err := TestClient(t).Get(ctx, key, &answer)
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
@@ -944,9 +942,9 @@ func RouteFull(t *testing.T, ns string, name string) func() *routev1.Route {
 	}
 }
 
-func RouteStatus(t *testing.T, ns string, name string) func() string {
+func RouteStatus(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
-		route := Route(t, ns, name)()
+		route := Route(t, ctx, ns, name)()
 		if route == nil || len(route.Status.Ingress) == 0 {
 			return ""
 		}
@@ -954,7 +952,7 @@ func RouteStatus(t *testing.T, ns string, name string) func() string {
 	}
 }
 
-func IntegrationCronJob(t *testing.T, ns string, name string) func() *batchv1.CronJob {
+func IntegrationCronJob(t *testing.T, ctx context.Context, ns string, name string) func() *batchv1.CronJob {
 	return func() *batchv1.CronJob {
 		lst := batchv1.CronJobList{
 			TypeMeta: metav1.TypeMeta{
@@ -962,7 +960,7 @@ func IntegrationCronJob(t *testing.T, ns string, name string) func() *batchv1.Cr
 				APIVersion: batchv1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"camel.apache.org/integration": name,
@@ -976,10 +974,10 @@ func IntegrationCronJob(t *testing.T, ns string, name string) func() *batchv1.Cr
 	}
 }
 
-func Integrations(t *testing.T, ns string) func() *v1.IntegrationList {
+func Integrations(t *testing.T, ctx context.Context, ns string) func() *v1.IntegrationList {
 	return func() *v1.IntegrationList {
 		lst := v1.NewIntegrationList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
 
@@ -987,21 +985,21 @@ func Integrations(t *testing.T, ns string) func() *v1.IntegrationList {
 	}
 }
 
-func NumIntegrations(t *testing.T, ns string) func() int {
+func NumIntegrations(t *testing.T, ctx context.Context, ns string) func() int {
 	return func() int {
-		lst := Integrations(t, ns)()
+		lst := Integrations(t, ctx, ns)()
 		return len(lst.Items)
 	}
 }
 
-func Integration(t *testing.T, ns string, name string) func() *v1.Integration {
+func Integration(t *testing.T, ctx context.Context, ns string, name string) func() *v1.Integration {
 	return func() *v1.Integration {
 		it := v1.NewIntegration(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &it); err != nil && !k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &it); err != nil && !k8serrors.IsNotFound(err) {
 			failTest(t, err)
 		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
@@ -1010,20 +1008,20 @@ func Integration(t *testing.T, ns string, name string) func() *v1.Integration {
 	}
 }
 
-func UnstructuredIntegration(t *testing.T, ns string, name string) func() *unstructured.Unstructured {
+func UnstructuredIntegration(t *testing.T, ctx context.Context, ns string, name string) func() *unstructured.Unstructured {
 	return func() *unstructured.Unstructured {
 		gvk := schema.GroupVersionKind{Group: v1.SchemeGroupVersion.Group, Version: v1.SchemeGroupVersion.Version, Kind: v1.IntegrationKind}
-		return UnstructuredObject(t, ns, name, gvk)()
+		return UnstructuredObject(t, ctx, ns, name, gvk)()
 	}
 }
 
-func UnstructuredObject(t *testing.T, ns string, name string, gvk schema.GroupVersionKind) func() *unstructured.Unstructured {
+func UnstructuredObject(t *testing.T, ctx context.Context, ns string, name string, gvk schema.GroupVersionKind) func() *unstructured.Unstructured {
 	return func() *unstructured.Unstructured {
 		object := &unstructured.Unstructured{}
 		object.SetNamespace(ns)
 		object.SetName(name)
 		object.SetGroupVersionKind(gvk)
-		if err := TestClient(t).Get(TestContext, ctrl.ObjectKeyFromObject(object), object); err != nil && !k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, ctrl.ObjectKeyFromObject(object), object); err != nil && !k8serrors.IsNotFound(err) {
 			failTest(t, err)
 		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
@@ -1032,9 +1030,9 @@ func UnstructuredObject(t *testing.T, ns string, name string, gvk schema.GroupVe
 	}
 }
 
-func IntegrationVersion(t *testing.T, ns string, name string) func() string {
+func IntegrationVersion(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return ""
 		}
@@ -1042,9 +1040,9 @@ func IntegrationVersion(t *testing.T, ns string, name string) func() string {
 	}
 }
 
-func IntegrationTraitProfile(t *testing.T, ns string, name string) func() v1.TraitProfile {
+func IntegrationTraitProfile(t *testing.T, ctx context.Context, ns string, name string) func() v1.TraitProfile {
 	return func() v1.TraitProfile {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return ""
 		}
@@ -1052,9 +1050,9 @@ func IntegrationTraitProfile(t *testing.T, ns string, name string) func() v1.Tra
 	}
 }
 
-func IntegrationPhase(t *testing.T, ns string, name string) func() v1.IntegrationPhase {
+func IntegrationPhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.IntegrationPhase {
 	return func() v1.IntegrationPhase {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return ""
 		}
@@ -1062,9 +1060,9 @@ func IntegrationPhase(t *testing.T, ns string, name string) func() v1.Integratio
 	}
 }
 
-func IntegrationSpecProfile(t *testing.T, ns string, name string) func() v1.TraitProfile {
+func IntegrationSpecProfile(t *testing.T, ctx context.Context, ns string, name string) func() v1.TraitProfile {
 	return func() v1.TraitProfile {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return ""
 		}
@@ -1072,9 +1070,9 @@ func IntegrationSpecProfile(t *testing.T, ns string, name string) func() v1.Trai
 	}
 }
 
-func IntegrationStatusCapabilities(t *testing.T, ns string, name string) func() []string {
+func IntegrationStatusCapabilities(t *testing.T, ctx context.Context, ns string, name string) func() []string {
 	return func() []string {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil || &it.Status == nil {
 			return nil
 		}
@@ -1082,9 +1080,9 @@ func IntegrationStatusCapabilities(t *testing.T, ns string, name string) func() 
 	}
 }
 
-func IntegrationSpecSA(t *testing.T, ns string, name string) func() string {
+func IntegrationSpecSA(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return ""
 		}
@@ -1092,9 +1090,9 @@ func IntegrationSpecSA(t *testing.T, ns string, name string) func() string {
 	}
 }
 
-func IntegrationKit(t *testing.T, ns string, name string) func() string {
+func IntegrationKit(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		if it == nil {
 			return ""
 		}
@@ -1105,9 +1103,9 @@ func IntegrationKit(t *testing.T, ns string, name string) func() string {
 	}
 }
 
-func IntegrationKitNamespace(t *testing.T, integrationNamespace string, name string) func() string {
+func IntegrationKitNamespace(t *testing.T, ctx context.Context, integrationNamespace string, name string) func() string {
 	return func() string {
-		it := Integration(t, integrationNamespace, name)()
+		it := Integration(t, ctx, integrationNamespace, name)()
 		if it == nil {
 			return ""
 		}
@@ -1118,10 +1116,10 @@ func IntegrationKitNamespace(t *testing.T, integrationNamespace string, name str
 	}
 }
 
-func Kit(t *testing.T, ns, name string) func() *v1.IntegrationKit {
+func Kit(t *testing.T, ctx context.Context, ns, name string) func() *v1.IntegrationKit {
 	return func() *v1.IntegrationKit {
 		kit := v1.NewIntegrationKit(ns, name)
-		if err := TestClient(t).Get(TestContext, ctrl.ObjectKeyFromObject(kit), kit); err != nil && !k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, ctrl.ObjectKeyFromObject(kit), kit); err != nil && !k8serrors.IsNotFound(err) {
 			failTest(t, err)
 		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
@@ -1130,9 +1128,9 @@ func Kit(t *testing.T, ns, name string) func() *v1.IntegrationKit {
 	}
 }
 
-func KitPhase(t *testing.T, ns, name string) func() v1.IntegrationKitPhase {
+func KitPhase(t *testing.T, ctx context.Context, ns, name string) func() v1.IntegrationKitPhase {
 	return func() v1.IntegrationKitPhase {
-		kit := Kit(t, ns, name)()
+		kit := Kit(t, ctx, ns, name)()
 		if kit == nil {
 			return v1.IntegrationKitPhaseNone
 		}
@@ -1140,9 +1138,9 @@ func KitPhase(t *testing.T, ns, name string) func() v1.IntegrationKitPhase {
 	}
 }
 
-func KitCondition(t *testing.T, ns string, name string, conditionType v1.IntegrationKitConditionType) func() *v1.IntegrationKitCondition {
+func KitCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.IntegrationKitConditionType) func() *v1.IntegrationKitCondition {
 	return func() *v1.IntegrationKitCondition {
-		kt := Kit(t, ns, name)()
+		kt := Kit(t, ctx, ns, name)()
 		if kt == nil {
 			return nil
 		}
@@ -1150,18 +1148,18 @@ func KitCondition(t *testing.T, ns string, name string, conditionType v1.Integra
 	}
 }
 
-func UpdateIntegration(t *testing.T, ns string, name string, mutate func(it *v1.Integration)) error {
-	it := Integration(t, ns, name)()
+func UpdateIntegration(t *testing.T, ctx context.Context, ns string, name string, mutate func(it *v1.Integration)) error {
+	it := Integration(t, ctx, ns, name)()
 	if it == nil {
 		return fmt.Errorf("no integration named %s found", name)
 	}
 	target := it.DeepCopy()
 	mutate(target)
-	return TestClient(t).Update(TestContext, target)
+	return TestClient(t).Update(ctx, target)
 }
 
-func PatchIntegration(t *testing.T, ns string, name string, mutate func(it *v1.Integration)) error {
-	it := Integration(t, ns, name)()
+func PatchIntegration(t *testing.T, ctx context.Context, ns string, name string, mutate func(it *v1.Integration)) error {
+	it := Integration(t, ctx, ns, name)()
 	if it == nil {
 		return fmt.Errorf("no integration named %s found", name)
 	}
@@ -1173,23 +1171,23 @@ func PatchIntegration(t *testing.T, ns string, name string, mutate func(it *v1.I
 	} else if len(p) == 0 {
 		return nil
 	}
-	return TestClient(t).Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
+	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
-func ScaleIntegration(t *testing.T, ns string, name string, replicas int32) error {
-	return PatchIntegration(t, ns, name, func(it *v1.Integration) {
+func ScaleIntegration(t *testing.T, ctx context.Context, ns string, name string, replicas int32) error {
+	return PatchIntegration(t, ctx, ns, name, func(it *v1.Integration) {
 		it.Spec.Replicas = &replicas
 	})
 }
 
-func Pipe(t *testing.T, ns string, name string) func() *v1.Pipe {
+func Pipe(t *testing.T, ctx context.Context, ns string, name string) func() *v1.Pipe {
 	return func() *v1.Pipe {
 		klb := v1.NewPipe(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &klb); err != nil && !k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &klb); err != nil && !k8serrors.IsNotFound(err) {
 			failTest(t, err)
 		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
@@ -1198,9 +1196,9 @@ func Pipe(t *testing.T, ns string, name string) func() *v1.Pipe {
 	}
 }
 
-func PipePhase(t *testing.T, ns string, name string) func() v1.PipePhase {
+func PipePhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.PipePhase {
 	return func() v1.PipePhase {
-		klb := Pipe(t, ns, name)()
+		klb := Pipe(t, ctx, ns, name)()
 		if klb == nil {
 			return ""
 		}
@@ -1208,9 +1206,9 @@ func PipePhase(t *testing.T, ns string, name string) func() v1.PipePhase {
 	}
 }
 
-func PipeSpecReplicas(t *testing.T, ns string, name string) func() *int32 {
+func PipeSpecReplicas(t *testing.T, ctx context.Context, ns string, name string) func() *int32 {
 	return func() *int32 {
-		klb := Pipe(t, ns, name)()
+		klb := Pipe(t, ctx, ns, name)()
 		if klb == nil {
 			return nil
 		}
@@ -1218,9 +1216,9 @@ func PipeSpecReplicas(t *testing.T, ns string, name string) func() *int32 {
 	}
 }
 
-func PipeStatusReplicas(t *testing.T, ns string, name string) func() *int32 {
+func PipeStatusReplicas(t *testing.T, ctx context.Context, ns string, name string) func() *int32 {
 	return func() *int32 {
-		klb := Pipe(t, ns, name)()
+		klb := Pipe(t, ctx, ns, name)()
 		if klb == nil {
 			return nil
 		}
@@ -1228,9 +1226,9 @@ func PipeStatusReplicas(t *testing.T, ns string, name string) func() *int32 {
 	}
 }
 
-func PipeCondition(t *testing.T, ns string, name string, conditionType v1.PipeConditionType) func() *v1.PipeCondition {
+func PipeCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.PipeConditionType) func() *v1.PipeCondition {
 	return func() *v1.PipeCondition {
-		kb := Pipe(t, ns, name)()
+		kb := Pipe(t, ctx, ns, name)()
 		if kb == nil {
 			return nil
 		}
@@ -1263,9 +1261,9 @@ func PipeConditionMessage(c *v1.PipeCondition) string {
 	return c.Message
 }
 
-func PipeConditionStatus(t *testing.T, ns string, name string, conditionType v1.PipeConditionType) func() corev1.ConditionStatus {
+func PipeConditionStatus(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.PipeConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
-		klb := Pipe(t, ns, name)()
+		klb := Pipe(t, ctx, ns, name)()
 		if klb == nil {
 			return "PipeMissing"
 		}
@@ -1277,8 +1275,8 @@ func PipeConditionStatus(t *testing.T, ns string, name string, conditionType v1.
 	}
 }
 
-func UpdatePipe(t *testing.T, ns string, name string, upd func(it *v1.Pipe)) error {
-	klb := Pipe(t, ns, name)()
+func UpdatePipe(t *testing.T, ctx context.Context, ns string, name string, upd func(it *v1.Pipe)) error {
+	klb := Pipe(t, ctx, ns, name)()
 	if klb == nil {
 		return fmt.Errorf("no Pipe named %s found", name)
 	}
@@ -1291,23 +1289,23 @@ func UpdatePipe(t *testing.T, ns string, name string, upd func(it *v1.Pipe)) err
 	} else if len(p) == 0 {
 		return nil
 	}
-	return TestClient(t).Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
+	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
-func ScalePipe(t *testing.T, ns string, name string, replicas int32) error {
-	return UpdatePipe(t, ns, name, func(klb *v1.Pipe) {
+func ScalePipe(t *testing.T, ctx context.Context, ns string, name string, replicas int32) error {
+	return UpdatePipe(t, ctx, ns, name, func(klb *v1.Pipe) {
 		klb.Spec.Replicas = &replicas
 	})
 }
 
-func AssignPipeToOperator(t *testing.T, ns, name, operator string) error {
-	klb := Pipe(t, ns, name)()
+func AssignPipeToOperator(t *testing.T, ctx context.Context, ns, name, operator string) error {
+	klb := Pipe(t, ctx, ns, name)()
 	if klb == nil {
 		return fmt.Errorf("cannot assign Pipe %q to operator:Pipe not found", name)
 	}
 
 	klb.SetOperatorID(operator)
-	return TestClient(t).Update(TestContext, klb)
+	return TestClient(t).Update(ctx, klb)
 }
 
 type KitFilter interface {
@@ -1352,7 +1350,7 @@ func (f *kitFilter) Match(kit *v1.IntegrationKit) bool {
 	return f.filter(kit)
 }
 
-func Kits(t *testing.T, ns string, options ...interface{}) func() []v1.IntegrationKit {
+func Kits(t *testing.T, ctx context.Context, ns string, options ...interface{}) func() []v1.IntegrationKit {
 	filters := make([]KitFilter, 0)
 	listOptions := []ctrl.ListOption{ctrl.InNamespace(ns)}
 	for _, option := range options {
@@ -1368,7 +1366,7 @@ func Kits(t *testing.T, ns string, options ...interface{}) func() []v1.Integrati
 
 	return func() []v1.IntegrationKit {
 		list := v1.NewIntegrationKitList()
-		if err := TestClient(t).List(TestContext, &list, listOptions...); err != nil {
+		if err := TestClient(t).List(ctx, &list, listOptions...); err != nil {
 			failTest(t, err)
 		}
 
@@ -1387,13 +1385,13 @@ func Kits(t *testing.T, ns string, options ...interface{}) func() []v1.Integrati
 	}
 }
 
-func DeleteKits(t *testing.T, ns string) error {
-	kits := Kits(t, ns)()
+func DeleteKits(t *testing.T, ctx context.Context, ns string) error {
+	kits := Kits(t, ctx, ns)()
 	if len(kits) == 0 {
 		return nil
 	}
 	for _, kit := range kits {
-		if err := TestClient(t).Delete(TestContext, &kit); err != nil {
+		if err := TestClient(t).Delete(ctx, &kit); err != nil {
 			return err
 		}
 	}
@@ -1401,24 +1399,24 @@ func DeleteKits(t *testing.T, ns string) error {
 	return nil
 }
 
-func DeleteIntegrations(t *testing.T, ns string) func() (int, error) {
+func DeleteIntegrations(t *testing.T, ctx context.Context, ns string) func() (int, error) {
 	return func() (int, error) {
-		integrations := Integrations(t, ns)()
+		integrations := Integrations(t, ctx, ns)()
 		if len(integrations.Items) == 0 {
 			return 0, nil
 		}
 
-		if err := Kamel(t, "delete", "--all", "-n", ns).Execute(); err != nil {
+		if err := Kamel(t, ctx, "delete", "--all", "-n", ns).Execute(); err != nil {
 			return 0, err
 		}
 
-		return NumIntegrations(t, ns)(), nil
+		return NumIntegrations(t, ctx, ns)(), nil
 	}
 }
 
-func OperatorImage(t *testing.T, ns string) func() string {
+func OperatorImage(t *testing.T, ctx context.Context, ns string) func() string {
 	return func() string {
-		pod := OperatorPod(t, ns)()
+		pod := OperatorPod(t, ctx, ns)()
 		if pod != nil {
 			if len(pod.Spec.Containers) > 0 {
 				return pod.Spec.Containers[0].Image
@@ -1428,9 +1426,9 @@ func OperatorImage(t *testing.T, ns string) func() string {
 	}
 }
 
-func OperatorPodSecurityContext(t *testing.T, ns string) func() *corev1.SecurityContext {
+func OperatorPodSecurityContext(t *testing.T, ctx context.Context, ns string) func() *corev1.SecurityContext {
 	return func() *corev1.SecurityContext {
-		pod := OperatorPod(t, ns)()
+		pod := OperatorPod(t, ctx, ns)()
 		if pod == nil || pod.Spec.Containers == nil || len(pod.Spec.Containers) == 0 {
 			return nil
 		}
@@ -1438,9 +1436,9 @@ func OperatorPodSecurityContext(t *testing.T, ns string) func() *corev1.Security
 	}
 }
 
-func OperatorPodHas(t *testing.T, ns string, predicate func(pod *corev1.Pod) bool) func() bool {
+func OperatorPodHas(t *testing.T, ctx context.Context, ns string, predicate func(pod *corev1.Pod) bool) func() bool {
 	return func() bool {
-		pod := OperatorPod(t, ns)()
+		pod := OperatorPod(t, ctx, ns)()
 		if pod == nil {
 			return false
 		}
@@ -1448,9 +1446,9 @@ func OperatorPodHas(t *testing.T, ns string, predicate func(pod *corev1.Pod) boo
 	}
 }
 
-func OperatorPodPhase(t *testing.T, ns string) func() corev1.PodPhase {
+func OperatorPodPhase(t *testing.T, ctx context.Context, ns string) func() corev1.PodPhase {
 	return func() corev1.PodPhase {
-		pod := OperatorPod(t, ns)()
+		pod := OperatorPod(t, ctx, ns)()
 		if pod == nil {
 			return ""
 		}
@@ -1458,9 +1456,9 @@ func OperatorPodPhase(t *testing.T, ns string) func() corev1.PodPhase {
 	}
 }
 
-func OperatorEnvVarValue(t *testing.T, ns string, key string) func() string {
+func OperatorEnvVarValue(t *testing.T, ctx context.Context, ns string, key string) func() string {
 	return func() string {
-		pod := OperatorPod(t, ns)()
+		pod := OperatorPod(t, ctx, ns)()
 		if pod == nil || len(pod.Spec.Containers) == 0 {
 			return ""
 		}
@@ -1475,7 +1473,7 @@ func OperatorEnvVarValue(t *testing.T, ns string, key string) func() string {
 	}
 }
 
-func Configmap(t *testing.T, ns string, name string) func() *corev1.ConfigMap {
+func Configmap(t *testing.T, ctx context.Context, ns string, name string) func() *corev1.ConfigMap {
 	return func() *corev1.ConfigMap {
 		cm := corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{
@@ -1491,7 +1489,7 @@ func Configmap(t *testing.T, ns string, name string) func() *corev1.ConfigMap {
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &cm); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &cm); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Error(err, "Error while retrieving configmap "+name)
@@ -1501,7 +1499,7 @@ func Configmap(t *testing.T, ns string, name string) func() *corev1.ConfigMap {
 	}
 }
 
-func BuilderPod(t *testing.T, ns string, name string) func() *corev1.Pod {
+func BuilderPod(t *testing.T, ctx context.Context, ns string, name string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		pod := corev1.Pod{
 			TypeMeta: metav1.TypeMeta{
@@ -1517,7 +1515,7 @@ func BuilderPod(t *testing.T, ns string, name string) func() *corev1.Pod {
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &pod); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &pod); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Error(err, "Error while retrieving pod "+name)
@@ -1527,9 +1525,9 @@ func BuilderPod(t *testing.T, ns string, name string) func() *corev1.Pod {
 	}
 }
 
-func BuilderPodPhase(t *testing.T, ns string, name string) func() corev1.PodPhase {
+func BuilderPodPhase(t *testing.T, ctx context.Context, ns string, name string) func() corev1.PodPhase {
 	return func() corev1.PodPhase {
-		pod := BuilderPod(t, ns, name)()
+		pod := BuilderPod(t, ctx, ns, name)()
 		if pod == nil {
 			return ""
 		}
@@ -1537,7 +1535,7 @@ func BuilderPodPhase(t *testing.T, ns string, name string) func() corev1.PodPhas
 	}
 }
 
-func BuilderPodsCount(t *testing.T, ns string) func() int {
+func BuilderPodsCount(t *testing.T, ctx context.Context, ns string) func() int {
 	return func() int {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -1545,7 +1543,7 @@ func BuilderPodsCount(t *testing.T, ns string) func() int {
 				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"camel.apache.org/component": "builder",
@@ -1556,7 +1554,7 @@ func BuilderPodsCount(t *testing.T, ns string) func() int {
 	}
 }
 
-func AutogeneratedConfigmapsCount(t *testing.T, ns string) func() int {
+func AutogeneratedConfigmapsCount(t *testing.T, ctx context.Context, ns string) func() int {
 	return func() int {
 		lst := corev1.ConfigMapList{
 			TypeMeta: metav1.TypeMeta{
@@ -1564,7 +1562,7 @@ func AutogeneratedConfigmapsCount(t *testing.T, ns string) func() int {
 				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				kubernetes.ConfigMapAutogenLabel: "true",
@@ -1575,11 +1573,11 @@ func AutogeneratedConfigmapsCount(t *testing.T, ns string) func() int {
 	}
 }
 
-func CreatePlainTextConfigmap(t *testing.T, ns string, name string, data map[string]string) error {
-	return CreatePlainTextConfigmapWithLabels(t, ns, name, data, map[string]string{})
+func CreatePlainTextConfigmap(t *testing.T, ctx context.Context, ns string, name string, data map[string]string) error {
+	return CreatePlainTextConfigmapWithLabels(t, ctx, ns, name, data, map[string]string{})
 }
 
-func CreatePlainTextConfigmapWithLabels(t *testing.T, ns string, name string, data map[string]string, labels map[string]string) error {
+func CreatePlainTextConfigmapWithLabels(t *testing.T, ctx context.Context, ns string, name string, data map[string]string, labels map[string]string) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1592,10 +1590,10 @@ func CreatePlainTextConfigmapWithLabels(t *testing.T, ns string, name string, da
 		},
 		Data: data,
 	}
-	return TestClient(t).Create(TestContext, &cm)
+	return TestClient(t).Create(ctx, &cm)
 }
 
-func CreatePlainTextConfigmapWithOwnerRefWithLabels(t *testing.T, ns string, name string, data map[string]string, orname string, uid types.UID, labels map[string]string) error {
+func CreatePlainTextConfigmapWithOwnerRefWithLabels(t *testing.T, ctx context.Context, ns string, name string, data map[string]string, orname string, uid types.UID, labels map[string]string) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1617,14 +1615,14 @@ func CreatePlainTextConfigmapWithOwnerRefWithLabels(t *testing.T, ns string, nam
 		},
 		Data: data,
 	}
-	return TestClient(t).Create(TestContext, &cm)
+	return TestClient(t).Create(ctx, &cm)
 }
 
-func UpdatePlainTextConfigmap(t *testing.T, ns string, name string, data map[string]string) error {
-	return UpdatePlainTextConfigmapWithLabels(t, ns, name, data, nil)
+func UpdatePlainTextConfigmap(t *testing.T, ctx context.Context, ns string, name string, data map[string]string) error {
+	return UpdatePlainTextConfigmapWithLabels(t, ctx, ns, name, data, nil)
 }
 
-func UpdatePlainTextConfigmapWithLabels(t *testing.T, ns string, name string, data map[string]string, labels map[string]string) error {
+func UpdatePlainTextConfigmapWithLabels(t *testing.T, ctx context.Context, ns string, name string, data map[string]string, labels map[string]string) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1637,10 +1635,10 @@ func UpdatePlainTextConfigmapWithLabels(t *testing.T, ns string, name string, da
 		},
 		Data: data,
 	}
-	return TestClient(t).Update(TestContext, &cm)
+	return TestClient(t).Update(ctx, &cm)
 }
 
-func CreateBinaryConfigmap(t *testing.T, ns string, name string, data map[string][]byte) error {
+func CreateBinaryConfigmap(t *testing.T, ctx context.Context, ns string, name string, data map[string][]byte) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1652,10 +1650,10 @@ func CreateBinaryConfigmap(t *testing.T, ns string, name string, data map[string
 		},
 		BinaryData: data,
 	}
-	return TestClient(t).Create(TestContext, &cm)
+	return TestClient(t).Create(ctx, &cm)
 }
 
-func DeleteConfigmap(t *testing.T, ns string, name string) error {
+func DeleteConfigmap(t *testing.T, ctx context.Context, ns string, name string) error {
 	cm := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -1666,18 +1664,18 @@ func DeleteConfigmap(t *testing.T, ns string, name string) error {
 			Name:      name,
 		},
 	}
-	return TestClient(t).Delete(TestContext, &cm)
+	return TestClient(t).Delete(ctx, &cm)
 }
 
-func CreatePlainTextSecret(t *testing.T, ns string, name string, data map[string]string) error {
-	return CreatePlainTextSecretWithLabels(t, ns, name, data, map[string]string{})
+func CreatePlainTextSecret(t *testing.T, ctx context.Context, ns string, name string, data map[string]string) error {
+	return CreatePlainTextSecretWithLabels(t, ctx, ns, name, data, map[string]string{})
 }
 
-func UpdatePlainTextSecret(t *testing.T, ns string, name string, data map[string]string) error {
-	return UpdatePlainTextSecretWithLabels(t, ns, name, data, nil)
+func UpdatePlainTextSecret(t *testing.T, ctx context.Context, ns string, name string, data map[string]string) error {
+	return UpdatePlainTextSecretWithLabels(t, ctx, ns, name, data, nil)
 }
 
-func UpdatePlainTextSecretWithLabels(t *testing.T, ns string, name string, data map[string]string, labels map[string]string) error {
+func UpdatePlainTextSecretWithLabels(t *testing.T, ctx context.Context, ns string, name string, data map[string]string, labels map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -1690,10 +1688,10 @@ func UpdatePlainTextSecretWithLabels(t *testing.T, ns string, name string, data 
 		},
 		StringData: data,
 	}
-	return TestClient(t).Update(TestContext, &sec)
+	return TestClient(t).Update(ctx, &sec)
 }
 
-func CreatePlainTextSecretWithLabels(t *testing.T, ns string, name string, data map[string]string, labels map[string]string) error {
+func CreatePlainTextSecretWithLabels(t *testing.T, ctx context.Context, ns string, name string, data map[string]string, labels map[string]string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -1706,13 +1704,13 @@ func CreatePlainTextSecretWithLabels(t *testing.T, ns string, name string, data 
 		},
 		StringData: data,
 	}
-	return TestClient(t).Create(TestContext, &sec)
+	return TestClient(t).Create(ctx, &sec)
 }
 
 // SecretByName Finds a secret in the given namespace by name or prefix of name
-func SecretByName(t *testing.T, ns string, prefix string) func() *corev1.Secret {
+func SecretByName(t *testing.T, ctx context.Context, ns string, prefix string) func() *corev1.Secret {
 	return func() *corev1.Secret {
-		secretList, err := TestClient(t).CoreV1().Secrets(ns).List(TestContext, metav1.ListOptions{})
+		secretList, err := TestClient(t).CoreV1().Secrets(ns).List(ctx, metav1.ListOptions{})
 		if err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
@@ -1733,7 +1731,7 @@ func SecretByName(t *testing.T, ns string, prefix string) func() *corev1.Secret 
 	}
 }
 
-func DeleteSecret(t *testing.T, ns string, name string) error {
+func DeleteSecret(t *testing.T, ctx context.Context, ns string, name string) error {
 	sec := corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -1744,10 +1742,10 @@ func DeleteSecret(t *testing.T, ns string, name string) error {
 			Name:      name,
 		},
 	}
-	return TestClient(t).Delete(TestContext, &sec)
+	return TestClient(t).Delete(ctx, &sec)
 }
 
-func KnativeService(t *testing.T, ns string, name string) func() *servingv1.Service {
+func KnativeService(t *testing.T, ctx context.Context, ns string, name string) func() *servingv1.Service {
 	return func() *servingv1.Service {
 		answer := servingv1.Service{
 			TypeMeta: metav1.TypeMeta{
@@ -1763,7 +1761,7 @@ func KnativeService(t *testing.T, ns string, name string) func() *servingv1.Serv
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &answer); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &answer); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Errorf(err, "Error while retrieving knative service %s", name)
@@ -1772,7 +1770,7 @@ func KnativeService(t *testing.T, ns string, name string) func() *servingv1.Serv
 		return &answer
 	}
 }
-func DeploymentWithIntegrationLabel(t *testing.T, ns string, label string) func() *appsv1.Deployment {
+func DeploymentWithIntegrationLabel(t *testing.T, ctx context.Context, ns string, label string) func() *appsv1.Deployment {
 	return func() *appsv1.Deployment {
 		lst := appsv1.DeploymentList{
 			TypeMeta: metav1.TypeMeta{
@@ -1780,7 +1778,7 @@ func DeploymentWithIntegrationLabel(t *testing.T, ns string, label string) func(
 				APIVersion: appsv1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns), ctrl.MatchingLabels{v1.IntegrationLabel: label}); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns), ctrl.MatchingLabels{v1.IntegrationLabel: label}); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Errorf(err, "Error while retrieving deployment %s", label)
@@ -1793,7 +1791,7 @@ func DeploymentWithIntegrationLabel(t *testing.T, ns string, label string) func(
 	}
 }
 
-func Deployment(t *testing.T, ns string, name string) func() *appsv1.Deployment {
+func Deployment(t *testing.T, ctx context.Context, ns string, name string) func() *appsv1.Deployment {
 	return func() *appsv1.Deployment {
 		answer := appsv1.Deployment{
 			TypeMeta: metav1.TypeMeta{
@@ -1809,7 +1807,7 @@ func Deployment(t *testing.T, ns string, name string) func() *appsv1.Deployment 
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &answer); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &answer); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Errorf(err, "Error while retrieving deployment %s", name)
@@ -1819,9 +1817,9 @@ func Deployment(t *testing.T, ns string, name string) func() *appsv1.Deployment 
 	}
 }
 
-func DeploymentCondition(t *testing.T, ns string, name string, conditionType appsv1.DeploymentConditionType) func() appsv1.DeploymentCondition {
+func DeploymentCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType appsv1.DeploymentConditionType) func() appsv1.DeploymentCondition {
 	return func() appsv1.DeploymentCondition {
-		deployment := Deployment(t, ns, name)()
+		deployment := Deployment(t, ctx, ns, name)()
 
 		condition := appsv1.DeploymentCondition{
 			Status: corev1.ConditionUnknown,
@@ -1838,10 +1836,10 @@ func DeploymentCondition(t *testing.T, ns string, name string, conditionType app
 	}
 }
 
-func Build(t *testing.T, ns, name string) func() *v1.Build {
+func Build(t *testing.T, ctx context.Context, ns, name string) func() *v1.Build {
 	return func() *v1.Build {
 		build := v1.NewBuild(ns, name)
-		if err := TestClient(t).Get(TestContext, ctrl.ObjectKeyFromObject(build), build); err != nil && k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, ctrl.ObjectKeyFromObject(build), build); err != nil && k8serrors.IsNotFound(err) {
 			return nil
 		} else if err != nil {
 			log.Error(err, "Error while retrieving build "+name)
@@ -1851,9 +1849,9 @@ func Build(t *testing.T, ns, name string) func() *v1.Build {
 	}
 }
 
-func BuildConfig(t *testing.T, ns, name string) func() v1.BuildConfiguration {
+func BuildConfig(t *testing.T, ctx context.Context, ns, name string) func() v1.BuildConfiguration {
 	return func() v1.BuildConfiguration {
-		build := Build(t, ns, name)()
+		build := Build(t, ctx, ns, name)()
 		if build != nil {
 			return *build.BuilderConfiguration()
 		}
@@ -1861,9 +1859,9 @@ func BuildConfig(t *testing.T, ns, name string) func() v1.BuildConfiguration {
 	}
 }
 
-func BuildPhase(t *testing.T, ns, name string) func() v1.BuildPhase {
+func BuildPhase(t *testing.T, ctx context.Context, ns, name string) func() v1.BuildPhase {
 	return func() v1.BuildPhase {
-		build := Build(t, ns, name)()
+		build := Build(t, ctx, ns, name)()
 		if build != nil {
 			return build.Status.Phase
 		}
@@ -1871,9 +1869,9 @@ func BuildPhase(t *testing.T, ns, name string) func() v1.BuildPhase {
 	}
 }
 
-func BuildConditions(t *testing.T, ns, name string) func() []v1.BuildCondition {
+func BuildConditions(t *testing.T, ctx context.Context, ns, name string) func() []v1.BuildCondition {
 	return func() []v1.BuildCondition {
-		build := Build(t, ns, name)()
+		build := Build(t, ctx, ns, name)()
 		if build != nil && &build.Status != nil && build.Status.Conditions != nil {
 			return build.Status.Conditions
 		}
@@ -1881,9 +1879,9 @@ func BuildConditions(t *testing.T, ns, name string) func() []v1.BuildCondition {
 	}
 }
 
-func BuildCondition(t *testing.T, ns string, name string, conditionType v1.BuildConditionType) func() *v1.BuildCondition {
+func BuildCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.BuildConditionType) func() *v1.BuildCondition {
 	return func() *v1.BuildCondition {
-		build := Build(t, ns, name)()
+		build := Build(t, ctx, ns, name)()
 		if build != nil && &build.Status != nil && build.Status.Conditions != nil {
 			return build.Status.GetCondition(conditionType)
 		}
@@ -1891,9 +1889,9 @@ func BuildCondition(t *testing.T, ns string, name string, conditionType v1.Build
 	}
 }
 
-func BuildFailureRecovery(t *testing.T, ns, name string) func() int {
+func BuildFailureRecovery(t *testing.T, ctx context.Context, ns, name string) func() int {
 	return func() int {
-		build := Build(t, ns, name)()
+		build := Build(t, ctx, ns, name)()
 		if build != nil {
 			return build.Status.Failure.Recovery.Attempt
 		}
@@ -1913,20 +1911,20 @@ func BuildsRunning(predicates ...func() v1.BuildPhase) func() int {
 	}
 }
 
-func HasPlatform(t *testing.T, ns string) func() bool {
+func HasPlatform(t *testing.T, ctx context.Context, ns string) func() bool {
 	return func() bool {
 		lst := v1.NewIntegrationPlatformList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			return false
 		}
 		return len(lst.Items) > 0
 	}
 }
 
-func Platform(t *testing.T, ns string) func() *v1.IntegrationPlatform {
+func Platform(t *testing.T, ctx context.Context, ns string) func() *v1.IntegrationPlatform {
 	return func() *v1.IntegrationPlatform {
 		lst := v1.NewIntegrationPlatformList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
 		if len(lst.Items) == 0 {
@@ -1939,10 +1937,10 @@ func Platform(t *testing.T, ns string) func() *v1.IntegrationPlatform {
 	}
 }
 
-func PlatformByName(t *testing.T, ns string, name string) func() *v1.IntegrationPlatform {
+func PlatformByName(t *testing.T, ctx context.Context, ns string, name string) func() *v1.IntegrationPlatform {
 	return func() *v1.IntegrationPlatform {
 		lst := v1.NewIntegrationPlatformList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
 		for _, p := range lst.Items {
@@ -1954,11 +1952,11 @@ func PlatformByName(t *testing.T, ns string, name string) func() *v1.Integration
 	}
 }
 
-func CopyIntegrationKits(t *testing.T, ns, operatorID string) error {
+func CopyIntegrationKits(t *testing.T, ctx context.Context, ns, operatorID string) error {
 	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
 
 	lst := v1.NewIntegrationKitList()
-	if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(opns)); err != nil {
+	if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(opns)); err != nil {
 		failTest(t, err)
 	}
 	for _, kit := range lst.Items {
@@ -1980,7 +1978,7 @@ func CopyIntegrationKits(t *testing.T, ns, operatorID string) error {
 
 			v1.SetAnnotation(&copyKit.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
 			fmt.Printf("Copy integration kit %s from namespace %s\n", kit.Name, opns)
-			if err := CreateIntegrationKit(t, &copyKit)(); err != nil {
+			if err := CreateIntegrationKit(t, ctx, &copyKit)(); err != nil {
 				return err
 			}
 		}
@@ -1989,11 +1987,11 @@ func CopyIntegrationKits(t *testing.T, ns, operatorID string) error {
 	return nil
 }
 
-func CopyCamelCatalog(t *testing.T, ns, operatorID string) error {
+func CopyCamelCatalog(t *testing.T, ctx context.Context, ns, operatorID string) error {
 	catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
 	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
 
-	defaultCatalog := CamelCatalog(t, opns, catalogName)()
+	defaultCatalog := CamelCatalog(t, ctx, opns, catalogName)()
 	if defaultCatalog != nil {
 		fmt.Printf("Copy catalog %s from namespace %s\n", catalogName, opns)
 		catalog := v1.CamelCatalog{
@@ -2004,16 +2002,16 @@ func CopyCamelCatalog(t *testing.T, ns, operatorID string) error {
 			Spec: *defaultCatalog.Spec.DeepCopy(),
 		}
 		v1.SetAnnotation(&catalog.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
-		return CreateCamelCatalog(t, &catalog)()
+		return CreateCamelCatalog(t, ctx, &catalog)()
 	}
 
 	return nil
 }
 
-func IntegrationProfileByName(t *testing.T, ns string, name string) func() *v1.IntegrationProfile {
+func IntegrationProfileByName(t *testing.T, ctx context.Context, ns string, name string) func() *v1.IntegrationProfile {
 	return func() *v1.IntegrationProfile {
 		lst := v1.NewIntegrationProfileList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
 		for _, pc := range lst.Items {
@@ -2025,14 +2023,14 @@ func IntegrationProfileByName(t *testing.T, ns string, name string) func() *v1.I
 	}
 }
 
-func CamelCatalog(t *testing.T, ns, name string) func() *v1.CamelCatalog {
+func CamelCatalog(t *testing.T, ctx context.Context, ns, name string) func() *v1.CamelCatalog {
 	return func() *v1.CamelCatalog {
 		cat := v1.CamelCatalog{}
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &cat); err != nil && !k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &cat); err != nil && !k8serrors.IsNotFound(err) {
 			failTest(t, err)
 		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
@@ -2041,10 +2039,10 @@ func CamelCatalog(t *testing.T, ns, name string) func() *v1.CamelCatalog {
 	}
 }
 
-func IntegrationProfile(t *testing.T, ns string) func() *v1.IntegrationProfile {
+func IntegrationProfile(t *testing.T, ctx context.Context, ns string) func() *v1.IntegrationProfile {
 	return func() *v1.IntegrationProfile {
 		lst := v1.NewIntegrationProfileList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
 		if len(lst.Items) == 0 {
@@ -2057,12 +2055,12 @@ func IntegrationProfile(t *testing.T, ns string) func() *v1.IntegrationProfile {
 	}
 }
 
-func CreateIntegrationProfile(t *testing.T, profile *v1.IntegrationProfile) error {
-	return TestClient(t).Create(TestContext, profile)
+func CreateIntegrationProfile(t *testing.T, ctx context.Context, profile *v1.IntegrationProfile) error {
+	return TestClient(t).Create(ctx, profile)
 }
 
-func UpdateIntegrationProfile(t *testing.T, ns string, upd func(ipr *v1.IntegrationProfile)) error {
-	ipr := IntegrationProfile(t, ns)()
+func UpdateIntegrationProfile(t *testing.T, ctx context.Context, ns string, upd func(ipr *v1.IntegrationProfile)) error {
+	ipr := IntegrationProfile(t, ctx, ns)()
 	if ipr == nil {
 		return fmt.Errorf("unable to locate Integration Profile in %s", ns)
 	}
@@ -2075,42 +2073,42 @@ func UpdateIntegrationProfile(t *testing.T, ns string, upd func(ipr *v1.Integrat
 	} else if len(p) == 0 {
 		return nil
 	}
-	return TestClient(t).Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
+	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
-func CreateCamelCatalog(t *testing.T, catalog *v1.CamelCatalog) func() error {
+func CreateCamelCatalog(t *testing.T, ctx context.Context, catalog *v1.CamelCatalog) func() error {
 	return func() error {
 		testSetupMutex.Lock()
 		defer testSetupMutex.Unlock()
-		return TestClient(t).Create(TestContext, catalog)
+		return TestClient(t).Create(ctx, catalog)
 	}
 }
 
-func CreateIntegrationKit(t *testing.T, kit *v1.IntegrationKit) func() error {
+func CreateIntegrationKit(t *testing.T, ctx context.Context, kit *v1.IntegrationKit) func() error {
 	return func() error {
 		testSetupMutex.Lock()
 		defer testSetupMutex.Unlock()
-		return TestClient(t).Create(TestContext, kit)
+		return TestClient(t).Create(ctx, kit)
 	}
 }
 
-func DeleteCamelCatalog(t *testing.T, ns, name string) func() bool {
+func DeleteCamelCatalog(t *testing.T, ctx context.Context, ns, name string) func() bool {
 	return func() bool {
-		cat := CamelCatalog(t, ns, name)()
+		cat := CamelCatalog(t, ctx, ns, name)()
 		if cat == nil {
 			return true
 		}
-		if err := TestClient(t).Delete(TestContext, cat); err != nil {
+		if err := TestClient(t).Delete(ctx, cat); err != nil {
 			log.Error(err, "Got error while deleting the catalog")
 		}
 		return true
 	}
 }
 
-func DefaultCamelCatalogPhase(t *testing.T, ns string) func() v1.CamelCatalogPhase {
+func DefaultCamelCatalogPhase(t *testing.T, ctx context.Context, ns string) func() v1.CamelCatalogPhase {
 	return func() v1.CamelCatalogPhase {
 		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
-		c := CamelCatalog(t, ns, catalogName)()
+		c := CamelCatalog(t, ctx, ns, catalogName)()
 		if c == nil {
 			return ""
 		}
@@ -2118,9 +2116,9 @@ func DefaultCamelCatalogPhase(t *testing.T, ns string) func() v1.CamelCatalogPha
 	}
 }
 
-func CamelCatalogPhase(t *testing.T, ns, name string) func() v1.CamelCatalogPhase {
+func CamelCatalogPhase(t *testing.T, ctx context.Context, ns, name string) func() v1.CamelCatalogPhase {
 	return func() v1.CamelCatalogPhase {
-		c := CamelCatalog(t, ns, name)()
+		c := CamelCatalog(t, ctx, ns, name)()
 		if c == nil {
 			return ""
 		}
@@ -2128,9 +2126,9 @@ func CamelCatalogPhase(t *testing.T, ns, name string) func() v1.CamelCatalogPhas
 	}
 }
 
-func CamelCatalogCondition(t *testing.T, ns, name string, conditionType v1.CamelCatalogConditionType) func() *v1.CamelCatalogCondition {
+func CamelCatalogCondition(t *testing.T, ctx context.Context, ns, name string, conditionType v1.CamelCatalogConditionType) func() *v1.CamelCatalogCondition {
 	return func() *v1.CamelCatalogCondition {
-		c := CamelCatalog(t, ns, name)()
+		c := CamelCatalog(t, ctx, ns, name)()
 		if c == nil {
 			return nil
 		}
@@ -2143,9 +2141,9 @@ func CamelCatalogCondition(t *testing.T, ns, name string, conditionType v1.Camel
 	}
 }
 
-func CamelCatalogImage(t *testing.T, ns, name string) func() string {
+func CamelCatalogImage(t *testing.T, ctx context.Context, ns, name string) func() string {
 	return func() string {
-		c := CamelCatalog(t, ns, name)()
+		c := CamelCatalog(t, ctx, ns, name)()
 		if c == nil {
 			return ""
 		}
@@ -2153,31 +2151,31 @@ func CamelCatalogImage(t *testing.T, ns, name string) func() string {
 	}
 }
 
-func CamelCatalogList(t *testing.T, ns string) func() []v1.CamelCatalog {
+func CamelCatalogList(t *testing.T, ctx context.Context, ns string) func() []v1.CamelCatalog {
 	return func() []v1.CamelCatalog {
 		lst := v1.NewCamelCatalogList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
 		return lst.Items
 	}
 }
 
-func DeletePlatform(t *testing.T, ns string) func() bool {
+func DeletePlatform(t *testing.T, ctx context.Context, ns string) func() bool {
 	return func() bool {
-		pl := Platform(t, ns)()
+		pl := Platform(t, ctx, ns)()
 		if pl == nil {
 			return true
 		}
-		if err := TestClient(t).Delete(TestContext, pl); err != nil {
+		if err := TestClient(t).Delete(ctx, pl); err != nil {
 			log.Error(err, "Got error while deleting the platform")
 		}
 		return false
 	}
 }
 
-func UpdatePlatform(t *testing.T, ns string, name string, upd func(ip *v1.IntegrationPlatform)) error {
-	ip := PlatformByName(t, ns, name)()
+func UpdatePlatform(t *testing.T, ctx context.Context, ns string, name string, upd func(ip *v1.IntegrationPlatform)) error {
+	ip := PlatformByName(t, ctx, ns, name)()
 	if ip == nil {
 		return fmt.Errorf("unable to locate Integration Platform %s in %s", name, ns)
 	}
@@ -2190,12 +2188,12 @@ func UpdatePlatform(t *testing.T, ns string, name string, upd func(ip *v1.Integr
 	} else if len(p) == 0 {
 		return nil
 	}
-	return TestClient(t).Patch(TestContext, target, ctrl.RawPatch(types.MergePatchType, p))
+	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
-func PlatformVersion(t *testing.T, ns string) func() string {
+func PlatformVersion(t *testing.T, ctx context.Context, ns string) func() string {
 	return func() string {
-		p := Platform(t, ns)()
+		p := Platform(t, ctx, ns)()
 		if p == nil {
 			return ""
 		}
@@ -2203,9 +2201,9 @@ func PlatformVersion(t *testing.T, ns string) func() string {
 	}
 }
 
-func PlatformPhase(t *testing.T, ns string) func() v1.IntegrationPlatformPhase {
+func PlatformPhase(t *testing.T, ctx context.Context, ns string) func() v1.IntegrationPlatformPhase {
 	return func() v1.IntegrationPlatformPhase {
-		p := Platform(t, ns)()
+		p := Platform(t, ctx, ns)()
 		if p == nil {
 			return ""
 		}
@@ -2213,9 +2211,9 @@ func PlatformPhase(t *testing.T, ns string) func() v1.IntegrationPlatformPhase {
 	}
 }
 
-func SelectedPlatformPhase(t *testing.T, ns string, name string) func() v1.IntegrationPlatformPhase {
+func SelectedPlatformPhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.IntegrationPlatformPhase {
 	return func() v1.IntegrationPlatformPhase {
-		p := PlatformByName(t, ns, name)()
+		p := PlatformByName(t, ctx, ns, name)()
 		if p == nil {
 			return ""
 		}
@@ -2223,9 +2221,9 @@ func SelectedPlatformPhase(t *testing.T, ns string, name string) func() v1.Integ
 	}
 }
 
-func SelectedIntegrationProfilePhase(t *testing.T, ns string, name string) func() v1.IntegrationProfilePhase {
+func SelectedIntegrationProfilePhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.IntegrationProfilePhase {
 	return func() v1.IntegrationProfilePhase {
-		pc := IntegrationProfileByName(t, ns, name)()
+		pc := IntegrationProfileByName(t, ctx, ns, name)()
 		if pc == nil {
 			return ""
 		}
@@ -2233,9 +2231,9 @@ func SelectedIntegrationProfilePhase(t *testing.T, ns string, name string) func(
 	}
 }
 
-func PlatformHas(t *testing.T, ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
+func PlatformHas(t *testing.T, ctx context.Context, ns string, predicate func(pl *v1.IntegrationPlatform) bool) func() bool {
 	return func() bool {
-		pl := Platform(t, ns)()
+		pl := Platform(t, ctx, ns)()
 		if pl == nil {
 			return false
 		}
@@ -2243,13 +2241,9 @@ func PlatformHas(t *testing.T, ns string, predicate func(pl *v1.IntegrationPlatf
 	}
 }
 
-func PlatformCondition(
-	t *testing.T,
-	ns string,
-	conditionType v1.IntegrationPlatformConditionType,
-) func() *v1.IntegrationPlatformCondition {
+func PlatformCondition(t *testing.T, ctx context.Context, ns string, conditionType v1.IntegrationPlatformConditionType) func() *v1.IntegrationPlatformCondition {
 	return func() *v1.IntegrationPlatformCondition {
-		p := Platform(t, ns)()
+		p := Platform(t, ctx, ns)()
 		if p == nil {
 			return nil
 		}
@@ -2257,13 +2251,9 @@ func PlatformCondition(
 	}
 }
 
-func PlatformConditionStatus(
-	t *testing.T,
-	ns string,
-	conditionType v1.IntegrationPlatformConditionType,
-) func() corev1.ConditionStatus {
+func PlatformConditionStatus(t *testing.T, ctx context.Context, ns string, conditionType v1.IntegrationPlatformConditionType) func() corev1.ConditionStatus {
 	return func() corev1.ConditionStatus {
-		c := PlatformCondition(t, ns, conditionType)()
+		c := PlatformCondition(t, ctx, ns, conditionType)()
 		if c == nil {
 			return "Unknown"
 		}
@@ -2271,9 +2261,9 @@ func PlatformConditionStatus(
 	}
 }
 
-func PlatformProfile(t *testing.T, ns string) func() v1.TraitProfile {
+func PlatformProfile(t *testing.T, ctx context.Context, ns string) func() v1.TraitProfile {
 	return func() v1.TraitProfile {
-		p := Platform(t, ns)()
+		p := Platform(t, ctx, ns)()
 		if p == nil {
 			return ""
 		}
@@ -2281,9 +2271,9 @@ func PlatformProfile(t *testing.T, ns string) func() v1.TraitProfile {
 	}
 }
 
-func PlatformTimeout(t *testing.T, ns string) func() *metav1.Duration {
+func PlatformTimeout(t *testing.T, ctx context.Context, ns string) func() *metav1.Duration {
 	return func() *metav1.Duration {
-		p := Platform(t, ns)()
+		p := Platform(t, ctx, ns)()
 		if p == nil {
 			return &metav1.Duration{}
 		}
@@ -2291,14 +2281,14 @@ func PlatformTimeout(t *testing.T, ns string) func() *metav1.Duration {
 	}
 }
 
-func AssignPlatformToOperator(t *testing.T, ns, operator string) error {
-	pl := Platform(t, ns)()
+func AssignPlatformToOperator(t *testing.T, ctx context.Context, ns, operator string) error {
+	pl := Platform(t, ctx, ns)()
 	if pl == nil {
 		return errors.New("cannot assign platform to operator: no platform found")
 	}
 
 	pl.SetOperatorID(operator)
-	return TestClient(t).Update(TestContext, pl)
+	return TestClient(t).Update(ctx, pl)
 }
 
 func GetExpectedCRDs(releaseVersion string) int {
@@ -2354,10 +2344,10 @@ func CRDs(t *testing.T) func() []metav1.APIResource {
 	}
 }
 
-func ConsoleCLIDownload(t *testing.T, name string) func() *consoleV1.ConsoleCLIDownload {
+func ConsoleCLIDownload(t *testing.T, ctx context.Context, name string) func() *consoleV1.ConsoleCLIDownload {
 	return func() *consoleV1.ConsoleCLIDownload {
 		cliDownload := consoleV1.ConsoleCLIDownload{}
-		if err := TestClient(t).Get(TestContext, ctrl.ObjectKey{Name: name}, &cliDownload); err != nil && !k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, ctrl.ObjectKey{Name: name}, &cliDownload); err != nil && !k8serrors.IsNotFound(err) {
 			failTest(t, err)
 		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
@@ -2366,7 +2356,7 @@ func ConsoleCLIDownload(t *testing.T, name string) func() *consoleV1.ConsoleCLID
 	}
 }
 
-func OperatorPod(t *testing.T, ns string) func() *corev1.Pod {
+func OperatorPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -2374,7 +2364,7 @@ func OperatorPod(t *testing.T, ns string) func() *corev1.Pod {
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"camel.apache.org/component": "operator",
@@ -2389,7 +2379,7 @@ func OperatorPod(t *testing.T, ns string) func() *corev1.Pod {
 }
 
 // Pod Find one pod filtered by namespace ns and label app.kubernetes.io/name value appName.
-func Pod(t *testing.T, ns string, appName string) func() (*corev1.Pod, error) {
+func Pod(t *testing.T, ctx context.Context, ns string, appName string) func() (*corev1.Pod, error) {
 	return func() (*corev1.Pod, error) {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -2397,7 +2387,7 @@ func Pod(t *testing.T, ns string, appName string) func() (*corev1.Pod, error) {
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"app.kubernetes.io/name": appName,
@@ -2411,34 +2401,34 @@ func Pod(t *testing.T, ns string, appName string) func() (*corev1.Pod, error) {
 	}
 }
 
-func OperatorTryPodForceKill(t *testing.T, ns string, timeSeconds int) {
-	pod := OperatorPod(t, ns)()
+func OperatorTryPodForceKill(t *testing.T, ctx context.Context, ns string, timeSeconds int) {
+	pod := OperatorPod(t, ctx, ns)()
 	if pod != nil {
-		if err := TestClient(t).Delete(TestContext, pod, ctrl.GracePeriodSeconds(timeSeconds)); err != nil {
+		if err := TestClient(t).Delete(ctx, pod, ctrl.GracePeriodSeconds(timeSeconds)); err != nil {
 			log.Error(err, "cannot forcefully kill the pod")
 		}
 	}
 }
 
-func ScaleOperator(t *testing.T, ns string, replicas int32) error {
-	operator, err := TestClient(t).AppsV1().Deployments(ns).Get(TestContext, "camel-k-operator", metav1.GetOptions{})
+func ScaleOperator(t *testing.T, ctx context.Context, ns string, replicas int32) error {
+	operator, err := TestClient(t).AppsV1().Deployments(ns).Get(ctx, "camel-k-operator", metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 	operator.Spec.Replicas = &replicas
-	_, err = TestClient(t).AppsV1().Deployments(ns).Update(TestContext, operator, metav1.UpdateOptions{})
+	_, err = TestClient(t).AppsV1().Deployments(ns).Update(ctx, operator, metav1.UpdateOptions{})
 	if err != nil {
 		return err
 	}
 
 	if replicas == 0 {
 		// speedup scale down by killing the pod
-		OperatorTryPodForceKill(t, ns, 10)
+		OperatorTryPodForceKill(t, ctx, ns, 10)
 	}
 	return nil
 }
 
-func ClusterRole(t *testing.T) func() []rbacv1.ClusterRole {
+func ClusterRole(t *testing.T, ctx context.Context) func() []rbacv1.ClusterRole {
 	return func() []rbacv1.ClusterRole {
 		lst := rbacv1.ClusterRoleList{
 			TypeMeta: metav1.TypeMeta{
@@ -2446,7 +2436,7 @@ func ClusterRole(t *testing.T) func() []rbacv1.ClusterRole {
 				APIVersion: rbacv1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.MatchingLabels{
 				"app": "camel-k",
 			}); err != nil {
@@ -2459,7 +2449,7 @@ func ClusterRole(t *testing.T) func() []rbacv1.ClusterRole {
 	}
 }
 
-func Role(t *testing.T, ns string) func() []rbacv1.Role {
+func Role(t *testing.T, ctx context.Context, ns string) func() []rbacv1.Role {
 	return func() []rbacv1.Role {
 		lst := rbacv1.RoleList{
 			TypeMeta: metav1.TypeMeta{
@@ -2467,7 +2457,7 @@ func Role(t *testing.T, ns string) func() []rbacv1.Role {
 				APIVersion: rbacv1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"app": "camel-k",
@@ -2481,7 +2471,7 @@ func Role(t *testing.T, ns string) func() []rbacv1.Role {
 	}
 }
 
-func RoleBinding(t *testing.T, ns string) func() *rbacv1.RoleBinding {
+func RoleBinding(t *testing.T, ctx context.Context, ns string) func() *rbacv1.RoleBinding {
 	return func() *rbacv1.RoleBinding {
 		lst := rbacv1.RoleBindingList{
 			TypeMeta: metav1.TypeMeta{
@@ -2489,7 +2479,7 @@ func RoleBinding(t *testing.T, ns string) func() *rbacv1.RoleBinding {
 				APIVersion: metav1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"app": "camel-k",
@@ -2503,7 +2493,7 @@ func RoleBinding(t *testing.T, ns string) func() *rbacv1.RoleBinding {
 	}
 }
 
-func ServiceAccount(t *testing.T, ns, name string) func() *corev1.ServiceAccount {
+func ServiceAccount(t *testing.T, ctx context.Context, ns, name string) func() *corev1.ServiceAccount {
 	return func() *corev1.ServiceAccount {
 		lst := corev1.ServiceAccountList{
 			TypeMeta: metav1.TypeMeta{
@@ -2511,7 +2501,7 @@ func ServiceAccount(t *testing.T, ns, name string) func() *corev1.ServiceAccount
 				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst,
+		if err := TestClient(t).List(ctx, &lst,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels{
 				"app": "camel-k",
@@ -2525,24 +2515,24 @@ func ServiceAccount(t *testing.T, ns, name string) func() *corev1.ServiceAccount
 	}
 }
 
-func KameletList(t *testing.T, ns string) func() []v1.Kamelet {
+func KameletList(t *testing.T, ctx context.Context, ns string) func() []v1.Kamelet {
 	return func() []v1.Kamelet {
 		lst := v1.NewKameletList()
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			failTest(t, err)
 		}
 		return lst.Items
 	}
 }
 
-func Kamelet(t *testing.T, name string, ns string) func() *v1.Kamelet {
+func Kamelet(t *testing.T, ctx context.Context, name string, ns string) func() *v1.Kamelet {
 	return func() *v1.Kamelet {
 		it := v1.NewKamelet(ns, name)
 		key := ctrl.ObjectKey{
 			Namespace: ns,
 			Name:      name,
 		}
-		if err := TestClient(t).Get(TestContext, key, &it); err != nil && !k8serrors.IsNotFound(err) {
+		if err := TestClient(t).Get(ctx, key, &it); err != nil && !k8serrors.IsNotFound(err) {
 			failTest(t, err)
 		} else if err != nil && k8serrors.IsNotFound(err) {
 			return nil
@@ -2558,12 +2548,12 @@ func KameletLabels(kamelet *v1.Kamelet) map[string]string {
 	return kamelet.GetLabels()
 }
 
-func ClusterDomainName(t *testing.T) (string, error) {
+func ClusterDomainName(t *testing.T, ctx context.Context) (string, error) {
 	dns := configv1.DNS{}
 	key := ctrl.ObjectKey{
 		Name: "cluster",
 	}
-	err := TestClient(t).Get(TestContext, key, &dns)
+	err := TestClient(t).Get(ctx, key, &dns)
 	if err != nil {
 		return "", err
 	}
@@ -2574,11 +2564,11 @@ func ClusterDomainName(t *testing.T) (string, error) {
 	Tekton
 */
 
-func CreateOperatorServiceAccount(t *testing.T, ns string) error {
-	return install.Resource(TestContext, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/manager/operator-service-account.yaml")
+func CreateOperatorServiceAccount(t *testing.T, ctx context.Context, ns string) error {
+	return install.Resource(ctx, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/manager/operator-service-account.yaml")
 }
 
-func CreateOperatorRole(t *testing.T, ns string) (err error) {
+func CreateOperatorRole(t *testing.T, ctx context.Context, ns string) (err error) {
 	oc, err := openshift.IsOpenShift(TestClient(t))
 	if err != nil {
 		failTest(t, err)
@@ -2589,32 +2579,32 @@ func CreateOperatorRole(t *testing.T, ns string) (err error) {
 		// This should ideally be removed from the common RBAC manifest.
 		customizer = install.RemoveIngressRoleCustomizer
 	}
-	err = install.Resource(TestContext, TestClient(t), ns, true, customizer, "/config/rbac/namespaced/operator-role.yaml")
+	err = install.Resource(ctx, TestClient(t), ns, true, customizer, "/config/rbac/namespaced/operator-role.yaml")
 	if err != nil {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-openshift.yaml")
+		return install.Resource(ctx, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-openshift.yaml")
 	}
 	return nil
 }
 
-func CreateOperatorRoleBinding(t *testing.T, ns string) error {
+func CreateOperatorRoleBinding(t *testing.T, ctx context.Context, ns string) error {
 	oc, err := openshift.IsOpenShift(TestClient(t))
 	if err != nil {
 		failTest(t, err)
 	}
-	err = install.Resource(TestContext, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/rbac/namespaced/operator-role-binding.yaml")
+	err = install.Resource(ctx, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/rbac/namespaced/operator-role-binding.yaml")
 	if err != nil {
 		return err
 	}
 	if oc {
-		return install.Resource(TestContext, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-binding-openshift.yaml")
+		return install.Resource(ctx, TestClient(t), ns, true, install.IdentityResourceCustomizer, "/config/rbac/openshift/namespaced/operator-role-binding-openshift.yaml")
 	}
 	return nil
 }
 
-func CreateKamelPod(t *testing.T, ns string, name string, command ...string) error {
+func CreateKamelPod(t *testing.T, ctx context.Context, ns string, name string, command ...string) error {
 	args := command
 	for _, hook := range KamelHooks {
 		args = hook(args)
@@ -2640,14 +2630,14 @@ func CreateKamelPod(t *testing.T, ns string, name string, command ...string) err
 			},
 		},
 	}
-	return TestClient(t).Create(TestContext, &pod)
+	return TestClient(t).Create(ctx, &pod)
 }
 
 /*
 	Knative
 */
 
-func CreateKnativeChannel(t *testing.T, ns string, name string) func() error {
+func CreateKnativeChannel(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	return func() error {
 		channel := messaging.InMemoryChannel{
 			TypeMeta: metav1.TypeMeta{
@@ -2659,11 +2649,11 @@ func CreateKnativeChannel(t *testing.T, ns string, name string) func() error {
 				Name:      name,
 			},
 		}
-		return TestClient(t).Create(TestContext, &channel)
+		return TestClient(t).Create(ctx, &channel)
 	}
 }
 
-func CreateKnativeBroker(t *testing.T, ns string, name string) func() error {
+func CreateKnativeBroker(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	return func() error {
 		broker := eventing.Broker{
 			TypeMeta: metav1.TypeMeta{
@@ -2675,7 +2665,7 @@ func CreateKnativeBroker(t *testing.T, ns string, name string) func() error {
 				Name:      name,
 			},
 		}
-		return TestClient(t).Create(TestContext, &broker)
+		return TestClient(t).Create(ctx, &broker)
 	}
 }
 
@@ -2683,7 +2673,7 @@ func CreateKnativeBroker(t *testing.T, ns string, name string) func() error {
 	Kamelets
 */
 
-func CreateKamelet(t *testing.T, operatorID string, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
 		kamelet := v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -2700,11 +2690,11 @@ func CreateKamelet(t *testing.T, operatorID string, ns string, name string, temp
 		}
 
 		kamelet.SetOperatorID(operatorID)
-		return TestClient(t).Create(TestContext, &kamelet)
+		return TestClient(t).Create(ctx, &kamelet)
 	}
 }
 
-func CreateTimerKamelet(t *testing.T, operatorID string, ns string, name string) func() error {
+func CreateTimerKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -2727,17 +2717,17 @@ func CreateTimerKamelet(t *testing.T, operatorID string, ns string, name string)
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ns, name, flow, props, nil)
+	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
 }
 
-func DeleteKamelet(t *testing.T, ns string, name string) error {
+func DeleteKamelet(t *testing.T, ctx context.Context, ns string, name string) error {
 	kamelet := v1.Kamelet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
 		},
 	}
-	return TestClient(t).Delete(TestContext, &kamelet)
+	return TestClient(t).Delete(ctx, &kamelet)
 }
 
 func asTemplate(t *testing.T, source map[string]interface{}) *v1.Template {
@@ -2765,7 +2755,7 @@ func AsTraitConfiguration(t *testing.T, props map[string]string) *traitv1.Config
 	Namespace testing functions
 */
 
-func Pods(t *testing.T, ns string) func() []corev1.Pod {
+func Pods(t *testing.T, ctx context.Context, ns string) func() []corev1.Pod {
 	return func() []corev1.Pod {
 		lst := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -2773,7 +2763,7 @@ func Pods(t *testing.T, ns string) func() []corev1.Pod {
 				APIVersion: v1.SchemeGroupVersion.String(),
 			},
 		}
-		if err := TestClient(t).List(TestContext, &lst, ctrl.InNamespace(ns)); err != nil {
+		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
 			if !k8serrors.IsUnauthorized(err) {
 				log.Error(err, "Error while listing the pods")
 			}
@@ -2783,33 +2773,36 @@ func Pods(t *testing.T, ns string) func() []corev1.Pod {
 	}
 }
 
-func WithNewTestNamespace(t *testing.T, doRun func(*gomega.WithT, string)) {
-	ns := NewTestNamespace(t, false)
-	defer deleteTestNamespace(t, ns)
+func WithNewTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
+	ctx := context.TODO()
+	ns := NewTestNamespace(t, ctx, false)
+	defer deleteTestNamespace(t, ctx, ns)
 	defer userCleanup(t)
 
-	invokeUserTestCode(t, ns.GetName(), doRun)
+	invokeUserTestCode(t, ctx, ns.GetName(), doRun)
 }
 
-func WithGlobalOperatorNamespace(t *testing.T, test func(*gomega.WithT, string)) {
+func WithGlobalOperatorNamespace(t *testing.T, test func(context.Context, *gomega.WithT, string)) {
+	ctx := context.TODO()
 	ocp, err := openshift.IsOpenShift(TestClient(t))
 	require.NoError(t, err)
 	if ocp {
 		// global operators are always installed in the openshift-operators namespace
-		invokeUserTestCode(t, "openshift-operators", test)
+		invokeUserTestCode(t, ctx, "openshift-operators", test)
 	} else {
 		// create new namespace for the global operator
 		WithNewTestNamespace(t, test)
 	}
 }
 
-func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(*gomega.WithT, string)) {
-	ns := NewTestNamespace(t, true)
-	defer deleteTestNamespace(t, ns)
-	defer deleteKnativeBroker(t, ns)
+func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
+	ctx := context.TODO()
+	ns := NewTestNamespace(t, ctx, true)
+	defer deleteTestNamespace(t, ctx, ns)
+	defer deleteKnativeBroker(t, ctx, ns)
 	defer userCleanup(t)
 
-	invokeUserTestCode(t, ns.GetName(), doRun)
+	invokeUserTestCode(t, ctx, ns.GetName(), doRun)
 }
 
 func userCleanup(t *testing.T) {
@@ -2828,17 +2821,17 @@ func userCleanup(t *testing.T) {
 	}
 }
 
-func invokeUserTestCode(t *testing.T, ns string, doRun func(*gomega.WithT, string)) {
+func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func(context.Context, *gomega.WithT, string)) {
 	defer func() {
-		DumpNamespace(t, ns)
+		DumpNamespace(t, ctx, ns)
 
 		osns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
 
 		// Try to clean up namespace
-		if ns != osns && HasPlatform(t, ns)() {
+		if ns != osns && HasPlatform(t, ctx, ns)() {
 			t.Logf("Clean up test namespace: %s", ns)
 
-			if err := Kamel(t, "uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute(); err != nil {
+			if err := Kamel(t, ctx, "uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute(); err != nil {
 				t.Logf("Error while cleaning up namespace %s: %v\n", ns, err)
 			}
 
@@ -2847,10 +2840,10 @@ func invokeUserTestCode(t *testing.T, ns string, doRun func(*gomega.WithT, strin
 	}()
 
 	g := gomega.NewWithT(t)
-	doRun(g, ns)
+	doRun(ctx, g, ns)
 }
 
-func deleteKnativeBroker(t *testing.T, ns metav1.Object) {
+func deleteKnativeBroker(t *testing.T, ctx context.Context, ns metav1.Object) {
 	nsRef := corev1.Namespace{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1.SchemeGroupVersion.String(),
@@ -2861,12 +2854,12 @@ func deleteKnativeBroker(t *testing.T, ns metav1.Object) {
 		},
 	}
 	nsKey := ctrl.ObjectKeyFromObject(&nsRef)
-	if err := TestClient(t).Get(TestContext, nsKey, &nsRef); err != nil {
+	if err := TestClient(t).Get(ctx, nsKey, &nsRef); err != nil {
 		failTest(t, err)
 	}
 
 	nsRef.SetLabels(make(map[string]string, 0))
-	if err := TestClient(t).Update(TestContext, &nsRef); err != nil {
+	if err := TestClient(t).Update(ctx, &nsRef); err != nil {
 		failTest(t, err)
 	}
 	broker := eventing.Broker{
@@ -2879,12 +2872,12 @@ func deleteKnativeBroker(t *testing.T, ns metav1.Object) {
 			Name:      TestDefaultNamespace,
 		},
 	}
-	if err := TestClient(t).Delete(TestContext, &broker); err != nil {
+	if err := TestClient(t).Delete(ctx, &broker); err != nil {
 		failTest(t, err)
 	}
 }
 
-func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
+func deleteTestNamespace(t *testing.T, ctx context.Context, ns ctrl.Object) {
 	value, saveNS := os.LookupEnv("CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE")
 	if t != nil && t.Failed() && saveNS && value == "true" {
 		t.Logf("Warning: retaining failed test project %q", ns.GetName())
@@ -2905,20 +2898,20 @@ func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 				Name: ns.GetName(),
 			},
 		}
-		if err := TestClient(t).Delete(TestContext, prj); err != nil {
+		if err := TestClient(t).Delete(ctx, prj); err != nil {
 			t.Logf("Warning: cannot delete test project %q", prj.Name)
 		}
 	} else {
-		if err := TestClient(t).Delete(TestContext, ns); err != nil {
+		if err := TestClient(t).Delete(ctx, ns); err != nil {
 			t.Logf("Warning: cannot delete test namespace %q", ns.GetName())
 		}
 	}
 
 	// Wait for all pods to be deleted
-	pods := Pods(t, ns.GetName())()
+	pods := Pods(t, ctx, ns.GetName())()
 	for i := 0; len(pods) > 0 && i < 60; i++ {
 		time.Sleep(1 * time.Second)
-		pods = Pods(t, ns.GetName())()
+		pods = Pods(t, ctx, ns.GetName())()
 	}
 	if len(pods) > 0 {
 		names := []string{}
@@ -2930,8 +2923,8 @@ func deleteTestNamespace(t *testing.T, ns ctrl.Object) {
 	}
 }
 
-func testNamespaceExists(t *testing.T, ns string) (bool, error) {
-	_, err := TestClient(t).CoreV1().Namespaces().Get(TestContext, ns, metav1.GetOptions{})
+func testNamespaceExists(t *testing.T, ctx context.Context, ns string) (bool, error) {
+	_, err := TestClient(t).CoreV1().Namespaces().Get(ctx, ns, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return false, nil
@@ -2943,42 +2936,42 @@ func testNamespaceExists(t *testing.T, ns string) (bool, error) {
 	return true, nil
 }
 
-func DumpNamespace(t *testing.T, ns string) {
+func DumpNamespace(t *testing.T, ctx context.Context, ns string) {
 	if t.Failed() {
-		if err := util.Dump(TestContext, TestClient(t), ns, t); err != nil {
+		if err := util.Dump(ctx, TestClient(t), ns, t); err != nil {
 			t.Logf("Error while dumping namespace %s: %v\n", ns, err)
 		}
 	}
 }
 
-func DeleteNamespace(t *testing.T, ns string) error {
-	nsObj, err := TestClient(t).CoreV1().Namespaces().Get(TestContext, ns, metav1.GetOptions{})
+func DeleteNamespace(t *testing.T, ctx context.Context, ns string) error {
+	nsObj, err := TestClient(t).CoreV1().Namespaces().Get(ctx, ns, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
-	deleteTestNamespace(t, nsObj)
+	deleteTestNamespace(t, ctx, nsObj)
 
 	return nil
 }
 
-func NewTestNamespace(t *testing.T, injectKnativeBroker bool) ctrl.Object {
+func NewTestNamespace(t *testing.T, ctx context.Context, injectKnativeBroker bool) ctrl.Object {
 	name := os.Getenv("CAMEL_K_TEST_NS")
 	if name == "" {
 		name = "test-" + uuid.New().String()
 	}
 
-	if exists, err := testNamespaceExists(t, name); err != nil {
+	if exists, err := testNamespaceExists(t, ctx, name); err != nil {
 		failTest(t, err)
 	} else if exists {
 		fmt.Println("Warning: namespace ", name, " already exists so using different namespace name")
 		name = fmt.Sprintf("%s-%d", name, time.Now().Second())
 	}
 
-	return NewNamedTestNamespace(t, name, injectKnativeBroker)
+	return NewNamedTestNamespace(t, ctx, name, injectKnativeBroker)
 }
 
-func NewNamedTestNamespace(t *testing.T, name string, injectKnativeBroker bool) ctrl.Object {
+func NewNamedTestNamespace(t *testing.T, ctx context.Context, name string, injectKnativeBroker bool) ctrl.Object {
 	brokerLabel := "eventing.knative.dev/injection"
 	c := TestClient(t)
 
@@ -3013,7 +3006,7 @@ func NewNamedTestNamespace(t *testing.T, name string, injectKnativeBroker bool) 
 		err = rest.Post().
 			Resource("projectrequests").
 			Body(request).
-			Do(TestContext).
+			Do(ctx).
 			Into(project)
 		if err != nil {
 			failTest(t, err)
@@ -3021,14 +3014,14 @@ func NewNamedTestNamespace(t *testing.T, name string, injectKnativeBroker bool) 
 		// workaround https://github.com/openshift/origin/issues/3819
 		if injectKnativeBroker {
 			// use Kubernetes API - https://access.redhat.com/solutions/2677921
-			if namespace, err := TestClient(t).CoreV1().Namespaces().Get(TestContext, name, metav1.GetOptions{}); err != nil {
+			if namespace, err := TestClient(t).CoreV1().Namespaces().Get(ctx, name, metav1.GetOptions{}); err != nil {
 				failTest(t, err)
 			} else {
 				if _, ok := namespace.GetLabels()[brokerLabel]; !ok {
 					namespace.SetLabels(map[string]string{
 						brokerLabel: "enabled",
 					})
-					if err = TestClient(t).Update(TestContext, namespace); err != nil {
+					if err = TestClient(t).Update(ctx, namespace); err != nil {
 						failTest(t, errors.New("Unable to label project with knative-eventing-injection. This operation needs update permission on the project."))
 					}
 				}
@@ -3050,7 +3043,7 @@ func NewNamedTestNamespace(t *testing.T, name string, injectKnativeBroker bool) 
 				brokerLabel: "enabled",
 			})
 		}
-		if err := TestClient(t).Create(TestContext, namespace); err != nil {
+		if err := TestClient(t).Create(ctx, namespace); err != nil {
 			failTest(t, err)
 		}
 		return namespace
@@ -3080,7 +3073,7 @@ func GetOutputStringAsync(cmd *cobra.Command) func() string {
 	}
 }
 
-func CreateLogKamelet(t *testing.T, operatorID string, ns string, name string) func() error {
+func CreateLogKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -3098,7 +3091,7 @@ func CreateLogKamelet(t *testing.T, operatorID string, ns string, name string) f
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ns, name, flow, props, nil)
+	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
 }
 
 func GetCIProcessID() string {
