@@ -64,7 +64,7 @@ func TestIntegrationProfile(t *testing.T) {
 			g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns1, "ipr-local"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
 			t.Run("Run integration with global integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(CamelKRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPod(t, ctx, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
 				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
@@ -81,11 +81,11 @@ func TestIntegrationProfile(t *testing.T) {
 					cpuLimits := pod.Spec.Containers[0].Resources.Limits.Cpu()
 					return cpuLimits != nil && cpuLimits.AsApproximateFloat64() > 0
 				}), TestTimeoutShort).Should(BeTrue())
-				g.Expect(Kamel(t, ctx, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
+				g.Expect(CamelK(t, ctx, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
 			})
 
 			t.Run("Run integration with namespace local integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-local", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(CamelKRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-local", "files/yaml.yaml").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPod(t, ctx, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
 				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
@@ -103,11 +103,11 @@ func TestIntegrationProfile(t *testing.T) {
 					cpuLimits := pod.Spec.Containers[0].Resources.Limits.Cpu()
 					return cpuLimits != nil && cpuLimits.AsApproximateFloat64() > 0
 				}), TestTimeoutShort).Should(BeTrue())
-				g.Expect(Kamel(t, ctx, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
+				g.Expect(CamelK(t, ctx, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
 			})
 
 			t.Run("Run integration without integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(CamelKRunWithID(t, ctx, operatorID, ns1, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
 				g.Eventually(IntegrationPod(t, ctx, ns1, "normal"), TestTimeoutShort).Should(Not(BeNil()))
 				g.Eventually(IntegrationPodHas(t, ctx, ns1, "normal", func(pod *corev1.Pod) bool {
 					if len(pod.Spec.Containers) != 1 {
@@ -119,7 +119,7 @@ func TestIntegrationProfile(t *testing.T) {
 			})
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
 		})
 	})
 }
@@ -141,7 +141,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
 		g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns, "ipr-global"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
 		g.Eventually(IntegrationPod(t, ctx, ns, "normal"), TestTimeoutMedium).Should(Not(BeNil()))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "normal"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "normal", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -151,7 +151,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "simple", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--name", "simple", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPod(t, ctx, ns, "simple"), TestTimeoutMedium).Should(Not(BeNil()))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "simple"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -165,7 +165,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 		g.Eventually(Kit(t, ctx, ns, integrationKitNameWithProfile)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
 		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
@@ -189,7 +189,7 @@ func TestPropagateIntegrationProfileChanges(t *testing.T) {
 		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
 		g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns, "debug-profile"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "simple", "--integration-profile", "debug-profile", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--name", "simple", "--integration-profile", "debug-profile", "files/yaml.yaml").Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPod(t, ctx, ns, "simple"), TestTimeoutMedium).Should(Not(BeNil()))
 		g.Eventually(IntegrationPodHas(t, ctx, ns, "simple", func(pod *corev1.Pod) bool {
@@ -215,6 +215,6 @@ func TestPropagateIntegrationProfileChanges(t *testing.T) {
 		}), TestTimeoutShort).Should(BeTrue())
 
 		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

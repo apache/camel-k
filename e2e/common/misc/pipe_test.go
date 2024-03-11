@@ -113,7 +113,7 @@ func TestPipe(t *testing.T) {
 				WithTransform(PipeConditionMessage, ContainSubstring("no ref or URI specified in endpoint")))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

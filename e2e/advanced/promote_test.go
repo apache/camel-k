@@ -63,7 +63,7 @@ func TestKamelCLIPromote(t *testing.T) {
 		*/
 
 		t.Run("plain integration dev", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorDevID, nsDev, "./files/promote-route.yaml", "--config", "configmap:my-cm-promote", "--config", "secret:my-sec-promote").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorDevID, nsDev, "./files/promote-route.yaml", "--config", "configmap:my-cm-promote", "--config", "secret:my-sec-promote").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, nsDev, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationObservedGeneration(t, ctx, nsDev, "promote-route")).Should(Equal(&one))
 			//g.Eventually(IntegrationConditionStatus(t, nsDev, "promote-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -73,7 +73,7 @@ func TestKamelCLIPromote(t *testing.T) {
 
 		t.Run("kamelet integration dev", func(t *testing.T) {
 			g.Expect(CreateTimerKamelet(t, ctx, operatorDevID, nsDev, "my-own-timer-source")()).To(Succeed())
-			g.Expect(KamelRunWithID(t, ctx, operatorDevID, nsDev, "./files/timer-kamelet-usage.yaml").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorDevID, nsDev, "./files/timer-kamelet-usage.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, nsDev, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, nsDev, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 		})
@@ -122,7 +122,7 @@ func TestKamelCLIPromote(t *testing.T) {
 
 			t.Run("plain integration promotion update", func(t *testing.T) {
 				// We need to update the Integration CR in order the operator to restart it both in dev and prod envs
-				g.Expect(KamelRunWithID(t, ctx, operatorDevID, nsDev, "./files/promote-route-edited.yaml", "--name", "promote-route", "--config", "configmap:my-cm-promote").Execute()).To(Succeed())
+				g.Expect(CamelKRunWithID(t, ctx, operatorDevID, nsDev, "./files/promote-route-edited.yaml", "--name", "promote-route", "--config", "configmap:my-cm-promote").Execute()).To(Succeed())
 				// The generation has to be incremented
 				g.Eventually(IntegrationObservedGeneration(t, ctx, nsDev, "promote-route")).Should(Equal(&two))
 				g.Eventually(IntegrationPodPhase(t, ctx, nsDev, "promote-route"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))

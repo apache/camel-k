@@ -59,7 +59,7 @@ func TestNativeBinding(t *testing.T) {
 					MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", bindingName, "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", bindingName, "-n", ns).Execute()).To(Succeed())
 			g.Expect(DeleteKits(t, ctx, ns)).To(Succeed())
 		})
 	})

@@ -76,7 +76,7 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		t.Run("Run integration with default environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-default")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--name", name, "files/Java.java").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -102,7 +102,7 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		t.Run("Run integration with custom environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-custom-proxy")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "environment.vars=HTTP_PROXY=http://custom.proxy").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "environment.vars=HTTP_PROXY=http://custom.proxy").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -128,7 +128,7 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		t.Run("Run integration without default HTTP proxy environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-no-proxy")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "environment.http-proxy=false").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "environment.http-proxy=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -160,7 +160,7 @@ func TestEnvironmentTrait(t *testing.T) {
 			g.Expect(envTrait["httpProxy"]).To(Equal(false))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

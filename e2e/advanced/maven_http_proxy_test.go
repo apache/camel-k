@@ -206,7 +206,7 @@ func TestMavenProxy(t *testing.T) {
 
 		// Run the Integration
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -226,7 +226,7 @@ func TestMavenProxy(t *testing.T) {
 		g.Expect(proxies.Items).To(HaveLen(1))
 
 		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		g.Expect(TestClient(t).Delete(ctx, deployment)).To(Succeed())
 		g.Expect(TestClient(t).Delete(ctx, service)).To(Succeed())
 		g.Expect(TestClient(t).Delete(ctx, secret)).To(Succeed())

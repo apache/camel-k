@@ -73,7 +73,7 @@ func TestServiceBindingTrait(t *testing.T) {
 			g.Expect(TestClient(t).Create(ctx, service)).To(Succeed())
 			// Create integration and bind it to our service
 			name := RandomizedSuffixName("service-binding")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/ServiceBinding.java", "--name", name, "--connect", serviceRef).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/ServiceBinding.java", "--name", name, "--connect", serviceRef).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -108,6 +108,6 @@ func TestServiceBindingTrait(t *testing.T) {
 		})
 
 		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

@@ -59,7 +59,7 @@ func TestJVMTrait(t *testing.T) {
 
 		t.Run("JVM trait classpath", func(t *testing.T) {
 			name := RandomizedSuffixName("classpath")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns,
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns,
 				"./files/jvm/Classpath.java",
 				"--name", name,
 				"--resource", "configmap:my-deps",
@@ -83,7 +83,7 @@ func TestJVMTrait(t *testing.T) {
 
 		t.Run("JVM trait classpath on deprecated path", func(t *testing.T) {
 			name := RandomizedSuffixName("classpath")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns,
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns,
 				"./files/jvm/Classpath.java",
 				"--name", name,
 				"-t", "mount.resources=configmap:my-deps/sample-1.0.jar@/etc/camel/resources",
@@ -107,7 +107,7 @@ func TestJVMTrait(t *testing.T) {
 
 		t.Run("JVM trait classpath on specific classpath", func(t *testing.T) {
 			name := RandomizedSuffixName("classpath")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns,
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns,
 				"./files/jvm/Classpath.java",
 				"--name", name,
 				"-t", "mount.resources=configmap:my-deps/sample-1.0.jar@/etc/other/resources",
@@ -129,6 +129,6 @@ func TestJVMTrait(t *testing.T) {
 			g.Expect(mountTrait["resources"]).To(ContainElements("configmap:my-deps/sample-1.0.jar@/etc/other/resources"))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

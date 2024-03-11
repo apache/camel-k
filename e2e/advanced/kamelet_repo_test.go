@@ -51,7 +51,7 @@ func TestKameletFromCustomRepository(t *testing.T) {
 		// Add the custom repository
 		g.Expect(Kamel(t, ctx, "kamelet", "add-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))

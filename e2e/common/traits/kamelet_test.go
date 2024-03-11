@@ -59,7 +59,7 @@ func TestKameletTrait(t *testing.T) {
 			g.Expect(CreateKamelet(t, operatorID, ctx, ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
 
 			name := RandomizedSuffixName("webhook")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Started capabilities-webhook-source-1 (platform-http:///webhook)"))
@@ -71,7 +71,7 @@ func TestKameletTrait(t *testing.T) {
 		})
 
 		// Clean-up
-		g.Expect(DeleteKamelet(t, ctx, ns, "capabilities-webhook-source")).To(Succeed())
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, ns, "capabilities-webhook-source")).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

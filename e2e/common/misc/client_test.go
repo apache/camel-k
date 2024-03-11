@@ -67,6 +67,6 @@ func TestClientFunctionalities(t *testing.T) {
 		err = camel.CamelV1().Integrations(ns).Delete(ctx, "dummy", metav1.DeleteOptions{})
 		require.NoError(t, err)
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

@@ -122,7 +122,7 @@ spec:
 
 		// Basic
 		t.Run("test basic case", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false", "--resource", "configmap:my-kamelet-cm@/kamelets", "-p camel.component.kamelet.location=file:/kamelets", "-d", "camel:yaml-dsl", "-d", "camel:timer").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false", "--resource", "configmap:my-kamelet-cm@/kamelets", "-p camel.component.kamelet.location=file:/kamelets", "-d", "camel:yaml-dsl", "-d", "camel:timer").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
 
@@ -135,6 +135,6 @@ spec:
 			g.Expect(kameletsTrait["enabled"]).To(Equal(false))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

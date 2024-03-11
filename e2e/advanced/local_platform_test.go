@@ -90,7 +90,7 @@ func TestLocalPlatform(t *testing.T) {
 			g.Expect(local.Status.Build.Maven.Properties["build-global-prop1"]).To(Equal("build-global-value1"))
 			g.Expect(local.Status.Build.Maven.Properties["build-local-prop1"]).To(Equal("build-local-value1"))
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "local-integration", "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns1, "--name", "local-integration", "files/yaml.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationPod(t, ctx, ns1, "local-integration"), TestTimeoutMedium).Should(Not(BeNil()))
 			g.Eventually(IntegrationPodHas(t, ctx, ns1, "local-integration", func(pod *corev1.Pod) bool {
 				if len(pod.Spec.Containers) != 1 {
@@ -101,7 +101,7 @@ func TestLocalPlatform(t *testing.T) {
 			}), TestTimeoutShort).Should(BeTrue())
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
 		})
 	})
 }

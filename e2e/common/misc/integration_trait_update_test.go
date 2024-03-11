@@ -47,17 +47,18 @@ func TestTraitUpdates(t *testing.T) {
 
 		t.Run("run and update trait", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml-route")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			var numberOfPods = func(pods *int32) bool {
 				return *pods >= 1 && *pods <= 2
 			}
 			// Adding a property will change the camel trait
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-p", "hello=world").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-p", "hello=world").Execute()).To(Succeed())
 			g.Consistently(IntegrationPodsNumbers(t, ctx, ns, name), TestTimeoutShort, 1*time.Second).Should(Satisfy(numberOfPods))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
+
 }
