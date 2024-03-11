@@ -24,6 +24,7 @@ package advanced
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"math"
 	"os"
@@ -58,24 +59,20 @@ func TestMetrics(t *testing.T) {
 		t.Skip("WARNING: Test marked as problematic ... skipping")
 	}
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := RandomizedSuffixName("java")
 		operatorID := "camel-k-metrics"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--log-level", "debug")).To(Succeed())
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--log-level", "debug")).To(Succeed())
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-t", "prometheus.enabled=true",
-			"-t", "prometheus.pod-monitor=false",
-		).Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		pod := OperatorPod(t, ns)()
+		pod := OperatorPod(t, ctx, ns)()
 		g.Expect(pod).NotTo(BeNil())
 
 		// pod.Namespace could be different from ns if using global operator
@@ -83,19 +80,19 @@ func TestMetrics(t *testing.T) {
 		logOptions := &corev1.PodLogOptions{
 			Container: "camel-k-operator",
 		}
-		logs, err := StructuredLogs(t, pod.Namespace, pod.Name, logOptions, false)
+		logs, err := StructuredLogs(t, ctx, pod.Namespace, pod.Name, logOptions, false)
 		g.Expect(err).To(BeNil())
 		g.Expect(logs).NotTo(BeEmpty())
 
 		response, err := TestClient(t).CoreV1().RESTClient().Get().
-			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, pod.Name)).DoRaw(TestContext)
+			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, pod.Name)).DoRaw(ctx)
 		g.Expect(err).To(BeNil())
 		metrics, err := parsePrometheusData(response)
 		g.Expect(err).To(BeNil())
 
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		g.Expect(it).NotTo(BeNil())
-		build := Build(t, ns, it.Status.IntegrationKit.Name)()
+		build := Build(t, ctx, ns, it.Status.IntegrationKit.Name)()
 		g.Expect(build).NotTo(BeNil())
 
 		t.Run("Build duration metric", func(t *testing.T) {
@@ -541,7 +538,7 @@ func TestMetrics(t *testing.T) {
 		})
 
 		// Clean up
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

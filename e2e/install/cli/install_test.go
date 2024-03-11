@@ -24,6 +24,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -47,40 +48,40 @@ import (
 )
 
 func TestBasicInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
-		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
-		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 
 		// Check if restricted security context has been applyed
-		operatorPod := OperatorPod(t, ns)()
+		operatorPod := OperatorPod(t, ctx, ns)()
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		t.Run("run yaml", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			// Check if file exists in operator pod
-			g.Expect(OperatorPod(t, ns)().Name).NotTo(Equal(""))
-			g.Expect(OperatorPod(t, ns)().Spec.Containers[0].Name).NotTo(Equal(""))
+			g.Expect(OperatorPod(t, ctx, ns)().Name).NotTo(Equal(""))
+			g.Expect(OperatorPod(t, ctx, ns)().Spec.Containers[0].Name).NotTo(Equal(""))
 
 			req := TestClient(t).CoreV1().RESTClient().Post().
 				Resource("pods").
-				Name(OperatorPod(t, ns)().Name).
+				Name(OperatorPod(t, ctx, ns)().Name).
 				Namespace(ns).
 				SubResource("exec").
-				Param("container", OperatorPod(t, ns)().Spec.Containers[0].Name)
+				Param("container", OperatorPod(t, ctx, ns)().Spec.Containers[0].Name)
 
 			req.VersionedParams(&corev1.PodExecOptions{
-				Container: OperatorPod(t, ns)().Spec.Containers[0].Name,
+				Container: OperatorPod(t, ctx, ns)().Spec.Containers[0].Name,
 				Command:   []string{"test", "-e", defaults.LocalRepository + "/org/apache/camel/k"},
 				Stdin:     false,
 				Stdout:    true,
@@ -101,35 +102,35 @@ func TestBasicInstallation(t *testing.T) {
 
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
 func TestAlternativeImageInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--olm=false", "--operator-image", "x/y:latest")).To(Succeed())
-		g.Eventually(OperatorImage(t, ns)).Should(Equal("x/y:latest"))
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--olm=false", "--operator-image", "x/y:latest")).To(Succeed())
+		g.Eventually(OperatorImage(t, ctx, ns)).Should(Equal("x/y:latest"))
 	})
 }
 
 func TestKitMainInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
-		g.Expect(Kamel(t, "kit", "create", "timer", "-d", "camel:timer", "-x", operatorID, "-n", ns).Execute()).To(Succeed())
-		g.Eventually(Build(t, ns, "timer"), TestTimeoutMedium).ShouldNot(BeNil())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		g.Expect(Kamel(t, ctx, "kit", "create", "timer", "-d", "camel:timer", "-x", operatorID, "-n", ns).Execute()).To(Succeed())
+		g.Eventually(Build(t, ctx, ns, "timer"), TestTimeoutMedium).ShouldNot(BeNil())
 	})
 }
 
 func TestMavenRepositoryInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--maven-repository", "https://my.repo.org/public/")).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--maven-repository", "https://my.repo.org/public/")).To(Succeed())
 		configmapName := fmt.Sprintf("%s-maven-settings", operatorID)
-		g.Eventually(Configmap(t, ns, configmapName)).Should(Not(BeNil()))
+		g.Eventually(Configmap(t, ctx, ns, configmapName)).Should(Not(BeNil()))
 		g.Eventually(func() string {
-			return Configmap(t, ns, configmapName)().Data["settings.xml"]
+			return Configmap(t, ctx, ns, configmapName)().Data["settings.xml"]
 		}).Should(ContainSubstring("https://my.repo.org/public/"))
 	})
 }
@@ -139,12 +140,12 @@ func TestMavenRepositoryInstallation(t *testing.T) {
  * so the Platform will have an empty Registry structure
  */
 func TestSkipRegistryInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--skip-registry-setup")).To(Succeed())
-		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--skip-registry-setup")).To(Succeed())
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(func() v1.RegistrySpec {
-			return Platform(t, ns)().Spec.Build.Registry
+			return Platform(t, ctx, ns)().Spec.Build.Registry
 		}, TestTimeoutMedium).Should(Equal(v1.RegistrySpec{}))
 	})
 }
@@ -173,18 +174,18 @@ func TestConsoleCliDownload(t *testing.T) {
 	templt, err := template.New("downloadLink").Parse(downloadUrlTemplate)
 	require.NoError(t, err)
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// make sure there is no preinstalled CliDownload resource
-		cliDownload := ConsoleCLIDownload(t, name)()
+		cliDownload := ConsoleCLIDownload(t, ctx, name)()
 		if cliDownload != nil {
-			g.Expect(TestClient(t).Delete(TestContext, cliDownload)).To(Succeed())
+			g.Expect(TestClient(t).Delete(ctx, cliDownload)).To(Succeed())
 		}
 
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
-		g.Eventually(ConsoleCLIDownload(t, name), TestTimeoutMedium).Should(Not(BeNil()))
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		g.Eventually(ConsoleCLIDownload(t, ctx, name), TestTimeoutMedium).Should(Not(BeNil()))
 
-		cliDownload = ConsoleCLIDownload(t, name)()
+		cliDownload = ConsoleCLIDownload(t, ctx, name)()
 		links := cliDownload.Spec.Links
 
 		for _, link := range links {
@@ -204,19 +205,19 @@ func TestConsoleCliDownload(t *testing.T) {
 }
 
 func TestInstallSkipDefaultKameletsInstallation(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, ns, "--skip-default-kamelets-setup")).To(Succeed())
-		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
-		g.Expect(KameletList(t, ns)()).Should(BeEmpty())
+		g.Expect(KamelInstallWithIDAndKameletCatalog(t, ctx, operatorID, ns, "--skip-default-kamelets-setup")).To(Succeed())
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		g.Expect(KameletList(t, ctx, ns)()).Should(BeEmpty())
 	})
 }
 
 func TestInstallDebugLogging(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "-z", "debug")).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "-z", "debug")).To(Succeed())
 
-		g.Eventually(OperatorEnvVarValue(t, ns, "LOG_LEVEL"), TestTimeoutLong).Should(Equal("debug"))
+		g.Eventually(OperatorEnvVarValue(t, ctx, ns, "LOG_LEVEL"), TestTimeoutLong).Should(Equal("debug"))
 	})
 }

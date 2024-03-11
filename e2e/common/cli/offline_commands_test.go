@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"io"
 	"testing"
 
@@ -31,24 +32,27 @@ import (
 )
 
 func TestKamelVersionWorksOffline(t *testing.T) {
+	ctx := context.TODO()
 	g := NewWithT(t)
-	g.Expect(Kamel(t, "version", "--kube-config", "non-existent-kubeconfig-file").Execute()).To(Succeed())
+	g.Expect(Kamel(t, ctx, "version", "--kube-config", "non-existent-kubeconfig-file").Execute()).To(Succeed())
 }
 
 func TestKamelHelpOptionWorksOffline(t *testing.T) {
+	ctx := context.TODO()
 	g := NewWithT(t)
 
-	traitCmd := Kamel(t, "run", "Xxx.java", "--help")
+	traitCmd := Kamel(t, ctx, "run", "Xxx.java", "--help")
 	traitCmd.SetOut(io.Discard)
 	g.Expect(traitCmd.Execute()).To(Succeed())
 }
 
 func TestKamelCompletionWorksOffline(t *testing.T) {
+	ctx := context.TODO()
 	g := NewWithT(t)
 
-	bashCmd := Kamel(t, "completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
+	bashCmd := Kamel(t, ctx, "completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
 	bashCmd.SetOut(io.Discard)
-	zshCmd := Kamel(t, "completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
+	zshCmd := Kamel(t, ctx, "completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
 	zshCmd.SetOut(io.Discard)
 	g.Expect(bashCmd.Execute()).To(Succeed())
 	g.Expect(zshCmd.Execute()).To(Succeed())

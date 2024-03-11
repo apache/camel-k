@@ -23,6 +23,7 @@ limitations under the License.
 package traits
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
 
@@ -38,38 +39,34 @@ import (
 func TestOpenAPI(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-traits-openapi"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		openapiContent, err := ioutil.ReadFile("./files/openapi/petstore-api.yaml")
 		require.NoError(t, err)
 		var cmDataProps = make(map[string]string)
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
-		CreatePlainTextConfigmap(t, ns, "my-openapi", cmDataProps)
+		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi", cmDataProps)
 
-		g.Expect(KamelRunWithID(t, operatorID, ns,
-			"--name", "petstore",
-			"--open-api", "configmap:my-openapi",
-			"files/openapi/petstore.groovy",
-		).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.groovy").Execute()).To(Succeed())
 
-		g.Eventually(IntegrationPodPhase(t, ns, "petstore"), TestTimeoutLong).
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "petstore"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
-		g.Eventually(DeploymentWithIntegrationLabel(t, ns, "petstore"), TestTimeoutLong).
+		g.Eventually(DeploymentWithIntegrationLabel(t, ctx, ns, "petstore"), TestTimeoutLong).
 			Should(Not(BeNil()))
 
-		g.Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
+		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-		g.Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
+		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-		g.Eventually(IntegrationLogs(t, ns, "petstore"), TestTimeoutMedium).
+		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

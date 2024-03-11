@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -33,47 +34,47 @@ import (
 )
 
 func TestKamelCLIDelete(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("delete running integration", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Expect(Kamel(t, "delete", "yaml", "-n", ns).Execute()).To(Succeed())
-			g.Eventually(Integration(t, ns, "yaml")).Should(BeNil())
-			g.Eventually(IntegrationPod(t, ns, "yaml"), TestTimeoutLong).Should(BeNil())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Expect(Kamel(t, ctx, "delete", "yaml", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, "yaml")).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "yaml"), TestTimeoutLong).Should(BeNil())
 		})
 
 		t.Run("delete building integration", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Expect(Kamel(t, "delete", "yaml", "-n", ns).Execute()).To(Succeed())
-			g.Eventually(Integration(t, ns, "yaml")).Should(BeNil())
-			g.Eventually(IntegrationPod(t, ns, "yaml"), TestTimeoutLong).Should(BeNil())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "delete", "yaml", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, "yaml")).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "yaml"), TestTimeoutLong).Should(BeNil())
 		})
 
 		t.Run("delete several integrations", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Expect(Kamel(t, "delete", "yaml", "-n", ns).Execute()).To(Succeed())
-			g.Eventually(Integration(t, ns, "yaml")).Should(BeNil())
-			g.Eventually(IntegrationPod(t, ns, "yaml"), TestTimeoutLong).Should(BeNil())
-			g.Expect(Kamel(t, "delete", "java", "-n", ns).Execute()).To(Succeed())
-			g.Eventually(Integration(t, ns, "java")).Should(BeNil())
-			g.Eventually(IntegrationPod(t, ns, "java"), TestTimeoutLong).Should(BeNil())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Expect(Kamel(t, ctx, "delete", "yaml", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, "yaml")).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "yaml"), TestTimeoutLong).Should(BeNil())
+			g.Expect(Kamel(t, ctx, "delete", "java", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, "java")).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "java"), TestTimeoutLong).Should(BeNil())
 		})
 
 		t.Run("delete all integrations", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPodPhase(t, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-			g.Eventually(Integration(t, ns, "yaml")).Should(BeNil())
-			g.Eventually(IntegrationPod(t, ns, "yaml"), TestTimeoutLong).Should(BeNil())
-			g.Eventually(Integration(t, ns, "java")).Should(BeNil())
-			g.Eventually(IntegrationPod(t, ns, "java"), TestTimeoutLong).Should(BeNil())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, "yaml")).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "yaml"), TestTimeoutLong).Should(BeNil())
+			g.Eventually(Integration(t, ctx, ns, "java")).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, "java"), TestTimeoutLong).Should(BeNil())
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

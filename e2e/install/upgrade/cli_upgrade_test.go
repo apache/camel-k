@@ -23,6 +23,7 @@ limitations under the License.
 package upgrade
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
@@ -39,7 +40,7 @@ import (
 
 // WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
 func TestCLIOperatorUpgrade(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		g.Expect(ok).To(BeTrue())
 
@@ -54,7 +55,7 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 
 		if len(CRDs(t)()) > 0 {
 			// Clean up old installation - maybe leftover from another test
-			if err := UninstallAll(t); err != nil && !kerrors.IsNotFound(err) {
+			if err := UninstallAll(t, ctx); err != nil && !kerrors.IsNotFound(err) {
 				t.Error(err)
 				t.FailNow()
 			}
@@ -62,83 +63,74 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		g.Eventually(CRDs(t)).Should(HaveLen(0))
 
 		// Should both install the CRDs and kamel in the given namespace
-		g.Expect(Kamel(
-			t,
-			"install",
-			"-n",
-			ns,
-			"--olm=false",
-			"--force",
-			"--base-image",
-			defaults.BaseImage(),
-		).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "install", "-n", ns, "--olm=false", "--force", "--base-image", defaults.BaseImage()).Execute()).To(Succeed())
 
 		// Check the operator pod is running
-		g.Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 
 		// Check the IntegrationPlatform has been reconciled
-		g.Eventually(PlatformVersion(t, ns), TestTimeoutMedium).Should(Equal(version))
+		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(version))
 
 		// Run the Integration
 		name := RandomizedSuffixName("yaml")
-		g.Expect(Kamel(t, "run", "-n", ns, "--name", name, "files/yaml.yaml").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
+		g.Expect(Kamel(t, ctx, "run", "-n", ns, "--name", name, "files/yaml.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
 
 		// Check the Integration version
-		g.Eventually(IntegrationVersion(t, ns, name)).Should(Equal(version))
+		g.Eventually(IntegrationVersion(t, ctx, ns, name)).Should(Equal(version))
 
 		// Clear the KAMEL_BIN environment variable so that the current version is used from now on
 		g.Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
 
 		// Upgrade the operator by installing the current version
-		g.Expect(Kamel(t, "install", "-n", ns, "--olm=false", "--skip-default-kamelets-setup", "--force", "--operator-image", image, "--base-image", defaults.BaseImage()).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "install", "-n", ns, "--olm=false", "--skip-default-kamelets-setup", "--force", "--operator-image", image, "--base-image", defaults.BaseImage()).Execute()).To(Succeed())
 
 		// Check the operator image is the current built one
-		g.Eventually(OperatorImage(t, ns)).Should(Equal(image))
+		g.Eventually(OperatorImage(t, ctx, ns)).Should(Equal(image))
 		// Check the operator pod is running
-		g.Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		// Check the IntegrationPlatform has been reconciled
-		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		g.Eventually(PlatformVersion(t, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the Integration hasn't been upgraded
-		g.Consistently(IntegrationVersion(t, ns, name), 5*time.Second, 1*time.Second).Should(Equal(version))
+		g.Consistently(IntegrationVersion(t, ctx, ns, name), 5*time.Second, 1*time.Second).Should(Equal(version))
 
 		// Force the Integration upgrade
-		g.Expect(Kamel(t, "rebuild", name, "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "rebuild", name, "-n", ns).Execute()).To(Succeed())
 
 		// A catalog should be created with the new configuration
-		g.Eventually(DefaultCamelCatalogPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
+		g.Eventually(DefaultCamelCatalogPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 		// Check the Integration version has been upgraded
-		g.Eventually(IntegrationVersion(t, ns, name), TestTimeoutMedium).Should(Equal(defaults.Version))
+		g.Eventually(IntegrationVersion(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the previous kit is not garbage collected
-		g.Eventually(Kits(t, ns, KitWithVersion(version))).Should(HaveLen(1))
+		g.Eventually(Kits(t, ctx, ns, KitWithVersion(version))).Should(HaveLen(1))
 		// Check a new kit is created with the current version
-		g.Eventually(Kits(t, ns, KitWithVersion(defaults.Version))).Should(HaveLen(1))
+		g.Eventually(Kits(t, ctx, ns, KitWithVersion(defaults.Version))).Should(HaveLen(1))
 		// Check the new kit is ready
-		g.Eventually(Kits(t, ns, KitWithVersion(defaults.Version), KitWithPhase(v1.IntegrationKitPhaseReady)),
+		g.Eventually(Kits(t, ctx, ns, KitWithVersion(defaults.Version), KitWithPhase(v1.IntegrationKitPhaseReady)),
 			TestTimeoutMedium).Should(HaveLen(1))
 
-		kit := Kits(t, ns, KitWithVersion(defaults.Version))()[0]
+		kit := Kits(t, ctx, ns, KitWithVersion(defaults.Version))()[0]
 
 		// Check the Integration uses the new image
-		g.Eventually(IntegrationKit(t, ns, name), TestTimeoutMedium).Should(Equal(kit.Name))
+		g.Eventually(IntegrationKit(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(kit.Name))
 		// Check the Integration Pod uses the new kit
-		g.Eventually(IntegrationPodImage(t, ns, name)).Should(Equal(kit.Status.Image))
+		g.Eventually(IntegrationPodImage(t, ctx, ns, name)).Should(Equal(kit.Status.Image))
 
 		// Check the Integration runs correctly
-		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Clean up
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		// Delete Integration Platform as it does not get removed with uninstall and might cause next tests to fail
-		DeletePlatform(t, ns)()
-		g.Expect(Kamel(t, "uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
+		DeletePlatform(t, ctx, ns)()
+		g.Expect(Kamel(t, ctx, "uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
 	})
 }

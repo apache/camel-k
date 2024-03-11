@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -43,20 +44,21 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Test setup failed! - %s\n", message)
 	})
 
+	ctx := context.TODO()
 	var t *testing.T
 
 	g.Expect(TestClient(t)).ShouldNot(BeNil())
 
 	// Install global operator for tests in this package, all tests must use this operatorID
-	g.Expect(NewNamedTestNamespace(t, operatorNS, false)).ShouldNot(BeNil())
-	g.Expect(CopyCamelCatalog(t, operatorNS, operatorID)).To(Succeed())
-	g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, operatorNS, "--global", "--force")).To(Succeed())
-	g.Eventually(SelectedPlatformPhase(t, operatorNS, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+	g.Expect(NewNamedTestNamespace(t, ctx, operatorNS, false)).ShouldNot(BeNil())
+	g.Expect(CopyCamelCatalog(t, ctx, operatorNS, operatorID)).To(Succeed())
+	g.Expect(KamelInstallWithIDAndKameletCatalog(t, ctx, operatorID, operatorNS, "--global", "--force")).To(Succeed())
+	g.Eventually(SelectedPlatformPhase(t, ctx, operatorNS, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 	exitCode := m.Run()
 
-	g.Expect(UninstallFromNamespace(t, operatorNS))
-	g.Expect(DeleteNamespace(t, operatorNS)).To(Succeed())
+	g.Expect(UninstallFromNamespace(t, ctx, operatorNS))
+	g.Expect(DeleteNamespace(t, ctx, operatorNS)).To(Succeed())
 
 	os.Exit(exitCode)
 }

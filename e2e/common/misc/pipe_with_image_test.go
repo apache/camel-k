@@ -23,6 +23,7 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -37,71 +38,53 @@ import (
 func TestPipeWithImage(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-pipe-image"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		bindingID := "with-image-binding"
 
 		t.Run("run with initial image", func(t *testing.T) {
 			expectedImage := "docker.io/jmalloc/echo-server:0.3.2"
 
-			g.Expect(KamelBindWithID(t, operatorID, ns,
-				"my-own-timer-source",
-				"my-own-log-sink",
-				"--annotation", "trait.camel.apache.org/container.image="+expectedImage,
-				"--annotation", "trait.camel.apache.org/jvm.enabled=false",
-				"--annotation", "trait.camel.apache.org/kamelets.enabled=false",
-				"--annotation", "trait.camel.apache.org/dependencies.enabled=false",
-				"--annotation", "test=1",
-				"--name", bindingID,
-			).Execute()).To(Succeed())
+			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink", "--annotation", "trait.camel.apache.org/container.image="+expectedImage, "--annotation", "trait.camel.apache.org/jvm.enabled=false", "--annotation", "trait.camel.apache.org/kamelets.enabled=false", "--annotation", "trait.camel.apache.org/dependencies.enabled=false", "--annotation", "test=1", "--name", bindingID).Execute()).To(Succeed())
 
-			g.Eventually(IntegrationGeneration(t, ns, bindingID)).
+			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			g.Eventually(Integration(t, ns, bindingID)).Should(WithTransform(Annotations, And(
+			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations, And(
 				HaveKeyWithValue("test", "1"),
 				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage),
 			)))
-			g.Eventually(IntegrationStatusImage(t, ns, bindingID)).
+			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
-			g.Eventually(IntegrationPodPhase(t, ns, bindingID), TestTimeoutLong).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutLong).
 				Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPodImage(t, ns, bindingID)).
+			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
 		})
 
 		t.Run("run with new image", func(t *testing.T) {
 			expectedImage := "docker.io/jmalloc/echo-server:0.3.3"
 
-			g.Expect(KamelBindWithID(t, operatorID, ns,
-				"my-own-timer-source",
-				"my-own-log-sink",
-				"--annotation", "trait.camel.apache.org/container.image="+expectedImage,
-				"--annotation", "trait.camel.apache.org/jvm.enabled=false",
-				"--annotation", "trait.camel.apache.org/kamelets.enabled=false",
-				"--annotation", "trait.camel.apache.org/dependencies.enabled=false",
-				"--annotation", "test=2",
-				"--name", bindingID,
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationGeneration(t, ns, bindingID)).
+			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink", "--annotation", "trait.camel.apache.org/container.image="+expectedImage, "--annotation", "trait.camel.apache.org/jvm.enabled=false", "--annotation", "trait.camel.apache.org/kamelets.enabled=false", "--annotation", "trait.camel.apache.org/dependencies.enabled=false", "--annotation", "test=2", "--name", bindingID).Execute()).To(Succeed())
+			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			g.Eventually(Integration(t, ns, bindingID)).Should(WithTransform(Annotations, And(
+			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations, And(
 				HaveKeyWithValue("test", "2"),
 				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage),
 			)))
-			g.Eventually(IntegrationStatusImage(t, ns, bindingID)).
+			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
-			g.Eventually(IntegrationPodPhase(t, ns, bindingID), TestTimeoutLong).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutLong).
 				Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationPodImage(t, ns, bindingID)).
+			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

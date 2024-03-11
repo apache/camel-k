@@ -23,6 +23,7 @@ limitations under the License.
 package support
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -53,7 +54,7 @@ func init() {
 						Name:      nexusService,
 					}
 
-					if err := TestClient(nil).Get(TestContext, key, &svc); err != nil {
+					if err := TestClient(nil).Get(context.TODO(), key, &svc); err != nil {
 						svcExists = false
 					}
 					svcChecked = true

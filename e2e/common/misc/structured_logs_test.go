@@ -23,6 +23,7 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -37,22 +38,20 @@ import (
 func TestStructuredLogs(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-structured-logs"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-t", "logging.format=json").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "logging.format=json").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-		pod := OperatorPod(t, ns)()
+		pod := OperatorPod(t, ctx, ns)()
 		g.Expect(pod).NotTo(BeNil())
 
 		// pod.Namespace could be different from ns if using global operator
@@ -60,15 +59,15 @@ func TestStructuredLogs(t *testing.T) {
 		logOptions := &corev1.PodLogOptions{
 			Container: "camel-k-operator",
 		}
-		logs, err := StructuredLogs(t, pod.Namespace, pod.Name, logOptions, false)
+		logs, err := StructuredLogs(t, ctx, pod.Namespace, pod.Name, logOptions, false)
 		g.Expect(err).To(BeNil())
 		g.Expect(logs).NotTo(BeEmpty())
 
-		it := Integration(t, ns, name)()
+		it := Integration(t, ctx, ns, name)()
 		g.Expect(it).NotTo(BeNil())
-		build := Build(t, IntegrationKitNamespace(t, ns, name)(), IntegrationKit(t, ns, name)())()
+		build := Build(t, ctx, IntegrationKitNamespace(t, ctx, ns, name)(), IntegrationKit(t, ctx, ns, name)())()
 		g.Expect(build).NotTo(BeNil())
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

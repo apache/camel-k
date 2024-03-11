@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -32,10 +33,11 @@ import (
 )
 
 func TestKamelCLIVersion(t *testing.T) {
+	ctx := context.TODO()
 	g := NewWithT(t)
 
 	t.Run("check version correctness", func(t *testing.T) {
-		version := GetOutputString(Kamel(t, "version"))
+		version := GetOutputString(Kamel(t, ctx, "version"))
 		g.Expect(version).To(ContainSubstring(defaults.Version))
 	})
 }

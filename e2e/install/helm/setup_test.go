@@ -23,6 +23,7 @@ limitations under the License.
 package helm
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -42,7 +43,7 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		ExpectExecSucceed(t, g, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
 		ExpectExecSucceed(t, g, Make(t, "release-helm"))
 		ExpectExecSucceed(t, g,
@@ -60,10 +61,10 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 			),
 		)
 
-		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 
 		// Check if restricted security context has been applyed
-		operatorPod := OperatorPod(t, ns)()
+		operatorPod := OperatorPod(t, ctx, ns)()
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
@@ -72,9 +73,9 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 		//Test a simple route
 		t.Run("simple route", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			g.Expect(KamelRun(t, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
 		ExpectExecSucceed(t, g,
@@ -87,6 +88,6 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 			),
 		)
 
-		g.Eventually(OperatorPod(t, ns)).Should(BeNil())
+		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
 	})
 }
