@@ -64,8 +64,17 @@ func (t *registryTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil, nil
 	}
-
-	return e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted), nil, nil
+	enabled := e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted)
+	if enabled {
+		condition := NewIntegrationCondition(
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			traitConfigurationReason,
+			"Registry trait is deprecated. It may be removed in future version. Read documentation to find alternatives (likely JVM trait).",
+		)
+		return true, condition, nil
+	}
+	return false, nil, nil
 }
 
 func (t *registryTrait) Apply(e *Environment) error {

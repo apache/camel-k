@@ -37,8 +37,8 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 	cmd := cobra.Command{
 		Use:     "reset",
 		Short:   "Reset the Camel K installation",
-		Long:    `Reset the Camel K installation by deleting everything except current platform configuration.`,
-		PreRunE: decode(&options),
+		Long:    `Reset the Camel K installation by deleting everything except current integration profile.`,
+		PreRunE: decode(&options, options.Flags),
 		Run:     options.reset,
 	}
 

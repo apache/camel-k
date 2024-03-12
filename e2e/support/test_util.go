@@ -23,6 +23,7 @@ limitations under the License.
 package support
 
 import (
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"os"
 	"os/exec"
 	"strings"
@@ -33,6 +34,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	"github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -56,7 +58,7 @@ func GetEnvOrDefault(key string, deflt string) string {
 	}
 }
 
-func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
+func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
 	t.Helper()
 
 	var cmdOut strings.Builder
@@ -69,15 +71,16 @@ func ExpectExecSucceed(t *testing.T, command *exec.Cmd) {
 		}
 	}()
 
+	RegisterTestingT(t)
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
-	Eventually(session).Should(gexec.Exit(0))
-	assert.NoError(t, err)
+	g.Eventually(session).Should(gexec.Exit(0))
+	require.NoError(t, err)
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
-// Expect a command error with an exit code of 1
-func ExpectExecError(t *testing.T, command *exec.Cmd) {
+// ExpectExecError Expect a command error with an exit code of 1
+func ExpectExecError(t *testing.T, g *WithT, command *exec.Cmd) {
 	t.Helper()
 
 	var cmdOut strings.Builder
@@ -92,21 +95,30 @@ func ExpectExecError(t *testing.T, command *exec.Cmd) {
 
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
 	session.Wait()
-	Eventually(session).ShouldNot(gexec.Exit(0))
-	assert.NoError(t, err)
+	g.Eventually(session).ShouldNot(gexec.Exit(0))
+	require.NoError(t, err)
 	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
-// Clean up the cluster ready for the next set of tests
-func Cleanup() {
+// Cleanup Clean up the cluster ready for the next set of tests
+func Cleanup(t *testing.T) {
 	// Remove the locally installed operator
-	UninstallAll()
+	if err := UninstallAll(t); err != nil {
+		log.Error(err, "Failed to uninstall Camel K")
+	}
 
 	// Ensure the CRDs & ClusterRoles are reinstalled if not already
-	Kamel("install", "--olm=false", "--cluster-setup").Execute()
+	if err := Kamel(t, "install", "--olm=false", "--cluster-setup").Execute(); err != nil {
+		log.Error(err, "Failed to perform Camel K cluster setup")
+	}
 }
 
-// Removes all items
-func UninstallAll() {
-	Kamel("uninstall", "--olm=false", "--all").Execute()
+// UninstallAll Removes all items
+func UninstallAll(t *testing.T) error {
+	return Kamel(t, "uninstall", "--olm=false", "--all").Execute()
+}
+
+// UninstallFromNamespace Removes operator from given namespace
+func UninstallFromNamespace(t *testing.T, ns string) error {
+	return Kamel(t, "uninstall", "--olm=false", "-n", ns).Execute()
 }

@@ -41,6 +41,7 @@ import (
 )
 
 const (
+	kameletsTraitID             = "kamelets"
 	contentKey                  = "content"
 	KameletLocationProperty     = "camel.component.kamelet.location"
 	kameletLabel                = "camel.apache.org/kamelet"
@@ -107,10 +108,6 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 			return err
 		}
 	}
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return t.addConfigurationSecrets(e)
-	}
-
 	return nil
 }
 
@@ -261,7 +258,9 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 	return nil
 }
 
-func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
+// Deprecated: use explicit secret configuration instead.
+func (t *kameletsTrait) listConfigurationSecrets(e *Environment) ([]string, error) {
+	listConfigurationSecrets := make([]string, 0)
 	for _, k := range t.getConfigurationKeys() {
 		options := metav1.ListOptions{
 			LabelSelector: fmt.Sprintf("%s=%s", kameletLabel, k.kamelet),
@@ -271,21 +270,16 @@ func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
 		}
 		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(e.Ctx, options)
 		if err != nil {
-			return err
+			return nil, err
 		}
-
 		for _, item := range secrets.Items {
 			if item.Labels != nil && item.Labels[kameletConfigurationLabel] != k.configurationID {
 				continue
 			}
-
-			e.Integration.Status.AddConfigurationsIfMissing(v1.ConfigurationSpec{
-				Type:  "secret",
-				Value: item.Name,
-			})
+			listConfigurationSecrets = append(listConfigurationSecrets, item.Name)
 		}
 	}
-	return nil
+	return listConfigurationSecrets, nil
 }
 
 func (t *kameletsTrait) getKameletKeys() []string {
@@ -374,12 +368,12 @@ func initializeConfigmapKameletSource(source v1.SourceSpec, hash, name, namespac
 				"camel.apache.org/kamelet":     kamName,
 			},
 			Annotations: map[string]string{
-				"camel.apache.org/source.language":    string(source.Language),
-				"camel.apache.org/source.name":        name,
-				"camel.apache.org/source.compression": strconv.FormatBool(source.Compression),
-				"camel.apache.org/source.generated":   "true",
-				"camel.apache.org/source.type":        string(source.Type),
-				"camel.apache.org/source.digest":      hash,
+				sourceLanguageAnnotation:            string(source.Language),
+				sourceNameAnnotation:                name,
+				sourceCompressionAnnotation:         strconv.FormatBool(source.Compression),
+				"camel.apache.org/source.generated": "true",
+				"camel.apache.org/source.type":      string(source.Type),
+				"camel.apache.org/source.digest":    hash,
 			},
 		},
 		Data: map[string]string{

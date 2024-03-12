@@ -37,7 +37,7 @@ func newKitGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitGetComman
 		Use:     "get",
 		Short:   "Get defined Integration Kit",
 		Long:    `Get defined Integration Kit.`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err

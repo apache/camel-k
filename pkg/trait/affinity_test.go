@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,7 +37,7 @@ func TestConfigureAffinityTraitDoesSucceed(t *testing.T) {
 
 	assert.True(t, configured)
 	assert.Nil(t, condition)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
@@ -48,7 +49,7 @@ func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 
 	assert.False(t, configured)
 	assert.Nil(t, condition)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestConfigureDisabledAffinityTraitFails(t *testing.T) {
@@ -58,7 +59,7 @@ func TestConfigureDisabledAffinityTraitFails(t *testing.T) {
 	configured, condition, err := affinityTrait.Configure(environment)
 
 	assert.False(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 }
 
@@ -68,7 +69,7 @@ func TestApplyAffinityMissingDeployment(t *testing.T) {
 	environment := createNominalMissingDeploymentTraitTest()
 	err := tolerationTrait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestApplyEmptyAffinityLabelsDoesSucceed(t *testing.T) {
@@ -89,7 +90,7 @@ func testApplyEmptyAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait,
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, affinity)
 }
 
@@ -112,7 +113,7 @@ func testApplyNodeAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, 
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, podSpec.Affinity.NodeAffinity)
 	nodeAffinity := podSpec.Affinity.NodeAffinity
 	assert.NotNil(t, nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[0].MatchExpressions[0])
@@ -142,7 +143,7 @@ func testApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrai
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, podSpec.Affinity.PodAntiAffinity)
 	podAntiAffinity := podSpec.Affinity.PodAntiAffinity
 	assert.NotNil(t, podAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0])
@@ -177,7 +178,7 @@ func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, e
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, podSpec.Affinity.PodAffinity)
 	podAffinity := podSpec.Affinity.PodAffinity
 	assert.NotNil(t, podAffinity.RequiredDuringSchedulingIgnoredDuringExecution[0].LabelSelector.MatchExpressions[0])

@@ -33,7 +33,7 @@ import (
 )
 
 func TestDuplicateParameters(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewWithT(t)
 
 	ctx, cancel := context.WithCancel(TestContext)
 	defer cancel()
@@ -52,5 +52,5 @@ func TestDuplicateParameters(t *testing.T) {
 
 	outParams :=
 		`"traits":{"affinity":{"enabled":true},"camel":{"properties":["prop1 = true","prop2 = true","foo = bar"]},"pull-secret":{"enabled":true},"addons":{"telemetry":{"enabled":true}}}`
-	Expect(commOutput).To(ContainSubstring(outParams))
+	g.Expect(commOutput).To(ContainSubstring(outParams))
 }

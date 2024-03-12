@@ -30,5 +30,5 @@ var TelemetryLocators []TelemetryLocator
 
 // TelemetryLocator is able to find the address of an available telemetry OTLP endpoint.
 type TelemetryLocator interface {
-	FindEndpoint(context.Context, client.Client, log.Logger, *trait.Environment) (string, error)
+	FindEndpoint(ctx context.Context, c client.Client, logger log.Logger, env *trait.Environment) (string, error)
 }

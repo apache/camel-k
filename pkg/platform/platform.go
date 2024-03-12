@@ -21,6 +21,7 @@ import (
 	"context"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -54,57 +55,58 @@ func LookupForPlatformName(ctx context.Context, c k8sclient.Reader, name string)
 }
 
 func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object) (*v1.IntegrationPlatform, error) {
-	return GetOrFindForResource(ctx, c, o, true)
+	var ip *v1.IntegrationPlatform
+	var err error
+
+	if selectedPlatform, ok := o.GetAnnotations()[v1.PlatformSelectorAnnotation]; ok {
+		ip, err = getOrFindAny(ctx, c, o.GetNamespace(), selectedPlatform)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if ip == nil {
+		if it, ok := o.(*v1.Integration); ok {
+			ip, err = getOrFindAny(ctx, c, it.Namespace, it.Status.Platform)
+			if err != nil {
+				return nil, err
+			}
+		} else if ik, ok := o.(*v1.IntegrationKit); ok {
+			ip, err = getOrFindAny(ctx, c, ik.Namespace, ik.Status.Platform)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	if ip == nil {
+		ip, err = findAny(ctx, c, o.GetNamespace())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return ip, nil
 }
 
-func GetOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool) (*v1.IntegrationPlatform, error) {
-	return getOrFindForResource(ctx, c, o, active, false)
-}
-
-func GetOrFindLocalForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool) (*v1.IntegrationPlatform, error) {
-	return getOrFindForResource(ctx, c, o, active, true)
+func GetForName(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
+	return getOrFindAny(ctx, c, namespace, name)
 }
 
 func GetOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
-	return findLocal(ctx, c, namespace, true)
-}
-
-func getOrFindForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object, active bool, local bool) (*v1.IntegrationPlatform, error) {
-	if selectedPlatform, ok := o.GetAnnotations()[v1.PlatformSelectorAnnotation]; ok {
-		return get(ctx, c, o.GetNamespace(), selectedPlatform)
-	}
-
-	if it, ok := o.(*v1.Integration); ok {
-		return getOrFind(ctx, c, it.Namespace, it.Status.Platform, active, local)
-	} else if ik, ok := o.(*v1.IntegrationKit); ok {
-		return getOrFind(ctx, c, ik.Namespace, ik.Status.Platform, active, local)
-	}
-	return find(ctx, c, o.GetNamespace(), active, local)
-}
-
-func getOrFind(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool, local bool) (*v1.IntegrationPlatform, error) {
-	if local {
-		return getOrFindLocal(ctx, c, namespace, name, active)
-	}
-	return getOrFindAny(ctx, c, namespace, name, active)
+	return findLocal(ctx, c, namespace)
 }
 
 // getOrFindAny returns the named platform or any other platform in the local namespace or the global one.
-func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
+func getOrFindAny(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
 	if name != "" {
-		return get(ctx, c, namespace, name)
+		pl, err := get(ctx, c, namespace, name)
+		if pl != nil {
+			return pl, err
+		}
 	}
 
-	return findAny(ctx, c, namespace, active)
-}
-
-// getOrFindLocal returns the named platform or any other platform in the local namespace.
-func getOrFindLocal(ctx context.Context, c k8sclient.Reader, namespace string, name string, active bool) (*v1.IntegrationPlatform, error) {
-	if name != "" {
-		return get(ctx, c, namespace, name)
-	}
-
-	return findLocal(ctx, c, namespace, active)
+	return findAny(ctx, c, namespace)
 }
 
 // get returns the given platform in the given namespace or the global one.
@@ -119,72 +121,59 @@ func get(ctx context.Context, c k8sclient.Reader, namespace string, name string)
 	return p, err
 }
 
-func find(ctx context.Context, c k8sclient.Reader, namespace string, active bool, local bool) (*v1.IntegrationPlatform, error) {
-	if local {
-		return findLocal(ctx, c, namespace, active)
-	}
-	return findAny(ctx, c, namespace, active)
-}
-
 // findAny returns the currently installed platform or any platform existing in local or operator namespace.
-func findAny(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
-	p, err := findLocal(ctx, c, namespace, active)
+func findAny(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
+	p, err := findLocal(ctx, c, namespace)
 	if err != nil && k8serrors.IsNotFound(err) {
 		operatorNamespace := GetOperatorNamespace()
 		if operatorNamespace != "" && operatorNamespace != namespace {
-			p, err = findLocal(ctx, c, operatorNamespace, active)
+			p, err = findLocal(ctx, c, operatorNamespace)
 		}
 	}
 	return p, err
 }
 
 // findLocal returns the currently installed platform or any platform existing in local namespace.
-func findLocal(ctx context.Context, c k8sclient.Reader, namespace string, active bool) (*v1.IntegrationPlatform, error) {
-	log.Debug("Finding available platforms")
+func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
+	log.Debugf("Finding available platforms in namespace %s", namespace)
 
-	lst, err := ListPrimaryPlatforms(ctx, c, namespace)
+	operatorNamespace := GetOperatorNamespace()
+	if namespace == operatorNamespace {
+		operatorID := defaults.OperatorID()
+		if operatorID != "" {
+			if p, err := get(ctx, c, operatorNamespace, operatorID); err == nil {
+				return p, nil
+			}
+		}
+	}
+
+	lst, err := ListPlatforms(ctx, c, namespace)
 	if err != nil {
 		return nil, err
 	}
 
+	var fallback *v1.IntegrationPlatform
 	for _, platform := range lst.Items {
 		platform := platform // pin
 		if IsActive(&platform) {
-			log.Debugf("Found active local integration platform %s", platform.Name)
+			log.Debugf("Found active integration platform %s", platform.Name)
 			return &platform, nil
+		} else {
+			fallback = &platform
 		}
 	}
 
-	if !active && len(lst.Items) > 0 {
-		// does not require the platform to be active, just return one if present
-		res := lst.Items[0]
-		log.Debugf("Found local integration platform %s", res.Name)
-		return &res, nil
+	if fallback != nil {
+		log.Debugf("Found inactive integration platform %s", fallback.Name)
+		return fallback, nil
 	}
 
-	log.Debugf("Not found a local integration platform")
+	log.Debugf("Unable to find integration platform in namespace %s", namespace)
 	return nil, k8serrors.NewNotFound(v1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 
-// ListPrimaryPlatforms returns all non-secondary platforms installed in a given namespace (only one will be active).
-func ListPrimaryPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
-	lst, err := ListAllPlatforms(ctx, c, namespace)
-	if err != nil {
-		return nil, err
-	}
-
-	filtered := v1.NewIntegrationPlatformList()
-	for i := range lst.Items {
-		pl := lst.Items[i]
-		if !IsSecondary(&pl) {
-			filtered.Items = append(filtered.Items, pl)
-		}
-	}
-	return &filtered, nil
-}
-
-// ListAllPlatforms returns all platforms installed in a given namespace.
-func ListAllPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
+// ListPlatforms returns all platforms installed in a given namespace.
+func ListPlatforms(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatformList, error) {
 	lst := v1.NewIntegrationPlatformList()
 	if err := c.List(ctx, &lst, k8sclient.InNamespace(namespace)); err != nil {
 		return nil, err
@@ -194,15 +183,7 @@ func ListAllPlatforms(ctx context.Context, c k8sclient.Reader, namespace string)
 
 // IsActive determines if the given platform is being used.
 func IsActive(p *v1.IntegrationPlatform) bool {
-	return p.Status.Phase != "" && p.Status.Phase != v1.IntegrationPlatformPhaseDuplicate
-}
-
-// IsSecondary determines if the given platform is marked as secondary.
-func IsSecondary(p *v1.IntegrationPlatform) bool {
-	if l, ok := p.Annotations[v1.SecondaryPlatformAnnotation]; ok && l == "true" {
-		return true
-	}
-	return false
+	return p.Status.Phase != v1.IntegrationPlatformPhaseNone
 }
 
 // GetTraitProfile returns the current profile of the platform (if present) or returns the default one for the cluster.

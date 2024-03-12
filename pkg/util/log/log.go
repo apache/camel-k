@@ -43,7 +43,7 @@ func InitForCmd() {
 
 // Injectable identifies objects that can receive a Logger.
 type Injectable interface {
-	InjectLogger(Logger)
+	InjectLogger(logger Logger)
 }
 
 // Logger --.
@@ -127,6 +127,16 @@ func (l Logger) ForIntegrationKit(target *v1.IntegrationKit) Logger {
 
 // ForIntegrationPlatform --.
 func (l Logger) ForIntegrationPlatform(target *v1.IntegrationPlatform) Logger {
+	return l.WithValues(
+		"api-version", target.APIVersion,
+		"kind", target.Kind,
+		"ns", target.Namespace,
+		"name", target.Name,
+	)
+}
+
+// ForIntegrationProfile --.
+func (l Logger) ForIntegrationProfile(target *v1.IntegrationProfile) Logger {
 	return l.WithValues(
 		"api-version", target.APIVersion,
 		"kind", target.Kind,

@@ -23,13 +23,14 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestKameletBundleSingle(t *testing.T) {
 	kb := newKameletBundle()
 	kb.add(kamelet("my-ns", "test"))
 	cmBundle, err := kb.toConfigmaps("my-it", "my-ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cmBundle)
 	assert.Len(t, cmBundle, 1)
 	assert.Equal(t, "my-ns", cmBundle[0].Namespace)
@@ -47,7 +48,7 @@ func TestKameletBundleMultiKameletsSingleConfigmap(t *testing.T) {
 	kb.add(kamelet("default", "test5"))
 	kb.add(kamelet("default", "test6"))
 	cmBundle, err := kb.toConfigmaps("my-it", "default")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cmBundle)
 	assert.Len(t, cmBundle, 1)
 	assert.Equal(t, "default", cmBundle[0].Namespace)
@@ -68,7 +69,7 @@ func TestKameletBundleMultiKameletsMultiConfigmap(t *testing.T) {
 		kb.add(kamelet("default", fmt.Sprintf("test%d", i)))
 	}
 	cmBundle, err := kb.toConfigmaps("my-it", "default")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cmBundle)
 	assert.Len(t, cmBundle, 2)
 	assert.Equal(t, "default", cmBundle[0].Namespace)

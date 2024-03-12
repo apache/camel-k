@@ -33,6 +33,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/property"
 )
 
+const (
+	CamelPropertiesType = "camel-properties"
+)
+
 type camelTrait struct {
 	BasePlatformTrait
 	traitv1.CamelTrait `property:",squash"`
@@ -172,7 +176,7 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 					Labels: map[string]string{
 						v1.IntegrationLabel:                e.Integration.Name,
 						"camel.apache.org/properties.type": "user",
-						kubernetes.ConfigMapTypeLabel:      "camel-properties",
+						kubernetes.ConfigMapTypeLabel:      CamelPropertiesType,
 					},
 				},
 				Data: map[string]string{
@@ -200,10 +204,10 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 					v1.IntegrationLabel: e.Integration.Name,
 				},
 				Annotations: map[string]string{
-					"camel.apache.org/source.language":    string(s.InferLanguage()),
-					"camel.apache.org/source.loader":      s.Loader,
-					"camel.apache.org/source.name":        s.Name,
-					"camel.apache.org/source.compression": strconv.FormatBool(s.Compression),
+					sourceLanguageAnnotation:    string(s.InferLanguage()),
+					sourceLoaderAnnotation:      s.Loader,
+					sourceNameAnnotation:        s.Name,
+					sourceCompressionAnnotation: strconv.FormatBool(s.Compression),
 				},
 			},
 			Data: map[string]string{
@@ -224,6 +228,9 @@ func determineRuntimeVersion(e *Environment) (string, error) {
 	}
 	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
 		return e.IntegrationKit.Status.RuntimeVersion, nil
+	}
+	if e.IntegrationProfile != nil && e.IntegrationProfile.Status.Build.RuntimeVersion != "" {
+		return e.IntegrationProfile.Status.Build.RuntimeVersion, nil
 	}
 	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
 		return e.Platform.Status.Build.RuntimeVersion, nil

@@ -25,6 +25,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -34,7 +35,7 @@ import (
 func TestJibMavenProfile(t *testing.T) {
 	profile, err := JibMavenProfile("3.3.0", "0.2.0")
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, strings.HasPrefix(profile, "<profile>"))
 	assert.True(t, strings.HasSuffix(profile, "</profile>"))
 	assert.True(t, strings.Contains(profile, "<version>3.3.0</version>"))
@@ -45,7 +46,7 @@ func TestJibMavenProfile(t *testing.T) {
 func TestJibMavenProfileDefaultValues(t *testing.T) {
 	profile, err := JibMavenProfile("", "")
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, strings.HasPrefix(profile, "<profile>"))
 	assert.True(t, strings.HasSuffix(profile, "</profile>"))
 	assert.True(t, strings.Contains(profile, "<version>"+JibMavenPluginVersionDefault+"</version>"))
@@ -72,7 +73,7 @@ func TestJibConfigMap(t *testing.T) {
 	}
 
 	err := CreateProfileConfigmap(ctx, c, kit, "<profile>awesomeprofile</profile>")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	key := ctrl.ObjectKey{
 		Namespace: "ns",
@@ -80,8 +81,8 @@ func TestJibConfigMap(t *testing.T) {
 	}
 	cm := &corev1.ConfigMap{}
 	err = c.Get(ctx, key, cm)
-	assert.NoError(t, err)
-	assert.Equal(t, cm.OwnerReferences[0].Name, "test")
+	require.NoError(t, err)
+	assert.Equal(t, "test", cm.OwnerReferences[0].Name)
 	assert.Equal(t, cm.OwnerReferences[0].UID, types.UID("8dc44a2b-063c-490e-ae02-1fab285ac70a"))
 	assert.NotNil(t, cm.Data["profile.xml"])
 	assert.True(t, strings.Contains(cm.Data["profile.xml"], "awesome"))

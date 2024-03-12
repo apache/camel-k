@@ -36,49 +36,52 @@ import (
 )
 
 func TestBuilderTimeout(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformConditionStatus(ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 
-		pl := Platform(ns)()
+		pl := Platform(t, ns)()
 		// set a short timeout to simulate the build timeout
 		pl.Spec.Build.Timeout = &metav1.Duration{
 			Duration: 10 * time.Second,
 		}
-		TestClient().Update(TestContext, pl)
-		Eventually(Platform(ns)).ShouldNot(BeNil())
-		Eventually(PlatformTimeout(ns)).Should(Equal(
+		TestClient(t).Update(TestContext, pl)
+		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformTimeout(t, ns)).Should(Equal(
 			&metav1.Duration{
 				Duration: 10 * time.Second,
 			},
 		))
 
-		operatorPod := OperatorPod(ns)()
+		operatorPod := OperatorPod(t, ns)()
 		operatorPodImage := operatorPod.Spec.Containers[0].Image
 
 		t.Run("run yaml", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml",
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml",
 				"--name", name,
 				"-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
-			Eventually(IntegrationPhase(ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-			integrationKitName := IntegrationKit(ns, name)()
+			g.Eventually(IntegrationPhase(t, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+			integrationKitName := IntegrationKit(t, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			Eventually(BuilderPodPhase(ns, builderKitName)).Should(Equal(corev1.PodPending))
-			Eventually(BuildPhase(ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
-			Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
-			Eventually(BuilderPod(ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
+			g.Eventually(BuilderPodPhase(t, ns, builderKitName)).Should(Equal(corev1.PodPending))
+			g.Eventually(BuildPhase(t, ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
+			g.Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
+			g.Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
 			// After a few minutes (5 max retries), this has to be in error state
-			Eventually(BuildPhase(ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
-			Eventually(IntegrationPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
-			Eventually(BuildFailureRecovery(ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
-			Eventually(BuilderPodPhase(ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
+			g.Eventually(BuildPhase(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
+			g.Eventually(IntegrationPhase(t, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(BuildFailureRecovery(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
+			g.Eventually(BuilderPodPhase(t, ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
 		})
 	})
 }

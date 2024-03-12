@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -37,7 +38,7 @@ func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
 	assert.Nil(t, condition)
@@ -57,7 +58,7 @@ func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.False(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, condition)
 	assert.Equal(t, expectedCondition, condition)
 }
@@ -69,7 +70,7 @@ func TestConfigureIngressTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
 }
@@ -81,7 +82,7 @@ func TestConfigureAutoIngressTraitWithUserServiceDoesSucceed(t *testing.T) {
 	configured, condition, err := ingressTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.Len(t, environment.Integration.Status.Conditions, 0)
 }
@@ -92,7 +93,7 @@ func TestApplyIngressTraitWithoutUserServiceDoesNotSucceed(t *testing.T) {
 
 	err := ingressTrait.Apply(environment)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "cannot Apply ingress trait: no target service", err.Error())
 	assert.Len(t, environment.Resources.Items(), 0)
 }
@@ -102,7 +103,7 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 
 	err := ingressTrait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
 	assert.Len(t, environment.Resources.Items(), 2)

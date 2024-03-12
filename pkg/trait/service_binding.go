@@ -37,6 +37,21 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/reference"
 )
 
+const (
+	serviceBindingMountPointAnnotation = "camel.apache.org/serviceBinding.mount-point"
+	serviceBindingLabel                = "camel.apache.org/serviceBinding"
+)
+
+var handlers = []pipeline.Handler{
+	pipeline.HandlerFunc(collect.PreFlight),
+	pipeline.HandlerFunc(collect.ProvisionedService),
+	pipeline.HandlerFunc(collect.BindingDefinitions),
+	pipeline.HandlerFunc(collect.BindingItems),
+	pipeline.HandlerFunc(collect.OwnedResources),
+	pipeline.HandlerFunc(mapping.Handle),
+	pipeline.HandlerFunc(naming.Handle),
+}
+
 type serviceBindingTrait struct {
 	BaseTrait
 	traitv1.ServiceBindingTrait `property:",squash"`
@@ -68,17 +83,15 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 		return err
 	}
 	// let the SBO retry policy be controlled by Camel-k
-	err = process(ctx, getHandlers())
+	err = process(ctx, handlers)
 	if err != nil {
 		return err
 	}
 
-	secret := createSecret(ctx, e.Integration.Namespace)
+	secret := createSecret(ctx, e.Integration.Namespace, e.Integration.Name)
 	if secret != nil {
 		e.Resources.Add(secret)
 		e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
-		e.ApplicationProperties["SERVICE_BINDING_ROOT"] = camel.ServiceBindingsMountPath
-		e.ServiceBindingSecret = secret.GetName()
 	}
 	return nil
 }
@@ -164,19 +177,7 @@ func createServiceBinding(e *Environment, services []sb.Service, name string) *s
 	}
 }
 
-func getHandlers() []pipeline.Handler {
-	return []pipeline.Handler{
-		pipeline.HandlerFunc(collect.PreFlight),
-		pipeline.HandlerFunc(collect.ProvisionedService),
-		pipeline.HandlerFunc(collect.BindingDefinitions),
-		pipeline.HandlerFunc(collect.BindingItems),
-		pipeline.HandlerFunc(collect.OwnedResources),
-		pipeline.HandlerFunc(mapping.Handle),
-		pipeline.HandlerFunc(naming.Handle),
-	}
-}
-
-func createSecret(ctx pipeline.Context, ns string) *corev1.Secret {
+func createSecret(ctx pipeline.Context, ns, integrationName string) *corev1.Secret {
 	name := ctx.BindingSecretName()
 	items := ctx.BindingItems()
 	data := items.AsMap()
@@ -191,6 +192,13 @@ func createSecret(ctx pipeline.Context, ns string) *corev1.Secret {
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: ns,
 			Name:      name,
+			Labels: map[string]string{
+				v1.IntegrationLabel: integrationName,
+				serviceBindingLabel: "true",
+			},
+			Annotations: map[string]string{
+				serviceBindingMountPointAnnotation: camel.ServiceBindingsMountPath,
+			},
 		},
 		StringData: data,
 	}

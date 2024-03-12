@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-// NewInitializeAction returns a action that initializes the platform configuration when not provided by the user.
+// NewInitializeAction returns the action that initializes the integration platform when not provided by the user.
 func NewInitializeAction() Action {
 	return &initializeAction{}
 }
@@ -39,51 +39,16 @@ func (action *initializeAction) Name() string {
 }
 
 func (action *initializeAction) CanHandle(platform *v1.IntegrationPlatform) bool {
-	return platform.Status.Phase == v1.IntegrationPlatformPhaseNone || platform.Status.Phase == v1.IntegrationPlatformPhaseDuplicate
+	return platform.Status.Phase == v1.IntegrationPlatformPhaseNone
 }
 
 func (action *initializeAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
-	duplicate, err := action.isPrimaryDuplicate(ctx, platform)
-	if err != nil {
-		return nil, err
-	}
-	if duplicate {
-		// another platform already present in the namespace
-		if platform.Status.Phase != v1.IntegrationPlatformPhaseDuplicate {
-			platform := platform.DeepCopy()
-			platform.Status.Phase = v1.IntegrationPlatformPhaseDuplicate
-
-			return platform, nil
-		}
-
-		return nil, nil
-	}
-
 	action.L.Info("Initializing IntegrationPlatform")
-	if err = platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {
+	if err := platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {
 		return nil, err
 	}
 	platform.Status.Phase = v1.IntegrationPlatformPhaseCreating
 	platform.Status.Version = defaults.Version
 
 	return platform, nil
-}
-
-func (action *initializeAction) isPrimaryDuplicate(ctx context.Context, thisPlatform *v1.IntegrationPlatform) (bool, error) {
-	if platformutil.IsSecondary(thisPlatform) {
-		// Always reconcile secondary platforms
-		return false, nil
-	}
-	platforms, err := platformutil.ListPrimaryPlatforms(ctx, action.client, thisPlatform.Namespace)
-	if err != nil {
-		return false, err
-	}
-	for _, p := range platforms.Items {
-		p := p // pin
-		if p.Name != thisPlatform.Name && platformutil.IsActive(&p) {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }

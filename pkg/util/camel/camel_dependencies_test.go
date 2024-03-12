@@ -24,6 +24,7 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNormalizeDependency(t *testing.T) {
@@ -40,7 +41,7 @@ func TestNormalizeDependency(t *testing.T) {
 
 func TestValidateDependency(t *testing.T) {
 	catalog, err := DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	output := strings.Builder{}
 	ValidateDependency(catalog, "", &output)
@@ -73,7 +74,7 @@ func TestValidateDependency(t *testing.T) {
 
 func TestManageIntegrationDependencies(t *testing.T) {
 	catalog, err := DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name         string
@@ -143,16 +144,16 @@ func TestManageIntegrationDependencies(t *testing.T) {
 			project := maven.Project{}
 
 			err = ManageIntegrationDependencies(&project, test.dependencies, catalog)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			coordinates := strings.Builder{}
 			for i, d := range project.Dependencies {
 				if i == 0 {
 					_, err = fmt.Fprintf(&coordinates, "%s:%s", d.GroupID, d.ArtifactID)
-					assert.Nil(t, err)
+					require.NoError(t, err)
 				} else {
 					_, err = fmt.Fprintf(&coordinates, ",%s:%s", d.GroupID, d.ArtifactID)
-					assert.Nil(t, err)
+					require.NoError(t, err)
 				}
 			}
 			assert.Equal(t, test.coordinates, coordinates.String(), coordinates)

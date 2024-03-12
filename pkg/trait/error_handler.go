@@ -67,7 +67,7 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 			t.addErrorHandlerDependencies(e, defaultErrorHandlerURI)
 		}
 
-		return t.addErrorHandlerAsSource(e)
+		return t.addGlobalErrorHandlerAsSource(e)
 	}
 	return nil
 }
@@ -84,7 +84,7 @@ func (t *errorHandlerTrait) addErrorHandlerDependencies(e *Environment, uri stri
 	}
 }
 
-func (t *errorHandlerTrait) addErrorHandlerAsSource(e *Environment) error {
+func (t *errorHandlerTrait) addGlobalErrorHandlerAsSource(e *Environment) error {
 	flowErrorHandler := map[string]interface{}{
 		"error-handler": map[string]string{
 			"ref-error-handler": t.ErrorHandlerRef,

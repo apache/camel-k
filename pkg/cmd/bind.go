@@ -47,7 +47,7 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 		Use:               "bind [source] [sink] ...",
 		Short:             "Bind Kubernetes resources, such as Kamelets, in an integration flow.",
 		Long:              "Bind Kubernetes resources, such as Kamelets, in an integration flow. Endpoints are expected in the format \"[[apigroup/]version:]kind:[namespace/]name\" or plain Camel URIs.",
-		PersistentPreRunE: decode(&options),
+		PersistentPreRunE: decode(&options, options.Flags),
 		PreRunE:           options.preRunE,
 		RunE:              options.runE,
 		Annotations:       make(map[string]string),

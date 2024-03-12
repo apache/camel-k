@@ -17,7 +17,7 @@
 
 #
 # RoleBinding installed in the operator namespace
-# to allow access to integrationplatforms
+# to allow access to integrationplatforms and integrationprofiles
 #
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

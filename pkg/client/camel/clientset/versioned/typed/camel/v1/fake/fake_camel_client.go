@@ -49,6 +49,10 @@ func (c *FakeCamelV1) IntegrationPlatforms(namespace string) v1.IntegrationPlatf
 	return &FakeIntegrationPlatforms{c, namespace}
 }
 
+func (c *FakeCamelV1) IntegrationProfiles(namespace string) v1.IntegrationProfileInterface {
+	return &FakeIntegrationProfiles{c, namespace}
+}
+
 func (c *FakeCamelV1) Kamelets(namespace string) v1.KameletInterface {
 	return &FakeKamelets{c, namespace}
 }

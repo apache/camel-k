@@ -18,9 +18,13 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
+	"net/url"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,14 +42,13 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	k8sutils "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
@@ -101,28 +104,24 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
 	err = tc.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 	ok, condition, err := tr.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	kc := envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION")
-	assert.NotNil(t, kc)
-
-	ne := knativeapi.NewCamelEnvironment()
-	err = ne.Deserialize(kc.Value)
-	assert.Nil(t, err)
+	ne, err := fromCamelProperties(environment.ApplicationProperties)
+	require.NoError(t, err)
 
 	cSource1 := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1", "Channel")
 	assert.NotNil(t, cSource1)
@@ -152,7 +151,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 
 func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
@@ -222,29 +221,25 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
 	err = tc.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 
 	ok, condition, err := tr.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
-	kc := envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION")
-	assert.NotNil(t, kc)
-
-	ne := knativeapi.NewCamelEnvironment()
-	err = ne.Deserialize(kc.Value)
-	assert.Nil(t, err)
+	ne, err := fromCamelProperties(environment.ApplicationProperties)
+	require.NoError(t, err)
 
 	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, source)
@@ -291,15 +286,15 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 			environment := NewFakeEnvironment(t, source)
 
 			c, err := NewFakeClient("ns")
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			tc := NewCatalog(c)
 
 			err = tc.Configure(&environment)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			_, err = tc.apply(&environment)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 		})
 	}
@@ -337,15 +332,15 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 			environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 			c, err := NewFakeClient("ns")
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			tc := NewCatalog(c)
 
 			err = tc.Configure(&environment)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			conditions, err := tc.apply(&environment)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Empty(t, conditions)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-platform-http")
@@ -353,66 +348,12 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 	}
 }
 
-func TestKnativeConfigurationSorting(t *testing.T) {
-	// unsorted on purpose
-	sources := []v1.SourceSpec{
-		{
-			DataSpec: v1.DataSpec{
-				Name:    "s1.groovy",
-				Content: `from('knative:channel/channel-source-2').log('${body}')`,
-			},
-			Language: v1.LanguageGroovy,
-		},
-		{
-			DataSpec: v1.DataSpec{
-				Name:    "s2.groovy",
-				Content: `from('knative:channel/channel-source-4').log('${body}')`,
-			},
-			Language: v1.LanguageGroovy,
-		},
-		{
-			DataSpec: v1.DataSpec{
-				Name:    "s3.groovy",
-				Content: `from('knative:channel/channel-source-1').log('${body}')`,
-			},
-			Language: v1.LanguageGroovy,
-		},
-		{
-			DataSpec: v1.DataSpec{
-				Name:    "s4.groovy",
-				Content: `from('knative:channel/channel-source-3').log('${body}')`,
-			},
-			Language: v1.LanguageGroovy,
-		},
-	}
-
-	environment := NewFakeEnvironment(t, v1.SourceSpec{})
-	environment.Integration.Status.Phase = v1.IntegrationPhaseRunning
-	environment.Integration.Spec.Sources = sources
-
-	c, err := SortChannelFakeClient("ns")
-	assert.Nil(t, err)
-	tc := NewCatalog(c)
-	err = tc.Configure(&environment)
-	assert.Nil(t, err)
-	conditions, _ := tc.apply(&environment)
-	assert.Empty(t, conditions)
-	// no matter if there is any other trait error
-	camelEnv := knativeapi.NewCamelEnvironment()
-	err = camelEnv.Deserialize(envvar.Get(environment.EnvVars, "CAMEL_KNATIVE_CONFIGURATION").Value)
-	assert.Nil(t, err)
-	assert.Equal(t, "channel-source-1", camelEnv.Services[0].Name)
-	assert.Equal(t, "channel-source-2", camelEnv.Services[1].Name)
-	assert.Equal(t, "channel-source-3", camelEnv.Services[2].Name)
-	assert.Equal(t, "channel-source-4", camelEnv.Services[3].Name)
-}
-
 func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	t.Helper()
 
 	client, _ := NewFakeClient("ns")
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
@@ -708,4 +649,67 @@ func SortChannelFakeClient(namespace string) (client.Client, error) {
 			},
 		},
 	)
+}
+
+func TestKnativeSinkBinding(t *testing.T) {
+	source := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "sink.groovy",
+			Content: `from('timer:foo').to('knative:channel/channel-sink-1?apiVersion=messaging.knative.dev%2Fv1&kind=Channel')`,
+		},
+		Language: v1.LanguageGroovy,
+	}
+
+	environment := NewFakeEnvironment(t, source)
+	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	tc := NewCatalog(c)
+
+	err = tc.Configure(&environment)
+	require.NoError(t, err)
+
+	_, err = tc.apply(&environment)
+	require.NoError(t, err)
+	baseProp := "camel.component.knative.environment.resources[0]"
+	assert.Equal(t, "channel-sink-1", environment.ApplicationProperties[baseProp+".name"])
+	assert.Equal(t, "${K_SINK}", environment.ApplicationProperties[baseProp+".url"])
+	assert.Equal(t, "${K_CE_OVERRIDES}", environment.ApplicationProperties[baseProp+".ceOverrides"])
+	assert.Equal(t, "channel", environment.ApplicationProperties[baseProp+".type"])
+	assert.Equal(t, "Channel", environment.ApplicationProperties[baseProp+".objectKind"])
+	assert.Equal(t, "messaging.knative.dev/v1", environment.ApplicationProperties[baseProp+".objectApiVersion"])
+	assert.Equal(t, "sink", environment.ApplicationProperties[baseProp+".endpointKind"])
+}
+
+// fromCamelProperties deserialize from properties to environment.
+func fromCamelProperties(appProps map[string]string) (*knativeapi.CamelEnvironment, error) {
+	env := knativeapi.NewCamelEnvironment()
+	re := regexp.MustCompile(`camel.component.knative.environment.resources\[(\d+)\].name`)
+	for k, v := range appProps {
+		if re.MatchString(k) {
+			index := re.FindStringSubmatch(k)[1]
+			baseComp := fmt.Sprintf("camel.component.knative.environment.resources[%s]", index)
+			url, err := url.Parse(appProps[fmt.Sprintf("%s.url", baseComp)])
+			if err != nil {
+				return nil, err
+			}
+			svc, err := knativeapi.BuildCamelServiceDefinition(
+				v,
+				knativeapi.CamelEndpointKind(appProps[fmt.Sprintf("%s.endpointKind", baseComp)]),
+				knativeapi.CamelServiceType(appProps[fmt.Sprintf("%s.type", baseComp)]),
+				*url,
+				appProps[fmt.Sprintf("%s.objectApiVersion", baseComp)],
+				appProps[fmt.Sprintf("%s.objectKind", baseComp)],
+			)
+			if err != nil {
+				return nil, err
+			}
+			svc.Metadata[knativeapi.CamelMetaKnativeReply] = appProps[fmt.Sprintf("%s.reply", baseComp)]
+			env.Services = append(env.Services, svc)
+		}
+	}
+
+	return &env, nil
 }

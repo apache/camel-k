@@ -53,6 +53,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&IntegrationKitList{},
 		&IntegrationPlatform{},
 		&IntegrationPlatformList{},
+		&IntegrationProfile{},
+		&IntegrationProfileList{},
 		&CamelCatalog{},
 		&CamelCatalogList{},
 		&Build{},

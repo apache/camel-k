@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -45,7 +46,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
 			conditions, err := NewBuilderTestCatalog().apply(e)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Empty(t, conditions)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
@@ -66,7 +67,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
 			conditions, err := NewBuilderTestCatalog().apply(e)
 
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Empty(t, conditions)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
@@ -79,7 +80,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, v1.BuildStrategyRoutine)
 	conditions, err := NewBuilderTestCatalog().apply(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
@@ -159,7 +160,7 @@ func TestMavenPropertyBuilderTrait(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "build-time-value1", env.Pipeline[0].Builder.Maven.Properties["build-time-prop1"])
 }
 
@@ -175,7 +176,7 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	builderTask := findCustomTaskByName(env.Pipeline, "builder")
 	customTask := findCustomTaskByName(env.Pipeline, "test")
 	packageTask := findCustomTaskByName(env.Pipeline, "package")
@@ -185,7 +186,7 @@ func TestCustomTaskBuilderTrait(t *testing.T) {
 	assert.NotNil(t, customTask)
 	assert.NotNil(t, packageTask)
 	assert.NotNil(t, publisherTask)
-	assert.Equal(t, 4, len(env.Pipeline))
+	assert.Len(t, env.Pipeline, 4)
 	assert.Equal(t, "test", customTask.Custom.Name)
 	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
 	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
@@ -199,11 +200,11 @@ func TestCustomTaskBuilderTraitValidStrategyOverride(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	customTask := findCustomTaskByName(env.Pipeline, "test")
 
-	assert.Equal(t, 4, len(env.Pipeline))
+	assert.Len(t, env.Pipeline, 4)
 	assert.Equal(t, "test", customTask.Custom.Name)
 	assert.Equal(t, "alpine", customTask.Custom.ContainerImage)
 	assert.Equal(t, "ls", customTask.Custom.ContainerCommands[0])
@@ -217,9 +218,9 @@ func TestCustomTaskBuilderTraitInvalidStrategy(t *testing.T) {
 	err := builderTrait.Apply(env)
 
 	// The error will be reported to IntegrationKits
-	assert.Nil(t, err)
-	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	require.NoError(t, err)
+	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
 }
 
@@ -232,9 +233,9 @@ func TestCustomTaskBuilderTraitInvalidStrategyOverride(t *testing.T) {
 	err := builderTrait.Apply(env)
 
 	// The error will be reported to IntegrationKits
-	assert.Nil(t, err)
-	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	require.NoError(t, err)
+	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Type, v1.IntegrationKitConditionType("IntegrationKitTasksValid"))
 }
 
@@ -245,7 +246,7 @@ func TestMavenProfilesBuilderTrait(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, v1.ValueSource{
 		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
@@ -273,9 +274,9 @@ func TestInvalidMavenProfilesBuilderTrait(t *testing.T) {
 	err := builderTrait.Apply(env)
 
 	// The error will be reported to IntegrationKits
-	assert.Nil(t, err)
-	assert.Equal(t, env.IntegrationKit.Status.Phase, v1.IntegrationKitPhaseError)
-	assert.Equal(t, env.IntegrationKit.Status.Conditions[0].Status, corev1.ConditionFalse)
+	require.NoError(t, err)
+	assert.Equal(t, v1.IntegrationKitPhaseError, env.IntegrationKit.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, env.IntegrationKit.Status.Conditions[0].Status)
 	assert.Contains(t, env.IntegrationKit.Status.Conditions[0].Message, "fakeprofile")
 }
 
@@ -285,7 +286,7 @@ func TestMavenBuilderTraitJib(t *testing.T) {
 
 	err := builderTrait.Apply(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, v1.ValueSource{
 		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
@@ -304,8 +305,8 @@ func TestBuilderCustomTasks(t *testing.T) {
 
 	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
-	assert.Nil(t, err)
-	assert.Equal(t, 2, len(tasks))
+	require.NoError(t, err)
+	assert.Len(t, tasks, 2)
 	assert.Equal(t, "test", tasks[0].Custom.Name)
 	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
 	assert.Equal(t, "ls", tasks[0].Custom.ContainerCommands[0])
@@ -322,7 +323,7 @@ func TestBuilderCustomTasksFailure(t *testing.T) {
 
 	_, err := builderTrait.customTasks(nil, "my-kit-img")
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "provide a custom task with at least 3 arguments, ie \"my-task-name;my-image;echo 'hello'\", was test;alpine", err.Error())
 }
 
@@ -332,8 +333,8 @@ func TestBuilderCustomTasksBashScript(t *testing.T) {
 
 	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
-	assert.Nil(t, err)
-	assert.Equal(t, 1, len(tasks))
+	require.NoError(t, err)
+	assert.Len(t, tasks, 1)
 	assert.Equal(t, "test", tasks[0].Custom.Name)
 	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
 	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
@@ -347,8 +348,8 @@ func TestBuilderCustomTasksSecurityContextScript(t *testing.T) {
 
 	tasks, err := builderTrait.customTasks(nil, "my-kit-img")
 
-	assert.Nil(t, err)
-	assert.Equal(t, 1, len(tasks))
+	require.NoError(t, err)
+	assert.Len(t, tasks, 1)
 	assert.Equal(t, "test", tasks[0].Custom.Name)
 	assert.Equal(t, "alpine", tasks[0].Custom.ContainerImage)
 	assert.Equal(t, "/bin/bash", tasks[0].Custom.ContainerCommands[0])
@@ -366,7 +367,7 @@ func TestBuilderCustomTasksConfiguration(t *testing.T) {
 
 	tasksConf, err := builderTrait.parseTasksConf()
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 4, len(tasksConf))
 	assert.Equal(t, "1000m", tasksConf["builder"].RequestCPU)
 	assert.Equal(t, "500m", tasksConf["custom1"].LimitCPU)
@@ -380,7 +381,7 @@ func TestBuilderCustomTasksConfigurationError(t *testing.T) {
 
 	_, err := builderTrait.parseTasksConf()
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "could not parse syntax error, expected format <task-name>:<task-resource>", err.Error())
 }
 
@@ -422,7 +423,7 @@ func TestBuilderDeprecatedParams(t *testing.T) {
 
 	active, condition, err := builderTrait.Configure(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, active)
 	assert.NotNil(t, condition)
 	assert.Contains(t, condition.message, "The request-cpu parameter is deprecated and may be removed in future releases")
@@ -451,10 +452,10 @@ func TestBuilderWithNoNodeSelector(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 
 	active, condition, err := builderTrait.Configure(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = builderTrait.Apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.True(t, active)
 	assert.Nil(t, condition)
@@ -471,10 +472,10 @@ func TestBuilderWithNodeSelector(t *testing.T) {
 	}
 
 	active, condition, err := builderTrait.Configure(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = builderTrait.Apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.True(t, active)
 	assert.Nil(t, condition)
@@ -491,10 +492,10 @@ func TestBuilderWithAnnotations(t *testing.T) {
 	}
 
 	active, condition, err := builderTrait.Configure(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = builderTrait.Apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.True(t, active)
 	assert.Nil(t, condition)
@@ -508,7 +509,7 @@ func TestBuilderNoTasksFilter(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 
 	err := builderTrait.Apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	pipelineTasks := tasksByName(env.Pipeline)
 	assert.Equal(t, []string{"builder", "package", "jib"}, pipelineTasks)
@@ -520,7 +521,7 @@ func TestBuilderTasksFilterNotExistingTasks(t *testing.T) {
 	builderTrait.TasksFilter = "builder,missing-task"
 
 	err := builderTrait.Apply(env)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "no task exist for missing-task name", err.Error())
 }
 
@@ -530,7 +531,7 @@ func TestBuilderTasksFilterMissingPublishTasks(t *testing.T) {
 	builderTrait.TasksFilter = "builder,package"
 
 	err := builderTrait.Apply(env)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "last pipeline task is not a publishing or a user task", err.Error())
 }
 
@@ -540,7 +541,7 @@ func TestBuilderTasksFilterOperatorTasks(t *testing.T) {
 	builderTrait.TasksFilter = "builder,package,jib"
 
 	err := builderTrait.Apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	pipelineTasks := tasksByName(env.Pipeline)
 	assert.Equal(t, []string{"builder", "package", "jib"}, pipelineTasks)
 }
@@ -551,7 +552,7 @@ func TestBuilderTasksFilterAndReorderOperatorTasks(t *testing.T) {
 	builderTrait.TasksFilter = "package,builder,jib"
 
 	err := builderTrait.Apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	pipelineTasks := tasksByName(env.Pipeline)
 	assert.Equal(t, []string{"package", "builder", "jib"}, pipelineTasks)
 }
@@ -564,7 +565,7 @@ func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
 	builderTrait.TasksFilter = "builder,my-custom-task,package,my-custom-publish"
 
 	err := builderTrait.Apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	pipelineTasks := tasksByName(env.Pipeline)
 	assert.Equal(t, []string{"builder", "my-custom-task", "package", "my-custom-publish"}, pipelineTasks)
 }

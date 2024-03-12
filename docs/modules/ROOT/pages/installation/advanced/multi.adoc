@@ -49,21 +49,23 @@ operator id:
 kubectl annotate integration timer-to-log camel.apache.org/operator.id=operator-2 --overwrite
 ----
 
-[[advanced-installation-multiple-platforms]]
-== Configuring Multiple Integration Platforms
+[[advanced-installation-integration-profile]]
+== Apply custom IntegrationProfile settings
 
 Any running Camel K integration is associated to a shared IntegrationPlatform resource that contains general configuration options.
-The integration platform is located in the integration namespace (or also in the operator namespace, in case of global installation)
-and typically only one ("primary", see later) integration platform is allowed to obtain a "Ready" state in a namespace, while others get the "Duplicate" state (i.e. IntegrationPlatform resources
-are somewhat "singleton" in a namespace).
+The integration platform is located in the operator namespace and typically uses the same name as the operator id that this platform belongs to.
+Each Camel K operator uses exactly one single integration platform in a "Ready" state.
+IntegrationPlatform resources are somewhat "singleton" in a namespace and belong to a single operator instance.
 
-There's a way to allow two or more integration platforms to get a "Ready" state in a namespace and for them to be used by integrations:
-platforms can be marked with the annotation `camel.apache.org/secondary.platform=true`.
-That annotation marks the platform as *secondary* so that it will never be used as default platform during the reconciliation of an integration,
-unless explicitly selected (any resource belonging to the "camel.apache.org" group can select a particular integration platform).
-Secondary platforms are also allowed to reach the "Ready" state without becoming "Duplicate".
+There's a way to allow customizations regarding the integration configuration.
+Users may add IntegrationProfile resources to an individual namespace.
+The profile holds custom integration platform settings for them to be used by integrations.
+The IntegrationProfile resource allows only a subset of the IntegrationPlatform settings for customization.
 
-To specify which integration platform should be used to reconcile a specific CR, the CR can be annotated like in the following example:
+The custom IntegrationProfile resource uses the operator id as an annotation to bind its reconciliation to an operator instance.
+Also, the profile must be explicitly selected by an annotation referencing the integration profile name (any resource belonging to the "camel.apache.org" group can select a particular profile configuration).
+
+To specify which profile should be used for an integration, the resource can be annotated like in the following example:
 
 [source,yaml]
 ----
@@ -71,12 +73,13 @@ kind: Integration
 apiVersion: camel.apache.org/v1
 metadata:
   annotations:
-    camel.apache.org/platform.id: my-platform-name
+    camel.apache.org/integration-profile.id: my-profile-name
 # ...
 ----
 
-The value of the `camel.apache.org/platform.id` annotation must match the name of an IntegrationPlatform custom resource, in the annotated resource namespace or
-also in the operator namespace.
+The value of the `camel.apache.org/integration-profile.id` annotation must match the name of an IntegrationProfile custom resource.
+The profile gets automatically resolved from the annotated resource namespace or from the operator namespace.
+In case you need to explicitly set the integration profile namespace you can do so with the `camel.apache.org/integration-profile.namespace` annotation.
 
-The selection of a secondary IntegrationPlatform enables new configuration scenarios, for example, sharing global configuration options for groups of integrations, or also
-providing per-operator specific configuration options e.g. when you install multiple global operators in the same namespace.
+The selection of a IntegrationProfile enables new configuration scenarios, for example, sharing global configuration options for groups of integrations, or also
+providing per-operator specific configuration options e.g. when you install multiple global operators in the cluster.

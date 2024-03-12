@@ -33,6 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPullSecret(t *testing.T) {
@@ -41,12 +42,12 @@ func TestPullSecret(t *testing.T) {
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.SecretName = "xxxy"
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
 	err = trait.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, deployment.Spec.Template.Spec.ImagePullSecrets, corev1.LocalObjectReference{Name: "xxxy"})
 }
 
@@ -56,7 +57,7 @@ func TestPullSecretDoesNothingWhenNotSetOnPlatform(t *testing.T) {
 
 	trait := newPullSecretTrait()
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 }
@@ -67,7 +68,7 @@ func TestPullSecretAuto(t *testing.T) {
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
 	trait.Auto = pointer.Bool(false)
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 }
@@ -79,13 +80,13 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	trait.Auto = pointer.Bool(false)
 	trait.ImagePullerDelegation = pointer.Bool(true)
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 	assert.True(t, *trait.ImagePullerDelegation)
 
 	err = trait.Apply(e)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	var roleBinding rbacv1.RoleBinding
 	roleBindingKey := client.ObjectKey{
@@ -93,7 +94,7 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 		Name:      "camel-k-puller-test-default",
 	}
 	err = e.Client.Get(e.Ctx, roleBindingKey, &roleBinding)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, roleBinding.Subjects, 1)
 }
 
@@ -127,7 +128,7 @@ func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment
 	var err error
 	e.Ctx = context.TODO()
 	e.Client, err = test.NewFakeClient(e.Integration, &deployment)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	return e, &deployment
 }

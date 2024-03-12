@@ -22,6 +22,7 @@ resources:
 - bases/camel.apache.org_camelcatalogs.yaml
 - bases/camel.apache.org_integrationkits.yaml
 - bases/camel.apache.org_integrationplatforms.yaml
+- bases/camel.apache.org_integrationprofiles.yaml
 - bases/camel.apache.org_integrations.yaml
 - bases/camel.apache.org_kamelets.yaml
 - bases/camel.apache.org_kameletbindings.yaml

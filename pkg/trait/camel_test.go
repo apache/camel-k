@@ -30,13 +30,14 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfigureEnabledCamelTraitSucceeds(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 }
@@ -45,12 +46,12 @@ func TestApplyCamelTraitSucceeds(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "0.0.1", environment.RuntimeVersion)
 	assert.Equal(t, "0.0.1", environment.Integration.Status.RuntimeVersion)
 	assert.Equal(t, "0.0.1", environment.IntegrationKit.Status.RuntimeVersion)
@@ -68,12 +69,12 @@ func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *t
 	environment.Integration.Status.RuntimeProvider = v1.RuntimeProviderQuarkus
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "unable to find catalog matching version requirement: runtime=Unmatchable version, provider=quarkus", err.Error())
 }
 
@@ -171,12 +172,12 @@ func TestApplyCamelTraitWithProperties(t *testing.T) {
 	trait.Properties = []string{"a=b", "c=d"}
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	userPropertiesCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels["camel.apache.org/properties.type"] == "user"
@@ -191,16 +192,16 @@ func TestApplyCamelTraitWithSources(t *testing.T) {
 	trait, environment := createNominalCamelTest(true)
 
 	configured, condition, err := trait.Configure(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, 1, environment.Resources.Size())
 	sourceCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
-		return cm.Name == "some-integration-source-000" && cm.Annotations["camel.apache.org/source.language"] == "xml" && cm.Annotations["camel.apache.org/source.name"] == "source2.xml"
+		return cm.Name == "some-integration-source-000" && cm.Annotations[sourceLanguageAnnotation] == "xml" && cm.Annotations[sourceNameAnnotation] == "source2.xml"
 	})
 	assert.NotNil(t, sourceCm)
 	assert.Equal(t, map[string]string{

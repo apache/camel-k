@@ -127,7 +127,7 @@ func isIntegrationUpdated(it *v1.Integration, previous, next *v1.IntegrationCond
 }
 
 func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, kit *v1.IntegrationKit) []reconcile.Request {
-	var requests []reconcile.Request
+	requests := make([]reconcile.Request, 0)
 	if kit.Status.Phase != v1.IntegrationKitPhaseReady && kit.Status.Phase != v1.IntegrationKitPhaseError {
 		return requests
 	}
@@ -145,9 +145,14 @@ func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Clie
 
 	for i := range list.Items {
 		integration := &list.Items[i]
+		if integration.Status.Phase != v1.IntegrationPhaseBuildingKit &&
+			integration.Status.Phase != v1.IntegrationPhaseRunning {
+			continue
+		}
+
 		Log.Debug("Integration Controller: Assessing integration", "integration", integration.Name, "namespace", integration.Namespace)
 
-		match, err := sameOrMatch(kit, integration)
+		match, err := sameOrMatch(ctx, c, kit, integration)
 		if err != nil {
 			Log.ForIntegration(integration).Errorf(err, "Error matching integration %q with kit %q", integration.Name, kit.Name)
 			continue
@@ -156,16 +161,13 @@ func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Clie
 			continue
 		}
 
-		if integration.Status.Phase == v1.IntegrationPhaseBuildingKit ||
-			integration.Status.Phase == v1.IntegrationPhaseRunning {
-			log.Infof("Kit %s ready, notify integration: %s", kit.Name, integration.Name)
-			requests = append(requests, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Namespace: integration.Namespace,
-					Name:      integration.Name,
-				},
-			})
-		}
+		log.Infof("Kit %s ready, notify integration: %s", kit.Name, integration.Name)
+		requests = append(requests, reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: integration.Namespace,
+				Name:      integration.Name,
+			},
+		})
 	}
 
 	return requests
@@ -271,6 +273,42 @@ func secretEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, sec 
 	return requests
 }
 
+func integrationProfileEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, profile *v1.IntegrationProfile) []reconcile.Request {
+	var requests []reconcile.Request
+
+	if profile.Status.Phase == v1.IntegrationProfilePhaseReady {
+		list := &v1.IntegrationList{}
+
+		// Do global search in case of global operator
+		var opts []ctrl.ListOption
+		if !platform.IsCurrentOperatorGlobal() {
+			opts = append(opts, ctrl.InNamespace(profile.Namespace))
+		}
+
+		if err := c.List(ctx, list, opts...); err != nil {
+			log.Error(err, "Failed to list integrations")
+			return requests
+		}
+
+		for i := range list.Items {
+			integration := list.Items[i]
+			if integration.Status.Phase == v1.IntegrationPhaseRunning && v1.GetIntegrationProfileAnnotation(&integration) == profile.Name {
+				if profileNamespace := v1.GetIntegrationProfileNamespaceAnnotation(&integration); profileNamespace == "" || profileNamespace == profile.Namespace {
+					log.Infof("IntegrationProfile %s changed, notify integration: %s", profile.Name, integration.Name)
+					requests = append(requests, reconcile.Request{
+						NamespacedName: types.NamespacedName{
+							Namespace: integration.Namespace,
+							Name:      integration.Name,
+						},
+					})
+				}
+			}
+		}
+	}
+
+	return requests
+}
+
 func integrationPlatformEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) []reconcile.Request {
 	var requests []reconcile.Request
 
@@ -368,6 +406,16 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 					return []reconcile.Request{}
 				}
 				return integrationPlatformEnqueueRequestsFromMapFunc(ctx, c, p)
+			})).
+		// Watch for IntegrationProfile and enqueue requests for any integrations that references the profile
+		Watches(&v1.IntegrationProfile{},
+			handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, a ctrl.Object) []reconcile.Request {
+				profile, ok := a.(*v1.IntegrationProfile)
+				if !ok {
+					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve IntegrationProfile")
+					return []reconcile.Request{}
+				}
+				return integrationProfileEnqueueRequestsFromMapFunc(ctx, c, profile)
 			})).
 		// Watch for Configmaps or Secret used in the Integrations for updates
 		Watches(&corev1.ConfigMap{},
@@ -549,7 +597,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 }
 
 func (r *reconcileIntegration) update(ctx context.Context, base *v1.Integration, target *v1.Integration, log *log.Logger) error {
-	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, r.client, target)
+	secrets, configmaps := getIntegrationSecretAndConfigmapResourceVersions(ctx, r.client, target)
 	d, err := digest.ComputeForIntegration(target, configmaps, secrets)
 	if err != nil {
 		return err

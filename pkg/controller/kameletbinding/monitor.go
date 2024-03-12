@@ -76,6 +76,12 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Kamel
 	operatorIDChanged := v1.GetOperatorIDAnnotation(binding) != "" &&
 		(v1.GetOperatorIDAnnotation(binding) != v1.GetOperatorIDAnnotation(&it))
 
+	integrationProfileChanged := v1.GetIntegrationProfileAnnotation(binding) != "" &&
+		(v1.GetIntegrationProfileAnnotation(binding) != v1.GetIntegrationProfileAnnotation(&it))
+
+	integrationProfileNamespaceChanged := v1.GetIntegrationProfileNamespaceAnnotation(binding) != "" &&
+		(v1.GetIntegrationProfileNamespaceAnnotation(binding) != v1.GetIntegrationProfileNamespaceAnnotation(&it))
+
 	sameTraits, err := trait.IntegrationAndKameletBindingSameTraits(&it, binding)
 	if err != nil {
 		return nil, err
@@ -92,11 +98,12 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Kamel
 
 	semanticEquality := equality.Semantic.DeepDerivative(expected.Spec, it.Spec)
 
-	if !semanticEquality || operatorIDChanged || !sameTraits {
+	if !semanticEquality || operatorIDChanged || integrationProfileChanged || integrationProfileNamespaceChanged || !sameTraits {
 		action.L.Info(
 			"Binding needs a rebuild",
 			"semantic-equality", !semanticEquality,
 			"operatorid-changed", operatorIDChanged,
+			"integration-profile-changed", integrationProfileChanged || integrationProfileNamespaceChanged,
 			"traits-changed", !sameTraits)
 
 		// Binding has changed and needs rebuild

@@ -31,6 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBindings(t *testing.T) {
@@ -212,7 +213,7 @@ func TestBindings(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			profile := tc.profile
 			if profile == "" {
@@ -229,7 +230,7 @@ func TestBindings(t *testing.T) {
 			binding, err := Translate(bindingContext, EndpointContext{
 				Type: tc.endpointType,
 			}, tc.endpoint)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)
 			assert.Equal(t, tc.traits, binding.Traits)

@@ -25,11 +25,12 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFile(t *testing.T) {
 	file, err := os.CreateTemp("", "camel-k-test-*")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	defer func() {
 		_ = os.Remove(file.Name())
 	}()
@@ -37,7 +38,7 @@ func TestFile(t *testing.T) {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(100*time.Second))
 	defer cancel()
 	changes, err := File(ctx, file.Name())
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	time.Sleep(100 * time.Millisecond)
 	expectedNumChanges := 3

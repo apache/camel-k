@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFilterFileLocation(t *testing.T) {
@@ -47,36 +48,36 @@ func TestFilterFileLocation(t *testing.T) {
 func TestDownloadDependencyWithBadURL(t *testing.T) {
 	u, _ := url.Parse("http://foo")
 	_, err := downloadDependency(context.Background(), *u)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestDownloadDependencyWithFileNameInURL(t *testing.T) {
 	u, _ := url.Parse("https://repo1.maven.org/maven2/org/apache/camel/camel-core/3.18.2/camel-core-3.18.2.jar")
 	path, err := downloadDependency(context.Background(), *u)
 	t.Cleanup(func() { os.Remove(path) })
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, strings.HasSuffix(path, "camel-core-3.18.2.jar"), "The name of the jar file is expected")
 	_, err = os.Stat(path)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestDownloadDependencyWithFileNameInQuery(t *testing.T) {
 	u, _ := url.Parse("https://search.maven.org/remotecontent?filepath=org/apache/camel/quarkus/camel-quarkus-file/2.12.0/camel-quarkus-file-2.12.0.jar")
 	path, err := downloadDependency(context.Background(), *u)
 	t.Cleanup(func() { os.Remove(path) })
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, strings.HasSuffix(path, "camel-quarkus-file-2.12.0.jar"), "The name of the jar file is expected")
 	_, err = os.Stat(path)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestDownloadDependencyWithoutFileName(t *testing.T) {
 	u, _ := url.Parse("https://search.maven.org")
 	path, err := downloadDependency(context.Background(), *u)
 	t.Cleanup(func() { os.Remove(path) })
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	_, err = os.Stat(path)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestExtractTraitNames(t *testing.T) {

@@ -349,11 +349,11 @@ func Equals(i1 Options, i2 Options) bool {
 
 // IntegrationsHaveSameTraits return if traits are the same.
 func IntegrationsHaveSameTraits(i1 *v1.Integration, i2 *v1.Integration) (bool, error) {
-	c1, err := NewStatusTraitsOptionsForIntegration(i1)
+	c1, err := NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
-	c2, err := NewStatusTraitsOptionsForIntegration(i2)
+	c2, err := NewSpecTraitsOptionsForIntegration(i2)
 	if err != nil {
 		return false, err
 	}
@@ -394,7 +394,7 @@ func KameletBindingsHaveSameTraits(i1 *v1alpha1.KameletBinding, i2 *v1alpha1.Kam
 // The comparison is done for the subset of traits defines on the binding as during the trait processing,
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
 func IntegrationAndPipeSameTraits(i1 *v1.Integration, i2 *v1.Pipe) (bool, error) {
-	itOpts, err := NewStatusTraitsOptionsForIntegration(i1)
+	itOpts, err := NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
@@ -418,7 +418,7 @@ func IntegrationAndPipeSameTraits(i1 *v1.Integration, i2 *v1.Pipe) (bool, error)
 // some traits may be added to the Integration i.e. knative configuration in case of sink binding.
 // Deprecated.
 func IntegrationAndKameletBindingSameTraits(i1 *v1.Integration, i2 *v1alpha1.KameletBinding) (bool, error) {
-	itOpts, err := NewStatusTraitsOptionsForIntegration(i1)
+	itOpts, err := NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}
@@ -450,8 +450,32 @@ func newTraitsOptions(opts Options, objectMeta *metav1.ObjectMeta) (Options, err
 	return opts, nil
 }
 
-func NewStatusTraitsOptionsForIntegration(i *v1.Integration) (Options, error) {
-	m1, err := ToTraitMap(i.Status.Traits)
+func NewSpecTraitsOptionsForIntegrationAndPlatform(i *v1.Integration, pl *v1.IntegrationPlatform) (Options, error) {
+	var options Options
+	var err error
+	if pl != nil {
+		options, err = ToTraitMap(pl.Status.Traits)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		options = Options{}
+	}
+
+	m1, err := ToTraitMap(i.Spec.Traits)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range m1 {
+		options[k] = v
+	}
+
+	return newTraitsOptions(options, &i.ObjectMeta)
+}
+
+func NewSpecTraitsOptionsForIntegration(i *v1.Integration) (Options, error) {
+	m1, err := ToTraitMap(i.Spec.Traits)
 	if err != nil {
 		return nil, err
 	}
@@ -468,76 +492,43 @@ func newTraitsOptionsForIntegrationKit(i *v1.IntegrationKit, traits v1.Integrati
 	return newTraitsOptions(m1, &i.ObjectMeta)
 }
 
-func NewStatusTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
-	return newTraitsOptionsForIntegrationKit(i, i.Status.Traits)
-}
-
 func NewSpecTraitsOptionsForIntegrationKit(i *v1.IntegrationKit) (Options, error) {
 	return newTraitsOptionsForIntegrationKit(i, i.Spec.Traits)
 }
 
-func NewTraitsOptionsForIntegrationPlatform(i *v1.IntegrationPlatform) (Options, error) {
-	m1, err := ToTraitMap(i.Spec.Traits)
-	if err != nil {
-		return nil, err
-	}
+func NewTraitsOptionsForPipe(pipe *v1.Pipe) (Options, error) {
+	options := Options{}
 
-	return newTraitsOptions(m1, &i.ObjectMeta)
-}
-
-func NewTraitsOptionsForPipe(i *v1.Pipe) (Options, error) {
-	if i.Spec.Integration != nil {
-		m1, err := ToTraitMap(i.Spec.Integration.Traits)
+	if pipe.Spec.Integration != nil {
+		m1, err := ToTraitMap(pipe.Spec.Integration.Traits)
 		if err != nil {
 			return nil, err
 		}
 
-		m2, err := FromAnnotations(&i.ObjectMeta)
-		if err != nil {
-			return nil, err
+		for k, v := range m1 {
+			options[k] = v
 		}
-
-		for k, v := range m2 {
-			m1[k] = v
-		}
-
-		return m1, nil
 	}
 
-	m1, err := FromAnnotations(&i.ObjectMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return m1, nil
+	return newTraitsOptions(options, &pipe.ObjectMeta)
 }
 
 // Deprecated.
-func NewTraitsOptionsForKameletBinding(i *v1alpha1.KameletBinding) (Options, error) {
-	if i.Spec.Integration != nil {
-		m1, err := ToTraitMap(i.Spec.Integration.Traits)
+func NewTraitsOptionsForKameletBinding(kb *v1alpha1.KameletBinding) (Options, error) {
+	options := Options{}
+
+	if kb.Spec.Integration != nil {
+		m1, err := ToTraitMap(kb.Spec.Integration.Traits)
 		if err != nil {
 			return nil, err
 		}
 
-		m2, err := FromAnnotations(&i.ObjectMeta)
-		if err != nil {
-			return nil, err
+		for k, v := range m1 {
+			options[k] = v
 		}
-
-		for k, v := range m2 {
-			m1[k] = v
-		}
-
-		return m1, nil
 	}
 
-	m1, err := FromAnnotations(&i.ObjectMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	return m1, nil
+	return newTraitsOptions(options, &kb.ObjectMeta)
 }
 
 func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {

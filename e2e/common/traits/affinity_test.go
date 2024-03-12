@@ -37,90 +37,99 @@ import (
 )
 
 func TestAffinityTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	var hostname string
-	if node, err := selectSchedulableNode(); err == nil {
-		hostname = node.Labels["kubernetes.io/hostname"]
-	} else {
-		// if 'get nodes' is not allowed, just skip tests for node affinity
-		hostname = ""
-	}
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-traits-affinity"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 
-	if hostname != "" {
-		t.Run("Run Java with node affinity", func(t *testing.T) {
-			name1 := RandomizedSuffixName("java1")
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-				"--name", name1,
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		var hostname string
+		if node, err := selectSchedulableNode(t); err == nil {
+			hostname = node.Labels["kubernetes.io/hostname"]
+		} else {
+			// if 'get nodes' is not allowed, just skip tests for node affinity
+			hostname = ""
+		}
+
+		if hostname != "" {
+			t.Run("Run Java with node affinity", func(t *testing.T) {
+				name1 := RandomizedSuffixName("java1")
+				g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+					"--name", name1,
+					"-t", "affinity.enabled=true",
+					"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ns, name1), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationConditionStatus(t, ns, name1, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+				g.Eventually(IntegrationLogs(t, ns, name1), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+				pod := IntegrationPod(t, ns, name1)()
+				g.Expect(pod.Spec.Affinity).NotTo(BeNil())
+				g.Expect(pod.Spec.Affinity.NodeAffinity).To(Equal(&corev1.NodeAffinity{
+					RequiredDuringSchedulingIgnoredDuringExecution: nodeSelector("kubernetes.io/hostname", corev1.NodeSelectorOpIn, hostname),
+				}))
+				g.Expect(pod.Spec.NodeName).To(Equal(hostname))
+
+				// check integration schema does not contains unwanted default trait value.
+				g.Eventually(UnstructuredIntegration(t, ns, name1)).ShouldNot(BeNil())
+				unstructuredIntegration := UnstructuredIntegration(t, ns, name1)()
+				affinityTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "affinity")
+				g.Expect(affinityTrait).NotTo(BeNil())
+				g.Expect(len(affinityTrait)).To(Equal(2))
+				g.Expect(affinityTrait["enabled"]).To(Equal(true))
+				g.Expect(affinityTrait["nodeAffinityLabels"]).NotTo(BeNil())
+
+				g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			})
+		}
+
+		t.Run("Run Java with pod affinity", func(t *testing.T) {
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+				"--name", "java2",
 				"-t", "affinity.enabled=true",
-				"-t", fmt.Sprintf("affinity.node-affinity-labels=kubernetes.io/hostname in(%s)", hostname)).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name1), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name1, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name1), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+				"-t", "affinity.pod-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ns, "java2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, "java2", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, "java2"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-			pod := IntegrationPod(ns, name1)()
-			Expect(pod.Spec.Affinity).NotTo(BeNil())
-			Expect(pod.Spec.Affinity.NodeAffinity).To(Equal(&corev1.NodeAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: nodeSelector("kubernetes.io/hostname", corev1.NodeSelectorOpIn, hostname),
+			pod := IntegrationPod(t, ns, "java2")()
+			g.Expect(pod.Spec.Affinity).NotTo(BeNil())
+			g.Expect(pod.Spec.Affinity.PodAffinity).To(Equal(&corev1.PodAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+					podAffinityTerm("camel.apache.org/integration", metav1.LabelSelectorOpExists, "kubernetes.io/hostname"),
+				},
 			}))
-			Expect(pod.Spec.NodeName).To(Equal(hostname))
 
-			// check integration schema does not contains unwanted default trait value.
-			Eventually(UnstructuredIntegration(ns, name1)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(ns, name1)()
-			affinityTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "affinity")
-			Expect(affinityTrait).NotTo(BeNil())
-			Expect(len(affinityTrait)).To(Equal(2))
-			Expect(affinityTrait["enabled"]).To(Equal(true))
-			Expect(affinityTrait["nodeAffinityLabels"]).NotTo(BeNil())
-
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
-	}
 
-	t.Run("Run Java with pod affinity", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", "java2",
-			"-t", "affinity.enabled=true",
-			"-t", "affinity.pod-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "java2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "java2", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "java2"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		t.Run("Run Java with pod anti affinity", func(t *testing.T) {
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+				"--name", "java3",
+				"-t", "affinity.enabled=true",
+				"-t", "affinity.pod-anti-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ns, "java3"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, "java3", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, "java3"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		pod := IntegrationPod(ns, "java2")()
-		Expect(pod.Spec.Affinity).NotTo(BeNil())
-		Expect(pod.Spec.Affinity.PodAffinity).To(Equal(&corev1.PodAffinity{
-			RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-				podAffinityTerm("camel.apache.org/integration", metav1.LabelSelectorOpExists, "kubernetes.io/hostname"),
-			},
-		}))
+			pod := IntegrationPod(t, ns, "java3")()
+			g.Expect(pod.Spec.Affinity).NotTo(BeNil())
+			g.Expect(pod.Spec.Affinity.PodAntiAffinity).To(Equal(&corev1.PodAntiAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+					podAffinityTerm("camel.apache.org/integration", metav1.LabelSelectorOpExists, "kubernetes.io/hostname"),
+				},
+			}))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-
-	t.Run("Run Java with pod anti affinity", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", "java3",
-			"-t", "affinity.enabled=true",
-			"-t", "affinity.pod-anti-affinity-labels=camel.apache.org/integration").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "java3"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "java3", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "java3"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-		pod := IntegrationPod(ns, "java3")()
-		Expect(pod.Spec.Affinity).NotTo(BeNil())
-		Expect(pod.Spec.Affinity.PodAntiAffinity).To(Equal(&corev1.PodAntiAffinity{
-			RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-				podAffinityTerm("camel.apache.org/integration", metav1.LabelSelectorOpExists, "kubernetes.io/hostname"),
-			},
-		}))
-
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 	})
 }
 
-func selectSchedulableNode() (*corev1.Node, error) {
-	nodes, err := TestClient().CoreV1().Nodes().List(TestContext, metav1.ListOptions{})
+func selectSchedulableNode(t *testing.T) (*corev1.Node, error) {
+	nodes, err := TestClient(t).CoreV1().Nodes().List(TestContext, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}

@@ -31,10 +31,21 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 	c, err := test.NewFakeClient(
+		&v1.IntegrationPlatform{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationPlatformKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "camel-k",
+			},
+		},
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: v1.SchemeGroupVersion.String(),
@@ -81,7 +92,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
@@ -104,7 +115,7 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 		},
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, kits)
 	assert.Len(t, kits, 1)
 	assert.Equal(t, "my-kit-2", kits[0].Name)
@@ -112,6 +123,16 @@ func TestLookupKitForIntegration_DiscardKitsInError(t *testing.T) {
 
 func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T) {
 	c, err := test.NewFakeClient(
+		&v1.IntegrationPlatform{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       v1.IntegrationPlatformKind,
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+				Name:      "camel-k",
+			},
+		},
 		// Should be discarded because it does not contain the required traits
 		&v1.IntegrationKit{
 			TypeMeta: metav1.TypeMeta{
@@ -162,11 +183,6 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
-				Traits: v1.IntegrationKitTraits{
-					Builder: &traitv1.BuilderTrait{
-						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					},
-				},
 			},
 		},
 		// Should NOT be discarded because it contains a subset of the required traits and
@@ -199,19 +215,11 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 			},
 			Status: v1.IntegrationKitStatus{
 				Phase: v1.IntegrationKitPhaseReady,
-				Traits: v1.IntegrationKitTraits{
-					Builder: &traitv1.BuilderTrait{
-						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-						Properties: []string{
-							"build-key1=build-value1",
-						},
-					},
-				},
 			},
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
@@ -241,18 +249,10 @@ func TestLookupKitForIntegration_DiscardKitsWithIncompatibleTraits(t *testing.T)
 				"camel-core",
 				"camel-irc",
 			},
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
 		},
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, kits)
 	assert.Len(t, kits, 1)
 	assert.Equal(t, "my-kit-3", kits[0].Name)
@@ -269,13 +269,6 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-				},
-			},
-		},
-		Status: v1.IntegrationStatus{
 			Traits: v1.Traits{
 				Builder: &traitv1.BuilderTrait{
 					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
@@ -299,7 +292,7 @@ func TestHasMatchingTraits_KitNoTraitShouldNotBePicked(t *testing.T) {
 	a.InjectLogger(log.Log)
 
 	ok, err := integrationAndKitHaveSameTraits(integration, kit)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, ok)
 }
 
@@ -314,16 +307,6 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 			Name:      "my-integration",
 		},
 		Spec: v1.IntegrationSpec{
-			Traits: v1.Traits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
-		},
-		Status: v1.IntegrationStatus{
 			Traits: v1.Traits{
 				Builder: &traitv1.BuilderTrait{
 					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
@@ -354,23 +337,13 @@ func TestHasMatchingTraits_KitSameTraitShouldBePicked(t *testing.T) {
 				},
 			},
 		},
-		Status: v1.IntegrationKitStatus{
-			Traits: v1.IntegrationKitTraits{
-				Builder: &traitv1.BuilderTrait{
-					PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-					Properties: []string{
-						"build-key1=build-value1",
-					},
-				},
-			},
-		},
 	}
 
 	a := buildKitAction{}
 	a.InjectLogger(log.Log)
 
 	ok, err := integrationAndKitHaveSameTraits(integration, kit)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 }
 
@@ -472,7 +445,7 @@ func TestHasNotMatchingSources(t *testing.T) {
 }
 
 func integrationAndKitHaveSameTraits(i1 *v1.Integration, i2 *v1.IntegrationKit) (bool, error) {
-	itOpts, err := trait.NewStatusTraitsOptionsForIntegration(i1)
+	itOpts, err := trait.NewSpecTraitsOptionsForIntegration(i1)
 	if err != nil {
 		return false, err
 	}

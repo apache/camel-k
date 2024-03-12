@@ -27,6 +27,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateBaseImageDockerFile(t *testing.T) {
@@ -44,12 +45,12 @@ func TestCreateBaseImageDockerFile(t *testing.T) {
 	BaseWorkingDirectory = "/tmp/"
 
 	err := CreateBaseImageDockerFile()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	baseDockerFilePath := filepath.Join(BaseWorkingDirectory, "Dockerfile")
 
 	c, err := util.ReadFile(baseDockerFilePath)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(c))
 
 	os.Remove("/tmp/Dockerfile")
@@ -91,10 +92,10 @@ func TestCreateIntegrationImageDockerFile(t *testing.T) {
 	expected := strings.Join(dockerFile1, "\n")
 
 	err := CreateIntegrationImageDockerFile(&cmd, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	c, err := util.ReadFile("/tmp/Dockerfile")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(c))
 
 	os.Remove("/tmp/Dockerfile")
@@ -102,10 +103,10 @@ func TestCreateIntegrationImageDockerFile(t *testing.T) {
 	expected = strings.Join(dockerFile2, "\n")
 
 	err = CreateIntegrationImageDockerFile(&cmd, true)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	c, err = util.ReadFile("/tmp/Dockerfile")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, string(c))
 
 	os.Remove("/tmp/Dockerfile")
@@ -136,9 +137,9 @@ func TestExtractRegistryName(t *testing.T) {
 	expected := "localhost:5000"
 
 	result, err := ExtractRegistryName("localhost:5000/imageName")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, result)
 
 	_, err = ExtractRegistryName("imageName")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }

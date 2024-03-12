@@ -41,39 +41,40 @@ func TestOperatorBasic(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	g := NewWithT(t)
+	g.Expect(UninstallAll(t)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg))
+		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, g, Make(t, "setup", namespaceArg))
 		// Skip default kamelets installation for faster test runs
-		ExpectExecSucceed(t, Make("operator",
+		ExpectExecSucceed(t, g, Make(t, "operator",
 			namespaceArg,
 			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
 		// Check if restricted security context has been applyed
-		operatorPod := OperatorPod(ns)()
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
+		operatorPod := OperatorPod(t, ns)()
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
-		Eventually(Platform(ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
 		registry := os.Getenv("KIND_REGISTRY")
 		if registry != "" {
-			platform := Platform(ns)()
-			Expect(platform.Status.Build.Registry).ShouldNot(BeNil())
-			Expect(platform.Status.Build.Registry.Address).To(Equal(registry))
+			platform := Platform(t, ns)()
+			g.Expect(platform.Status.Build.Registry).ShouldNot(BeNil())
+			g.Expect(platform.Status.Build.Registry.Address).To(Equal(registry))
 		}
 
 	})
@@ -84,29 +85,30 @@ func TestOperatorKustomizeAlternativeImage(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	g := NewWithT(t)
+	g.Expect(UninstallAll(t)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg))
+		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, g, Make(t, "setup", namespaceArg))
 
 		// Skip default kamelets installation for faster test runs
 		newImage := "quay.io/kameltest/kamel-operator"
 		newTag := "1.1.1"
-		ExpectExecSucceed(t, Make("operator",
+		ExpectExecSucceed(t, g, Make(t, "operator",
 			fmt.Sprintf("CUSTOM_IMAGE=%s", newImage),
 			fmt.Sprintf("CUSTOM_VERSION=%s", newTag),
 			namespaceArg,
 			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		Eventually(OperatorImage(ns)).Should(Equal(fmt.Sprintf("%s:%s", newImage, newTag)))
+		g.Eventually(OperatorImage(t, ns)).Should(Equal(fmt.Sprintf("%s:%s", newImage, newTag)))
 	})
 }
 
@@ -115,46 +117,47 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	UninstallAll()
+	g := NewWithT(t)
+	g.Expect(UninstallAll(t)).To(Succeed())
 
 	// Return the cluster to previous state
-	defer Cleanup()
+	defer Cleanup(t)
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
-		ExpectExecSucceed(t, Make("setup-cluster", namespaceArg))
-		ExpectExecSucceed(t, Make("setup", namespaceArg, "GLOBAL=true"))
+		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
+		ExpectExecSucceed(t, g, Make(t, "setup", namespaceArg, "GLOBAL=true"))
 
 		// Skip default kamelets installation for faster test runs
-		ExpectExecSucceed(t, Make("operator",
+		ExpectExecSucceed(t, g, Make(t, "operator",
 			namespaceArg,
 			"GLOBAL=true",
 			"INSTALL_DEFAULT_KAMELETS=false"))
 
 		// Refresh the test client to account for the newly installed CRDs
-		SyncClient()
+		RefreshClient(t)
 
-		podFunc := OperatorPod(ns)
-		Eventually(podFunc).ShouldNot(BeNil())
-		Eventually(OperatorPodPhase(ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		podFunc := OperatorPod(t, ns)
+		g.Eventually(podFunc).ShouldNot(BeNil())
+		g.Eventually(OperatorPodPhase(t, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		pod := podFunc()
 
 		containers := pod.Spec.Containers
-		Expect(containers).NotTo(BeEmpty())
+		g.Expect(containers).NotTo(BeEmpty())
 
 		envvars := containers[0].Env
-		Expect(envvars).NotTo(BeEmpty())
+		g.Expect(envvars).NotTo(BeEmpty())
 
 		found := false
 		for _, v := range envvars {
 			if v.Name == "WATCH_NAMESPACE" {
-				Expect(v.Value).To(Equal("\"\""))
+				g.Expect(v.Value).To(Equal("\"\""))
 				found = true
 				break
 			}
 		}
-		Expect(found).To(BeTrue())
+		g.Expect(found).To(BeTrue())
 
-		Eventually(Platform(ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
 	})
 }

@@ -41,22 +41,21 @@ func TestRunWithDockerHubRegistry(t *testing.T) {
 		return
 	}
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-docker-hub"
-		Expect(KamelInstallWithID(operatorID, ns,
+		g.Expect(KamelInstallWithID(t, operatorID, ns,
 			"--registry", "docker.io",
 			"--organization", user,
 			"--registry-auth-username", user,
 			"--registry-auth-password", pass,
-			"--cluster-type", "kubernetes").
-			Execute()).To(Succeed())
+			"--cluster-type", "kubernetes")).To(Succeed())
 
-		Expect(KamelRunWithID(operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(IntegrationPodImage(ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.io"))
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPodImage(t, ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.io"))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
@@ -69,21 +68,20 @@ func TestRunWithGithubPackagesRegistry(t *testing.T) {
 		return
 	}
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-github-registry"
-		Expect(KamelInstallWithID(operatorID, ns,
+		g.Expect(KamelInstallWithID(t, operatorID, ns,
 			"--registry", "docker.pkg.github.com",
 			"--organization", repo,
 			"--registry-auth-username", user,
 			"--registry-auth-password", pass,
-			"--cluster-type", "kubernetes").
-			Execute()).To(Succeed())
+			"--cluster-type", "kubernetes")).To(Succeed())
 
-		Expect(KamelRunWithID(operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Eventually(IntegrationPodImage(ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.pkg.github.com"))
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
+		g.Eventually(IntegrationLogs(t, ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPodImage(t, ns, "groovy"), TestTimeoutShort).Should(HavePrefix("docker.pkg.github.com"))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

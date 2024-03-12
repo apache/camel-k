@@ -28,6 +28,7 @@ rules:
   - builds/finalizers
   - integrationkits/finalizers
   - integrationplatforms/finalizers
+  - integrationprofiles/finalizers
   - integrations/finalizers
   - pipes/finalizers
   - kameletbindings/finalizers

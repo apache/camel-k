@@ -22,6 +22,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -35,7 +36,7 @@ func initializeKameletRemoveRepoCmdOptions(t *testing.T) (*kameletRemoveRepoComm
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	kameletRemoveRepoCommandOptions := addTestKameletRemoveRepoCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return kameletRemoveRepoCommandOptions, rootCmd, *options
 }
@@ -57,30 +58,30 @@ func addTestKameletRemoveRepoCmd(options RootCmdOptions, rootCmd *cobra.Command)
 func TestKameletRemoveRepoNoFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletRemoveRepoCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "foo")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestKameletRemoveRepoNonExistingFlag(t *testing.T) {
 	_, rootCmd, _ := initializeKameletRemoveRepoCmdOptions(t)
 	_, err := test.ExecuteCommand(rootCmd, cmdKameletRemoveRepo, "--nonExistingFlag", "foo")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKameletRemoveRepoURINotFoundEmpty(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{}
 	_, err := getURIIndex("foo", repositories)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKameletRemoveRepoURINotFoundNotEmpty(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar"}}
 	_, err := getURIIndex("foo", repositories)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestKameletRemoveRepoURIFound(t *testing.T) {
 	repositories := []v1.KameletRepositorySpec{{URI: "github:foo/bar1"}, {URI: "github:foo/bar2"}, {URI: "github:foo/bar3"}}
 	i, err := getURIIndex("github:foo/bar2", repositories)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 1, i)
 }

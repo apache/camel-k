@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
@@ -37,19 +38,19 @@ func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
 
 	trait := newErrorHandlerTrait()
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 
 	e.Integration.Status.Phase = v1.IntegrationPhaseNone
 	enabled, condition, err = trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 	enabled, condition, err = trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
@@ -65,12 +66,12 @@ func TestErrorHandlerApplySource(t *testing.T) {
 
 	trait := newErrorHandlerTrait()
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
 	err = trait.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `- error-handler:
     ref-error-handler: defaultErrorHandler
 `, e.Integration.Status.GeneratedSources[0].Content)
@@ -78,7 +79,7 @@ func TestErrorHandlerApplySource(t *testing.T) {
 
 func TestErrorHandlerApplyDependency(t *testing.T) {
 	c, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	e := &Environment{
 		Catalog:      NewEnvironmentTestCatalog(),
 		CamelCatalog: c,
@@ -91,11 +92,11 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 
 	trait := newErrorHandlerTrait()
 	enabled, condition, err := trait.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
 	err = trait.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "camel:log", e.Integration.Status.Dependencies[0])
 }

@@ -29,6 +29,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -36,7 +37,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
-func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v1.Integration, options ...ctrl.ListOption) ([]v1.IntegrationKit, error) {
+func lookupKitsForIntegration(ctx context.Context, c client.Client, integration *v1.Integration, options ...ctrl.ListOption) ([]v1.IntegrationKit, error) {
 	pl, err := platform.GetForResource(ctx, c, integration)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		return nil, err
@@ -70,7 +71,7 @@ func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v
 	kits := make([]v1.IntegrationKit, 0)
 	for i := range list.Items {
 		kit := &list.Items[i]
-		match, err := integrationMatches(integration, kit)
+		match, err := integrationMatches(ctx, c, integration, kit)
 		if err != nil {
 			return nil, err
 		} else if !match || kit.Status.Phase == v1.IntegrationKitPhaseError {
@@ -84,18 +85,18 @@ func lookupKitsForIntegration(ctx context.Context, c ctrl.Reader, integration *v
 
 // sameOrMatch returns whether the v1.IntegrationKit is the one used by the v1.Integration or if it meets the
 // requirements of the v1.Integration.
-func sameOrMatch(kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
+func sameOrMatch(ctx context.Context, c client.Client, kit *v1.IntegrationKit, integration *v1.Integration) (bool, error) {
 	if integration.Status.IntegrationKit != nil {
 		if integration.Status.IntegrationKit.Namespace == kit.Namespace && integration.Status.IntegrationKit.Name == kit.Name {
 			return true, nil
 		}
 	}
 
-	return integrationMatches(integration, kit)
+	return integrationMatches(ctx, c, integration, kit)
 }
 
 // integrationMatches returns whether the v1.IntegrationKit meets the requirements of the v1.Integration.
-func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
+func integrationMatches(ctx context.Context, c client.Client, integration *v1.Integration, kit *v1.IntegrationKit) (bool, error) {
 	ilog := log.ForIntegration(integration)
 
 	ilog.Debug("Matching integration", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
@@ -114,11 +115,19 @@ func integrationMatches(integration *v1.Integration, kit *v1.IntegrationKit) (bo
 	// A kit can be used only if it contains a subset of the traits and related configurations
 	// declared on integration.
 
-	itc, err := trait.NewStatusTraitsOptionsForIntegration(integration)
+	pl, err := platform.GetForResource(ctx, c, integration)
+	if err != nil && !k8serrors.IsNotFound(err) {
+		return false, err
+	}
+	if _, err := platform.ApplyIntegrationProfile(ctx, c, pl, integration); err != nil {
+		return false, err
+	}
+
+	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(integration, pl)
 	if err != nil {
 		return false, err
 	}
-	ikc, err := trait.NewStatusTraitsOptionsForIntegrationKit(kit)
+	ikc, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
 	if err != nil {
 		return false, err
 	}
@@ -181,7 +190,7 @@ func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error)
 	if err != nil {
 		return false, err
 	}
-	c2, err := trait.NewStatusTraitsOptionsForIntegrationKit(target)
+	c2, err := trait.NewSpecTraitsOptionsForIntegrationKit(target)
 	if err != nil {
 		return false, err
 	}

@@ -39,7 +39,7 @@ func newKameletGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kameletG
 		Use:     "get",
 		Short:   "Get defined Kamelet",
 		Long:    `Get defined Kamelet.`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(); err != nil {
 				return err

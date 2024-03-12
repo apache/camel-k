@@ -25,12 +25,11 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/install"
-	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-// NewCreateAction returns a action that creates resources needed by the platform.
+// NewCreateAction returns the action that creates resources needed by the platform.
 func NewCreateAction() Action {
 	return &createAction{}
 }
@@ -67,7 +66,7 @@ func (action *createAction) Handle(ctx context.Context, platform *v1.Integration
 		}
 	}
 
-	if !platformutil.IsSecondary(platform) && defaults.InstallDefaultKamelets() {
+	if defaults.InstallDefaultKamelets() {
 		// Kamelet Catalog installed on platform reconciliation for cases where users install a global operator
 		if err := install.KameletCatalog(ctx, action.client, platform.Namespace); err != nil {
 			return nil, err

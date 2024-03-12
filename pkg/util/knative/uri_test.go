@@ -22,12 +22,13 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 )
 
 func TestChannelUri(t *testing.T) {
 	ref, err := ExtractObjectReference("knative:endpoint/ciao")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "",
 		APIVersion: "",
@@ -35,7 +36,7 @@ func TestChannelUri(t *testing.T) {
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative:endpoint/ciao?apiVersion=xxx")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "",
 		APIVersion: "xxx",
@@ -43,7 +44,7 @@ func TestChannelUri(t *testing.T) {
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative:endpoint/ciao?x=y&apiVersion=xxx")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "",
 		APIVersion: "xxx",
@@ -51,7 +52,7 @@ func TestChannelUri(t *testing.T) {
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative:channel/ciao2?x=y&apiVersion=eventing.knative.dev/v1&kind=KafkaChannel")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "KafkaChannel",
 		APIVersion: "eventing.knative.dev/v1",
@@ -59,7 +60,7 @@ func TestChannelUri(t *testing.T) {
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative:endpoint/ciao?aapiVersion=xxx&kind=Broker")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Broker",
 		APIVersion: "",
@@ -67,7 +68,7 @@ func TestChannelUri(t *testing.T) {
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative://endpoint/ciao?&apiVersion=serving.knative.dev/v1alpha1&kind=Service&1=1")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Kind:       "Service",
 		APIVersion: "serving.knative.dev/v1alpha1",
@@ -75,7 +76,7 @@ func TestChannelUri(t *testing.T) {
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative://event/chuck?&apiVersion=eventing.knative.dev/v1beta1&name=broker2")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		APIVersion: "eventing.knative.dev/v1beta1",
 		Name:       "broker2",
@@ -83,14 +84,14 @@ func TestChannelUri(t *testing.T) {
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative://event/chuck?&brokerApxxiVersion=eventing.knative.dev/v1beta1&brokxerName=broker2")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		Name: "default",
 		Kind: "Broker",
 	}, ref)
 
 	ref, err = ExtractObjectReference("knative://event?&apiVersion=eventing.knative.dev/v1beta13&brokxerName=broker2")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.ObjectReference{
 		APIVersion: "eventing.knative.dev/v1beta13",
 		Name:       "default",

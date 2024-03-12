@@ -76,8 +76,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/watch"
 )
 
-const usageDependency = `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency, "-d http(s)://my-repo/my-dependency.jar|targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>&classpath=<true>" for custom dependencies located on an http server or "file://localPath[?targetPath=<path>&registry=<registry_URL>&skipChecksums=<true>&skipPOM=<true>&classpath=<true>]" for local files`
-
 func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) {
 	options := runCmdOptions{
 		RootCmdOptions: rootCmdOptions,
@@ -98,7 +96,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().String("image", "", "An image built externally (ie, via CICD). Enabling it will skip the Integration build phase.")
 	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
-	cmd.Flags().StringArrayP("dependency", "d", nil, usageDependency)
+	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency`)
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
 	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name])")
@@ -112,6 +110,7 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 	cmd.Flags().Bool("use-flows", true, "Write yaml sources as Flow objects in the integration custom resource")
 	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this integration.")
 	cmd.Flags().String("profile", "", "Trait profile used for deployment")
+	cmd.Flags().String("integration-profile", "", "Integration profile used for deployment")
 	cmd.Flags().StringArrayP("trait", "t", nil, "Configure a trait. E.g. \"-t service.enabled=false\"")
 	cmd.Flags().StringP("output", "o", "", "Output format. One of: json|yaml")
 	cmd.Flags().Bool("compression", false, "Enable storage of sources and resources as a compressed binary blobs")
@@ -134,38 +133,39 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 }
 
 type runCmdOptions struct {
-	*RootCmdOptions `json:"-"`
-	Compression     bool     `mapstructure:"compression" yaml:",omitempty"`
-	Wait            bool     `mapstructure:"wait" yaml:",omitempty"`
-	Logs            bool     `mapstructure:"logs" yaml:",omitempty"`
-	Sync            bool     `mapstructure:"sync" yaml:",omitempty"`
-	Dev             bool     `mapstructure:"dev" yaml:",omitempty"`
-	UseFlows        bool     `mapstructure:"use-flows" yaml:",omitempty"`
-	Save            bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
-	IntegrationKit  string   `mapstructure:"kit" yaml:",omitempty"`
-	IntegrationName string   `mapstructure:"name" yaml:",omitempty"`
-	ContainerImage  string   `mapstructure:"image" yaml:",omitempty"`
-	Profile         string   `mapstructure:"profile" yaml:",omitempty"`
-	OperatorID      string   `mapstructure:"operator-id" yaml:",omitempty"`
-	OutputFormat    string   `mapstructure:"output" yaml:",omitempty"`
-	PodTemplate     string   `mapstructure:"pod-template" yaml:",omitempty"`
-	ServiceAccount  string   `mapstructure:"service-account" yaml:",omitempty"`
-	Connects        []string `mapstructure:"connects" yaml:",omitempty"`
-	Resources       []string `mapstructure:"resources" yaml:",omitempty"`
-	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
-	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
-	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
-	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
-	Configs         []string `mapstructure:"configs" yaml:",omitempty"`
-	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
-	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
-	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
-	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
-	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
-	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
-	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
-	RegistryOptions url.Values
-	Force           bool `mapstructure:"force" yaml:",omitempty"`
+	*RootCmdOptions    `json:"-"`
+	Compression        bool     `mapstructure:"compression" yaml:",omitempty"`
+	Wait               bool     `mapstructure:"wait" yaml:",omitempty"`
+	Logs               bool     `mapstructure:"logs" yaml:",omitempty"`
+	Sync               bool     `mapstructure:"sync" yaml:",omitempty"`
+	Dev                bool     `mapstructure:"dev" yaml:",omitempty"`
+	UseFlows           bool     `mapstructure:"use-flows" yaml:",omitempty"`
+	Save               bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	IntegrationKit     string   `mapstructure:"kit" yaml:",omitempty"`
+	IntegrationName    string   `mapstructure:"name" yaml:",omitempty"`
+	ContainerImage     string   `mapstructure:"image" yaml:",omitempty"`
+	Profile            string   `mapstructure:"profile" yaml:",omitempty"`
+	IntegrationProfile string   `mapstructure:"integration-profile" yaml:",omitempty"`
+	OperatorID         string   `mapstructure:"operator-id" yaml:",omitempty"`
+	OutputFormat       string   `mapstructure:"output" yaml:",omitempty"`
+	PodTemplate        string   `mapstructure:"pod-template" yaml:",omitempty"`
+	ServiceAccount     string   `mapstructure:"service-account" yaml:",omitempty"`
+	Connects           []string `mapstructure:"connects" yaml:",omitempty"`
+	Resources          []string `mapstructure:"resources" yaml:",omitempty"`
+	OpenAPIs           []string `mapstructure:"open-apis" yaml:",omitempty"`
+	Dependencies       []string `mapstructure:"dependencies" yaml:",omitempty"`
+	Properties         []string `mapstructure:"properties" yaml:",omitempty"`
+	BuildProperties    []string `mapstructure:"build-properties" yaml:",omitempty"`
+	Configs            []string `mapstructure:"configs" yaml:",omitempty"`
+	Repositories       []string `mapstructure:"maven-repositories" yaml:",omitempty"`
+	Traits             []string `mapstructure:"traits" yaml:",omitempty"`
+	Volumes            []string `mapstructure:"volumes" yaml:",omitempty"`
+	EnvVars            []string `mapstructure:"envs" yaml:",omitempty"`
+	Labels             []string `mapstructure:"labels" yaml:",omitempty"`
+	Annotations        []string `mapstructure:"annotations" yaml:",omitempty"`
+	Sources            []string `mapstructure:"sources" yaml:",omitempty"`
+	RegistryOptions    url.Values
+	Force              bool `mapstructure:"force" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -187,7 +187,8 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 
 	// load from kamel.run (1)
 	pathToRoot := pathToRoot(cmd)
-	if err := decodeKey(o, pathToRoot); err != nil {
+
+	if err := decodeKey(o, pathToRoot, o.Flags.AllSettings()); err != nil {
 		return err
 	}
 
@@ -212,7 +213,7 @@ func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
 	if name != "" {
 		// load from kamel.run.integration.$name (2)
 		pathToRoot += ".integration." + name
-		if err := decodeKey(o, pathToRoot); err != nil {
+		if err := decodeKey(o, pathToRoot, o.Flags.AllSettings()); err != nil {
 			return err
 		}
 
@@ -666,6 +667,17 @@ func (o *runCmdOptions) applyAnnotations(cmd *cobra.Command, c client.Client, it
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
 	it.SetOperatorID(strings.TrimSpace(o.OperatorID))
 
+	// --integration-profile={id} is a syntax sugar for '--annotation camel.apache.org/integration-profile.id={id}'
+	if o.IntegrationProfile != "" {
+		if strings.Contains(o.IntegrationProfile, "/") {
+			namespacedName := strings.SplitN(o.IntegrationProfile, "/", 2)
+			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, namespacedName[0])
+			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, namespacedName[1])
+		} else {
+			v1.SetAnnotation(&it.ObjectMeta, v1.IntegrationProfileAnnotation, o.IntegrationProfile)
+		}
+	}
+
 	for _, annotation := range o.Annotations {
 		parts := strings.SplitN(annotation, "=", 2)
 		if len(parts) == 2 {
@@ -818,6 +830,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 	var platform *v1.IntegrationPlatform
 	var catalog *camel.RuntimeCatalog
 	for _, item := range o.Dependencies {
+		// Deprecated: won't be supported in future releases
 		if strings.HasPrefix(item, "file://") || strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {
 			if platform == nil {
 				var err error
@@ -826,6 +839,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 					return err
 				}
 			}
+			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: this feature is deprecated and may disappear in future release. Use jvm trait instead.\n")
 			if err := o.uploadDependency(platform, item, name, cmd, it); err != nil {
 				return fmt.Errorf("error trying to upload %s to the Image Registry.: %w", item, err)
 			}
@@ -834,7 +848,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				// The catalog used for lightweight validation of Camel components.
 				// The exact runtime version is not used here since resolving the runtime version may be
 				// a costly operation and most of the use cases should be covered by the default catalog.
-				// And the validation only warns potential misusages of Camel components at the CLI level,
+				// And the validation only warns potential misusage of Camel components at the CLI level,
 				// so strictness of catalog version is not necessary here.
 				var err error
 				catalog, err = createCamelCatalog(o.Context)
@@ -854,7 +868,7 @@ func (o *runCmdOptions) getPlatform(cmd *cobra.Command, c client.Client, it *v1.
 	if !contains(o.Traits, "registry.enabled=false") {
 		o.Traits = append(o.Traits, "registry.enabled=true")
 	}
-	pl, err := platform.GetOrFindForResource(o.Context, c, it, true)
+	pl, err := platform.GetForResource(o.Context, c, it)
 	if err != nil {
 		return nil, err
 	}
@@ -1008,6 +1022,7 @@ func (o *runCmdOptions) getTargetPath() string {
 	return o.RegistryOptions.Get("targetPath")
 }
 
+// Deprecated: won't be supported in future releases.
 func (o *runCmdOptions) uploadDependency(platform *v1.IntegrationPlatform, item string, integrationName string, cmd *cobra.Command, integration *v1.Integration) error {
 	var localPath string
 	if strings.HasPrefix(item, "http://") || strings.HasPrefix(item, "https://") {

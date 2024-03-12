@@ -36,7 +36,7 @@ func newKameletRemoveRepoCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *k
 		Use:     "remove-repo github:owner/repo[/path_to_kamelets_folder][@version] ...",
 		Short:   "Remove a Kamelet repository",
 		Long:    `Remove a Kamelet repository.`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err
@@ -45,7 +45,7 @@ func newKameletRemoveRepoCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *k
 		},
 	}
 
-	cmd.Flags().StringP("operator-id", "x", "", "Id of the Operator to update. If not set, the active primary Integration Platform is updated.")
+	cmd.Flags().StringP("operator-id", "x", "", "Id of the Operator to update. If not set, the default active Integration Platform is updated.")
 
 	return &cmd, &options
 }

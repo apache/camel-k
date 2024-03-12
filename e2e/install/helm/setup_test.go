@@ -37,17 +37,15 @@ import (
 )
 
 func TestHelmInstallRunUninstall(t *testing.T) {
-	RegisterTestingT(t)
-
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	customImage := fmt.Sprintf("%s/apache/camel-k", KAMEL_INSTALL_REGISTRY)
 
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 
-	WithNewTestNamespace(t, func(ns string) {
-		ExpectExecSucceed(t, Make(fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
-		ExpectExecSucceed(t, Make("release-helm"))
-		ExpectExecSucceed(t,
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		ExpectExecSucceed(t, g, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
+		ExpectExecSucceed(t, g, Make(t, "release-helm"))
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"helm",
 				"install",
@@ -62,24 +60,24 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
 
 		// Check if restricted security context has been applyed
-		operatorPod := OperatorPod(ns)()
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
-		Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
+		operatorPod := OperatorPod(t, ns)()
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
+		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
 		//Test a simple route
 		t.Run("simple route", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			Expect(KamelRun(ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRun(t, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"helm",
 				"uninstall",
@@ -89,6 +87,6 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 			),
 		)
 
-		Eventually(OperatorPod(ns)).Should(BeNil())
+		g.Eventually(OperatorPod(t, ns)).Should(BeNil())
 	})
 }

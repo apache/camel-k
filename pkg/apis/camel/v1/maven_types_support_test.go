@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMarshalEmptyProperties(t *testing.T) {
@@ -34,11 +35,11 @@ func TestMarshalEmptyProperties(t *testing.T) {
 		Name: xml.Name{Local: "root"},
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = e.Flush()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "", buf.String())
 }
 
@@ -54,11 +55,11 @@ func TestMarshalProperties(t *testing.T) {
 		Name: xml.Name{Local: "root"},
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = e.Flush()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	result := buf.String()
 	assert.True(t, strings.HasPrefix(result, "<root>"))
@@ -75,11 +76,11 @@ func TestMarshalEmptyPluginProperties(t *testing.T) {
 		Name: xml.Name{Local: "root"},
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = e.Flush()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "", buf.String())
 }
 
@@ -95,11 +96,11 @@ func TestMarshalPluginProperties(t *testing.T) {
 		Name: xml.Name{Local: "root"},
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = e.Flush()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	result := buf.String()
 	assert.True(t, strings.HasPrefix(result, "<root>"))
@@ -124,11 +125,11 @@ func TestMarshalPluginPropertiesWithNestedProps(t *testing.T) {
 		Name: xml.Name{Local: "root"},
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = e.Flush()
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	result := buf.String()
 	assert.True(t, strings.HasPrefix(result, "<root>"))

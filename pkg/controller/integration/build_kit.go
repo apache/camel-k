@@ -46,13 +46,13 @@ func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// TODO: we may need to add a timeout strategy, i.e give up after some time in case of an unrecoverable error.
 
-	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, action.client, integration)
+	secrets, configmaps := getIntegrationSecretAndConfigmapResourceVersions(ctx, action.client, integration)
 	hash, err := digest.ComputeForIntegration(integration, configmaps, secrets)
 	if err != nil {
 		return nil, err
 	}
 	if hash != integration.Status.Digest {
-		action.L.Info("Integration needs a rebuild")
+		action.L.Info("Integration %s digest has changed: resetting its status. Will check if it needs to be rebuilt and restarted.", integration.Name)
 		integration.Initialize()
 		integration.Status.Digest = hash
 		return integration, nil
@@ -70,11 +70,10 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		if err != nil {
 			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
 				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
-
 		}
 
 		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
-			match, err := integrationMatches(integration, kit)
+			match, err := integrationMatches(ctx, action.client, integration, kit)
 			if err != nil {
 				return nil, fmt.Errorf("unable to match any integration kit with integration %s/%s: %w",
 					integration.Namespace, integration.Name, err)

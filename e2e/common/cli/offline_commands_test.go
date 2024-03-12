@@ -26,33 +26,30 @@ import (
 	"io"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
 )
 
 func TestKamelVersionWorksOffline(t *testing.T) {
-	RegisterTestingT(t)
-
-	assert.Nil(t, Kamel("version", "--kube-config", "non-existent-kubeconfig-file").Execute())
+	g := NewWithT(t)
+	g.Expect(Kamel(t, "version", "--kube-config", "non-existent-kubeconfig-file").Execute()).To(Succeed())
 }
 
 func TestKamelHelpOptionWorksOffline(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewWithT(t)
 
-	traitCmd := Kamel("run", "Xxx.java", "--help")
+	traitCmd := Kamel(t, "run", "Xxx.java", "--help")
 	traitCmd.SetOut(io.Discard)
-	assert.Nil(t, traitCmd.Execute())
+	g.Expect(traitCmd.Execute()).To(Succeed())
 }
 
 func TestKamelCompletionWorksOffline(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewWithT(t)
 
-	bashCmd := Kamel("completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
+	bashCmd := Kamel(t, "completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
 	bashCmd.SetOut(io.Discard)
-	zshCmd := Kamel("completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
+	zshCmd := Kamel(t, "completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
 	zshCmd.SetOut(io.Discard)
-	assert.Nil(t, bashCmd.Execute())
-	assert.Nil(t, zshCmd.Execute())
+	g.Expect(bashCmd.Execute()).To(Succeed())
+	g.Expect(zshCmd.Execute()).To(Succeed())
 }

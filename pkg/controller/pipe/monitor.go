@@ -51,14 +51,14 @@ func (action *monitorAction) CanHandle(binding *v1.Pipe) bool {
 		binding.Status.Phase == v1.PipePhaseReady
 }
 
-func (action *monitorAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.Pipe, error) {
+func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pipe, error) {
 	key := client.ObjectKey{
-		Namespace: binding.Namespace,
-		Name:      binding.Name,
+		Namespace: pipe.Namespace,
+		Name:      pipe.Name,
 	}
 	it := v1.Integration{}
 	if err := action.client.Get(ctx, key, &it); err != nil && k8serrors.IsNotFound(err) {
-		target := binding.DeepCopy()
+		target := pipe.DeepCopy()
 		// Rebuild the integration
 		target.Status.Phase = v1.PipePhaseNone
 		target.Status.SetCondition(
@@ -69,22 +69,28 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.
 		)
 		return target, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("could not load integration for Pipe %q: %w", binding.Name, err)
+		return nil, fmt.Errorf("could not load integration for Pipe %q: %w", pipe.Name, err)
 	}
 
-	operatorIDChanged := v1.GetOperatorIDAnnotation(binding) != "" &&
-		(v1.GetOperatorIDAnnotation(binding) != v1.GetOperatorIDAnnotation(&it))
+	operatorIDChanged := v1.GetOperatorIDAnnotation(pipe) != "" &&
+		(v1.GetOperatorIDAnnotation(pipe) != v1.GetOperatorIDAnnotation(&it))
 
-	sameTraits, err := trait.IntegrationAndPipeSameTraits(&it, binding)
+	integrationProfileChanged := v1.GetIntegrationProfileAnnotation(pipe) != "" &&
+		(v1.GetIntegrationProfileAnnotation(pipe) != v1.GetIntegrationProfileAnnotation(&it))
+
+	integrationProfileNamespaceChanged := v1.GetIntegrationProfileNamespaceAnnotation(pipe) != "" &&
+		(v1.GetIntegrationProfileNamespaceAnnotation(pipe) != v1.GetIntegrationProfileNamespaceAnnotation(&it))
+
+	sameTraits, err := trait.IntegrationAndPipeSameTraits(&it, pipe)
 	if err != nil {
 		return nil, err
 	}
 
 	// Check if the integration needs to be changed
-	expected, err := CreateIntegrationFor(ctx, action.client, binding)
-	if binding.Spec.Integration != nil {
-		action.L.Infof("Pipe %s is using deprecated .spec.integration parameter. Please, update and use annotation traits instead", binding.Name)
-		binding.Status.SetCondition(
+	expected, err := CreateIntegrationFor(ctx, action.client, pipe)
+	if pipe.Spec.Integration != nil {
+		action.L.Infof("Pipe %s is using deprecated .spec.integration parameter. Please, update and use annotation traits instead", pipe.Name)
+		pipe.Status.SetCondition(
 			v1.PipeIntegrationDeprecationNotice,
 			corev1.ConditionTrue,
 			".spec.integration parameter is deprecated",
@@ -92,23 +98,24 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.
 		)
 	}
 	if err != nil {
-		binding.Status.Phase = v1.PipePhaseError
-		binding.Status.SetErrorCondition(v1.PipeIntegrationConditionError,
+		pipe.Status.Phase = v1.PipePhaseError
+		pipe.Status.SetErrorCondition(v1.PipeIntegrationConditionError,
 			"Couldn't create an Integration custom resource", err)
-		return binding, err
+		return pipe, err
 	}
 
 	semanticEquality := equality.Semantic.DeepDerivative(expected.Spec, it.Spec)
 
-	if !semanticEquality || operatorIDChanged || !sameTraits {
+	if !semanticEquality || operatorIDChanged || integrationProfileChanged || integrationProfileNamespaceChanged || !sameTraits {
 		action.L.Info(
 			"Pipe needs a rebuild",
 			"semantic-equality", !semanticEquality,
 			"operatorid-changed", operatorIDChanged,
+			"integration-profile-changed", integrationProfileChanged || integrationProfileNamespaceChanged,
 			"traits-changed", !sameTraits)
 
 		// Pipe has changed and needs rebuild
-		target := binding.DeepCopy()
+		target := pipe.DeepCopy()
 		// Rebuild the integration
 		target.Status.Phase = v1.PipePhaseNone
 		target.Status.SetCondition(
@@ -121,7 +128,7 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.
 	}
 
 	// Map integration phase and conditions to Pipe
-	target := binding.DeepCopy()
+	target := pipe.DeepCopy()
 
 	switch it.Status.Phase {
 

@@ -40,7 +40,7 @@ func newDescribePlatformCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *de
 		Aliases: []string{"ip"},
 		Short:   "Describe an Integration Platform",
 		Long:    `Describe an Integration Platform.`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err

@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -32,7 +33,7 @@ import (
 
 func TestListPublishedImages(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	c, err := test.NewFakeClient(
 		&v1.IntegrationKit{
@@ -79,7 +80,7 @@ func TestListPublishedImages(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, c)
 
 	i, err := listPublishedImages(&builderContext{
@@ -88,7 +89,7 @@ func TestListPublishedImages(t *testing.T) {
 		C:       cancellable.NewContext(),
 	})
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, i, 1)
 	assert.Equal(t, "image-2", i[0].Image)
 }

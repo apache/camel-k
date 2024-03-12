@@ -40,6 +40,11 @@ func (c *Catalog) Configure(env *Environment) error {
 			return err
 		}
 	}
+	if env.IntegrationProfile != nil {
+		if err := c.configureTraits(env.IntegrationProfile.Status.Traits); err != nil {
+			return err
+		}
+	}
 	if env.IntegrationKit != nil {
 		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
 			return err

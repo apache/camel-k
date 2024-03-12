@@ -24,8 +24,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -62,6 +60,7 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	cmd.Flags().Bool("skip-cluster-role-bindings", true, "Do not uninstall the Camel K Cluster Role Bindings")
 	cmd.Flags().Bool("skip-cluster-roles", true, "Do not uninstall the Camel K Cluster Roles")
 	cmd.Flags().Bool("skip-integration-platform", false, "Do not uninstall the Camel K Integration Platform in the current namespace")
+	cmd.Flags().Bool("skip-integration-profile", false, "Do not uninstall the Camel K Integration Profile in the current namespace")
 	cmd.Flags().Bool("skip-service-accounts", false, "Do not uninstall the Camel K Service Accounts in the current namespace")
 	cmd.Flags().Bool("skip-config-maps", false, "Do not uninstall the Camel K Config Maps in the current namespace")
 	cmd.Flags().Bool("skip-registry-secret", false, "Do not uninstall the Camel K Registry Secret in the current namespace")
@@ -87,6 +86,7 @@ type uninstallCmdOptions struct {
 	SkipClusterRoleBindings bool `mapstructure:"skip-cluster-role-bindings"`
 	SkipClusterRoles        bool `mapstructure:"skip-cluster-roles"`
 	SkipIntegrationPlatform bool `mapstructure:"skip-integration-platform"`
+	SkipIntegrationProfile  bool `mapstructure:"skip-integration-profile"`
 	SkipServiceAccounts     bool `mapstructure:"skip-service-accounts"`
 	SkipConfigMaps          bool `mapstructure:"skip-config-maps"`
 	SkipRegistrySecret      bool `mapstructure:"skip-registry-secret"`
@@ -105,13 +105,14 @@ var defaultListOptions = metav1.ListOptions{
 
 func (o *uninstallCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	path := pathToRoot(cmd)
-	if err := decodeKey(o, path); err != nil {
+
+	if err := decodeKey(o, path, o.Flags.AllSettings()); err != nil {
 		return err
 	}
 
-	o.OlmOptions.OperatorName = viper.GetString(path + ".olm-operator-name")
-	o.OlmOptions.Package = viper.GetString(path + ".olm-package")
-	o.OlmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
+	o.OlmOptions.OperatorName = o.Flags.GetString(path + ".olm-operator-name")
+	o.OlmOptions.Package = o.Flags.GetString(path + ".olm-package")
+	o.OlmOptions.GlobalNamespace = o.Flags.GetString(path + ".olm-global-namespace")
 
 	return nil
 }
@@ -129,6 +130,13 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Integration Platform removed from namespace %s\n", o.Namespace)
 	}
 
+	if !o.SkipIntegrationProfile {
+		if err = o.uninstallIntegrationProfile(o.Context, c); err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "Camel K Integration Profile removed from namespace %s\n", o.Namespace)
+	}
+
 	if err = o.uninstallNamespaceResources(o.Context, cmd, c); err != nil {
 		return err
 	}
@@ -137,7 +145,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	uninstallViaOLM := false
 	if o.OlmEnabled {
 		var err error
-		if uninstallViaOLM, err = olm.IsAPIAvailable(o.Context, c, o.Namespace); err != nil {
+		if uninstallViaOLM, err = olm.IsAPIAvailable(c); err != nil {
 			return fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
 		}
 
@@ -478,6 +486,22 @@ func (o *uninstallCmdOptions) uninstallIntegrationPlatform(ctx context.Context, 
 
 	for _, integrationPlatform := range integrationPlatforms.Items {
 		err := c.CamelV1().IntegrationPlatforms(o.Namespace).Delete(ctx, integrationPlatform.GetName(), metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (o *uninstallCmdOptions) uninstallIntegrationProfile(ctx context.Context, c client.Client) error {
+	configurations, err := c.CamelV1().IntegrationProfiles(o.Namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, configuration := range configurations.Items {
+		err := c.CamelV1().IntegrationProfiles(o.Namespace).Delete(ctx, configuration.GetName(), metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}

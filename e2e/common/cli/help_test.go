@@ -31,27 +31,27 @@ import (
 )
 
 func TestKamelCLIHelp(t *testing.T) {
-	RegisterTestingT(t)
+	g := NewWithT(t)
 
 	t.Run("default help message", func(t *testing.T) {
-		helpMsg := GetOutputString(Kamel("help"))
-		Expect(helpMsg).To(ContainSubstring("Apache Camel K is a lightweight integration platform, born on Kubernetes"))
-		Expect(helpMsg).To(ContainSubstring("Usage:"))
-		Expect(helpMsg).To(ContainSubstring("Available Commands:"))
-		Expect(helpMsg).To(ContainSubstring("Flags:"))
+		helpMsg := GetOutputString(Kamel(t, "help"))
+		g.Expect(helpMsg).To(ContainSubstring("Apache Camel K is a lightweight integration platform, born on Kubernetes"))
+		g.Expect(helpMsg).To(ContainSubstring("Usage:"))
+		g.Expect(helpMsg).To(ContainSubstring("Available Commands:"))
+		g.Expect(helpMsg).To(ContainSubstring("Flags:"))
 	})
 
 	t.Run("'get' command help (short flag)", func(t *testing.T) {
-		helpMsg := GetOutputString(Kamel("get", "-h"))
-		Expect(helpMsg).To(ContainSubstring("Get the status of integrations deployed on Kubernetes"))
-		Expect(helpMsg).To(ContainSubstring("Usage:"))
-		Expect(helpMsg).To(ContainSubstring("Flags:"))
+		helpMsg := GetOutputString(Kamel(t, "get", "-h"))
+		g.Expect(helpMsg).To(ContainSubstring("Get the status of integrations deployed on Kubernetes"))
+		g.Expect(helpMsg).To(ContainSubstring("Usage:"))
+		g.Expect(helpMsg).To(ContainSubstring("Flags:"))
 	})
 
 	t.Run("'bind' command help (long flag)", func(t *testing.T) {
-		helpMsg := GetOutputString(Kamel("bind", "--help"))
-		Expect(helpMsg).To(ContainSubstring("Bind Kubernetes resources, such as Kamelets, in an integration flow."))
-		Expect(helpMsg).To(ContainSubstring("kamel bind [source] [sink] ... [flags]"))
-		Expect(helpMsg).To(ContainSubstring("Global Flags:"))
+		helpMsg := GetOutputString(Kamel(t, "bind", "--help"))
+		g.Expect(helpMsg).To(ContainSubstring("Bind Kubernetes resources, such as Kamelets, in an integration flow."))
+		g.Expect(helpMsg).To(ContainSubstring("kamel bind [source] [sink] ... [flags]"))
+		g.Expect(helpMsg).To(ContainSubstring("Global Flags:"))
 	})
 }

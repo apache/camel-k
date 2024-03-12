@@ -33,16 +33,16 @@ import (
 // TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.
 // This feature is used in Tekton pipelines.
 func TestTektonLikeBehavior(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateOperatorServiceAccount(ns)).To(Succeed())
-		Expect(CreateOperatorRole(ns)).To(Succeed())
-		Expect(CreateOperatorRoleBinding(ns)).To(Succeed())
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		g.Expect(CreateOperatorServiceAccount(t, ns)).To(Succeed())
+		g.Expect(CreateOperatorRole(t, ns)).To(Succeed())
+		g.Expect(CreateOperatorRoleBinding(t, ns)).To(Succeed())
 
-		Eventually(OperatorPod(ns)).Should(BeNil())
-		Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
+		g.Eventually(OperatorPod(t, ns)).Should(BeNil())
+		g.Expect(CreateKamelPod(t, ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
 
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
 	})
 }

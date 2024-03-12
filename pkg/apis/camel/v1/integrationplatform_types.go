@@ -189,8 +189,6 @@ const (
 	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
 	// IntegrationPlatformPhaseCreateCatalog when the IntegrationPlatform creates a new CamelCatalog.
 	IntegrationPlatformPhaseCreateCatalog IntegrationPlatformPhase = "CreateCatalog"
-	// IntegrationPlatformPhaseDuplicate when the IntegrationPlatform is duplicated.
-	IntegrationPlatformPhaseDuplicate IntegrationPlatformPhase = "Duplicate"
 
 	// IntegrationPlatformConditionReady is the condition if the IntegrationPlatform is ready.
 	// Deprecated: use IntegrationPlatformConditionTypeCreated.

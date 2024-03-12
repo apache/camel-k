@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -192,7 +193,7 @@ const expectedCustomSettingsWithExtraServers = `<?xml version="1.0" encoding="UT
 
 func TestMavenSettingsFromConfigMap(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	c, err := test.NewFakeClient(
 		&corev1.ConfigMap{
@@ -210,7 +211,7 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ctx := builderContext{
 		Catalog:   catalog,
@@ -234,14 +235,14 @@ func TestMavenSettingsFromConfigMap(t *testing.T) {
 	}
 
 	err = Project.GenerateProjectSettings.execute(&ctx)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 }
 
 func TestMavenSettingsWithSettingsSecurityFromConfigMap(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	c, err := test.NewFakeClient(
 		&corev1.ConfigMap{
@@ -272,7 +273,7 @@ func TestMavenSettingsWithSettingsSecurityFromConfigMap(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ctx := builderContext{
 		Catalog:   catalog,
@@ -304,7 +305,7 @@ func TestMavenSettingsWithSettingsSecurityFromConfigMap(t *testing.T) {
 	}
 
 	err = Project.GenerateProjectSettings.execute(&ctx)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 	assert.Equal(t, []byte("setting-security-data"), ctx.Maven.SettingsSecurity)
@@ -312,7 +313,7 @@ func TestMavenSettingsWithSettingsSecurityFromConfigMap(t *testing.T) {
 
 func TestMavenSettingsFromSecret(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	c, err := test.NewFakeClient(
 		&corev1.Secret{
@@ -330,7 +331,7 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ctx := builderContext{
 		Catalog:   catalog,
@@ -354,14 +355,14 @@ func TestMavenSettingsFromSecret(t *testing.T) {
 	}
 
 	err = Project.GenerateProjectSettings.execute(&ctx)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 }
 
 func TestMavenSettingsWithSettingsSecurityFromSecret(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	c, err := test.NewFakeClient(
 		&corev1.Secret{
@@ -392,7 +393,7 @@ func TestMavenSettingsWithSettingsSecurityFromSecret(t *testing.T) {
 		},
 	)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ctx := builderContext{
 		Catalog:   catalog,
@@ -424,7 +425,7 @@ func TestMavenSettingsWithSettingsSecurityFromSecret(t *testing.T) {
 	}
 
 	err = Project.GenerateProjectSettings.execute(&ctx)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, []byte("setting-data"), ctx.Maven.UserSettings)
 	assert.Equal(t, []byte("setting-security-data"), ctx.Maven.SettingsSecurity)
@@ -432,10 +433,10 @@ func TestMavenSettingsWithSettingsSecurityFromSecret(t *testing.T) {
 
 func TestInjectEmptyServersIntoDefaultMavenSettings(t *testing.T) {
 	settings, err := maven.NewSettings(maven.DefaultRepositories)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	content, err := util.EncodeXML(settings)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	contentStr := string(content)
 	newSettings := injectServersIntoMavenSettings(contentStr, nil)
@@ -445,7 +446,7 @@ func TestInjectEmptyServersIntoDefaultMavenSettings(t *testing.T) {
 
 func TestInjectServersIntoDefaultMavenSettings(t *testing.T) {
 	settings, err := maven.NewSettings(maven.DefaultRepositories)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	servers := []v1.Server{
 		{
@@ -459,14 +460,14 @@ func TestInjectServersIntoDefaultMavenSettings(t *testing.T) {
 	}
 
 	content, err := util.EncodeXML(settings)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	contentStr := string(content)
 	newSettings := injectServersIntoMavenSettings(contentStr, servers)
 
 	settings.Servers = servers
 	expectedNewSettings, err := util.EncodeXML(settings)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	expectedNewSettingsStr := string(expectedNewSettings)
 	assert.Equal(t, expectedNewSettingsStr, newSettings)

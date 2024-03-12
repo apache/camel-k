@@ -137,6 +137,8 @@ else
   export CAMEL_K_GLOBAL_OPERATOR_NS="default"
 fi
 
+export CAMEL_K_E2E_FAST_SETUP="true"
+
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0

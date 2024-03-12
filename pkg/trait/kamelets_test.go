@@ -370,12 +370,10 @@ func TestKameletConfigLookup(t *testing.T) {
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
 	assert.Equal(t, []configurationKey{newConfigurationKey("timer", "")}, trait.getConfigurationKeys())
 
-	err = trait.Apply(environment)
+	list, err := trait.listConfigurationSecrets(environment)
 	require.NoError(t, err)
-	assert.Len(t, environment.Integration.Status.Configuration, 2)
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
-	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
+	assert.Contains(t, list, "my-secret", "my-secret3")
+	assert.NotContains(t, list, "my-secret2")
 }
 
 func TestKameletNamedConfigLookup(t *testing.T) {
@@ -437,12 +435,10 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 		newConfigurationKey("timer", "id2"),
 	}, trait.getConfigurationKeys())
 
-	err = trait.Apply(environment)
+	list, err := trait.listConfigurationSecrets(environment)
 	require.NoError(t, err)
-	assert.Len(t, environment.Integration.Status.Configuration, 2)
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret"})
-	assert.Contains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret2"})
-	assert.NotContains(t, environment.Integration.Status.Configuration, v1.ConfigurationSpec{Type: "secret", Value: "my-secret3"})
+	assert.Contains(t, list, "my-secret", "my-secret2")
+	assert.NotContains(t, list, "my-secret3")
 }
 
 func TestKameletConditionFalse(t *testing.T) {
@@ -474,7 +470,7 @@ func TestKameletConditionFalse(t *testing.T) {
 	assert.Nil(t, condition)
 
 	err = trait.Apply(environment)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)

@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 /*
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -18,9 +15,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package integrationprofile
 
-import "github.com/apache/camel-k/v2/e2e/support"
+import (
+	"context"
 
-var ns = support.GetEnvOrDefault("CAMEL_K_TEST_NAMESPACE", support.GetCIProcessID())
-var operatorID = support.GetEnvOrDefault("CAMEL_K_OPERATOR_ID", support.GetCIProcessID())
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+)
+
+// NewMonitorAction returns an action that monitors the integration profile after it's fully initialized.
+func NewMonitorAction() Action {
+	return &monitorAction{}
+}
+
+type monitorAction struct {
+	baseAction
+}
+
+func (action *monitorAction) Name() string {
+	return "monitor"
+}
+
+func (action *monitorAction) CanHandle(profile *v1.IntegrationProfile) bool {
+	return profile.Status.Phase == v1.IntegrationProfilePhaseReady
+}
+
+func (action *monitorAction) Handle(ctx context.Context, profile *v1.IntegrationProfile) (*v1.IntegrationProfile, error) {
+	// Refresh applied profile
+	profile.ResyncStatusFullConfig()
+	return profile, nil
+}

@@ -29,10 +29,12 @@ const (
 	TraitAnnotationPrefix = "trait.camel.apache.org/"
 	// OperatorIDAnnotation operator id annotation label.
 	OperatorIDAnnotation = "camel.apache.org/operator.id"
-	// SecondaryPlatformAnnotation secondary platform annotation label.
-	SecondaryPlatformAnnotation = "camel.apache.org/secondary.platform"
 	// PlatformSelectorAnnotation platform id annotation label.
 	PlatformSelectorAnnotation = "camel.apache.org/platform.id"
+	// IntegrationProfileAnnotation integration profile id annotation label.
+	IntegrationProfileAnnotation = "camel.apache.org/integration-profile.id"
+	// IntegrationProfileNamespaceAnnotation integration profile id annotation label.
+	IntegrationProfileNamespaceAnnotation = "camel.apache.org/integration-profile.namespace"
 )
 
 // BuildConfiguration represent the configuration required to build the runtime.
@@ -230,6 +232,7 @@ type Traits struct {
 	// The configuration of Quarkus trait
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 	// The configuration of Registry trait
+	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The configuration of Route trait
 	Route *trait.RouteTrait `property:"route" json:"route,omitempty"`

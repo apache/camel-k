@@ -20,7 +20,7 @@
 
 set +e
 
-resourcetypes="integrations integrationkits integrationplatforms camelcatalogs kamelets builds pipes kameletbindings"
+resourcetypes="integrations integrationkits integrationplatforms integrationprofiles camelcatalogs kamelets builds pipes kameletbindings"
 
 #
 # Loop through the resource types

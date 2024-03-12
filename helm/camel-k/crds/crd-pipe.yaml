@@ -7038,20 +7038,26 @@ spec:
                             format: int32
                             type: integer
                           rollingUpdateMaxSurge:
+                            anyOf:
+                            - type: integer
+                            - type: string
                             description: 'The maximum number of pods that can be scheduled
                               above the desired number of pods. Value can be an absolute
                               number (ex: 5) or a percentage of desired pods (ex:
                               10%). This can not be 0 if MaxUnavailable is 0. Absolute
                               number is calculated from percentage by rounding up.
                               Defaults to `25%`.'
-                            type: integer
+                            x-kubernetes-int-or-string: true
                           rollingUpdateMaxUnavailable:
+                            anyOf:
+                            - type: integer
+                            - type: string
                             description: 'The maximum number of pods that can be unavailable
                               during the update. Value can be an absolute number (ex:
                               5) or a percentage of desired pods (ex: 10%). Absolute
                               number is calculated from percentage by rounding down.
                               This can not be 0 if MaxSurge is 0. Defaults to `25%`.'
-                            type: integer
+                            x-kubernetes-int-or-string: true
                           strategy:
                             description: The deployment strategy to use to replace
                               existing pods with new ones.
@@ -7672,7 +7678,8 @@ spec:
                             description: Enable "hot reload" when a secret/configmap
                               mounted is edited (default `false`). The configmap/secret
                               must be marked with `camel.apache.org/integration` label
-                              to be taken in account.
+                              to be taken in account. The resource will be watched
+                              for any kind change, also for changes in metadata.
                             type: boolean
                           resources:
                             description: 'A list of resources (text or binary content)
@@ -7686,6 +7693,16 @@ spec:
                             items:
                               type: string
                             type: array
+                          scanKameletsImplicitLabelSecrets:
+                            description: 'Deprecated: include your properties in an
+                              explicit property file backed by a secret. Let the operator
+                              to scan for secret labeled with `camel.apache.org/kamelet`
+                              and `camel.apache.org/kamelet.configuration`. These
+                              secrets are mounted to the application and treated as
+                              plain properties file with their key/value list (ie
+                              .spec.data["camel.my-property"] = my-value) (default
+                              `true`).'
+                            type: boolean
                           volumes:
                             description: 'A list of Persistent Volume Claims to be
                               mounted. Syntax: [pvcname:/container/path]'
@@ -7909,7 +7926,8 @@ spec:
                             type: array
                         type: object
                       registry:
-                        description: The configuration of Registry trait
+                        description: 'The configuration of Registry trait Deprecated:
+                          use jvm trait or read documentation.'
                         properties:
                           configuration:
                             description: 'Legacy trait configuration parameters. Deprecated:

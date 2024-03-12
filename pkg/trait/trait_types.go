@@ -35,7 +35,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -45,6 +44,11 @@ import (
 const (
 	True  = "true"
 	False = "false"
+
+	sourceLanguageAnnotation    = "camel.apache.org/source.language"
+	sourceLoaderAnnotation      = "camel.apache.org/source.loader"
+	sourceNameAnnotation        = "camel.apache.org/source.name"
+	sourceCompressionAnnotation = "camel.apache.org/source.compression"
 )
 
 // Identifiable represent an identifiable type.
@@ -81,14 +85,14 @@ type Trait interface {
 	RequiresIntegrationPlatform() bool
 
 	// IsAllowedInProfile tells if the trait supports the given profile
-	IsAllowedInProfile(v1.TraitProfile) bool
+	IsAllowedInProfile(traitProfile v1.TraitProfile) bool
 
 	// Order is the order in which the trait should be executed in the normal flow
 	Order() int
 }
 
 type Comparable interface {
-	Matches(Trait) bool
+	Matches(trait Trait) bool
 }
 
 type ComparableTrait interface {
@@ -190,7 +194,7 @@ func (trait *BasePlatformTrait) IsPlatformTrait() bool {
 // ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
 type ControllerStrategySelector interface {
 	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
-	SelectControllerStrategy(*Environment) (*ControllerStrategy, error)
+	SelectControllerStrategy(env *Environment) (*ControllerStrategy, error)
 	// ControllerStrategySelectorOrder returns the order (priority) of the controller strategy selector
 	ControllerStrategySelectorOrder() int
 }
@@ -207,6 +211,8 @@ type Environment struct {
 	Client client.Client
 	// The active Platform
 	Platform *v1.IntegrationPlatform
+	// The active IntegrationProfile
+	IntegrationProfile *v1.IntegrationProfile
 	// The current Integration
 	Integration *v1.Integration
 	// The IntegrationKit associated to the Integration
@@ -224,7 +230,6 @@ type Environment struct {
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
 	Interceptors          []string
-	ServiceBindingSecret  string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.
@@ -419,7 +424,7 @@ func (e *Environment) computeApplicationProperties() (*corev1.ConfigMap, error) 
 				Labels: map[string]string{
 					v1.IntegrationLabel:                e.Integration.Name,
 					"camel.apache.org/properties.type": "application",
-					kubernetes.ConfigMapTypeLabel:      "camel-properties",
+					kubernetes.ConfigMapTypeLabel:      CamelPropertiesType,
 				},
 			},
 			Data: map[string]string{
@@ -512,8 +517,9 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	// Resources (likely application properties or kamelets)
 	if e.Resources != nil {
 		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
-			// Camel properties
-			if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "camel-properties" {
+			switch configMap.Labels[kubernetes.ConfigMapTypeLabel] {
+			case CamelPropertiesType:
+				// Camel properties
 				propertiesType := configMap.Labels["camel.apache.org/properties.type"]
 				resName := propertiesType + ".properties"
 
@@ -535,10 +541,10 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 				} else {
 					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
 				}
-			} else if configMap.Labels[kubernetes.ConfigMapTypeLabel] == "kamelets-bundle" {
+			case KameletBundleType:
 				// Kamelets bundle configmap
 				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
-				refName := "kamelets-bundle"
+				refName := KameletBundleType
 				vol := getVolume(refName, "configmap", configMap.Name, "", "")
 				mnt := getMount(refName, kameletMountPoint, "", true)
 
@@ -566,17 +572,6 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		refName := kubernetes.SanitizeLabel(secret["value"])
 		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], "secret", secret["resourceType"])
 		vol := getVolume(refName, "secret", secret["value"], secret["resourceKey"], secret["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-	// append Service Binding secrets
-	if len(e.ServiceBindingSecret) > 0 {
-		secret := e.ServiceBindingSecret
-		refName := kubernetes.SanitizeLabel(secret)
-		mountPath := filepath.Join(camel.ServiceBindingsMountPath, strings.ToLower(secret))
-		vol := getVolume(refName, "secret", secret, "", "")
 		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)
@@ -740,17 +735,4 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	return nil
-}
-
-// nolint: unused
-func (e *Environment) getAllInterceptors() []string {
-	res := make([]string, 0)
-	util.StringSliceUniqueConcat(&res, e.Interceptors)
-
-	if e.Integration != nil {
-		for _, s := range e.Integration.AllSources() {
-			util.StringSliceUniqueConcat(&res, s.Interceptors)
-		}
-	}
-	return res
 }

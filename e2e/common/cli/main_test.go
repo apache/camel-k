@@ -20,32 +20,43 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package support
+package cli
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
-	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestCommonCamelKInstallStartup(t *testing.T) {
-	RegisterTestingT(t)
+func TestMain(m *testing.M) {
+	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", "false")
+	if justCompile == "true" {
+		os.Exit(m.Run())
+	}
 
-	ns := NewTestNamespace(false)
-	Expect(ns).ShouldNot(BeNil())
-	// the namespace is dynamic if there is some collision
-	// we store this value as it will be used for cleaning in the teardown process
-	SaveCIProcessID(ns.GetName())
-	// fail fast if something did not work writing the resource
-	Expect(GetCIProcessID()).ShouldNot(Equal(""))
+	g := NewGomega(func(message string, callerSkip ...int) {
+		fmt.Printf("Test setup failed! - %s\n", message)
+	})
 
-	Expect(KamelInstallWithIDAndKameletCatalog(ns.GetName(), ns.GetName()).Execute()).To(Succeed())
-	Eventually(OperatorPod(ns.GetName())).ShouldNot(BeNil())
-	Eventually(Platform(ns.GetName())).ShouldNot(BeNil())
-	Eventually(PlatformConditionStatus(ns.GetName(), v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
-		Should(Equal(corev1.ConditionTrue))
+	var t *testing.T
+
+	g.Expect(TestClient(t)).ShouldNot(BeNil())
+
+	// Install global operator for tests in this package, all tests must use this operatorID
+	g.Expect(NewNamedTestNamespace(t, operatorNS, false)).ShouldNot(BeNil())
+	g.Expect(CopyCamelCatalog(t, operatorNS, operatorID)).To(Succeed())
+	g.Expect(KamelInstallWithIDAndKameletCatalog(t, operatorID, operatorNS, "--global", "--force")).To(Succeed())
+	g.Eventually(SelectedPlatformPhase(t, operatorNS, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+	exitCode := m.Run()
+
+	g.Expect(UninstallFromNamespace(t, operatorNS))
+	g.Expect(DeleteNamespace(t, operatorNS)).To(Succeed())
+
+	os.Exit(exitCode)
 }

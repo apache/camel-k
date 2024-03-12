@@ -87,6 +87,7 @@ type IntegrationKitTraits struct {
 	// NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the Pod running the native build must have enough memory available.
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
 	// The Registry trait sets up Maven to use the Image registry as a Maven repository.
+	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The collection of addon trait configurations
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
@@ -120,8 +121,6 @@ type IntegrationKitStatus struct {
 	Version string `json:"version,omitempty"`
 	// a list of conditions which happened for the events related the kit
 	Conditions []IntegrationKitCondition `json:"conditions,omitempty"`
-	// generated traits executed by the kit
-	Traits IntegrationKitTraits `json:"traits,omitempty"`
 }
 
 // +kubebuilder:object:root=true

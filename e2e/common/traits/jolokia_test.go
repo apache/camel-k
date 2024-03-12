@@ -36,39 +36,47 @@ import (
 )
 
 func TestJolokiaTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	t.Run("Run Java with Jolokia", func(t *testing.T) {
-		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-t", "jolokia.enabled=true",
-			"-t", "jolokia.use-ssl-client-authentication=false",
-			"-t", "jolokia.protocol=http",
-			"-t", "jolokia.extended-client-check=false").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
+		operatorID := "camel-k-traits-jolokia"
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
 
-		pod := IntegrationPod(ns, name)
-		response, err := TestClient().CoreV1().RESTClient().Get().
-			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod().Name)).DoRaw(TestContext)
-		Expect(err).To(BeNil())
-		Expect(response).To(ContainSubstring(`"status":200`))
+		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, name)()
-		jolokiaTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jolokia")
-		Expect(jolokiaTrait).ToNot(BeNil())
-		Expect(len(jolokiaTrait)).To(Equal(4))
-		Expect(jolokiaTrait["enabled"]).To(Equal(true))
-		Expect(jolokiaTrait["useSSLClientAuthentication"]).To(Equal(false))
-		Expect(jolokiaTrait["protocol"]).To(Equal("http"))
-		Expect(jolokiaTrait["extendedClientCheck"]).To(Equal(false))
+		t.Run("Run Java with Jolokia", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java",
+				"--name", name,
+				"-t", "jolokia.enabled=true",
+				"-t", "jolokia.use-ssl-client-authentication=false",
+				"-t", "jolokia.protocol=http",
+				"-t", "jolokia.extended-client-check=false").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
+			pod := IntegrationPod(t, ns, name)
+			response, err := TestClient(t).CoreV1().RESTClient().Get().
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod().Name)).DoRaw(TestContext)
+			g.Expect(err).To(BeNil())
+			g.Expect(response).To(ContainSubstring(`"status":200`))
+
+			// check integration schema does not contains unwanted default trait value.
+			g.Eventually(UnstructuredIntegration(t, ns, name)).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(t, ns, name)()
+			jolokiaTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jolokia")
+			g.Expect(jolokiaTrait).ToNot(BeNil())
+			g.Expect(len(jolokiaTrait)).To(Equal(4))
+			g.Expect(jolokiaTrait["enabled"]).To(Equal(true))
+			g.Expect(jolokiaTrait["useSSLClientAuthentication"]).To(Equal(false))
+			g.Expect(jolokiaTrait["protocol"]).To(Equal("http"))
+			g.Expect(jolokiaTrait["extendedClientCheck"]).To(Equal(false))
+
+		})
+
+		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-
 }

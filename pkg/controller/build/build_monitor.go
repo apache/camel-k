@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
@@ -31,6 +32,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
+const enqueuedMsg = "%s - the build (%s) gets enqueued"
+
 var runningBuilds sync.Map
 
 type Monitor struct {
@@ -38,7 +41,8 @@ type Monitor struct {
 	buildOrderStrategy v1.BuildOrderStrategy
 }
 
-func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Build) (bool, error) {
+func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Build) (bool, *v1.BuildCondition, error) {
+
 	var runningBuildsTotal int32
 	runningBuilds.Range(func(_, v interface{}) bool {
 		runningBuildsTotal++
@@ -54,24 +58,27 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 	}
 
 	if runningBuildsTotal >= bm.maxRunningBuilds {
+		reason := fmt.Sprintf(
+			"Maximum number of running builds (%d) exceeded",
+			runningBuildsTotal,
+		)
 		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "max-running-builds-limit", runningBuildsTotal).
-			ForBuild(build).Infof("Maximum number of running builds (%d) exceeded - the build (%s) gets enqueued", runningBuildsTotal, build.Name)
-
+			ForBuild(build).Infof(enqueuedMsg, reason, build.Name)
 		// max number of running builds limit exceeded
-		return false, nil
+		return false, scheduledWaitingBuildcondition(build.Name, reason), nil
 	}
 
 	layout := build.Labels[v1.IntegrationKitLayoutLabel]
 
 	// Native builds can be run in parallel, as incremental images is not applicable.
 	if layout == v1.IntegrationKitLayoutNativeSources {
-		return true, nil
+		return true, scheduledReadyBuildcondition(build.Name), nil
 	}
 
 	// We assume incremental images is only applicable across images whose layout is identical
 	withCompatibleLayout, err := labels.NewRequirement(v1.IntegrationKitLayoutLabel, selection.Equals, []string{layout})
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 
 	builds := &v1.BuildList{}
@@ -83,11 +90,12 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 			Selector: labels.NewSelector().Add(*withCompatibleLayout),
 		})
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
 
 	var reason string
 	allowed := true
+	condition := scheduledReadyBuildcondition(build.Name)
 	switch bm.buildOrderStrategy {
 	case v1.BuildOrderStrategyFIFO:
 		// Check on builds that have been created before the current build and grant precedence if any.
@@ -116,10 +124,11 @@ func (bm *Monitor) canSchedule(ctx context.Context, c ctrl.Reader, build *v1.Bui
 
 	if !allowed {
 		Log.WithValues("request-namespace", requestNamespace, "request-name", requestName, "order-strategy", bm.buildOrderStrategy).
-			ForBuild(build).Infof("%s - the build (%s) gets enqueued", reason, build.Name)
+			ForBuild(build).Infof(enqueuedMsg, reason, build.Name)
+		condition = scheduledWaitingBuildcondition(build.Name, reason)
 	}
 
-	return allowed, nil
+	return allowed, condition, nil
 }
 
 func monitorRunningBuild(build *v1.Build) {
@@ -128,4 +137,28 @@ func monitorRunningBuild(build *v1.Build) {
 
 func monitorFinishedBuild(build *v1.Build) {
 	runningBuilds.Delete(types.NamespacedName{Namespace: build.Namespace, Name: build.Name}.String())
+}
+
+func scheduledReadyBuildcondition(buildName string) *v1.BuildCondition {
+	return scheduledBuildcondition(corev1.ConditionTrue, v1.BuildConditionReadyReason, fmt.Sprintf(
+		"the build (%s) is scheduled",
+		buildName,
+	))
+}
+
+func scheduledWaitingBuildcondition(buildName string, reason string) *v1.BuildCondition {
+	return scheduledBuildcondition(corev1.ConditionFalse, v1.BuildConditionWaitingReason, fmt.Sprintf(
+		enqueuedMsg,
+		reason,
+		buildName,
+	))
+}
+
+func scheduledBuildcondition(status corev1.ConditionStatus, reason string, msg string) *v1.BuildCondition {
+	return &v1.BuildCondition{
+		Type:    v1.BuildConditionScheduled,
+		Status:  status,
+		Reason:  reason,
+		Message: msg,
+	}
 }

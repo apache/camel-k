@@ -45,7 +45,7 @@ func newCmdDump(rootCmdOptions *RootCmdOptions) (*cobra.Command, *dumpCmdOptions
 		Use:     "dump [filename]",
 		Short:   "Dump the state of namespace",
 		Long:    `Dump the state of currently used namespace. If no filename will be specified, the output will be on stdout`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE:    options.dump,
 	}
 

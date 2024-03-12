@@ -187,6 +187,21 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
+	// IntegrationProfiles
+	iprs, err := camelClient.CamelV1().IntegrationProfiles(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("Found %d integration profiles:\n", len(iprs.Items))
+	for _, p := range iprs.Items {
+		ref := p
+		pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
 	// CamelCatalogs
 	cats, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -243,7 +258,7 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	// OLM CSV
 	csvs := olm.ClusterServiceVersionList{}
 	err = c.List(ctx, &csvs, ctrl.InNamespace(ns))
-	if err != nil {
+	if err != nil && !kubernetes.IsUnknownAPIError(err) {
 		return err
 	}
 	t.Logf("\nFound %d OLM CSVs:\n", len(csvs.Items))

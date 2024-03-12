@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -42,13 +43,13 @@ const (
 
 func TestServiceWithDefaults(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -110,7 +111,7 @@ func TestServiceWithDefaults(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -142,13 +143,13 @@ func TestServiceWithDefaults(t *testing.T) {
 
 func TestService(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -218,7 +219,7 @@ func TestService(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -248,7 +249,7 @@ func TestService(t *testing.T) {
 
 func TestServiceWithCustomContainerName(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
@@ -306,7 +307,7 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -328,13 +329,13 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 
 func TestServiceWithNodePort(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	serviceType := traitv1.ServiceTypeNodePort
 	environment := Environment{
@@ -398,7 +399,7 @@ func TestServiceWithNodePort(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -425,13 +426,13 @@ func TestServiceWithNodePort(t *testing.T) {
 // knative-service has the priority and the k8s service is not run.
 func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -505,7 +506,7 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	)
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, conditions, 2)
 	assert.Contains(t, conditions, deploymentCondition)
 	assert.Contains(t, conditions, serviceCondition)
@@ -516,13 +517,13 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 
 func TestServicesWithKnativeProfile(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -583,7 +584,7 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	)
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, conditions, 2)
 	assert.Contains(t, conditions, deploymentCondition)
 	assert.Contains(t, conditions, serviceCondition)
@@ -595,13 +596,13 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 // When the knative-service is disabled at the IntegrationPlatform, the k8s service is enabled.
 func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
 
 	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	environment := Environment{
 		CamelCatalog: catalog,
@@ -663,7 +664,7 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	)
 	conditions, err := traitCatalog.apply(&environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, conditions, 1)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)

@@ -34,13 +34,16 @@ import (
 )
 
 func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(g *WithT, ns string) {
 		operatorID := "camel-k-failing-deploy"
 		nsRestr := "restr"
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns, "--global", "--force").Execute()).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
 		// Create restricted namespace
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"kubectl",
 				"create",
@@ -48,7 +51,7 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 				nsRestr,
 			),
 		)
-		ExpectExecSucceed(t,
+		ExpectExecSucceed(t, g,
 			exec.Command(
 				"kubectl",
 				"label",
@@ -65,14 +68,14 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 		)
 		// Create an Integration into a restricted namespace
 		name := RandomizedSuffixName("java-fail")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
 		// Check the error is reported into the Integration
-		Eventually(IntegrationPhase(nsRestr, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
-		Eventually(IntegrationCondition(nsRestr, name, v1.IntegrationConditionReady)().Status).
+		g.Eventually(IntegrationPhase(t, nsRestr, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+		g.Eventually(IntegrationCondition(t, nsRestr, name, v1.IntegrationConditionReady)().Status).
 			Should(Equal(corev1.ConditionFalse))
-		Eventually(IntegrationCondition(nsRestr, name, v1.IntegrationConditionReady)().Message).
+		g.Eventually(IntegrationCondition(t, nsRestr, name, v1.IntegrationConditionReady)().Message).
 			Should(ContainSubstring("is forbidden: violates PodSecurity"))
 		// Clean up
-		Eventually(DeleteIntegrations(nsRestr)).Should(Equal(0))
+		g.Eventually(DeleteIntegrations(t, nsRestr)).Should(Equal(0))
 	})
 }

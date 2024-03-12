@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -170,16 +171,16 @@ func TestExpressions(t *testing.T) {
 
 			ref, err := converter.FromString(tc.name)
 			if tc.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
 				asString, err2 := converter.ToString(ref)
-				assert.NoError(t, err2)
+				require.NoError(t, err2)
 
 				props, err3 := converter.PropertiesFromString(tc.name)
-				assert.NoError(t, err3)
+				require.NoError(t, err3)
 				assert.Equal(t, tc.properties, props)
 
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, tc.ref, ref)
 				assert.Equal(t, tc.stringRef, asString)
 			}
