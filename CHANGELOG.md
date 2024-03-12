@@ -58,6 +58,7 @@
 
 **Merged pull requests:**
 
+- Azure Key Vault Trait: Support Azure Identity as authentication method [\#5244](https://github.com/apache/camel-k/pull/5244) ([oscerd](https://github.com/oscerd))
 - chore\(e2e\): Fix smoke tests [\#5240](https://github.com/apache/camel-k/pull/5240) ([christophd](https://github.com/christophd))
 - fix\(cmd\): delete KameletBinding until they exists [\#5237](https://github.com/apache/camel-k/pull/5237) ([squakez](https://github.com/squakez))
 - fix\(ctrl\): message digest change [\#5236](https://github.com/apache/camel-k/pull/5236) ([squakez](https://github.com/squakez))
@@ -65,6 +66,7 @@
 - \[Regression\] fix\(quarkus\): don't override application.properties [\#5234](https://github.com/apache/camel-k/pull/5234) ([squakez](https://github.com/squakez))
 - fix\(trait\): revert persisted status [\#5233](https://github.com/apache/camel-k/pull/5233) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.48.0 to 0.50.0 [\#5232](https://github.com/apache/camel-k/pull/5232) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(traits\): use Comparable matches [\#5230](https://github.com/apache/camel-k/pull/5230) ([squakez](https://github.com/squakez))
 - fix\(trait\): Add documentation and test on multiple sources [\#5229](https://github.com/apache/camel-k/pull/5229) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/cloudevents/sdk-go/v2 from 2.13.0 to 2.15.2 [\#5228](https://github.com/apache/camel-k/pull/5228) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(lint\): Update golangci-lint version to 1.55 [\#5227](https://github.com/apache/camel-k/pull/5227) ([christophd](https://github.com/christophd))
