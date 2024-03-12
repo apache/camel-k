@@ -25,7 +25,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
 
@@ -34,7 +33,7 @@ func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
 		Catalog:     NewEnvironmentTestCatalog(),
 		Integration: &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfigurationProperty(fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 
 	trait := newErrorHandlerTrait()
 	enabled, condition, err := trait.Configure(e)
@@ -72,8 +71,8 @@ func TestErrorHandlerApplySource(t *testing.T) {
 
 	err = trait.Apply(e)
 	require.NoError(t, err)
-	assert.Equal(t, `- error-handler:
-    ref-error-handler: defaultErrorHandler
+	assert.Equal(t, `- errorHandler:
+    refErrorHandler: defaultErrorHandler
 `, e.Integration.Status.GeneratedSources[0].Content)
 }
 
@@ -85,9 +84,9 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 		CamelCatalog: c,
 		Integration:  &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", "camel.beans.defaultErrorHandler = #class:org.apache.camel.builder.DeadLetterChannelBuilder")
-	e.Integration.Spec.AddConfiguration("property", "camel.beans.defaultErrorHandler.deadLetterUri = log:info")
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfigurationProperty("camel.beans.defaultErrorHandler = #class:org.apache.camel.builder.DeadLetterChannelBuilder")
+	e.Integration.Spec.AddConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri = log:info")
+	e.Integration.Spec.AddConfigurationProperty(fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	trait := newErrorHandlerTrait()
@@ -98,5 +97,9 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 
 	err = trait.Apply(e)
 	require.NoError(t, err)
+	assert.Len(t, e.Integration.Spec.Configuration, 3)
+	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", e.Integration.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
+	assert.Equal(t, "log:info", e.Integration.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri"))
+	assert.Equal(t, "defaultErrorHandler", e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
 	assert.Equal(t, "camel:log", e.Integration.Status.Dependencies[0])
 }

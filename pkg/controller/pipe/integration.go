@@ -224,10 +224,7 @@ func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding
 				return err
 			}
 
-			integration.Spec.Configuration = append(integration.Spec.Configuration, v1.ConfigurationSpec{
-				Type:  "property",
-				Value: entry,
-			})
+			integration.Spec.AddConfigurationProperty(entry)
 		}
 
 	}
