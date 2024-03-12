@@ -25,8 +25,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
 func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
@@ -34,7 +34,7 @@ func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
 		Catalog:     NewEnvironmentTestCatalog(),
 		Integration: &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfigurationProperty(fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 
 	trait := newErrorHandlerTrait()
 	enabled, condition, err := trait.Configure(e)
@@ -61,7 +61,7 @@ func TestErrorHandlerApplySource(t *testing.T) {
 		Catalog:     NewEnvironmentTestCatalog(),
 		Integration: &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfigurationProperty(fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	trait := newErrorHandlerTrait()
@@ -85,9 +85,9 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 		CamelCatalog: c,
 		Integration:  &v1.Integration{},
 	}
-	e.Integration.Spec.AddConfiguration("property", "camel.beans.defaultErrorHandler = #class:org.apache.camel.builder.DeadLetterChannelBuilder")
-	e.Integration.Spec.AddConfiguration("property", "camel.beans.defaultErrorHandler.deadLetterUri = log:info")
-	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Spec.AddConfigurationProperty("camel.beans.defaultErrorHandler = #class:org.apache.camel.builder.DeadLetterChannelBuilder")
+	e.Integration.Spec.AddConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri = log:info")
+	e.Integration.Spec.AddConfigurationProperty(fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 	trait := newErrorHandlerTrait()
@@ -98,5 +98,74 @@ func TestErrorHandlerApplyDependency(t *testing.T) {
 
 	err = trait.Apply(e)
 	require.NoError(t, err)
+	assert.Len(t, e.Integration.Spec.Configuration, 3)
 	assert.Equal(t, "camel:log", e.Integration.Status.Dependencies[0])
+}
+
+func TestErrorHandlerDisableNoErrorHandler(t *testing.T) {
+	c, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+	e := &Environment{
+		Catalog:      NewEnvironmentTestCatalog(),
+		CamelCatalog: c,
+		Integration:  &v1.Integration{},
+	}
+	e.Integration.Spec.AddConfigurationProperty("camel.beans.defaultErrorHandler = #class:org.apache.camel.builder.DeadLetterChannelBuilder")
+	e.Integration.Spec.AddConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri = log:info")
+	e.Integration.Spec.AddConfigurationProperty(fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
+	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization
+	e.Integration.Status.RuntimeVersion = "3.8.0-SNAPSHOT"
+
+	trait := newErrorHandlerTrait()
+	enabled, condition, err := trait.Configure(e)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(e)
+	require.NoError(t, err)
+	assert.Len(t, e.Integration.Spec.Configuration, 4)
+	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", e.Integration.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
+	assert.Equal(t, "log:info", e.Integration.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri"))
+	assert.Equal(t, "defaultErrorHandler", e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
+	assert.Equal(t, "false", e.Integration.Spec.GetConfigurationProperty("camel.component.kamelet.noErrorHandler"))
+}
+
+func TestShouldDisableNoErrorHandler(t *testing.T) {
+	assert.False(t, shouldHandleNoErrorHandler(&v1.Integration{}))
+	assert.False(t, shouldHandleNoErrorHandler(&v1.Integration{
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: defaults.DefaultRuntimeVersion,
+		},
+	}))
+	assert.False(t, shouldHandleNoErrorHandler(&v1.Integration{
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: "3.6.0",
+		},
+	}))
+	assert.False(t, shouldHandleNoErrorHandler(&v1.Integration{
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: "3.6.0-SNAPSHOT",
+		},
+	}))
+	assert.False(t, shouldHandleNoErrorHandler(&v1.Integration{
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: "3.6.0-ABCDEFG",
+		},
+	}))
+	assert.True(t, shouldHandleNoErrorHandler(&v1.Integration{
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: "3.8.0",
+		},
+	}))
+	assert.True(t, shouldHandleNoErrorHandler(&v1.Integration{
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: "3.8.0-SNAPSHOT",
+		},
+	}))
+	assert.True(t, shouldHandleNoErrorHandler(&v1.Integration{
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: "3.8.0-ABCDEFG",
+		},
+	}))
 }

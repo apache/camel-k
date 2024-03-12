@@ -19,12 +19,14 @@ package trait
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v2"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 
 	"github.com/apache/camel-k/v2/pkg/util"
 )
@@ -67,6 +69,17 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 			t.addErrorHandlerDependencies(e, defaultErrorHandlerURI)
 		}
 
+		if shouldHandleNoErrorHandler(e.Integration) {
+			// noErrorHandler is enabled by default on Kamelets since Camel 4.4.0 (runtimeVersion 3.8.0)
+			// need to disable this setting so that pipe error handler works
+			confValue, err := property.EncodePropertyFileEntry("camel.component.kamelet.noErrorHandler", "false")
+			if err != nil {
+				return err
+			}
+
+			e.Integration.Spec.AddConfigurationProperty(confValue)
+		}
+
 		return t.addGlobalErrorHandlerAsSource(e)
 	}
 	return nil
@@ -106,4 +119,18 @@ func (t *errorHandlerTrait) addGlobalErrorHandlerAsSource(e *Environment) error 
 	e.Integration.Status.AddOrReplaceGeneratedSources(errorHandlerSource)
 
 	return nil
+}
+
+// shouldHandleNoErrorHandler determines the runtime version and checks on noErrorHandler that is configured for this version.
+func shouldHandleNoErrorHandler(it *v1.Integration) bool {
+	if it.Status.RuntimeVersion != "" {
+		runtimeVersion, _ := strings.CutSuffix(it.Status.RuntimeVersion, "-SNAPSHOT")
+		if versionNumber, err := strconv.Atoi(strings.ReplaceAll(runtimeVersion, ".", "")); err == nil {
+			return versionNumber >= 380 // >= runtimeVersion 3.8.0
+		} else {
+			return runtimeVersion >= "3.8.0"
+		}
+	}
+
+	return false
 }
