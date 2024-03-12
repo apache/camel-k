@@ -8,6 +8,7 @@
 
 - Update buil/Dokerfile to use go 1.21 [\#5231](https://github.com/apache/camel-k/issues/5231)
 - Error java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#5225](https://github.com/apache/camel-k/issues/5225)
+- Deployment Trait maxUnavailable and maxSurge default values differ from documentation and do not support % values [\#5223](https://github.com/apache/camel-k/issues/5223)
 - Misleading "Monitor: Integration needs a rebuild" message [\#5219](https://github.com/apache/camel-k/issues/5219)
 - Route parameters are ignored for `path` parameters [\#5203](https://github.com/apache/camel-k/issues/5203)
 - Builder property failure when using non xml tag characters [\#5195](https://github.com/apache/camel-k/issues/5195)
