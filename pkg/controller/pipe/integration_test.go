@@ -54,6 +54,56 @@ func TestCreateIntegrationForPipe(t *testing.T) {
 	assert.Equal(t, expectedNominalRoute(), string(dsl))
 }
 
+func TestCreateIntegrationForPipeWithSinkErrorHandler(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
+
+	pipe := nominalPipe("my-error-handler-pipe")
+	pipe.Spec.ErrorHandler = &v1.ErrorHandlerSpec{
+		RawMessage: []byte(`{"sink": {"endpoint": {"uri": "someUri"}}}`),
+	}
+
+	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
+	require.NoError(t, err)
+	assert.Equal(t, "my-error-handler-pipe", it.Name)
+	assert.Equal(t, "default", it.Namespace)
+	assert.Equal(t, "camel.apache.org/v1", it.OwnerReferences[0].APIVersion)
+	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
+	assert.Equal(t, "my-error-handler-pipe", it.OwnerReferences[0].Name)
+	assert.Len(t, it.Spec.Configuration, 3)
+	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
+	assert.Equal(t, "someUri", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri"))
+	assert.Equal(t, "defaultErrorHandler", it.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
+	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
+	require.NoError(t, err)
+	assert.Equal(t, expectedNominalRoute(), string(dsl))
+}
+
+func TestCreateIntegrationForPipeWithLogErrorHandler(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
+
+	pipe := nominalPipe("my-error-handler-pipe")
+	pipe.Spec.ErrorHandler = &v1.ErrorHandlerSpec{
+		RawMessage: []byte(`{"log": {"parameters": {"showHeaders": "true"}}}`),
+	}
+
+	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
+	require.NoError(t, err)
+	assert.Equal(t, "my-error-handler-pipe", it.Name)
+	assert.Equal(t, "default", it.Namespace)
+	assert.Equal(t, "camel.apache.org/v1", it.OwnerReferences[0].APIVersion)
+	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
+	assert.Equal(t, "my-error-handler-pipe", it.OwnerReferences[0].Name)
+	assert.Len(t, it.Spec.Configuration, 3)
+	assert.Equal(t, "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
+	assert.Equal(t, "true", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.showHeaders"))
+	assert.Equal(t, "defaultErrorHandler", it.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
+	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
+	require.NoError(t, err)
+	assert.Equal(t, expectedNominalRoute(), string(dsl))
+}
+
 func TestCreateIntegrationForPipeDataType(t *testing.T) {
 	client, err := test.NewFakeClient()
 	require.NoError(t, err)

@@ -116,6 +116,11 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 	in.Dependencies = append(in.Dependencies, dependency)
 }
 
+// AddConfigurationProperty adds a new configuration property.
+func (in *IntegrationSpec) AddConfigurationProperty(confValue string) {
+	in.AddConfiguration("property", confValue)
+}
+
 // GetConfigurationProperty returns a configuration property.
 func (in *IntegrationSpec) GetConfigurationProperty(property string) string {
 	for _, confSpec := range in.Configuration {
