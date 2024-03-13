@@ -37,7 +37,7 @@ import (
 )
 
 func TestKnative(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 
 	knChannelMessages := "messages"

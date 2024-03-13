@@ -23,7 +23,6 @@ limitations under the License.
 package cli
 
 import (
-	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -32,7 +31,7 @@ import (
 )
 
 func TestKamelCLIHelp(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 
 	t.Run("default help message", func(t *testing.T) {

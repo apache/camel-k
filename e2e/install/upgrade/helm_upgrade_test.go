@@ -41,7 +41,7 @@ import (
 
 // WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
 func TestHelmOperatorUpgrade(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")

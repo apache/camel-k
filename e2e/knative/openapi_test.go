@@ -23,7 +23,6 @@ limitations under the License.
 package knative
 
 import (
-	"context"
 	"testing"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -33,7 +32,7 @@ import (
 )
 
 func TestOpenAPIService(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 
 	openapiContent, err := ioutil.ReadFile("./files/petstore-api.yaml")

@@ -136,6 +136,7 @@ var TestTimeoutVeryLong = 60 * time.Minute
 
 var NoOlmOperatorImage string
 
+var testContext = context.TODO()
 var testClient client.Client
 var clientMutex = sync.Mutex{}
 
@@ -153,6 +154,10 @@ func failTest(t *testing.T, err error) {
 	} else {
 		panic(err)
 	}
+}
+
+func TestContext() context.Context {
+	return testContext
 }
 
 func TestClient(t *testing.T) client.Client {
@@ -180,6 +185,7 @@ func RefreshClient(t *testing.T) client.Client {
 	if err != nil {
 		failTest(t, err)
 	}
+	testContext = context.TODO()
 	return testClient
 }
 
@@ -2781,21 +2787,19 @@ func Pods(t *testing.T, ctx context.Context, ns string) func() []corev1.Pod {
 }
 
 func WithNewTestNamespace(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
-	ctx := context.TODO()
-	ns := NewTestNamespace(t, ctx, false)
-	defer deleteTestNamespace(t, ctx, ns)
+	ns := NewTestNamespace(t, testContext, false)
+	defer deleteTestNamespace(t, testContext, ns)
 	defer userCleanup(t)
 
-	invokeUserTestCode(t, ctx, ns.GetName(), doRun)
+	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
 }
 
 func WithGlobalOperatorNamespace(t *testing.T, test func(context.Context, *gomega.WithT, string)) {
-	ctx := context.TODO()
 	ocp, err := openshift.IsOpenShift(TestClient(t))
 	require.NoError(t, err)
 	if ocp {
 		// global operators are always installed in the openshift-operators namespace
-		invokeUserTestCode(t, ctx, "openshift-operators", test)
+		invokeUserTestCode(t, testContext, "openshift-operators", test)
 	} else {
 		// create new namespace for the global operator
 		WithNewTestNamespace(t, test)
@@ -2803,13 +2807,12 @@ func WithGlobalOperatorNamespace(t *testing.T, test func(context.Context, *gomeg
 }
 
 func WithNewTestNamespaceWithKnativeBroker(t *testing.T, doRun func(context.Context, *gomega.WithT, string)) {
-	ctx := context.TODO()
-	ns := NewTestNamespace(t, ctx, true)
-	defer deleteTestNamespace(t, ctx, ns)
-	defer deleteKnativeBroker(t, ctx, ns)
+	ns := NewTestNamespace(t, testContext, true)
+	defer deleteTestNamespace(t, testContext, ns)
+	defer deleteKnativeBroker(t, testContext, ns)
 	defer userCleanup(t)
 
-	invokeUserTestCode(t, ctx, ns.GetName(), doRun)
+	invokeUserTestCode(t, testContext, ns.GetName(), doRun)
 }
 
 func userCleanup(t *testing.T) {
