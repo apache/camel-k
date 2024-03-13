@@ -23,7 +23,6 @@ limitations under the License.
 package knative
 
 import (
-	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,7 +34,7 @@ import (
 )
 
 func TestPodTraitWithKnative(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 
 	g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/podtest-knative2.groovy", "--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())

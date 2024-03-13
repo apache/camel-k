@@ -37,7 +37,7 @@ import (
 )
 
 func TestKustomizeUninstallBasic(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
@@ -83,7 +83,7 @@ func TestKustomizeUninstallBasic(t *testing.T) {
 }
 
 func TestUninstallGlobal(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)

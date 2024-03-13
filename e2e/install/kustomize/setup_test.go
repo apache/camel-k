@@ -35,7 +35,7 @@ import (
 )
 
 func TestSetupKustomizeBasic(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
@@ -72,7 +72,7 @@ func TestSetupKustomizeGlobal(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
-	ctx := context.TODO()
+	ctx := TestContext()
 
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)

@@ -23,7 +23,6 @@ limitations under the License.
 package cli
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -44,10 +43,10 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Test setup failed! - %s\n", message)
 	})
 
-	ctx := context.TODO()
 	var t *testing.T
 
 	g.Expect(TestClient(t)).ShouldNot(BeNil())
+	ctx := TestContext()
 
 	// Install global operator for tests in this package, all tests must use this operatorID
 	g.Expect(NewNamedTestNamespace(t, ctx, operatorNS, false)).ShouldNot(BeNil())

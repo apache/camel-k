@@ -41,7 +41,7 @@ func TestOperatorBasic(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
-	ctx := context.TODO()
+	ctx := TestContext()
 
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)
@@ -87,7 +87,7 @@ func TestOperatorKustomizeAlternativeImage(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
-	ctx := context.TODO()
+	ctx := TestContext()
 
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)
@@ -121,7 +121,7 @@ func TestOperatorKustomizeGlobal(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
-	ctx := context.TODO()
+	ctx := TestContext()
 
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)

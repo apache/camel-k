@@ -23,7 +23,6 @@ limitations under the License.
 package knative
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
@@ -39,7 +38,7 @@ import (
 
 // Test that a Pipe can be changed and the changes are propagated to the Integration
 func TestKameletChange(t *testing.T) {
-	ctx := context.TODO()
+	ctx := TestContext()
 	g := NewWithT(t)
 	timerPipe := "timer-binding"
 

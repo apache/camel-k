@@ -35,7 +35,7 @@ import (
 func TestDuplicateParameters(t *testing.T) {
 	g := NewWithT(t)
 
-	ctx, cancel := context.WithCancel(context.TODO())
+	ctx, cancel := context.WithCancel(TestContext())
 	defer cancel()
 
 	// run kamel to output the traits/configuration structure in json format to check the processed values
