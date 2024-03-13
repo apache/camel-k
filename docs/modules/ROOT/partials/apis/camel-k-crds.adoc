@@ -2494,6 +2494,13 @@ Maven repositories that can be used by the kit
 
 the sources to add at build time
 
+|`capabilities` +
+[]string
+|
+
+
+features offered by the IntegrationKit
+
 
 |===
 

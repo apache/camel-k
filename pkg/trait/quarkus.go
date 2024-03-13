@@ -273,26 +273,25 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
 		}
 	}
-
 	for k, v := range integration.Annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			v1.SetAnnotation(&kit.ObjectMeta, k, v)
 		}
 	}
-
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {
 		kit.SetOperatorID(operatorID)
 	}
-
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies: e.Integration.Status.Dependencies,
 		Repositories: e.Integration.Spec.Repositories,
 		Traits:       propagateKitTraits(e),
 	}
-
 	if packageType == nativeSourcesPackageType {
 		kit.Spec.Sources = propagateSourcesRequiredAtBuildTime(e)
+	}
+	if e.Integration.Status.Capabilities != nil {
+		kit.Spec.Capabilities = e.Integration.Status.Capabilities
 	}
 	return kit
 }

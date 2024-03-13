@@ -88,6 +88,11 @@ spec:
           spec:
             description: the desired configuration
             properties:
+              capabilities:
+                description: features offered by the IntegrationKit
+                items:
+                  type: string
+                type: array
               configuration:
                 description: 'Deprecated: Use camel trait (camel.properties) to manage
                   properties Use mount trait (mount.configs) to manage configs Use
