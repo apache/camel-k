@@ -48,12 +48,9 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 		containerTestName := "testname"
 
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		ip := Platform(t, ctx, ns)()
-		ip.Spec.Traits = v1.Traits{Logging: &trait.LoggingTrait{Level: "DEBUG"}, Container: &trait.ContainerTrait{Name: containerTestName}}
-
-		if err := TestClient(t).Update(ctx, ip); err != nil {
-			t.Fatal("Can't create IntegrationPlatform", err)
-		}
+		g.Expect(UpdatePlatform(t, ctx, ns, operatorID, func(ip *v1.IntegrationPlatform) {
+			ip.Spec.Traits = v1.Traits{Logging: &trait.LoggingTrait{Level: "DEBUG"}, Container: &trait.ContainerTrait{Name: containerTestName}}
+		})).To(Succeed())
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		name := RandomizedSuffixName("java")
