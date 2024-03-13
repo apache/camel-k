@@ -101,6 +101,8 @@ func TestEnvironmentTrait(t *testing.T) {
 		})
 
 		t.Run("Run integration with custom environment", func(t *testing.T) {
+			t.Skip("FIXME CAMELK: CAMEL-20559 - array param")
+
 			name := RandomizedSuffixName("java-custom-proxy")
 			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "environment.vars=HTTP_PROXY=http://custom.proxy").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
