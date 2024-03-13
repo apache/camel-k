@@ -58,8 +58,11 @@
 
 **Merged pull requests:**
 
+- chore: propagate capabilities to Kit [\#5247](https://github.com/apache/camel-k/pull/5247) ([squakez](https://github.com/squakez))
 - Azure Key Vault Trait: Support Azure Identity as authentication method [\#5244](https://github.com/apache/camel-k/pull/5244) ([oscerd](https://github.com/oscerd))
+- chore\(ci\): Upgrade setup-kubectl action [\#5243](https://github.com/apache/camel-k/pull/5243) ([gansheer](https://github.com/gansheer))
 - chore\(e2e\): Fix smoke tests [\#5240](https://github.com/apache/camel-k/pull/5240) ([christophd](https://github.com/christophd))
+- chore\(e2e\): Separate common-it E2E tests, so they run more efficient [\#5239](https://github.com/apache/camel-k/pull/5239) ([christophd](https://github.com/christophd))
 - fix\(cmd\): delete KameletBinding until they exists [\#5237](https://github.com/apache/camel-k/pull/5237) ([squakez](https://github.com/squakez))
 - fix\(ctrl\): message digest change [\#5236](https://github.com/apache/camel-k/pull/5236) ([squakez](https://github.com/squakez))
 - fix\(build\): Upgrade container image to golang 1.21 [\#5235](https://github.com/apache/camel-k/pull/5235) ([gansheer](https://github.com/gansheer))
