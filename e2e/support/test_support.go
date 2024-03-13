@@ -485,6 +485,13 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 			TailLines: pointer.Int64(100),
 		}
 
+		for _, container := range pod.Status.ContainerStatuses {
+			if !container.Ready || container.State.Waiting != nil {
+				// avoid logs watch fail due to container creating state
+				return ""
+			}
+		}
+
 		if len(pod.Spec.Containers) > 1 {
 			options.Container = pod.Spec.Containers[0].Name
 		}
@@ -493,7 +500,7 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 	}
 }
 
-// Retrieve the Logs from the Pod defined by its name in the given namespace ns. The number of lines numLines from the end of the logs to show.
+// TailedLogs Retrieve the Logs from the Pod defined by its name in the given namespace ns. The number of lines numLines from the end of the logs to show.
 func TailedLogs(t *testing.T, ctx context.Context, ns, name string, numLines int64) func() string {
 	return func() string {
 		options := corev1.PodLogOptions{
@@ -517,12 +524,12 @@ func Logs(t *testing.T, ctx context.Context, ns, podName string, options corev1.
 			}
 		}()
 
-		bytes, err := io.ReadAll(byteReader)
+		logBytes, err := io.ReadAll(byteReader)
 		if err != nil {
 			log.Error(err, "Error while reading container logs")
 			return ""
 		}
-		return string(bytes)
+		return string(logBytes)
 	}
 }
 
@@ -760,7 +767,7 @@ func HealthCheckData(r *v1.HealthCheckResponse) (map[string]interface{}, error) 
 	}
 
 	var data map[string]interface{}
-	if err := json.Unmarshal(r.Data, data); err != nil {
+	if err := json.Unmarshal(r.Data, &data); err != nil {
 		return nil, err
 	}
 
@@ -873,7 +880,7 @@ func ServiceType(t *testing.T, ctx context.Context, ns string, name string) func
 	}
 }
 
-// Find the service in the given namespace with the given type
+// ServicesByType Find the service in the given namespace with the given type
 func ServicesByType(t *testing.T, ctx context.Context, ns string, svcType corev1.ServiceType) func() []corev1.Service {
 	return func() []corev1.Service {
 		svcs := []corev1.Service{}
