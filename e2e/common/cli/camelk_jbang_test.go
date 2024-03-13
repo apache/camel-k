@@ -24,11 +24,13 @@ package cli
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+	"github.com/stretchr/testify/assert"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -141,4 +143,11 @@ func TestCamelKCLILog(t *testing.T) {
 		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 
+}
+
+// TODO Remove before merge
+func TestConf(t *testing.T) {
+	val, present := os.LookupEnv("JBANG_NO_VERSION_CHECK")
+	assert.True(t, present)
+	assert.Equal(t, "true", val)
 }
