@@ -18,18 +18,29 @@
 apiVersion: camel.apache.org/v1alpha1
 kind: Kamelet
 metadata:
-  name: timer-to-log-example
+  name: example-source
 spec:
-  source:
-    ref:
-      apiVersion: camel.apache.org/v1alpha1
-      kind: Kamelet
-      name: timer-source
+  definition:
+    description: Produces periodic events with a custom payload
     properties:
-      period: 2000
-      message: Hello world
-  sink:
-    ref:
-      apiVersion: camel.apache.org/v1alpha1
-      kind: Kamelet
-      name: log-sink
+      message:
+        description: The message to generate
+        title: Message
+        type: string
+      period:
+        default: 1000
+        description: The time interval between two events
+        title: Period
+        type: integer
+    required:
+    - message
+    title: Example Timer
+  template:
+    from:
+      uri: timer:tick
+      parameters:
+        period: "#property:period"
+      steps:
+      - setBody:
+          constant: "#property:message"
+      - to: kamelet:sink
