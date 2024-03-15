@@ -27,6 +27,7 @@
 - Include the operator node-selector in the helm chart [\#5103](https://github.com/apache/camel-k/issues/5103)
 - TestCreateCatalog fail when DEFAULT\_RUNTIME\_VERSION=3.6.0-SNAPSHOT [\#5099](https://github.com/apache/camel-k/issues/5099)
 - Remove secondary IntegrationPlatform in favor of using IntegrationProfile settings [\#5097](https://github.com/apache/camel-k/issues/5097)
+- Basic example fails on Docker Desktop MacOS [\#5095](https://github.com/apache/camel-k/issues/5095)
 - Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
