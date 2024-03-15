@@ -96,11 +96,11 @@ After a successful build, if you're connected to a Docker daemon, you can build 
 make images
 ----
 
-The above command produces a `camel-k` image with the name `docker.io/apache/camel-k`. Sometimes you might need to produce `camel-k` images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `STAGING_IMAGE_NAME` to `make` as shown below:
+The above command produces a `camel-k` image with the name `docker.io/apache/camel-k`. Sometimes you might need to produce `camel-k` images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `STAGING_IMAGE` to `make` as shown below:
 
 [source]
 ----
-make STAGING_IMAGE_NAME='docker.io/myrepo/camel-k' images-push-staging
+make STAGING_IMAGE='docker.io/myrepo/camel-k' images-push-staging
 ----
 
 [[testing]]
