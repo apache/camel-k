@@ -15,22 +15,21 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# * patches/integration-platform-patch.yaml
-# customizes the integration platform custom resource
-# Edit the patch manually to add required configuration
-#
-resources:
-- bases/camel_v1_integrationplatform.yaml
-- bases/camel_v1_integrationprofile.yaml
-- bases/camel_v1_integration.yaml
-- bases/camel_v1_integrationkit.yaml
-- bases/camel_v1_camelcatalog.yaml
-- bases/camel_v1_build.yaml
-- bases/camel_v1_kamelet.yaml
-- bases/camel_v1_pipe.yaml
-- bases/camel_v1alpha1_kamelet.yaml
-- bases/camel_v1alpha1_kameletbinding.yaml
-
-patchesStrategicMerge:
-- patch-integration-platform.yaml
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: timer-to-log-example
+spec:
+  source:
+    ref:
+      apiVersion: camel.apache.org/v1alpha1
+      kind: Kamelet
+      name: timer-source
+    properties:
+      period: 2000
+      message: Hello world
+  sink:
+    ref:
+      apiVersion: camel.apache.org/v1alpha1
+      kind: Kamelet
+      name: log-sink
