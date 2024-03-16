@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- XSD might be wrong [\#5250](https://github.com/apache/camel-k/issues/5250)
 - Update buil/Dokerfile to use go 1.21 [\#5231](https://github.com/apache/camel-k/issues/5231)
 - Error java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#5225](https://github.com/apache/camel-k/issues/5225)
 - Deployment Trait maxUnavailable and maxSurge default values differ from documentation and do not support % values [\#5223](https://github.com/apache/camel-k/issues/5223)
@@ -20,6 +21,7 @@
 - Performance regression due to configmap/secrets whole cluster watch [\#5143](https://github.com/apache/camel-k/issues/5143)
 - Running integrations fail when the used registry has a port other than default 80 [\#5141](https://github.com/apache/camel-k/issues/5141)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
+- Update github actions to a version that use node 20 [\#5130](https://github.com/apache/camel-k/issues/5130)
 - Integrations remain in Initialization loop when referenced config map has owner references [\#5114](https://github.com/apache/camel-k/issues/5114)
 - Externally built Integrations are deployed without a command in Camel-K 2.2.0 [\#5112](https://github.com/apache/camel-k/issues/5112)
 - Coverage report wrong percentage [\#5108](https://github.com/apache/camel-k/issues/5108)
@@ -44,6 +46,7 @@
 - Data type Kamelet hardcoded [\#5014](https://github.com/apache/camel-k/issues/5014)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
+- Azure Key Vault Trait: Support Azure Identity as authentication method [\#4983](https://github.com/apache/camel-k/issues/4983)
 - Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
 - Upgrade to Go 1.21 [\#4795](https://github.com/apache/camel-k/issues/4795)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
@@ -51,6 +54,7 @@
 - 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
+- Build waiting condition [\#4542](https://github.com/apache/camel-k/issues/4542)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 - Remove duplication of the default platform creation [\#3433](https://github.com/apache/camel-k/issues/3433)
 - Use `go:embed` instead of vfsgen for embedded resources handling [\#3384](https://github.com/apache/camel-k/issues/3384)
