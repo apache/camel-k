@@ -2183,7 +2183,7 @@ github.com/apache/camel-k/v2/pkg/util/source/test_support.go:60:					assertExtra
 github.com/apache/camel-k/v2/pkg/util/source/types.go:46:						NewMetadata						100.0%
 github.com/apache/camel-k/v2/pkg/util/source/types.go:56:						AddRequiredCapability					0.0%
 github.com/apache/camel-k/v2/pkg/util/source/types.go:61:						AddDependency						100.0%
-github.com/apache/camel-k/v2/pkg/util/sync/file.go:28:							File							78.6%
+github.com/apache/camel-k/v2/pkg/util/sync/file.go:28:							File							85.7%
 github.com/apache/camel-k/v2/pkg/util/test/assertions.go:30:						EnvVarExists						0.0%
 github.com/apache/camel-k/v2/pkg/util/test/assertions.go:38:						EnvVarHasValue						0.0%
 github.com/apache/camel-k/v2/pkg/util/test/assertions.go:47:						HasVolume						0.0%
@@ -2257,4 +2257,4 @@ github.com/apache/camel-k/v2/pkg/util/util.go:649:							WithTempDir						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:664:							ConfigTreePropertySplit					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:685:							trimQuotes						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:696:							NavigateConfigTree					0.0%
-total:													(statements)						37.1%
+total:													(statements)						37.2%

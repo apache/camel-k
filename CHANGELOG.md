@@ -47,6 +47,7 @@
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
 - Azure Key Vault Trait: Support Azure Identity as authentication method [\#4983](https://github.com/apache/camel-k/issues/4983)
+- Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 - Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
 - Upgrade to Go 1.21 [\#4795](https://github.com/apache/camel-k/issues/4795)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
