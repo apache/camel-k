@@ -34,7 +34,7 @@ func initializePlatformcontrollerCmdOptions(t *testing.T) (*platformcontrollerCm
 
 	options, rootCmd := kamelTestPreAddCommandInit()
 	platformcontrollerCmdOptions := addTestPlatformcontrollerCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return platformcontrollerCmdOptions, rootCmd, *options
 }
@@ -42,7 +42,7 @@ func initializePlatformcontrollerCmdOptions(t *testing.T) (*platformcontrollerCm
 // nolint: unparam
 func addTestPlatformcontrollerCmd(options RootCmdOptions, rootCmd *cobra.Command) *platformcontrollerCmdOptions {
 	// add a testing version of operator Command
-	platformcontrollerCmd, platformcontrollerOptions := newCmdPlatformController()
+	platformcontrollerCmd, platformcontrollerOptions := newCmdPlatformController(&options)
 	platformcontrollerCmd.RunE = func(c *cobra.Command, args []string) error {
 		return nil
 	}
