@@ -15,6 +15,7 @@
 - Builder property failure when using non xml tag characters [\#5195](https://github.com/apache/camel-k/issues/5195)
 - Error configuring property: camel.component.test\[00001\]port\[80\]tcp.addr because cannot find component with name test\[00001\]port\[80\]tcp. [\#5179](https://github.com/apache/camel-k/issues/5179)
 - Get environment variable value is empty in properties file [\#5178](https://github.com/apache/camel-k/issues/5178)
+- Install operator image according to the target architecture [\#5169](https://github.com/apache/camel-k/issues/5169)
 - Debug Integrations failing [\#5161](https://github.com/apache/camel-k/issues/5161)
 - Multiple crons at the same Integration do not run as expected [\#5158](https://github.com/apache/camel-k/issues/5158)
 - Kamel delete KameletBinding only removes integration resource [\#5156](https://github.com/apache/camel-k/issues/5156)
@@ -64,6 +65,7 @@
 
 **Merged pull requests:**
 
+- Fix wrong Kamelet sample content [\#5255](https://github.com/apache/camel-k/pull/5255) ([claudio4j](https://github.com/claudio4j))
 - Add Kamelet v1alpha1 sample [\#5254](https://github.com/apache/camel-k/pull/5254) ([claudio4j](https://github.com/claudio4j))
 - chore\(ci\): Upgrade kind action to 2.0.4 [\#5249](https://github.com/apache/camel-k/pull/5249) ([gansheer](https://github.com/gansheer))
 - chore: propagate capabilities to Kit [\#5247](https://github.com/apache/camel-k/pull/5247) ([squakez](https://github.com/squakez))
