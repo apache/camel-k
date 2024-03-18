@@ -52,6 +52,7 @@ import (
 	zapctrl "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -192,7 +193,12 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		&corev1.Pod{}:        {Label: selector},
 		&appsv1.Deployment{}: {Label: selector},
 		&batchv1.Job{}:       {Label: selector},
-		&servingv1.Service{}: {Label: selector},
+	}
+
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); ok && err == nil {
+		selectors[&servingv1.Service{}] = cache.ByObject{
+			Label: selector,
+		}
 	}
 
 	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
@@ -201,12 +207,19 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		}
 	}
 
+	defaultNamespaces := map[string]cache.Config{
+		operatorNamespace: {},
+	}
+	if operatorNamespace != watchNamespace {
+		defaultNamespaces[watchNamespace] = cache.Config{}
+	}
+
 	options := cache.Options{
-		ByObject: selectors,
+		DefaultNamespaces: defaultNamespaces,
+		ByObject:          selectors,
 	}
 
 	mgr, err := manager.New(cfg, manager.Options{
-		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
 		LeaderElectionNamespace:       operatorNamespace,
@@ -214,9 +227,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
-		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
+		Metrics:                       metricsserver.Options{BindAddress: ":" + strconv.Itoa(int(monitoringPort))},
 		Cache:                         options,
 	})
+
 	exitOnError(err, "")
 
 	log.Info("Configuring manager")
