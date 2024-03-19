@@ -43,7 +43,7 @@ var (
 
 	integration = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "camel_k_integration_phase",
+			Name: "camel_k_integration_phase_total",
 			Help: "Number of integration processed",
 		}, []string{
 			"phase",
@@ -57,12 +57,12 @@ func init() {
 	metrics.Registry.MustRegister(timeToFirstReadiness, integration)
 }
 
-func updateIntegrationPhase(iId string, p string) {
-	phase := strings.Replace(strings.ToLower(p), " ", "_", -1)
+func updateIntegrationPhase(iID string, p string) {
+	phase := strings.ReplaceAll(strings.ToLower(p), " ", "_")
 
-	if phase != "" && iId != "" {
+	if phase != "" && iID != "" {
 		labels := prometheus.Labels{
-			"id":    iId,
+			"id":    iID,
 			"phase": phase,
 		}
 		integration.With(labels).Inc()
