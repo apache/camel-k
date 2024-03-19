@@ -78,7 +78,7 @@ INDEX_DIR := index
 OPM := opm
 
 # Used to push pre-release artifacts
-STAGING_IMAGE_NAME := docker.io/camelk/camel-k
+STAGING_IMAGE := docker.io/camelk/camel-k
 STAGING_RUNTIME_REPO :=
 
 # Kamelets options
@@ -456,17 +456,29 @@ images-all:
 	make IMAGE_ARCH=arm64 images
 	make IMAGE_ARCH=amd64 images
 
-images-push-staging:
-	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-amd64
-	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
-	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-amd64
-	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
+images-push:
+	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64
+	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 	@if docker inspect $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 &> /dev/null; then \
 		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 exists, building the multiarch manifest"; \
-		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64; \
-		docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64; \
-		docker manifest create $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION) --amend $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-amd64 --amend $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64; \
-		docker manifest push --purge $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION); \
+		docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64; \
+		docker manifest create $(CUSTOM_IMAGE):$(CUSTOM_VERSION) --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64; \
+		docker manifest push --purge $(CUSTOM_IMAGE):$(CUSTOM_VERSION); \
+	else \
+		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 does not exist"; \
+	fi
+
+images-push-staging:
+	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64
+	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE):$(CUSTOM_VERSION)
+	docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64
+	docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)
+	@if docker inspect $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 &> /dev/null; then \
+		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 exists, building the multiarch manifest"; \
+		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
+		docker push $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
+		docker manifest create $(STAGING_IMAGE):$(CUSTOM_VERSION) --amend $(STAGING_IMAGE):$(CUSTOM_VERSION)-amd64 --amend $(STAGING_IMAGE):$(CUSTOM_VERSION)-arm64; \
+		docker manifest push --purge $(STAGING_IMAGE):$(CUSTOM_VERSION); \
 	else \
 		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 does not exist"; \
 	fi
@@ -508,7 +520,7 @@ sbomgen:
 	cyclonedx-gomod mod -licenses -json -output sbom.json
 
 # Build images
-images-nightly: clean codegen set-version build-resources images
+images-nightly: clean codegen set-version build-resources images-all
 
 # Release artifacts
 release-nightly: cross-compile images-push
