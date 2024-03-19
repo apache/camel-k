@@ -23,6 +23,7 @@
 - Running integrations fail when the used registry has a port other than default 80 [\#5141](https://github.com/apache/camel-k/issues/5141)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
 - Update github actions to a version that use node 20 [\#5130](https://github.com/apache/camel-k/issues/5130)
+- Monitor Camel Integrations in K8s Deployments [\#5120](https://github.com/apache/camel-k/issues/5120)
 - Integrations remain in Initialization loop when referenced config map has owner references [\#5114](https://github.com/apache/camel-k/issues/5114)
 - Externally built Integrations are deployed without a command in Camel-K 2.2.0 [\#5112](https://github.com/apache/camel-k/issues/5112)
 - Coverage report wrong percentage [\#5108](https://github.com/apache/camel-k/issues/5108)
@@ -65,8 +66,10 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/onsi/gomega from 1.31.1 to 1.32.0 [\#5257](https://github.com/apache/camel-k/pull/5257) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Fix wrong Kamelet sample content [\#5255](https://github.com/apache/camel-k/pull/5255) ([claudio4j](https://github.com/claudio4j))
 - Add Kamelet v1alpha1 sample [\#5254](https://github.com/apache/camel-k/pull/5254) ([claudio4j](https://github.com/claudio4j))
+- \[\#5252\] release-nightly does not build/push multiarch manifest [\#5253](https://github.com/apache/camel-k/pull/5253) ([tdiesler](https://github.com/tdiesler))
 - chore\(ci\): Upgrade kind action to 2.0.4 [\#5249](https://github.com/apache/camel-k/pull/5249) ([gansheer](https://github.com/gansheer))
 - chore: propagate capabilities to Kit [\#5247](https://github.com/apache/camel-k/pull/5247) ([squakez](https://github.com/squakez))
 - Azure Key Vault Trait: Support Azure Identity as authentication method [\#5244](https://github.com/apache/camel-k/pull/5244) ([oscerd](https://github.com/oscerd))
@@ -118,6 +121,7 @@
 - chore\(deps\): bump github.com/prometheus/common from 0.46.0 to 0.47.0 [\#5159](https://github.com/apache/camel-k/pull/5159) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(build\): Add Build waiting condition [\#5157](https://github.com/apache/camel-k/pull/5157) ([gansheer](https://github.com/gansheer))
 - Reduce write to hash, prepare string from secret, configmap [\#5155](https://github.com/apache/camel-k/pull/5155) ([lfabriko](https://github.com/lfabriko))
+- \[chore\] improve metrics for integration [\#5154](https://github.com/apache/camel-k/pull/5154) ([lgarciaaco](https://github.com/lgarciaaco))
 - feat\(traits\): persist generated status [\#5153](https://github.com/apache/camel-k/pull/5153) ([squakez](https://github.com/squakez))
 - fix\(core\): Externally built Integrations run command configuration from jvm trait [\#5151](https://github.com/apache/camel-k/pull/5151) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): Java required by automatic-updates [\#5150](https://github.com/apache/camel-k/pull/5150) ([gansheer](https://github.com/gansheer))
