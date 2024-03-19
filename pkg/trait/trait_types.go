@@ -73,11 +73,6 @@ type Trait interface {
 	// InfluencesKit determines if the trait has any influence on Integration Kits
 	InfluencesKit() bool
 
-	// InfluencesBuild defines a low level of granularity for those traits which influences the build.
-	// The trait can specify if any particular trait configuration influences a build or not.
-	// Note: You must override this method if you override `InfluencesKit()`
-	InfluencesBuild(this, prev map[string]interface{}) bool
-
 	// IsPlatformTrait marks all fundamental traits that allow the platform to work
 	IsPlatformTrait() bool
 
@@ -91,10 +86,12 @@ type Trait interface {
 	Order() int
 }
 
+// Comparable is the interface exposing comparable funcs.
 type Comparable interface {
 	Matches(trait Trait) bool
 }
 
+// ComparableTrait is the interface used to compare two traits between them.
 type ComparableTrait interface {
 	Trait
 	Comparable
@@ -151,12 +148,6 @@ func (trait *BaseTrait) InjectClient(c client.Client) {
 
 // InfluencesKit determines if the trait has any influence on Integration Kits.
 func (trait *BaseTrait) InfluencesKit() bool {
-	return false
-}
-
-// InfluencesBuild defines a low level of granularity for those traits which influences the build.
-// The trait can specify if any particular trait configuration influences a build or not.
-func (trait *BaseTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
 	return false
 }
 

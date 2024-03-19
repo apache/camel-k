@@ -23,6 +23,7 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -38,50 +39,48 @@ import (
 func TestBuilderTimeout(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
-		g.Eventually(OperatorPod(t, ns)).ShouldNot(BeNil())
-		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformConditionStatus(t, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
 
-		pl := Platform(t, ns)()
+		pl := Platform(t, ctx, ns)()
 		// set a short timeout to simulate the build timeout
 		pl.Spec.Build.Timeout = &metav1.Duration{
 			Duration: 10 * time.Second,
 		}
-		TestClient(t).Update(TestContext, pl)
-		g.Eventually(Platform(t, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformTimeout(t, ns)).Should(Equal(
+		TestClient(t).Update(ctx, pl)
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
+		g.Eventually(PlatformTimeout(t, ctx, ns)).Should(Equal(
 			&metav1.Duration{
 				Duration: 10 * time.Second,
 			},
 		))
 
-		operatorPod := OperatorPod(t, ns)()
+		operatorPod := OperatorPod(t, ctx, ns)()
 		operatorPodImage := operatorPod.Spec.Containers[0].Image
 
 		t.Run("run yaml", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml",
-				"--name", name,
-				"-t", "builder.strategy=pod").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
-			g.Eventually(IntegrationPhase(t, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
-			integrationKitName := IntegrationKit(t, ns, name)()
+			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
+			integrationKitName := IntegrationKit(t, ctx, ns, name)()
 			builderKitName := fmt.Sprintf("camel-k-%s-builder", integrationKitName)
-			g.Eventually(BuilderPodPhase(t, ns, builderKitName)).Should(Equal(corev1.PodPending))
-			g.Eventually(BuildPhase(t, ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
-			g.Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
-			g.Eventually(BuilderPod(t, ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
+			g.Eventually(BuilderPodPhase(t, ctx, ns, builderKitName)).Should(Equal(corev1.PodPending))
+			g.Eventually(BuildPhase(t, ctx, ns, integrationKitName)).Should(Equal(v1.BuildPhaseRunning))
+			g.Eventually(BuilderPod(t, ctx, ns, builderKitName)().Spec.InitContainers[0].Name).Should(Equal("builder"))
+			g.Eventually(BuilderPod(t, ctx, ns, builderKitName)().Spec.InitContainers[0].Image).Should(Equal(operatorPodImage))
 			// After a few minutes (5 max retries), this has to be in error state
-			g.Eventually(BuildPhase(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
-			g.Eventually(IntegrationPhase(t, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
-			g.Eventually(BuildFailureRecovery(t, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
-			g.Eventually(BuilderPodPhase(t, ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
+			g.Eventually(BuildPhase(t, ctx, ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+			g.Eventually(BuildFailureRecovery(t, ctx, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
+			g.Eventually(BuilderPodPhase(t, ctx, ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
 		})
 	})
 }

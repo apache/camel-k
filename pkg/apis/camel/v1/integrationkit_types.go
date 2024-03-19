@@ -74,6 +74,8 @@ type IntegrationKitSpec struct {
 	Repositories []string `json:"repositories,omitempty"`
 	// the sources to add at build time
 	Sources []SourceSpec `json:"sources,omitempty"`
+	// features offered by the IntegrationKit
+	Capabilities []string `json:"capabilities,omitempty"`
 }
 
 // IntegrationKitTraits defines traits assigned to an `IntegrationKit`.

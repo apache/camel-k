@@ -23,6 +23,7 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -60,7 +61,7 @@ var httpdTlsMountPath = "/etc/tls/private"
 func TestMavenProxy(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		hostname := fmt.Sprintf("%s.%s.svc", "proxy", ns)
 
 		// Generate the TLS certificate
@@ -114,21 +115,21 @@ func TestMavenProxy(t *testing.T) {
 				corev1.TLSPrivateKeyKey: privateKeyPem,
 			},
 		}
-		g.Expect(TestClient(t).Create(TestContext, secret)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, secret)).To(Succeed())
 
 		// HTTPD ConfigMap
 		config := newHTTPDConfigMap(ns, hostname)
-		g.Expect(TestClient(t).Create(TestContext, config)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, config)).To(Succeed())
 
 		// HTTPD Deployment
 		deployment := newHTTPDDeployment(ns, config.Name, secret.Name)
-		g.Expect(TestClient(t).Create(TestContext, deployment)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, deployment)).To(Succeed())
 
 		service := newHTTPDService(deployment)
-		g.Expect(TestClient(t).Create(TestContext, service)).To(Succeed())
+		g.Expect(TestClient(t).Create(ctx, service)).To(Succeed())
 
 		// Wait for the Deployment to become ready
-		g.Eventually(Deployment(t, ns, deployment.Name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+		g.Eventually(Deployment(t, ctx, ns, deployment.Name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
 			Fields{
 				"Status": MatchFields(IgnoreExtras,
 					Fields{
@@ -137,7 +138,7 @@ func TestMavenProxy(t *testing.T) {
 			}),
 		))
 
-		svc := Service(t, TestDefaultNamespace, "kubernetes")()
+		svc := Service(t, ctx, TestDefaultNamespace, "kubernetes")()
 		g.Expect(svc).NotTo(BeNil())
 
 		// It may be needed to populate the values from the cluster, machine and service network CIDRs
@@ -150,11 +151,11 @@ func TestMavenProxy(t *testing.T) {
 
 		// Install Camel K with the HTTP proxy
 		operatorID := "camel-k-maven-proxy"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
 		olm, olmErr := olm.IsAPIAvailable(TestClient(t))
 		installed, inErr := kubernetes.IsAPIResourceInstalled(TestClient(t), configv1.GroupVersion.String(), reflect.TypeOf(configv1.Proxy{}).Name())
-		permission, pErr := kubernetes.CheckPermission(TestContext, TestClient(t), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
+		permission, pErr := kubernetes.CheckPermission(ctx, TestClient(t), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
 		olmInstall := pErr == nil && olmErr == nil && inErr == nil && olm && installed && permission
 		var defaultProxy configv1.Proxy
 		if olmInstall {
@@ -163,12 +164,12 @@ func TestMavenProxy(t *testing.T) {
 			key := ctrl.ObjectKey{
 				Name: "cluster",
 			}
-			g.Expect(TestClient(t).Get(TestContext, key, &defaultProxy)).To(Succeed())
+			g.Expect(TestClient(t).Get(ctx, key, &defaultProxy)).To(Succeed())
 
 			newProxy := defaultProxy.DeepCopy()
 			newProxy.Spec.HTTPProxy = fmt.Sprintf("http://%s", hostname)
 			newProxy.Spec.NoProxy = strings.Join(noProxy, ",")
-			g.Expect(TestClient(t).Update(TestContext, newProxy))
+			g.Expect(TestClient(t).Update(ctx, newProxy))
 
 			defer func() {
 				//
@@ -177,30 +178,24 @@ func TestMavenProxy(t *testing.T) {
 				//       does not work on some platforms, eg. OCP4
 				//
 				patch := []byte(`[{"op": "replace","path": "/spec","value": {}},{"op": "replace","path": "/status","value": {}}]`)
-				TestClient(t).Patch(TestContext, &defaultProxy, ctrl.RawPatch(types.JSONPatchType, patch))
+				TestClient(t).Patch(ctx, &defaultProxy, ctrl.RawPatch(types.JSONPatchType, patch))
 			}()
 
 			// ENV values should be injected by the OLM
-			g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 		} else {
-			g.Expect(KamelInstallWithID(t, operatorID, ns,
-				"--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname),
-				// TODO: enable TLS for the HTTPS proxy when Maven supports it
-				// "--operator-env-vars", fmt.Sprintf("HTTPS_PROXY=https://%s", hostname),
-				// "--maven-ca-secret", secret.Name+"/"+corev1.TLSCertKey,
-				"--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","),
-			)).To(Succeed())
+			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
 		}
 
-		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Run the Integration
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
-		g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		proxies := corev1.PodList{
 			TypeMeta: metav1.TypeMeta{
@@ -208,23 +203,23 @@ func TestMavenProxy(t *testing.T) {
 				APIVersion: corev1.SchemeGroupVersion.String(),
 			},
 		}
-		err = TestClient(t).List(TestContext, &proxies,
+		err = TestClient(t).List(ctx, &proxies,
 			ctrl.InNamespace(ns),
 			ctrl.MatchingLabels(deployment.Spec.Selector.MatchLabels),
 		)
 		g.Expect(err).To(Succeed())
 		g.Expect(proxies.Items).To(HaveLen(1))
 
-		logs := Logs(t, ns, proxies.Items[0].Name, corev1.PodLogOptions{})()
+		logs := Logs(t, ctx, ns, proxies.Items[0].Name, corev1.PodLogOptions{})()
 		g.Expect(logs).NotTo(BeEmpty())
 		g.Expect(logs).To(ContainSubstring("\"CONNECT repo.maven.apache.org:443 HTTP/1.1\" 200"))
 
 		// Clean up
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-		g.Expect(TestClient(t).Delete(TestContext, deployment)).To(Succeed())
-		g.Expect(TestClient(t).Delete(TestContext, service)).To(Succeed())
-		g.Expect(TestClient(t).Delete(TestContext, secret)).To(Succeed())
-		g.Expect(TestClient(t).Delete(TestContext, config)).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, deployment)).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, service)).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, secret)).To(Succeed())
+		g.Expect(TestClient(t).Delete(ctx, config)).To(Succeed())
 	})
 }
 

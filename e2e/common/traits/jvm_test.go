@@ -23,6 +23,7 @@ limitations under the License.
 package traits
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -39,13 +40,13 @@ import (
 func TestJVMTrait(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-traits-jvm"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Store a configmap holding a jar
 		var cmData = make(map[string][]byte)
@@ -53,27 +54,24 @@ func TestJVMTrait(t *testing.T) {
 		source, err := os.ReadFile("./files/jvm/sample-1.0.jar")
 		require.NoError(t, err)
 		cmData["sample-1.0.jar"] = source
-		err = CreateBinaryConfigmap(t, ns, "my-deps", cmData)
+		err = CreateBinaryConfigmap(t, ctx, ns, "my-deps", cmData)
 		require.NoError(t, err)
 
 		t.Run("JVM trait classpath", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, operatorID, ns, "./files/jvm/Classpath.java",
-				"--resource", "configmap:my-deps",
-				"-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar",
-			).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/jvm/Classpath.java", "--resource", "configmap:my-deps", "-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
 
 			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ns, "classpath")).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ns, "classpath")()
+			g.Eventually(UnstructuredIntegration(t, ctx, ns, "classpath")).ShouldNot(BeNil())
+			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, "classpath")()
 			jvmTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jvm")
 			g.Expect(jvmTrait).ToNot(BeNil())
 			g.Expect(len(jvmTrait)).To(Equal(1))
 			g.Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources/my-deps/sample-1.0.jar"))
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

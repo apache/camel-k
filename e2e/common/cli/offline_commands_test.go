@@ -32,13 +32,13 @@ import (
 
 func TestKamelVersionWorksOffline(t *testing.T) {
 	g := NewWithT(t)
-	g.Expect(Kamel(t, "version", "--kube-config", "non-existent-kubeconfig-file").Execute()).To(Succeed())
+	g.Expect(Kamel(t, TestContext(), "version", "--kube-config", "non-existent-kubeconfig-file").Execute()).To(Succeed())
 }
 
 func TestKamelHelpOptionWorksOffline(t *testing.T) {
 	g := NewWithT(t)
 
-	traitCmd := Kamel(t, "run", "Xxx.java", "--help")
+	traitCmd := Kamel(t, TestContext(), "run", "Xxx.java", "--help")
 	traitCmd.SetOut(io.Discard)
 	g.Expect(traitCmd.Execute()).To(Succeed())
 }
@@ -46,9 +46,9 @@ func TestKamelHelpOptionWorksOffline(t *testing.T) {
 func TestKamelCompletionWorksOffline(t *testing.T) {
 	g := NewWithT(t)
 
-	bashCmd := Kamel(t, "completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
+	bashCmd := Kamel(t, TestContext(), "completion", "bash", "--kube-config", "non-existent-kubeconfig-file")
 	bashCmd.SetOut(io.Discard)
-	zshCmd := Kamel(t, "completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
+	zshCmd := Kamel(t, TestContext(), "completion", "zsh", "--kube-config", "non-existent-kubeconfig-file")
 	zshCmd.SetOut(io.Discard)
 	g.Expect(bashCmd.Execute()).To(Succeed())
 	g.Expect(zshCmd.Execute()).To(Succeed())

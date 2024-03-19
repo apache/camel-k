@@ -35,7 +35,7 @@ func TestKamelCLIVersion(t *testing.T) {
 	g := NewWithT(t)
 
 	t.Run("check version correctness", func(t *testing.T) {
-		version := GetOutputString(Kamel(t, "version"))
+		version := GetOutputString(Kamel(t, TestContext(), "version"))
 		g.Expect(version).To(ContainSubstring(defaults.Version))
 	})
 }

@@ -23,6 +23,7 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -38,10 +39,10 @@ import (
 func TestIntegrationProfile(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-integration-profile"
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
-		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--global", "--force")).To(Succeed())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
 		integrationProfile.SetOperatorID(operatorID)
@@ -50,44 +51,44 @@ func TestIntegrationProfile(t *testing.T) {
 			LimitCPU: "0.2",
 		}
 
-		g.Expect(CreateIntegrationProfile(t, &integrationProfile)).To(Succeed())
-		g.Eventually(SelectedIntegrationProfilePhase(t, ns, "ipr-global"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
+		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
+		g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns, "ipr-global"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
-		WithNewTestNamespace(t, func(g *WithT, ns1 string) {
+		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns1 string) {
 			integrationProfile := v1.NewIntegrationProfile(ns1, "ipr-local")
 			integrationProfile.SetOperatorID(operatorID)
 			integrationProfile.Spec.Traits.Container = &traitv1.ContainerTrait{
 				LimitCPU: "0.1",
 			}
-			g.Expect(CreateIntegrationProfile(t, &integrationProfile)).To(Succeed())
-			g.Eventually(SelectedIntegrationProfilePhase(t, ns1, "ipr-local"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
+			g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
+			g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns1, "ipr-local"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
 			t.Run("Run integration with global integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
 
-				g.Eventually(IntegrationPod(t, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
-				g.Eventually(IntegrationPodHas(t, ns1, "limited", func(pod *corev1.Pod) bool {
+				g.Eventually(IntegrationPod(t, ctx, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
+				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
 					if len(pod.Spec.Containers) != 1 {
 						return false
 					}
 					containerName := pod.Spec.Containers[0].Name
 					return containerName == "ck-integration-global"
 				}), TestTimeoutShort).Should(BeTrue())
-				g.Eventually(IntegrationPodHas(t, ns1, "limited", func(pod *corev1.Pod) bool {
+				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
 					if len(pod.Spec.Containers) != 1 {
 						return false
 					}
 					cpuLimits := pod.Spec.Containers[0].Resources.Limits.Cpu()
 					return cpuLimits != nil && cpuLimits.AsApproximateFloat64() > 0
 				}), TestTimeoutShort).Should(BeTrue())
-				g.Expect(Kamel(t, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
+				g.Expect(Kamel(t, ctx, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
 			})
 
 			t.Run("Run integration with namespace local integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-local", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-local", "files/yaml.yaml").Execute()).To(Succeed())
 
-				g.Eventually(IntegrationPod(t, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
-				g.Eventually(IntegrationPodHas(t, ns1, "limited", func(pod *corev1.Pod) bool {
+				g.Eventually(IntegrationPod(t, ctx, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
+				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
 					if len(pod.Spec.Containers) != 1 {
 						return false
 					}
@@ -95,20 +96,20 @@ func TestIntegrationProfile(t *testing.T) {
 					return containerName == "integration"
 				}), TestTimeoutShort).Should(BeTrue())
 
-				g.Eventually(IntegrationPodHas(t, ns1, "limited", func(pod *corev1.Pod) bool {
+				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
 					if len(pod.Spec.Containers) != 1 {
 						return false
 					}
 					cpuLimits := pod.Spec.Containers[0].Resources.Limits.Cpu()
 					return cpuLimits != nil && cpuLimits.AsApproximateFloat64() > 0
 				}), TestTimeoutShort).Should(BeTrue())
-				g.Expect(Kamel(t, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
+				g.Expect(Kamel(t, ctx, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
 			})
 
 			t.Run("Run integration without integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, operatorID, ns1, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
-				g.Eventually(IntegrationPod(t, ns1, "normal"), TestTimeoutShort).Should(Not(BeNil()))
-				g.Eventually(IntegrationPodHas(t, ns1, "normal", func(pod *corev1.Pod) bool {
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Eventually(IntegrationPod(t, ctx, ns1, "normal"), TestTimeoutShort).Should(Not(BeNil()))
+				g.Eventually(IntegrationPodHas(t, ctx, ns1, "normal", func(pod *corev1.Pod) bool {
 					if len(pod.Spec.Containers) != 1 {
 						return false
 					}
@@ -118,7 +119,7 @@ func TestIntegrationProfile(t *testing.T) {
 			})
 
 			// Clean up
-			g.Expect(Kamel(t, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns1).Execute()).To(Succeed())
 		})
 	})
 }
@@ -126,10 +127,10 @@ func TestIntegrationProfile(t *testing.T) {
 func TestIntegrationProfileInfluencesKit(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-ipr-kit"
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
-		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--global", "--force")).To(Succeed())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
 		integrationProfile.SetOperatorID(operatorID)
@@ -137,44 +138,44 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 			Properties: []string{"b1=foo"},
 		}
 
-		g.Expect(CreateIntegrationProfile(t, &integrationProfile)).To(Succeed())
-		g.Eventually(SelectedIntegrationProfilePhase(t, ns, "ipr-global"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
+		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
+		g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns, "ipr-global"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
-		g.Expect(KamelRunWithID(t, operatorID, ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
-		g.Eventually(IntegrationPod(t, ns, "normal"), TestTimeoutMedium).Should(Not(BeNil()))
-		g.Eventually(IntegrationPodPhase(t, ns, "normal"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, "normal", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ns, "normal"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPod(t, ctx, ns, "normal"), TestTimeoutMedium).Should(Not(BeNil()))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "normal"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "normal", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "normal"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		// Verify that a new kit has been built based on the default base image
-		integrationKitName := IntegrationKit(t, ns, "normal")()
-		g.Eventually(Kit(t, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
-		g.Eventually(Kit(t, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
+		integrationKitName := IntegrationKit(t, ctx, ns, "normal")()
+		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
+		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
-		g.Expect(KamelRunWithID(t, operatorID, ns, "--name", "simple", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "simple", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
 
-		g.Eventually(IntegrationPod(t, ns, "simple"), TestTimeoutMedium).Should(Not(BeNil()))
-		g.Eventually(IntegrationPodPhase(t, ns, "simple"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		g.Eventually(IntegrationConditionStatus(t, ns, "simple", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		g.Eventually(IntegrationLogs(t, ns, "simple"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		g.Eventually(IntegrationPod(t, ctx, ns, "simple"), TestTimeoutMedium).Should(Not(BeNil()))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "simple"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "simple", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "simple"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Verify that a new kit has been built based on the previous kit
-		integrationKitNameWithProfile := IntegrationKit(t, ns, "simple")()
+		integrationKitNameWithProfile := IntegrationKit(t, ctx, ns, "simple")()
 		g.Eventually(integrationKitNameWithProfile).ShouldNot(Equal(integrationKitName))
-		g.Eventually(Kit(t, ns, integrationKitNameWithProfile)().Status.BaseImage).Should(ContainSubstring(integrationKitName))
-		g.Eventually(Kit(t, ns, integrationKitNameWithProfile)().Status.RootImage).Should(Equal(defaults.BaseImage()))
+		g.Eventually(Kit(t, ctx, ns, integrationKitNameWithProfile)().Status.BaseImage).Should(ContainSubstring(integrationKitName))
+		g.Eventually(Kit(t, ctx, ns, integrationKitNameWithProfile)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
 		// Clean up
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
 func TestPropagateIntegrationProfileChanges(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-ipr-changes"
-		g.Expect(KamelInstallWithID(t, operatorID, ns, "--global", "--force")).To(Succeed())
-		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--global", "--force")).To(Succeed())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "debug-profile")
 		integrationProfile.SetOperatorID(operatorID)
@@ -185,13 +186,13 @@ func TestPropagateIntegrationProfileChanges(t *testing.T) {
 			Level: "DEBUG",
 		}
 
-		g.Expect(CreateIntegrationProfile(t, &integrationProfile)).To(Succeed())
-		g.Eventually(SelectedIntegrationProfilePhase(t, ns, "debug-profile"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
+		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
+		g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns, "debug-profile"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
-		g.Expect(KamelRunWithID(t, operatorID, ns, "--name", "simple", "--integration-profile", "debug-profile", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "simple", "--integration-profile", "debug-profile", "files/yaml.yaml").Execute()).To(Succeed())
 
-		g.Eventually(IntegrationPod(t, ns, "simple"), TestTimeoutMedium).Should(Not(BeNil()))
-		g.Eventually(IntegrationPodHas(t, ns, "simple", func(pod *corev1.Pod) bool {
+		g.Eventually(IntegrationPod(t, ctx, ns, "simple"), TestTimeoutMedium).Should(Not(BeNil()))
+		g.Eventually(IntegrationPodHas(t, ctx, ns, "simple", func(pod *corev1.Pod) bool {
 			if len(pod.Spec.Containers) != 1 {
 				return false
 			}
@@ -199,13 +200,13 @@ func TestPropagateIntegrationProfileChanges(t *testing.T) {
 			return containerName == "ck-ipr"
 		}), TestTimeoutShort).Should(BeTrue())
 
-		g.Expect(UpdateIntegrationProfile(t, ns, func(ipr *v1.IntegrationProfile) {
+		g.Expect(UpdateIntegrationProfile(t, ctx, ns, func(ipr *v1.IntegrationProfile) {
 			ipr.Spec.Traits.Container = &traitv1.ContainerTrait{
 				Name: "ck-ipr-new",
 			}
 		})).To(Succeed())
 
-		g.Eventually(IntegrationPodHas(t, ns, "simple", func(pod *corev1.Pod) bool {
+		g.Eventually(IntegrationPodHas(t, ctx, ns, "simple", func(pod *corev1.Pod) bool {
 			if len(pod.Spec.Containers) != 1 {
 				return false
 			}
@@ -214,6 +215,6 @@ func TestPropagateIntegrationProfileChanges(t *testing.T) {
 		}), TestTimeoutShort).Should(BeTrue())
 
 		// Clean up
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

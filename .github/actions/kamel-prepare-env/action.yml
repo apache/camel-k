@@ -97,7 +97,7 @@ runs:
     # Install a version of kubectl for generic access to cluster
     #
     - id: install-kubectl
-      uses: azure/setup-kubectl@v3
+      uses: azure/setup-kubectl@v4
       if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
       with:
         version: 'v1.27.4'

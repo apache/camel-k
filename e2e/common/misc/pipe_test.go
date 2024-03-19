@@ -23,6 +23,7 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -37,75 +38,66 @@ import (
 func TestPipe(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-pipe"
-		g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
-		g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Error Handler testing
 		t.Run("test error handler", func(t *testing.T) {
-			g.Expect(createErrorProducerKamelet(t, operatorID, ns, "my-own-error-producer-source")()).To(Succeed())
-			g.Expect(CreateLogKamelet(t, operatorID, ns, "my-own-log-sink")()).To(Succeed())
+			g.Expect(createErrorProducerKamelet(t, ctx, operatorID, ns, "my-own-error-producer-source")()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, ctx, operatorID, ns, "my-own-log-sink")()).To(Succeed())
 
 			t.Run("throw error test", func(t *testing.T) {
-				g.Expect(KamelBindWithID(t, operatorID, ns,
-					"my-own-error-producer-source",
-					"my-own-log-sink",
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-error-producer-source", "my-own-log-sink",
 					"--error-handler", "sink:my-own-log-sink",
 					"-p", "source.message=throw Error",
 					"-p", "sink.loggerName=integrationLogger",
 					"-p", "error-handler.loggerName=kameletErrorHandler",
 					// Needed in the test to make sure to do the right string comparison later
 					"-t", "logging.color=false",
-					"--name", "throw-error-binding",
-				).Execute()).To(Succeed())
+					"--name", "throw-error-binding").Execute()).To(Succeed())
 
-				g.Eventually(IntegrationPodPhase(t, ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationLogs(t, ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
-				g.Eventually(IntegrationLogs(t, ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, "throw-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, "throw-error-binding"), TestTimeoutShort).Should(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, "throw-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
 
 			})
 
 			t.Run("don't throw error test", func(t *testing.T) {
-				g.Expect(KamelBindWithID(t, operatorID, ns,
-					"my-own-error-producer-source",
-					"my-own-log-sink",
+				g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-error-producer-source", "my-own-log-sink",
 					"--error-handler", "sink:my-own-log-sink",
 					"-p", "source.message=true",
 					"-p", "sink.loggerName=integrationLogger",
 					"-p", "error-handler.loggerName=kameletErrorHandler",
 					// Needed in the test to make sure to do the right string comparison later
 					"-t", "logging.color=false",
-					"--name", "no-error-binding",
-				).Execute()).To(Succeed())
+					"--name", "no-error-binding").Execute()).To(Succeed())
 
-				g.Eventually(IntegrationPodPhase(t, ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationLogs(t, ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
-				g.Eventually(IntegrationLogs(t, ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, "no-error-binding"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationLogs(t, ctx, ns, "no-error-binding"), TestTimeoutShort).ShouldNot(ContainSubstring("[kameletErrorHandler] (Camel (camel-1) thread #1 - timer://tick)"))
+				g.Eventually(IntegrationLogs(t, ctx, ns, "no-error-binding"), TestTimeoutShort).Should(ContainSubstring("[integrationLogger] (Camel (camel-1) thread #1 - timer://tick)"))
 
 			})
 		})
 
 		//Pipe with traits testing
 		t.Run("test Pipe with trait", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, operatorID, ns, "my-own-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, "my-own-timer-source")()).To(Succeed())
 			// Log sink kamelet exists from previous test
 
-			g.Expect(KamelBindWithID(t, operatorID, ns,
-				"my-own-timer-source",
-				"my-own-log-sink",
+			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink",
 				"-p", "source.message=hello from test",
 				"-p", "sink.loggerName=integrationLogger",
 				"--annotation", "trait.camel.apache.org/camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",
-				"--name", "kb-with-traits",
-			).Execute()).To(Succeed())
+				"--name", "kb-with-traits").Execute()).To(Succeed())
 
-			g.Eventually(IntegrationPodPhase(t, ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("hello from test"))
-			g.Eventually(IntegrationLogs(t, ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("hello from test"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "kb-with-traits"), TestTimeoutShort).Should(ContainSubstring("integrationLogger"))
 		})
 
 		// Pipe with wrong spec
@@ -113,22 +105,22 @@ func TestPipe(t *testing.T) {
 			name := RandomizedSuffixName("bad-klb")
 			kb := v1.NewPipe(ns, name)
 			kb.Spec = v1.PipeSpec{}
-			_, err := kubernetes.ReplaceResource(TestContext, TestClient(t), &kb)
+			_, err := kubernetes.ReplaceResource(ctx, TestClient(t), &kb)
 			g.Eventually(err).Should(BeNil())
-			g.Eventually(PipePhase(t, ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
-			g.Eventually(PipeConditionStatus(t, ns, name, v1.PipeConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
-			g.Eventually(PipeCondition(t, ns, name, v1.PipeIntegrationConditionError), TestTimeoutShort).Should(
+			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
+			g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
+			g.Eventually(PipeCondition(t, ctx, ns, name, v1.PipeIntegrationConditionError), TestTimeoutShort).Should(
 				WithTransform(PipeConditionMessage, And(
 					ContainSubstring("could not determine source URI"),
 					ContainSubstring("no ref or URI specified in endpoint"),
 				)))
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
-func createErrorProducerKamelet(t *testing.T, operatorID string, ns string, name string) func() error {
+func createErrorProducerKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -156,5 +148,5 @@ func createErrorProducerKamelet(t *testing.T, operatorID string, ns string, name
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ns, name, flow, props, nil)
+	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
 }

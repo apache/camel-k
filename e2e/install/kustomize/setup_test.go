@@ -23,6 +23,7 @@ limitations under the License.
 package kustomize
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -34,18 +35,19 @@ import (
 )
 
 func TestSetupKustomizeBasic(t *testing.T) {
+	ctx := TestContext()
 	g := NewWithT(t)
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
 	// Ensure no CRDs are already installed
-	g.Expect(UninstallAll(t)).To(Succeed())
+	g.Expect(UninstallAll(t, ctx)).To(Succeed())
 	g.Eventually(CRDs(t)).Should(HaveLen(0))
 
 	// Return the cluster to previous state
-	defer Cleanup(t)
+	defer Cleanup(t, ctx)
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
 		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
 		g.Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
@@ -54,14 +56,14 @@ func TestSetupKustomizeBasic(t *testing.T) {
 
 		kpRoles := ExpectedKubePromoteRoles
 		opRoles := kpRoles + ExpectedOSPromoteRoles
-		g.Eventually(Role(t, ns)).Should(Or(HaveLen(kpRoles), HaveLen(opRoles)))
+		g.Eventually(Role(t, ctx, ns)).Should(Or(HaveLen(kpRoles), HaveLen(opRoles)))
 
 		kcRoles := ExpectedKubeClusterRoles
 		ocRoles := kcRoles + ExpectedOSClusterRoles
-		g.Eventually(ClusterRole(t)).Should(Or(HaveLen(kcRoles), HaveLen(ocRoles)))
+		g.Eventually(ClusterRole(t, ctx)).Should(Or(HaveLen(kcRoles), HaveLen(ocRoles)))
 
 		// Tidy up to ensure next test works
-		g.Expect(Kamel(t, "uninstall", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "uninstall", "-n", ns).Execute()).To(Succeed())
 	})
 
 }
@@ -70,25 +72,27 @@ func TestSetupKustomizeGlobal(t *testing.T) {
 	makeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makeDir)
 
+	ctx := TestContext()
+
 	// Ensure no CRDs are already installed
 	g := NewWithT(t)
-	g.Expect(UninstallAll(t)).To(Succeed())
+	g.Expect(UninstallAll(t, ctx)).To(Succeed())
 	g.Eventually(CRDs(t)).Should(HaveLen(0))
 
 	// Return the cluster to previous state
-	defer Cleanup(t)
+	defer Cleanup(t, ctx)
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		namespaceArg := fmt.Sprintf("NAMESPACE=%s", ns)
 		ExpectExecSucceed(t, g, Make(t, "setup-cluster", namespaceArg))
 		g.Eventually(CRDs(t)).Should(HaveLen(GetExpectedCRDs(defaults.Version)))
 
 		ExpectExecSucceed(t, g, Make(t, "setup", "GLOBAL=true", namespaceArg))
 
-		g.Eventually(Role(t, ns)).Should(HaveLen(0))
+		g.Eventually(Role(t, ctx, ns)).Should(HaveLen(0))
 
 		kcpRoles := ExpectedKubeClusterRoles + ExpectedKubePromoteRoles
 		ocpRoles := kcpRoles + ExpectedOSClusterRoles + ExpectedOSPromoteRoles
-		g.Eventually(ClusterRole(t)).Should(Or(HaveLen(kcpRoles), HaveLen(ocpRoles)))
+		g.Eventually(ClusterRole(t, ctx)).Should(Or(HaveLen(kcpRoles), HaveLen(ocpRoles)))
 	})
 }

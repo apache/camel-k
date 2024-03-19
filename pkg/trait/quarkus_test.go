@@ -225,3 +225,31 @@ func TestGetLanguageSettingsWithLoaders(t *testing.T) {
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageKotlin))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 }
+
+func TestQuarkusMatches(t *testing.T) {
+	qt := quarkusTrait{
+		BasePlatformTrait: NewBasePlatformTrait("quarkus", 600),
+		QuarkusTrait: traitv1.QuarkusTrait{
+			Modes: []traitv1.QuarkusMode{traitv1.JvmQuarkusMode},
+		},
+	}
+	qt2 := quarkusTrait{
+		BasePlatformTrait: NewBasePlatformTrait("quarkus", 600),
+		QuarkusTrait: traitv1.QuarkusTrait{
+			Modes:           []traitv1.QuarkusMode{traitv1.JvmQuarkusMode},
+			NativeBaseImage: QuarkusNativeDefaultBaseImageName,
+		},
+	}
+
+	assert.True(t, qt.Matches(&qt2))
+	qt2.Modes = append(qt2.Modes, traitv1.NativeQuarkusMode)
+	assert.True(t, qt.Matches(&qt2))
+	qt2.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
+	assert.False(t, qt.Matches(&qt2))
+	qt2.Modes = nil
+	assert.True(t, qt.Matches(&qt2))
+	qt2.Modes = []traitv1.QuarkusMode{}
+	assert.True(t, qt.Matches(&qt2))
+	qt2.NativeBaseImage = "docker.io/my-new-native-base"
+	assert.False(t, qt.Matches(&qt2))
+}

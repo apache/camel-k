@@ -533,7 +533,6 @@ func NewTraitsOptionsForKameletBinding(kb *v1alpha1.KameletBinding) (Options, er
 
 func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {
 	options := make(Options)
-
 	for k, v := range meta.Annotations {
 		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
 			configKey := strings.TrimPrefix(k, v1.TraitAnnotationPrefix)
@@ -544,22 +543,7 @@ func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {
 				if _, ok := options[id]; !ok {
 					options[id] = make(map[string]interface{})
 				}
-
-				propParts := util.ConfigTreePropertySplit(prop)
-				var current = options[id]
-				if len(propParts) > 1 {
-					c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
-					if err != nil {
-						return options, err
-					}
-					if cc, ok := c.(map[string]interface{}); ok {
-						current = cc
-					} else {
-						return options, errors.New(`invalid array specification: to set an array value use the ["v1", "v2"] format`)
-					}
-				}
-				current[prop] = v
-
+				options[id][prop] = stringOrSlice(v)
 			} else {
 				return options, fmt.Errorf("wrong format for trait annotation %q: missing trait ID", k)
 			}
@@ -567,6 +551,24 @@ func FromAnnotations(meta *metav1.ObjectMeta) (Options, error) {
 	}
 
 	return options, nil
+}
+
+// stringOrSlice returns either a string or a slice with trimmed values when the input is
+// represented as an array style (ie, [a,b,c]).
+func stringOrSlice(val string) interface{} {
+	if val == "[]" {
+		// empty array
+		return []string{}
+	}
+	if strings.HasPrefix(val, "[") && strings.HasSuffix(val, "]") {
+		slice := strings.Split(val[1:len(val)-1], ",")
+		for i := range slice {
+			slice[i] = strings.Trim(slice[i], " ")
+		}
+		return slice
+	} else {
+		return val
+	}
 }
 
 // verify if the integration in the Environment contains an endpoint.
@@ -592,4 +594,57 @@ func containsEndpoint(name string, e *Environment, c client.Client) (bool, error
 		}
 	}
 	return hasKnativeEndpoint, nil
+}
+
+// HasMatchingTraits verifies if two traits options match.
+func HasMatchingTraits(traitMap Options, kitTraitMap Options) (bool, error) {
+	catalog := NewCatalog(nil)
+
+	for _, t := range catalog.AllTraits() {
+		if t == nil || !t.InfluencesKit() {
+			// We don't store the trait configuration if the trait cannot influence the kit behavior
+			continue
+		}
+		id := string(t.ID())
+		it, _ := traitMap.Get(id)
+		kt, _ := kitTraitMap.Get(id)
+		if ct, ok := t.(ComparableTrait); ok {
+			// if it's match trait use its matches method to determine the match
+			if match, err := matchesComparableTrait(ct, it, kt); !match || err != nil {
+				return false, err
+			}
+		} else {
+			if !matchesTrait(it, kt) {
+				return false, nil
+			}
+		}
+	}
+
+	return true, nil
+}
+
+func matchesComparableTrait(ct ComparableTrait, it map[string]interface{}, kt map[string]interface{}) (bool, error) {
+	t1 := reflect.New(reflect.TypeOf(ct).Elem()).Interface()
+	if err := ToTrait(it, &t1); err != nil {
+		return false, err
+	}
+	t2 := reflect.New(reflect.TypeOf(ct).Elem()).Interface()
+	if err := ToTrait(kt, &t2); err != nil {
+		return false, err
+	}
+	ct2, ok := t2.(ComparableTrait)
+	if !ok {
+		return false, fmt.Errorf("type assertion failed: %v", t2)
+	}
+	tt1, ok := t1.(Trait)
+	if !ok {
+		return false, fmt.Errorf("type assertion failed: %v", t1)
+	}
+
+	return ct2.Matches(tt1), nil
+}
+
+func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
+	// perform exact match on the two trait maps
+	return reflect.DeepEqual(it, kt)
 }

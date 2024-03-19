@@ -15,22 +15,32 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-#
-# * patches/integration-platform-patch.yaml
-# customizes the integration platform custom resource
-# Edit the patch manually to add required configuration
-#
-resources:
-- bases/camel_v1_integrationplatform.yaml
-- bases/camel_v1_integrationprofile.yaml
-- bases/camel_v1_integration.yaml
-- bases/camel_v1_integrationkit.yaml
-- bases/camel_v1_camelcatalog.yaml
-- bases/camel_v1_build.yaml
-- bases/camel_v1_kamelet.yaml
-- bases/camel_v1_pipe.yaml
-- bases/camel_v1alpha1_kamelet.yaml
-- bases/camel_v1alpha1_kameletbinding.yaml
-
-patchesStrategicMerge:
-- patch-integration-platform.yaml
+apiVersion: camel.apache.org/v1alpha1
+kind: Kamelet
+metadata:
+  name: example-source
+spec:
+  definition:
+    description: Produces periodic events with a custom payload
+    properties:
+      message:
+        description: The message to generate
+        title: Message
+        type: string
+      period:
+        default: 1000
+        description: The time interval between two events
+        title: Period
+        type: integer
+    required:
+    - message
+    title: Example Timer
+  template:
+    from:
+      uri: timer:tick
+      parameters:
+        period: "#property:period"
+      steps:
+      - setBody:
+          constant: "#property:message"
+      - to: kamelet:sink

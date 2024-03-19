@@ -23,6 +23,7 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
 	"fmt"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"testing"
@@ -37,9 +38,9 @@ import (
 func TestKamelCLIDump(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("dump empty namespace", func(t *testing.T) {
-			dump := GetOutputString(Kamel(t, "dump", "-n", ns))
+			dump := GetOutputString(Kamel(t, ctx, "dump", "-n", ns))
 
 			g.Expect(dump).To(ContainSubstring("Found 0 integrations:"))
 			g.Expect(dump).To(ContainSubstring("Found 0 deployments:"))
@@ -47,16 +48,16 @@ func TestKamelCLIDump(t *testing.T) {
 
 		t.Run("dump non-empty namespace", func(t *testing.T) {
 			operatorID := fmt.Sprintf("camel-k-%s", ns)
-			g.Expect(CopyCamelCatalog(t, ns, operatorID)).To(Succeed())
-			g.Expect(CopyIntegrationKits(t, ns, operatorID)).To(Succeed())
-			g.Expect(KamelInstallWithID(t, operatorID, ns)).To(Succeed())
-			g.Eventually(SelectedPlatformPhase(t, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+			g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+			g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+			g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, "yaml")).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml")).Should(ContainSubstring("Magicstring!"))
 
-			dump := GetOutputString(Kamel(t, "dump", "-n", ns))
+			dump := GetOutputString(Kamel(t, ctx, "dump", "-n", ns))
 			g.Expect(dump).To(ContainSubstring("Found 1 platforms"))
 			g.Expect(dump).To(ContainSubstring("Found 1 integrations"))
 			g.Expect(dump).To(ContainSubstring("name: yaml"))

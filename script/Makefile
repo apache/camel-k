@@ -32,8 +32,8 @@ OPM_VERSION := v1.24.0
 BASE_IMAGE := eclipse-temurin:17
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
-# Default value, change to your architecture accordingly
-IMAGE_ARCH ?= amd64
+# Test for arm64, fall back to amd64
+IMAGE_ARCH ?= $(if $(filter arm64,$(shell uname -m)),arm64,amd64)
 #
 # Situations when user wants to override
 # the image name and version
@@ -240,9 +240,15 @@ ifeq (, $(shell command -v gotestfmt 2> /dev/null))
 	go install github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest
 endif
 
+# Build images without running unit tests
+# NOTEST=1 make images
 test: do-build
+ifndef NOTEST
 	@echo "####### Running unit test..."
 	go test ./... $(COVERAGE_OPTS)
+else
+	@echo "####### Skipping unit test..."
+endif
 
 #
 # Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
@@ -342,8 +348,8 @@ test-quarkus-native-high-memory: do-build
 	go test -timeout 180m -v ./e2e/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
-	@echo "####### Building kamel CLI for $(GOOS) $(IMAGE_ARCH) architecture..."
-	CGO_ENABLED=0 GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+	@echo "####### Building kamel CLI for linux/$(IMAGE_ARCH) architecture..."
+	CGO_ENABLED=0 GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
 	# Symbolic link to a local CLI
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
@@ -362,7 +368,7 @@ endif
 
 build-compile-integration-tests:
 	@echo "####### Compiling integration tests..."
-	export CAMEL_K_E2E_JUST_COMPILE="true" ;\
+	export CAMEL_K_E2E_JUST_COMPILE="true"; \
 	go test -run nope -tags="integration" ./e2e/...
 
 clean:
@@ -416,57 +422,54 @@ maven-overlay:
 	mkdir -p build/_maven_overlay
 	./script/maven_overlay.sh build/_maven_overlay
 
-kamel-overlay:
-	mkdir -p build/_output/bin
-ifeq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
-	@echo "####### Copying Linux platform arch $(IMAGE_ARCH) CLI into output build directory..."
-else
-	@echo "####### (Re)Building a Linux platform arch $(IMAGE_ARCH) CLI "
-	@echo "####### Likely you're on a non Linux host, so I need to build a Linux CLI to bundle in the container image"
-	GOOS=linux GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
-endif
-	cp build/_output/bin/kamel-$(IMAGE_ARCH) build/_output/bin/kamel
-
 TARGET_STAGE := base
 ifeq ($(DEBUG_MODE),true)
 	TARGET_STAGE := debug
 	CUSTOM_IMAGE := $(CUSTOM_IMAGE)-debug
 endif
 
-DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
-ifneq ($(IMAGE_ARCH), amd64)
-	DOCKER_TAG := $(DOCKER_TAG)-$(IMAGE_ARCH)
-endif
+DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH)
 
-images: build kamel-overlay maven-overlay bundle-kamelets
+images: build maven-overlay bundle-kamelets
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
 	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
-	docker buildx build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) -t $(DOCKER_TAG) -f build/Dockerfile .
+	docker buildx build --target $(TARGET_STAGE) --platform=linux/$(IMAGE_ARCH) --build-arg IMAGE_ARCH=$(IMAGE_ARCH) --load -t $(DOCKER_TAG) -f build/Dockerfile .
+	docker tag $(DOCKER_TAG) $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
 # Mainly used for internal CI purposes
 image-push:
 	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
 
-images-all: images
+# Make sure the current docker builder must supports the wanted platform list, which may not be the case for the default builder
+#
+# docker buildx inspect
+# ...
+# Platforms: linux/amd64*, linux/arm64*
+#
+#
+# docker buildx create --name mybuilder --platform linux/amd64,linux/arm64
+# docker buildx use mybuilder
+images-all:
 	make IMAGE_ARCH=arm64 images
-
-images-push:
-	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
-	docker push $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64
+	make IMAGE_ARCH=amd64 images
 
 images-push-staging:
-	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION) $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
-	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64
+	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-amd64
+	docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
+	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-amd64
 	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)
-	docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64
-	# TODO: we can evaluate the usage of manifest and try the following
-	# docker manifest create $(CUSTOM_IMAGE):$(CUSTOM_VERSION) \
-	# --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-amd64 \
-	# --amend $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64
-	# docker manifest push --purge $(CUSTOM_IMAGE):$(CUSTOM_VERSION)
+	@if docker inspect $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 &> /dev/null; then \
+		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 exists, building the multiarch manifest"; \
+		docker tag $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64; \
+		docker push $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64; \
+		docker manifest create $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION) --amend $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-amd64 --amend $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION)-arm64; \
+		docker manifest push --purge $(STAGING_IMAGE_NAME):$(CUSTOM_VERSION); \
+	else \
+		echo "Image $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-arm64 does not exist"; \
+	fi
 
 get-image:
 	@echo $(CUSTOM_IMAGE)

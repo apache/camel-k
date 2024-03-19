@@ -42,7 +42,7 @@ import (
 //
 // To enable the automatic context reload on secrets updates you should define
 // the following trait options:
-// -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true" -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000" -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string" -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t azure-key-vault.blob-access-key="account-name"
+// -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true" -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000" -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string" -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t azure-key-vault.blob-access-key="account-name" -t azure-key-vault.azure-identity-enabled="true"
 //
 // +camel-k:trait=azure-key-vault.
 type Trait struct {
@@ -63,6 +63,8 @@ type Trait struct {
 	ContextReloadEnabled *bool `property:"context-reload-enabled" json:"contextReloadEnabled,omitempty"`
 	// Define if we want to use the Refresh Feature for secrets
 	RefreshEnabled *bool `property:"refresh-enabled" json:"refreshEnabled,omitempty"`
+	// Whether the Azure Identity Authentication should be used or not
+	AzureIdentityEnabled *bool `property:"azure-identity-enabled" json:"azureIdentityEnabled,omitempty"`
 	// If Refresh is enabled, this defines the interval to check the refresh event
 	RefreshPeriod string `property:"refresh-period" json:"refreshPeriod,omitempty"`
 	// If Refresh is enabled, the regular expression representing the secrets we want to track
@@ -107,6 +109,10 @@ func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, *t
 		t.RefreshEnabled = pointer.Bool(false)
 	}
 
+	if t.AzureIdentityEnabled == nil {
+		t.AzureIdentityEnabled = pointer.Bool(false)
+	}
+
 	return true, nil, nil
 }
 
@@ -143,6 +149,7 @@ func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
 		environment.ApplicationProperties["camel.vault.azure.clientId"] = t.ClientID
 		environment.ApplicationProperties["camel.vault.azure.vaultName"] = t.VaultName
 		environment.ApplicationProperties["camel.vault.azure.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
+		environment.ApplicationProperties["camel.vault.azure.azureIdentityEnabled"] = strconv.FormatBool(*t.AzureIdentityEnabled)
 		environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
 		environment.ApplicationProperties["camel.vault.azure.refreshPeriod"] = t.RefreshPeriod
 		if t.Secrets != "" {

@@ -53,7 +53,7 @@ func init() {
 						Name:      nexusService,
 					}
 
-					if err := TestClient(nil).Get(TestContext, key, &svc); err != nil {
+					if err := TestClient(nil).Get(TestContext(), key, &svc); err != nil {
 						svcExists = false
 					}
 					svcChecked = true

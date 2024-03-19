@@ -37,7 +37,7 @@ import (
 )
 
 func TestRunDevMode(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		/*
 		 * TODO
 		 * The changing of the yaml file constant from "string" to "magic" is not being
@@ -50,7 +50,7 @@ func TestRunDevMode(t *testing.T) {
 		}
 
 		t.Run("run yaml dev mode", func(t *testing.T) {
-			ctx, cancel := context.WithCancel(TestContext)
+			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 			piper, pipew := io.Pipe()
 			defer pipew.Close()
@@ -79,7 +79,7 @@ func TestRunDevMode(t *testing.T) {
 		})
 
 		t.Run("run yaml remote dev mode", func(t *testing.T) {
-			ctx, cancel := context.WithCancel(TestContext)
+			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 			piper, pipew := io.Pipe()
 			defer pipew.Close()
@@ -114,15 +114,15 @@ func TestRunDevMode(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
 
 			// First run (warm up)
-			g.Expect(KamelRunWithID(t, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Expect(Kamel(t, "delete", name, "-n", ns).Execute()).To(Succeed())
-			g.Eventually(Integration(t, ns, name)).Should(BeNil())
-			g.Eventually(IntegrationPod(t, ns, name), TestTimeoutMedium).Should(BeNil())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, name)).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutMedium).Should(BeNil())
 
 			// Second run (rebuild)
-			ctx, cancel := context.WithCancel(TestContext)
+			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()
 			piper, pipew := io.Pipe()
 			defer pipew.Close()
@@ -148,6 +148,6 @@ func TestRunDevMode(t *testing.T) {
 			g.Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

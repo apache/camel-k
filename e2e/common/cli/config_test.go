@@ -23,6 +23,7 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -39,30 +40,30 @@ import (
 )
 
 func TestKamelCLIConfig(t *testing.T) {
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("check default namespace", func(t *testing.T) {
 			_, err := os.Stat(cmd.DefaultConfigLocation)
 			assert.True(t, os.IsNotExist(err), "No file at "+cmd.DefaultConfigLocation+" was expected")
 			t.Cleanup(func() { os.Remove(cmd.DefaultConfigLocation) })
-			g.Expect(Kamel(t, "config", "--default-namespace", ns).Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "config", "--default-namespace", ns).Execute()).To(Succeed())
 			_, err = os.Stat(cmd.DefaultConfigLocation)
 			require.NoError(t, err, "A file at "+cmd.DefaultConfigLocation+" was expected")
-			g.Expect(Kamel(t, "run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(Kamel(t, ctx, "run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
 
-			g.Eventually(IntegrationPodPhase(t, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			// first line of the integration logs
-			logs := strings.Split(IntegrationLogs(t, ns, "yaml")(), "\n")[0]
-			podName := IntegrationPod(t, ns, "yaml")().Name
+			logs := strings.Split(IntegrationLogs(t, ctx, ns, "yaml")(), "\n")[0]
+			podName := IntegrationPod(t, ctx, ns, "yaml")().Name
 
-			logsCLI := GetOutputStringAsync(Kamel(t, "log", "yaml"))
+			logsCLI := GetOutputStringAsync(Kamel(t, ctx, "log", "yaml"))
 			g.Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
 			g.Eventually(logsCLI).Should(ContainSubstring(logs))
 		})
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

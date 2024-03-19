@@ -23,6 +23,7 @@ limitations under the License.
 package misc
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -41,32 +42,31 @@ import (
 func TestClientFunctionalities(t *testing.T) {
 	t.Parallel()
 
-	WithNewTestNamespace(t, func(g *WithT, ns string) {
-
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		cfg, err := config.GetConfig()
 		require.NoError(t, err)
 		camel, err := versioned.NewForConfig(cfg)
 		require.NoError(t, err)
 
-		lst, err := camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
+		lst, err := camel.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
 		require.NoError(t, err)
 		assert.Empty(t, lst.Items)
 
-		integration, err := camel.CamelV1().Integrations(ns).Create(TestContext, &v1.Integration{
+		integration, err := camel.CamelV1().Integrations(ns).Create(ctx, &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "dummy",
 			},
 		}, metav1.CreateOptions{})
 		require.NoError(t, err)
 
-		lst, err = camel.CamelV1().Integrations(ns).List(TestContext, metav1.ListOptions{})
+		lst, err = camel.CamelV1().Integrations(ns).List(ctx, metav1.ListOptions{})
 		require.NoError(t, err)
 		assert.NotEmpty(t, lst.Items)
 		assert.Equal(t, lst.Items[0].Name, integration.Name)
 
-		err = camel.CamelV1().Integrations(ns).Delete(TestContext, "dummy", metav1.DeleteOptions{})
+		err = camel.CamelV1().Integrations(ns).Delete(ctx, "dummy", metav1.DeleteOptions{})
 		require.NoError(t, err)
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
