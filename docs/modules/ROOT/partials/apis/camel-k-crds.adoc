@@ -1400,7 +1400,7 @@ list of dependencies needed for this scope
 
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-Capability is a particular feature which requires a well known set of dependencies
+Capability is a particular feature which requires a well known set of dependencies and other properties
 which are specified in the runtime catalog.
 
 [cols="2,2a",options="header"]
@@ -1413,7 +1413,28 @@ which are specified in the runtime catalog.
 |
 
 
+List of required Maven dependencies
 
+|`runtimeProperties` +
+map[string]string
+|
+
+
+Set of required Camel runtime properties
+
+|`buildTimeProperties` +
+map[string]string
+|
+
+
+Set of required Camel build time properties
+
+|`metadata` +
+map[string]string
+|
+
+
+Set of generic metadata
 
 
 |===

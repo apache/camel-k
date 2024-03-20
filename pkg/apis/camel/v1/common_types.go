@@ -342,10 +342,17 @@ type RuntimeSpec struct {
 	Capabilities map[string]Capability `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
 }
 
-// Capability is a particular feature which requires a well known set of dependencies
+// Capability is a particular feature which requires a well known set of dependencies and other properties
 // which are specified in the runtime catalog.
 type Capability struct {
-	Dependencies []MavenArtifact `json:"dependencies" yaml:"dependencies"`
+	// List of required Maven dependencies
+	Dependencies []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+	// Set of required Camel runtime properties
+	RuntimeProperties map[string]string `json:"runtimeProperties,omitempty" yaml:"runtimeProperties,omitempty"`
+	// Set of required Camel build time properties
+	BuildTimeProperties map[string]string `json:"buildTimeProperties,omitempty" yaml:"buildTimeProperties,omitempty"`
+	// Set of generic metadata
+	Metadata map[string]string `json:"metadata,omitempty" yaml:"Metadata,omitempty"`
 }
 
 const (

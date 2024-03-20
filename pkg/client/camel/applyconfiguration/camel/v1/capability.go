@@ -22,7 +22,10 @@ package v1
 // CapabilityApplyConfiguration represents an declarative configuration of the Capability type for use
 // with apply.
 type CapabilityApplyConfiguration struct {
-	Dependencies []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
+	Dependencies        []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
+	RuntimeProperties   map[string]string                 `json:"runtimeProperties,omitempty"`
+	BuildTimeProperties map[string]string                 `json:"buildTimeProperties,omitempty"`
+	Metadata            map[string]string                 `json:"metadata,omitempty"`
 }
 
 // CapabilityApplyConfiguration constructs an declarative configuration of the Capability type for use with
@@ -40,6 +43,48 @@ func (b *CapabilityApplyConfiguration) WithDependencies(values ...*MavenArtifact
 			panic("nil value passed to WithDependencies")
 		}
 		b.Dependencies = append(b.Dependencies, *values[i])
+	}
+	return b
+}
+
+// WithRuntimeProperties puts the entries into the RuntimeProperties field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the RuntimeProperties field,
+// overwriting an existing map entries in RuntimeProperties field with the same key.
+func (b *CapabilityApplyConfiguration) WithRuntimeProperties(entries map[string]string) *CapabilityApplyConfiguration {
+	if b.RuntimeProperties == nil && len(entries) > 0 {
+		b.RuntimeProperties = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.RuntimeProperties[k] = v
+	}
+	return b
+}
+
+// WithBuildTimeProperties puts the entries into the BuildTimeProperties field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the BuildTimeProperties field,
+// overwriting an existing map entries in BuildTimeProperties field with the same key.
+func (b *CapabilityApplyConfiguration) WithBuildTimeProperties(entries map[string]string) *CapabilityApplyConfiguration {
+	if b.BuildTimeProperties == nil && len(entries) > 0 {
+		b.BuildTimeProperties = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.BuildTimeProperties[k] = v
+	}
+	return b
+}
+
+// WithMetadata puts the entries into the Metadata field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the Metadata field,
+// overwriting an existing map entries in Metadata field with the same key.
+func (b *CapabilityApplyConfiguration) WithMetadata(entries map[string]string) *CapabilityApplyConfiguration {
+	if b.Metadata == nil && len(entries) > 0 {
+		b.Metadata = make(map[string]string, len(entries))
+	}
+	for k, v := range entries {
+		b.Metadata[k] = v
 	}
 	return b
 }
