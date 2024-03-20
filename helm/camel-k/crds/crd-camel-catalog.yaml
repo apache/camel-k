@@ -372,10 +372,16 @@ spec:
                   capabilities:
                     additionalProperties:
                       description: Capability is a particular feature which requires
-                        a well known set of dependencies which are specified in the
-                        runtime catalog.
+                        a well known set of dependencies and other properties which
+                        are specified in the runtime catalog.
                       properties:
+                        buildTimeProperties:
+                          additionalProperties:
+                            type: string
+                          description: Set of required Camel build time properties
+                          type: object
                         dependencies:
+                          description: List of required Maven dependencies
                           items:
                             description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                               Maven artifact.
@@ -400,8 +406,16 @@ spec:
                             - groupId
                             type: object
                           type: array
-                      required:
-                      - dependencies
+                        metadata:
+                          additionalProperties:
+                            type: string
+                          description: Set of generic metadata
+                          type: object
+                        runtimeProperties:
+                          additionalProperties:
+                            type: string
+                          description: Set of required Camel runtime properties
+                          type: object
                       type: object
                     description: features offered by this runtime
                     type: object
