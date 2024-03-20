@@ -654,3 +654,13 @@ func TestBuilderMatchesTasks(t *testing.T) {
 	assert.False(t, t1.Matches(&t2))
 	assert.False(t, t2.Matches(&t3))
 }
+
+func TestBuilderTraitPlatforms(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.ImagePlatforms = []string{"linux/amd64", "linux/arm64"}
+	err := builderTrait.Apply(env)
+	require.NoError(t, err)
+
+	assert.Equal(t, []string{"linux/amd64", "linux/arm64"}, env.Pipeline[2].Jib.Configuration.ImagePlatforms)
+}

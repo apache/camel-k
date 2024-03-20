@@ -117,6 +117,12 @@ spec:
                     - fifo
                     - sequential
                     type: string
+                  platforms:
+                    description: The list of platforms used in order to build a container
+                      image.
+                    items:
+                      type: string
+                    type: array
                   requestCPU:
                     description: The minimum amount of CPU required. Only used for
                       `pod` strategy
@@ -196,6 +202,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy
@@ -300,6 +312,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy
@@ -835,6 +853,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy
@@ -910,6 +934,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy
@@ -1013,6 +1043,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy
@@ -1115,6 +1151,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy
@@ -1641,6 +1683,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy
@@ -1712,6 +1760,12 @@ spec:
                               - fifo
                               - sequential
                               type: string
+                            platforms:
+                              description: The list of platforms used in order to
+                                build a container image.
+                              items:
+                                type: string
+                              type: array
                             requestCPU:
                               description: The minimum amount of CPU required. Only
                                 used for `pod` strategy

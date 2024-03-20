@@ -36,6 +36,7 @@ type BuildConfigurationApplyConfiguration struct {
 	LimitMemory         *string                `json:"limitMemory,omitempty"`
 	NodeSelector        map[string]string      `json:"nodeSelector,omitempty"`
 	Annotations         map[string]string      `json:"annotations,omitempty"`
+	ImagePlatforms      []string               `json:"platforms,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs an declarative configuration of the BuildConfiguration type for use with
@@ -132,6 +133,16 @@ func (b *BuildConfigurationApplyConfiguration) WithAnnotations(entries map[strin
 	}
 	for k, v := range entries {
 		b.Annotations[k] = v
+	}
+	return b
+}
+
+// WithImagePlatforms adds the given value to the ImagePlatforms field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the ImagePlatforms field.
+func (b *BuildConfigurationApplyConfiguration) WithImagePlatforms(values ...string) *BuildConfigurationApplyConfiguration {
+	for i := range values {
+		b.ImagePlatforms = append(b.ImagePlatforms, values[i])
 	}
 	return b
 }

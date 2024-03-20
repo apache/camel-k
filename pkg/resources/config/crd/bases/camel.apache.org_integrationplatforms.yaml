@@ -136,6 +136,12 @@ spec:
                         - fifo
                         - sequential
                         type: string
+                      platforms:
+                        description: The list of platforms used in order to build
+                          a container image.
+                        items:
+                          type: string
+                        type: array
                       requestCPU:
                         description: The minimum amount of CPU required. Only used
                           for `pod` strategy
@@ -573,6 +579,12 @@ spec:
                         - fifo
                         - sequential
                         type: string
+                      platforms:
+                        description: The list of manifest platforms to use to build
+                          a container image (default `linux/amd64`).
+                        items:
+                          type: string
+                        type: array
                       properties:
                         description: A list of properties to be provided to the build
                           task
@@ -1978,6 +1990,12 @@ spec:
                         - fifo
                         - sequential
                         type: string
+                      platforms:
+                        description: The list of platforms used in order to build
+                          a container image.
+                        items:
+                          type: string
+                        type: array
                       requestCPU:
                         description: The minimum amount of CPU required. Only used
                           for `pod` strategy
@@ -2463,6 +2481,12 @@ spec:
                         - fifo
                         - sequential
                         type: string
+                      platforms:
+                        description: The list of manifest platforms to use to build
+                          a container image (default `linux/amd64`).
+                        items:
+                          type: string
+                        type: array
                       properties:
                         description: A list of properties to be provided to the build
                           task

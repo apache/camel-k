@@ -72,4 +72,6 @@ type BuilderTrait struct {
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
 	// When using `pod` strategy, annotation to use for the builder pod.
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	// The list of manifest platforms to use to build a container image (default `linux/amd64`).
+	ImagePlatforms []string `property:"platforms" json:"platforms,omitempty"`
 }

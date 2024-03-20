@@ -59,6 +59,8 @@ type BuildConfiguration struct {
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
 	// Annotation to use for the builder pod. Only used for `pod` strategy
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	// The list of platforms used in order to build a container image.
+	ImagePlatforms []string `property:"platforms" json:"platforms,omitempty"`
 }
 
 // BuildStrategy specifies how the Build should be executed.
