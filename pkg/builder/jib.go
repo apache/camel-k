@@ -109,7 +109,10 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	mavenArgs = append(mavenArgs, "-P", "jib")
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+t.task.Image)
 	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
-	mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+"linux/amd64,linux/arm64")
+	if t.task.Configuration.ImagePlatforms != nil {
+		platforms := strings.Join(t.task.Configuration.ImagePlatforms, ",")
+		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+platforms)
+	}
 	if t.task.Registry.Insecure {
 		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
 	}

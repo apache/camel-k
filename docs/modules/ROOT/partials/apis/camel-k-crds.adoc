@@ -658,6 +658,13 @@ map[string]string
 
 Annotation to use for the builder pod. Only used for `pod` strategy
 
+|`platforms` +
+[]string
+|
+
+
+The list of platforms used in order to build a container image.
+
 
 |===
 
@@ -6299,6 +6306,13 @@ map[string]string
 
 
 When using `pod` strategy, annotation to use for the builder pod.
+
+|`platforms` +
+[]string
+|
+
+
+The list of manifest platforms to use to build a container image (default `linux/amd64`).
 
 
 |===

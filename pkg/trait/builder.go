@@ -266,7 +266,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
-		pipelineTasks = append(pipelineTasks, v1.Task{Jib: &v1.JibTask{
+		jibTask := v1.Task{Jib: &v1.JibTask{
 			BaseTask: v1.BaseTask{
 				Name:          "jib",
 				Configuration: *taskConfOrDefault(tasksConf, "jib"),
@@ -276,7 +276,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Image:     imageName,
 				Registry:  e.Platform.Status.Build.Registry,
 			},
-		}})
+		}}
+		if t.ImagePlatforms != nil {
+			jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
+		}
+		pipelineTasks = append(pipelineTasks, jibTask)
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
