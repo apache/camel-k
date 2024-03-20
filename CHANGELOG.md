@@ -23,6 +23,7 @@
 - Running integrations fail when the used registry has a port other than default 80 [\#5141](https://github.com/apache/camel-k/issues/5141)
 - camel-jackson configure configure "autoDiscoverObjectMapper" property for non-spring boot application [\#5140](https://github.com/apache/camel-k/issues/5140)
 - Update github actions to a version that use node 20 [\#5130](https://github.com/apache/camel-k/issues/5130)
+- Monitor Camel Integrations in K8s Deployments [\#5120](https://github.com/apache/camel-k/issues/5120)
 - Integrations remain in Initialization loop when referenced config map has owner references [\#5114](https://github.com/apache/camel-k/issues/5114)
 - Externally built Integrations are deployed without a command in Camel-K 2.2.0 [\#5112](https://github.com/apache/camel-k/issues/5112)
 - Coverage report wrong percentage [\#5108](https://github.com/apache/camel-k/issues/5108)
