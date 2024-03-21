@@ -6,12 +6,16 @@
 
 **Closed issues:**
 
+- Camelk | AtlasMap Support [\#5261](https://github.com/apache/camel-k/issues/5261)
+- release-nightly does not build/push multiarch manifest [\#5252](https://github.com/apache/camel-k/issues/5252)
 - XSD might be wrong [\#5250](https://github.com/apache/camel-k/issues/5250)
+- Pipe error handler not working with Camel 4.4.0 [\#5242](https://github.com/apache/camel-k/issues/5242)
 - Update buil/Dokerfile to use go 1.21 [\#5231](https://github.com/apache/camel-k/issues/5231)
 - Error java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#5225](https://github.com/apache/camel-k/issues/5225)
 - Deployment Trait maxUnavailable and maxSurge default values differ from documentation and do not support % values [\#5223](https://github.com/apache/camel-k/issues/5223)
 - Misleading "Monitor: Integration needs a rebuild" message [\#5219](https://github.com/apache/camel-k/issues/5219)
 - Route parameters are ignored for `path` parameters [\#5203](https://github.com/apache/camel-k/issues/5203)
+- Flaky `kamel run --dev` test [\#5197](https://github.com/apache/camel-k/issues/5197)
 - Builder property failure when using non xml tag characters [\#5195](https://github.com/apache/camel-k/issues/5195)
 - Error configuring property: camel.component.test\[00001\]port\[80\]tcp.addr because cannot find component with name test\[00001\]port\[80\]tcp. [\#5179](https://github.com/apache/camel-k/issues/5179)
 - Get environment variable value is empty in properties file [\#5178](https://github.com/apache/camel-k/issues/5178)
@@ -48,8 +52,10 @@
 - Data type Kamelet hardcoded [\#5014](https://github.com/apache/camel-k/issues/5014)
 - Quarkus buildMode should sort JVM before Native execution [\#5001](https://github.com/apache/camel-k/issues/5001)
 - Failing to build native integration  [\#5000](https://github.com/apache/camel-k/issues/5000)
+- Route diagram not visible in hawtio console: JMX connector not running [\#4990](https://github.com/apache/camel-k/issues/4990)
 - Azure Key Vault Trait: Support Azure Identity as authentication method [\#4983](https://github.com/apache/camel-k/issues/4983)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
+- Quarkus native check failing [\#4885](https://github.com/apache/camel-k/issues/4885)
 - Use generated trait [\#4811](https://github.com/apache/camel-k/issues/4811)
 - Upgrade to Go 1.21 [\#4795](https://github.com/apache/camel-k/issues/4795)
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
