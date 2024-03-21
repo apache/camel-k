@@ -10,6 +10,7 @@
 - release-nightly does not build/push multiarch manifest [\#5252](https://github.com/apache/camel-k/issues/5252)
 - XSD might be wrong [\#5250](https://github.com/apache/camel-k/issues/5250)
 - Pipe error handler not working with Camel 4.4.0 [\#5242](https://github.com/apache/camel-k/issues/5242)
+- Integration builds fail with arm64 base image [\#5238](https://github.com/apache/camel-k/issues/5238)
 - Update buil/Dokerfile to use go 1.21 [\#5231](https://github.com/apache/camel-k/issues/5231)
 - Error java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#5225](https://github.com/apache/camel-k/issues/5225)
 - Deployment Trait maxUnavailable and maxSurge default values differ from documentation and do not support % values [\#5223](https://github.com/apache/camel-k/issues/5223)
@@ -72,6 +73,9 @@
 
 **Merged pull requests:**
 
+- doc\(trait\): sourceless Integrations [\#5265](https://github.com/apache/camel-k/pull/5265) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/docker/docker from 24.0.7+incompatible to 24.0.9+incompatible [\#5263](https://github.com/apache/camel-k/pull/5263) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(traits\): builder image platforms [\#5262](https://github.com/apache/camel-k/pull/5262) ([squakez](https://github.com/squakez))
 - chore: Use camel case for Pipe error handler ref [\#5260](https://github.com/apache/camel-k/pull/5260) ([christophd](https://github.com/christophd))
 - fix\(ci\): use ubuntu which now have 16 GB memory [\#5259](https://github.com/apache/camel-k/pull/5259) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/onsi/gomega from 1.31.1 to 1.32.0 [\#5257](https://github.com/apache/camel-k/pull/5257) ([dependabot[bot]](https://github.com/apps/dependabot))
