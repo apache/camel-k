@@ -185,17 +185,17 @@ func TestBuilderTrait(t *testing.T) {
 			// Check containers conditions
 			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
 			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
+				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom1Succeeded")).Status,
 				TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
+				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom1Succeeded")).Message,
 				TestTimeoutShort).Should(ContainSubstring("generated-bytecode.jar"))
 			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
 			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Status,
+				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom2Succeeded")).Status,
 				TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom2 succeeded")).Message,
+				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom2Succeeded")).Message,
 				TestTimeoutShort).Should(ContainSubstring("</project>"))
 
 			// Check logs
@@ -215,12 +215,12 @@ func TestBuilderTrait(t *testing.T) {
 			// Check containers conditions
 			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
 			g.Eventually(BuildConditions(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutLong).ShouldNot(BeNil())
-			g.Eventually(BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Container custom1 succeeded")), TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Containercustom1Succeeded")), TestTimeoutMedium).ShouldNot(BeNil())
 			g.Eventually(
-				BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Container custom1 succeeded"))().Status,
+				BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Containercustom1Succeeded"))().Status,
 				TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 			g.Eventually(
-				BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Container custom1 succeeded"))().Message,
+				BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Containercustom1Succeeded"))().Message,
 				TestTimeoutShort).Should(ContainSubstring("No such file or directory"))
 
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
@@ -252,10 +252,10 @@ func TestBuilderTrait(t *testing.T) {
 			// Check containers conditions
 			g.Eventually(Build(t, ctx, integrationKitNamespace, integrationKitName), TestTimeoutShort).ShouldNot(BeNil())
 			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Status,
+				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom1Succeeded")).Status,
 				TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(
-				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Container custom1 succeeded")).Message,
+				Build(t, ctx, integrationKitNamespace, integrationKitName)().Status.GetCondition(v1.BuildConditionType("Containercustom1Succeeded")).Message,
 				TestTimeoutShort).Should(ContainSubstring("</project>"))
 
 			// Check logs

@@ -450,6 +450,7 @@ func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 		},
 	}
 	expectedCondition := NewIntegrationCondition(
+		"Container",
 		v1.IntegrationConditionKnativeAvailable,
 		corev1.ConditionFalse,
 		v1.IntegrationConditionKnativeNotInstalledReason,

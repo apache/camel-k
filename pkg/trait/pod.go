@@ -49,7 +49,7 @@ func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+		return false, NewIntegrationConditionUserDisabled("Pod"), nil
 	}
 	if e.Integration.Spec.PodTemplate == nil {
 		return false, nil, nil

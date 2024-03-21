@@ -103,6 +103,7 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 				if endpoint != "" {
 					t.L.Infof("Using tracing endpoint: %s", endpoint)
 					condition = trait.NewIntegrationCondition(
+						"Telemetry",
 						v1.IntegrationConditionTraitInfo,
 						corev1.ConditionTrue,
 						"TracingEndpoint",

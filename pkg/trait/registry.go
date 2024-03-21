@@ -62,6 +62,7 @@ func (t *registryTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	enabled := e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted)
 	if enabled {
 		condition := NewIntegrationCondition(
+			"Registry",
 			v1.IntegrationConditionTraitInfo,
 			corev1.ConditionTrue,
 			traitConfigurationReason,

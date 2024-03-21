@@ -49,7 +49,7 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 		return false, nil, nil
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+		return false, NewIntegrationConditionUserDisabled("PullSecret"), nil
 	}
 	if !e.IntegrationInRunningPhases() {
 		return false, nil, nil

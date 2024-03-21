@@ -60,6 +60,7 @@ func (t *routeTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
+			"Route",
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionRouteNotAvailableReason,

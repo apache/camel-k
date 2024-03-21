@@ -35,6 +35,7 @@ const (
 // TraitCondition is used to get all information/warning about a trait configuration.
 // It should either use an IntegrationConditionType or IntegrationKitConditionType.
 type TraitCondition struct {
+	traitID                     string
 	integrationConditionType    v1.IntegrationConditionType
 	integrationKitConditionType v1.IntegrationKitConditionType
 	conditionStatus             corev1.ConditionStatus
@@ -42,8 +43,9 @@ type TraitCondition struct {
 	reason                      string
 }
 
-func NewIntegrationCondition(ict v1.IntegrationConditionType, cs corev1.ConditionStatus, reason, message string) *TraitCondition {
+func NewIntegrationCondition(traitID string, ict v1.IntegrationConditionType, cs corev1.ConditionStatus, reason, message string) *TraitCondition {
 	return &TraitCondition{
+		traitID:                  traitID,
 		integrationConditionType: ict,
 		conditionStatus:          cs,
 		reason:                   reason,
@@ -51,22 +53,28 @@ func NewIntegrationCondition(ict v1.IntegrationConditionType, cs corev1.Conditio
 	}
 }
 
-func NewIntegrationConditionUserDisabled() *TraitCondition {
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, userDisabledMessage)
+func NewIntegrationConditionUserDisabled(traitID string) *TraitCondition {
+	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, userDisabledMessage)
 }
 
-func NewIntegrationConditionUserEnabledWithMessage(message string) *TraitCondition {
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", userEnabledMessage, message))
+func NewIntegrationConditionUserEnabledWithMessage(traitID string, message string) *TraitCondition {
+	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", userEnabledMessage, message))
 }
 
-func newIntegrationConditionPlatformDisabledWithMessage(message string) *TraitCondition {
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", platformDisabledMessage, message))
+func newIntegrationConditionPlatformDisabledWithMessage(traitID string, message string) *TraitCondition {
+	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", platformDisabledMessage, message))
 }
 
 func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, corev1.ConditionStatus, string, string) {
-	return tc.integrationConditionType, tc.conditionStatus, tc.reason, tc.message
+	return v1.IntegrationConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationConditionType)),
+		tc.conditionStatus,
+		tc.reason,
+		tc.message
 }
 
 func (tc *TraitCondition) integrationKitCondition() (v1.IntegrationKitConditionType, corev1.ConditionStatus, string, string) {
-	return tc.integrationKitConditionType, tc.conditionStatus, tc.reason, tc.message
+	return v1.IntegrationKitConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationKitConditionType)),
+		tc.conditionStatus,
+		tc.reason,
+		tc.message
 }

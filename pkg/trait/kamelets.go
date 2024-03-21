@@ -77,7 +77,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		return false, nil, nil
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+		return false, NewIntegrationConditionUserDisabled("Kamelets"), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil

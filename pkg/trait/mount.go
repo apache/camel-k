@@ -190,6 +190,7 @@ func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition 
 		kamelets, ok := trait.(*kameletsTrait)
 		if !ok {
 			return NewIntegrationCondition(
+				"Mount",
 				v1.IntegrationConditionTraitInfo,
 				corev1.ConditionTrue,
 				traitConfigurationReason,
@@ -202,6 +203,7 @@ func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition 
 		implicitKameletSecrets, err := kamelets.listConfigurationSecrets(e)
 		if err != nil {
 			return NewIntegrationCondition(
+				"Mount",
 				v1.IntegrationConditionTraitInfo,
 				corev1.ConditionTrue,
 				traitConfigurationReason,
@@ -216,6 +218,7 @@ func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition 
 
 	if featureUsed {
 		return NewIntegrationCondition(
+			"Mount",
 			v1.IntegrationConditionTraitInfo,
 			corev1.ConditionTrue,
 			traitConfigurationReason,

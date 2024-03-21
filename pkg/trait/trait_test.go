@@ -557,6 +557,7 @@ func TestExecutedTraitsCondition(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedCondition := NewIntegrationCondition(
+		"",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",

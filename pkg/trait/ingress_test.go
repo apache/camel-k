@@ -50,6 +50,7 @@ func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	ingressTrait.Enabled = pointer.Bool(false)
 
 	expectedCondition := NewIntegrationCondition(
+		"Ingress",
 		v1.IntegrationConditionExposureAvailable,
 		corev1.ConditionFalse,
 		v1.IntegrationConditionIngressNotAvailableReason,

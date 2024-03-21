@@ -54,7 +54,7 @@ func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	if !pointer.BoolDeref(l.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+		return false, NewIntegrationConditionUserDisabled("Logging"), nil
 	}
 
 	return e.IntegrationInRunningPhases(), nil, nil

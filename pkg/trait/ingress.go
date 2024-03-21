@@ -61,6 +61,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
+			"Ingress",
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionIngressNotAvailableReason,

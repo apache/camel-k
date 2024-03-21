@@ -49,6 +49,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
+			"Service",
 			v1.IntegrationConditionServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionServiceNotAvailableReason,
@@ -61,7 +62,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.GetTrait(knativeServiceTraitID) != nil {
 		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
 		if pointer.BoolDeref(knativeServiceTrait.Enabled, true) {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("knative-service trait has priority over this trait"), nil
+			return false, newIntegrationConditionPlatformDisabledWithMessage("Service", "knative-service trait has priority over this trait"), nil
 		}
 	}
 
@@ -74,6 +75,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		var condition *TraitCondition
 		if err != nil {
 			condition = NewIntegrationCondition(
+				"Service",
 				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionServiceNotAvailableReason,
