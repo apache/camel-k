@@ -354,7 +354,7 @@ type Capability struct {
 	// Set of required Camel build time properties
 	BuildTimeProperties map[string]string `json:"buildTimeProperties,omitempty" yaml:"buildTimeProperties,omitempty"`
 	// Set of generic metadata
-	Metadata map[string]string `json:"metadata,omitempty" yaml:"Metadata,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 }
 
 const (

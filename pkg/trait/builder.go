@@ -384,7 +384,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	if task.Maven.Properties == nil {
 		task.Maven.Properties = make(map[string]string)
 	}
-	// User provided Maven properties
+	// User provided build-time properties
 	if t.Properties != nil {
 		for _, v := range t.Properties {
 			key, value := property.SplitPropertyFileEntry(v)
@@ -394,6 +394,11 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 
 			task.Maven.Properties[key] = value
 		}
+	}
+
+	// Build time property required by master capability
+	if e.IntegrationKit.HasCapability("master") && e.CamelCatalog.Runtime.Capabilities["master"].BuildTimeProperties != nil {
+		task.Maven.Properties[e.CamelCatalog.Runtime.Capabilities["master"].BuildTimeProperties["enabled"]] = "true"
 	}
 
 	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategyJib {

@@ -106,6 +106,17 @@ func (in *IntegrationKit) IsExternal() bool {
 	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeExternal
 }
 
+// HasCapability returns true if the Kit is enabled with such a capability.
+func (in *IntegrationKit) HasCapability(capability string) bool {
+	for _, cap := range in.Spec.Capabilities {
+		if cap == capability {
+			return true
+		}
+	}
+
+	return false
+}
+
 // GetCondition returns the condition with the provided type.
 func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionType) *IntegrationKitCondition {
 	for i := range in.Conditions {
