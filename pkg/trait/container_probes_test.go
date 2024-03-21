@@ -81,7 +81,7 @@ func TestProbesDependencies(t *testing.T) {
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
 }
 
@@ -106,7 +106,7 @@ func TestProbesOnDeployment(t *testing.T) {
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	container := env.GetIntegrationContainer()
 
@@ -144,7 +144,7 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	container := env.GetIntegrationContainer()
 
@@ -199,7 +199,6 @@ func TestProbesOnKnativeService(t *testing.T) {
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Len(t, conditions, 2)
 	assert.Contains(t, conditions, ctrlStrategyCondition)
 	assert.Contains(t, conditions, serviceOverrideCondition)
 

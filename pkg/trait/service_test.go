@@ -109,10 +109,9 @@ func TestServiceWithDefaults(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -217,10 +216,9 @@ func TestService(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -305,10 +303,9 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -397,10 +394,9 @@ func TestServiceWithNodePort(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	_, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("service"))
@@ -507,7 +503,6 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Len(t, conditions, 2)
 	assert.Contains(t, conditions, deploymentCondition)
 	assert.Contains(t, conditions, serviceCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -585,7 +580,6 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Len(t, conditions, 2)
 	assert.Contains(t, conditions, deploymentCondition)
 	assert.Contains(t, conditions, serviceCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -665,7 +659,6 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Len(t, conditions, 1)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait(serviceTraitID))

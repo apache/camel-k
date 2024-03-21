@@ -102,7 +102,7 @@ func TestIstioInject(t *testing.T) {
 	env := NewIstioTestEnv(t, &d, &s, true)
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.Empty(t, s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.NotEmpty(t, d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
 }
@@ -127,7 +127,7 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.Equal(t, "true", s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, "true", d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
 }
@@ -152,7 +152,7 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.Equal(t, "false", s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, "false", d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
 }
@@ -175,6 +175,6 @@ func TestIstioDisabled(t *testing.T) {
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotContains(t, env.ExecutedTraits, "istio")
 }

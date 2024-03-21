@@ -26,6 +26,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/log"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // Catalog collects all information about traits in one place.
@@ -115,9 +116,7 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
 			if err != nil {
 				return traitsConditions, fmt.Errorf("%s trait execution failed: %w", trait.ID(), err)
 			}
-
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
-
 			// execute post step processors
 			for _, processor := range environment.PostStepProcessors {
 				err := processor(environment)
@@ -127,12 +126,7 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
 			}
 		}
 	}
-
-	traitIds := make([]string, 0)
-	for _, trait := range environment.ExecutedTraits {
-		traitIds = append(traitIds, string(trait.ID()))
-	}
-	c.L.Debugf("Applied traits: %s", strings.Join(traitIds, ","))
+	traitsConditions = append(traitsConditions, c.executedTraitCondition(environment.ExecutedTraits))
 
 	if !applicable && environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) {
 		return traitsConditions, errors.New("no trait can be executed because of no ready platform found")
@@ -146,6 +140,17 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
 	}
 
 	return traitsConditions, nil
+}
+
+func (c *Catalog) executedTraitCondition(executedTrait []Trait) *TraitCondition {
+	traitIds := make([]string, 0)
+	for _, trait := range executedTrait {
+		traitIds = append(traitIds, string(trait.ID()))
+	}
+	message := fmt.Sprintf("Applied traits: %s", strings.Join(traitIds, ","))
+	c.L.Debugf(message)
+
+	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
 }
 
 // GetTrait returns the trait with the given ID.

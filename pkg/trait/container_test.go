@@ -89,7 +89,7 @@ func TestContainerWithDefaults(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("container"))
@@ -170,7 +170,7 @@ func TestContainerWithOpenshift(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("container"))
@@ -238,7 +238,7 @@ func TestContainerWithCustomName(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("container"))
@@ -304,7 +304,7 @@ func TestContainerWithCustomImage(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	for _, postAction := range environment.PostActions {
 		require.NoError(t, postAction(&environment))
@@ -428,7 +428,7 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 	conditions, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	container := environment.GetIntegrationContainer()
 

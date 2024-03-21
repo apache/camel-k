@@ -288,7 +288,7 @@ func TestCronDeps(t *testing.T) {
 	conditions, err := tc.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
@@ -370,7 +370,7 @@ func TestCronMultipleScheduleFallback(t *testing.T) {
 	conditions, err := tc.apply(&environment)
 
 	assert.Nil(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
@@ -448,7 +448,7 @@ func TestCronDepsFallback(t *testing.T) {
 	conditions, err := tc.apply(&environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
@@ -529,7 +529,6 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	)
 	conditions, err := tc.apply(&environment)
 	require.NoError(t, err)
-	assert.Len(t, conditions, 1)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 
@@ -618,7 +617,6 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	)
 	conditions, err := tc.apply(&environment)
 	require.NoError(t, err)
-	assert.Len(t, conditions, 1)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 

@@ -549,3 +549,18 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 func NewTraitTestCatalog() *Catalog {
 	return NewCatalog(nil)
 }
+
+func TestExecutedTraitsCondition(t *testing.T) {
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
+	catalog := NewTraitTestCatalog()
+	conditions, err := catalog.apply(env)
+	require.NoError(t, err)
+
+	expectedCondition := NewIntegrationCondition(
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"TraitConfiguration",
+		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,mount,quarkus,jvm,owner",
+	)
+	assert.Contains(t, conditions, expectedCondition)
+}
