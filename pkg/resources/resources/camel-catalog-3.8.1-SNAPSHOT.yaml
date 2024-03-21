@@ -18,22 +18,24 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.2.3
+  name: camel-catalog-3.8.1-snapshot
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 4.0.3
-    camel.apache.org/catalog.version: 4.0.3
-    camel.apache.org/runtime.version: 3.2.3
+    camel.apache.org/catalog.loader.version: 4.4.1
+    camel.apache.org/catalog.version: 4.4.1
+    camel.apache.org/runtime.version: 3.8.1-SNAPSHOT
 spec:
   runtime:
-    version: 3.2.3
+    version: 3.8.1-SNAPSHOT
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 3.2.3
-      camel.version: 4.0.3
-      quarkus.native-builder-image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-jdk-17
-      quarkus.version: 3.2.9.Final
+      camel-quarkus.version: 3.8.1
+      camel.version: 4.4.1
+      jib.layer-filter-extension-maven.version: 0.3.0
+      jib.maven-plugin.version: 3.4.1
+      quarkus.native-builder-image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21
+      quarkus.version: 3.8.3
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
@@ -66,24 +68,42 @@ spec:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-microprofile-health
+        metadata:
+          defaultLivenessProbePath: /q/health/live
+          defaultReadinessProbePath: /q/health/ready
+          defaultStartupProbePath: /q/health/started
       jolokia:
         dependencies:
-        - groupId: org.apache.camel
-          artifactId: camel-jaxb
+        - groupId: org.apache.camel.quarkus
+          artifactId: camel-quarkus-jaxb
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-management
         - groupId: org.jolokia
-          artifactId: jolokia-jvm
+          artifactId: jolokia-agent-jvm
+          classifier: javaagent
       knative:
         dependencies:
         - groupId: org.apache.camel.k
           artifactId: camel-k-knative-impl
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-knative
+      logging:
+        runtimeProperties:
+          color: quarkus.console.color
+          format: quarkus.log.console.format
+          json: quarkus.log.console.json
+          jsonPrettyPrint: quarkus.log.console.json.pretty-print
+          level: quarkus.log.level
       master:
         dependencies:
         - groupId: org.apache.camel.k
           artifactId: camel-k-master
+        runtimeProperties:
+          labelKeyFormat: quarkus.camel.cluster.kubernetes.labels."%s"
+          resourceName: quarkus.camel.cluster.kubernetes.resource-name
+          resourceType: quarkus.camel.cluster.kubernetes.resource-type
+        buildTimeProperties:
+          enabled: quarkus.camel.cluster.kubernetes.enabled
       platform-http:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -104,10 +124,19 @@ spec:
         dependencies:
         - groupId: org.apache.camel.k
           artifactId: camel-k-resume-kafka
+      service-binding:
+        runtimeProperties:
+          enabled: quarkus.kubernetes-service-binding.enabled
       telemetry:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-opentelemetry
+        runtimeProperties:
+          endpoint: quarkus.opentelemetry.tracer.exporter.otlp.endpoint
+          sampler: quarkus.opentelemetry.tracer.sampler
+          samplerParentBased: quarkus.opentelemetry.tracer.sampler.parent-based
+          samplerRatio: quarkus.opentelemetry.tracer.sampler.ratio
+          serviceName: quarkus.opentelemetry.tracer.resource-attributes
       tracing:
         dependencies:
         - groupId: org.apache.camel.quarkus
@@ -486,6 +515,13 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.bean.validator.BeanValidatorComponent
+    camel-quarkus-beanio:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-beanio
+      dataformats:
+      - beanio
+      javaTypes:
+      - org.apache.camel.dataformat.beanio.BeanIODataFormat
     camel-quarkus-bindy:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-bindy
@@ -657,6 +693,7 @@ spec:
       - ref
       - simple
       - tokenize
+      - variable
       javaTypes:
       - org.apache.camel.language.constant.ConstantLanguage
       - org.apache.camel.language.header.HeaderLanguage
@@ -665,6 +702,7 @@ spec:
       - org.apache.camel.language.simple.FileLanguage
       - org.apache.camel.language.simple.SimpleLanguage
       - org.apache.camel.language.tokenizer.TokenizeLanguage
+      - org.apache.camel.language.variable.VariableLanguage
     camel-quarkus-core-cloud:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-core-cloud
@@ -888,6 +926,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.es.ElasticsearchComponent
+    camel-quarkus-elasticsearch-rest-client:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-elasticsearch-rest-client
+      schemes:
+      - id: elasticsearch-rest-client
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.elasticsearch.rest.client.ElasticsearchRestClientComponent
     camel-quarkus-etcd3:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-etcd3
@@ -906,15 +953,6 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.exec.ExecComponent
-    camel-quarkus-facebook:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-facebook
-      schemes:
-      - id: facebook
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.facebook.FacebookComponent
     camel-quarkus-fastjson:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-fastjson
@@ -1243,15 +1281,6 @@ spec:
       - org.apache.camel.component.hazelcast.seda.HazelcastSedaComponent
       - org.apache.camel.component.hazelcast.set.HazelcastSetComponent
       - org.apache.camel.component.hazelcast.topic.HazelcastTopicComponent
-    camel-quarkus-hdfs:
-      groupId: org.apache.camel.quarkus
-      artifactId: camel-quarkus-hdfs
-      schemes:
-      - id: hdfs
-        http: false
-        passive: false
-      javaTypes:
-      - org.apache.camel.component.hdfs.HdfsComponent
     camel-quarkus-headersmap:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-headersmap
@@ -1495,8 +1524,10 @@ spec:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-joor
       languages:
+      - java
       - joor
       javaTypes:
+      - org.apache.camel.language.joor.JavaLanguage
       - org.apache.camel.language.joor.JoorLanguage
     camel-quarkus-jpa:
       groupId: org.apache.camel.quarkus
@@ -1644,6 +1675,9 @@ spec:
       - id: kubernetes-config-maps
         http: false
         passive: false
+      - id: kubernetes-cronjob
+        http: false
+        passive: false
       - id: kubernetes-custom-resources
         http: false
         passive: false
@@ -1700,6 +1734,7 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.kubernetes.config_maps.KubernetesConfigMapsComponent
+      - org.apache.camel.component.kubernetes.cronjob.KubernetesCronJobComponent
       - org.apache.camel.component.kubernetes.customresources.KubernetesCustomResourcesComponent
       - org.apache.camel.component.kubernetes.deployments.KubernetesDeploymentsComponent
       - org.apache.camel.component.kubernetes.events.KubernetesEventsComponent
@@ -1821,6 +1856,9 @@ spec:
       javaTypes:
       - org.apache.camel.component.mail.MailComponent
       - org.apache.camel.dataformat.mime.multipart.MimeMultipartDataFormat
+    camel-quarkus-mail-microsoft-oauth:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-mail-microsoft-oauth
     camel-quarkus-management:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-management
@@ -2000,6 +2038,15 @@ spec:
     camel-quarkus-openapi-java:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-openapi-java
+    camel-quarkus-opensearch:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-opensearch
+      schemes:
+      - id: opensearch
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.opensearch.OpensearchComponent
     camel-quarkus-openstack:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-openstack
@@ -2340,6 +2387,15 @@ spec:
     camel-quarkus-smallrye-reactive-messaging:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-smallrye-reactive-messaging
+    camel-quarkus-smb:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-smb
+      schemes:
+      - id: smb
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.smb.SmbComponent
     camel-quarkus-smpp:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-smpp
@@ -2402,6 +2458,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.springrabbit.SpringRabbitMQComponent
+    camel-quarkus-spring-redis:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-spring-redis
+      schemes:
+      - id: spring-redis
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.redis.RedisComponent
     camel-quarkus-sql:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-sql
@@ -2790,6 +2855,10 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.zookeepermaster.MasterComponent
+    jolokia-agent-jvm:
+      groupId: org.jolokia
+      artifactId: jolokia-agent-jvm
+      classifier: javaagent
   loaders:
     groovy:
       groupId: org.apache.camel.quarkus

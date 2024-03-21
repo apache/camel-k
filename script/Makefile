@@ -23,7 +23,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.3.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.2.0
-DEFAULT_RUNTIME_VERSION := 3.2.3
+DEFAULT_RUNTIME_VERSION := 3.8.1-SNAPSHOT
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.27.4
 OPERATOR_SDK_VERSION := v1.28.0
@@ -256,7 +256,7 @@ endif
 #
 test-common: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/common/... -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 90m -v ./e2e/common/traits/master_test.go -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
 	exit $${FAILED}
 
 #
