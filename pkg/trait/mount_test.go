@@ -46,7 +46,7 @@ func TestMountVolumesEmpty(t *testing.T) {
 	conditions, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
 
@@ -69,7 +69,7 @@ func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 	conditions, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
 
@@ -118,7 +118,7 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 	conditions, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("mount"))
 

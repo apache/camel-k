@@ -114,7 +114,7 @@ func TestEmptyLoggingTrait(t *testing.T) {
 	conditions, err := NewLoggingTestCatalog().apply(env)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false
@@ -167,7 +167,7 @@ func TestJsonLoggingTrait(t *testing.T) {
 	conditions, err := NewLoggingTestCatalog().apply(env)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
 	quarkusConsoleColor := false

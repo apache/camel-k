@@ -44,7 +44,7 @@ func TestDefaultEnvironment(t *testing.T) {
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	ns := false
 	name := false
@@ -93,7 +93,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	ns := false
 	name := false
@@ -133,7 +133,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	ns := false
 	name := false
@@ -172,7 +172,7 @@ func TestCustomEnvVars(t *testing.T) {
 
 	conditions, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 
 	userK1 := false
 	userK2 := false

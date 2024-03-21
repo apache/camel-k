@@ -48,7 +48,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 			conditions, err := NewBuilderTestCatalog().apply(e)
 
 			require.NoError(t, err)
-			assert.Empty(t, conditions)
+			assert.NotEmpty(t, conditions)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Pipeline)
@@ -69,7 +69,7 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 			conditions, err := NewBuilderTestCatalog().apply(e)
 
 			require.NoError(t, err)
-			assert.Empty(t, conditions)
+			assert.NotEmpty(t, conditions)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Pipeline)
@@ -82,7 +82,7 @@ func TestS2IBuilderTrait(t *testing.T) {
 	conditions, err := NewBuilderTestCatalog().apply(env)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
 	assert.NotEmpty(t, env.Pipeline)

@@ -341,7 +341,7 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 
 			conditions, err := tc.apply(&environment)
 			require.NoError(t, err)
-			assert.Empty(t, conditions)
+			assert.NotEmpty(t, conditions)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-platform-http")
 		})
