@@ -75,6 +75,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
@@ -89,6 +90,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	if e.Resources.GetDeploymentForIntegration(e.Integration) != nil {
 		// A controller is already present for the integration
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
@@ -99,6 +101,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
@@ -107,6 +110,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	}
 	if strategy != ControllerStrategyKnativeService {
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,

@@ -44,6 +44,7 @@ func TestConfigureDisabledGCTraitDoesNotSucceed(t *testing.T) {
 	gcTrait.Enabled = pointer.Bool(false)
 
 	expectedCondition := NewIntegrationCondition(
+		"GC",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",

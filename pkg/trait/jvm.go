@@ -57,7 +57,7 @@ func newJvmTrait() Trait {
 
 func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+		return false, NewIntegrationConditionUserDisabled("JVM"), nil
 	}
 	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
@@ -66,15 +66,15 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
 	if qt := e.Catalog.GetTrait(quarkusTraitID); qt != nil {
 		if quarkus, ok := qt.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("quarkus native build"), nil
+			return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "quarkus native build"), nil
 		}
 	}
 
 	if e.IntegrationKit != nil && e.IntegrationKit.IsExternal() {
 		if pointer.BoolDeref(t.Enabled, false) {
-			return true, NewIntegrationConditionUserEnabledWithMessage("integration kit was not created via Camel K operator"), nil
+			return true, NewIntegrationConditionUserEnabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
 		} else {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("integration kit was not created via Camel K operator"), nil
+			return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
 		}
 	}
 

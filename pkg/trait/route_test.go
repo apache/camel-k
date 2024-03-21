@@ -235,9 +235,10 @@ func TestRoute_Disabled(t *testing.T) {
 	}
 
 	expectedCondition := NewIntegrationCondition(
+		"Route",
 		v1.IntegrationConditionExposureAvailable,
 		corev1.ConditionFalse,
-		"routeTraitConfiguration",
+		"RouteNotAvailable",
 		"explicitly disabled",
 	)
 	traitsCatalog := environment.Catalog

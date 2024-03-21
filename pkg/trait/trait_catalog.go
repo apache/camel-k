@@ -104,7 +104,6 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
 		applicable = true
 		enabled, condition, err := trait.Configure(environment)
 		if condition != nil {
-			condition.reason = fmt.Sprintf("%sTraitConfiguration", trait.ID())
 			traitsConditions = append(traitsConditions, condition)
 		}
 		if err != nil {
@@ -150,7 +149,7 @@ func (c *Catalog) executedTraitCondition(executedTrait []Trait) *TraitCondition 
 	message := fmt.Sprintf("Applied traits: %s", strings.Join(traitIds, ","))
 	c.L.Debugf(message)
 
-	return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+	return NewIntegrationCondition("", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
 }
 
 // GetTrait returns the trait with the given ID.

@@ -81,6 +81,7 @@ func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
 	trait.Enabled = pointer.Bool(false)
 
 	expectedCondition := NewIntegrationCondition(
+		"JVM",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",
@@ -97,6 +98,7 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseExternal(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypeExternal)
 
 	expectedCondition := NewIntegrationCondition(
+		"JVM",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",
@@ -114,6 +116,7 @@ func TestConfigureJvmTraitInRightIntegrationKitPhaseExternalAndJvmEnabled(t *tes
 	trait.Enabled = pointer.Bool(true)
 
 	expectedCondition := NewIntegrationCondition(
+		"JVM",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",

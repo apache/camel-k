@@ -78,7 +78,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+		return false, NewIntegrationConditionUserDisabled("Cron"), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
@@ -86,6 +86,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 
 	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityCron]; !ok {
 		return false, NewIntegrationCondition(
+			"Cron",
 			v1.IntegrationConditionCronJobAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionCronJobNotAvailableReason,
@@ -97,6 +98,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		globalCron, err := t.getGlobalCron(e)
 		if err != nil {
 			return false, NewIntegrationCondition(
+				"Cron",
 				v1.IntegrationConditionCronJobAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionCronJobNotAvailableReason,
@@ -140,6 +142,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		var condition *TraitCondition
 		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 			condition = NewIntegrationCondition(
+				"Cron",
 				v1.IntegrationConditionCronJobAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionCronJobNotAvailableReason,
@@ -153,6 +156,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		return false, NewIntegrationCondition(
+			"Cron",
 			v1.IntegrationConditionCronJobAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionCronJobNotAvailableReason,
