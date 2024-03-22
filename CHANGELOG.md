@@ -47,6 +47,7 @@
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
 - Provide a page linking to Camel DSLs [\#5037](https://github.com/apache/camel-k/issues/5037)
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
+- Polish trait conditions [\#5027](https://github.com/apache/camel-k/issues/5027)
 - Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - \[Discussion\] Camel K 2024 roadmap [\#5019](https://github.com/apache/camel-k/issues/5019)
 - Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
@@ -73,6 +74,9 @@
 
 **Merged pull requests:**
 
+- feat\(catalog\): support placeholders [\#5268](https://github.com/apache/camel-k/pull/5268) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/common from 0.50.0 to 0.51.0 [\#5267](https://github.com/apache/camel-k/pull/5267) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(trait\): add executed trait condition [\#5266](https://github.com/apache/camel-k/pull/5266) ([squakez](https://github.com/squakez))
 - doc\(trait\): sourceless Integrations [\#5265](https://github.com/apache/camel-k/pull/5265) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/docker/docker from 24.0.7+incompatible to 24.0.9+incompatible [\#5263](https://github.com/apache/camel-k/pull/5263) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(traits\): builder image platforms [\#5262](https://github.com/apache/camel-k/pull/5262) ([squakez](https://github.com/squakez))
