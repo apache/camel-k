@@ -46,11 +46,16 @@ func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.opentelemetry.enabled"])
-	assert.Equal(t, "http://endpoint3", e.ApplicationProperties["quarkus.opentelemetry.tracer.exporter.otlp.endpoint"])
-	assert.Equal(t, "service.name=test", e.ApplicationProperties["quarkus.opentelemetry.tracer.resource-attributes"])
-	assert.Equal(t, "on", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler"])
-	assert.Empty(t, e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.ratio"])
-	assert.Equal(t, "true", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.parent-based"])
+	assert.Equal(t, "http://endpoint3", e.ApplicationProperties["camel.k.telemetry.endpoint"])
+	assert.Equal(t, "service.name=test", e.ApplicationProperties["camel.k.telemetry.serviceName"])
+	assert.Equal(t, "on", e.ApplicationProperties["camel.k.telemetry.sampler"])
+	assert.Equal(t, "", e.ApplicationProperties["camel.k.telemetry.samplerRatio"])
+	assert.Equal(t, "true", e.ApplicationProperties["camel.k.telemetry.samplerParentBased"])
+	assert.Equal(t, "${camel.k.telemetry.endpoint}", e.ApplicationProperties["quarkus.opentelemetry.tracer.exporter.otlp.endpoint"])
+	assert.Equal(t, "${camel.k.telemetry.serviceName}", e.ApplicationProperties["quarkus.opentelemetry.tracer.resource-attributes"])
+	assert.Equal(t, "${camel.k.telemetry.sampler}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler"])
+	assert.Equal(t, "${camel.k.telemetry.samplerRatio}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.ratio"])
+	assert.Equal(t, "${camel.k.telemetry.samplerParentBased}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.parent-based"])
 }
 
 func TestTelemetryTraitWithValues(t *testing.T) {
@@ -72,11 +77,16 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.opentelemetry.enabled"])
-	assert.Equal(t, "http://endpoint3", e.ApplicationProperties["quarkus.opentelemetry.tracer.exporter.otlp.endpoint"])
-	assert.Equal(t, "service.name=Test", e.ApplicationProperties["quarkus.opentelemetry.tracer.resource-attributes"])
-	assert.Equal(t, "ratio", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler"])
-	assert.Equal(t, "0.001", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.ratio"])
-	assert.Equal(t, "false", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.parent-based"])
+	assert.Equal(t, "http://endpoint3", e.ApplicationProperties["camel.k.telemetry.endpoint"])
+	assert.Equal(t, "service.name=Test", e.ApplicationProperties["camel.k.telemetry.serviceName"])
+	assert.Equal(t, "ratio", e.ApplicationProperties["camel.k.telemetry.sampler"])
+	assert.Equal(t, "0.001", e.ApplicationProperties["camel.k.telemetry.samplerRatio"])
+	assert.Equal(t, "false", e.ApplicationProperties["camel.k.telemetry.samplerParentBased"])
+	assert.Equal(t, "${camel.k.telemetry.endpoint}", e.ApplicationProperties["quarkus.opentelemetry.tracer.exporter.otlp.endpoint"])
+	assert.Equal(t, "${camel.k.telemetry.serviceName}", e.ApplicationProperties["quarkus.opentelemetry.tracer.resource-attributes"])
+	assert.Equal(t, "${camel.k.telemetry.sampler}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler"])
+	assert.Equal(t, "${camel.k.telemetry.samplerRatio}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.ratio"])
+	assert.Equal(t, "${camel.k.telemetry.samplerParentBased}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.parent-based"])
 }
 
 func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *trait.Environment {

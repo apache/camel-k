@@ -18,6 +18,8 @@ limitations under the License.
 package telemetry
 
 import (
+	"fmt"
+
 	"k8s.io/utils/pointer"
 
 	corev1 "k8s.io/api/core/v1"
@@ -130,30 +132,63 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 func (t *telemetryTrait) Apply(e *trait.Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTelemetry)
 
+	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
+		t.setCatalogConfiguration(e)
+	} else {
+		t.setProperties(e)
+	}
+
+	return nil
+}
+
+func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+
+	if t.Endpoint != "" {
+		e.ApplicationProperties["camel.k.telemetry.endpoint"] = t.Endpoint
+	}
+	if t.ServiceName != "" {
+		e.ApplicationProperties["camel.k.telemetry.serviceName"] = fmt.Sprintf("service.name=%s", t.ServiceName)
+	}
+	if t.Sampler != "" {
+		e.ApplicationProperties["camel.k.telemetry.sampler"] = t.Sampler
+	}
+	if t.SamplerRatio != "" {
+		e.ApplicationProperties["camel.k.telemetry.samplerRatio"] = t.SamplerRatio
+	}
+	if pointer.BoolDeref(t.SamplerParentBased, true) {
+		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = "true"
+	} else {
+		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = "false"
+	}
+
+	for _, cp := range e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties {
+		e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+	}
+}
+
+// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
+func (t *telemetryTrait) setProperties(e *trait.Environment) {
 	if e.CamelCatalog != nil {
 		provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
 		properties := telemetryProperties[provider]
-
 		if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {
 			e.ApplicationProperties[appPropEnabled] = "true"
 		}
-
 		if appPropEndpoint := properties[propEndpoint]; appPropEndpoint != "" && t.Endpoint != "" {
 			e.ApplicationProperties[appPropEndpoint] = t.Endpoint
 		}
-
 		if appPropServiceName := properties[propServiceName]; appPropServiceName != "" && t.ServiceName != "" {
 			e.ApplicationProperties[appPropServiceName] = "service.name=" + t.ServiceName
 		}
-
 		if appPropSampler := properties[propSampler]; appPropSampler != "" && t.Sampler != "" {
 			e.ApplicationProperties[appPropSampler] = t.Sampler
 		}
-
 		if appPropSamplerRatio := properties[propSamplerRatio]; appPropSamplerRatio != "" && t.SamplerRatio != "" {
 			e.ApplicationProperties[appPropSamplerRatio] = t.SamplerRatio
 		}
-
 		if appPropSamplerParentBased := properties[propSamplerParentBased]; appPropSamplerParentBased != "" {
 			if pointer.BoolDeref(t.SamplerParentBased, true) {
 				e.ApplicationProperties[appPropSamplerParentBased] = "true"
@@ -161,8 +196,5 @@ func (t *telemetryTrait) Apply(e *trait.Environment) error {
 				e.ApplicationProperties[appPropSamplerParentBased] = "false"
 			}
 		}
-
 	}
-
-	return nil
 }
