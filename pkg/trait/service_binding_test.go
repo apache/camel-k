@@ -44,18 +44,24 @@ func TestServiceBinding(t *testing.T) {
 	handlers = []pipeline.Handler{}
 	err = sbTrait.Apply(environment)
 	require.NoError(t, err)
+	assert.Equal(t, "true", environment.ApplicationProperties["camel.k.serviceBinding.enabled"])
+	assert.Equal(t, "${camel.k.serviceBinding.enabled}", environment.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"])
 	// TODO we should make the service binding trait to easily work with fake client
-	// and test the apply result in the environment accordingly.
+	// and test the apply secret in the environment accordingly.
 }
 
 func createNominalServiceBindingTest() (*serviceBindingTrait, *Environment) {
 	trait, _ := newServiceBindingTrait().(*serviceBindingTrait)
 	client, _ := test.NewFakeClient()
-
+	catalog := NewCatalog(client)
+	c, err := camel.DefaultCatalog()
+	if err != nil {
+		panic(err)
+	}
 	environment := &Environment{
 		Client:       client,
-		Catalog:      NewCatalog(client),
-		CamelCatalog: &camel.RuntimeCatalog{},
+		Catalog:      catalog,
+		CamelCatalog: c,
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Sources: []v1.SourceSpec{

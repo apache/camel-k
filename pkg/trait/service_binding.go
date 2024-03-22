@@ -88,12 +88,36 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 		return err
 	}
 
+	if e.CamelCatalog.Runtime.Capabilities["service-binding"].RuntimeProperties != nil {
+		t.setCatalogConfiguration(e)
+	} else {
+		t.setProperties(e)
+	}
+
 	secret := createSecret(ctx, e.Integration.Namespace, e.Integration.Name)
 	if secret != nil {
 		e.Resources.Add(secret)
-		e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
 	}
+
 	return nil
+}
+
+func (t *serviceBindingTrait) setCatalogConfiguration(e *Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	e.ApplicationProperties["camel.k.serviceBinding.enabled"] = True
+	for _, cp := range e.CamelCatalog.Runtime.Capabilities["service-binding"].RuntimeProperties {
+		e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+	}
+}
+
+// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
+func (t *serviceBindingTrait) setProperties(e *Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
 }
 
 func (t *serviceBindingTrait) getContext(e *Environment) (pipeline.Context, error) {
