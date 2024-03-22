@@ -1324,6 +1324,37 @@ the metadata of the loader
 
 |===
 
+[#_camel_apache_org_v1_CamelProperty]
+=== CamelProperty
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Capability, Capability>>
+
+CamelProperty represents a Camel property that may end up in an application.properties file.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`key` +
+string
+|
+
+
+
+
+|`value` +
+string
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_CamelScheme]
 === CamelScheme
 
@@ -1423,14 +1454,14 @@ which are specified in the runtime catalog.
 List of required Maven dependencies
 
 |`runtimeProperties` +
-map[string]string
+*xref:#_camel_apache_org_v1_CamelProperty[[\]CamelProperty]*
 |
 
 
 Set of required Camel runtime properties
 
 |`buildTimeProperties` +
-map[string]string
+*xref:#_camel_apache_org_v1_CamelProperty[[\]CamelProperty]*
 |
 
 

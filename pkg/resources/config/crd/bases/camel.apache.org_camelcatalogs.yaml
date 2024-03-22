@@ -376,10 +376,19 @@ spec:
                         are specified in the runtime catalog.
                       properties:
                         buildTimeProperties:
-                          additionalProperties:
-                            type: string
                           description: Set of required Camel build time properties
-                          type: object
+                          items:
+                            description: CamelProperty represents a Camel property
+                              that may end up in an application.properties file.
+                            properties:
+                              key:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            type: object
+                          type: array
                         dependencies:
                           description: List of required Maven dependencies
                           items:
@@ -412,10 +421,19 @@ spec:
                           description: Set of generic metadata
                           type: object
                         runtimeProperties:
-                          additionalProperties:
-                            type: string
                           description: Set of required Camel runtime properties
-                          type: object
+                          items:
+                            description: CamelProperty represents a Camel property
+                              that may end up in an application.properties file.
+                            properties:
+                              key:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                            - key
+                            type: object
+                          type: array
                       type: object
                     description: features offered by this runtime
                     type: object

@@ -350,11 +350,17 @@ type Capability struct {
 	// List of required Maven dependencies
 	Dependencies []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
 	// Set of required Camel runtime properties
-	RuntimeProperties map[string]string `json:"runtimeProperties,omitempty" yaml:"runtimeProperties,omitempty"`
+	RuntimeProperties []CamelProperty `json:"runtimeProperties,omitempty" yaml:"runtimeProperties,omitempty"`
 	// Set of required Camel build time properties
-	BuildTimeProperties map[string]string `json:"buildTimeProperties,omitempty" yaml:"buildTimeProperties,omitempty"`
+	BuildTimeProperties []CamelProperty `json:"buildTimeProperties,omitempty" yaml:"buildTimeProperties,omitempty"`
 	// Set of generic metadata
-	Metadata map[string]string `json:"metadata,omitempty" yaml:"Metadata,omitempty"`
+	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+}
+
+// CamelProperty represents a Camel property that may end up in an application.properties file.
+type CamelProperty struct {
+	Key   string `json:"key" yaml:"key"`
+	Value string `json:"value,omitempty" yaml:"value,omitempty"`
 }
 
 const (
