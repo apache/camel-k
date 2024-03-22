@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -50,6 +51,8 @@ const (
 	sourceNameAnnotation        = "camel.apache.org/source.name"
 	sourceCompressionAnnotation = "camel.apache.org/source.compression"
 )
+
+var capabilityDynamicProperty = regexp.MustCompile(`(\$\{([^}]*)\})`)
 
 // Identifiable represent an identifiable type.
 type Identifiable interface {
@@ -726,4 +729,18 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	return nil
+}
+
+// CapabilityPropertyKey returns the key or expand any variable provided in it. vars variable contain the
+// possible dynamic values to use.
+func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) string {
+	if capabilityDynamicProperty.MatchString(camelPropertyKey) && vars != nil {
+		match := capabilityDynamicProperty.FindStringSubmatch(camelPropertyKey)
+		if len(match) < 2 {
+			// Should not happen, but fallback to the key not expanded instead of panic if it comes to happen
+			return camelPropertyKey
+		}
+		return strings.ReplaceAll(camelPropertyKey, match[1], vars[match[2]])
+	}
+	return camelPropertyKey
 }

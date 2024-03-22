@@ -68,6 +68,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.CamelCatalogStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelLoader"):
 		return &camelv1.CamelLoaderApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("CamelProperty"):
+		return &camelv1.CamelPropertyApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelScheme"):
 		return &camelv1.CamelSchemeApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelSchemeScope"):

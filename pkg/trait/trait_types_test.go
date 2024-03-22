@@ -154,3 +154,13 @@ func TestVolumeWithKeyOnly(t *testing.T) {
 	assert.Equal(t, "SomeKey", items[0].Key)
 	assert.Equal(t, "SomeKey", items[0].Path)
 }
+
+func TestCapabilityPropertyKey(t *testing.T) {
+	camelPropertyKeyStatic := CapabilityPropertyKey("quarkus.camel.cluster.kubernetes.resource-name", nil)
+	assert.Equal(t, "quarkus.camel.cluster.kubernetes.resource-name", camelPropertyKeyStatic)
+	vars := map[string]string{
+		"camel.k.master.labelKey": "org.apache.camel/integration",
+	}
+	camelPropertyKeyDynamic := CapabilityPropertyKey(`quarkus.camel.cluster.kubernetes.labels."${camel.k.master.labelKey}"`, vars)
+	assert.Equal(t, `quarkus.camel.cluster.kubernetes.labels."org.apache.camel/integration"`, camelPropertyKeyDynamic)
+}

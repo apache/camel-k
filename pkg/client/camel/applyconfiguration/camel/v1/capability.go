@@ -23,8 +23,8 @@ package v1
 // with apply.
 type CapabilityApplyConfiguration struct {
 	Dependencies        []MavenArtifactApplyConfiguration `json:"dependencies,omitempty"`
-	RuntimeProperties   map[string]string                 `json:"runtimeProperties,omitempty"`
-	BuildTimeProperties map[string]string                 `json:"buildTimeProperties,omitempty"`
+	RuntimeProperties   []CamelPropertyApplyConfiguration `json:"runtimeProperties,omitempty"`
+	BuildTimeProperties []CamelPropertyApplyConfiguration `json:"buildTimeProperties,omitempty"`
 	Metadata            map[string]string                 `json:"metadata,omitempty"`
 }
 
@@ -47,30 +47,28 @@ func (b *CapabilityApplyConfiguration) WithDependencies(values ...*MavenArtifact
 	return b
 }
 
-// WithRuntimeProperties puts the entries into the RuntimeProperties field in the declarative configuration
+// WithRuntimeProperties adds the given value to the RuntimeProperties field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, the entries provided by each call will be put on the RuntimeProperties field,
-// overwriting an existing map entries in RuntimeProperties field with the same key.
-func (b *CapabilityApplyConfiguration) WithRuntimeProperties(entries map[string]string) *CapabilityApplyConfiguration {
-	if b.RuntimeProperties == nil && len(entries) > 0 {
-		b.RuntimeProperties = make(map[string]string, len(entries))
-	}
-	for k, v := range entries {
-		b.RuntimeProperties[k] = v
+// If called multiple times, values provided by each call will be appended to the RuntimeProperties field.
+func (b *CapabilityApplyConfiguration) WithRuntimeProperties(values ...*CamelPropertyApplyConfiguration) *CapabilityApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithRuntimeProperties")
+		}
+		b.RuntimeProperties = append(b.RuntimeProperties, *values[i])
 	}
 	return b
 }
 
-// WithBuildTimeProperties puts the entries into the BuildTimeProperties field in the declarative configuration
+// WithBuildTimeProperties adds the given value to the BuildTimeProperties field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, the entries provided by each call will be put on the BuildTimeProperties field,
-// overwriting an existing map entries in BuildTimeProperties field with the same key.
-func (b *CapabilityApplyConfiguration) WithBuildTimeProperties(entries map[string]string) *CapabilityApplyConfiguration {
-	if b.BuildTimeProperties == nil && len(entries) > 0 {
-		b.BuildTimeProperties = make(map[string]string, len(entries))
-	}
-	for k, v := range entries {
-		b.BuildTimeProperties[k] = v
+// If called multiple times, values provided by each call will be appended to the BuildTimeProperties field.
+func (b *CapabilityApplyConfiguration) WithBuildTimeProperties(values ...*CamelPropertyApplyConfiguration) *CapabilityApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithBuildTimeProperties")
+		}
+		b.BuildTimeProperties = append(b.BuildTimeProperties, *values[i])
 	}
 	return b
 }
