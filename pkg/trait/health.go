@@ -96,6 +96,29 @@ func (t *healthTrait) Apply(e *Environment) error {
 		port = &p
 	}
 
+	if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+		t.setCatalogConfiguration(container, port, e.CamelCatalog.Runtime.Capabilities["health"].Metadata)
+	} else {
+		t.setDefaultConfiguration(container, port)
+	}
+
+	return nil
+}
+
+func (t *healthTrait) setCatalogConfiguration(container *corev1.Container, port *intstr.IntOrString, metadata map[string]string) {
+	if pointer.BoolDeref(t.LivenessProbeEnabled, false) {
+		container.LivenessProbe = t.newLivenessProbe(port, metadata["defaultLivenessProbePath"])
+	}
+	if pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
+		container.ReadinessProbe = t.newReadinessProbe(port, metadata["defaultReadinessProbePath"])
+	}
+	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
+		container.StartupProbe = t.newStartupProbe(port, metadata["defaultStartupProbePath"])
+	}
+}
+
+// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
+func (t *healthTrait) setDefaultConfiguration(container *corev1.Container, port *intstr.IntOrString) {
 	if pointer.BoolDeref(t.LivenessProbeEnabled, false) {
 		container.LivenessProbe = t.newLivenessProbe(port, defaultLivenessProbePath)
 	}
@@ -105,8 +128,6 @@ func (t *healthTrait) Apply(e *Environment) error {
 	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
 		container.StartupProbe = t.newStartupProbe(port, defaultStartupProbePath)
 	}
-
-	return nil
 }
 
 func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *corev1.Probe {
