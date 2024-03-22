@@ -117,101 +117,37 @@ func TestEmptyLoggingTrait(t *testing.T) {
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
-	quarkusConsoleColor := false
-	jsonFormat := false
-	jsonPrettyPrint := false
-	logLevelIsInfo := false
-	logFormatIsNotDefault := false
+	assert.Equal(t, "INFO", env.ApplicationProperties["camel.k.logging.level"])
+	assert.Equal(t, "", env.ApplicationProperties["camel.k.logging.format"])
+	assert.Equal(t, "false", env.ApplicationProperties["camel.k.logging.json"])
+	assert.Equal(t, "", env.ApplicationProperties["camel.k.logging.jsonPrettyPrint"])
+	assert.Equal(t, "true", env.ApplicationProperties["camel.k.logging.color"])
 
-	for _, e := range env.EnvVars {
-		if e.Name == envVarQuarkusConsoleColor {
-			if e.Value == "true" {
-				quarkusConsoleColor = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogConsoleJSON {
-			if e.Value == "true" {
-				jsonFormat = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogConsoleJSONPrettyPrint {
-			if e.Value == "true" {
-				jsonPrettyPrint = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogLevel {
-			if e.Value == "INFO" {
-				logLevelIsInfo = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogConsoleFormat {
-			logFormatIsNotDefault = true
-		}
-	}
-
-	assert.True(t, quarkusConsoleColor)
-	assert.True(t, logLevelIsInfo)
-	assert.False(t, jsonFormat)
-	assert.False(t, jsonPrettyPrint)
-	assert.False(t, logFormatIsNotDefault)
-	assert.NotEmpty(t, env.ExecutedTraits)
+	assert.Equal(t, "${camel.k.logging.level}", env.ApplicationProperties["quarkus.log.level"])
+	assert.Equal(t, "", env.ApplicationProperties["quarkus.log.console.format"])
+	assert.Equal(t, "${camel.k.logging.json}", env.ApplicationProperties["quarkus.log.console.json"])
+	assert.Equal(t, "", env.ApplicationProperties["quarkus.log.console.json.pretty-print"])
+	assert.Equal(t, "${camel.k.logging.color}", env.ApplicationProperties["quarkus.console.color"])
 }
 
 func TestJsonLoggingTrait(t *testing.T) {
 	// When running, this log should look like "09:07:00 INFO  (main) Profile prod activated."
-	env := createLoggingTestEnv(t, true, true, false, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n")
+	env := createLoggingTestEnv(t, true, true, true, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n")
 	conditions, err := NewLoggingTestCatalog().apply(env)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
-	quarkusConsoleColor := false
-	jsonFormat := true
-	jsonPrettyPrint := false
-	logLevelIsTrace := false
-	logFormatIsNotDefault := false
+	assert.Equal(t, "TRACE", env.ApplicationProperties["camel.k.logging.level"])
+	assert.Equal(t, "%d{HH:mm:ss} %-5p (%t) %s%e%n", env.ApplicationProperties["camel.k.logging.format"])
+	assert.Equal(t, "true", env.ApplicationProperties["camel.k.logging.json"])
+	assert.Equal(t, "true", env.ApplicationProperties["camel.k.logging.jsonPrettyPrint"])
+	assert.Equal(t, "", env.ApplicationProperties["camel.k.logging.color"])
 
-	for _, e := range env.EnvVars {
-		if e.Name == envVarQuarkusConsoleColor {
-			if e.Value == "true" {
-				quarkusConsoleColor = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogConsoleJSON {
-			if e.Value == "true" {
-				jsonFormat = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogConsoleJSONPrettyPrint {
-			if e.Value == "true" {
-				jsonPrettyPrint = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogLevel {
-			if e.Value == "TRACE" {
-				logLevelIsTrace = true
-			}
-		}
-
-		if e.Name == envVarQuarkusLogConsoleFormat {
-			if e.Value == "%d{HH:mm:ss} %-5p (%t) %s%e%n" {
-				logFormatIsNotDefault = true
-			}
-		}
-	}
-
-	assert.False(t, quarkusConsoleColor)
-	assert.True(t, jsonFormat)
-	assert.False(t, jsonPrettyPrint)
-	assert.True(t, logLevelIsTrace)
-	assert.True(t, logFormatIsNotDefault)
-	assert.NotEmpty(t, env.ExecutedTraits)
+	assert.Equal(t, "${camel.k.logging.level}", env.ApplicationProperties["quarkus.log.level"])
+	assert.Equal(t, "${camel.k.logging.format}", env.ApplicationProperties["quarkus.log.console.format"])
+	assert.Equal(t, "${camel.k.logging.json}", env.ApplicationProperties["quarkus.log.console.json"])
+	assert.Equal(t, "${camel.k.logging.jsonPrettyPrint}", env.ApplicationProperties["quarkus.log.console.json.pretty-print"])
+	assert.Equal(t, "", env.ApplicationProperties["quarkus.console.color"])
 }

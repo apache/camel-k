@@ -61,6 +61,17 @@ func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 }
 
 func (l loggingTrait) Apply(e *Environment) error {
+	if e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties != nil {
+		l.setCatalogConfiguration(e)
+	} else {
+		l.setEnvConfiguration(e)
+	}
+
+	return nil
+}
+
+// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
+func (l loggingTrait) setEnvConfiguration(e *Environment) {
 	envvar.SetVal(&e.EnvVars, envVarQuarkusLogLevel, l.Level)
 
 	if l.Format != "" {
@@ -80,6 +91,32 @@ func (l loggingTrait) Apply(e *Environment) error {
 			envvar.SetVal(&e.EnvVars, envVarQuarkusConsoleColor, True)
 		}
 	}
+}
 
-	return nil
+func (l loggingTrait) setCatalogConfiguration(e *Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	e.ApplicationProperties["camel.k.logging.level"] = l.Level
+	if l.Format != "" {
+		e.ApplicationProperties["camel.k.logging.format"] = l.Format
+	}
+	if pointer.BoolDeref(l.JSON, false) {
+		e.ApplicationProperties["camel.k.logging.json"] = True
+		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
+			e.ApplicationProperties["camel.k.logging.jsonPrettyPrint"] = True
+		}
+	} else {
+		// If the trait is false OR unset, we default to false.
+		e.ApplicationProperties["camel.k.logging.json"] = False
+		if pointer.BoolDeref(l.Color, true) {
+			e.ApplicationProperties["camel.k.logging.color"] = True
+		}
+	}
+
+	for _, cp := range e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties {
+		if CapabilityPropertyKey(cp.Value, e.ApplicationProperties) != "" {
+			e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+		}
+	}
 }
