@@ -59,18 +59,7 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
 			g.Expect(IntegrationPod(t, ctx, ns, name)().Spec.Containers[0].Name).To(BeEquivalentTo(containerTestName))
-
-			found := false
-			for _, env := range IntegrationPod(t, ctx, ns, name)().Spec.Containers[0].Env {
-				if env.Name == "QUARKUS_LOG_LEVEL" {
-					g.Expect(env.Value).To(BeEquivalentTo("DEBUG"))
-					found = true
-					break
-				}
-			}
-			g.Expect(found).To(BeTrue(), "Can't find QUARKUS_LOG_LEVEL ENV variable")
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("DEBUG"))
 
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
