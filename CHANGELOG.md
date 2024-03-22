@@ -10,6 +10,7 @@
 - release-nightly does not build/push multiarch manifest [\#5252](https://github.com/apache/camel-k/issues/5252)
 - XSD might be wrong [\#5250](https://github.com/apache/camel-k/issues/5250)
 - Pipe error handler not working with Camel 4.4.0 [\#5242](https://github.com/apache/camel-k/issues/5242)
+- Integration builds fail with arm64 base image [\#5238](https://github.com/apache/camel-k/issues/5238)
 - Update buil/Dokerfile to use go 1.21 [\#5231](https://github.com/apache/camel-k/issues/5231)
 - Error java.lang.ClassNotFoundException: io.quarkus.bootstrap.runner.QuarkusEntryPoint [\#5225](https://github.com/apache/camel-k/issues/5225)
 - Deployment Trait maxUnavailable and maxSurge default values differ from documentation and do not support % values [\#5223](https://github.com/apache/camel-k/issues/5223)
