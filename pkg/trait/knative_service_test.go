@@ -122,7 +122,7 @@ func TestKnativeService(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait("knative"))
+	assert.NotNil(t, environment.GetTrait("knative-service"))
 	assert.Equal(t, 4, environment.Resources.Size())
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
@@ -335,7 +335,7 @@ func TestKnativeServiceWithRest(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait("knative"))
+	assert.NotNil(t, environment.GetTrait("knative-service"))
 
 	assert.NotNil(t, environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName
@@ -403,7 +403,7 @@ func TestKnativeServiceNotApplicable(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
-	assert.NotNil(t, environment.GetTrait("knative"))
+	assert.Nil(t, environment.GetTrait("knative-service"))
 
 	assert.Nil(t, environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == KnativeServiceTestName
