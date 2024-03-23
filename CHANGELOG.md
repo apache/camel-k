@@ -47,6 +47,7 @@
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
 - Provide a page linking to Camel DSLs [\#5037](https://github.com/apache/camel-k/issues/5037)
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
+- Polish trait conditions [\#5027](https://github.com/apache/camel-k/issues/5027)
 - Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - \[Discussion\] Camel K 2024 roadmap [\#5019](https://github.com/apache/camel-k/issues/5019)
 - Unable to authenticate with Docker Hub API v2 [\#5017](https://github.com/apache/camel-k/issues/5017)
