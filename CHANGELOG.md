@@ -64,6 +64,7 @@
 - Pipe using simple language expressions causing failure [\#4777](https://github.com/apache/camel-k/issues/4777)
 - 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
+- Provide full description for trait in CRD [\#4727](https://github.com/apache/camel-k/issues/4727)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Build waiting condition [\#4542](https://github.com/apache/camel-k/issues/4542)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
