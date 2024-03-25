@@ -123,6 +123,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			}
 			t.EventSinks = items
 		}
+		hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 || len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSources) > 0 || len(t.EventSinks) > 0
+		t.Enabled = &hasKnativeEndpoint
+		if !hasKnativeEndpoint {
+			return false, nil, nil
+		}
 		if t.FilterSourceChannels == nil {
 			// Filtering is no longer used by default
 			t.FilterSourceChannels = pointer.Bool(false)

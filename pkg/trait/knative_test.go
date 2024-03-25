@@ -348,6 +348,142 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 	}
 }
 
+func TestKnativeEnabled(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "route.groovy",
+							Content: `from('timer:foo').to('knative:channel/channel-source-1')`,
+						},
+						Language: v1.LanguageGroovy,
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// configure the init trait
+	init := NewInitTrait()
+	ok, condition, err := init.Configure(&environment)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+
+	// apply the init trait
+	require.NoError(t, init.Apply(&environment))
+
+	// configure the knative trait
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	ok, condition, err = knTrait.Configure(&environment)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+
+	// apply the knative trait
+	require.NoError(t, knTrait.Apply(&environment))
+
+	assert.True(t, *knTrait.Enabled)
+	assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityKnative)
+}
+
+func TestKnativeNotEnabled(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "route.groovy",
+							Content: `from('timer:foo').to('log:info')`,
+						},
+						Language: v1.LanguageGroovy,
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// configure the init trait
+	init := NewInitTrait()
+	ok, condition, err := init.Configure(&environment)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+
+	// apply the init trait
+	require.NoError(t, init.Apply(&environment))
+
+	// configure the knative trait
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	ok, condition, err = knTrait.Configure(&environment)
+	require.NoError(t, err)
+	assert.False(t, ok)
+	assert.Nil(t, condition)
+
+	assert.NotContains(t, environment.Integration.Status.Capabilities, v1.CapabilityKnative)
+}
+
 func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	t.Helper()
 
@@ -545,105 +681,6 @@ func NewFakeClient(namespace string) (client.Client, error) {
 						APIVersion: serving.SchemeGroupVersion.String(),
 						Kind:       "Service",
 						Name:       "event-source-1",
-					},
-				},
-			},
-		},
-	)
-}
-
-func SortChannelFakeClient(namespace string) (client.Client, error) {
-	channelSourceURL1, err := apis.ParseURL("http://channel-source-1.host/")
-	if err != nil {
-		return nil, err
-	}
-	channelSourceURL2, err := apis.ParseURL("http://channel-source-2.host/")
-	if err != nil {
-		return nil, err
-	}
-	channelSourceURL3, err := apis.ParseURL("http://channel-source-3.host/")
-	if err != nil {
-		return nil, err
-	}
-	channelSourceURL4, err := apis.ParseURL("http://channel-source-4.host/")
-	if err != nil {
-		return nil, err
-	}
-
-	return test.NewFakeClient(
-		// Channels unsorted on purpose
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-2",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL2,
-						},
-					},
-				},
-			},
-		},
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-4",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL4,
-						},
-					},
-				},
-			},
-		},
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-1",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL1,
-						},
-					},
-				},
-			},
-		},
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-3",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL3,
-						},
 					},
 				},
 			},
