@@ -27,6 +27,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
@@ -321,7 +322,13 @@ func kamelInstallWithContext(ctx context.Context, operatorID string, namespace s
 		fmt.Printf("Setting operator image pull policy to %s\n", opImagePullPolicy)
 		installArgs = append(installArgs, "--operator-image-pull-policy", opImagePullPolicy)
 	}
-
+	if len(os.Getenv("CAMEL_K_TEST_MAVEN_CA_PEM_PATH")) > 0 {
+		certName := "myCert"
+		secretName := "maven-ca-certs"
+		CreateSecretDecoded(namespace, os.Getenv("CAMEL_K_TEST_MAVEN_CA_PEM_PATH"), secretName, certName)
+		installArgs = append(installArgs, "--maven-repository", os.Getenv("KAMEL_INSTALL_MAVEN_REPOSITORIES"),
+			"--maven-ca-secret", secretName+"/"+certName)
+	}
 	installArgs = append(installArgs, args...)
 	return KamelWithContext(ctx, installArgs...)
 }
@@ -1713,6 +1720,25 @@ func DeleteSecret(ns string, name string) error {
 		},
 	}
 	return TestClient().Delete(TestContext, &sec)
+}
+func CreateSecretDecoded(ns string, pathToFile string, secretName string, certName string) error {
+	bytes, _ := os.ReadFile(pathToFile)
+	block, _ := pem.Decode(bytes)
+
+	secret := corev1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      secretName,
+		},
+		Data: map[string][]byte{
+			certName: block.Bytes,
+		},
+	}
+	return TestClient().Create(TestContext, &secret)
 }
 
 func KnativeService(ns string, name string) func() *servingv1.Service {
