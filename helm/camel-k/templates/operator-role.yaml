@@ -366,6 +366,7 @@ rules:
   - kafka.strimzi.io
   resources:
   - kafkatopics
+  - kafkatopics/status
   - kafkas
   verbs:
   - get

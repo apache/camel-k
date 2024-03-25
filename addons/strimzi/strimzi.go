@@ -23,11 +23,11 @@ import (
 
 	"github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset"
 	"github.com/apache/camel-k/v2/addons/strimzi/duck/v1beta2"
-
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -77,7 +77,21 @@ func (s BindingProvider) Translate(ctx bindings.BindingContext, _ bindings.Endpo
 		// look them up
 		topic, err := s.Client.KafkaV1beta2().KafkaTopics(ctx.Namespace).Get(ctx.Ctx, endpoint.Ref.Name, v1.GetOptions{})
 		if err != nil {
-			return nil, err
+			if k8serrors.IsNotFound(err) {
+				topicList, err := s.Client.KafkaV1beta2().KafkaTopics(ctx.Namespace).List(ctx.Ctx, v1.ListOptions{
+					FieldSelector: "status.topicName=" + endpoint.Ref.Name,
+				})
+				if err != nil {
+					return nil, err
+				}
+				if len(topicList.Items) == 0 {
+					return nil, fmt.Errorf("couldn't find any KafkaTopic with either name or topicName %s", endpoint.Ref.Name)
+				}
+				// Just return the first item
+				topic = &topicList.Items[0]
+			} else {
+				return nil, err
+			}
 		}
 
 		clusterName := topic.Labels[v1beta2.StrimziKafkaClusterLabel]

@@ -40,6 +40,12 @@ const (
 type KafkaTopic struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Status            KafkaTopicStatus `json:"status,omitempty"`
+}
+
+// KafkaTopicStatus is the duck of a KafkaTopic status.
+type KafkaTopicStatus struct {
+	TopicName string `json:"topicName,omitempty"`
 }
 
 // +kubebuilder:object:root=true
