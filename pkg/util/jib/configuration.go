@@ -36,9 +36,10 @@ import (
 const JibMavenGoal = "jib:build"
 const JibMavenToImageParam = "-Djib.to.image="
 const JibMavenFromImageParam = "-Djib.from.image="
+const JibMavenFromPlatforms = "-Djib.from.platforms="
 const JibMavenInsecureRegistries = "-Djib.allowInsecureRegistries="
 const JibDigestFile = "target/jib-image.digest"
-const JibMavenPluginVersionDefault = "3.3.2"
+const JibMavenPluginVersionDefault = "3.4.1"
 const JibLayerFilterExtensionMavenVersionDefault = "0.3.0"
 
 type JibBuild struct {

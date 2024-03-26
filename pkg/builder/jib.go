@@ -19,6 +19,7 @@ package builder
 
 import (
 	"context"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -107,12 +108,20 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		return status.Failed(err)
 	}
 
+	arch, err := t.GetControllerArchitecture(ctx, t.c)
+	if err != nil {
+		return status.Failed(err)
+	}
+
 	mavenArgs := make([]string, 0)
 	mavenArgs = append(mavenArgs, jib.JibMavenGoal)
 	mavenArgs = append(mavenArgs, strings.Split(string(mavenCommand), " ")...)
 	mavenArgs = append(mavenArgs, "-P", "jib")
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+t.task.Image)
 	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
+	if arch == "amd64" || arch == "arm64" {
+		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+"linux/"+arch)
+	}
 	if t.task.Registry.Insecure {
 		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
 	}
@@ -141,4 +150,26 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	}
 
 	return status
+}
+
+func (t *jibTask) GetControllerArchitecture(ctx context.Context, c client.Client) (string, error) {
+
+	podName := os.Getenv("POD_NAME")
+	namespace, _ := c.GetCurrentNamespace("")
+	log.Infof("Fetching image architecture for pod %s in namespace %s", podName, namespace)
+
+	// Get the pod by name
+	pod, err := c.CoreV1().Pods(namespace).Get(ctx, podName, metav1.GetOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Note, it might be better to inspect the image metadata
+	// by querying the registry with the image id
+	image := pod.Spec.Containers[0].Image
+	if strings.HasSuffix(image, "-amd64") || strings.HasSuffix(image, "-arm64") {
+		return image[len(image)-5:], nil
+	}
+
+	return "", nil
 }
