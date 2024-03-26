@@ -24,13 +24,13 @@ github.com/apache/camel-k/v2/addons/register_strimzi.go:25:						init							100.
 github.com/apache/camel-k/v2/addons/register_telemetry.go:25:						init							100.0%
 github.com/apache/camel-k/v2/addons/strimzi/addtoscheme_strimzi_duck_v1beta2.go:25:			init							100.0%
 github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:40:						ID							0.0%
-github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:44:						Translate						64.5%
-github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:104:						getBootstrapServers					66.7%
-github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:124:						Order							0.0%
-github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:136:						ID							0.0%
-github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:142:						Translate						0.0%
-github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:204:						getBootstrapServers					0.0%
-github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:225:						Order							0.0%
+github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:44:						Translate						65.8%
+github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:118:						getBootstrapServers					66.7%
+github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:138:						Order							0.0%
+github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:150:						ID							0.0%
+github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:156:						Translate						0.0%
+github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:218:						getBootstrapServers					0.0%
+github.com/apache/camel-k/v2/addons/strimzi/strimzi.go:239:						Order							0.0%
 github.com/apache/camel-k/v2/addons/telemetry/telemetry.go:84:						NewTelemetryTrait					100.0%
 github.com/apache/camel-k/v2/addons/telemetry/telemetry.go:90:						Configure						47.4%
 github.com/apache/camel-k/v2/addons/telemetry/telemetry.go:130:						Apply							94.7%
@@ -2264,4 +2264,4 @@ github.com/apache/camel-k/v2/pkg/util/util.go:649:							WithTempDir						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:664:							ConfigTreePropertySplit					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:685:							trimQuotes						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:696:							NavigateConfigTree					0.0%
-total:													(statements)						37.2%
+total:													(statements)						37.3%

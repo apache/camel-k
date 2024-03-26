@@ -47,6 +47,7 @@
 - Nightly check against latest runtime failure [\#5042](https://github.com/apache/camel-k/issues/5042)
 - Provide a page linking to Camel DSLs [\#5037](https://github.com/apache/camel-k/issues/5037)
 - Nightly SBOM procedure should not run if there are no changes [\#5033](https://github.com/apache/camel-k/issues/5033)
+- Mac github actions failing [\#5028](https://github.com/apache/camel-k/issues/5028)
 - Polish trait conditions [\#5027](https://github.com/apache/camel-k/issues/5027)
 - Nightly release soft failure [\#5023](https://github.com/apache/camel-k/issues/5023)
 - \[Discussion\] Camel K 2024 roadmap [\#5019](https://github.com/apache/camel-k/issues/5019)
@@ -63,6 +64,7 @@
 - Pointer to an external schema/CRD [\#4788](https://github.com/apache/camel-k/issues/4788)
 - Pipe using simple language expressions causing failure [\#4777](https://github.com/apache/camel-k/issues/4777)
 - 1st Integration after Camel K runtime version update failing [\#4776](https://github.com/apache/camel-k/issues/4776)
+- KameletBinding could not find a topic with a different `metadata.name` and `topicName`. [\#4759](https://github.com/apache/camel-k/issues/4759)
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Build waiting condition [\#4542](https://github.com/apache/camel-k/issues/4542)
@@ -74,6 +76,7 @@
 
 **Merged pull requests:**
 
+- feat\(strimzi\): bind to either KafkaTopic name or topicName [\#5281](https://github.com/apache/camel-k/pull/5281) ([squakez](https://github.com/squakez))
 - Add optional install to tests [\#5278](https://github.com/apache/camel-k/pull/5278) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): bump github.com/prometheus/common from 0.51.0 to 0.51.1 [\#5276](https://github.com/apache/camel-k/pull/5276) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Only enable knative trait when there is a knative endpoint [\#5275](https://github.com/apache/camel-k/pull/5275) ([claudio4j](https://github.com/claudio4j))
