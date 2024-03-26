@@ -28,7 +28,7 @@ const (
 
 	StrimziKafkaClusterLabel = "strimzi.io/cluster"
 
-	StrimziListenerTypePlain = "plain"
+	StrimziListenerNamePlain = "plain"
 )
 
 // +genclient
@@ -78,7 +78,7 @@ type KafkaStatus struct {
 // KafkaStatusListener contains listener information.
 type KafkaStatusListener struct {
 	BootstrapServers string `json:"bootstrapServers,omitempty"`
-	Type             string `json:"type,omitempty"`
+	Name             string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true
