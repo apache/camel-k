@@ -125,7 +125,10 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 	// Run traits that are enabled for the phase
 	environment, err := trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {
-		return nil, err
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyCondition(corev1.ConditionFalse,
+			v1.IntegrationConditionInitializationFailedReason, err.Error())
+		return integration, err
 	}
 
 	return action.monitorPods(ctx, environment, integration)
