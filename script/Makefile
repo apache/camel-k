@@ -226,6 +226,8 @@ codegen-tools-install: controller-gen
 
 build: codegen build-resources test build-kamel build-compile-integration-tests
 
+build-platform: build build-kamel-platform
+
 ci-build: clean codegen set-version check-licenses dir-licenses build-kamel cross-compile
 
 do-build: gotestfmt-install
@@ -353,6 +355,15 @@ build-kamel:
 	# Symbolic link to a local CLI
 	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
 
+build-kamel-platform:
+	# Perform only when running on OS other than linux
+ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
+	@echo "####### Building platform specific kamel CLI for $(IMAGE_ARCH) architecture..."
+	CGO_ENABLED=0 GOARCH=$(IMAGE_ARCH) go build $(GOFLAGS) -o build/_output/bin/kamel-$(IMAGE_ARCH) ./cmd/kamel/*.go
+	# Symbolic link to a local CLI
+	ln -sf build/_output/bin/kamel-$(IMAGE_ARCH) ./kamel
+endif
+
 build-resources:
 	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
 
@@ -430,7 +441,9 @@ endif
 
 DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH)
 
-images: build maven-overlay bundle-kamelets
+images: build maven-overlay bundle-kamelets image-build build-kamel-platform
+
+image-build:
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
 	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
@@ -536,7 +549,7 @@ release-kustomize:
 get-staging-repo:
 	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
-.PHONY: do-build build build-kamel build-resources dep codegen images images-push images-push-staging test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
+.PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary
