@@ -19,6 +19,7 @@ package builder
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -109,6 +110,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	mavenArgs = append(mavenArgs, "-P", "jib")
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+t.task.Image)
 	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
+	mavenArgs = append(mavenArgs, jib.JibMavenBaseImageCache+mavenDir+"/jib")
 	if t.task.Configuration.ImagePlatforms != nil {
 		platforms := strings.Join(t.task.Configuration.ImagePlatforms, ",")
 		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+platforms)
@@ -122,6 +124,9 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		mvnCmd = c
 	}
 	cmd := exec.CommandContext(ctx, mvnCmd, mavenArgs...)
+	cmd.Env = os.Environ()
+	// Set Jib config directory to a writable directory within the image, Jib will create a default config file
+	cmd.Env = append(cmd.Env, fmt.Sprintf("XDG_CONFIG_HOME=%s/jib", mavenDir))
 	cmd.Dir = mavenDir
 
 	myerror := util.RunAndLog(ctx, cmd, maven.MavenLogHandler, maven.MavenLogHandler)
