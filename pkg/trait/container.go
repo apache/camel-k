@@ -176,57 +176,36 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-
 	container := corev1.Container{
 		Name:  t.Name,
 		Image: e.Integration.Status.Image,
 		Env:   make([]corev1.EnvVar, 0),
 	}
-
 	if t.ImagePullPolicy != "" {
 		container.ImagePullPolicy = t.ImagePullPolicy
 	}
-
 	// combine Environment of integration with platform, kit, integration
 	for _, env := range e.collectConfigurationPairs("env") {
 		envvar.SetVal(&container.Env, env.Name, env.Value)
 	}
-
 	envvar.SetVal(&container.Env, digest.IntegrationDigestEnvVar, e.Integration.Status.Digest)
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF", filepath.Join(camel.BasePath, "application.properties"))
 	envvar.SetVal(&container.Env, "CAMEL_K_CONF_D", camel.ConfDPath)
 
-	e.addSourcesProperties()
-	if props, err := e.computeApplicationProperties(); err != nil {
-		return err
-	} else if props != nil {
-		e.Resources.Add(props)
-	}
-
-	t.configureResources(&container)
-	if pointer.BoolDeref(t.Expose, false) {
-		t.configureService(e, &container)
-	}
-	t.configureCapabilities(e)
-
-	t.configureSecurityContext(e, &container)
-
 	var containers *[]corev1.Container
 	visited := false
-
+	knative := false
 	// Deployment
 	if err := e.Resources.VisitDeploymentE(func(deployment *appsv1.Deployment) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-
 		containers = &deployment.Spec.Template.Spec.Containers
 		visited = true
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	// Knative Service
 	if err := e.Resources.VisitKnativeServiceE(func(service *serving.Service) error {
 		for _, env := range e.EnvVars {
@@ -236,34 +215,43 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 			case env.ValueFrom.FieldRef != nil && env.ValueFrom.FieldRef.FieldPath == "metadata.namespace":
 				envvar.SetVar(&container.Env, corev1.EnvVar{Name: env.Name, Value: e.Integration.Namespace})
 			case env.ValueFrom.FieldRef != nil:
-				t.L.Infof("Skipping environment variable %s (fieldRef)", env.Name)
+				t.L.Debugf("Skipping environment variable %s (fieldRef)", env.Name)
 			case env.ValueFrom.ResourceFieldRef != nil:
-				t.L.Infof("Skipping environment variable %s (resourceFieldRef)", env.Name)
+				t.L.Debugf("Skipping environment variable %s (resourceFieldRef)", env.Name)
 			default:
 				envvar.SetVar(&container.Env, env)
 			}
 		}
-
 		containers = &service.Spec.ConfigurationSpec.Template.Spec.Containers
 		visited = true
+		knative = true
 		return nil
 	}); err != nil {
 		return err
 	}
-
 	// CronJob
 	if err := e.Resources.VisitCronJobE(func(cron *batchv1.CronJob) error {
 		for _, envVar := range e.EnvVars {
 			envvar.SetVar(&container.Env, envVar)
 		}
-
 		containers = &cron.Spec.JobTemplate.Spec.Template.Spec.Containers
 		visited = true
 		return nil
 	}); err != nil {
 		return err
 	}
-
+	e.addSourcesProperties()
+	if props, err := e.computeApplicationProperties(); err != nil {
+		return err
+	} else if props != nil {
+		e.Resources.Add(props)
+	}
+	t.configureResources(&container)
+	if knative || pointer.BoolDeref(t.Expose, false) {
+		t.configureService(e, &container, knative)
+	}
+	t.configureCapabilities(e)
+	t.configureSecurityContext(e, &container)
 	if visited {
 		*containers = append(*containers, container)
 	}
@@ -271,46 +259,42 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	return nil
 }
 
-func (t *containerTrait) configureService(e *Environment, container *corev1.Container) {
-	service := e.Resources.GetServiceForIntegration(e.Integration)
-	if service == nil {
-		return
-	}
-
+func (t *containerTrait) configureService(e *Environment, container *corev1.Container, isKnative bool) {
 	name := t.PortName
 	if name == "" {
 		name = defaultContainerPortName
 	}
-
 	containerPort := corev1.ContainerPort{
-		Name:          name,
 		ContainerPort: int32(t.Port),
 		Protocol:      corev1.ProtocolTCP,
 	}
-
-	servicePort := corev1.ServicePort{
-		Name:       t.ServicePortName,
-		Port:       int32(t.ServicePort),
-		Protocol:   corev1.ProtocolTCP,
-		TargetPort: intstr.FromString(name),
+	if !isKnative {
+		// Knative does not want name=http
+		containerPort.Name = name
+		// The service is managed by Knative, so, we only take care of this when it's managed by us
+		service := e.Resources.GetServiceForIntegration(e.Integration)
+		if service != nil {
+			servicePort := corev1.ServicePort{
+				Name:       t.ServicePortName,
+				Port:       int32(t.ServicePort),
+				Protocol:   corev1.ProtocolTCP,
+				TargetPort: intstr.FromString(name),
+			}
+			e.Integration.Status.SetCondition(
+				v1.IntegrationConditionServiceAvailable,
+				corev1.ConditionTrue,
+				v1.IntegrationConditionServiceAvailableReason,
+				// service -> container
+				fmt.Sprintf("%s(%s/%d) -> %s(%s/%d)",
+					service.Name, servicePort.Name, servicePort.Port,
+					container.Name, containerPort.Name, containerPort.ContainerPort),
+			)
+			service.Spec.Ports = append(service.Spec.Ports, servicePort)
+			// Mark the service as a user service
+			service.Labels["camel.apache.org/service.type"] = v1.ServiceTypeUser
+		}
 	}
-
-	e.Integration.Status.SetCondition(
-		v1.IntegrationConditionServiceAvailable,
-		corev1.ConditionTrue,
-		v1.IntegrationConditionServiceAvailableReason,
-
-		// service -> container
-		fmt.Sprintf("%s(%s/%d) -> %s(%s/%d)",
-			service.Name, servicePort.Name, servicePort.Port,
-			container.Name, containerPort.Name, containerPort.ContainerPort),
-	)
-
 	container.Ports = append(container.Ports, containerPort)
-	service.Spec.Ports = append(service.Spec.Ports, servicePort)
-
-	// Mark the service as a user service
-	service.Labels["camel.apache.org/service.type"] = v1.ServiceTypeUser
 }
 
 func (t *containerTrait) configureResources(container *corev1.Container) {

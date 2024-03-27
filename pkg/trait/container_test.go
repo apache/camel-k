@@ -528,3 +528,130 @@ func createEnvironment() *Environment {
 
 	return environment
 }
+
+func TestDeploymentContainerPorts(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		Ctx:          context.TODO(),
+		Client:       client,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Traits: v1.Traits{
+					Container: &traitv1.ContainerTrait{
+						Port:        8081,
+						ServicePort: 8081,
+					},
+				},
+				Sources: []v1.SourceSpec{
+					{
+						Language: v1.LanguageJavaSource,
+						DataSpec: v1.DataSpec{
+							Name: "MyTest.java",
+							Content: `
+							public class MyRouteBuilder extends RouteBuilder {
+								@Override
+								public void configure() throws Exception {
+									from("netty-http:http://0.0.0.0:8081/hello").log("Received message: ${body}");
+								}
+							}
+							`,
+						},
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+	environment.Platform.ResyncStatusFullConfig()
+
+	_, err = traitCatalog.apply(&environment)
+	require.NoError(t, err)
+	container := environment.GetIntegrationContainer()
+	assert.Len(t, container.Ports, 1)
+	assert.Equal(t, int32(8081), container.Ports[0].ContainerPort)
+	assert.Equal(t, "http", container.Ports[0].Name)
+	svc := environment.Resources.GetServiceForIntegration(environment.Integration)
+	assert.Len(t, svc.Spec.Ports, 1)
+	assert.Equal(t, int32(8081), svc.Spec.Ports[0].Port)
+}
+
+func TestKnativeServiceContainerPorts(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		Ctx:          context.TODO(),
+		Client:       client,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Integration: &v1.Integration{
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Traits: v1.Traits{
+					Container: &traitv1.ContainerTrait{
+						Port:        8081,
+						ServicePort: 8081,
+					},
+				},
+				Sources: []v1.SourceSpec{
+					{
+						Language: v1.LanguageJavaSource,
+						DataSpec: v1.DataSpec{
+							Name: "MyTest.java",
+							Content: `
+							public class MyRouteBuilder extends RouteBuilder {
+								@Override
+								public void configure() throws Exception {
+									from("netty-http:http://0.0.0.0:8081/hello").log("Received message: ${body}");
+								}
+							}
+							`,
+						},
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+	environment.Platform.ResyncStatusFullConfig()
+
+	_, err = traitCatalog.apply(&environment)
+	require.NoError(t, err)
+	container := environment.GetIntegrationContainer()
+	assert.Len(t, container.Ports, 1)
+	assert.Equal(t, int32(8081), container.Ports[0].ContainerPort)
+	assert.Equal(t, "", container.Ports[0].Name)
+}
