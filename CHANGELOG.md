@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Could not determine source URI: cluster "camel-ai-kafka" has no listeners of type "plain" [\#5295](https://github.com/apache/camel-k/issues/5295)
+- OS platform not considered during "make build" [\#5288](https://github.com/apache/camel-k/issues/5288)
 - Camelk | AtlasMap Support [\#5261](https://github.com/apache/camel-k/issues/5261)
 - release-nightly does not build/push multiarch manifest [\#5252](https://github.com/apache/camel-k/issues/5252)
 - XSD might be wrong [\#5250](https://github.com/apache/camel-k/issues/5250)
@@ -37,7 +39,9 @@
 - Include the operator node-selector in the helm chart [\#5103](https://github.com/apache/camel-k/issues/5103)
 - TestCreateCatalog fail when DEFAULT\_RUNTIME\_VERSION=3.6.0-SNAPSHOT [\#5099](https://github.com/apache/camel-k/issues/5099)
 - Remove secondary IntegrationPlatform in favor of using IntegrationProfile settings [\#5097](https://github.com/apache/camel-k/issues/5097)
+- Basic example fails on Docker Desktop MacOS [\#5095](https://github.com/apache/camel-k/issues/5095)
 - Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
+- Operator is stuck in a "deploying" phase loop when internal deployment fails indefinitely  [\#5084](https://github.com/apache/camel-k/issues/5084)
 - Ability to set different resources for jvm and native containers when both are used in the same Integration [\#5065](https://github.com/apache/camel-k/issues/5065)
 - Don't run dependabot on forked repos [\#5063](https://github.com/apache/camel-k/issues/5063)
 - Operator 2.2.0 does not spawn builder pod with strategy: pod [\#5060](https://github.com/apache/camel-k/issues/5060)
@@ -68,6 +72,7 @@
 - Provide alternative publishing strategy via pipeline [\#4747](https://github.com/apache/camel-k/issues/4747)
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Build waiting condition [\#4542](https://github.com/apache/camel-k/issues/4542)
+- Add support for Strimzi Kafka in KameletBinding/Pipe [\#4337](https://github.com/apache/camel-k/issues/4337)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 - Remove duplication of the default platform creation [\#3433](https://github.com/apache/camel-k/issues/3433)
 - Use `go:embed` instead of vfsgen for embedded resources handling [\#3384](https://github.com/apache/camel-k/issues/3384)
@@ -76,6 +81,11 @@
 
 **Merged pull requests:**
 
+- fix\(\#5238\): Fix Jib integration build [\#5294](https://github.com/apache/camel-k/pull/5294) ([christophd](https://github.com/christophd))
+- fix\(knative\): enable service container port [\#5291](https://github.com/apache/camel-k/pull/5291) ([squakez](https://github.com/squakez))
+- fix\(\#5288\): Makefile building platform specific kamel CLI binary [\#5290](https://github.com/apache/camel-k/pull/5290) ([christophd](https://github.com/christophd))
+- fix\(ctrl\): report error on traits failure [\#5285](https://github.com/apache/camel-k/pull/5285) ([squakez](https://github.com/squakez))
+- feat\(kafka\): support Kafka binding resource [\#5284](https://github.com/apache/camel-k/pull/5284) ([squakez](https://github.com/squakez))
 - feat\(strimzi\): bind to either KafkaTopic name or topicName [\#5281](https://github.com/apache/camel-k/pull/5281) ([squakez](https://github.com/squakez))
 - Add optional install to tests [\#5278](https://github.com/apache/camel-k/pull/5278) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): bump github.com/prometheus/common from 0.51.0 to 0.51.1 [\#5276](https://github.com/apache/camel-k/pull/5276) ([dependabot[bot]](https://github.com/apps/dependabot))
