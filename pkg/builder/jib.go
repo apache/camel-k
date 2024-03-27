@@ -114,6 +114,8 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	if t.task.Configuration.ImagePlatforms != nil {
 		platforms := strings.Join(t.task.Configuration.ImagePlatforms, ",")
 		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+platforms)
+	} else {
+		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+"linux/amd64,linux/arm64")
 	}
 	if t.task.Registry.Insecure {
 		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
