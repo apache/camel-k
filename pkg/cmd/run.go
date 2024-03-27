@@ -851,7 +851,7 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				// And the validation only warns potential misusage of Camel components at the CLI level,
 				// so strictness of catalog version is not necessary here.
 				var err error
-				catalog, err = createCamelCatalog(o.Context)
+				catalog, err = createCamelCatalog()
 				if err != nil {
 					return err
 				}
