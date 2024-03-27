@@ -28,6 +28,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/cmd"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/gomega"
@@ -36,7 +37,6 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/cmd"
 )
 
 func TestKamelCLIConfig(t *testing.T) {

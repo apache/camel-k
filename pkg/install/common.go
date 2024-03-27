@@ -36,6 +36,10 @@ import (
 
 const serviceAccountName = "camel-k-operator"
 
+func getComponentsNames() []string {
+	return []string{"operator", "platformcontroller"}
+}
+
 // ResourceCustomizer can be used to inject code that changes the objects before they are created.
 type ResourceCustomizer func(object ctrl.Object) ctrl.Object
 

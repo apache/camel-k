@@ -18,3 +18,5 @@
 resources:
 - operator-pod-monitor.yaml
 - operator-prometheus-rule.yaml
+- platformcontroller-pod-monitor.yaml
+- platformcontroller-prometheus-rule.yaml

@@ -1,0 +1,89 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camel-k-platformcontroller
+  labels:
+    app: "camel-k"
+    camel.apache.org/component: platformcontroller
+    name: camel-k-platformcontroller
+    app.kubernetes.io/component: platformcontroller
+    app.kubernetes.io/name: camel-k-platformcontroller
+    app.kubernetes.io/version: "2.3.0-SNAPSHOT"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: camel-k-platformcontroller
+  template:
+    metadata:
+      labels:
+        name: camel-k-platformcontroller
+        camel.apache.org/component: platformcontroller
+        app: "camel-k"
+        app.kubernetes.io/component: platformcontroller
+        app.kubernetes.io/name: camel-k-platformcontroller
+        app.kubernetes.io/version: "2.3.0-SNAPSHOT"
+    spec:
+      serviceAccountName: camel-k-operator
+      containers:
+        - name: camel-k-platformcontroller
+          image: docker.io/apache/camel-k:2.3.0-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          command:
+            - kamel
+            - platformcontroller
+          ports:
+            - containerPort: 8080
+              name: metrics
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OPERATOR_NAME
+              value: "camel-k-platformcontroller"
+            - name: OPERATOR_ID
+              value: "camel-k"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            # NAMESPACE is always the operator namespace, independently of WATCH_NAMESPACE
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+
