@@ -33,7 +33,7 @@ BASE_IMAGE := eclipse-temurin:17
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 # Test for arm64, fall back to amd64
-IMAGE_ARCH ?= $(if $(filter arm64,$(shell uname -m)),arm64,amd64)
+IMAGE_ARCH ?= $(if $(filter arm64 aarch64,$(shell uname -m)),arm64,amd64)
 #
 # Situations when user wants to override
 # the image name and version
