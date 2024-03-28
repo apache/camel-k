@@ -58,7 +58,7 @@ func TestJVMTrait(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("JVM trait classpath", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/jvm/Classpath.java", "--resource", "configmap:my-deps", "-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "./files/jvm/Classpath.java", "--resource", "configmap:my-deps", "-t", "jvm.classpath=/etc/camel/resources/my-deps/sample-1.0.jar").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "classpath"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "classpath", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "classpath"), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
@@ -72,6 +72,6 @@ func TestJVMTrait(t *testing.T) {
 			g.Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources/my-deps/sample-1.0.jar"))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

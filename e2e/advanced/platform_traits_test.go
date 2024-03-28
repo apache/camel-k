@@ -55,7 +55,7 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 
 		name := RandomizedSuffixName("java")
 		t.Run("Run integration with platform traits", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -73,7 +73,7 @@ func TestTraitOnIntegrationPlatform(t *testing.T) {
 			g.Expect(found).To(BeTrue(), "Can't find QUARKUS_LOG_LEVEL ENV variable")
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("DEBUG"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 	})
 }

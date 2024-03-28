@@ -45,7 +45,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 		t.Run("java native support", func(t *testing.T) {
 			name := javaNativeName
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -56,7 +56,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 			t.Run("java native same should not rebuild", func(t *testing.T) {
 				name := javaNativeCloneName
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+				g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
@@ -70,7 +70,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 
 			t.Run("java native should rebuild", func(t *testing.T) {
 				name := javaNative2Name
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java2.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+				g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java2.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -82,12 +82,12 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			})
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("groovy native support", func(t *testing.T) {
 			name := RandomizedSuffixName("groovy-native")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Groovy.groovy", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Groovy.groovy", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -98,12 +98,12 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Groovy Magicstring!"))
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("kotlin native support", func(t *testing.T) {
 			name := RandomizedSuffixName("kotlin-native")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Kotlin.kts", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Kotlin.kts", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -114,7 +114,7 @@ func TestNativeHighMemoryIntegrations(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Kotlin Magicstring!"))
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 	})
 }

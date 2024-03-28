@@ -448,6 +448,97 @@ func KamelWithContext(t *testing.T, ctx context.Context, args ...string) *cobra.
 	return c
 }
 
+func CamelK(t *testing.T, ctx context.Context, args ...string) *cobra.Command {
+	return CamelKWithContext(t, ctx, args...)
+}
+
+func CamelKRunWithID(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+	return CamelKRunWithContext(t, ctx, operatorID, namespace, args...)
+}
+
+func CamelKRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+	return CamelKCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
+}
+
+func CamelKCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
+	var cmdArgs []string
+
+	cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
+
+	cmdArgs = append(cmdArgs, args...)
+	return CamelKWithContext(t, ctx, cmdArgs...)
+}
+
+func CamelKWithContext(t *testing.T, ctx context.Context, args ...string) *cobra.Command {
+	var c *cobra.Command
+	var err error
+
+	if os.Getenv("CAMEL_K_TEST_LOG_LEVEL") == "debug" {
+		fmt.Printf("Executing camel k with command %+q\n", args)
+		fmt.Println("Printing stack for CamelKWithContext")
+		debug.PrintStack()
+	}
+
+	tempArgs := []string{"run", "--deps=org.apache.camel:camel-jbang-plugin-k:4.4.1", "--deps=org.apache.camel.k:camel-k-crds:2.3.0-SNAPSHOT", "camel@apache/camel", "k"}
+
+	camelKArgs := os.Getenv("CAMELK_ARGS")
+	camelKDefaultArgs := strings.Fields(camelKArgs)
+	cmdArgs := append(tempArgs, camelKDefaultArgs...)
+	args = append(cmdArgs, args...)
+
+	camelKBin := os.Getenv("CAMELK_BIN")
+	if camelKBin != "" {
+		if _, e := os.Stat(camelKBin); e != nil && os.IsNotExist(e) {
+			failTest(t, e)
+		}
+	} else {
+		camelKBin = "jbang"
+	}
+	c = &cobra.Command{
+		DisableFlagParsing: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			externalBin := exec.CommandContext(ctx, camelKBin, args...)
+			var stdout, stderr io.Reader
+			stdout, err = externalBin.StdoutPipe()
+			if err != nil {
+				failTest(t, err)
+			}
+			stderr, err = externalBin.StderrPipe()
+			if err != nil {
+				failTest(t, err)
+			}
+			err := externalBin.Start()
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(c.OutOrStdout(), stdout)
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(c.ErrOrStderr(), stderr)
+			if err != nil {
+				return err
+			}
+			err = externalBin.Wait()
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+
+	if err != nil {
+		failTest(t, err)
+	}
+	for _, hook := range KamelHooks {
+		args = hook(args)
+	}
+	c.SetArgs(args)
+	return c
+}
+
 func Make(t *testing.T, rule string, args ...string) *exec.Cmd {
 	return MakeWithContext(t, rule, args...)
 }

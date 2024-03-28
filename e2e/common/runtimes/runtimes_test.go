@@ -51,7 +51,7 @@ func TestSourceLessIntegrations(t *testing.T) {
 
 		t.Run("Camel Main", func(t *testing.T) {
 			itName := "my-camel-main-v1"
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-main:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-main:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationCondition(t, ctx, ns, itName, v1.IntegrationConditionType("JVMTraitInfo"))().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
@@ -61,7 +61,7 @@ func TestSourceLessIntegrations(t *testing.T) {
 
 		t.Run("Camel Spring Boot", func(t *testing.T) {
 			itName := "my-camel-sb-v1"
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-sb:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-sb:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationCondition(t, ctx, ns, itName, v1.IntegrationConditionType("JVMTraitInfo"))().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
@@ -71,7 +71,7 @@ func TestSourceLessIntegrations(t *testing.T) {
 
 		t.Run("Camel Quarkus", func(t *testing.T) {
 			itName := "my-camel-quarkus-v1"
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-quarkus:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--image", "docker.io/squakez/my-camel-quarkus:1.0.0", "--resource", "configmap:my-cm-sourceless@/tmp/app/data").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, itName), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, itName, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationCondition(t, ctx, ns, itName, v1.IntegrationConditionType("JVMTraitInfo"))().Message).Should(Equal("explicitly disabled by the platform: integration kit was not created via Camel K operator"))
@@ -79,6 +79,7 @@ func TestSourceLessIntegrations(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, itName), TestTimeoutShort).Should(ContainSubstring("powered by Quarkus"))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
+
 }

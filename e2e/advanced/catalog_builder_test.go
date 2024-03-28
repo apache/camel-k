@@ -56,10 +56,13 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		// The operator should create the catalog, but fail on reconciliation as it is not compatible
 		// and the integration should fail as well
 		t.Run("Run catalog not compatible", func(t *testing.T) {
+			t.Skip("FIXME CAMELK: CAMEL-20576 - snake-case")
+
 			name := RandomizedSuffixName("java-1-15")
 			nonCompatibleCatalogName := "camel-catalog-1.15.0"
+
 			g.Expect(
-				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version=1.15.0").Execute()).To(Succeed())
+				CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version=1.15.0").Execute()).To(Succeed())
 
 			g.Eventually(CamelCatalog(t, ctx, ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
@@ -79,6 +82,8 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		// Run an integration with a compatible catalog
 		// The operator should create the catalog, reconcile it properly and run the Integration accordingly
 		t.Run("Run catalog compatible", func(t *testing.T) {
+			t.Skip("FIXME CAMELK: CAMEL-20576 - snake-case")
+
 			name := RandomizedSuffixName("java-1-17")
 			compatibleVersion := "1.17.0"
 			compatibleCatalogName := "camel-catalog-" + strings.ToLower(compatibleVersion)
@@ -88,7 +93,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).Should(BeNil())
 
 			g.Expect(
-				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
+				CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
 
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).ShouldNot(BeNil())
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
@@ -103,6 +108,8 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		})
 
 		t.Run("Run catalog container exists", func(t *testing.T) {
+			t.Skip("FIXME CAMELK: CAMEL-20576 - snake-case")
+
 			name := RandomizedSuffixName("java")
 			compatibleVersion := "1.17.0"
 			compatibleCatalogName := "camel-catalog-" + strings.ToLower(compatibleVersion)
@@ -112,7 +119,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).Should(BeNil())
 
 			g.Expect(
-				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
+				CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
 
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).ShouldNot(BeNil())
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
@@ -132,6 +139,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

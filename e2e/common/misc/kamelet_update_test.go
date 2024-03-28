@@ -54,7 +54,7 @@ func TestBundleKameletUpdate(t *testing.T) {
 		g.Consistently(Kamelet(t, ctx, "user-sink", ns), 5*time.Second, 1*time.Second).
 			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

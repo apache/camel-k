@@ -26,9 +26,10 @@ import (
 	"context"
 	"testing"
 
+	"os/exec"
+
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"os/exec"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -69,7 +70,7 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 		)
 		// Create an Integration into a restricted namespace
 		name := RandomizedSuffixName("java-fail")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
 		// Check the error is reported into the Integration
 		g.Eventually(IntegrationPhase(t, ctx, nsRestr, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
 		g.Eventually(IntegrationCondition(t, ctx, nsRestr, name, v1.IntegrationConditionReady)().Status).

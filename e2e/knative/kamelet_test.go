@@ -48,7 +48,7 @@ func TestKameletChange(t *testing.T) {
 	g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, timerSource)()).To(Succeed())
 	g.Expect(CreateKnativeChannel(t, ctx, ns, knChannel)()).To(Succeed())
 	// Consumer route that will read from the KNative channel
-	g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/test-kamelet-display.groovy", "-w").Execute()).To(Succeed())
+	g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/test-kamelet-display.groovy", "-w").Execute()).To(Succeed())
 	g.Eventually(IntegrationPodPhase(t, ctx, ns, "test-kamelet-display")).Should(Equal(corev1.PodRunning))
 
 	// Create the Pipe
@@ -78,5 +78,5 @@ func TestKameletChange(t *testing.T) {
 			WithTransform(PipeConditionMessage, Equal("1/1 ready replicas")),
 		))
 
-	g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+	g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

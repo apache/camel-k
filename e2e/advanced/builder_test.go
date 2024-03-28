@@ -67,7 +67,7 @@ func TestBuilderTimeout(t *testing.T) {
 
 		t.Run("run yaml", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 			integrationKitName := IntegrationKit(t, ctx, ns, name)()

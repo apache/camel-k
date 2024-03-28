@@ -46,7 +46,7 @@ func TestKamelReset(t *testing.T) {
 
 		t.Run("Reset the whole platform", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml1")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -61,7 +61,7 @@ func TestKamelReset(t *testing.T) {
 
 		t.Run("Reset skip-integrations", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml2")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -76,7 +76,7 @@ func TestKamelReset(t *testing.T) {
 
 		t.Run("Reset skip-kits", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml3")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -90,6 +90,6 @@ func TestKamelReset(t *testing.T) {
 			g.Expect(Kit(t, ctx, ns, kitName)()).To(Not(BeNil()))
 		})
 		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

@@ -116,7 +116,7 @@ func TestPipe(t *testing.T) {
 				)))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

@@ -49,7 +49,7 @@ func TestJolokiaTrait(t *testing.T) {
 
 		t.Run("Run Java with Jolokia", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false", "-t", "jolokia.protocol=http", "-t", "jolokia.extended-client-check=false").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false", "-t", "jolokia.protocol=http", "-t", "jolokia.extended-client-check=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -73,6 +73,6 @@ func TestJolokiaTrait(t *testing.T) {
 
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

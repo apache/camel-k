@@ -47,11 +47,13 @@ func TestErrorHandlerTrait(t *testing.T) {
 
 		t.Run("Run errored integration with error handler", func(t *testing.T) {
 			name := RandomizedSuffixName("error-handler")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/ErroredRoute.java", "--name", name, "-t", "error-handler.enabled=true", "-t", "error-handler.ref=defaultErrorHandler", "-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder", "-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/ErroredRoute.java", "--name", name, "-t", "error-handler.enabled=true", "-t", "error-handler.ref=defaultErrorHandler", "-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder", "-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).ShouldNot(ContainSubstring("InvalidPayloadException"))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("my-special-error-handler-in-place"))
 		})
+
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

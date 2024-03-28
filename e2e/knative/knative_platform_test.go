@@ -57,7 +57,7 @@ func TestKnativePlatformDetection(t *testing.T) {
 		cluster := Platform(t, ctx, ns)().Status.Cluster
 
 		t.Run("run yaml on cluster profile", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(IntegrationTraitProfile(t, ctx, ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfile(string(cluster))))
@@ -79,11 +79,11 @@ func TestKnativePlatformDetection(t *testing.T) {
 			// It should keep the old profile saved in status
 			g.Eventually(IntegrationTraitProfile(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(v1.TraitProfile(cluster)))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("run yaml on automatic profile", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationTraitProfile(t, ctx, ns, "yaml"), TestTimeoutShort).Should(Equal(v1.TraitProfileKnative))
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())

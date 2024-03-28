@@ -47,7 +47,7 @@ func TestServiceTrait(t *testing.T) {
 		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("NodePort service", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.node-port=true").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.node-port=true").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			//
@@ -56,12 +56,12 @@ func TestServiceTrait(t *testing.T) {
 			//
 			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Default service (ClusterIP)", func(t *testing.T) {
 			// Service trait is enabled by default
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			//
@@ -70,24 +70,23 @@ func TestServiceTrait(t *testing.T) {
 			//
 			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("NodePort service from Type", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.type=NodePort").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.type=NodePort").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-
 			//
 			// Service names can vary with the ExternalName Service
 			// sometimes being created first and being given the root name
 			//
 			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("ClusterIP service from Type", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.type=ClusterIP").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.type=ClusterIP").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			//
@@ -105,11 +104,11 @@ func TestServiceTrait(t *testing.T) {
 			g.Expect(serviceTrait["enabled"]).To(Equal(true))
 			g.Expect(serviceTrait["type"]).To(Equal("ClusterIP"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("LoadBalancer service from Type", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.type=LoadBalancer").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true", "-t", "service.type=LoadBalancer").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			//
@@ -118,7 +117,7 @@ func TestServiceTrait(t *testing.T) {
 			//
 			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeLoadBalancer), TestTimeoutLong).ShouldNot(BeEmpty())
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 	})
 }

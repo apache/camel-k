@@ -54,12 +54,12 @@ func TestMain(m *testing.M) {
 
 		g.Expect(TestClient(t)).ShouldNot(BeNil())
 		ctx := TestContext()
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "languages/files/Java.java").Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "languages/files/Java.java").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "languages/files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "languages/files/yaml.yaml").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

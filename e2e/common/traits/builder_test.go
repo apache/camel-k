@@ -49,7 +49,7 @@ func TestBuilderTrait(t *testing.T) {
 
 		t.Run("Run build strategy routine", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.order-strategy=sequential", "-t", "builder.strategy=routine").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.order-strategy=sequential", "-t", "builder.strategy=routine").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -68,12 +68,12 @@ func TestBuilderTrait(t *testing.T) {
 
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Run build order strategy dependencies", func(t *testing.T) {
 			name := RandomizedSuffixName("java-dependencies-strategy")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java",
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java",
 				"--name", name,
 				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
 				"--build-property", "strategy=dependencies",
@@ -95,12 +95,12 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(BuildConfig(t, ctx, integrationKitNamespace, integrationKitName)().LimitMemory, TestTimeoutShort).Should(Equal(""))
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Run build order strategy fifo", func(t *testing.T) {
 			name := RandomizedSuffixName("java-fifo-strategy")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java",
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java",
 				"--name", name,
 				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
 				"--build-property", "strategy=fifo",
@@ -123,12 +123,12 @@ func TestBuilderTrait(t *testing.T) {
 
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName), TestTimeoutShort).Should(BeNil())
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Run build resources configuration", func(t *testing.T) {
 			name := RandomizedSuffixName("java-resource-config")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java",
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java",
 				"--name", name,
 				// This is required in order to avoid reusing a Kit already existing (which is the default behavior)
 				"--build-property", "resources=new-build",
@@ -162,12 +162,12 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName)().Spec.InitContainers[0].Resources.Requests.Memory().String(), TestTimeoutShort).Should(Equal("2Gi"))
 			g.Eventually(BuilderPod(t, ctx, integrationKitNamespace, builderKitName)().Spec.InitContainers[0].Resources.Limits.Memory().String(), TestTimeoutShort).Should(Equal("3Gi"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Run custom pipeline task", func(t *testing.T) {
 			name := RandomizedSuffixName("java-pipeline")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.tasks=custom1;alpine;tree", "-t", "builder.tasks=custom2;alpine;cat maven/pom.xml", "-t", "builder.strategy=pod").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.tasks=custom1;alpine;tree", "-t", "builder.tasks=custom2;alpine;cat maven/pom.xml", "-t", "builder.strategy=pod").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
@@ -202,12 +202,12 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`generated-bytecode.jar`))
 			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom2"})).Should(ContainSubstring(`<artifactId>camel-k-runtime-bom</artifactId>`))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Run custom pipeline task error", func(t *testing.T) {
 			name := RandomizedSuffixName("java-error")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.tasks=custom1;alpine;cat missingfile.txt", "-t", "builder.strategy=pod").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.tasks=custom1;alpine;cat missingfile.txt", "-t", "builder.strategy=pod").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 			integrationKitName := IntegrationKit(t, ctx, ns, name)()
@@ -223,7 +223,7 @@ func TestBuilderTrait(t *testing.T) {
 				BuildCondition(t, ctx, integrationKitNamespace, integrationKitName, v1.BuildConditionType("Containercustom1Succeeded"))().Message,
 				TestTimeoutShort).Should(ContainSubstring("No such file or directory"))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Run maven profile", func(t *testing.T) {
@@ -234,7 +234,7 @@ func TestBuilderTrait(t *testing.T) {
 			mavenProfile2Cm := newMavenProfileConfigMap(ns, "maven-profile-dependency", "dependency-profile")
 			g.Expect(TestClient(t).Create(ctx, mavenProfile2Cm)).To(Succeed())
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.maven-profiles=configmap:maven-profile-owasp/owasp-profile", "-t", "builder.maven-profiles=configmap:maven-profile-dependency/dependency-profile", "-t", "builder.tasks=custom1;alpine;cat maven/pom.xml", "-t", "builder.strategy=pod").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "builder.maven-profiles=configmap:maven-profile-owasp/owasp-profile", "-t", "builder.maven-profiles=configmap:maven-profile-dependency/dependency-profile", "-t", "builder.tasks=custom1;alpine;cat maven/pom.xml", "-t", "builder.strategy=pod").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(Equal(corev1.ConditionTrue))
@@ -262,7 +262,7 @@ func TestBuilderTrait(t *testing.T) {
 			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`<id>owasp-profile</id>`))
 			g.Eventually(Logs(t, ctx, integrationKitNamespace, builderKitName, corev1.PodLogOptions{Container: "custom1"})).Should(ContainSubstring(`<id>dependency-profile</id>`))
 
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 			g.Expect(TestClient(t).Delete(ctx, mavenProfile1Cm)).To(Succeed())
 			g.Expect(TestClient(t).Delete(ctx, mavenProfile2Cm)).To(Succeed())
 		})

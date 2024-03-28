@@ -53,7 +53,7 @@ func TestOpenAPI(t *testing.T) {
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi", cmDataProps)
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.groovy").Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.groovy").Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "petstore"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
@@ -67,6 +67,6 @@ func TestOpenAPI(t *testing.T) {
 		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
