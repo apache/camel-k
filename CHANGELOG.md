@@ -81,6 +81,7 @@
 
 **Merged pull requests:**
 
+- fix\(cmd\): cannot load catalog on CLI [\#5296](https://github.com/apache/camel-k/pull/5296) ([squakez](https://github.com/squakez))
 - fix\(\#5238\): Fix Jib integration build [\#5294](https://github.com/apache/camel-k/pull/5294) ([christophd](https://github.com/christophd))
 - fix\(knative\): enable service container port [\#5291](https://github.com/apache/camel-k/pull/5291) ([squakez](https://github.com/squakez))
 - fix\(\#5288\): Makefile building platform specific kamel CLI binary [\#5290](https://github.com/apache/camel-k/pull/5290) ([christophd](https://github.com/christophd))
