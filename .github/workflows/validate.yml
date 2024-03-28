@@ -51,9 +51,9 @@ jobs:
           go-version-file: 'go.mod'
           check-latest: true
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         env:
           GOGC: 20
         with:
-          version: v1.53.3
+          version: v1.54
           args: --verbose --deadline 15m --config .golangci.yml
