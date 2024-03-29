@@ -81,6 +81,7 @@
 
 **Merged pull requests:**
 
+- knative-service stage fix [\#5300](https://github.com/apache/camel-k/pull/5300) ([mertdotcc](https://github.com/mertdotcc))
 - fix\(cmd\): cannot load catalog on CLI [\#5296](https://github.com/apache/camel-k/pull/5296) ([squakez](https://github.com/squakez))
 - fix\(\#5238\): Fix Jib integration build [\#5294](https://github.com/apache/camel-k/pull/5294) ([christophd](https://github.com/christophd))
 - fix\(knative\): enable service container port [\#5291](https://github.com/apache/camel-k/pull/5291) ([squakez](https://github.com/squakez))
