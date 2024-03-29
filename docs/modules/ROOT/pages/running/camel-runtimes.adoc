@@ -150,10 +150,10 @@ NOTE: this is a best effort analysis taking as reference the work available in v
 |x
 
 |KNative Service
+|x
+|x
+|x
 |v
-|x
-|x
-|x
 
 |KNative
 |x
