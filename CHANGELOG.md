@@ -73,6 +73,7 @@
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Build waiting condition [\#4542](https://github.com/apache/camel-k/issues/4542)
 - Add support for Strimzi Kafka in KameletBinding/Pipe [\#4337](https://github.com/apache/camel-k/issues/4337)
+- Refactor master trait to use camel-quarkus-kubernetes [\#4048](https://github.com/apache/camel-k/issues/4048)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 - Remove duplication of the default platform creation [\#3433](https://github.com/apache/camel-k/issues/3433)
 - Use `go:embed` instead of vfsgen for embedded resources handling [\#3384](https://github.com/apache/camel-k/issues/3384)
@@ -81,6 +82,9 @@
 
 **Merged pull requests:**
 
+- fix\(olm\): bundle script [\#5303](https://github.com/apache/camel-k/pull/5303) ([squakez](https://github.com/squakez))
+- chore\(runtime\): default to 3.8.1 [\#5302](https://github.com/apache/camel-k/pull/5302) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump fabric8-version from 6.10.0 to 6.11.0 in /java/crds [\#5301](https://github.com/apache/camel-k/pull/5301) ([dependabot[bot]](https://github.com/apps/dependabot))
 - knative-service stage fix [\#5300](https://github.com/apache/camel-k/pull/5300) ([mertdotcc](https://github.com/mertdotcc))
 - fix\(cmd\): cannot load catalog on CLI [\#5296](https://github.com/apache/camel-k/pull/5296) ([squakez](https://github.com/squakez))
 - fix\(\#5238\): Fix Jib integration build [\#5294](https://github.com/apache/camel-k/pull/5294) ([christophd](https://github.com/christophd))
@@ -92,6 +96,10 @@
 - Add optional install to tests [\#5278](https://github.com/apache/camel-k/pull/5278) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): bump github.com/prometheus/common from 0.51.0 to 0.51.1 [\#5276](https://github.com/apache/camel-k/pull/5276) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Only enable knative trait when there is a knative endpoint [\#5275](https://github.com/apache/camel-k/pull/5275) ([claudio4j](https://github.com/claudio4j))
+- feat\(traits\): telemetry refactoring [\#5274](https://github.com/apache/camel-k/pull/5274) ([squakez](https://github.com/squakez))
+- feat\(traits\): health refactoring [\#5273](https://github.com/apache/camel-k/pull/5273) ([squakez](https://github.com/squakez))
+- feat\(traits\): service binding refactoring [\#5272](https://github.com/apache/camel-k/pull/5272) ([squakez](https://github.com/squakez))
+- feat\(traits\): master refactoring [\#5269](https://github.com/apache/camel-k/pull/5269) ([squakez](https://github.com/squakez))
 - feat\(catalog\): support placeholders [\#5268](https://github.com/apache/camel-k/pull/5268) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.50.0 to 0.51.0 [\#5267](https://github.com/apache/camel-k/pull/5267) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(trait\): add executed trait condition [\#5266](https://github.com/apache/camel-k/pull/5266) ([squakez](https://github.com/squakez))

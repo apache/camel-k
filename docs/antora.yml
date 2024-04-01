@@ -30,13 +30,13 @@ asciidoc:
     prerelease: true
     camel-kamelets-version: '4.0.1'
     camel-kamelets-docs-version: 4.0.x
-    camel-k-runtime-version: 3.2.3
+    camel-k-runtime-version: 3.8.1
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
-    camel-version: 4.0.3
-    camel-docs-version: 4.0.x
-    camel-quarkus-version: 3.2.3
-    camel-quarkus-docs-version: 3.2.x
-    quarkus-version: 3.2.9.Final
+    camel-version: 4.4.1
+    camel-docs-version: 4.4.x
+    camel-quarkus-version: 3.8.1
+    camel-quarkus-docs-version: 3.8.x
+    quarkus-version: 3.8.3
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.27.7
     operator-fwk-api-version: 0.20.0
