@@ -73,6 +73,7 @@
 - Quarkus native checks failure [\#4723](https://github.com/apache/camel-k/issues/4723)
 - Build waiting condition [\#4542](https://github.com/apache/camel-k/issues/4542)
 - Add support for Strimzi Kafka in KameletBinding/Pipe [\#4337](https://github.com/apache/camel-k/issues/4337)
+- Refactor master trait to use camel-quarkus-kubernetes [\#4048](https://github.com/apache/camel-k/issues/4048)
 - Add DataTypeRegistry as bean in Camel context [\#3845](https://github.com/apache/camel-k/issues/3845)
 - Remove duplication of the default platform creation [\#3433](https://github.com/apache/camel-k/issues/3433)
 - Use `go:embed` instead of vfsgen for embedded resources handling [\#3384](https://github.com/apache/camel-k/issues/3384)
