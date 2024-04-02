@@ -95,12 +95,6 @@ NOTE: this is a best effort analysis taking as reference the work available in v
 |x
 |v
 
-|Affinity
-|x
-|x
-|x
-|v
-
 |Error Handler
 |x
 |v
