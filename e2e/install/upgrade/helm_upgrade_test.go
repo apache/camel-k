@@ -41,6 +41,9 @@ import (
 
 // WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
 func TestHelmOperatorUpgrade(t *testing.T) {
+	// TODO re-enable this test
+	t.Skip("this test does not work correctly. It has to be temporarily skipped.")
+
 	ctx := TestContext()
 	g := NewWithT(t)
 
@@ -98,6 +101,8 @@ func TestHelmOperatorUpgrade(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
+		// TODO this is wrong. The goal of the test should be to upgrade an Integration. The CRDs deletion however deletes the Integration
+		// invalidating this test.
 		// Delete CRDs with kustomize
 		ExpectExecSucceed(t, g,
 			exec.Command(
