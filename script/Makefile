@@ -20,7 +20,7 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 2.3.0-SNAPSHOT
+VERSION ?= 2.3.0
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.2.0
 DEFAULT_RUNTIME_VERSION := 3.8.1
@@ -85,7 +85,7 @@ STAGING_RUNTIME_REPO :=
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v4.0.1
+KAMELET_CATALOG_REPO_TAG := v4.4.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
