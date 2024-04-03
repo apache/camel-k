@@ -499,6 +499,7 @@ func CamelKWithContext(t *testing.T, ctx context.Context, args ...string) *cobra
 		debug.PrintStack()
 	}
 
+	// TODO: add env vars for camel-jbang-plugin-k version and use another value for camel-k version
 	tempArgs := []string{"run", "--deps=org.apache.camel:camel-jbang-plugin-k:4.4.1", "--deps=org.apache.camel.k:camel-k-crds:2.3.0-SNAPSHOT", "camel@apache/camel", "k"}
 
 	camelKArgs := os.Getenv("CAMELK_ARGS")

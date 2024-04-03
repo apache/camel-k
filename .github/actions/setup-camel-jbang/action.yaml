@@ -25,7 +25,7 @@ runs:
       name: Install JBang
       shell: bash
       env:
-        JBANG_DOWNLOAD_VERSION: '0.115.0'
+        JBANG_DOWNLOAD_VERSION: '0.116.0'
       run: |
         curl -Ls https://sh.jbang.dev | bash -s - app setup
         echo "$HOME/.jbang/bin" >> $GITHUB_PATH
