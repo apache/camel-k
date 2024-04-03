@@ -70,7 +70,7 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 		)
 		// Create an Integration into a restricted namespace
 		name := RandomizedSuffixName("java-fail")
-		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, nsRestr, "files/Java.java", "--name", name).Execute()).To(Succeed())
 		// Check the error is reported into the Integration
 		g.Eventually(IntegrationPhase(t, ctx, nsRestr, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
 		g.Eventually(IntegrationCondition(t, ctx, nsRestr, name, v1.IntegrationConditionReady)().Status).
@@ -79,5 +79,14 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 			Should(ContainSubstring("is forbidden: violates PodSecurity"))
 		// Clean up
 		g.Eventually(DeleteIntegrations(t, ctx, nsRestr)).Should(Equal(0))
+		// Delete restricted namespace
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"kubectl",
+				"delete",
+				"ns",
+				nsRestr,
+			),
+		)
 	})
 }
