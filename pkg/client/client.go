@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/scale"
@@ -52,6 +53,8 @@ const (
 	inContainerNamespaceFile = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 	kubeConfigEnvVar         = "KUBECONFIG"
 )
+
+var newClientMutex sync.Mutex
 
 // Client is an abstraction for a k8s client.
 type Client interface {
@@ -125,6 +128,13 @@ func NewClient(fastDiscovery bool) (Client, error) {
 
 // NewClientWithConfig creates a new k8s client that can be used from outside or in the cluster.
 func NewClientWithConfig(fastDiscovery bool, cfg *rest.Config) (Client, error) {
+
+	// The below call to apis.AddToScheme is not thread safe in the k8s API
+	// We try to synchronize here across all k8s clients
+	// https://github.com/apache/camel-k/issues/5315
+	newClientMutex.Lock()
+	defer newClientMutex.Unlock()
+
 	clientScheme := scheme.Scheme
 
 	// Setup Scheme for all resources
