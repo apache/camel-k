@@ -153,7 +153,6 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
 		t.Run("Don't reuse previous kit", func(t *testing.T) {
-			t.Skip("FIXME CAMELK: bug on builder.incremental-image-build linked to https://github.com/apache/camel-k/pull/5077 not in camel-k-crds")
 
 			nameClone := RandomizedSuffixName("java-clone")
 			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", nameClone, "-t", "builder.incremental-image-build=false").Execute()).To(Succeed())
@@ -165,7 +164,6 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 		})
 
 		t.Run("Don't create incremental kit", func(t *testing.T) {
-			t.Skip("FIXME CAMELK: bug on builder.incremental-image-build linked to https://github.com/apache/camel-k/pull/5077 not in camel-k-crds")
 
 			// Another integration that should be built on top of the previous IntegrationKit
 			// just add a new random dependency
@@ -219,7 +217,6 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 		})
 
 		t.Run("Create new hierarchy kit", func(t *testing.T) {
-			t.Skip("FIXME CAMELK: CAMEL-20576 - snake-case")
 
 			// We should spin off a new hierarchy of builds
 			newBaseImage := "eclipse-temurin:17.0.8.1_1-jdk-ubi9-minimal"

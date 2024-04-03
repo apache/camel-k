@@ -56,7 +56,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		// The operator should create the catalog, but fail on reconciliation as it is not compatible
 		// and the integration should fail as well
 		t.Run("Run catalog not compatible", func(t *testing.T) {
-			t.Skip("FIXME CAMELK: CAMEL-20576 - snake-case")
 
 			name := RandomizedSuffixName("java-1-15")
 			nonCompatibleCatalogName := "camel-catalog-1.15.0"
@@ -82,7 +81,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		// Run an integration with a compatible catalog
 		// The operator should create the catalog, reconcile it properly and run the Integration accordingly
 		t.Run("Run catalog compatible", func(t *testing.T) {
-			t.Skip("FIXME CAMELK: CAMEL-20576 - snake-case")
 
 			name := RandomizedSuffixName("java-1-17")
 			compatibleVersion := "1.17.0"
@@ -108,7 +106,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 		})
 
 		t.Run("Run catalog container exists", func(t *testing.T) {
-			t.Skip("FIXME CAMELK: CAMEL-20576 - snake-case")
 
 			name := RandomizedSuffixName("java")
 			compatibleVersion := "1.17.0"
