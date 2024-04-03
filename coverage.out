@@ -1477,7 +1477,7 @@ github.com/apache/camel-k/v2/pkg/trait/container.go:332:						configureCapabilit
 github.com/apache/camel-k/v2/pkg/trait/container.go:338:						configureSecurityContext				100.0%
 github.com/apache/camel-k/v2/pkg/trait/cron.go:70:							newCronTrait						100.0%
 github.com/apache/camel-k/v2/pkg/trait/cron.go:76:							Configure						78.0%
-github.com/apache/camel-k/v2/pkg/trait/cron.go:173:							Apply							94.4%
+github.com/apache/camel-k/v2/pkg/trait/cron.go:173:							Apply							88.9%
 github.com/apache/camel-k/v2/pkg/trait/cron.go:209:							getCronJobFor						83.3%
 github.com/apache/camel-k/v2/pkg/trait/cron.go:269:							SelectControllerStrategy				80.0%
 github.com/apache/camel-k/v2/pkg/trait/cron.go:286:							ControllerStrategySelectorOrder				100.0%
@@ -1595,7 +1595,9 @@ github.com/apache/camel-k/v2/pkg/trait/knative_service.go:169:						ControllerSt
 github.com/apache/camel-k/v2/pkg/trait/knative_service.go:173:						getServiceFor						47.5%
 github.com/apache/camel-k/v2/pkg/trait/logging.go:42:							newLoggingTraitTrait					100.0%
 github.com/apache/camel-k/v2/pkg/trait/logging.go:51:							Configure						60.0%
-github.com/apache/camel-k/v2/pkg/trait/logging.go:63:							Apply							90.9%
+github.com/apache/camel-k/v2/pkg/trait/logging.go:63:							Apply							75.0%
+github.com/apache/camel-k/v2/pkg/trait/logging.go:74:							setEnvConfiguration					0.0%
+github.com/apache/camel-k/v2/pkg/trait/logging.go:96:							setCatalogConfiguration					100.0%
 github.com/apache/camel-k/v2/pkg/trait/mount.go:43:							newMountTrait						100.0%
 github.com/apache/camel-k/v2/pkg/trait/mount.go:50:							Configure						81.8%
 github.com/apache/camel-k/v2/pkg/trait/mount.go:79:							Apply							80.8%
@@ -2245,7 +2247,7 @@ github.com/apache/camel-k/v2/pkg/util/util.go:160:							StringSliceUniqueAdd			
 github.com/apache/camel-k/v2/pkg/util/util.go:177:							StringSliceUniqueConcat					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:188:							SubstringFrom						100.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:197:							SubstringBefore						100.0%
-github.com/apache/camel-k/v2/pkg/util/util.go:217:							RandomString						90.9%
+github.com/apache/camel-k/v2/pkg/util/util.go:217:							RandomString						100.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:235:							RandomInt63						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:239:							EncodeXMLWithoutHeader					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:243:							EncodeXML						0.0%
@@ -2281,4 +2283,4 @@ github.com/apache/camel-k/v2/pkg/util/util.go:649:							WithTempDir						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:664:							ConfigTreePropertySplit					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:685:							trimQuotes						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:696:							NavigateConfigTree					0.0%
-total:													(statements)						37.7%
+total:													(statements)						37.8%
