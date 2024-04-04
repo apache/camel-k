@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Annotations for dapr.io Sidecar Not Applied in Camel K Integration Deployment [\#5313](https://github.com/apache/camel-k/issues/5313)
 - Java CRDs plugin error [\#5310](https://github.com/apache/camel-k/issues/5310)
 - Upgrade error traces [\#5271](https://github.com/apache/camel-k/issues/5271)
 - Multi architecture support - Integrations [\#4149](https://github.com/apache/camel-k/issues/4149)
