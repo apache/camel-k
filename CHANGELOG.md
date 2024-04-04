@@ -13,6 +13,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/prometheus/client\_model from 0.6.0 to 0.6.1 [\#5319](https://github.com/apache/camel-k/pull/5319) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(cli\): openshift cli install rbac path [\#5316](https://github.com/apache/camel-k/pull/5316) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): plugin failure [\#5312](https://github.com/apache/camel-k/pull/5312) ([squakez](https://github.com/squakez))
 - fix\(e2e\): temporarily disable test [\#5308](https://github.com/apache/camel-k/pull/5308) ([squakez](https://github.com/squakez))
 - fix\(olm\): bundle script [\#5303](https://github.com/apache/camel-k/pull/5303) ([squakez](https://github.com/squakez))
