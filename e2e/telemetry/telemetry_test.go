@@ -37,6 +37,8 @@ import (
 
 func TestTelemetryTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Skip("CAMEL-20645: telemetry trait parameters ignored")
+
 		operatorID := "camel-k-trait-telemetry"
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
