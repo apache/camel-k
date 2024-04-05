@@ -7,12 +7,19 @@
 **Closed issues:**
 
 - Annotations for dapr.io Sidecar Not Applied in Camel K Integration Deployment [\#5313](https://github.com/apache/camel-k/issues/5313)
+- Update multi-arch release page description [\#5311](https://github.com/apache/camel-k/issues/5311)
 - Java CRDs plugin error [\#5310](https://github.com/apache/camel-k/issues/5310)
 - Upgrade error traces [\#5271](https://github.com/apache/camel-k/issues/5271)
+- Support `kamel run ... -t camel.runtime-version=1.x` notation [\#4739](https://github.com/apache/camel-k/issues/4739)
 - Multi architecture support - Integrations [\#4149](https://github.com/apache/camel-k/issues/4149)
 
 **Merged pull requests:**
 
+- feat\(trait\): allow usage of semver for camel.runtime-version  [\#5327](https://github.com/apache/camel-k/pull/5327) ([squakez](https://github.com/squakez))
+- doc: adjust nightly release description [\#5325](https://github.com/apache/camel-k/pull/5325) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.18.0 to 0.19.0 [\#5323](https://github.com/apache/camel-k/pull/5323) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore: Upgrade golang.org/x/net [\#5322](https://github.com/apache/camel-k/pull/5322) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump github.com/prometheus/common from 0.51.1 to 0.52.2 [\#5320](https://github.com/apache/camel-k/pull/5320) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/client\_model from 0.6.0 to 0.6.1 [\#5319](https://github.com/apache/camel-k/pull/5319) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(cli\): openshift cli install rbac path [\#5316](https://github.com/apache/camel-k/pull/5316) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): plugin failure [\#5312](https://github.com/apache/camel-k/pull/5312) ([squakez](https://github.com/squakez))
