@@ -230,3 +230,19 @@ func TestCamelMatches(t *testing.T) {
 	t2.RuntimeVersion = "3.2.1"
 	assert.False(t, t1.Matches(&t2))
 }
+
+func TestCamelCatalogSemver(t *testing.T) {
+	trait, environment := createNominalCamelTest(true)
+	trait.RuntimeVersion = "2.x"
+	environment.CamelCatalog.CamelCatalogSpec.Runtime.Version = "2.16.0"
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, configured)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	// 2.x will translate with 2.16.0 as it is already existing
+	assert.Equal(t, environment.CamelCatalog.CamelCatalogSpec.Runtime.Version, environment.RuntimeVersion)
+}
