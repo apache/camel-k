@@ -6851,7 +6851,10 @@ spec:
                           runtimeVersion:
                             description: The camel-k-runtime version to use for the
                               integration. It overrides the default version set in
-                              the Integration Platform.
+                              the Integration Platform. You can use a fixed version
+                              (for example "3.2.3") or a semantic version (for example
+                              "3.x") which will try to resolve to the best matching
+                              Catalog existing on the cluster.
                             type: string
                         type: object
                       container:
