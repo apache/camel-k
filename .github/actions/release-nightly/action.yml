@@ -125,19 +125,12 @@ runs:
         artifacts: "./camel-k-client*.tar.gz,sbom.json"
         body: |
           Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using
-          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}` (default `amd64` architecture,
-          `-arm64` suffix for ARM64 architectures)
+          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
 
           To test it, download the client for your OS and run:
           ```
           kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
           ```
-
-          To test ARM64 architecture, download the client for your OS and run:
-          ```
-          kamel install --olm=false --operator-image=${{ env.IMAGE_NAME }}:${{ env.VERSION }}-arm64 --maven-repository=${{ env.MAVEN_REPOSITORY }}
-          ```
-
           NOTE: last updated on ${{ env.UPD_DATE }}
         token: ${{ inputs.secretGithubToken }}
         draft: false
