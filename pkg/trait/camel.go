@@ -86,7 +86,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 		}
 	}
 
-	e.RuntimeVersion = t.RuntimeVersion
+	e.RuntimeVersion = e.CamelCatalog.Runtime.Version
 
 	if e.Integration != nil {
 		e.Integration.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
