@@ -7,8 +7,10 @@
 **Closed issues:**
 
 - Annotations for dapr.io Sidecar Not Applied in Camel K Integration Deployment [\#5313](https://github.com/apache/camel-k/issues/5313)
+- Update multi-arch release page description [\#5311](https://github.com/apache/camel-k/issues/5311)
 - Java CRDs plugin error [\#5310](https://github.com/apache/camel-k/issues/5310)
 - Upgrade error traces [\#5271](https://github.com/apache/camel-k/issues/5271)
+- Support `kamel run ... -t camel.runtime-version=1.x` notation [\#4739](https://github.com/apache/camel-k/issues/4739)
 - Multi architecture support - Integrations [\#4149](https://github.com/apache/camel-k/issues/4149)
 
 ## [v2.3.0](https://github.com/apache/camel-k/tree/v2.3.0) (2024-04-02)
