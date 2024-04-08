@@ -167,14 +167,17 @@ After the voting is complete with success, the artifacts can be released.
 Republish docker image in the Apache org on Docker Hub:
 
 ```
-# assuming logged in to docker hub
-docker pull camelk/camel-k:$VERSION
-docker tag camelk/camel-k:$VERSION apache/camel-k:$VERSION
-docker push apache/camel-k:$VERSION
+# assuming logged in to docker hub (default amd64)
+docker pull camelk/camel-k:$VERSION-amd64
+docker tag camelk/camel-k:$VERSION-amd64 apache/camel-k:$VERSION-amd64
+docker push apache/camel-k:$VERSION-amd64
 # push any other supported architecture (ie, arm64)
 docker pull camelk/camel-k:$VERSION-arm64
 docker tag camelk/camel-k:$VERSION-arm64 apache/camel-k:$VERSION-arm64
 docker push apache/camel-k:$VERSION-arm64
+# create and push the manifest
+docker manifest create apache/camel-k:$VERSION--amend apache/camel-k:$VERSION-amd64 --amend apache/camel-k:$VERSION-arm64
+docker manifest push --purge apache/camel-k:$VERSION
 ```
 
 Release the staging repository at: https://repository.apache.org (Camel K CRD dependency).
