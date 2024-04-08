@@ -52,6 +52,7 @@ import (
 	zapctrl "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -186,27 +187,42 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 
 	hasIntegrationLabel, err := labels.NewRequirement(v1.IntegrationLabel, selection.Exists, []string{})
 	exitOnError(err, "cannot create Integration label selector")
-	selector := labels.NewSelector().Add(*hasIntegrationLabel)
+	labelsSelector := labels.NewSelector().Add(*hasIntegrationLabel)
+
+	selector := cache.ByObject{
+		Label: labelsSelector,
+	}
+
+	if !platform.IsCurrentOperatorGlobal() {
+		selector = cache.ByObject{
+			Label:      labelsSelector,
+			Namespaces: getNamespacesSelector(operatorNamespace, watchNamespace),
+		}
+	}
 
 	selectors := map[ctrl.Object]cache.ByObject{
-		&corev1.Pod{}:        {Label: selector},
-		&appsv1.Deployment{}: {Label: selector},
-		&batchv1.Job{}:       {Label: selector},
-		&servingv1.Service{}: {Label: selector},
+		&corev1.Pod{}:        selector,
+		&appsv1.Deployment{}: selector,
+		&batchv1.Job{}:       selector,
+	}
+
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); ok && err == nil {
+		selectors[&servingv1.Service{}] = selector
 	}
 
 	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
-		selectors[&batchv1.CronJob{}] = cache.ByObject{
-			Label: selector,
-		}
+		selectors[&batchv1.CronJob{}] = selector
 	}
 
 	options := cache.Options{
 		ByObject: selectors,
 	}
 
+	if !platform.IsCurrentOperatorGlobal() {
+		options.DefaultNamespaces = getNamespacesSelector(operatorNamespace, watchNamespace)
+	}
+
 	mgr, err := manager.New(cfg, manager.Options{
-		Namespace:                     watchNamespace,
 		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
 		LeaderElectionNamespace:       operatorNamespace,
@@ -214,7 +230,7 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
-		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
+		Metrics:                       metricsserver.Options{BindAddress: ":" + strconv.Itoa(int(monitoringPort))},
 		Cache:                         options,
 	})
 	exitOnError(err, "")
@@ -241,6 +257,16 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 	log.Info("Starting the manager")
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
+}
+
+func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[string]cache.Config {
+	namespacesSelector := map[string]cache.Config{
+		operatorNamespace: {},
+	}
+	if operatorNamespace != watchNamespace {
+		namespacesSelector[watchNamespace] = cache.Config{}
+	}
+	return namespacesSelector
 }
 
 // findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists.

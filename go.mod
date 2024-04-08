@@ -52,8 +52,8 @@ require (
 	k8s.io/utils v0.0.0-20230505201702-9f6742963106
 	knative.dev/eventing v0.40.3
 	knative.dev/pkg v0.0.0-20240116073220-b488e7be5902
-	knative.dev/serving v0.40.1
-	sigs.k8s.io/controller-runtime v0.15.2
+	knative.dev/serving v0.39.3
+	sigs.k8s.io/controller-runtime v0.16.5
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1
 )
 
@@ -76,7 +76,7 @@ require (
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.9+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.7.0 // indirect
-	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
+	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.8.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
