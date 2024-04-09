@@ -17,8 +17,8 @@ require (
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/onsi/gomega v1.32.0
-	// go get github.com/openshift/api@release-4.12
-	github.com/openshift/api v0.0.0-20230817133225-564be9ddb58e
+	// go get github.com/openshift/api@release-4.14
+	github.com/openshift/api v0.0.0-20240304080513-3e8192a10b13
 	github.com/operator-framework/api v0.20.0
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.67.1
 	github.com/prometheus/client_golang v1.19.0
