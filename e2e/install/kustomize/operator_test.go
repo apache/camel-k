@@ -32,6 +32,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	testutil "github.com/apache/camel-k/v2/e2e/support/util"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	. "github.com/onsi/gomega"
@@ -75,9 +76,9 @@ func TestOperatorBasic(t *testing.T) {
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		registry := os.Getenv("KIND_REGISTRY")
 		if registry != "" {
-			platform := Platform(t, ctx, ns)()
-			g.Expect(platform.Status.Build.Registry).ShouldNot(BeNil())
-			g.Expect(platform.Status.Build.Registry.Address).To(Equal(registry))
+			g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
+				return pl.Status.Build.Registry.Address == registry
+			}), TestTimeoutShort).Should(BeTrue())
 		}
 
 	})
