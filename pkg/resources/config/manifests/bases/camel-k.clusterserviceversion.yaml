@@ -58,6 +58,11 @@ spec:
       kind: IntegrationPlatform
       name: integrationplatforms.camel.apache.org
       version: v1
+    - description: IntegrationProfile is the Schema for the integrationprofiles API
+      displayName: Integration Profile
+      kind: IntegrationProfile
+      name: integrationprofiles.camel.apache.org
+      version: v1
     - description: Integration is the Schema for the integrations API
       displayName: Integration
       kind: Integration
