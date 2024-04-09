@@ -9,7 +9,12 @@
 - Annotations for dapr.io Sidecar Not Applied in Camel K Integration Deployment [\#5313](https://github.com/apache/camel-k/issues/5313)
 - Update multi-arch release page description [\#5311](https://github.com/apache/camel-k/issues/5311)
 - Java CRDs plugin error [\#5310](https://github.com/apache/camel-k/issues/5310)
+- Release 2.3.0 [\#5277](https://github.com/apache/camel-k/issues/5277)
 - Upgrade error traces [\#5271](https://github.com/apache/camel-k/issues/5271)
+- Native build failed directly [\#5080](https://github.com/apache/camel-k/issues/5080)
+- Bad revision when running jvm and native builds with knative [\#5069](https://github.com/apache/camel-k/issues/5069)
+- Camel-K doesn't create the Ingress resource although it is enabled in the Traits using Pipe or KameletBinding [\#5044](https://github.com/apache/camel-k/issues/5044)
+- Bump kubernetes dependencies to 1.28.x [\#4847](https://github.com/apache/camel-k/issues/4847)
 - Support `kamel run ... -t camel.runtime-version=1.x` notation [\#4739](https://github.com/apache/camel-k/issues/4739)
 - Multi architecture support - Integrations [\#4149](https://github.com/apache/camel-k/issues/4149)
 
