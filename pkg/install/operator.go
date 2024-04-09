@@ -145,7 +145,9 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse environment variables!")
 					}
 					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
-						d.Spec.Template.Spec.Containers[i].Env = append(d.Spec.Template.Spec.Containers[i].Env, envVars...)
+						for _, envVar := range envVars {
+							envvar.SetVar(&d.Spec.Template.Spec.Containers[i].Env, envVar)
+						}
 					}
 				}
 			}
