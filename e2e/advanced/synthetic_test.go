@@ -30,6 +30,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	. "github.com/onsi/gomega/gstruct"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -70,6 +71,13 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns,
 			"--operator-env-vars", "CAMEL_K_SYNTHETIC_INTEGRATIONS=true",
 		)).To(Succeed())
+		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
+			if envVar := envvar.Get(op.Spec.Containers[0].Env, "CAMEL_K_SYNTHETIC_INTEGRATIONS"); envVar != nil {
+				return envVar.Value == "true"
+			}
+			return false
+
+		}), TestTimeoutShort).Should(BeTrue())
 
 		// Run the external deployment
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/deploy.yaml", "-n", ns))
