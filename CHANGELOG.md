@@ -6,12 +6,16 @@
 
 **Closed issues:**
 
+- Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
+- IntegrationProfile empty description [\#5341](https://github.com/apache/camel-k/issues/5341)
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - fatal error: concurrent map read and map write [\#5315](https://github.com/apache/camel-k/issues/5315)
 
 **Merged pull requests:**
 
+- fix\(\#4922\): Fix flaky TestHealthTrait [\#5346](https://github.com/apache/camel-k/pull/5346) ([christophd](https://github.com/christophd))
+- fix\(\#5341\): Add IntegrationProfile to CSV [\#5342](https://github.com/apache/camel-k/pull/5342) ([christophd](https://github.com/christophd))
 - fix\(olm\): set minKubeVersion and Openshift version [\#5339](https://github.com/apache/camel-k/pull/5339) ([squakez](https://github.com/squakez))
 - fix\(\#5326\): Fix flaky E2E test [\#5338](https://github.com/apache/camel-k/pull/5338) ([christophd](https://github.com/christophd))
 - chore\(deps\): openshift api to 4.15 [\#5336](https://github.com/apache/camel-k/pull/5336) ([squakez](https://github.com/squakez))
