@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
+- IntegrationProfile empty description [\#5341](https://github.com/apache/camel-k/issues/5341)
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - fatal error: concurrent map read and map write [\#5315](https://github.com/apache/camel-k/issues/5315)
