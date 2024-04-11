@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- CLI install synthetic environment variable duplicate in operator pod container [\#5349](https://github.com/apache/camel-k/issues/5349)
 - Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
 - IntegrationProfile empty description [\#5341](https://github.com/apache/camel-k/issues/5341)
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
@@ -14,13 +15,17 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/prometheus/common from 0.52.2 to 0.52.3 [\#5352](https://github.com/apache/camel-k/pull/5352) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(install\): No duplicate envvars on operator pod container [\#5350](https://github.com/apache/camel-k/pull/5350) ([gansheer](https://github.com/gansheer))
 - fix\(\#4922\): Fix flaky TestHealthTrait [\#5346](https://github.com/apache/camel-k/pull/5346) ([christophd](https://github.com/christophd))
 - fix\(\#5341\): Add IntegrationProfile to CSV [\#5342](https://github.com/apache/camel-k/pull/5342) ([christophd](https://github.com/christophd))
 - fix\(olm\): set minKubeVersion and Openshift version [\#5339](https://github.com/apache/camel-k/pull/5339) ([squakez](https://github.com/squakez))
 - fix\(\#5326\): Fix flaky E2E test [\#5338](https://github.com/apache/camel-k/pull/5338) ([christophd](https://github.com/christophd))
 - chore\(deps\): openshift api to 4.15 [\#5336](https://github.com/apache/camel-k/pull/5336) ([squakez](https://github.com/squakez))
+- feat\(deps\): Upgrade controller-runtime to 0.16.x [\#5335](https://github.com/apache/camel-k/pull/5335) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump golang.org/x/sync from 0.6.0 to 0.7.0 [\#5331](https://github.com/apache/camel-k/pull/5331) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fatal error: concurrent map read and map write [\#5317](https://github.com/apache/camel-k/pull/5317) ([tdiesler](https://github.com/tdiesler))
+- Platform choice for aarch64 is incorrect [\#5299](https://github.com/apache/camel-k/pull/5299) ([tdiesler](https://github.com/tdiesler))
 - chore\(deps\): bump knative.dev/eventing from 0.39.3 to 0.40.3 [\#5220](https://github.com/apache/camel-k/pull/5220) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/serving from 0.39.3 to 0.40.1 [\#5133](https://github.com/apache/camel-k/pull/5133) ([dependabot[bot]](https://github.com/apps/dependabot))
 
