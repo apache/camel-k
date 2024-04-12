@@ -39,12 +39,14 @@ import (
 	"k8s.io/client-go/kubernetes"
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
 	clientscheme "k8s.io/client-go/kubernetes/scheme"
+	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/scale"
 	fakescale "k8s.io/client-go/scale/fake"
 	"k8s.io/client-go/testing"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 // NewFakeClient ---.
@@ -142,6 +144,11 @@ type FakeClient struct {
 	enabledOpenshift bool
 }
 
+func (c *FakeClient) Intercept(intercept *interceptor.Funcs) {
+	cw := c.Client.(controller.WithWatch) // nolint: forcetypeassert
+	c.Client = interceptor.NewClient(cw, *intercept)
+}
+
 func (c *FakeClient) AddReactor(verb, resource string, reaction testing.ReactionFunc) {
 	c.camel.AddReactor(verb, resource, reaction)
 }
@@ -184,6 +191,14 @@ func (c *FakeClient) EnableOpenshiftDiscovery() {
 	c.enabledOpenshift = true
 }
 
+func (c *FakeClient) AuthorizationV1() authorizationv1.AuthorizationV1Interface {
+	return &FakeAuthorization{
+		AuthorizationV1Interface: c.Interface.AuthorizationV1(),
+		disabledGroups:           c.disabledGroups,
+		enabledOpenshift:         c.enabledOpenshift,
+	}
+}
+
 func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
 	return &FakeDiscovery{
 		DiscoveryInterface: c.Interface.Discovery(),
@@ -200,6 +215,16 @@ func (c *FakeClient) ServerOrClientSideApplier() client.ServerOrClientSideApplie
 
 func (c *FakeClient) ScalesClient() (scale.ScalesGetter, error) {
 	return c.scales, nil
+}
+
+type FakeAuthorization struct {
+	authorizationv1.AuthorizationV1Interface
+	disabledGroups   []string
+	enabledOpenshift bool
+}
+
+func (f *FakeAuthorization) SelfSubjectRulesReviews() authorizationv1.SelfSubjectRulesReviewInterface {
+	return f.AuthorizationV1Interface.SelfSubjectRulesReviews()
 }
 
 type FakeDiscovery struct {
