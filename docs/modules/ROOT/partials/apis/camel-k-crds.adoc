@@ -878,6 +878,7 @@ will take care of producing the expected Camel/Camel-Quarkus runtime.
 * <<#_camel_apache_org_v1_Task, Task>>
 
 BuildahTask is used to configure Buildah.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===
@@ -4181,6 +4182,7 @@ Properties --
 * <<#_camel_apache_org_v1_Task, Task>>
 
 KanikoTask is used to configure Kaniko.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===
@@ -4233,6 +4235,7 @@ docker image to use
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 
 KanikoTaskCache is used to configure Kaniko cache.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===
@@ -5589,7 +5592,7 @@ a PackageTask, used to package the project
 
 
 a BuildahTask, for Buildah strategy
-Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
+Deprecated: use jib, s2i or a custom publishing strategy instead
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
@@ -5597,7 +5600,7 @@ Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 
 a KanikoTask, for Kaniko strategy
-Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
+Deprecated: use jib, s2i or a custom publishing strategy instead
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
@@ -5605,6 +5608,7 @@ Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 
 a SpectrumTask, for Spectrum strategy
+Deprecated: use jib, s2i or a custom publishing strategy instead
 
 |`s2i` +
 *xref:#_camel_apache_org_v1_S2iTask[S2iTask]*

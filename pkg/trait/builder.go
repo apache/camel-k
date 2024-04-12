@@ -92,6 +92,9 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 
 	condition := t.adaptDeprecatedFields()
+	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
+		condition = newOrAppend(condition, "Spectrum publishing strategy is deprecated and may be removed in future releases. Make sure to use any supported publishing strategy instead.")
+	}
 
 	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {

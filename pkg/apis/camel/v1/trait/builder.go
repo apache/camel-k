@@ -57,7 +57,7 @@ type BuilderTrait struct {
 	// A list of tasks to be executed (available only when using `pod` strategy) with format `<name>;<container-image>;<container-command>`.
 	Tasks []string `property:"tasks" json:"tasks,omitempty"`
 	// A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-	// Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`)
+	// Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
 	// if you need to execute them. Useful only with `pod` strategy.
 	TasksFilter string `property:"tasks-filter" json:"tasksFilter,omitempty"`
 	// A list of request cpu configuration for the specific task with format `<task-name>:<request-cpu-conf>`.
