@@ -74,12 +74,17 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 		return nil, fmt.Errorf("error during trait customization: %w", err)
 	}
 
+	postActionErrors := make([]error, 0)
 	// execute post actions registered by traits
 	for _, postAction := range environment.PostActions {
 		err := postAction(environment)
 		if err != nil {
-			return nil, fmt.Errorf("error executing post actions: %w", err)
+			postActionErrors = append(postActionErrors, err)
 		}
+	}
+
+	if len(postActionErrors) > 0 {
+		return nil, fmt.Errorf("error executing post actions - %d/%d failed: %s", len(postActionErrors), len(environment.PostActions), postActionErrors)
 	}
 
 	switch {
