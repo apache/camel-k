@@ -161,7 +161,7 @@ spec:
                   properties:
                     buildah:
                       description: 'a BuildahTask, for Buildah strategy Deprecated:
-                        use spectrum, jib, s2i or a custom publishing strategy instead'
+                        use jib, s2i or a custom publishing strategy instead'
                       properties:
                         baseImage:
                           description: base image layer
@@ -1027,7 +1027,7 @@ spec:
                       type: object
                     kaniko:
                       description: 'a KanikoTask, for Kaniko strategy Deprecated:
-                        use spectrum, jib, s2i or a custom publishing strategy instead'
+                        use jib, s2i or a custom publishing strategy instead'
                       properties:
                         baseImage:
                           description: base image layer
@@ -1789,7 +1789,8 @@ spec:
                           type: string
                       type: object
                     spectrum:
-                      description: a SpectrumTask, for Spectrum strategy
+                      description: 'a SpectrumTask, for Spectrum strategy Deprecated:
+                        use jib, s2i or a custom publishing strategy instead'
                       properties:
                         baseImage:
                           description: base image layer

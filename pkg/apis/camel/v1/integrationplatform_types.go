@@ -153,6 +153,7 @@ const (
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
 	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster.
+	// Deprecated: use jib, s2i or a custom publishing strategy instead.
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
 	// in order to push the incremental images to the image repository.
