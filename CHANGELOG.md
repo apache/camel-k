@@ -6,15 +6,20 @@
 
 **Closed issues:**
 
+- Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
 - CLI install synthetic environment variable duplicate in operator pod container [\#5349](https://github.com/apache/camel-k/issues/5349)
 - Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
 - IntegrationProfile empty description [\#5341](https://github.com/apache/camel-k/issues/5341)
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - fatal error: concurrent map read and map write [\#5315](https://github.com/apache/camel-k/issues/5315)
+- Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
 
 **Merged pull requests:**
 
+- chore\(ci\): Fix license check [\#5364](https://github.com/apache/camel-k/pull/5364) ([gansheer](https://github.com/gansheer))
+- feat\(trait\): Spectrum deprecation notice [\#5363](https://github.com/apache/camel-k/pull/5363) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump knative.dev/serving from 0.39.3 to 0.40.1 [\#5358](https://github.com/apache/camel-k/pull/5358) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/common from 0.52.2 to 0.52.3 [\#5352](https://github.com/apache/camel-k/pull/5352) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(install\): No duplicate envvars on operator pod container [\#5350](https://github.com/apache/camel-k/pull/5350) ([gansheer](https://github.com/gansheer))
 - fix\(\#4922\): Fix flaky TestHealthTrait [\#5346](https://github.com/apache/camel-k/pull/5346) ([christophd](https://github.com/christophd))

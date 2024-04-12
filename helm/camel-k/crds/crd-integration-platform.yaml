@@ -618,8 +618,8 @@ spec:
                         description: A list of tasks sorted by the order of execution
                           in a csv format, ie, `<taskName1>,<taskName2>,...`. Mind
                           that you must include also the operator tasks (`builder`,
-                          `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`) if
-                          you need to execute them. Useful only with `pod` strategy.
+                          `quarkus-native`, `package`, `jib`, `s2i`) if you need to
+                          execute them. Useful only with `pod` strategy.
                         type: string
                       tasksLimitCPU:
                         description: A list of limit cpu configuration for the specific
@@ -2523,8 +2523,8 @@ spec:
                         description: A list of tasks sorted by the order of execution
                           in a csv format, ie, `<taskName1>,<taskName2>,...`. Mind
                           that you must include also the operator tasks (`builder`,
-                          `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`) if
-                          you need to execute them. Useful only with `pod` strategy.
+                          `quarkus-native`, `package`, `jib`, `s2i`) if you need to
+                          execute them. Useful only with `pod` strategy.
                         type: string
                       tasksLimitCPU:
                         description: A list of limit cpu configuration for the specific
