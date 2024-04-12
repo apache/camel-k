@@ -28,6 +28,9 @@ import (
 // IntegrationLabel is used to tag k8s object created by a given Integration.
 const IntegrationLabel = "camel.apache.org/integration"
 
+// IntegrationGenerationLabel is used to check on outdated integration resources that can be removed by garbage collection.
+const IntegrationGenerationLabel = "camel.apache.org/generation"
+
 // IntegrationSyntheticLabel is used to tag k8s synthetic Integrations.
 const IntegrationSyntheticLabel = "camel.apache.org/is-synthetic"
 
