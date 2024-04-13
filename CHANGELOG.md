@@ -6,12 +6,14 @@
 
 **Closed issues:**
 
+- Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
 - CLI install synthetic environment variable duplicate in operator pod container [\#5349](https://github.com/apache/camel-k/issues/5349)
 - Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
 - IntegrationProfile empty description [\#5341](https://github.com/apache/camel-k/issues/5341)
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - fatal error: concurrent map read and map write [\#5315](https://github.com/apache/camel-k/issues/5315)
+- Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
 
 ## [2.3.1-nightly](https://github.com/apache/camel-k/tree/2.3.1-nightly) (2024-04-08)
 
