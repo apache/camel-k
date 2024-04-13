@@ -17,6 +17,7 @@
 
 **Merged pull requests:**
 
+- fix: Fix garbage collection trait [\#5365](https://github.com/apache/camel-k/pull/5365) ([christophd](https://github.com/christophd))
 - chore\(ci\): Fix license check [\#5364](https://github.com/apache/camel-k/pull/5364) ([gansheer](https://github.com/gansheer))
 - feat\(trait\): Spectrum deprecation notice [\#5363](https://github.com/apache/camel-k/pull/5363) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/serving from 0.39.3 to 0.40.1 [\#5358](https://github.com/apache/camel-k/pull/5358) ([dependabot[bot]](https://github.com/apps/dependabot))
