@@ -24,6 +24,8 @@ package misc
 
 import (
 	"context"
+	"os"
+	"runtime"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -37,6 +39,12 @@ import (
 
 func TestPipe(t *testing.T) {
 	t.Parallel()
+
+	// [TODO] Enable arm64 smoke tests to run out of the box
+	// https://github.com/apache/camel-k/issues/5362
+	if runtime.GOARCH == "arm64" && os.Getenv("CAMEL_K_TEST_BASE_IMAGE") == "" {
+		t.Skipf("TestPipe not supported on platform: %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-pipe"

@@ -35,7 +35,9 @@ import (
 	"os/exec"
 	"reflect"
 	"regexp"
+	"runtime"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -350,6 +352,11 @@ func KamelRunWithID(t *testing.T, ctx context.Context, operatorID string, namesp
 }
 
 func KamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
+	if runtime.GOARCH == "arm64" && !slices.Contains(args, "builder.platforms") {
+		builderPlatform := "linux/arm64"
+		fmt.Printf("Add trait to run command: -t builder.platforms=%s\n", builderPlatform)
+		args = append(args, "-t", "builder.platforms="+builderPlatform)
+	}
 	return KamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
 }
 

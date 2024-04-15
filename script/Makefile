@@ -96,6 +96,7 @@ TEST_PREBUILD = build
 # Tests may run in parallel to each other. This count sets the amount of tests run in parallel. (default value usually is GOMAXPROCS)
 TEST_COMMON_PARALLEL_COUNT ?= 4
 TEST_ADVANCED_PARALLEL_COUNT ?= 4
+TEST_SKIP_AFTER_FAILURE_COUNT ?= 1
 
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
 #GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultOperatorName=camel-k-operator
@@ -258,7 +259,7 @@ endif
 #
 test-common: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/common/... -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 90m -v ./e2e/common/... -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
@@ -266,27 +267,33 @@ test-common: do-build
 #
 test-smoke: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 10m -v ./e2e/common/main_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v ./e2e/common/languages -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v \
-		./e2e/common/misc/cron_test.go \
-		./e2e/common/misc/kamelet_test.go \
-		./e2e/common/misc/pipe_test.go \
-	 	-tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 30m -v \
-		./e2e/common/traits/camel_test.go \
-		./e2e/common/traits/container_test.go \
-		./e2e/common/traits/openapi_test.go \
-		./e2e/common/traits/service_test.go \
-	 	-tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || FAILED=1; \
-	exit $${FAILED}
+	go test -timeout 10m -count=1 -v ./e2e/common/main_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
+	if [ $$FAILED -lt $(TEST_SKIP_AFTER_FAILURE_COUNT) ]; then \
+		go test -timeout 30m -count=1 -v ./e2e/common/languages -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
+	fi; \
+	if [ $$FAILED -lt $(TEST_SKIP_AFTER_FAILURE_COUNT) ]; then \
+		go test -timeout 30m -count=1 -v \
+			./e2e/common/misc/cron_test.go \
+			./e2e/common/misc/kamelet_test.go \
+			./e2e/common/misc/pipe_test.go \
+			-tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
+	fi; \
+	if [ $$FAILED -lt $(TEST_SKIP_AFTER_FAILURE_COUNT) ]; then \
+		go test -timeout 30m -count=1 -v \
+			./e2e/common/traits/camel_test.go \
+			./e2e/common/traits/container_test.go \
+			./e2e/common/traits/openapi_test.go \
+			./e2e/common/traits/service_test.go \
+			-tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
+	fi; \
+	exit $$FAILED
 
 #
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
 test-advanced: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/advanced -tags=integration -parallel=$(TEST_ADVANCED_PARALLEL_COUNT) $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 90m -v ./e2e/advanced -tags=integration -parallel=$(TEST_ADVANCED_PARALLEL_COUNT) $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
@@ -294,9 +301,9 @@ test-advanced: do-build
 #
 test-install: do-build
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 40m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 40m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
-	go test -timeout 40m -v ./e2e/install/helm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 40m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 40m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 40m -v ./e2e/install/helm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
@@ -318,7 +325,7 @@ test-install-upgrade: do-build
 #
 test-knative: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT) || FAILED=1; \
+	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
