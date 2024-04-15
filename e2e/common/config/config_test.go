@@ -127,8 +127,7 @@ func TestRunConfigExamples(t *testing.T) {
 			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-inlined", secData)
 			g.Expect(err).To(BeNil())
 
-			// TODO: remove jvm.options trait as soon as CAMEL-20054 gets fixed
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-secret-route.groovy", "-t", "mount.configs=secret:my-sec-inlined", "-t", "jvm.options=-Dcamel.k.mount-path.secrets=/etc/camel/conf.d/_secrets").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-secret-route.groovy", "-t", "mount.configs=secret:my-sec-inlined").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-secret-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "property-secret-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-external-value"))
