@@ -145,9 +145,9 @@ exit_code=0
 if [ "${SMOKE_TEST_ONLY}" == "true" ]; then
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-smoke || exit_code=1
 elif [ "${CUSTOM_INSTALL_TEST}" == "true" ]; then
-  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-advanced || exit_code=1
+  DO_TEST_PREBUILD=false GOTESTFMT="-race -json 2>&1 | gotestfmt" make test-advanced || exit_code=1
 else
-  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common || exit_code=1
+  DO_TEST_PREBUILD=false GOTESTFMT="-race -json 2>&1 | gotestfmt" make test-common || exit_code=1
 fi
 set +e
 
