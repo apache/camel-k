@@ -13,10 +13,15 @@
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
+- TestHelmOperatorUpgrade error [\#5304](https://github.com/apache/camel-k/issues/5304)
+- unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 
 **Merged pull requests:**
 
+- fix\(ci\): remove Helm upgrade test [\#5377](https://github.com/apache/camel-k/pull/5377) ([squakez](https://github.com/squakez))
+- chore\(ci\): Upgrade kind to 0.22.0 and kindest/node to 1.28.7 [\#5373](https://github.com/apache/camel-k/pull/5373) ([gansheer](https://github.com/gansheer))
 - chore\(e2e\): Remove unnecessary jvm.option in test [\#5371](https://github.com/apache/camel-k/pull/5371) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump fabric8-version from 6.11.0 to 6.12.0 in /java/crds [\#5368](https://github.com/apache/camel-k/pull/5368) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix: Fix garbage collection trait [\#5365](https://github.com/apache/camel-k/pull/5365) ([christophd](https://github.com/christophd))
 - chore\(ci\): Fix license check [\#5364](https://github.com/apache/camel-k/pull/5364) ([gansheer](https://github.com/gansheer))
 - feat\(trait\): Spectrum deprecation notice [\#5363](https://github.com/apache/camel-k/pull/5363) ([squakez](https://github.com/squakez))
