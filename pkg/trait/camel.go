@@ -63,6 +63,13 @@ func (t *camelTrait) Matches(trait Trait) bool {
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.IntegrationKit != nil && e.IntegrationKit.IsExternal() {
+		return false, newIntegrationConditionPlatformDisabledWithMessage("Camel", "integration kit was not created via Camel K operator"), nil
+	}
+	if e.Integration != nil && e.Integration.IsSynthetic() {
+		return false, newIntegrationConditionPlatformDisabledWithMessage("Camel", "syntetic integration"), nil
+	}
+
 	if t.RuntimeVersion == "" {
 		if runtimeVersion, err := determineRuntimeVersion(e); err != nil {
 			return false, nil, err
@@ -71,21 +78,15 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	// Don't run this trait for a synthetic Integration
-	return e.Integration == nil || !e.Integration.IsSynthetic(), nil, nil
+	return true, nil, nil
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
-	if t.RuntimeVersion == "" {
-		return errors.New("unable to determine runtime version")
-	}
-
 	if e.CamelCatalog == nil {
 		if err := t.loadOrCreateCatalog(e, t.RuntimeVersion); err != nil {
 			return err
 		}
 	}
-
 	e.RuntimeVersion = e.CamelCatalog.Runtime.Version
 
 	if e.Integration != nil {

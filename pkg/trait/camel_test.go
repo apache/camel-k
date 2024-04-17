@@ -246,3 +246,32 @@ func TestCamelCatalogSemver(t *testing.T) {
 	// 2.x will translate with 2.16.0 as it is already existing
 	assert.Equal(t, environment.CamelCatalog.CamelCatalogSpec.Runtime.Version, environment.RuntimeVersion)
 }
+
+func TestCamelTraitExternalKit(t *testing.T) {
+	trait, environment := createNominalCamelTest(true)
+	environment.Integration.Status = v1.IntegrationStatus{}
+	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Equal(t, "explicitly disabled by the platform: integration kit was not created via Camel K operator", condition.message)
+	assert.False(t, configured)
+
+	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
+	assert.Equal(t, "", environment.Integration.Status.RuntimeVersion)
+}
+
+func TestCamelTraitSyntheticIntegration(t *testing.T) {
+	trait, environment := createNominalCamelTest(true)
+	environment.Integration.Status = v1.IntegrationStatus{}
+	environment.Integration.Annotations = make(map[string]string)
+	environment.Integration.Annotations[v1.IntegrationSyntheticLabel] = "true"
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Equal(t, "explicitly disabled by the platform: syntetic integration", condition.message)
+	assert.False(t, configured)
+
+	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
+	assert.Equal(t, "", environment.Integration.Status.RuntimeVersion)
+}
