@@ -83,6 +83,9 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
+	if e.CamelCatalog == nil {
+		return false, newIntegrationConditionPlatformDisabledWithMessage("Cron", "no camel catalog available for this Integration"), nil
+	}
 
 	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityCron]; !ok {
 		return false, NewIntegrationCondition(
