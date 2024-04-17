@@ -12,6 +12,20 @@ kamel install --force --olm=false
 
 This operation will install all the required configuration for the new operator version, replacing the previous one. Mind that the `Integration` resources running won't be affected, so they will keep running with the default runtime details provided in the previous operator version.
 
+[[helms-crds]]
+=== CRD Upgrades (Helm upgrade)
+
+Generally, when upgrading a patch or a minor version, we may introduce slight non-breaking compatibility changes in CRDs. These changes should be onboarded with the installation procedure you're using (CLI, OLM). However, you may want to control the upgrade of CRDs (for instance, upgrading in Helm, which, does not support CRDs upgrade out of the box). In this case, before doing the upgrade, you'll need to manually upgrade the CRDs, in order to use the new parameters expected by the new operator you're upgrading to. For Helm, this would turn in an operation like the following one:
+
+```bash
+# Upgrade the CRDs
+$ curl -LO "https://github.com/apache/camel-k/raw/main/docs/charts/camel-k-x.y.z.tgz"
+$ tar xvzf camel-k-x.y.z.tgz
+$ kubectl replace -f camel-k/crds
+# Upgrade the `camel-k` Deployment
+$ helm upgrade camel-k/camel-k --version x.y.z
+```
+
 [[refresh-integrations]]
 == Refresh integrations
 
