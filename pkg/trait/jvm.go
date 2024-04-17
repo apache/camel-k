@@ -74,6 +74,9 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
 	}
 
+	if e.CamelCatalog == nil {
+		return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "no camel catalog available for this Integration"), nil
+	}
 	return true, nil, nil
 }
 
