@@ -43,6 +43,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/apache/camel-k/v2/pkg/apis"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
@@ -135,12 +136,14 @@ func NewClientWithConfig(fastDiscovery bool, cfg *rest.Config) (Client, error) {
 	newClientMutex.Lock()
 	defer newClientMutex.Unlock()
 
+	var err error
 	clientScheme := scheme.Scheme
-
-	// Setup Scheme for all resources
-	err := apis.AddToScheme(clientScheme)
-	if err != nil {
-		return nil, err
+	if !clientScheme.IsVersionRegistered(v1.SchemeGroupVersion) {
+		// Setup Scheme for all resources
+		err = apis.AddToScheme(clientScheme)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var clientset kubernetes.Interface
