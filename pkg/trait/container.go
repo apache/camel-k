@@ -168,7 +168,6 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 			kit.SetOperatorID(operatorID)
 		}
 
-		t.L.Infof("image %s", kit.Spec.Image)
 		e.Resources.Add(kit)
 		e.Integration.SetIntegrationKit(kit)
 	}

@@ -120,10 +120,12 @@ func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil, nil
 	}
+	if e.CamelCatalog == nil {
+		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if !e.IntegrationInPhase(camelv1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
 	if t.Auto == nil || *t.Auto {
 		if err := t.populateTriggersFromKamelets(e); err != nil {
 			return false, nil, err

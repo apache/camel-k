@@ -70,6 +70,9 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("ServiceBinding"), nil
 	}
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if len(t.Services) == 0 {
 		return false, nil, nil
 	}
