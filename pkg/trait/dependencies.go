@@ -42,7 +42,9 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, *TraitCondition, er
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
 }
 

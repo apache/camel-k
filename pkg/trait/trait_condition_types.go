@@ -56,8 +56,23 @@ func NewIntegrationConditionUserDisabled(traitID string) *TraitCondition {
 	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, userDisabledMessage)
 }
 
-func newIntegrationConditionPlatformDisabledWithMessage(traitID string, message string) *TraitCondition {
+func NewIntegrationConditionUserEnabledWithMessage(traitID string, message string) *TraitCondition {
+	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", userEnabledMessage, message))
+}
+
+func NewIntegrationConditionPlatformDisabledWithMessage(traitID string, message string) *TraitCondition {
 	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", platformDisabledMessage, message))
+}
+
+// This one is reused among different traits in order to avoid polluting the conditions with the same message.
+func NewIntegrationConditionPlatformDisabledCatalogMissing() *TraitCondition {
+	return NewIntegrationCondition(
+		"Generic",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		traitConfigurationReason,
+		"no camel catalog available for this Integration. Several traits have not been executed for this reason. Check applied trait condition to know more.",
+	)
 }
 
 func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, corev1.ConditionStatus, string, string) {
