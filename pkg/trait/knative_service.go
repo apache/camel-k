@@ -144,8 +144,8 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		// explicitly disabled
+	if !pointer.BoolDeref(t.Enabled, true) || e.CamelCatalog == nil {
+		// explicitly disabled or sourceless Integration (missing catalog)
 		return nil, nil
 	}
 

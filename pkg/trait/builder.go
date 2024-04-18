@@ -90,7 +90,9 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.IntegrationKit == nil {
 		return false, nil, nil
 	}
-
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	condition := t.adaptDeprecatedFields()
 
 	t.setPlatform(e)

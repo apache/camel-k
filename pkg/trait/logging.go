@@ -56,7 +56,7 @@ func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, NewIntegrationConditionUserDisabled("Logging"), nil
 	}
 	if e.CamelCatalog == nil {
-		return false, newIntegrationConditionPlatformDisabledWithMessage("Logging", "no camel catalog available for this Integration"), nil
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 
 	return e.IntegrationInRunningPhases(), nil, nil

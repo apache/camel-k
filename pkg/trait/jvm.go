@@ -66,16 +66,16 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
 	if qt := e.Catalog.GetTrait(quarkusTraitID); qt != nil {
 		if quarkus, ok := qt.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "quarkus native build"), nil
+			return false, NewIntegrationConditionPlatformDisabledWithMessage("JVM", "quarkus native build"), nil
 		}
 	}
 
 	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() {
-		return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
 	}
 
 	if e.CamelCatalog == nil {
-		return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "no camel catalog available for this Integration"), nil
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 	return true, nil, nil
 }

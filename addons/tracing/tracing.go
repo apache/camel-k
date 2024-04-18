@@ -90,6 +90,9 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondit
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil, nil
 	}
+	if e.CamelCatalog == nil {
+		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 
 	if pointer.BoolDeref(t.Auto, true) {
 		if t.Endpoint == "" {
@@ -125,30 +128,23 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondit
 func (t *tracingTrait) Apply(e *trait.Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTracing)
 
-	if e.CamelCatalog != nil {
-		provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
-		properties := tracingProperties[provider]
+	provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
+	properties := tracingProperties[provider]
 
-		if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {
-			e.ApplicationProperties[appPropEnabled] = "true"
-		}
-
-		if appPropEndpoint := properties[propEndpoint]; appPropEndpoint != "" && t.Endpoint != "" {
-			e.ApplicationProperties[appPropEndpoint] = t.Endpoint
-		}
-
-		if appPropServiceName := properties[propServiceName]; appPropServiceName != "" && t.ServiceName != "" {
-			e.ApplicationProperties[appPropServiceName] = t.ServiceName
-		}
-
-		if appPropSamplerType := properties[propSamplerType]; appPropSamplerType != "" && t.SamplerType != nil {
-			e.ApplicationProperties[appPropSamplerType] = *t.SamplerType
-		}
-
-		if appPropSamplerParam := properties[propSamplerParam]; appPropSamplerParam != "" && t.SamplerParam != nil {
-			e.ApplicationProperties[appPropSamplerParam] = *t.SamplerParam
-		}
-
+	if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {
+		e.ApplicationProperties[appPropEnabled] = "true"
+	}
+	if appPropEndpoint := properties[propEndpoint]; appPropEndpoint != "" && t.Endpoint != "" {
+		e.ApplicationProperties[appPropEndpoint] = t.Endpoint
+	}
+	if appPropServiceName := properties[propServiceName]; appPropServiceName != "" && t.ServiceName != "" {
+		e.ApplicationProperties[appPropServiceName] = t.ServiceName
+	}
+	if appPropSamplerType := properties[propSamplerType]; appPropSamplerType != "" && t.SamplerType != nil {
+		e.ApplicationProperties[appPropSamplerType] = *t.SamplerType
+	}
+	if appPropSamplerParam := properties[propSamplerParam]; appPropSamplerParam != "" && t.SamplerParam != nil {
+		e.ApplicationProperties[appPropSamplerParam] = *t.SamplerParam
 	}
 
 	return nil

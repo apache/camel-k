@@ -29,9 +29,12 @@ import (
 )
 
 func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
 	e := &Environment{
-		Catalog:     NewEnvironmentTestCatalog(),
-		Integration: &v1.Integration{},
+		CamelCatalog: catalog,
+		Catalog:      NewEnvironmentTestCatalog(),
+		Integration:  &v1.Integration{},
 	}
 	e.Integration.Spec.AddConfigurationProperty(fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 
@@ -56,9 +59,12 @@ func TestErrorHandlerConfigureFromIntegrationProperty(t *testing.T) {
 }
 
 func TestErrorHandlerApplySource(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
 	e := &Environment{
-		Catalog:     NewEnvironmentTestCatalog(),
-		Integration: &v1.Integration{},
+		CamelCatalog: catalog,
+		Catalog:      NewEnvironmentTestCatalog(),
+		Integration:  &v1.Integration{},
 	}
 	e.Integration.Spec.AddConfiguration("property", fmt.Sprintf("%v = %s", v1.ErrorHandlerRefName, "defaultErrorHandler"))
 	e.Integration.Status.Phase = v1.IntegrationPhaseInitialization

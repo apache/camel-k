@@ -92,6 +92,9 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, trait.NewIntegrationConditionUserDisabled(masterComponent), nil
 	}
+	if e.CamelCatalog == nil {
+		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseBuildingKit) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}

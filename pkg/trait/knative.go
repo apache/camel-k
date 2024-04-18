@@ -73,6 +73,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Knative"), nil
 	}
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
