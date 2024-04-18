@@ -28,9 +28,13 @@ import (
 )
 
 func TestDependenciesTraitApplicability(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
 	e := &Environment{
-		Catalog:     NewEnvironmentTestCatalog(),
-		Integration: &v1.Integration{},
+		CamelCatalog: catalog,
+		Catalog:      NewEnvironmentTestCatalog(),
+		Integration:  &v1.Integration{},
 	}
 
 	trait := newDependenciesTrait()

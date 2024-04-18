@@ -53,6 +53,9 @@ func newHealthTrait() Trait {
 }
 
 func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if e.Integration == nil ||
 		!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil

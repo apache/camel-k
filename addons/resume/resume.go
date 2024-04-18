@@ -79,6 +79,9 @@ func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.Tr
 	if !pointer.BoolDeref(r.Enabled, false) {
 		return false, nil, nil
 	}
+	if environment.CamelCatalog == nil {
+		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if !environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !environment.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}

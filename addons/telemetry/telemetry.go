@@ -93,7 +93,9 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
 		return false, nil, nil
 	}
-
+	if e.CamelCatalog == nil {
+		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	var condition *trait.TraitCondition
 	if pointer.BoolDeref(t.Auto, true) {
 		if t.Endpoint == "" {
