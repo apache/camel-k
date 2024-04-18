@@ -34,7 +34,6 @@ spec:
     listKind: IntegrationPlatformList
     plural: integrationplatforms
     shortNames:
-    - ip
     - itp
     singular: integrationplatform
   scope: Namespaced
