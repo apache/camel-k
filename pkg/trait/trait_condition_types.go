@@ -35,12 +35,11 @@ const (
 // TraitCondition is used to get all information/warning about a trait configuration.
 // It should either use an IntegrationConditionType or IntegrationKitConditionType.
 type TraitCondition struct {
-	traitID                     string
-	integrationConditionType    v1.IntegrationConditionType
-	integrationKitConditionType v1.IntegrationKitConditionType
-	conditionStatus             corev1.ConditionStatus
-	message                     string
-	reason                      string
+	traitID                  string
+	integrationConditionType v1.IntegrationConditionType
+	conditionStatus          corev1.ConditionStatus
+	message                  string
+	reason                   string
 }
 
 func NewIntegrationCondition(traitID string, ict v1.IntegrationConditionType, cs corev1.ConditionStatus, reason, message string) *TraitCondition {
@@ -73,7 +72,7 @@ func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, c
 }
 
 func (tc *TraitCondition) integrationKitCondition() (v1.IntegrationKitConditionType, corev1.ConditionStatus, string, string) {
-	return v1.IntegrationKitConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationKitConditionType)),
+	return v1.IntegrationKitConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationConditionType)),
 		tc.conditionStatus,
 		tc.reason,
 		tc.message
