@@ -93,6 +93,8 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 
 	condition := t.adaptDeprecatedFields()
 
+	t.setPlatform(e)
+
 	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
 			quarkus, ok := trait.(*quarkusTrait)
@@ -626,4 +628,13 @@ func publishingOrUserTask(t v1.Task) bool {
 	}
 
 	return false
+}
+
+// Will set a default platform if either specified in the trait or the platform/profile configuration.
+func (t *builderTrait) setPlatform(e *Environment) {
+	if t.ImagePlatforms == nil {
+		if e.Platform != nil && e.Platform.Status.Build.BuildConfiguration.ImagePlatforms != nil {
+			t.ImagePlatforms = e.Platform.Status.Build.BuildConfiguration.ImagePlatforms
+		}
+	}
 }
