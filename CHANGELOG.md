@@ -13,6 +13,8 @@
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
+- TestHelmOperatorUpgrade error [\#5304](https://github.com/apache/camel-k/issues/5304)
+- unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 
 ## [2.3.1-nightly](https://github.com/apache/camel-k/tree/2.3.1-nightly) (2024-04-08)
 
