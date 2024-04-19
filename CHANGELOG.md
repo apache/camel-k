@@ -15,6 +15,16 @@
 - Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
 - TestHelmOperatorUpgrade error [\#5304](https://github.com/apache/camel-k/issues/5304)
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
+- Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
+- Image Registry [\#3176](https://github.com/apache/camel-k/issues/3176)
+- Compact/flatten integrationkit \(container image\) hierarchy? [\#2736](https://github.com/apache/camel-k/issues/2736)
+- Complete Integration PodSpec template [\#2620](https://github.com/apache/camel-k/issues/2620)
+- support endpoint-dsl  [\#1746](https://github.com/apache/camel-k/issues/1746)
+- Execute maven operation asynchronously [\#762](https://github.com/apache/camel-k/issues/762)
+- Cannot load Knative configuration from file or env variable [\#654](https://github.com/apache/camel-k/issues/654)
+- Support new Camel 3 webhooks [\#597](https://github.com/apache/camel-k/issues/597)
+- Garbage-collect unused kits [\#254](https://github.com/apache/camel-k/issues/254)
+- Enable services to be associated with a version [\#182](https://github.com/apache/camel-k/issues/182)
 
 ## [2.3.1-nightly](https://github.com/apache/camel-k/tree/2.3.1-nightly) (2024-04-08)
 
