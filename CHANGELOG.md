@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
+- IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
 - Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
 - CLI install synthetic environment variable duplicate in operator pod container [\#5349](https://github.com/apache/camel-k/issues/5349)
 - Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
@@ -14,12 +16,17 @@
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
 - TestHelmOperatorUpgrade error [\#5304](https://github.com/apache/camel-k/issues/5304)
+- Build configuration on IntegrationPlatform ignored [\#5289](https://github.com/apache/camel-k/issues/5289)
+- Pod failure when using fixed native image [\#5207](https://github.com/apache/camel-k/issues/5207)
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
 - Image Registry [\#3176](https://github.com/apache/camel-k/issues/3176)
+- kamelet: allow to add additional attributes to in/out [\#3090](https://github.com/apache/camel-k/issues/3090)
+- Running camel-k in a constrained environment  [\#2800](https://github.com/apache/camel-k/issues/2800)
 - Compact/flatten integrationkit \(container image\) hierarchy? [\#2736](https://github.com/apache/camel-k/issues/2736)
 - Complete Integration PodSpec template [\#2620](https://github.com/apache/camel-k/issues/2620)
 - support endpoint-dsl  [\#1746](https://github.com/apache/camel-k/issues/1746)
+- User profiles [\#934](https://github.com/apache/camel-k/issues/934)
 - Execute maven operation asynchronously [\#762](https://github.com/apache/camel-k/issues/762)
 - Cannot load Knative configuration from file or env variable [\#654](https://github.com/apache/camel-k/issues/654)
 - Support new Camel 3 webhooks [\#597](https://github.com/apache/camel-k/issues/597)
@@ -28,8 +35,16 @@
 
 **Merged pull requests:**
 
+- doc\(\#5386\): Contributing page updated [\#5393](https://github.com/apache/camel-k/pull/5393) ([vkrejcirik](https://github.com/vkrejcirik))
+- Replaced echo-server image by multiarch [\#5392](https://github.com/apache/camel-k/pull/5392) ([lfabriko](https://github.com/lfabriko))
+- chore\(deps\): bump github.com/onsi/gomega from 1.32.0 to 1.33.0 [\#5388](https://github.com/apache/camel-k/pull/5388) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/prometheus/common from 0.52.3 to 0.53.0 [\#5387](https://github.com/apache/camel-k/pull/5387) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(api\): remove deprecated ip shortname [\#5384](https://github.com/apache/camel-k/pull/5384) ([squakez](https://github.com/squakez))
+- fix\(trait\): inherit platform configuration [\#5383](https://github.com/apache/camel-k/pull/5383) ([squakez](https://github.com/squakez))
+- fix\(trait\): condition kit type [\#5382](https://github.com/apache/camel-k/pull/5382) ([squakez](https://github.com/squakez))
 - chore: re-enable file permissions test on darwin [\#5380](https://github.com/apache/camel-k/pull/5380) ([lzap](https://github.com/lzap))
 - fix\(ci\): remove Helm upgrade test [\#5377](https://github.com/apache/camel-k/pull/5377) ([squakez](https://github.com/squakez))
+- \(fix\#5315\): concurrent map read and map write [\#5375](https://github.com/apache/camel-k/pull/5375) ([tdiesler](https://github.com/tdiesler))
 - chore\(ci\): Upgrade kind to 0.22.0 and kindest/node to 1.28.7 [\#5373](https://github.com/apache/camel-k/pull/5373) ([gansheer](https://github.com/gansheer))
 - chore\(e2e\): Remove unnecessary jvm.option in test [\#5371](https://github.com/apache/camel-k/pull/5371) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump fabric8-version from 6.11.0 to 6.12.0 in /java/crds [\#5368](https://github.com/apache/camel-k/pull/5368) ([dependabot[bot]](https://github.com/apps/dependabot))
