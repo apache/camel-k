@@ -49,7 +49,7 @@ func TestPipeWithImage(t *testing.T) {
 		bindingID := "with-image-binding"
 
 		t.Run("run with initial image", func(t *testing.T) {
-			expectedImage := "docker.io/jmalloc/echo-server:0.3.2"
+			expectedImage := "quay.io/fuse_qe/echo-server:0.3.2"
 
 			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink", "--annotation", "trait.camel.apache.org/container.image="+expectedImage, "--annotation", "trait.camel.apache.org/jvm.enabled=false", "--annotation", "trait.camel.apache.org/kamelets.enabled=false", "--annotation", "trait.camel.apache.org/dependencies.enabled=false", "--annotation", "test=1", "--name", bindingID).Execute()).To(Succeed())
 
@@ -68,7 +68,7 @@ func TestPipeWithImage(t *testing.T) {
 		})
 
 		t.Run("run with new image", func(t *testing.T) {
-			expectedImage := "docker.io/jmalloc/echo-server:0.3.3"
+			expectedImage := "quay.io/fuse_qe/echo-server:0.3.3"
 
 			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink", "--annotation", "trait.camel.apache.org/container.image="+expectedImage, "--annotation", "trait.camel.apache.org/jvm.enabled=false", "--annotation", "trait.camel.apache.org/kamelets.enabled=false", "--annotation", "trait.camel.apache.org/dependencies.enabled=false", "--annotation", "test=2", "--name", bindingID).Execute()).To(Succeed())
 			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
