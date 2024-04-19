@@ -186,7 +186,7 @@ Now you can play with Camel K:
 
 [source]
 ----
-./kamel run <kamel-k-examples>/01-basic/Basic.java
+./kamel run <camel-k-examples>/01-basic/Basic.java
 ----
 
 [[local-development]]
