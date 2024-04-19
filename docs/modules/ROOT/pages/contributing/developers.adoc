@@ -59,7 +59,7 @@ This is a high-level overview of the project structure:
 | https://github.com/apache/camel-k/tree/main/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary (manager) and the **kamel** client tool.
 | https://github.com/apache/camel-k/tree/main/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
 | https://github.com/apache/camel-k/tree/main/e2e[/e2e]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
-| https://github.com/apache/camel-k/tree/main/examples[/examples]			| Camel K examples were moved to separete git repository https://github.com/apache/camel-k-examples[camel-k-examples].
+| https://github.com/apache/camel-k/tree/main/examples[/examples]			| Camel K examples were moved to separate git repository https://github.com/apache/camel-k-examples[camel-k-examples].
 | https://github.com/apache/camel-k/tree/main/helm/camel-k[/helm/camel-k]           | Contains Helm chart for Camel K installation on any Kubernetes cluster.
 | https://github.com/apache/camel-k/tree/main/install[/install]         | Contains installation files.
 | https://github.com/apache/camel-k/tree/main/java[/java]           | Contains crds and Maven logging.
