@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
+- IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
 - Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
 - CLI install synthetic environment variable duplicate in operator pod container [\#5349](https://github.com/apache/camel-k/issues/5349)
 - Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
@@ -14,12 +16,17 @@
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
 - Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
 - TestHelmOperatorUpgrade error [\#5304](https://github.com/apache/camel-k/issues/5304)
+- Build configuration on IntegrationPlatform ignored [\#5289](https://github.com/apache/camel-k/issues/5289)
+- Pod failure when using fixed native image [\#5207](https://github.com/apache/camel-k/issues/5207)
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
 - Image Registry [\#3176](https://github.com/apache/camel-k/issues/3176)
+- kamelet: allow to add additional attributes to in/out [\#3090](https://github.com/apache/camel-k/issues/3090)
+- Running camel-k in a constrained environment  [\#2800](https://github.com/apache/camel-k/issues/2800)
 - Compact/flatten integrationkit \(container image\) hierarchy? [\#2736](https://github.com/apache/camel-k/issues/2736)
 - Complete Integration PodSpec template [\#2620](https://github.com/apache/camel-k/issues/2620)
 - support endpoint-dsl  [\#1746](https://github.com/apache/camel-k/issues/1746)
+- User profiles [\#934](https://github.com/apache/camel-k/issues/934)
 - Execute maven operation asynchronously [\#762](https://github.com/apache/camel-k/issues/762)
 - Cannot load Knative configuration from file or env variable [\#654](https://github.com/apache/camel-k/issues/654)
 - Support new Camel 3 webhooks [\#597](https://github.com/apache/camel-k/issues/597)
