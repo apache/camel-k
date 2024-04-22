@@ -42,7 +42,6 @@ func TestBuilderTimeout(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
 		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
@@ -79,7 +78,7 @@ func TestBuilderTimeout(t *testing.T) {
 			// After a few minutes (5 max retries), this has to be in error state
 			g.Eventually(BuildPhase(t, ctx, ns, integrationKitName), TestTimeoutMedium).Should(Equal(v1.BuildPhaseError))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
-			g.Eventually(BuildFailureRecovery(t, ctx, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
+			g.Eventually(BuildFailureRecoveryAttempt(t, ctx, ns, integrationKitName), TestTimeoutMedium).Should(Equal(5))
 			g.Eventually(BuilderPodPhase(t, ctx, ns, builderKitName), TestTimeoutMedium).Should(Equal(corev1.PodFailed))
 		})
 	})

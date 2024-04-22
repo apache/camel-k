@@ -2023,21 +2023,16 @@ func CopyIntegrationKits(t *testing.T, ctx context.Context, ns, operatorID strin
 		failTest(t, err)
 	}
 	for _, kit := range lst.Items {
-		if kit.Status.Image != "" {
+		if kit.Status.Image != "" && kit.Status.Phase == v1.IntegrationKitPhaseReady {
 			copyKit := v1.IntegrationKit{
 				ObjectMeta: metav1.ObjectMeta{
 					Namespace: ns,
 					Name:      kit.Name,
+					Labels:    kit.Labels,
 				},
-				Spec: *kit.Spec.DeepCopy(),
+				Spec:   *kit.Spec.DeepCopy(),
+				Status: *kit.Status.DeepCopy(),
 			}
-
-			if copyKit.Labels == nil {
-				copyKit.Labels = make(map[string]string)
-			}
-
-			copyKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
-			copyKit.Spec.Image = kit.Status.Image
 
 			v1.SetAnnotation(&copyKit.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
 			fmt.Printf("Copy integration kit %s from namespace %s\n", kit.Name, opns)
