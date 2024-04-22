@@ -137,11 +137,14 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 		// Add some information for post-processing, this may need to be refactored
 		// to a proper data structure
 		kit.Labels = map[string]string{
-			v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypeExternal,
+			v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypeSynthetic,
 			kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
 			kubernetes.CamelCreatorLabelName:      e.Integration.Name,
 			kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
 			kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
+		}
+		if pointer.BoolDeref(t.ImageWasKit, false) {
+			kit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
 		}
 
 		if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
