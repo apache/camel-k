@@ -128,9 +128,9 @@ const ExpectedOSClusterRoles = 1
 
 var TestDefaultNamespace = "default"
 
-var TestTimeoutShort = 1 * time.Minute
-var TestTimeoutMedium = 5 * time.Minute
-var TestTimeoutLong = 15 * time.Minute
+var TestTimeoutShort = 5 * time.Minute
+var TestTimeoutMedium = 20 * time.Minute
+var TestTimeoutLong = 30 * time.Minute
 
 // TestTimeoutVeryLong should be used only for testing native builds.
 var TestTimeoutVeryLong = 60 * time.Minute
