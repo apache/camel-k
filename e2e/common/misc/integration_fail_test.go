@@ -86,9 +86,8 @@ func TestBadRouteIntegration(t *testing.T) {
 			integrationKitNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseError))
 			//Build in error with 5 attempts
-			build := Build(t, ctx, integrationKitNamespace, kitName)()
-			g.Eventually(build.Status.Phase, TestTimeoutShort).Should(Equal(v1.BuildPhaseError))
-			g.Eventually(build.Status.Failure.Recovery.Attempt, TestTimeoutShort).Should(Equal(5))
+			g.Eventually(BuildPhase(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.BuildPhaseError))
+			g.Eventually(BuildFailureRecoveryAttempt(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(5))
 
 			// Fixing the route should reconcile the Integration
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
@@ -99,8 +98,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
 			g.Expect(kitRecoveryName).NotTo(Equal(kitName))
 			// New Build success
-			buildRecovery := Build(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName)()
-			g.Eventually(buildRecovery.Status.Phase, TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
+			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
 
 		})
 
@@ -129,8 +127,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			integrationKitRecoveryNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
 			// New Build success
-			buildRecovery := Build(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName)()
-			g.Eventually(buildRecovery.Status.Phase, TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
+			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
 		})
 
 		t.Run("run unresolvable component java route", func(t *testing.T) {
@@ -158,8 +155,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			integrationKitRecoveryNamespace := IntegrationKitNamespace(t, ctx, ns, name)()
 			g.Eventually(KitPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
 			// New Build success
-			buildRecovery := Build(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName)()
-			g.Eventually(buildRecovery.Status.Phase, TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
+			g.Eventually(BuildPhase(t, ctx, integrationKitRecoveryNamespace, kitRecoveryName), TestTimeoutShort).Should(Equal(v1.BuildPhaseSucceeded))
 		})
 
 		t.Run("run invalid java route", func(t *testing.T) {
