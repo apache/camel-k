@@ -6529,6 +6529,13 @@ string
 
 The main container image
 
+|`imageWasKit` +
+bool
+|
+
+
+A flag to mark the image used is coming from an IntegrationKit created externally.
+
 |`imagePullPolicy` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#pullpolicy-v1-core[Kubernetes core/v1.PullPolicy]*
 |
@@ -7200,8 +7207,6 @@ Forces the value for labels `sidecar.istio.io/inject`. By default the label is s
 The JVM trait is used to configure the JVM that runs the Integration. This trait is configured only for Integration and related IntegrationKits
 (bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
 trait is disabled by the platform.
-
-WARNING: you can still enable the trait explicitly even when it is disabled by the platform but you should be aware that some configurations could fail.
 
 
 [cols="2,2a",options="header"]

@@ -6638,6 +6638,10 @@ spec:
                         - Never
                         - IfNotPresent
                         type: string
+                      imageWasKit:
+                        description: A flag to mark the image used is coming from
+                          an IntegrationKit created externally.
+                        type: boolean
                       limitCPU:
                         description: The maximum amount of CPU required.
                         type: string

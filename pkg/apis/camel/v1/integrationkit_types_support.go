@@ -106,6 +106,11 @@ func (in *IntegrationKit) IsExternal() bool {
 	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeExternal
 }
 
+// IsSynthetic returns true for synthetic IntegrationKits.
+func (in *IntegrationKit) IsSynthetic() bool {
+	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeSynthetic
+}
+
 // HasCapability returns true if the Kit is enabled with such a capability.
 func (in *IntegrationKit) HasCapability(capability string) bool {
 	for _, cap := range in.Spec.Capabilities {

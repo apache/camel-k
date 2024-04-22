@@ -51,6 +51,8 @@ type ContainerTrait struct {
 	Name string `property:"name" json:"name,omitempty"`
 	// The main container image
 	Image string `property:"image" json:"image,omitempty"`
+	// A flag to mark the image used is coming from an IntegrationKit created externally.
+	ImageWasKit *bool `property:"image-was-kit" json:"imageWasKit,omitempty"`
 	// The pull policy: Always|Never|IfNotPresent
 	// +kubebuilder:validation:Enum=Always;Never;IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`

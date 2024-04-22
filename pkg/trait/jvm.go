@@ -70,12 +70,8 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	if e.IntegrationKit != nil && e.IntegrationKit.IsExternal() {
-		if pointer.BoolDeref(t.Enabled, false) {
-			return true, NewIntegrationConditionUserEnabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
-		} else {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
-		}
+	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() {
+		return false, newIntegrationConditionPlatformDisabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
 	}
 
 	return true, nil, nil

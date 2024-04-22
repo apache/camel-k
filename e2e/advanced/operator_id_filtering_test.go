@@ -100,7 +100,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 					// Save resources by deleting "moving" integration
 					g.Expect(Kamel(t, ctx, "delete", "moving", "-n", ns).Execute()).To(Succeed())
 
-					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "pre-built", "--force", "-t", fmt.Sprintf("container.image=%s", image), "-t", "jvm.enabled=true").Execute()).To(Succeed())
+					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "pre-built", "--force", "-t", fmt.Sprintf("container.image=%s", image), "-t", "container.image-was-kit=true").Execute()).To(Succeed())
 					g.Consistently(IntegrationPhase(t, ctx, ns, "pre-built"), 10*time.Second).Should(BeEmpty())
 					g.Expect(AssignIntegrationToOperator(t, ctx, ns, "pre-built", operator2)).To(Succeed())
 					g.Eventually(IntegrationPhase(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))

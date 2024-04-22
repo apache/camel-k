@@ -102,8 +102,7 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
+      imageWasKit: true
 status: {}
 `, output)
 }
@@ -144,8 +143,7 @@ spec:
     traits:
       container:
         image: my-special-image
-      jvm:
-        enabled: true
+        imageWasKit: true
   sink: {}
   source: {}
 status: {}
@@ -202,8 +200,7 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
+      imageWasKit: true
 status: {}
 `, output)
 }
@@ -248,8 +245,7 @@ spec:
     traits:
       container:
         image: my-special-image
-      jvm:
-        enabled: true
+        imageWasKit: true
   sink: {}
   source: {}
 status: {}
@@ -325,8 +321,7 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
+      imageWasKit: true
 status: {}
 `, output)
 	// Verify also when the operator Id is set in the integration
@@ -349,8 +344,7 @@ spec:
   traits:
     container:
       image: my-special-image
-    jvm:
-      enabled: true
+      imageWasKit: true
 status: {}
 `, output)
 }
