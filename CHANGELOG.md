@@ -21,6 +21,7 @@
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
 - Image Registry [\#3176](https://github.com/apache/camel-k/issues/3176)
+- kustomize: generate namespaced and descoped rbacs [\#3165](https://github.com/apache/camel-k/issues/3165)
 - kamelet: allow to add additional attributes to in/out [\#3090](https://github.com/apache/camel-k/issues/3090)
 - Running camel-k in a constrained environment  [\#2800](https://github.com/apache/camel-k/issues/2800)
 - Compact/flatten integrationkit \(container image\) hierarchy? [\#2736](https://github.com/apache/camel-k/issues/2736)
@@ -35,6 +36,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump org.apache:apache from 31 to 32 in /java/crds [\#5397](https://github.com/apache/camel-k/pull/5397) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump fabric8-version from 6.12.0 to 6.12.1 in /java/crds [\#5396](https://github.com/apache/camel-k/pull/5396) ([dependabot[bot]](https://github.com/apps/dependabot))
 - doc\(\#5386\): Contributing page updated [\#5393](https://github.com/apache/camel-k/pull/5393) ([vkrejcirik](https://github.com/vkrejcirik))
 - Replaced echo-server image by multiarch [\#5392](https://github.com/apache/camel-k/pull/5392) ([lfabriko](https://github.com/lfabriko))
 - chore\(deps\): bump github.com/onsi/gomega from 1.32.0 to 1.33.0 [\#5388](https://github.com/apache/camel-k/pull/5388) ([dependabot[bot]](https://github.com/apps/dependabot))
