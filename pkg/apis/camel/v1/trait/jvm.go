@@ -21,8 +21,6 @@ package trait
 // (bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
 // trait is disabled by the platform.
 //
-// WARNING: you can still enable the trait explicitly even when it is disabled by the platform but you should be aware that some configurations could fail.
-//
 // +camel-k:trait=jvm.
 type JVMTrait struct {
 	Trait `property:",squash" json:",inline"`

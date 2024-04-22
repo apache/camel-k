@@ -147,12 +147,14 @@ const (
 	// IntegrationKitTypeLabel labels the kit type.
 	IntegrationKitTypeLabel = "camel.apache.org/kit.type"
 
-	// IntegrationKitTypePlatform identifies a kit created by the platform.
+	// IntegrationKitTypePlatform identifies a Kit created by the platform.
 	IntegrationKitTypePlatform = "platform"
-	// IntegrationKitTypeUser identifies a kit created by the user.
+	// IntegrationKitTypeUser identifies a Kit created by the user.
 	IntegrationKitTypeUser = "user"
-	// IntegrationKitTypeExternal identifies a kit created by any third party.
+	// IntegrationKitTypeExternal identifies a Kit created by any third party.
 	IntegrationKitTypeExternal = "external"
+	// IntegrationKitTypeSynthetic identifies a synthetic Kit (generated for any container image for which the operator cannot make any assumption).
+	IntegrationKitTypeSynthetic = "synthetic"
 
 	// IntegrationKitLayoutLabel labels the kit layout.
 	IntegrationKitLayoutLabel = "camel.apache.org/kit.layout"
