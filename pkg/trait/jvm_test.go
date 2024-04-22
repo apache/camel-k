@@ -95,7 +95,7 @@ func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
 }
 
 func TestConfigureJvmTraitInWrongIntegrationKitPhaseExternal(t *testing.T) {
-	trait, environment := createNominalJvmTest(v1.IntegrationKitTypeExternal)
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypeSynthetic)
 
 	expectedCondition := NewIntegrationCondition(
 		"JVM",
@@ -107,24 +107,6 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseExternal(t *testing.T) {
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
 	assert.False(t, configured)
-	assert.NotNil(t, condition)
-	assert.Equal(t, expectedCondition, condition)
-}
-
-func TestConfigureJvmTraitInRightIntegrationKitPhaseExternalAndJvmEnabled(t *testing.T) {
-	trait, environment := createNominalJvmTest(v1.IntegrationKitTypeExternal)
-	trait.Enabled = pointer.Bool(true)
-
-	expectedCondition := NewIntegrationCondition(
-		"JVM",
-		v1.IntegrationConditionTraitInfo,
-		corev1.ConditionTrue,
-		"TraitConfiguration",
-		"explicitly enabled by the user: integration kit was not created via Camel K operator",
-	)
-	configured, condition, err := trait.Configure(environment)
-	require.NoError(t, err)
-	assert.True(t, configured)
 	assert.NotNil(t, condition)
 	assert.Equal(t, expectedCondition, condition)
 }
