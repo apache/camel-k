@@ -21,6 +21,7 @@
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
 - Image Registry [\#3176](https://github.com/apache/camel-k/issues/3176)
+- kustomize: generate namespaced and descoped rbacs [\#3165](https://github.com/apache/camel-k/issues/3165)
 - kamelet: allow to add additional attributes to in/out [\#3090](https://github.com/apache/camel-k/issues/3090)
 - Running camel-k in a constrained environment  [\#2800](https://github.com/apache/camel-k/issues/2800)
 - Compact/flatten integrationkit \(container image\) hierarchy? [\#2736](https://github.com/apache/camel-k/issues/2736)
