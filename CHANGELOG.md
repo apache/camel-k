@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Error when setting knative-service trait annotations [\#5401](https://github.com/apache/camel-k/issues/5401)
 - Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
 - IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
 - Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
@@ -14,9 +15,13 @@
 - IntegrationProfile empty description [\#5341](https://github.com/apache/camel-k/issues/5341)
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
+- fatal error: concurrent map read and map write [\#5315](https://github.com/apache/camel-k/issues/5315)
 - Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
+- Sourceless Integration status show default provider/version [\#5309](https://github.com/apache/camel-k/issues/5309)
 - TestHelmOperatorUpgrade error [\#5304](https://github.com/apache/camel-k/issues/5304)
+- Platform choice for aarch64 is incorrect  [\#5298](https://github.com/apache/camel-k/issues/5298)
 - Build configuration on IntegrationPlatform ignored [\#5289](https://github.com/apache/camel-k/issues/5289)
+- \[2.2.x\] Basic integration fails on ARM64 [\#5280](https://github.com/apache/camel-k/issues/5280)
 - Pod failure when using fixed native image [\#5207](https://github.com/apache/camel-k/issues/5207)
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
@@ -36,6 +41,7 @@
 
 **Merged pull requests:**
 
+- fix\(trait\): define synthetic Kit [\#5399](https://github.com/apache/camel-k/pull/5399) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump org.apache:apache from 31 to 32 in /java/crds [\#5397](https://github.com/apache/camel-k/pull/5397) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump fabric8-version from 6.12.0 to 6.12.1 in /java/crds [\#5396](https://github.com/apache/camel-k/pull/5396) ([dependabot[bot]](https://github.com/apps/dependabot))
 - doc\(\#5386\): Contributing page updated [\#5393](https://github.com/apache/camel-k/pull/5393) ([vkrejcirik](https://github.com/vkrejcirik))
@@ -46,6 +52,7 @@
 - fix\(trait\): inherit platform configuration [\#5383](https://github.com/apache/camel-k/pull/5383) ([squakez](https://github.com/squakez))
 - fix\(trait\): condition kit type [\#5382](https://github.com/apache/camel-k/pull/5382) ([squakez](https://github.com/squakez))
 - chore: re-enable file permissions test on darwin [\#5380](https://github.com/apache/camel-k/pull/5380) ([lzap](https://github.com/lzap))
+- fix\(trait\): don't report runtime version... [\#5378](https://github.com/apache/camel-k/pull/5378) ([squakez](https://github.com/squakez))
 - fix\(ci\): remove Helm upgrade test [\#5377](https://github.com/apache/camel-k/pull/5377) ([squakez](https://github.com/squakez))
 - \(fix\#5315\): concurrent map read and map write [\#5375](https://github.com/apache/camel-k/pull/5375) ([tdiesler](https://github.com/tdiesler))
 - chore\(ci\): Upgrade kind to 0.22.0 and kindest/node to 1.28.7 [\#5373](https://github.com/apache/camel-k/pull/5373) ([gansheer](https://github.com/gansheer))
