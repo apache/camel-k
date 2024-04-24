@@ -653,5 +653,5 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 	container := environment.GetIntegrationContainer()
 	assert.Len(t, container.Ports, 1)
 	assert.Equal(t, int32(8081), container.Ports[0].ContainerPort)
-	assert.Equal(t, "", container.Ports[0].Name)
+	assert.Equal(t, defaultKnativeContainerPortName, container.Ports[0].Name)
 }
