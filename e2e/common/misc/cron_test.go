@@ -32,6 +32,8 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRunCronExample(t *testing.T) {
@@ -44,13 +46,6 @@ func TestRunCronExample(t *testing.T) {
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 
 		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
-		t.Run("cron", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/cron.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationCronJob(t, ctx, ns, "cron"), TestTimeoutLong).ShouldNot(BeNil())
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "cron"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
-		})
 
 		t.Run("cron-yaml", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/cron-yaml.yaml").Execute()).To(Succeed())
@@ -78,6 +73,21 @@ func TestRunCronExample(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "cron-quartz"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron-quartz", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "cron-quartz"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		})
+
+		t.Run("cron-trait-yaml", func(t *testing.T) {
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/cron-trait-yaml.yaml", "-t", "cron.enabled=true", "-t", "cron.schedule=0/2 * * * *").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "cron-trait-yaml", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationCronJob(t, ctx, ns, "cron-trait-yaml"), TestTimeoutLong).ShouldNot(BeNil())
+
+			// Verify that `-t cron.schedule` overrides the schedule in the yaml
+			//
+			// kubectl get cronjobs -n test-de619ae2-eddc-4bac-86a6-53d80be030ea
+			// NAME               SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+			// cron-trait-yaml    0/2 * * * *   False     0        <none>          38s
+
+			cronJob := IntegrationCronJob(t, ctx, ns, "cron-trait-yaml")()
+			assert.Equal(t, "0/2 * * * *", cronJob.Spec.Schedule)
 		})
 
 		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
