@@ -695,7 +695,13 @@ spec:
                           Service.
                         type: boolean
                       image:
-                        description: The main container image
+                        description: The main container image to use for the Integration.
+                          When using this parameter the operator will create a synthetic
+                          IntegrationKit which won't be able to execute traits requiring
+                          CamelCatalog. If the container image you're using is coming
+                          from an IntegrationKit, use instead Integration `.spec.integrationKit`
+                          parameter. If you're moving the Integration across environments,
+                          you will also need to create an "external" IntegrationKit.
                         type: string
                       imagePullPolicy:
                         description: 'The pull policy: Always|Never|IfNotPresent'
@@ -704,10 +710,6 @@ spec:
                         - Never
                         - IfNotPresent
                         type: string
-                      imageWasKit:
-                        description: A flag to mark the image used is coming from
-                          an IntegrationKit created externally.
-                        type: boolean
                       limitCPU:
                         description: The maximum amount of CPU required.
                         type: string
@@ -2604,7 +2606,13 @@ spec:
                           Service.
                         type: boolean
                       image:
-                        description: The main container image
+                        description: The main container image to use for the Integration.
+                          When using this parameter the operator will create a synthetic
+                          IntegrationKit which won't be able to execute traits requiring
+                          CamelCatalog. If the container image you're using is coming
+                          from an IntegrationKit, use instead Integration `.spec.integrationKit`
+                          parameter. If you're moving the Integration across environments,
+                          you will also need to create an "external" IntegrationKit.
                         type: string
                       imagePullPolicy:
                         description: 'The pull policy: Always|Never|IfNotPresent'
@@ -2613,10 +2621,6 @@ spec:
                         - Never
                         - IfNotPresent
                         type: string
-                      imageWasKit:
-                        description: A flag to mark the image used is coming from
-                          an IntegrationKit created externally.
-                        type: boolean
                       limitCPU:
                         description: The maximum amount of CPU required.
                         type: string

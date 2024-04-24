@@ -30,6 +30,7 @@ import (
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -95,15 +96,31 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 
 				t.Run("Operators can run scoped integrations with fixed image", func(t *testing.T) {
-					image := IntegrationPodImage(t, ctx, ns, "moving")()
-					g.Expect(image).NotTo(BeEmpty())
-					// Save resources by deleting "moving" integration
-					g.Expect(Kamel(t, ctx, "delete", "moving", "-n", ns).Execute()).To(Succeed())
-
-					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "pre-built", "--force", "-t", fmt.Sprintf("container.image=%s", image), "-t", "container.image-was-kit=true").Execute()).To(Succeed())
-					g.Consistently(IntegrationPhase(t, ctx, ns, "pre-built"), 10*time.Second).Should(BeEmpty())
-					g.Expect(AssignIntegrationToOperator(t, ctx, ns, "pre-built", operator2)).To(Succeed())
+					kitName := IntegrationKit(t, ctx, ns, "moving")()
+					g.Expect(kitName).NotTo(BeEmpty())
+					kitImage := KitImage(t, ctx, nsop2, kitName)()
+					g.Expect(kitImage).NotTo(BeEmpty())
+					// external kit creation
+					externalKit := v1.IntegrationKit{
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: ns,
+							Name:      "external",
+							Labels: map[string]string{
+								"camel.apache.org/kit.type": v1.IntegrationKitTypeExternal,
+							},
+							Annotations: map[string]string{
+								"camel.apache.org/operator.id": operator2,
+							},
+						},
+						Spec: v1.IntegrationKitSpec{
+							Image: kitImage,
+						},
+					}
+					g.Expect(TestClient(t).Create(ctx, &externalKit)).Should(BeNil())
+					g.Expect(KamelRunWithID(t, ctx, operator2, ns, "files/yaml.yaml", "--name", "pre-built", "--kit", "external", "--force").Execute()).To(Succeed())
+					g.Consistently(IntegrationPhase(t, ctx, ns, "pre-built"), 10*time.Second).ShouldNot(Equal(v1.IntegrationPhaseBuildingKit))
 					g.Eventually(IntegrationPhase(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+					g.Eventually(IntegrationStatusImage(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(kitImage))
 					g.Eventually(IntegrationPodPhase(t, ctx, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 					g.Eventually(IntegrationLogs(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 					g.Expect(Kamel(t, ctx, "delete", "pre-built", "-n", ns).Execute()).To(Succeed())
@@ -112,7 +129,6 @@ func TestOperatorIDFiltering(t *testing.T) {
 				t.Run("Operators can run scoped Pipes", func(t *testing.T) {
 					g.Expect(KamelBindWithID(t, ctx, "operator-x", ns, "timer-source?message=Hello", "log-sink", "--name", "klb", "--force").Execute()).To(Succeed())
 					g.Consistently(Integration(t, ctx, ns, "klb"), 10*time.Second).Should(BeNil())
-
 					g.Expect(AssignPipeToOperator(t, ctx, ns, "klb", operator1)).To(Succeed())
 					g.Eventually(Integration(t, ctx, ns, "klb"), TestTimeoutShort).ShouldNot(BeNil())
 					g.Eventually(IntegrationPhase(t, ctx, ns, "klb"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
