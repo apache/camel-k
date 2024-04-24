@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Error when setting knative-service trait annotations [\#5401](https://github.com/apache/camel-k/issues/5401)
 - Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
 - IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
 - Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
@@ -14,9 +15,13 @@
 - IntegrationProfile empty description [\#5341](https://github.com/apache/camel-k/issues/5341)
 - OLM procedure, clear errors and warnings [\#5333](https://github.com/apache/camel-k/issues/5333)
 - Flaky TestOperatorBasic [\#5326](https://github.com/apache/camel-k/issues/5326)
+- fatal error: concurrent map read and map write [\#5315](https://github.com/apache/camel-k/issues/5315)
 - Deprecate Spectrum publishing strategy [\#5314](https://github.com/apache/camel-k/issues/5314)
+- Sourceless Integration status show default provider/version [\#5309](https://github.com/apache/camel-k/issues/5309)
 - TestHelmOperatorUpgrade error [\#5304](https://github.com/apache/camel-k/issues/5304)
+- Platform choice for aarch64 is incorrect  [\#5298](https://github.com/apache/camel-k/issues/5298)
 - Build configuration on IntegrationPlatform ignored [\#5289](https://github.com/apache/camel-k/issues/5289)
+- \[2.2.x\] Basic integration fails on ARM64 [\#5280](https://github.com/apache/camel-k/issues/5280)
 - Pod failure when using fixed native image [\#5207](https://github.com/apache/camel-k/issues/5207)
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
