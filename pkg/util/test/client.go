@@ -113,10 +113,12 @@ func NewFakeClient(initObjs ...runtime.Object) (client.Client, error) {
 	})
 
 	return &FakeClient{
-		Client:    c,
-		Interface: clientset,
-		camel:     camelClientset,
-		scales:    &fakescaleclient,
+		Client:                 c,
+		Interface:              clientset,
+		camel:                  camelClientset,
+		scales:                 &fakescaleclient,
+		enabledKnativeServing:  true,
+		enabledKnativeEventing: true,
 	}, nil
 }
 
@@ -138,10 +140,12 @@ func filterObjects(scheme *runtime.Scheme, input []runtime.Object, filter func(g
 type FakeClient struct {
 	controller.Client
 	kubernetes.Interface
-	camel            *fakecamelclientset.Clientset
-	scales           *fakescale.FakeScaleClient
-	disabledGroups   []string
-	enabledOpenshift bool
+	camel                  *fakecamelclientset.Clientset
+	scales                 *fakescale.FakeScaleClient
+	disabledGroups         []string
+	enabledOpenshift       bool
+	enabledKnativeServing  bool
+	enabledKnativeEventing bool
 }
 
 func (c *FakeClient) Intercept(intercept *interceptor.Funcs) {
@@ -191,6 +195,14 @@ func (c *FakeClient) EnableOpenshiftDiscovery() {
 	c.enabledOpenshift = true
 }
 
+func (c *FakeClient) DisableKnativeServing() {
+	c.enabledKnativeServing = false
+}
+
+func (c *FakeClient) DisableKnativeEventing() {
+	c.enabledKnativeEventing = false
+}
+
 func (c *FakeClient) AuthorizationV1() authorizationv1.AuthorizationV1Interface {
 	return &FakeAuthorization{
 		AuthorizationV1Interface: c.Interface.AuthorizationV1(),
@@ -201,9 +213,11 @@ func (c *FakeClient) AuthorizationV1() authorizationv1.AuthorizationV1Interface 
 
 func (c *FakeClient) Discovery() discovery.DiscoveryInterface {
 	return &FakeDiscovery{
-		DiscoveryInterface: c.Interface.Discovery(),
-		disabledGroups:     c.disabledGroups,
-		enabledOpenshift:   c.enabledOpenshift,
+		DiscoveryInterface:     c.Interface.Discovery(),
+		disabledGroups:         c.disabledGroups,
+		enabledOpenshift:       c.enabledOpenshift,
+		enabledKnativeServing:  c.enabledKnativeServing,
+		enabledKnativeEventing: c.enabledKnativeEventing,
 	}
 }
 
@@ -229,8 +243,10 @@ func (f *FakeAuthorization) SelfSubjectRulesReviews() authorizationv1.SelfSubjec
 
 type FakeDiscovery struct {
 	discovery.DiscoveryInterface
-	disabledGroups   []string
-	enabledOpenshift bool
+	disabledGroups         []string
+	enabledOpenshift       bool
+	enabledKnativeServing  bool
+	enabledKnativeEventing bool
 }
 
 func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*metav1.APIResourceList, error) {
@@ -247,26 +263,33 @@ func (f *FakeDiscovery) ServerResourcesForGroupVersion(groupVersion string) (*me
 		}
 	}
 
-	// used to verify if knative is installed
-	if groupVersion == "serving.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
-		return &metav1.APIResourceList{
-			GroupVersion: "serving.knative.dev/v1",
-		}, nil
+	// used to verify if Knative Serving is installed
+	if f.enabledKnativeServing {
+		if groupVersion == "serving.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+			return &metav1.APIResourceList{
+				GroupVersion: "serving.knative.dev/v1",
+			}, nil
+		}
 	}
-	if groupVersion == "eventing.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
-		return &metav1.APIResourceList{
-			GroupVersion: "eventing.knative.dev/v1",
-		}, nil
+
+	// used to verify if Knative Eventing is installed
+	if f.enabledKnativeEventing {
+		if groupVersion == "eventing.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+			return &metav1.APIResourceList{
+				GroupVersion: "eventing.knative.dev/v1",
+			}, nil
+		}
+		if groupVersion == "messaging.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+			return &metav1.APIResourceList{
+				GroupVersion: "messaging.knative.dev/v1",
+			}, nil
+		}
+		if groupVersion == "messaging.knative.dev/v1beta1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
+			return &metav1.APIResourceList{
+				GroupVersion: "messaging.knative.dev/v1beta1",
+			}, nil
+		}
 	}
-	if groupVersion == "messaging.knative.dev/v1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
-		return &metav1.APIResourceList{
-			GroupVersion: "messaging.knative.dev/v1",
-		}, nil
-	}
-	if groupVersion == "messaging.knative.dev/v1beta1" && !util.StringSliceExists(f.disabledGroups, groupVersion) {
-		return &metav1.APIResourceList{
-			GroupVersion: "messaging.knative.dev/v1beta1",
-		}, nil
-	}
+
 	return f.DiscoveryInterface.ServerResourcesForGroupVersion(groupVersion)
 }
