@@ -43,11 +43,10 @@ import (
 )
 
 const (
-	defaultContainerName     = "integration"
-	defaultContainerPort     = 8080
-	defaultContainerPortName = "http"
-	defaultServicePort       = 80
-	containerTraitID         = "container"
+	defaultContainerName = "integration"
+	defaultContainerPort = 8080
+	defaultServicePort   = 80
+	containerTraitID     = "container"
 )
 
 type containerTrait struct {
@@ -261,15 +260,14 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 func (t *containerTrait) configureService(e *Environment, container *corev1.Container, isKnative bool) {
 	name := t.PortName
 	if name == "" {
-		name = defaultContainerPortName
+		name = e.determineDefaultContainerPortName()
 	}
 	containerPort := corev1.ContainerPort{
+		Name:          name,
 		ContainerPort: int32(t.Port),
 		Protocol:      corev1.ProtocolTCP,
 	}
 	if !isKnative {
-		// Knative does not want name=http
-		containerPort.Name = name
 		// The service is managed by Knative, so, we only take care of this when it's managed by us
 		service := e.Resources.GetServiceForIntegration(e.Integration)
 		if service != nil {

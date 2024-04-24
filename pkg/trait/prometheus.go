@@ -64,7 +64,7 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 			v1.IntegrationConditionPrometheusAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionContainerNotAvailableReason,
-			"",
+			"integration container not available",
 		)
 		return nil
 	}
@@ -75,14 +75,9 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 		Reason: v1.IntegrationConditionPrometheusAvailableReason,
 	}
 
-	controller, err := e.DetermineControllerStrategy()
-	if err != nil {
-		return err
-	}
-
 	containerPort := e.getIntegrationContainerPort()
 	if containerPort == nil {
-		containerPort = t.getContainerPort(e, controller)
+		containerPort = e.createContainerPort()
 		container.Ports = append(container.Ports, *containerPort)
 	}
 
@@ -91,14 +86,6 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 	// Add the PodMonitor resource
 	if pointer.BoolDeref(t.PodMonitor, false) {
 		portName := containerPort.Name
-		// Knative defaults to naming the userland container port "user-port".
-		// Let's rely on that default, granted it is not officially part of the Knative
-		// runtime contract.
-		// See https://github.com/knative/specs/blob/main/specs/serving/runtime-contract.md
-		if portName == "" && controller == ControllerStrategyKnativeService {
-			portName = "user-port"
-		}
-
 		podMonitor, err := t.getPodMonitorFor(e, portName)
 		if err != nil {
 			return err
@@ -112,29 +99,6 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 	e.Integration.Status.SetConditions(condition)
 
 	return nil
-}
-
-func (t *prometheusTrait) getContainerPort(e *Environment, controller ControllerStrategy) *corev1.ContainerPort {
-	var name string
-	var port int
-
-	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
-		if ct, ok := t.(*containerTrait); ok {
-			name = ct.PortName
-			port = ct.Port
-		}
-	}
-
-	// Let's rely on Knative default HTTP negotiation
-	if name == "" && controller != ControllerStrategyKnativeService {
-		name = defaultContainerPortName
-	}
-
-	return &corev1.ContainerPort{
-		Name:          name,
-		ContainerPort: int32(port),
-		Protocol:      corev1.ProtocolTCP,
-	}
 }
 
 func (t *prometheusTrait) getPodMonitorFor(e *Environment, portName string) (*monitoringv1.PodMonitor, error) {
