@@ -28,11 +28,24 @@ import (
 
 // IsRefKindInstalled returns true if the cluster has the referenced Kind installed.
 func IsRefKindInstalled(c kubernetes.Interface, ref corev1.ObjectReference) (bool, error) {
-	if installed, err := isInstalled(c, ref.GroupVersionKind().GroupVersion()); err != nil {
+	if installed, err := isServerResourceAvailable(c, ref.GroupVersionKind().GroupVersion()); err != nil {
 		return false, err
 	} else if installed {
 		return true, nil
 	}
+	return false, nil
+}
+
+// IsInstalled returns true if we are connected to a cluster with either Knative Serving or Eventing installed.
+func IsInstalled(c kubernetes.Interface) (bool, error) {
+	if ok, err := IsServingInstalled(c); ok {
+		return ok, err
+	} else if ok, err = IsEventingInstalled(c); ok {
+		return ok, err
+	} else if err != nil {
+		return false, err
+	}
+
 	return false, nil
 }
 
@@ -52,7 +65,7 @@ func IsEventingInstalled(c kubernetes.Interface) (bool, error) {
 	})
 }
 
-func isInstalled(c kubernetes.Interface, api schema.GroupVersion) (bool, error) {
+func isServerResourceAvailable(c kubernetes.Interface, api schema.GroupVersion) (bool, error) {
 	_, err := c.Discovery().ServerResourcesForGroupVersion(api.String())
 	if err != nil && (k8serrors.IsNotFound(err) || util.IsUnknownAPIError(err)) {
 		return false, nil
