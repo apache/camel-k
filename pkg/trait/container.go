@@ -143,9 +143,6 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 			kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
 			kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
 		}
-		if pointer.BoolDeref(t.ImageWasKit, false) {
-			kit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
-		}
 
 		if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
 			v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
