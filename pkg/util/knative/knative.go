@@ -75,7 +75,27 @@ func CreateSubscription(channelReference corev1.ObjectReference, serviceName str
 	}
 }
 
-func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string) *eventing.Trigger {
+// CreateServiceTrigger create Knative trigger with arbitrary Kubernetes Service as a subscriber - usually used when no Knative Serving is available on the cluster.
+func CreateServiceTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string) (*eventing.Trigger, error) {
+	subscriberRef := duckv1.KReference{
+		APIVersion: "v1",
+		Kind:       "Service",
+		Name:       serviceName,
+	}
+	return CreateTrigger(brokerReference, subscriberRef, eventType, path)
+}
+
+// CreateKnativeServiceTrigger create Knative trigger with Knative Serving Service as a subscriber - default option when Knative Serving is available on the cluster.
+func CreateKnativeServiceTrigger(brokerReference corev1.ObjectReference, serviceName string, eventType string, path string) (*eventing.Trigger, error) {
+	subscriberRef := duckv1.KReference{
+		APIVersion: serving.SchemeGroupVersion.String(),
+		Kind:       "Service",
+		Name:       serviceName,
+	}
+	return CreateTrigger(brokerReference, subscriberRef, eventType, path)
+}
+
+func CreateTrigger(brokerReference corev1.ObjectReference, subscriberRef duckv1.KReference, eventType string, path string) (*eventing.Trigger, error) {
 	nameSuffix := ""
 	var attributes map[string]string
 	if eventType != "" {
@@ -91,7 +111,7 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: brokerReference.Namespace,
-			Name:      brokerReference.Name + "-" + serviceName + nameSuffix,
+			Name:      brokerReference.Name + "-" + subscriberRef.Name + nameSuffix,
 		},
 		Spec: eventing.TriggerSpec{
 			Filter: &eventing.TriggerFilter{
@@ -99,17 +119,13 @@ func CreateTrigger(brokerReference corev1.ObjectReference, serviceName string, e
 			},
 			Broker: brokerReference.Name,
 			Subscriber: duckv1.Destination{
-				Ref: &duckv1.KReference{
-					APIVersion: serving.SchemeGroupVersion.String(),
-					Kind:       "Service",
-					Name:       serviceName,
-				},
+				Ref: &subscriberRef,
 				URI: &apis.URL{
 					Path: path,
 				},
 			},
 		},
-	}
+	}, nil
 }
 
 func CreateSinkBinding(source corev1.ObjectReference, target corev1.ObjectReference) *sources.SinkBinding {

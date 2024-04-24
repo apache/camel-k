@@ -47,6 +47,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
@@ -85,20 +86,6 @@ var (
 			Group:   batchv1.SchemeGroupVersion.Group,
 			Version: batchv1.SchemeGroupVersion.Version,
 		}: {},
-	}
-	deletableTypesByProfile = map[v1.TraitProfile]map[schema.GroupVersionKind]struct{}{
-		v1.TraitProfileKnative: {
-			schema.GroupVersionKind{
-				Kind:    "Service",
-				Group:   "serving.knative.dev",
-				Version: "v1",
-			}: {},
-			schema.GroupVersionKind{
-				Kind:    "Trigger",
-				Group:   "eventing.knative.dev",
-				Version: "v1",
-			}: {},
-		},
 	}
 )
 
@@ -160,12 +147,30 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 	}
 
 	profile := e.DetermineProfile()
-	if profileDeletableTypes, ok := deletableTypesByProfile[profile]; ok {
-		// copy profile related deletable types if not already present
-		for key, value := range profileDeletableTypes {
-			if _, found := deletableGVKs[key]; !found {
-				deletableGVKs[key] = value
-			}
+	deletableTypesByProfile := map[schema.GroupVersionKind]struct{}{}
+
+	if profile == v1.TraitProfileKnative {
+		if ok, _ := knative.IsServingInstalled(e.Client); ok {
+			deletableTypesByProfile[schema.GroupVersionKind{
+				Kind:    "Service",
+				Group:   "serving.knative.dev",
+				Version: "v1",
+			}] = struct{}{}
+		}
+
+		if ok, _ := knative.IsEventingInstalled(e.Client); ok {
+			deletableTypesByProfile[schema.GroupVersionKind{
+				Kind:    "Trigger",
+				Group:   "eventing.knative.dev",
+				Version: "v1",
+			}] = struct{}{}
+		}
+	}
+
+	// copy profile related deletable types if not already present
+	for key, value := range deletableTypesByProfile {
+		if _, found := deletableGVKs[key]; !found {
+			deletableGVKs[key] = value
 		}
 	}
 

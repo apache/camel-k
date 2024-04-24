@@ -248,7 +248,7 @@ func determineTraitProfile(ctx context.Context, c client.Client, binding *v1alph
 			return pl.Spec.Profile, nil
 		}
 	}
-	if ok, err := knative.IsServingInstalled(c); err != nil {
+	if ok, err := knative.IsInstalled(c); err != nil {
 		return "", err
 	} else if ok {
 		return v1.TraitProfileKnative, nil

@@ -23,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -266,10 +267,32 @@ func (c *Collection) GetServiceForIntegration(integration *v1.Integration) *core
 	})
 }
 
-// GetKnativeService returns a knative Service that matches the given function.
+// GetKnativeService returns a Knative Service that matches the given function.
 func (c *Collection) GetKnativeService(filter func(*serving.Service) bool) *serving.Service {
 	var retValue *serving.Service
 	c.VisitKnativeService(func(re *serving.Service) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
+// GetKnativeTrigger returns a Knative Trigger that matches the given function.
+func (c *Collection) GetKnativeTrigger(filter func(*eventing.Trigger) bool) *eventing.Trigger {
+	var retValue *eventing.Trigger
+	c.VisitKnativeTrigger(func(re *eventing.Trigger) {
+		if filter(re) {
+			retValue = re
+		}
+	})
+	return retValue
+}
+
+// GetKnativeSubscription returns a Knative channel Subscription that matches the given function.
+func (c *Collection) GetKnativeSubscription(filter func(subscription *messaging.Subscription) bool) *messaging.Subscription {
+	var retValue *messaging.Subscription
+	c.VisitKnativeSubscription(func(re *messaging.Subscription) {
 		if filter(re) {
 			retValue = re
 		}
@@ -352,6 +375,15 @@ func (c *Collection) VisitKnativeServiceE(visitor func(*serving.Service) error) 
 func (c *Collection) VisitKnativeTrigger(visitor func(trigger *eventing.Trigger)) {
 	c.Visit(func(res runtime.Object) {
 		if conv, ok := res.(*eventing.Trigger); ok {
+			visitor(conv)
+		}
+	})
+}
+
+// VisitKnativeSubscription executes the visitor function on all Knative channel Subscription resources.
+func (c *Collection) VisitKnativeSubscription(visitor func(trigger *messaging.Subscription)) {
+	c.Visit(func(res runtime.Object) {
+		if conv, ok := res.(*messaging.Subscription); ok {
 			visitor(conv)
 		}
 	})
