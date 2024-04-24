@@ -1154,6 +1154,16 @@ func KitPhase(t *testing.T, ctx context.Context, ns, name string) func() v1.Inte
 	}
 }
 
+func KitImage(t *testing.T, ctx context.Context, ns, name string) func() string {
+	return func() string {
+		kit := Kit(t, ctx, ns, name)()
+		if kit == nil {
+			return ""
+		}
+		return kit.Status.Image
+	}
+}
+
 func KitCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.IntegrationKitConditionType) func() *v1.IntegrationKitCondition {
 	return func() *v1.IntegrationKitCondition {
 		kt := Kit(t, ctx, ns, name)()
