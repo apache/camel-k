@@ -50,6 +50,11 @@ const (
 	sourceLoaderAnnotation      = "camel.apache.org/source.loader"
 	sourceNameAnnotation        = "camel.apache.org/source.name"
 	sourceCompressionAnnotation = "camel.apache.org/source.compression"
+
+	defaultContainerPortName = "http"
+	// Knative does not want name=http, it only supports http1 (HTTP/1) and h2c (HTTP/2)
+	// https://github.com/knative/specs/blob/main/specs/serving/runtime-contract.md#protocols-and-ports
+	defaultKnativeContainerPortName = "h2c"
 )
 
 var capabilityDynamicProperty = regexp.MustCompile(`(\$\{([^}]*)\})`)
@@ -335,6 +340,19 @@ func (e *Environment) DetermineControllerStrategy() (ControllerStrategy, error) 
 	}
 
 	return defaultStrategy, nil
+}
+
+// determineDefaultContainerPortName determines the default port name, according the controller strategy used.
+func (e *Environment) determineDefaultContainerPortName() string {
+	controller, err := e.DetermineControllerStrategy()
+	if err != nil {
+		log.WithValues("Function", "trait.determineDefaultContainerPortName").Errorf(err, "could not determine controller strategy, using default deployment container name")
+		return defaultContainerPortName
+	}
+	if controller == ControllerStrategyKnativeService {
+		return defaultKnativeContainerPortName
+	}
+	return defaultContainerPortName
 }
 
 func (e *Environment) getControllerStrategyChoosers() []ControllerStrategySelector {
@@ -712,14 +730,17 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 		return nil
 	}
 
+	// User specified port name
 	portName := ""
 	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
 		if ct, ok := t.(*containerTrait); ok {
 			portName = ct.PortName
 		}
 	}
+
+	// default port name (may change according the controller strategy, ie Knative)
 	if portName == "" {
-		portName = defaultContainerPortName
+		portName = e.determineDefaultContainerPortName()
 	}
 
 	for i, port := range container.Ports {
@@ -729,6 +750,29 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	return nil
+}
+
+// createContainerPort creates a new container port with values taken from Container trait or default.
+func (e *Environment) createContainerPort() *corev1.ContainerPort {
+	var name string
+	var port int
+
+	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
+		if ct, ok := t.(*containerTrait); ok {
+			name = ct.PortName
+			port = ct.Port
+		}
+	}
+
+	if name == "" {
+		name = e.determineDefaultContainerPortName()
+	}
+
+	return &corev1.ContainerPort{
+		Name:          name,
+		ContainerPort: int32(port),
+		Protocol:      corev1.ProtocolTCP,
+	}
 }
 
 // CapabilityPropertyKey returns the key or expand any variable provided in it. vars variable contain the
