@@ -37,8 +37,8 @@ import (
 //
 // WARNING: The Tracing trait can't be enabled at the same time as the Telemetry trait.
 //
-// +camel-k:trait=tracing
-// +camel-k:deprecated=2.3.0
+// +camel-k:trait=tracing.
+// +camel-k:deprecated=1.12.0.
 type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait, including automatic discovery of the tracing endpoint.
