@@ -6,10 +6,14 @@
 
 **Closed issues:**
 
+- \[Regression\] Nightly Quarkus native checks failure [\#5420](https://github.com/apache/camel-k/issues/5420)
+- Helm test failure [\#5413](https://github.com/apache/camel-k/issues/5413)
 - RBAC issues with Pipe and Knative [\#5410](https://github.com/apache/camel-k/issues/5410)
+- Remove container.imageWasKit [\#5407](https://github.com/apache/camel-k/issues/5407)
 - Error when setting knative-service trait annotations [\#5401](https://github.com/apache/camel-k/issues/5401)
 - Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
 - IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
+- Builder trait maven-profiles expect the profile in the operator namespace [\#5372](https://github.com/apache/camel-k/issues/5372)
 - Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
 - CLI install synthetic environment variable duplicate in operator pod container [\#5349](https://github.com/apache/camel-k/issues/5349)
 - Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
@@ -44,6 +48,10 @@
 
 **Merged pull requests:**
 
+- fix\(trait\): compute cm after catalog [\#5423](https://github.com/apache/camel-k/pull/5423) ([squakez](https://github.com/squakez))
+- fix\(trait\): remove imageWasKit [\#5418](https://github.com/apache/camel-k/pull/5418) ([squakez](https://github.com/squakez))
+- doc\(trait\): Maven profile cm/secret additional information [\#5416](https://github.com/apache/camel-k/pull/5416) ([gansheer](https://github.com/gansheer))
+- Add e2e traits test for cron [\#5414](https://github.com/apache/camel-k/pull/5414) ([tdiesler](https://github.com/tdiesler))
 - Adding eventing core types on RBAC [\#5412](https://github.com/apache/camel-k/pull/5412) ([matzew](https://github.com/matzew))
 - chore\(e2e\): Use new test namespace in Knative E2E tests [\#5408](https://github.com/apache/camel-k/pull/5408) ([christophd](https://github.com/christophd))
 - fix\(trait\): define synthetic Kit [\#5399](https://github.com/apache/camel-k/pull/5399) ([squakez](https://github.com/squakez))
