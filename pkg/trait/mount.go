@@ -113,8 +113,10 @@ func (t *mountTrait) Apply(e *Environment) error {
 	}
 
 	if visited {
-		// Volumes declared in the Integration resources
-		e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
+		// Volumes declared in the Integration resources (we skip for synthetic kits)
+		if e.IntegrationKit == nil || !e.IntegrationKit.IsSynthetic() {
+			e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
+		}
 		// Volumes declared in the trait config/resource options
 		err := t.configureVolumesAndMounts(volumes, &container.VolumeMounts)
 		if err != nil {
