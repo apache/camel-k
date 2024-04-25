@@ -20,7 +20,8 @@ package trait
 // The Dependencies trait is internally used to automatically add runtime dependencies based on the
 // integration that the user wants to run.
 //
-// +camel-k:trait=dependencies.
+// +camel-k:trait=dependencies
+// +camel-k:deprecated=2.4.0
 type DependenciesTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 }
