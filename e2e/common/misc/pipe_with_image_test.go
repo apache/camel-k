@@ -61,7 +61,7 @@ func TestPipeWithImage(t *testing.T) {
 			)))
 			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutLong).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).
 				Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
@@ -79,7 +79,7 @@ func TestPipeWithImage(t *testing.T) {
 			)))
 			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutLong).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).
 				Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
