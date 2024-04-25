@@ -79,11 +79,6 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
-	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases() {
-		// Get all resources
-		maps := t.computeConfigMaps(e)
-		e.Resources.AddAll(maps)
-	}
 	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() {
 		// This is required as during init phase, the trait set by default these values
 		// which are widely used in the platform for different purposese.
@@ -107,7 +102,11 @@ func (t *camelTrait) Apply(e *Environment) error {
 		e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
 		e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
 	}
-
+	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases() {
+		// Get all resources
+		maps := t.computeConfigMaps(e)
+		e.Resources.AddAll(maps)
+	}
 	return nil
 }
 
