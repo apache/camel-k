@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- RBAC issues with Pipe and Knative [\#5410](https://github.com/apache/camel-k/issues/5410)
 - Error when setting knative-service trait annotations [\#5401](https://github.com/apache/camel-k/issues/5401)
 - Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
 - IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
@@ -23,6 +24,7 @@
 - Build configuration on IntegrationPlatform ignored [\#5289](https://github.com/apache/camel-k/issues/5289)
 - \[2.2.x\] Basic integration fails on ARM64 [\#5280](https://github.com/apache/camel-k/issues/5280)
 - Pod failure when using fixed native image [\#5207](https://github.com/apache/camel-k/issues/5207)
+- Fix flaky health trait test [\#4922](https://github.com/apache/camel-k/issues/4922)
 - unambigious reference to configmaps and secrets [\#4841](https://github.com/apache/camel-k/issues/4841)
 - Startup times take way longer than advertised numbers [\#4192](https://github.com/apache/camel-k/issues/4192)
 - Image Registry [\#3176](https://github.com/apache/camel-k/issues/3176)
@@ -31,6 +33,7 @@
 - Running camel-k in a constrained environment  [\#2800](https://github.com/apache/camel-k/issues/2800)
 - Compact/flatten integrationkit \(container image\) hierarchy? [\#2736](https://github.com/apache/camel-k/issues/2736)
 - Complete Integration PodSpec template [\#2620](https://github.com/apache/camel-k/issues/2620)
+- Integration / KameletBinding: include information about the running pods/deployments [\#2504](https://github.com/apache/camel-k/issues/2504)
 - support endpoint-dsl  [\#1746](https://github.com/apache/camel-k/issues/1746)
 - User profiles [\#934](https://github.com/apache/camel-k/issues/934)
 - Execute maven operation asynchronously [\#762](https://github.com/apache/camel-k/issues/762)
