@@ -8240,8 +8240,6 @@ Deprecated: for backward compatibility.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-WARNING: The Registry trait is **deprecated** and will removed in future release versions.
-
 The Registry trait sets up Maven to use the Image registry
 as a Maven repository.
 

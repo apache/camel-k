@@ -90,7 +90,7 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 	for _, s := range t.CommentLines {
 		if strings.Contains(s, tagTrait) {
-			matches := tagTraitID.FindStringSubmatch(s)
+			matches := tagTraitRegex.FindStringSubmatch(s)
 			if len(matches) < 2 {
 				panic(fmt.Sprintf("unable to extract trait ID from tag line `%s`", s))
 			}
