@@ -9,7 +9,9 @@
 - \[Regression\] Nightly Quarkus native checks failure [\#5420](https://github.com/apache/camel-k/issues/5420)
 - Helm test failure [\#5413](https://github.com/apache/camel-k/issues/5413)
 - RBAC issues with Pipe and Knative [\#5410](https://github.com/apache/camel-k/issues/5410)
+- Knative accepted port names [\#5409](https://github.com/apache/camel-k/issues/5409)
 - Remove container.imageWasKit [\#5407](https://github.com/apache/camel-k/issues/5407)
+- Cannot load Knative configuration from file or env variable [\#5402](https://github.com/apache/camel-k/issues/5402)
 - Error when setting knative-service trait annotations [\#5401](https://github.com/apache/camel-k/issues/5401)
 - Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
 - IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
@@ -49,10 +51,12 @@
 **Merged pull requests:**
 
 - fix\(trait\): compute cm after catalog [\#5423](https://github.com/apache/camel-k/pull/5423) ([squakez](https://github.com/squakez))
+- fix\(\#5402\): Evaluate Knative profile based on Serving/Eventing installed [\#5419](https://github.com/apache/camel-k/pull/5419) ([christophd](https://github.com/christophd))
 - fix\(trait\): remove imageWasKit [\#5418](https://github.com/apache/camel-k/pull/5418) ([squakez](https://github.com/squakez))
 - doc\(trait\): Maven profile cm/secret additional information [\#5416](https://github.com/apache/camel-k/pull/5416) ([gansheer](https://github.com/gansheer))
 - Add e2e traits test for cron [\#5414](https://github.com/apache/camel-k/pull/5414) ([tdiesler](https://github.com/tdiesler))
 - Adding eventing core types on RBAC [\#5412](https://github.com/apache/camel-k/pull/5412) ([matzew](https://github.com/matzew))
+- fix\(trait\): controller strategy default service port name [\#5411](https://github.com/apache/camel-k/pull/5411) ([squakez](https://github.com/squakez))
 - chore\(e2e\): Use new test namespace in Knative E2E tests [\#5408](https://github.com/apache/camel-k/pull/5408) ([christophd](https://github.com/christophd))
 - fix\(trait\): define synthetic Kit [\#5399](https://github.com/apache/camel-k/pull/5399) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump org.apache:apache from 31 to 32 in /java/crds [\#5397](https://github.com/apache/camel-k/pull/5397) ([dependabot[bot]](https://github.com/apps/dependabot))
