@@ -19,7 +19,7 @@ package trait
 
 // The health trait is responsible for configuring the health probes on the integration container.
 //
-// It's disabled by default.
+// NOTE: this trait is enabled by default.
 //
 // +camel-k:trait=health.
 type HealthTrait struct {

@@ -46,7 +46,7 @@ func TestKamelCLIGet(t *testing.T) {
 			kitName := IntegrationKit(t, ctx, ns, "yaml")()
 			kitNamespace := IntegrationKitNamespace(t, ctx, ns, "yaml")()
 			regex := fmt.Sprintf("^NAME\tPHASE\tKIT\n\\s*yaml\tRunning\t(%s/%s|%s)", kitNamespace, kitName, kitName)
-			g.Expect(GetOutputString(Kamel(t, ctx, "get", "-n", ns))).To(MatchRegexp(regex))
+			g.Eventually(GetOutputString(Kamel(t, ctx, "get", "-n", ns))).Should(MatchRegexp(regex))
 
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
@@ -65,7 +65,7 @@ func TestKamelCLIGet(t *testing.T) {
 			kitNamespace2 := IntegrationKitNamespace(t, ctx, ns, "yaml")()
 			regex := fmt.Sprintf("^NAME\tPHASE\tKIT\n\\s*java\tRunning\t"+
 				"(%s/%s|%s)\n\\s*yaml\tRunning\t(%s/%s|%s)\n", kitNamespace1, kitName1, kitName1, kitNamespace2, kitName2, kitName2)
-			g.Expect(GetOutputString(Kamel(t, ctx, "get", "-n", ns))).To(MatchRegexp(regex))
+			g.Eventually(GetOutputString(Kamel(t, ctx, "get", "-n", ns))).Should(MatchRegexp(regex))
 
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
