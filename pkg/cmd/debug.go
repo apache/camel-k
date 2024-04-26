@@ -134,6 +134,11 @@ func (o *debugCmdOptions) run(cmd *cobra.Command, args []string) error {
 }
 
 func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integration, active bool) (*v1.Integration, error) {
+	it = o.toggle(it, active)
+	return c.Integrations(it.Namespace).Update(o.Context, it, metav1.UpdateOptions{})
+}
+
+func (o *debugCmdOptions) toggle(it *v1.Integration, active bool) *v1.Integration {
 	if it.Spec.Traits.JVM == nil {
 		it.Spec.Traits.JVM = &traitv1.JVMTrait{}
 	}
@@ -147,5 +152,5 @@ func (o *debugCmdOptions) toggleDebug(c camelv1.IntegrationsGetter, it *v1.Integ
 		jvmTrait.DebugSuspend = nil
 	}
 
-	return c.Integrations(it.Namespace).Update(o.Context, it, metav1.UpdateOptions{})
+	return it
 }

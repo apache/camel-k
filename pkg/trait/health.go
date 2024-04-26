@@ -60,11 +60,15 @@ func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, false) {
-		return false, nil, nil
+
+	// The trait must be disabled if a debug operation is ongoing
+	if jt := e.Catalog.GetTrait(jvmTraitID); jt != nil {
+		if jvm, ok := jt.(*jvmTrait); ok && pointer.BoolDeref(jvm.Debug, false) {
+			return false, NewIntegrationConditionPlatformDisabledWithMessage("Health", "debug operation ongoing: incompatible with health checks"), nil
+		}
 	}
 
-	return true, nil, nil
+	return pointer.BoolDeref(t.Enabled, true), nil, nil
 }
 
 func (t *healthTrait) Apply(e *Environment) error {

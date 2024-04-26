@@ -40,6 +40,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
+const (
+	jvmTraitID = "jvm"
+)
+
 type jvmTrait struct {
 	BaseTrait
 	traitv1.JVMTrait `property:",squash"`
@@ -47,7 +51,7 @@ type jvmTrait struct {
 
 func newJvmTrait() Trait {
 	return &jvmTrait{
-		BaseTrait: NewBaseTrait("jvm", 2000),
+		BaseTrait: NewBaseTrait(jvmTraitID, 2000),
 		JVMTrait: traitv1.JVMTrait{
 			DebugAddress: "*:5005",
 			PrintCommand: pointer.Bool(true),
