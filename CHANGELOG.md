@@ -6,10 +6,14 @@
 
 **Closed issues:**
 
+- \[Regression\] Nightly Quarkus native checks failure [\#5420](https://github.com/apache/camel-k/issues/5420)
+- Helm test failure [\#5413](https://github.com/apache/camel-k/issues/5413)
 - RBAC issues with Pipe and Knative [\#5410](https://github.com/apache/camel-k/issues/5410)
+- Remove container.imageWasKit [\#5407](https://github.com/apache/camel-k/issues/5407)
 - Error when setting knative-service trait annotations [\#5401](https://github.com/apache/camel-k/issues/5401)
 - Contributing page is obsolete [\#5386](https://github.com/apache/camel-k/issues/5386)
 - IntegrationKit Trait condition missing [\#5381](https://github.com/apache/camel-k/issues/5381)
+- Builder trait maven-profiles expect the profile in the operator namespace [\#5372](https://github.com/apache/camel-k/issues/5372)
 - Wrongly formatted license [\#5360](https://github.com/apache/camel-k/issues/5360)
 - CLI install synthetic environment variable duplicate in operator pod container [\#5349](https://github.com/apache/camel-k/issues/5349)
 - Flaky TestHealthTrait [\#5345](https://github.com/apache/camel-k/issues/5345)
