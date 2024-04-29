@@ -863,6 +863,9 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				if err != nil {
 					return err
 				}
+				if catalog == nil {
+					return fmt.Errorf("error trying to load the default Camel catalog")
+				}
 			}
 			addDependency(cmd, it, item, catalog)
 		}
