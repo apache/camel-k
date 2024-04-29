@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -38,7 +37,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -130,7 +128,10 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if sourceIntegration.Status.Phase != v1.IntegrationPhaseRunning {
 		return fmt.Errorf("could not promote an Integration in %s status", sourceIntegration.Status.Phase)
 	}
-
+	sourceKit, err := o.getIntegrationKit(c, sourceIntegration.Status.IntegrationKit.Name)
+	if err != nil {
+		return err
+	}
 	// Image only mode
 	if o.Image {
 		showImageOnly(cmd, sourceIntegration)
@@ -147,8 +148,12 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	// Pipe promotion
 	if promotePipe {
-		destPipe := o.editPipe(sourcePipe, sourceIntegration)
+		destPipe, destKit := o.editPipe(sourcePipe, sourceIntegration, sourceKit)
 		if o.OutputFormat != "" {
+			if err := showIntegrationKitOutput(cmd, destKit, o.OutputFormat); err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), `---`)
 			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
 		}
 		// Ensure the destination namespace has access to the source namespace images
@@ -156,18 +161,29 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
+		_, err = o.replaceResource(destKit)
+		if err != nil {
+			return err
+		}
 		replaced, err := o.replaceResource(destPipe)
+		if err != nil {
+			return err
+		}
 		if !replaced {
 			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Pipe "`+name+`" created`)
 		} else {
 			fmt.Fprintln(cmd.OutOrStdout(), `Promoted Pipe "`+name+`" updated`)
 		}
-		return err
+		return nil
 	}
 
 	// Plain Integration promotion
-	destIntegration := o.editIntegration(sourceIntegration)
+	destIntegration, destKit := o.editIntegration(sourceIntegration, sourceKit)
 	if o.OutputFormat != "" {
+		if err := showIntegrationKitOutput(cmd, destKit, o.OutputFormat); err != nil {
+			return err
+		}
+		fmt.Fprintln(cmd.OutOrStdout(), `---`)
 		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
 	}
 	// Ensure the destination namespace has access to the source namespace images
@@ -175,13 +191,20 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	_, err = o.replaceResource(destKit)
+	if err != nil {
+		return err
+	}
 	replaced, err := o.replaceResource(destIntegration)
+	if err != nil {
+		return err
+	}
 	if !replaced {
 		fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" created`)
 	} else {
 		fmt.Fprintln(cmd.OutOrStdout(), `Promoted Integration "`+name+`" updated`)
 	}
-	return err
+	return nil
 }
 
 func checkOpsCompatibility(cmd *cobra.Command, source, dest map[string]string) error {
@@ -222,6 +245,19 @@ func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.In
 	}
 
 	return &it, nil
+}
+
+func (o *promoteCmdOptions) getIntegrationKit(c client.Client, name string) (*v1.IntegrationKit, error) {
+	ik := v1.NewIntegrationKit(o.Namespace, name)
+	key := k8sclient.ObjectKey{
+		Name:      name,
+		Namespace: o.Namespace,
+	}
+	if err := c.Get(o.Context, key, ik); err != nil {
+		return nil, err
+	}
+
+	return ik, nil
 }
 
 func (o *promoteCmdOptions) validateDestResources(c client.Client, it *v1.Integration) error {
@@ -459,23 +495,27 @@ func existsKamelet(ctx context.Context, c client.Client, name string, namespace 
 	return true
 }
 
-func (o *promoteCmdOptions) editIntegration(it *v1.Integration) *v1.Integration {
-	dst := v1.NewIntegration(o.To, it.Name)
+func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.IntegrationKit) (*v1.Integration, *v1.IntegrationKit) {
 	contImage := it.Status.Image
-	dst.Spec = *it.Spec.DeepCopy()
-	dst.Annotations = cloneAnnotations(it.Annotations, o.ToOperator)
-	dst.Labels = cloneLabels(it.Labels)
-	if dst.Spec.Traits.Container == nil {
-		dst.Spec.Traits.Container = &traitv1.ContainerTrait{}
+	// IntegrationKit
+	dstKit := v1.NewIntegrationKit(o.To, kit.Name)
+	dstKit.Spec = *kit.Spec.DeepCopy()
+	dstKit.Annotations = cloneAnnotations(kit.Annotations, o.ToOperator)
+	dstKit.Labels = cloneLabels(kit.Labels)
+	dstKit.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
+	dstKit.Spec.Image = contImage
+	// Integration
+	dstIt := v1.NewIntegration(o.To, it.Name)
+	dstIt.Spec = *it.Spec.DeepCopy()
+	dstIt.Annotations = cloneAnnotations(it.Annotations, o.ToOperator)
+	dstIt.Labels = cloneLabels(it.Labels)
+	dstIt.Spec.IntegrationKit = &corev1.ObjectReference{
+		Namespace: dstKit.Namespace,
+		Name:      dstKit.Name,
+		Kind:      dstKit.Kind,
 	}
-	dst.Spec.Traits.Container.Image = contImage
-	if dst.Spec.Traits.JVM == nil {
-		dst.Spec.Traits.JVM = &traitv1.JVMTrait{}
-	}
-	if dst.Spec.Traits.JVM.Enabled == nil {
-		dst.Spec.Traits.JVM.Enabled = pointer.Bool(true)
-	}
-	return &dst
+
+	return &dstIt, dstKit
 }
 
 // Return all annotations overriding the operator Id if provided.
@@ -507,25 +547,29 @@ func cloneLabels(lbs map[string]string) map[string]string {
 	return newMap
 }
 
-func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration) *v1.Pipe {
+func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) (*v1.Pipe, *v1.IntegrationKit) {
+	contImage := it.Status.Image
+	// IntegrationKit
+	dstKit := v1.NewIntegrationKit(o.To, kit.Name)
+	dstKit.Spec = *kit.Spec.DeepCopy()
+	dstKit.Annotations = cloneAnnotations(kit.Annotations, o.ToOperator)
+	dstKit.Labels = cloneLabels(kit.Labels)
+	dstKit.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
+	dstKit.Spec.Image = contImage
+	// Pipe
 	dst := v1.NewPipe(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	dst.Annotations = cloneAnnotations(kb.Annotations, o.ToOperator)
 	dst.Labels = cloneLabels(kb.Labels)
-	contImage := it.Status.Image
 	if dst.Spec.Integration == nil {
 		dst.Spec.Integration = &v1.IntegrationSpec{}
 	}
-	if dst.Spec.Integration.Traits.Container == nil {
-		dst.Spec.Integration.Traits.Container = &traitv1.ContainerTrait{}
+	dst.Spec.Integration.IntegrationKit = &corev1.ObjectReference{
+		Namespace: dstKit.Namespace,
+		Name:      dstKit.Name,
+		Kind:      dstKit.Kind,
 	}
-	dst.Spec.Integration.Traits.Container.Image = contImage
-	if dst.Spec.Integration.Traits.JVM == nil {
-		dst.Spec.Integration.Traits.JVM = &traitv1.JVMTrait{}
-	}
-	if dst.Spec.Integration.Traits.JVM.Enabled == nil {
-		dst.Spec.Integration.Traits.JVM.Enabled = pointer.Bool(true)
-	}
+
 	if dst.Spec.Source.Ref != nil {
 		dst.Spec.Source.Ref.Namespace = o.To
 	}
@@ -539,7 +583,7 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration) *v1.Pipe {
 			}
 		}
 	}
-	return &dst
+	return &dst, dstKit
 }
 
 func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) {

@@ -90,8 +90,15 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.IntegrationKit == nil {
 		return false, nil, nil
 	}
-
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	condition := t.adaptDeprecatedFields()
+	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
+		condition = newOrAppend(condition, "Spectrum publishing strategy is deprecated and may be removed in future releases. Make sure to use any supported publishing strategy instead.")
+	}
+
+	t.setPlatform(e)
 
 	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
 		if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
@@ -626,4 +633,13 @@ func publishingOrUserTask(t v1.Task) bool {
 	}
 
 	return false
+}
+
+// Will set a default platform if either specified in the trait or the platform/profile configuration.
+func (t *builderTrait) setPlatform(e *Environment) {
+	if t.ImagePlatforms == nil {
+		if e.Platform != nil && e.Platform.Status.Build.BuildConfiguration.ImagePlatforms != nil {
+			t.ImagePlatforms = e.Platform.Status.Build.BuildConfiguration.ImagePlatforms
+		}
+	}
 }

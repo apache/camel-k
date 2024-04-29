@@ -45,6 +45,7 @@ func TestConfigureEnabledCamelTraitSucceeds(t *testing.T) {
 
 func TestApplyCamelTraitSucceeds(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -61,6 +62,22 @@ func TestApplyCamelTraitSucceeds(t *testing.T) {
 	assert.True(t, exactVersionRegexp.MatchString("1.2.3"))
 	assert.True(t, exactVersionRegexp.MatchString("1.0.0-SNAPSHOT"))
 	assert.False(t, exactVersionRegexp.MatchString("wroong"))
+}
+
+func TestApplyCamelTraitExternalKit(t *testing.T) {
+	trait, environment := createNominalCamelTest(false)
+	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeSynthetic
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, configured)
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	assert.Equal(t, "", environment.Integration.Status.RuntimeVersion)
+	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
+	assert.Equal(t, "", environment.IntegrationKit.Status.RuntimeVersion)
+	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
 }
 
 func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *testing.T) {
@@ -229,4 +246,36 @@ func TestCamelMatches(t *testing.T) {
 	assert.True(t, t1.Matches(&t2))
 	t2.RuntimeVersion = "3.2.1"
 	assert.False(t, t1.Matches(&t2))
+}
+
+func TestCamelCatalogSemver(t *testing.T) {
+	trait, environment := createNominalCamelTest(true)
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+	trait.RuntimeVersion = "2.x"
+	environment.CamelCatalog.CamelCatalogSpec.Runtime.Version = "2.16.0"
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, configured)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	// 2.x will translate with 2.16.0 as it is already existing
+	assert.Equal(t, environment.CamelCatalog.CamelCatalogSpec.Runtime.Version, environment.RuntimeVersion)
+}
+
+func TestCamelTraitSyntheticIntegration(t *testing.T) {
+	trait, environment := createNominalCamelTest(true)
+	environment.Integration.Status = v1.IntegrationStatus{}
+	environment.Integration.Annotations = make(map[string]string)
+	environment.Integration.Annotations[v1.IntegrationSyntheticLabel] = "true"
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Equal(t, "explicitly disabled by the platform: synthetic integration", condition.message)
+	assert.False(t, configured)
+
+	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
+	assert.Equal(t, "", environment.Integration.Status.RuntimeVersion)
 }

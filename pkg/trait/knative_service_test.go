@@ -414,6 +414,81 @@ func TestKnativeServiceNotApplicable(t *testing.T) {
 	}))
 }
 
+func TestKnativeServiceNoServingAvailable(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := test.NewFakeClient()
+	fakeClient := client.(*test.FakeClient) //nolint
+	fakeClient.DisableKnativeServing()
+
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      KnativeServiceTestName,
+				Namespace: KnativeServiceTestNamespace,
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.js",
+							Content: `from("platform-http:test").log("hello")`,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.Nil(t, environment.GetTrait("knative-service"))
+
+	assert.Nil(t, environment.Resources.GetKnativeService(func(service *serving.Service) bool {
+		return service.Name == KnativeServiceTestName
+	}))
+
+	assert.NotNil(t, environment.Resources.GetDeployment(func(deployment *appsv1.Deployment) bool {
+		return deployment.Name == KnativeServiceTestName
+	}))
+}
+
 func TestKnativeServiceWithRollout(t *testing.T) {
 	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{RolloutDuration: "60s"})
 	assert.NotEmpty(t, environment.ExecutedTraits)

@@ -362,6 +362,8 @@ func TestHealthTrait(t *testing.T) {
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			// Wait for the integration condition to become ready=false and then check that it remains not ready for some time - fixes some test flakiness
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
 			g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), 1*time.Minute).
 				Should(Equal(corev1.ConditionFalse))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))

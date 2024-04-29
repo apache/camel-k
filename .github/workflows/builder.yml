@@ -76,7 +76,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        publisher: ["Jib", "Spectrum"]
+        publisher: ["Jib"]
 
     steps:
     - name: Checkout code

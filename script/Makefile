@@ -20,9 +20,9 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 2.3.0-SNAPSHOT
+VERSION ?= 2.4.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 2.2.0
+LAST_RELEASED_VERSION ?= 2.3.0
 DEFAULT_RUNTIME_VERSION := 3.8.1
 CONTROLLER_GEN_VERSION := v0.6.1
 CODEGEN_VERSION := v0.27.4
@@ -33,7 +33,7 @@ BASE_IMAGE := eclipse-temurin:17
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
 # Test for arm64, fall back to amd64
-IMAGE_ARCH ?= $(if $(filter arm64,$(shell uname -m)),arm64,amd64)
+IMAGE_ARCH ?= $(if $(filter arm64 aarch64,$(shell uname -m)),arm64,amd64)
 #
 # Situations when user wants to override
 # the image name and version
@@ -645,6 +645,9 @@ ifneq ($(origin PACKAGE), undefined)
 BUNDLE_PACKAGE := --package=$(PACKAGE)
 endif
 BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL) $(BUNDLE_PACKAGE)
+# TODO automate these configuration retrieving the content from go.mod
+BUNDLE_METADATA_OPENSHIFT_VERSION ?= "v4.14"
+MIN_KUBE_VERSION ?= "1.24.0"
 
 #
 # Tailor the manifest according to default values for this project
@@ -658,6 +661,7 @@ pre-bundle:
 	@sed -i 's/^  name: .*.\(v.*\)/  name: $(CSV_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  displayName: .*/  displayName: $(CSV_DISPLAY_NAME)/' $(CSV_PATH)
 	@sed -i 's/^  version: .*/  version: $(CSV_VERSION)/' $(CSV_PATH)
+	@sed -i 's/^  minKubeVersion: .*/  minKubeVersion: $(MIN_KUBE_VERSION)/' $(CSV_PATH)
 	@if grep -q replaces $(CSV_PATH); \
 		then sed -i 's/^  replaces: .*/  replaces: $(CSV_REPLACES)/' $(CSV_PATH); \
 		else sed -i '/  version: ${CSV_VERSION}/a \ \ replaces: $(CSV_REPLACES)' $(CSV_PATH); \
@@ -680,6 +684,7 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 # Rename the CSV name to conform with the existing released operator versions
 # This cannot happen in pre-bundle as the operator-sdk generation expects a CSV name the same as PACKAGE
 	@sed -i "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_PRODUCTION_PATH)
+	@echo "  com.redhat.openshift.versions : $(BUNDLE_METADATA_OPENSHIFT_VERSION)" >> ./bundle/metadata/annotations.yaml
 	$(OPERATOR_SDK) bundle validate ./bundle
 
 # Build the bundle image.

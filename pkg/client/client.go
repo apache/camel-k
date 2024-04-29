@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/scale"
@@ -42,6 +43,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	"github.com/apache/camel-k/v2/pkg/apis"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
 	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
@@ -52,6 +54,8 @@ const (
 	inContainerNamespaceFile = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 	kubeConfigEnvVar         = "KUBECONFIG"
 )
+
+var newClientMutex sync.Mutex
 
 // Client is an abstraction for a k8s client.
 type Client interface {
@@ -125,12 +129,21 @@ func NewClient(fastDiscovery bool) (Client, error) {
 
 // NewClientWithConfig creates a new k8s client that can be used from outside or in the cluster.
 func NewClientWithConfig(fastDiscovery bool, cfg *rest.Config) (Client, error) {
-	clientScheme := scheme.Scheme
 
-	// Setup Scheme for all resources
-	err := apis.AddToScheme(clientScheme)
-	if err != nil {
-		return nil, err
+	// The below call to apis.AddToScheme is not thread safe in the k8s API
+	// We try to synchronize here across all k8s clients
+	// https://github.com/apache/camel-k/issues/5315
+	newClientMutex.Lock()
+	defer newClientMutex.Unlock()
+
+	var err error
+	clientScheme := scheme.Scheme
+	if !clientScheme.IsVersionRegistered(v1.SchemeGroupVersion) {
+		// Setup Scheme for all resources
+		err = apis.AddToScheme(clientScheme)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var clientset kubernetes.Interface

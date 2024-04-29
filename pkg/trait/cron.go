@@ -83,7 +83,9 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityCron]; !ok {
 		return false, NewIntegrationCondition(
 			"Cron",
@@ -93,7 +95,6 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 			"the runtime provider %s does not declare 'cron' capability",
 		), nil
 	}
-
 	if pointer.BoolDeref(t.Auto, true) {
 		globalCron, err := t.getGlobalCron(e)
 		if err != nil {
@@ -306,6 +307,9 @@ func (c *cronInfo) withSchedule(schedule string) *cronInfo {
 }
 
 func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
+	if e.CamelCatalog == nil {
+		return nil, nil
+	}
 	fromURIs, err := t.getSourcesFromURIs(e)
 	if err != nil {
 		return nil, err

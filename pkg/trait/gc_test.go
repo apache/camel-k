@@ -18,15 +18,23 @@ limitations under the License.
 package trait
 
 import (
+	"context"
+	"strconv"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
+	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 func TestConfigureGCTraitDoesSucceed(t *testing.T) {
@@ -89,6 +97,215 @@ func TestApplyGCTraitDuringInitializationPhaseSkipPostActions(t *testing.T) {
 	assert.Len(t, environment.PostActions, 0)
 }
 
+func TestGetDefaultMinimalGarbageCollectableTypes(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Generation = 2
+
+	gcTrait.Client, _ = test.NewFakeClient()
+	environment.Client = gcTrait.Client
+
+	deletableTypes, err := gcTrait.getDeletableTypes(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, deletableTypes, 6)
+}
+
+func TestGarbageCollectResources(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Generation = 2
+
+	deployment := getIntegrationDeployment(environment.Integration)
+	deployment.Labels[v1.IntegrationGenerationLabel] = "1"
+	gcTrait.Client, _ = test.NewFakeClient(deployment)
+
+	environment.Client = gcTrait.Client
+
+	resourceDeleted := false
+	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient.Intercept(&interceptor.Funcs{
+		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
+			assert.Equal(t, environment.Integration.Name, obj.GetName())
+			assert.Equal(t, "Deployment", obj.GetObjectKind().GroupVersionKind().Kind)
+			resourceDeleted = true
+			return nil
+		},
+	})
+	err := gcTrait.garbageCollectResources(environment)
+
+	require.NoError(t, err)
+	assert.True(t, resourceDeleted)
+}
+
+func TestGarbageCollectPreserveResourcesWithSameGeneration(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Generation = 2
+
+	deployment := getIntegrationDeployment(environment.Integration)
+	gcTrait.Client, _ = test.NewFakeClient(deployment)
+
+	environment.Client = gcTrait.Client
+
+	resourceDeleted := false
+	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient.Intercept(&interceptor.Funcs{
+		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
+			resourceDeleted = true
+			return nil
+		},
+	})
+	err := gcTrait.garbageCollectResources(environment)
+
+	require.NoError(t, err)
+	assert.False(t, resourceDeleted)
+}
+
+func TestGarbageCollectPreserveResourcesOwnerReferenceMismatch(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Generation = 2
+
+	deployment := getIntegrationDeployment(environment.Integration)
+	deployment.Labels[v1.IntegrationGenerationLabel] = "1"
+	deployment.OwnerReferences = []metav1.OwnerReference{
+		{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       "Integration",
+			Name:       "other-integration-owner",
+		},
+	}
+	gcTrait.Client, _ = test.NewFakeClient(deployment)
+
+	environment.Client = gcTrait.Client
+
+	resourceDeleted := false
+	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient.Intercept(&interceptor.Funcs{
+		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
+			resourceDeleted = true
+			return nil
+		},
+	})
+	err := gcTrait.garbageCollectResources(environment)
+
+	require.NoError(t, err)
+	assert.False(t, resourceDeleted)
+}
+
+func TestGarbageCollectKnativeServiceResources(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Generation = 2
+	environment.Integration.Spec.Profile = v1.TraitProfileKnative
+
+	gcTrait.Client, _ = test.NewFakeClient(&servingv1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      environment.Integration.Name,
+			Namespace: environment.Integration.Namespace,
+			Labels: map[string]string{
+				v1.IntegrationLabel:           environment.Integration.Name,
+				v1.IntegrationGenerationLabel: "1",
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: v1.SchemeGroupVersion.String(),
+					Kind:       "Integration",
+					Name:       environment.Integration.Name,
+				},
+			},
+		},
+	})
+
+	environment.Client = gcTrait.Client
+
+	resourceDeleted := false
+	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient.Intercept(&interceptor.Funcs{
+		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
+			assert.Equal(t, environment.Integration.Name, obj.GetName())
+			assert.Equal(t, "Service", obj.GetObjectKind().GroupVersionKind().Kind)
+			assert.Equal(t, servingv1.SchemeGroupVersion, obj.GetObjectKind().GroupVersionKind().GroupVersion())
+			resourceDeleted = true
+			return nil
+		},
+	})
+	err := gcTrait.garbageCollectResources(environment)
+
+	require.NoError(t, err)
+	assert.True(t, resourceDeleted)
+}
+
+func TestGarbageCollectKnativeTriggerResources(t *testing.T) {
+	gcTrait, environment := createNominalGCTest()
+	environment.Integration.Generation = 2
+	environment.Integration.Spec.Profile = v1.TraitProfileKnative
+
+	gcTrait.Client, _ = test.NewFakeClient(&eventingv1.Trigger{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      environment.Integration.Name,
+			Namespace: environment.Integration.Namespace,
+			Labels: map[string]string{
+				v1.IntegrationLabel:           environment.Integration.Name,
+				v1.IntegrationGenerationLabel: "1",
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: v1.SchemeGroupVersion.String(),
+					Kind:       "Integration",
+					Name:       environment.Integration.Name,
+				},
+			},
+		},
+	})
+
+	environment.Client = gcTrait.Client
+
+	resourceDeleted := false
+	fakeClient := gcTrait.Client.(*test.FakeClient) //nolint
+	fakeClient.Intercept(&interceptor.Funcs{
+		Delete: func(ctx context.Context, client ctrl.WithWatch, obj ctrl.Object, opts ...ctrl.DeleteOption) error {
+			assert.Equal(t, environment.Integration.Name, obj.GetName())
+			assert.Equal(t, "Trigger", obj.GetObjectKind().GroupVersionKind().Kind)
+			assert.Equal(t, eventingv1.SchemeGroupVersion, obj.GetObjectKind().GroupVersionKind().GroupVersion())
+			resourceDeleted = true
+			return nil
+		},
+	})
+	err := gcTrait.garbageCollectResources(environment)
+
+	require.NoError(t, err)
+	assert.True(t, resourceDeleted)
+}
+
+func getIntegrationDeployment(integration *v1.Integration) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      integration.Name,
+			Namespace: integration.Namespace,
+			Labels: map[string]string{
+				v1.IntegrationLabel:           integration.Name,
+				v1.IntegrationGenerationLabel: strconv.FormatInt(integration.Generation, 10),
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: v1.SchemeGroupVersion.String(),
+					Kind:       "Integration",
+					Name:       integration.Name,
+				},
+			},
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: new(int32),
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func createNominalGCTest() (*gcTrait, *Environment) {
 	trait, _ := newGCTrait().(*gcTrait)
 	trait.Enabled = pointer.Bool(true)
@@ -98,6 +315,7 @@ func createNominalGCTest() (*gcTrait, *Environment) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:       "integration-name",
+				Namespace:  "namespace",
 				Generation: 1,
 			},
 			Status: v1.IntegrationStatus{

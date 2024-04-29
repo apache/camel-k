@@ -73,7 +73,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Property from ConfigMap", func(t *testing.T) {
 			var cmData = make(map[string]string)
 			cmData["my.message"] = "my-configmap-property-value"
-			CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-property", cmData)
+			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-property", cmData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-route.groovy", "-p", "configmap:my-cm-test-property").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -85,7 +86,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Property from ConfigMap as property file", func(t *testing.T) {
 			var cmData = make(map[string]string)
 			cmData["my.properties"] = "my.message=my-configmap-property-entry"
-			CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-properties", cmData)
+			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-properties", cmData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-route.groovy", "-p", "configmap:my-cm-test-properties").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -97,7 +99,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Property from Secret", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["my.message"] = "my-secret-property-value"
-			CreatePlainTextSecret(t, ctx, ns, "my-sec-test-property", secData)
+			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-property", secData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-route.groovy", "-p", "secret:my-sec-test-property").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -109,7 +112,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Property from Secret as property file", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["my.properties"] = "my.message=my-secret-property-entry"
-			CreatePlainTextSecret(t, ctx, ns, "my-sec-test-properties", secData)
+			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-properties", secData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-route.groovy", "--name", "property-route-secret", "-p", "secret:my-sec-test-properties").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-route-secret"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -120,10 +124,10 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Property from Secret inlined", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["my-message"] = "my-secret-external-value"
-			CreatePlainTextSecret(t, ctx, ns, "my-sec-inlined", secData)
+			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-inlined", secData)
+			g.Expect(err).To(BeNil())
 
-			// TODO: remove jvm.options trait as soon as CAMEL-20054 gets fixed
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-secret-route.groovy", "-t", "mount.configs=secret:my-sec-inlined", "-t", "jvm.options=-Dcamel.k.mount-path.secrets=/etc/camel/conf.d/_secrets").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/property-secret-route.groovy", "-t", "mount.configs=secret:my-sec-inlined").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-secret-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "property-secret-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-external-value"))
@@ -145,13 +149,15 @@ func TestRunConfigExamples(t *testing.T) {
 		// Store a configmap on the cluster
 		var cmData = make(map[string]string)
 		cmData["my-configmap-key"] = "my-configmap-content"
-		CreatePlainTextConfigmap(t, ctx, ns, "my-cm", cmData)
+		err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm", cmData)
+		g.Expect(err).To(BeNil())
 
 		// Store a configmap with multiple values
 		var cmDataMulti = make(map[string]string)
 		cmDataMulti["my-configmap-key"] = "should-not-see-it"
 		cmDataMulti["my-configmap-key-2"] = "my-configmap-content-2"
-		CreatePlainTextConfigmap(t, ctx, ns, "my-cm-multi", cmDataMulti)
+		err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-multi", cmDataMulti)
+		g.Expect(err).To(BeNil())
 
 		t.Run("Config configmap", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/config-configmap-route.groovy", "--config", "configmap:my-cm").Execute()).To(Succeed())
@@ -192,7 +198,8 @@ func TestRunConfigExamples(t *testing.T) {
 			// Store a configmap as property file
 			var cmDataProps = make(map[string]string)
 			cmDataProps["my.properties"] = "my.key.1=hello\nmy.key.2=world"
-			CreatePlainTextConfigmap(t, ctx, ns, "my-cm-properties", cmDataProps)
+			err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-properties", cmDataProps)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/config-configmap-properties-route.groovy", "--config", "configmap:my-cm-properties").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "config-configmap-properties-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -205,13 +212,15 @@ func TestRunConfigExamples(t *testing.T) {
 		// Store a secret on the cluster
 		var secData = make(map[string]string)
 		secData["my-secret-key"] = "very top secret"
-		CreatePlainTextSecret(t, ctx, ns, "my-sec", secData)
+		err = CreatePlainTextSecret(t, ctx, ns, "my-sec", secData)
+		g.Expect(err).To(BeNil())
 
 		// Store a secret with multi values
 		var secDataMulti = make(map[string]string)
 		secDataMulti["my-secret-key"] = "very top secret"
 		secDataMulti["my-secret-key-2"] = "even more secret"
-		CreatePlainTextSecret(t, ctx, ns, "my-sec-multi", secDataMulti)
+		err = CreatePlainTextSecret(t, ctx, ns, "my-sec-multi", secDataMulti)
+		g.Expect(err).To(BeNil())
 
 		t.Run("Config secret", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/config-secret-route.groovy", "--config", "secret:my-sec").Execute()).To(Succeed())
@@ -277,7 +286,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from ConfigMap", func(t *testing.T) {
 			var cmData = make(map[string]string)
 			cmData["quarkus.application.name"] = "my-cool-application"
-			CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-property", cmData)
+			err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-property", cmData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/build-property-file-route.groovy", "--build-property", "configmap:my-cm-test-build-property").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -289,7 +299,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from ConfigMap as property file", func(t *testing.T) {
 			var cmData = make(map[string]string)
 			cmData["my.properties"] = "quarkus.application.name=my-super-cool-application"
-			CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-properties", cmData)
+			err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-properties", cmData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/build-property-file-route.groovy", "--name", "build-property-file-route-cm", "--build-property", "configmap:my-cm-test-build-properties").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route-cm"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -301,7 +312,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from Secret", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["quarkus.application.name"] = "my-great-application"
-			CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-property", secData)
+			err = CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-property", secData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/build-property-file-route.groovy", "--build-property", "secret:my-sec-test-build-property").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -313,7 +325,8 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from Secret as property file", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["my.properties"] = "quarkus.application.name=my-awsome-application"
-			CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-properties", secData)
+			err = CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-properties", secData)
+			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "./files/build-property-file-route.groovy", "--name", "build-property-file-route-secret", "--build-property", "secret:my-sec-test-build-properties").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-file-route-secret"), TestTimeoutLong).Should(Equal(corev1.PodRunning))

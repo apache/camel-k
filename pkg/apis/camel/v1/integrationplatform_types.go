@@ -64,7 +64,7 @@ type IntegrationPlatformStatus struct {
 
 // +genclient
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip;itp,categories=kamel;camel
+// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=itp,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
@@ -153,6 +153,7 @@ const (
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
 	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster.
+	// Deprecated: use jib, s2i or a custom publishing strategy instead.
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
 	// in order to push the incremental images to the image repository.

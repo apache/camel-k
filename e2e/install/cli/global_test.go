@@ -27,8 +27,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
+	"time"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -120,6 +119,9 @@ func TestRunGlobalInstall(t *testing.T) {
 				g.Eventually(IntegrationLogs(t, ctx, ns5, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				g.Expect(IntegrationConditionMessage(IntegrationCondition(t, ctx, ns5, "java", v1.IntegrationConditionPlatformAvailable)())).To(MatchRegexp(operatorNamespace + "\\/.*"))
 				kit := IntegrationKit(t, ctx, ns5, "java")()
+				g.Expect(kit).NotTo(BeEmpty())
+				kitImage := KitImage(t, ctx, operatorNamespace, kit)()
+				g.Expect(kitImage).NotTo(BeEmpty())
 				g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns5).Execute()).To(Succeed())
 				g.Expect(Kits(t, ctx, ns5)()).Should(WithTransform(integrationKitsToNamesTransform(), Not(ContainElement(kit))))
 				globalKits := Kits(t, ctx, operatorNamespace)()
@@ -135,12 +137,13 @@ func TestRunGlobalInstall(t *testing.T) {
 						},
 					},
 					Spec: v1.IntegrationKitSpec{
-						Image: getKitImage(t, ctx, operatorNamespace, kit),
+						Image: kitImage,
 					},
 				}
 				g.Expect(TestClient(t).Create(ctx, &externalKit)).Should(BeNil())
 
-				g.Expect(KamelRun(t, ctx, ns5, "files/Java.java", "--name", "ext", "--kit", "external", "-t", "jvm.enabled=true").Execute()).To(Succeed())
+				g.Expect(KamelRun(t, ctx, ns5, "files/Java.java", "--name", "ext", "--kit", "external").Execute()).To(Succeed())
+				g.Consistently(IntegrationPhase(t, ctx, ns5, "ext"), 10*time.Second).ShouldNot(Equal(v1.IntegrationPhaseBuildingKit))
 				g.Eventually(IntegrationPodPhase(t, ctx, ns5, "ext"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationLogs(t, ctx, ns5, "ext"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				g.Expect(IntegrationKit(t, ctx, ns5, "ext")()).Should(Equal("external"))
@@ -164,25 +167,4 @@ func integrationKitsToNamesTransform() func([]v1.IntegrationKit) []string {
 		}
 		return names
 	}
-}
-
-func getKitImage(t *testing.T, ctx context.Context, ns string, name string) string {
-	get := v1.IntegrationKit{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "IntegrationKit",
-			APIVersion: v1.SchemeGroupVersion.String(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: ns,
-			Name:      name,
-		},
-	}
-	key := ctrl.ObjectKey{
-		Namespace: ns,
-		Name:      name,
-	}
-	if err := TestClient(t).Get(ctx, key, &get); err != nil {
-		return ""
-	}
-	return get.Status.Image
 }

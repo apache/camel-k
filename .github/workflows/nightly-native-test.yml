@@ -30,8 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # We let it on main only because it's too much resource consuming
-        ref-branch: [main]
+        ref-branch: [main, release-2.3.x]
 
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-latest

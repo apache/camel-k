@@ -73,6 +73,9 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Knative"), nil
 	}
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
@@ -328,7 +331,9 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 				serviceName = "default"
 			}
 			servicePath := fmt.Sprintf("/events/%s", eventType)
-			t.createTrigger(e, ref, eventType, servicePath)
+			if triggerErr := t.createTrigger(e, ref, eventType, servicePath); triggerErr != nil {
+				return triggerErr
+			}
 
 			if !env.ContainsService(serviceName, knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, ref.APIVersion, ref.Kind) {
 				svc := knativeapi.CamelServiceDefinition{
@@ -472,7 +477,7 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 	return err
 }
 
-func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference, eventType string, path string) {
+func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference, eventType string, path string) error {
 	// TODO extend to additional filters too, to filter them at source and not at destination
 	found := e.Resources.HasKnativeTrigger(func(trigger *eventing.Trigger) bool {
 		return trigger.Spec.Broker == ref.Name &&
@@ -483,9 +488,32 @@ func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference
 		if ref.Namespace == "" {
 			ref.Namespace = e.Integration.Namespace
 		}
-		trigger := knativeutil.CreateTrigger(*ref, e.Integration.Name, eventType, path)
+
+		controllerStrategy, err := e.DetermineControllerStrategy()
+		if err != nil {
+			return err
+		}
+
+		var trigger *eventing.Trigger
+		switch controllerStrategy {
+		case ControllerStrategyKnativeService:
+			trigger, err = knativeutil.CreateKnativeServiceTrigger(*ref, e.Integration.Name, eventType, path)
+			if err != nil {
+				return err
+			}
+		case ControllerStrategyDeployment:
+			trigger, err = knativeutil.CreateServiceTrigger(*ref, e.Integration.Name, eventType, path)
+			if err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("failed to create Knative trigger: unsupported controller strategy %s", controllerStrategy)
+		}
+
 		e.Resources.Add(trigger)
 	}
+
+	return nil
 }
 
 func (t *knativeTrait) ifServiceMissingDo(

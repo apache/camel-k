@@ -1151,6 +1151,30 @@ spec:
                                         cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                       type: object
                                   type: object
+                                restartPolicy:
+                                  description: 'RestartPolicy defines the restart
+                                    behavior of individual containers in a pod. This
+                                    field may only be set for init containers, and
+                                    the only allowed value is "Always". For non-init
+                                    containers or when this field is not specified,
+                                    the restart behavior is defined by the Pod''s
+                                    restart policy and the container type. Setting
+                                    the RestartPolicy as "Always" for the init container
+                                    will have the following effect: this init container
+                                    will be continually restarted on exit until all
+                                    regular containers have terminated. Once all regular
+                                    containers have completed, all init containers
+                                    with restartPolicy "Always" will be shut down.
+                                    This lifecycle differs from normal init containers
+                                    and is often referred to as a "sidecar" container.
+                                    Although this init container still starts in the
+                                    init container sequence, it does not wait for
+                                    the container to complete before proceeding to
+                                    the next init container. Instead, the next init
+                                    container starts immediately after this init container
+                                    is started, or after any startupProbe has successfully
+                                    completed.'
+                                  type: string
                                 securityContext:
                                   description: 'SecurityContext defines the security
                                     options the container should be run with. If set,
@@ -1286,8 +1310,9 @@ spec:
                                             should be used. The profile must be preconfigured
                                             on the node to work. Must be a descending
                                             path, relative to the kubelet's configured
-                                            seccomp profile location. Must only be
-                                            set if type is "Localhost".
+                                            seccomp profile location. Must be set
+                                            if type is "Localhost". Must NOT be set
+                                            for any other type.
                                           type: string
                                         type:
                                           description: "type indicates which kind
@@ -1324,18 +1349,12 @@ spec:
                                         hostProcess:
                                           description: HostProcess determines if a
                                             container should be run as a 'Host Process'
-                                            container. This field is alpha-level and
-                                            will only be honored by components that
-                                            enable the WindowsHostProcessContainers
-                                            feature flag. Setting this field without
-                                            the feature flag will result in errors
-                                            when validating the Pod. All of a Pod's
-                                            containers must have the same effective
-                                            HostProcess value (it is not allowed to
-                                            have a mix of HostProcess containers and
-                                            non-HostProcess containers).  In addition,
-                                            if HostProcess is true then HostNetwork
-                                            must also be set to true.
+                                            container. All of a Pod's containers must
+                                            have the same effective HostProcess value
+                                            (it is not allowed to have a mix of HostProcess
+                                            containers and non-HostProcess containers).
+                                            In addition, if HostProcess is true then
+                                            HostNetwork must also be set to true.
                                           type: boolean
                                         runAsUserName:
                                           description: The UserName in Windows to
@@ -2559,6 +2578,12 @@ spec:
                                         cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                       type: object
                                   type: object
+                                restartPolicy:
+                                  description: Restart policy for the container to
+                                    manage the restart behavior of each container
+                                    within a pod. This may only be set for init containers.
+                                    You cannot set this field on ephemeral containers.
+                                  type: string
                                 securityContext:
                                   description: 'Optional: SecurityContext defines
                                     the security options the ephemeral container should
@@ -2694,8 +2719,9 @@ spec:
                                             should be used. The profile must be preconfigured
                                             on the node to work. Must be a descending
                                             path, relative to the kubelet's configured
-                                            seccomp profile location. Must only be
-                                            set if type is "Localhost".
+                                            seccomp profile location. Must be set
+                                            if type is "Localhost". Must NOT be set
+                                            for any other type.
                                           type: string
                                         type:
                                           description: "type indicates which kind
@@ -2732,18 +2758,12 @@ spec:
                                         hostProcess:
                                           description: HostProcess determines if a
                                             container should be run as a 'Host Process'
-                                            container. This field is alpha-level and
-                                            will only be honored by components that
-                                            enable the WindowsHostProcessContainers
-                                            feature flag. Setting this field without
-                                            the feature flag will result in errors
-                                            when validating the Pod. All of a Pod's
-                                            containers must have the same effective
-                                            HostProcess value (it is not allowed to
-                                            have a mix of HostProcess containers and
-                                            non-HostProcess containers).  In addition,
-                                            if HostProcess is true then HostNetwork
-                                            must also be set to true.
+                                            container. All of a Pod's containers must
+                                            have the same effective HostProcess value
+                                            (it is not allowed to have a mix of HostProcess
+                                            containers and non-HostProcess containers).
+                                            In addition, if HostProcess is true then
+                                            HostNetwork must also be set to true.
                                           type: boolean
                                         runAsUserName:
                                           description: The UserName in Windows to
@@ -3971,6 +3991,30 @@ spec:
                                         cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                                       type: object
                                   type: object
+                                restartPolicy:
+                                  description: 'RestartPolicy defines the restart
+                                    behavior of individual containers in a pod. This
+                                    field may only be set for init containers, and
+                                    the only allowed value is "Always". For non-init
+                                    containers or when this field is not specified,
+                                    the restart behavior is defined by the Pod''s
+                                    restart policy and the container type. Setting
+                                    the RestartPolicy as "Always" for the init container
+                                    will have the following effect: this init container
+                                    will be continually restarted on exit until all
+                                    regular containers have terminated. Once all regular
+                                    containers have completed, all init containers
+                                    with restartPolicy "Always" will be shut down.
+                                    This lifecycle differs from normal init containers
+                                    and is often referred to as a "sidecar" container.
+                                    Although this init container still starts in the
+                                    init container sequence, it does not wait for
+                                    the container to complete before proceeding to
+                                    the next init container. Instead, the next init
+                                    container starts immediately after this init container
+                                    is started, or after any startupProbe has successfully
+                                    completed.'
+                                  type: string
                                 securityContext:
                                   description: 'SecurityContext defines the security
                                     options the container should be run with. If set,
@@ -4106,8 +4150,9 @@ spec:
                                             should be used. The profile must be preconfigured
                                             on the node to work. Must be a descending
                                             path, relative to the kubelet's configured
-                                            seccomp profile location. Must only be
-                                            set if type is "Localhost".
+                                            seccomp profile location. Must be set
+                                            if type is "Localhost". Must NOT be set
+                                            for any other type.
                                           type: string
                                         type:
                                           description: "type indicates which kind
@@ -4144,18 +4189,12 @@ spec:
                                         hostProcess:
                                           description: HostProcess determines if a
                                             container should be run as a 'Host Process'
-                                            container. This field is alpha-level and
-                                            will only be honored by components that
-                                            enable the WindowsHostProcessContainers
-                                            feature flag. Setting this field without
-                                            the feature flag will result in errors
-                                            when validating the Pod. All of a Pod's
-                                            containers must have the same effective
-                                            HostProcess value (it is not allowed to
-                                            have a mix of HostProcess containers and
-                                            non-HostProcess containers).  In addition,
-                                            if HostProcess is true then HostNetwork
-                                            must also be set to true.
+                                            container. All of a Pod's containers must
+                                            have the same effective HostProcess value
+                                            (it is not allowed to have a mix of HostProcess
+                                            containers and non-HostProcess containers).
+                                            In addition, if HostProcess is true then
+                                            HostNetwork must also be set to true.
                                           type: boolean
                                         runAsUserName:
                                           description: The UserName in Windows to
@@ -4570,7 +4609,8 @@ spec:
                                       The profile must be preconfigured on the node
                                       to work. Must be a descending path, relative
                                       to the kubelet's configured seccomp profile
-                                      location. Must only be set if type is "Localhost".
+                                      location. Must be set if type is "Localhost".
+                                      Must NOT be set for any other type.
                                     type: string
                                   type:
                                     description: "type indicates which kind of seccomp
@@ -4642,16 +4682,12 @@ spec:
                                   hostProcess:
                                     description: HostProcess determines if a container
                                       should be run as a 'Host Process' container.
-                                      This field is alpha-level and will only be honored
-                                      by components that enable the WindowsHostProcessContainers
-                                      feature flag. Setting this field without the
-                                      feature flag will result in errors when validating
-                                      the Pod. All of a Pod's containers must have
-                                      the same effective HostProcess value (it is
-                                      not allowed to have a mix of HostProcess containers
-                                      and non-HostProcess containers).  In addition,
-                                      if HostProcess is true then HostNetwork must
-                                      also be set to true.
+                                      All of a Pod's containers must have the same
+                                      effective HostProcess value (it is not allowed
+                                      to have a mix of HostProcess containers and
+                                      non-HostProcess containers). In addition, if
+                                      HostProcess is true then HostNetwork must also
+                                      be set to true.
                                     type: boolean
                                   runAsUserName:
                                     description: The UserName in Windows to run the
@@ -6732,14 +6768,17 @@ spec:
                             type: string
                           mavenProfiles:
                             description: 'A list of references pointing to configmaps/secrets
-                              that contains a maven profile. The content of the maven
-                              profile is expected to be a text containing a valid
-                              maven profile starting with `<profile>` and ending with
-                              `</profile>` that will be integrated as an inline profile
-                              in the POM. Syntax: [configmap|secret]:name[/key], where
-                              name represents the resource name, key optionally represents
-                              the resource key to be filtered (default key value =
-                              profile.xml).'
+                              that contains a maven profile. This configmap/secret
+                              is a resource of the IntegrationKit created, therefore
+                              it needs to be present in the namespace where the operator
+                              is going to create the IntegrationKit. The content of
+                              the maven profile is expected to be a text containing
+                              a valid maven profile starting with `<profile>` and
+                              ending with `</profile>` that will be integrated as
+                              an inline profile in the POM. Syntax: [configmap|secret]:name[/key],
+                              where name represents the resource name, key optionally
+                              represents the resource key to be filtered (default
+                              key value = profile.xml).'
                             items:
                               type: string
                             type: array
@@ -6797,9 +6836,8 @@ spec:
                             description: A list of tasks sorted by the order of execution
                               in a csv format, ie, `<taskName1>,<taskName2>,...`.
                               Mind that you must include also the operator tasks (`builder`,
-                              `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`)
-                              if you need to execute them. Useful only with `pod`
-                              strategy.
+                              `quarkus-native`, `package`, `jib`, `s2i`) if you need
+                              to execute them. Useful only with `pod` strategy.
                             type: string
                           tasksLimitCPU:
                             description: A list of limit cpu configuration for the
@@ -6851,7 +6889,10 @@ spec:
                           runtimeVersion:
                             description: The camel-k-runtime version to use for the
                               integration. It overrides the default version set in
-                              the Integration Platform.
+                              the Integration Platform. You can use a fixed version
+                              (for example "3.2.3") or a semantic version (for example
+                              "3.x") which will try to resolve to the best matching
+                              Catalog existing on the cluster.
                             type: string
                         type: object
                       container:
@@ -6873,7 +6914,14 @@ spec:
                               kubernetes Service.
                             type: boolean
                           image:
-                            description: The main container image
+                            description: The main container image to use for the Integration.
+                              When using this parameter the operator will create a
+                              synthetic IntegrationKit which won't be able to execute
+                              traits requiring CamelCatalog. If the container image
+                              you're using is coming from an IntegrationKit, use instead
+                              Integration `.spec.integrationKit` parameter. If you're
+                              moving the Integration across environments, you will
+                              also need to create an "external" IntegrationKit.
                             type: string
                           imagePullPolicy:
                             description: 'The pull policy: Always|Never|IfNotPresent'

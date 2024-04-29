@@ -145,7 +145,9 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse environment variables!")
 					}
 					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
-						d.Spec.Template.Spec.Containers[i].Env = append(d.Spec.Template.Spec.Containers[i].Env, envVars...)
+						for _, envVar := range envVars {
+							envvar.SetVar(&d.Spec.Template.Spec.Containers[i].Env, envVar)
+						}
 					}
 				}
 			}
@@ -464,7 +466,7 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {
 	if global {
 		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-			"/config/openshift/descoped/operator-cluster-role-openshift.yaml",
+			"/config/rbac/openshift/descoped/operator-cluster-role-openshift.yaml",
 			"/config/rbac/openshift/descoped/operator-cluster-role-binding-openshift.yaml",
 		)
 	} else {

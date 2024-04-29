@@ -15,7 +15,7 @@ There are many ways you can contribute to Camel K, not only software development
 * Use it and report any feedback, improvement or bug you may find via https://github.com/apache/camel-k/[Github], link:/community/mailing-list/[mailing list] or https://camel.zulipchat.com[chat].
 * Contribute by writing missing documentation or blog posts about the features around Camel K
 * https://twitter.com/ApacheCamel[Tweet], like and socialize Camel K in your preferred social network
-* Enjoy the talks that the contributors submit in various conferences around the world
+* Enjoy the talks that the contributors submit in various conferences around the world.
 
 [[requirements]]
 == Requirements
@@ -36,11 +36,9 @@ The Camel K Java runtime (camel-k-runtime) requires:
 
 [[checks]]
 == Running checks
-Checks rely on `golangci-lint` being installed, to install it look at the https://github.com/golangci/golangci-lint#local-installation[Local Installation] instructions.
+Checks rely on `golangci-lint` being installed in version `1.55.2`, to install it look at the https://golangci-lint.run/welcome/install/[Local Installation] instructions.
 
-You can run checks via `make lint`, or you can install a GIT pre-commit hook and have the checks run via https://pre-commit.com[pre-commit]; then make sure to install the pre-commit hooks after installing pre-commit by running:
-
- $ pre-commit install
+You can run checks via `make lint`.
 
 [[checking-out]]
 == Checking Out the Sources
@@ -56,14 +54,18 @@ This is a high-level overview of the project structure:
 [options="header"]
 |=======================
 | Path						| Content
+| https://github.com/apache/camel-k/tree/main/addons[/addons]       | Contains various of addons. 
 | https://github.com/apache/camel-k/tree/main/build[/build]			| Contains the Docker and Maven build configuration.
 | https://github.com/apache/camel-k/tree/main/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary (manager) and the **kamel** client tool.
-| https://github.com/apache/camel-k/tree/main/config[/config]		| Contains Kubernetes resource files, specifically for use with the operator-sdk, that are used by the **kamel** client during installation. The `/pkg/resources/resources.go` file is kept in sync with the content of the directory (`make build-resources`), so that resources can be used from within the go code.
-| https://github.com/apache/camel-k/tree/main/deploy[/deploy]		| Contains Kubernetes resource files, used by the **kamel** client during installation. The `/pkg/resources.go` file is kept in sync with the content of the directory (`make build-resources`), so that resources can be used from within the go code.
 | https://github.com/apache/camel-k/tree/main/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
 | https://github.com/apache/camel-k/tree/main/e2e[/e2e]			| Include integration tests to ensure that the software interacts correctly with Kubernetes and OpenShift.
-| https://github.com/apache/camel-k/tree/main/examples[/examples]			| Various examples of Camel K usage.
+| https://github.com/apache/camel-k/tree/main/examples[/examples]			| Camel K examples were moved to separate git repository https://github.com/apache/camel-k-examples[camel-k-examples].
+| https://github.com/apache/camel-k/tree/main/helm/camel-k[/helm/camel-k]           | Contains Helm chart for Camel K installation on any Kubernetes cluster.
+| https://github.com/apache/camel-k/tree/main/install[/install]         | Contains installation files.
+| https://github.com/apache/camel-k/tree/main/java[/java]           | Contains crds and Maven logging.
 | https://github.com/apache/camel-k/tree/main/pkg[/pkg]			| This is where the code resides. The code is divided in multiple subpackages.
+| https://github.com/apache/camel-k/tree/main/proposals[/proposals]           | Contains variety of proposals for Camel K.
+| https://github.com/apache/camel-k/tree/main/release-utils/scripts[/release-utils/scripts]         | Contains scripts for creating release.
 | https://github.com/apache/camel-k/tree/main/script[/script]		| Contains scripts used during make operations for building the project.
 |=======================
 
@@ -79,7 +81,12 @@ make
 
 This executes a full build of the Go code. If you need to build the components separately you can execute:
 
-* `make build-kamel`: to build the `kamel` client tool only.
+To build the `kamel` client tool only:
+
+[source]
+----
+make build-kamel
+----
 
 Currently the build is not entirely supported on Windows. If you're building on a Windows system, here's a temporary workaround:
 
@@ -96,7 +103,7 @@ After a successful build, if you're connected to a Docker daemon, you can build 
 make images
 ----
 
-The above command produces a `camel-k` image with the name `docker.io/apache/camel-k`. Sometimes you might need to produce `camel-k` images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `STAGING_IMAGE` to `make` as shown below:
+The above command produces a `camel-k` image with the name `apache/camel-k`. Sometimes you might need to produce `camel-k` images that need to be pushed to the custom repository e.g. `docker.io/myrepo/camel-k`, to do that you can pass a parameter `STAGING_IMAGE` to `make` as shown below:
 
 [source]
 ----
@@ -139,16 +146,16 @@ First remove any camel k operator you may have installed, otherwise it will conf
 
 * Enable the `registry` minikube addon: `minikube addons enable registry`
 * Set the access to the internal minikube registry: `eval $(minikube docker-env)`
-* Run `make images`: to build the project and install the image in the internal minikube registry
+* Run `make images` to build the project and install the image in the internal minikube registry
 * Install camel-k-operator: `./kamel install`
 
 === For remote Kubernetes/OpenShift clusters
 
-If you have changed anything locally and want to apply the changes to a remote cluster, first push your `camel-k` image to a custom repository (see <<building>>) and run the following command (the image name `docker.io/myrepo/camel-k:1.5.0-SNAPSHOT` should be changed accordingly):
+If you have changed anything locally and want to apply the changes to a remote cluster, first push your `camel-k` image to a custom repository (see <<building>>) and run the following command (the image name `docker.io/myrepo/camel-k:2.4.0-SNAPSHOT` should be changed accordingly):
 
 [source]
 ----
-kamel install --operator-image=docker.io/myrepo/camel-k:1.5.0-SNAPSHOT --operator-image-pull-policy=Always --olm=false
+kamel install --operator-image=docker.io/myrepo/camel-k:2.4.0-SNAPSHOT --operator-image-pull-policy=Always --olm=false
 ----
 
 Note `--olm=false` is necessary as otherwise the OLM bundle version is preferred.
@@ -157,15 +164,21 @@ Note `--olm=false` is necessary as otherwise the OLM bundle version is preferred
 
 If you want to test Helm installation
 
-* Build the Helm chart `make release-helm`
+* Build the Helm chart: `make release-helm`
 * Build the project and the image: `make images`
-* Set the internal registry `export REGISTRY_ADDRESS=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')`
+* Set the internal registry: `export REGISTRY_ADDRESS=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')`
 * Install with Helm (look at the latest version produced by `make release-helm`)
-```
- helm install camel-k-dev docs/charts/camel-k-2.1.0-SNAPSHOT.tgz --set platform.build.registry.address=${REGISTRY_ADDRESS} --set platform.build.registry.insecure=true --set operator.image=apache/camel-k:2.1.0-SNAPSHOT
-```
 
-To uninstall: `helm uninstall camel-k-dev`
+[source]
+----
+helm install camel-k-dev docs/charts/camel-k-2.4.0-SNAPSHOT.tgz --set platform.build.registry.address=${REGISTRY_ADDRESS} --set platform.build.registry.insecure=true --set operator.image=apache/camel-k:2.4.0-SNAPSHOT
+----
+
+* To uninstall: `helm uninstall camel-k-dev`
+
+=== Examples
+
+Camel K examples are located in separate git repository https://github.com/apache/camel-k-examples/[camel-k-examples]. You can clone it and run the examples locally.
 
 === Use
 
@@ -173,14 +186,7 @@ Now you can play with Camel K:
 
 [source]
 ----
-./kamel run examples/Sample.java
-----
-
-To add additional dependencies to your routes:
-
-[source]
-----
-./kamel run -d camel:dns examples/dns.js
+./kamel run <camel-k-examples>/01-basic/Basic.java
 ----
 
 [[local-development]]
@@ -236,7 +242,10 @@ files in a directory named `bundle`. The directory contains a Dockerfile that al
 single image. It is this image that is submitted to the OLM registry.
 
 To generate the bundle for camel-k, use the following command:
+
+[source]
 ----
 make bundle
 ----
+
 The bundle directory is created at the root of the camel-k project filesystem.

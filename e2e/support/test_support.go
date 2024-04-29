@@ -139,7 +139,6 @@ var NoOlmOperatorImage string
 
 var testContext = context.TODO()
 var testClient client.Client
-var clientMutex = sync.Mutex{}
 
 var testSetupMutex = sync.Mutex{}
 var kamelInstallMutex = sync.Mutex{}
@@ -162,8 +161,6 @@ func TestContext() context.Context {
 }
 
 func TestClient(t *testing.T) client.Client {
-	clientMutex.Lock()
-	defer clientMutex.Unlock()
 
 	if testClient != nil {
 		return testClient
@@ -178,8 +175,6 @@ func TestClient(t *testing.T) client.Client {
 }
 
 func RefreshClient(t *testing.T) client.Client {
-	clientMutex.Lock()
-	defer clientMutex.Unlock()
 
 	var err error
 	testClient, err = NewTestClient()
@@ -1156,6 +1151,16 @@ func KitPhase(t *testing.T, ctx context.Context, ns, name string) func() v1.Inte
 			return v1.IntegrationKitPhaseNone
 		}
 		return kit.Status.Phase
+	}
+}
+
+func KitImage(t *testing.T, ctx context.Context, ns, name string) func() string {
+	return func() string {
+		kit := Kit(t, ctx, ns, name)()
+		if kit == nil {
+			return ""
+		}
+		return kit.Status.Image
 	}
 }
 

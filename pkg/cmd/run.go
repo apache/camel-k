@@ -609,6 +609,14 @@ func showIntegrationOutput(cmd *cobra.Command, integration *v1.Integration, outp
 	return printer.PrintObj(integration, cmd.OutOrStdout())
 }
 
+func showIntegrationKitOutput(cmd *cobra.Command, integrationKit *v1.IntegrationKit, outputFormat string) error {
+	printer := printers.NewTypeSetter(scheme.Scheme)
+	printer.Delegate = &kubernetes.CLIPrinter{
+		Format: outputFormat,
+	}
+	return printer.PrintObj(integrationKit, cmd.OutOrStdout())
+}
+
 func (o *runCmdOptions) getIntegration(cmd *cobra.Command, c client.Client, namespace, name string) (*v1.Integration, *v1.Integration, error) {
 	it := &v1.Integration{
 		TypeMeta: metav1.TypeMeta{
@@ -854,6 +862,9 @@ func (o *runCmdOptions) applyDependencies(cmd *cobra.Command, c client.Client, i
 				catalog, err = createCamelCatalog()
 				if err != nil {
 					return err
+				}
+				if catalog == nil {
+					return fmt.Errorf("error trying to load the default Camel catalog")
 				}
 			}
 			addDependency(cmd, it, item, catalog)

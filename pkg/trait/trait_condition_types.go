@@ -35,12 +35,11 @@ const (
 // TraitCondition is used to get all information/warning about a trait configuration.
 // It should either use an IntegrationConditionType or IntegrationKitConditionType.
 type TraitCondition struct {
-	traitID                     string
-	integrationConditionType    v1.IntegrationConditionType
-	integrationKitConditionType v1.IntegrationKitConditionType
-	conditionStatus             corev1.ConditionStatus
-	message                     string
-	reason                      string
+	traitID                  string
+	integrationConditionType v1.IntegrationConditionType
+	conditionStatus          corev1.ConditionStatus
+	message                  string
+	reason                   string
 }
 
 func NewIntegrationCondition(traitID string, ict v1.IntegrationConditionType, cs corev1.ConditionStatus, reason, message string) *TraitCondition {
@@ -61,8 +60,19 @@ func NewIntegrationConditionUserEnabledWithMessage(traitID string, message strin
 	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", userEnabledMessage, message))
 }
 
-func newIntegrationConditionPlatformDisabledWithMessage(traitID string, message string) *TraitCondition {
+func NewIntegrationConditionPlatformDisabledWithMessage(traitID string, message string) *TraitCondition {
 	return NewIntegrationCondition(traitID, v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, fmt.Sprintf("%s: %s", platformDisabledMessage, message))
+}
+
+// This one is reused among different traits in order to avoid polluting the conditions with the same message.
+func NewIntegrationConditionPlatformDisabledCatalogMissing() *TraitCondition {
+	return NewIntegrationCondition(
+		"Generic",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		traitConfigurationReason,
+		"no camel catalog available for this Integration. Several traits have not been executed for this reason. Check applied trait condition to know more.",
+	)
 }
 
 func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, corev1.ConditionStatus, string, string) {
@@ -73,7 +83,7 @@ func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, c
 }
 
 func (tc *TraitCondition) integrationKitCondition() (v1.IntegrationKitConditionType, corev1.ConditionStatus, string, string) {
-	return v1.IntegrationKitConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationKitConditionType)),
+	return v1.IntegrationKitConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationConditionType)),
 		tc.conditionStatus,
 		tc.reason,
 		tc.message

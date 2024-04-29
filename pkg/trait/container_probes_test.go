@@ -207,10 +207,10 @@ func TestProbesOnKnativeService(t *testing.T) {
 	container := env.GetIntegrationContainer()
 
 	assert.Equal(t, "", container.LivenessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(0), container.LivenessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, int32(defaultContainerPort), container.LivenessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, defaultLivenessProbePath, container.LivenessProbe.HTTPGet.Path)
 	assert.Equal(t, "", container.ReadinessProbe.HTTPGet.Host)
-	assert.Equal(t, int32(0), container.ReadinessProbe.HTTPGet.Port.IntVal)
+	assert.Equal(t, int32(defaultContainerPort), container.ReadinessProbe.HTTPGet.Port.IntVal)
 	assert.Equal(t, defaultReadinessProbePath, container.ReadinessProbe.HTTPGet.Path)
 	assert.Equal(t, int32(1234), container.LivenessProbe.TimeoutSeconds)
 }

@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -144,8 +145,13 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		// explicitly disabled
+	if !pointer.BoolDeref(t.Enabled, true) || e.CamelCatalog == nil {
+		// explicitly disabled or sourceless Integration (missing catalog)
+		return nil, nil
+	}
+
+	// Knative serving is required
+	if ok, _ := knative.IsServingInstalled(e.Client); !ok {
 		return nil, nil
 	}
 

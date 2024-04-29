@@ -53,6 +53,9 @@ func newHealthTrait() Trait {
 }
 
 func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	if e.Integration == nil ||
 		!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
@@ -84,17 +87,14 @@ func (t *healthTrait) Apply(e *Environment) error {
 	if container == nil {
 		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
 	}
+
 	var port *intstr.IntOrString
-	// Use the default named HTTP container port if it exists.
-	// For Knative, the Serving webhook is responsible for setting the user-land port,
-	// and associating the probes with the corresponding port.
-	if containerPort := e.getIntegrationContainerPort(); containerPort != nil && containerPort.Name == defaultContainerPortName {
-		p := intstr.FromString(defaultContainerPortName)
-		port = &p
-	} else if e.GetTrait(knativeServiceTraitID) == nil {
-		p := intstr.FromInt(defaultContainerPort)
-		port = &p
+	containerPort := e.getIntegrationContainerPort()
+	if containerPort == nil {
+		containerPort = e.createContainerPort()
 	}
+	p := intstr.FromInt32(containerPort.ContainerPort)
+	port = &p
 
 	if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
 		t.setCatalogConfiguration(container, port, e.CamelCatalog.Runtime.Capabilities["health"].Metadata)

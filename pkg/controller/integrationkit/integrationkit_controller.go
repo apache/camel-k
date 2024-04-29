@@ -237,7 +237,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 		rlog.Debug("Preparing to shift integration kit phase")
-		if target.IsExternal() {
+		if target.IsExternal() || target.IsSynthetic() {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 			return r.update(ctx, &instance, target)
 		}

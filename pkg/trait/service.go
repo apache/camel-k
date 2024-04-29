@@ -56,13 +56,15 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			"explicitly disabled",
 		), nil
 	}
-
+	if e.CamelCatalog == nil {
+		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+	}
 	// in case the knative-service and service trait are enabled, the knative-service has priority
 	// then this service is disabled
 	if e.GetTrait(knativeServiceTraitID) != nil {
 		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
 		if pointer.BoolDeref(knativeServiceTrait.Enabled, true) {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("Service", "knative-service trait has priority over this trait"), nil
+			return false, NewIntegrationConditionPlatformDisabledWithMessage("Service", "knative-service trait has priority over this trait"), nil
 		}
 	}
 
