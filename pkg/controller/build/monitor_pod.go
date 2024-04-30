@@ -361,6 +361,8 @@ func publishTaskImageName(tasks []v1.Task) string {
 		return t.Spectrum.Image
 	case t.Jib != nil:
 		return t.Jib.Image
+	case t.S2i != nil:
+		return t.S2i.Name
 	}
 
 	return ""
@@ -378,6 +380,8 @@ func publishTaskName(tasks []v1.Task) string {
 		return t.Spectrum.Name
 	case t.Jib != nil:
 		return t.Jib.Name
+	case t.S2i != nil:
+		return t.S2i.Name
 	}
 
 	return ""
