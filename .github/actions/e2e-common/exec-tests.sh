@@ -139,6 +139,9 @@ fi
 
 export CAMEL_K_E2E_FAST_SETUP="true"
 
+export CAMEL_K_TEST_COPY_CATALOG="false"
+export CAMEL_K_TEST_COPY_INTEGRATION_KITS="false"
+
 # Then run all integration tests rather than ending on first failure
 set -e
 exit_code=0
