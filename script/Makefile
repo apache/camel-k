@@ -230,7 +230,10 @@ build-platform: build build-kamel-platform
 
 ci-build: clean codegen set-version check-licenses dir-licenses build-kamel cross-compile
 
-do-build: gotestfmt-install
+check_jdk_version:
+	@go run ./cmd/util/check_jdk_version
+
+do-build: gotestfmt-install check_jdk_version
 ifeq ($(DO_TEST_PREBUILD),true)
 TEST_PREBUILD = build
 else
