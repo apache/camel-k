@@ -4,8 +4,15 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.3.1...HEAD)
 
+**Closed issues:**
+
+- Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
+
 **Merged pull requests:**
 
+- chore\(release\): fix missing licenses [\#5442](https://github.com/apache/camel-k/pull/5442) ([gansheer](https://github.com/gansheer))
+- chore\(e2e\): Allow to disable copy optimizations on E2E tests [\#5436](https://github.com/apache/camel-k/pull/5436) ([christophd](https://github.com/christophd))
+- fix\(pipeline\): add s2i to publish tasks [\#5435](https://github.com/apache/camel-k/pull/5435) ([mmajerni](https://github.com/mmajerni))
 - docs: remove duplicate affinity entry in camel-runtimes doc [\#5434](https://github.com/apache/camel-k/pull/5434) ([mdebarros](https://github.com/mdebarros))
 - chore\(cmd\): error if no default catalog found [\#5431](https://github.com/apache/camel-k/pull/5431) ([squakez](https://github.com/squakez))
 - fix\(trait\): compute cm after catalog [\#5423](https://github.com/apache/camel-k/pull/5423) ([squakez](https://github.com/squakez))
