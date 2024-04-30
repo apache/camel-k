@@ -1999,6 +1999,11 @@ func PlatformByName(t *testing.T, ctx context.Context, ns string, name string) f
 }
 
 func CopyIntegrationKits(t *testing.T, ctx context.Context, ns, operatorID string) error {
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_INTEGRATION_KITS"); ok && value == "false" {
+		fmt.Println("Copy integration kits optimization is disabled")
+		return nil
+	}
+
 	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
 
 	lst := v1.NewIntegrationKitList()
@@ -2034,6 +2039,11 @@ func CopyIntegrationKits(t *testing.T, ctx context.Context, ns, operatorID strin
 }
 
 func CopyCamelCatalog(t *testing.T, ctx context.Context, ns, operatorID string) error {
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_CATALOG"); ok && value == "false" {
+		fmt.Println("Copy catalog optimization is disabled")
+		return nil
+	}
+
 	catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
 	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
 
