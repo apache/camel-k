@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.3.1...HEAD)
+
+**Closed issues:**
+
+- Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
+
 ## [v2.3.1](https://github.com/apache/camel-k/tree/v2.3.1) (2024-04-29)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.3.1...v2.3.1)
