@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
+- Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 
 ## [v2.3.1](https://github.com/apache/camel-k/tree/v2.3.1) (2024-04-29)
 
