@@ -43,6 +43,10 @@ spec:
       jsonPath: .status.phase
       name: Phase
       type: string
+    - description: The integration readiness
+      jsonPath: .status.conditions[?(@.type=="Ready")].status
+      name: Ready
+      type: string
     - description: The runtime version
       jsonPath: .status.runtimeProvider
       name: Runtime Provider
