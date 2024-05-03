@@ -6620,9 +6620,24 @@ spec:
                   container:
                     description: The configuration of Container trait
                     properties:
+                      allowPrivilegeEscalation:
+                        description: Security Context AllowPrivilegeEscalation configuration
+                        type: boolean
                       auto:
                         description: To automatically enable the trait
                         type: boolean
+                      capabilitiesAdd:
+                        description: Security Context Capabilities Add configuration
+                        items:
+                          description: Capability represent POSIX capabilities type
+                          type: string
+                        type: array
+                      capabilitiesDrop:
+                        description: Security Context Capabilities Drop configuration
+                        items:
+                          description: Capability represent POSIX capabilities type
+                          type: string
+                        type: array
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
                           for backward compatibility.'
@@ -6676,6 +6691,15 @@ spec:
                       requestMemory:
                         description: The minimum amount of memory required.
                         type: string
+                      runAsNonRoot:
+                        description: Security Context RunAsNonRoot configuration
+                        type: boolean
+                      seccompProfileType:
+                        description: Security Context SeccompProfileType configuration
+                        enum:
+                        - Unconfined
+                        - RuntimeDefault
+                        type: string
                       servicePort:
                         description: To configure under which service port the container
                           port is to be exposed (default `80`).
@@ -6684,6 +6708,12 @@ spec:
                         description: To configure under which service port name the
                           container port is to be exposed (default `http`).
                         type: string
+                      uid:
+                        description: 'Security Context RunAsUser configuration: this
+                          value is automatically retrieved in Openshift clusters when
+                          not explicitly set.'
+                        format: int64
+                        type: integer
                     type: object
                   cron:
                     description: The configuration of Cron trait

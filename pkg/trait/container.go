@@ -43,10 +43,15 @@ import (
 )
 
 const (
+	containerTraitID     = "container"
 	defaultContainerName = "integration"
 	defaultContainerPort = 8080
 	defaultServicePort   = 80
-	containerTraitID     = "container"
+	// default security context configuration
+	defaultRunAsNonRoot             = true
+	defaultSeccompProfileType       = corev1.SeccompProfileTypeRuntimeDefault
+	defaultAllowPrivilegeEscalation = false
+	defaultCapabilitiesDrop         = "ALL"
 )
 
 type containerTrait struct {
@@ -58,10 +63,14 @@ func newContainerTrait() Trait {
 	return &containerTrait{
 		BasePlatformTrait: NewBasePlatformTrait(containerTraitID, 1600),
 		ContainerTrait: traitv1.ContainerTrait{
-			Port:            defaultContainerPort,
-			ServicePort:     defaultServicePort,
-			ServicePortName: defaultContainerPortName,
-			Name:            defaultContainerName,
+			Port:                     defaultContainerPort,
+			ServicePort:              defaultServicePort,
+			ServicePortName:          defaultContainerPortName,
+			Name:                     defaultContainerName,
+			RunAsNonRoot:             pointer.Bool(defaultRunAsNonRoot),
+			SeccompProfileType:       defaultSeccompProfileType,
+			AllowPrivilegeEscalation: pointer.Bool(defaultAllowPrivilegeEscalation),
+			CapabilitiesDrop:         []corev1.Capability{defaultCapabilitiesDrop},
 		},
 	}
 }
@@ -249,7 +258,10 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		t.configureService(e, &container, knative)
 	}
 	t.configureCapabilities(e)
-	t.configureSecurityContext(e, &container)
+	err := t.setSecurityContext(e, &container)
+	if err != nil {
+		return err
+	}
 	if visited {
 		*containers = append(*containers, container)
 	}
@@ -332,13 +344,33 @@ func (t *containerTrait) configureCapabilities(e *Environment) {
 	}
 }
 
-func (t *containerTrait) configureSecurityContext(e *Environment, container *corev1.Container) {
-	// get security context from security context constraint configuration in namespace
-	isOpenShift, _ := openshift.IsOpenShift(e.Client)
-	if isOpenShift {
-		securityContext, _ := openshift.GetOpenshiftSecurityContextRestricted(e.Ctx, e.Client, e.Integration.Namespace)
-		if securityContext != nil {
-			container.SecurityContext = securityContext
+func (t *containerTrait) setSecurityContext(e *Environment, container *corev1.Container) error {
+	sc := corev1.SecurityContext{
+		RunAsNonRoot: t.RunAsNonRoot,
+		SeccompProfile: &corev1.SeccompProfile{
+			Type: t.SeccompProfileType,
+		},
+		AllowPrivilegeEscalation: t.AllowPrivilegeEscalation,
+		Capabilities:             &corev1.Capabilities{Drop: t.CapabilitiesDrop, Add: t.CapabilitiesAdd},
+	}
+	if t.RunAsUser == nil {
+		// get security context UID from Openshift when non configured by the user
+		isOpenShift, err := openshift.IsOpenShift(e.Client)
+		if err != nil {
+			return err
+		}
+		if isOpenShift {
+			securityContextUid, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
+			if err != nil {
+				return err
+			}
+			if securityContextUid != nil {
+				t.RunAsUser = securityContextUid
+			}
 		}
 	}
+	sc.RunAsUser = t.RunAsUser
+	container.SecurityContext = &sc
+
+	return nil
 }

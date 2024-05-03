@@ -26,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
+	"k8s.io/utils/pointer"
 )
 
 var noSccAnnotationNamespace *corev1.Namespace = &corev1.Namespace{
@@ -67,7 +68,7 @@ func TestGetUserIdNamespaceConstrained(t *testing.T) {
 	uid, errUID := GetOpenshiftUser(context.Background(), kclient, "myuser")
 
 	require.NoError(t, errUID)
-	assert.Equal(t, "1000860000", uid)
+	assert.Equal(t, pointer.Int64(1000860000), uid)
 }
 
 func TestGetPodSecurityContextNamespaceWithoutLabels(t *testing.T) {
@@ -93,9 +94,9 @@ func TestGetPodSecurityContextNamespaceConstrained(t *testing.T) {
 func TestGetSecurityContextNamespaceWithoutLabels(t *testing.T) {
 	kclient := initClientWithNamespace(t, noSccAnnotationNamespace)
 
-	_, errSc := GetOpenshiftSecurityContextRestricted(context.Background(), kclient, "no-scc-annotations-namespace")
-
+	sc, errSc := GetOpenshiftSecurityContextRestricted(context.Background(), kclient, "no-scc-annotations-namespace")
 	require.Error(t, errSc)
+	assert.Nil(t, sc)
 	assert.Contains(t, errSc.Error(), "annotation 'openshift.io/sa.scc.uid-range' not found")
 }
 

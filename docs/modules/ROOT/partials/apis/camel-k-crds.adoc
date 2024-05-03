@@ -6539,6 +6539,48 @@ Integration `.spec.integrationKit` parameter. If you're moving the Integration a
 
 The pull policy: Always{vbar}Never{vbar}IfNotPresent
 
+|`uid` +
+int64
+|
+
+
+Security Context RunAsUser configuration: this value is automatically retrieved in Openshift clusters when not explicitly set.
+
+|`runAsNonRoot` +
+bool
+|
+
+
+Security Context RunAsNonRoot configuration
+
+|`seccompProfileType` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#seccompprofiletype-v1-core[Kubernetes core/v1.SeccompProfileType]*
+|
+
+
+Security Context SeccompProfileType configuration
+
+|`allowPrivilegeEscalation` +
+bool
+|
+
+
+Security Context AllowPrivilegeEscalation configuration
+
+|`capabilitiesDrop` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#capability-v1-core[[\]Kubernetes core/v1.Capability]*
+|
+
+
+Security Context Capabilities Drop configuration
+
+|`capabilitiesAdd` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#capability-v1-core[[\]Kubernetes core/v1.Capability]*
+|
+
+
+Security Context Capabilities Add configuration
+
 
 |===
 

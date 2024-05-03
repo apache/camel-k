@@ -56,4 +56,17 @@ type ContainerTrait struct {
 	// The pull policy: Always|Never|IfNotPresent
 	// +kubebuilder:validation:Enum=Always;Never;IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
+	// Security Context RunAsUser configuration: this value is automatically retrieved in Openshift clusters when not explicitly set.
+	RunAsUser *int64 `property:"run-as-user" json:"runAsUser,omitempty"`
+	// Security Context RunAsNonRoot configuration
+	RunAsNonRoot *bool `property:"run-as-non-root" json:"runAsNonRoot,omitempty"`
+	// Security Context SeccompProfileType configuration
+	// +kubebuilder:validation:Enum=Unconfined;RuntimeDefault
+	SeccompProfileType corev1.SeccompProfileType `property:"seccomp-profile-type" json:"seccompProfileType,omitempty"`
+	// Security Context AllowPrivilegeEscalation configuration
+	AllowPrivilegeEscalation *bool `property:"allow-privilege-escalation" json:"allowPrivilegeEscalation,omitempty"`
+	// Security Context Capabilities Drop configuration
+	CapabilitiesDrop []corev1.Capability `property:"capabilities-drop" json:"capabilitiesDrop,omitempty"`
+	// Security Context Capabilities Add configuration
+	CapabilitiesAdd []corev1.Capability `property:"capabilities-add" json:"capabilitiesAdd,omitempty"`
 }
