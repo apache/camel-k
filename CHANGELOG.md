@@ -6,16 +6,23 @@
 
 **Closed issues:**
 
+- Build should enforce a required jdk version [\#5439](https://github.com/apache/camel-k/issues/5439)
 - Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
+- Make healt trait as default [\#5024](https://github.com/apache/camel-k/issues/5024)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 
 **Merged pull requests:**
 
+- feat\(api\): show integration readiness [\#5448](https://github.com/apache/camel-k/pull/5448) ([squakez](https://github.com/squakez))
+- Enhance offline script and documentation [\#5447](https://github.com/apache/camel-k/pull/5447) ([claudio4j](https://github.com/claudio4j))
+- chore\(deps\): bump github.com/onsi/gomega from 1.33.0 to 1.33.1 [\#5444](https://github.com/apache/camel-k/pull/5444) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(release\): fix missing licenses [\#5442](https://github.com/apache/camel-k/pull/5442) ([gansheer](https://github.com/gansheer))
+- fixes\(\#5439\): Build should enforce a required jdk version [\#5440](https://github.com/apache/camel-k/pull/5440) ([tdiesler](https://github.com/tdiesler))
 - chore\(e2e\): Allow to disable copy optimizations on E2E tests [\#5436](https://github.com/apache/camel-k/pull/5436) ([christophd](https://github.com/christophd))
 - fix\(pipeline\): add s2i to publish tasks [\#5435](https://github.com/apache/camel-k/pull/5435) ([mmajerni](https://github.com/mmajerni))
 - docs: remove duplicate affinity entry in camel-runtimes doc [\#5434](https://github.com/apache/camel-k/pull/5434) ([mdebarros](https://github.com/mdebarros))
 - chore\(cmd\): error if no default catalog found [\#5431](https://github.com/apache/camel-k/pull/5431) ([squakez](https://github.com/squakez))
+- \(\#5424\) Generate badges & ignore internal traits [\#5425](https://github.com/apache/camel-k/pull/5425) ([tdiesler](https://github.com/tdiesler))
 - fix\(trait\): compute cm after catalog [\#5423](https://github.com/apache/camel-k/pull/5423) ([squakez](https://github.com/squakez))
 - fix\(\#5402\): Evaluate Knative profile based on Serving/Eventing installed [\#5419](https://github.com/apache/camel-k/pull/5419) ([christophd](https://github.com/christophd))
 - fix\(trait\): remove imageWasKit [\#5418](https://github.com/apache/camel-k/pull/5418) ([squakez](https://github.com/squakez))
@@ -58,6 +65,7 @@
 - Platform choice for aarch64 is incorrect [\#5299](https://github.com/apache/camel-k/pull/5299) ([tdiesler](https://github.com/tdiesler))
 - chore\(deps\): bump knative.dev/eventing from 0.39.3 to 0.40.3 [\#5220](https://github.com/apache/camel-k/pull/5220) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump knative.dev/serving from 0.39.3 to 0.40.1 [\#5133](https://github.com/apache/camel-k/pull/5133) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(trait\): enable health trait by default [\#5096](https://github.com/apache/camel-k/pull/5096) ([squakez](https://github.com/squakez))
 
 ## [v2.3.1](https://github.com/apache/camel-k/tree/v2.3.1) (2024-04-29)
 

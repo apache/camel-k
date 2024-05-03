@@ -6922,7 +6922,7 @@ Deprecated: to be removed from trait configuration.
 
 The health trait is responsible for configuring the health probes on the integration container.
 
-It's disabled by default.
+NOTE: this trait is enabled by default.
 
 
 [cols="2,2a",options="header"]
