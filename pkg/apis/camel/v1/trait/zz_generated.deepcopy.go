@@ -6,7 +6,8 @@
 package trait
 
 import (
-	"k8s.io/api/networking/v1"
+	"k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
@@ -185,6 +186,31 @@ func (in *ContainerTrait) DeepCopyInto(out *ContainerTrait) {
 		in, out := &in.Expose, &out.Expose
 		*out = new(bool)
 		**out = **in
+	}
+	if in.RunAsUser != nil {
+		in, out := &in.RunAsUser, &out.RunAsUser
+		*out = new(int64)
+		**out = **in
+	}
+	if in.RunAsNonRoot != nil {
+		in, out := &in.RunAsNonRoot, &out.RunAsNonRoot
+		*out = new(bool)
+		**out = **in
+	}
+	if in.AllowPrivilegeEscalation != nil {
+		in, out := &in.AllowPrivilegeEscalation, &out.AllowPrivilegeEscalation
+		*out = new(bool)
+		**out = **in
+	}
+	if in.CapabilitiesDrop != nil {
+		in, out := &in.CapabilitiesDrop, &out.CapabilitiesDrop
+		*out = make([]v1.Capability, len(*in))
+		copy(*out, *in)
+	}
+	if in.CapabilitiesAdd != nil {
+		in, out := &in.CapabilitiesAdd, &out.CapabilitiesAdd
+		*out = make([]v1.Capability, len(*in))
+		copy(*out, *in)
 	}
 }
 
@@ -419,7 +445,7 @@ func (in *IngressTrait) DeepCopyInto(out *IngressTrait) {
 	}
 	if in.PathType != nil {
 		in, out := &in.PathType, &out.PathType
-		*out = new(v1.PathType)
+		*out = new(networkingv1.PathType)
 		**out = **in
 	}
 	if in.Auto != nil {

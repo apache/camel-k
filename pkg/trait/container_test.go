@@ -24,6 +24,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -463,7 +464,6 @@ func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 }
 
 func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
-
 	environment := createEnvironment()
 	trait, _ := newContainerTrait().(*containerTrait)
 	environment.Integration.Spec.Sources = []v1.SourceSpec{
@@ -487,7 +487,6 @@ func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
 }
 
 func createEnvironment() *Environment {
-
 	client, _ := test.NewFakeClient()
 	// disable the knative eventing api
 	fakeClient := client.(*test.FakeClient) //nolint
@@ -654,4 +653,140 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 	assert.Len(t, container.Ports, 1)
 	assert.Equal(t, int32(8081), container.Ports[0].ContainerPort)
 	assert.Equal(t, defaultKnativeContainerPortName, container.Ports[0].Name)
+}
+
+func TestDefaultKubernetesSecurityContext(t *testing.T) {
+	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	traitCatalog := NewCatalog(nil)
+
+	conditions, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("container"))
+
+	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+
+	assert.NotNil(t, d)
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.Equal(t, defaultContainerName, d.Spec.Template.Spec.Containers[0].Name)
+	assert.Equal(t, pointer.Bool(true), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Nil(t, d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
+	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, d.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, pointer.Bool(false), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []corev1.Capability{defaultCapabilitiesDrop}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Nil(t, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
+}
+
+func TestDefaultKnativeSecurityContext(t *testing.T) {
+	environment := createSettingContextEnvironment(t, v1.TraitProfileKnative)
+	traitCatalog := NewCatalog(nil)
+
+	conditions, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.Nil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("knative-service"))
+	assert.NotNil(t, environment.GetTrait("container"))
+
+	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
+		return service.Name == ServiceTestName
+	})
+
+	assert.NotNil(t, s)
+	assert.Len(t, s.Spec.Template.Spec.Containers, 1)
+	assert.Equal(t, defaultContainerName, s.Spec.Template.Spec.Containers[0].Name)
+	assert.Equal(t, pointer.Bool(true), s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Nil(t, s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
+	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, s.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, pointer.Bool(false), s.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []corev1.Capability{defaultCapabilitiesDrop}, s.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Nil(t, s.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
+}
+
+func TestUserSecurityContext(t *testing.T) {
+	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	environment.Integration.Spec.Traits = v1.Traits{
+		Container: &traitv1.ContainerTrait{
+			RunAsNonRoot:             pointer.Bool(false),
+			RunAsUser:                pointer.Int64(1000),
+			SeccompProfileType:       "Unconfined",
+			AllowPrivilegeEscalation: pointer.Bool(true),
+			CapabilitiesDrop:         []corev1.Capability{"DROP"},
+			CapabilitiesAdd:          []corev1.Capability{"ADD"},
+		},
+	}
+	traitCatalog := NewCatalog(nil)
+
+	conditions, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("container"))
+
+	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+
+	assert.NotNil(t, d)
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.Equal(t, pointer.Bool(false), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, pointer.Int64(1000), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
+	assert.Equal(t, corev1.SeccompProfileTypeUnconfined, d.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
+	assert.Equal(t, pointer.Bool(true), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []corev1.Capability{"DROP"}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Equal(t, []corev1.Capability{"ADD"}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
+}
+
+func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: "myuser",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: profile,
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					Registry:       v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	return &environment
 }
