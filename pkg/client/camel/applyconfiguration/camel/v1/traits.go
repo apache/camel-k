@@ -26,46 +26,47 @@ import (
 // TraitsApplyConfiguration represents an declarative configuration of the Traits type for use
 // with apply.
 type TraitsApplyConfiguration struct {
-	Affinity       *trait.AffinityTrait                    `json:"affinity,omitempty"`
-	Builder        *trait.BuilderTrait                     `json:"builder,omitempty"`
-	Camel          *trait.CamelTrait                       `json:"camel,omitempty"`
-	Container      *trait.ContainerTrait                   `json:"container,omitempty"`
-	Cron           *trait.CronTrait                        `json:"cron,omitempty"`
-	Dependencies   *trait.DependenciesTrait                `json:"dependencies,omitempty"`
-	Deployer       *trait.DeployerTrait                    `json:"deployer,omitempty"`
-	Deployment     *trait.DeploymentTrait                  `json:"deployment,omitempty"`
-	Environment    *trait.EnvironmentTrait                 `json:"environment,omitempty"`
-	ErrorHandler   *trait.ErrorHandlerTrait                `json:"error-handler,omitempty"`
-	GC             *trait.GCTrait                          `json:"gc,omitempty"`
-	Health         *trait.HealthTrait                      `json:"health,omitempty"`
-	Ingress        *trait.IngressTrait                     `json:"ingress,omitempty"`
-	Istio          *trait.IstioTrait                       `json:"istio,omitempty"`
-	Jolokia        *trait.JolokiaTrait                     `json:"jolokia,omitempty"`
-	JVM            *trait.JVMTrait                         `json:"jvm,omitempty"`
-	Kamelets       *trait.KameletsTrait                    `json:"kamelets,omitempty"`
-	Knative        *trait.KnativeTrait                     `json:"knative,omitempty"`
-	KnativeService *trait.KnativeServiceTrait              `json:"knative-service,omitempty"`
-	Logging        *trait.LoggingTrait                     `json:"logging,omitempty"`
-	Mount          *trait.MountTrait                       `json:"mount,omitempty"`
-	OpenAPI        *trait.OpenAPITrait                     `json:"openapi,omitempty"`
-	Owner          *trait.OwnerTrait                       `json:"owner,omitempty"`
-	PDB            *trait.PDBTrait                         `json:"pdb,omitempty"`
-	Platform       *trait.PlatformTrait                    `json:"platform,omitempty"`
-	Pod            *trait.PodTrait                         `json:"pod,omitempty"`
-	Prometheus     *trait.PrometheusTrait                  `json:"prometheus,omitempty"`
-	PullSecret     *trait.PullSecretTrait                  `json:"pull-secret,omitempty"`
-	Quarkus        *trait.QuarkusTrait                     `json:"quarkus,omitempty"`
-	Registry       *trait.RegistryTrait                    `json:"registry,omitempty"`
-	Route          *trait.RouteTrait                       `json:"route,omitempty"`
-	Service        *trait.ServiceTrait                     `json:"service,omitempty"`
-	ServiceBinding *trait.ServiceBindingTrait              `json:"service-binding,omitempty"`
-	Toleration     *trait.TolerationTrait                  `json:"toleration,omitempty"`
-	Addons         map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
-	Keda           *TraitSpecApplyConfiguration            `json:"keda,omitempty"`
-	Master         *TraitSpecApplyConfiguration            `json:"master,omitempty"`
-	Strimzi        *TraitSpecApplyConfiguration            `json:"strimzi,omitempty"`
-	ThreeScale     *TraitSpecApplyConfiguration            `json:"3scale,omitempty"`
-	Tracing        *TraitSpecApplyConfiguration            `json:"tracing,omitempty"`
+	Affinity        *trait.AffinityTrait                    `json:"affinity,omitempty"`
+	Builder         *trait.BuilderTrait                     `json:"builder,omitempty"`
+	Camel           *trait.CamelTrait                       `json:"camel,omitempty"`
+	Container       *trait.ContainerTrait                   `json:"container,omitempty"`
+	Cron            *trait.CronTrait                        `json:"cron,omitempty"`
+	Dependencies    *trait.DependenciesTrait                `json:"dependencies,omitempty"`
+	Deployer        *trait.DeployerTrait                    `json:"deployer,omitempty"`
+	Deployment      *trait.DeploymentTrait                  `json:"deployment,omitempty"`
+	Environment     *trait.EnvironmentTrait                 `json:"environment,omitempty"`
+	ErrorHandler    *trait.ErrorHandlerTrait                `json:"error-handler,omitempty"`
+	GC              *trait.GCTrait                          `json:"gc,omitempty"`
+	Health          *trait.HealthTrait                      `json:"health,omitempty"`
+	Ingress         *trait.IngressTrait                     `json:"ingress,omitempty"`
+	Istio           *trait.IstioTrait                       `json:"istio,omitempty"`
+	Jolokia         *trait.JolokiaTrait                     `json:"jolokia,omitempty"`
+	JVM             *trait.JVMTrait                         `json:"jvm,omitempty"`
+	Kamelets        *trait.KameletsTrait                    `json:"kamelets,omitempty"`
+	Knative         *trait.KnativeTrait                     `json:"knative,omitempty"`
+	KnativeService  *trait.KnativeServiceTrait              `json:"knative-service,omitempty"`
+	Logging         *trait.LoggingTrait                     `json:"logging,omitempty"`
+	Mount           *trait.MountTrait                       `json:"mount,omitempty"`
+	OpenAPI         *trait.OpenAPITrait                     `json:"openapi,omitempty"`
+	Owner           *trait.OwnerTrait                       `json:"owner,omitempty"`
+	PDB             *trait.PDBTrait                         `json:"pdb,omitempty"`
+	Platform        *trait.PlatformTrait                    `json:"platform,omitempty"`
+	Pod             *trait.PodTrait                         `json:"pod,omitempty"`
+	Prometheus      *trait.PrometheusTrait                  `json:"prometheus,omitempty"`
+	PullSecret      *trait.PullSecretTrait                  `json:"pull-secret,omitempty"`
+	Quarkus         *trait.QuarkusTrait                     `json:"quarkus,omitempty"`
+	Registry        *trait.RegistryTrait                    `json:"registry,omitempty"`
+	Route           *trait.RouteTrait                       `json:"route,omitempty"`
+	SecurityContext *trait.SecurityContextTrait             `json:"security-context,omitempty"`
+	Service         *trait.ServiceTrait                     `json:"service,omitempty"`
+	ServiceBinding  *trait.ServiceBindingTrait              `json:"service-binding,omitempty"`
+	Toleration      *trait.TolerationTrait                  `json:"toleration,omitempty"`
+	Addons          map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
+	Keda            *TraitSpecApplyConfiguration            `json:"keda,omitempty"`
+	Master          *TraitSpecApplyConfiguration            `json:"master,omitempty"`
+	Strimzi         *TraitSpecApplyConfiguration            `json:"strimzi,omitempty"`
+	ThreeScale      *TraitSpecApplyConfiguration            `json:"3scale,omitempty"`
+	Tracing         *TraitSpecApplyConfiguration            `json:"tracing,omitempty"`
 }
 
 // TraitsApplyConfiguration constructs an declarative configuration of the Traits type for use with
@@ -319,6 +320,14 @@ func (b *TraitsApplyConfiguration) WithRegistry(value trait.RegistryTrait) *Trai
 // If called multiple times, the Route field is set to the value of the last call.
 func (b *TraitsApplyConfiguration) WithRoute(value trait.RouteTrait) *TraitsApplyConfiguration {
 	b.Route = &value
+	return b
+}
+
+// WithSecurityContext sets the SecurityContext field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the SecurityContext field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithSecurityContext(value trait.SecurityContextTrait) *TraitsApplyConfiguration {
+	b.SecurityContext = &value
 	return b
 }
 

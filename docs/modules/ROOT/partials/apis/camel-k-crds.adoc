@@ -5948,6 +5948,13 @@ Deprecated: use jvm trait or read documentation.
 
 The configuration of Route trait
 
+|`security-context` +
+*xref:#_camel_apache_org_v1_trait_SecurityContextTrait[SecurityContextTrait]*
+|
+
+
+The configuration of Security Context trait
+
 |`service` +
 *xref:#_camel_apache_org_v1_trait_ServiceTrait[ServiceTrait]*
 |
@@ -6539,47 +6546,47 @@ Integration `.spec.integrationKit` parameter. If you're moving the Integration a
 
 The pull policy: Always{vbar}Never{vbar}IfNotPresent
 
-|`uid` +
+|`runAsUser` +
 int64
 |
 
 
-Security Context RunAsUser configuration: this value is automatically retrieved in Openshift clusters when not explicitly set.
+Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
 
 |`runAsNonRoot` +
 bool
 |
 
 
-Security Context RunAsNonRoot configuration
+Security Context RunAsNonRoot configuration (default false).
 
 |`seccompProfileType` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#seccompprofiletype-v1-core[Kubernetes core/v1.SeccompProfileType]*
 |
 
 
-Security Context SeccompProfileType configuration
+Security Context SeccompProfileType configuration (default RuntimeDefault).
 
 |`allowPrivilegeEscalation` +
 bool
 |
 
 
-Security Context AllowPrivilegeEscalation configuration
+Security Context AllowPrivilegeEscalation configuration (default false).
 
 |`capabilitiesDrop` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#capability-v1-core[[\]Kubernetes core/v1.Capability]*
 |
 
 
-Security Context Capabilities Drop configuration
+Security Context Capabilities Drop configuration (default ALL).
 
 |`capabilitiesAdd` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#capability-v1-core[[\]Kubernetes core/v1.Capability]*
 |
 
 
-Security Context Capabilities Add configuration
+Security Context Capabilities Add configuration (default none).
 
 
 |===
@@ -7960,6 +7967,7 @@ Only one of `max-unavailable` and `min-available` can be specified.
 * <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
 * <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
 * <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
+* <<#_camel_apache_org_v1_trait_SecurityContextTrait, SecurityContextTrait>>
 
 PlatformBaseTrait is the base type for platform traits. It cannot be disabled by the user.
 
@@ -8444,6 +8452,52 @@ string
 To configure how to deal with insecure traffic, e.g. `Allow`, `Disable` or `Redirect` traffic.
 
 Refer to the OpenShift route documentation for additional information.
+
+
+|===
+
+[#_camel_apache_org_v1_trait_SecurityContextTrait]
+=== SecurityContextTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Security Context trait can be used to configure the security setting of the Pod running the application.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
+
+
+
+
+|`runAsUser` +
+int64
+|
+
+
+Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
+
+|`runAsNonRoot` +
+bool
+|
+
+
+Security Context RunAsNonRoot configuration (default false).
+
+|`seccompProfileType` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#seccompprofiletype-v1-core[Kubernetes core/v1.SeccompProfileType]*
+|
+
+
+Security Context SeccompProfileType configuration (default RuntimeDefault).
 
 
 |===

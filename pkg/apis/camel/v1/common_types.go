@@ -238,6 +238,8 @@ type Traits struct {
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The configuration of Route trait
 	Route *trait.RouteTrait `property:"route" json:"route,omitempty"`
+	// The configuration of Security Context trait
+	SecurityContext *trait.SecurityContextTrait `property:"security-context" json:"security-context,omitempty"`
 	// The configuration of Service trait
 	Service *trait.ServiceTrait `property:"service" json:"service,omitempty"`
 	// The configuration of Service Binding trait

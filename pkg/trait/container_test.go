@@ -181,7 +181,7 @@ func TestContainerWithOpenshift(t *testing.T) {
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
 	assert.Equal(t, defaultContainerName, d.Spec.Template.Spec.Containers[0].Name)
-	assert.Equal(t, pointer.Bool(true), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, pointer.Bool(defaultContainerRunAsNonRoot), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
 	assert.Equal(t, pointer.Int64(1000860000), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 }
 
@@ -672,11 +672,11 @@ func TestDefaultKubernetesSecurityContext(t *testing.T) {
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
 	assert.Equal(t, defaultContainerName, d.Spec.Template.Spec.Containers[0].Name)
-	assert.Equal(t, pointer.Bool(true), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, pointer.Bool(defaultContainerRunAsNonRoot), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, d.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
-	assert.Equal(t, pointer.Bool(false), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
-	assert.Equal(t, []corev1.Capability{defaultCapabilitiesDrop}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Equal(t, pointer.Bool(defaultContainerAllowPrivilegeEscalation), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []corev1.Capability{defaultContainerCapabilitiesDrop}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
 }
 
@@ -700,11 +700,11 @@ func TestDefaultKnativeSecurityContext(t *testing.T) {
 	assert.NotNil(t, s)
 	assert.Len(t, s.Spec.Template.Spec.Containers, 1)
 	assert.Equal(t, defaultContainerName, s.Spec.Template.Spec.Containers[0].Name)
-	assert.Equal(t, pointer.Bool(true), s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, pointer.Bool(defaultContainerRunAsNonRoot), s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
 	assert.Nil(t, s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, s.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
-	assert.Equal(t, pointer.Bool(false), s.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
-	assert.Equal(t, []corev1.Capability{defaultCapabilitiesDrop}, s.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
+	assert.Equal(t, pointer.Bool(defaultContainerAllowPrivilegeEscalation), s.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, []corev1.Capability{defaultContainerCapabilitiesDrop}, s.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Nil(t, s.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
 }
 
