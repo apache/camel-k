@@ -8,11 +8,16 @@
 
 - Build should enforce a required jdk version [\#5439](https://github.com/apache/camel-k/issues/5439)
 - Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
+- Release 2.3.1 [\#5430](https://github.com/apache/camel-k/issues/5430)
+- Health trait: Inconsistent Integration condition ready status [\#5351](https://github.com/apache/camel-k/issues/5351)
 - Make healt trait as default [\#5024](https://github.com/apache/camel-k/issues/5024)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
+- --port flag not working while running kamel integration in debug mode  [\#4443](https://github.com/apache/camel-k/issues/4443)
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/oauth2 from 0.19.0 to 0.20.0 [\#5452](https://github.com/apache/camel-k/pull/5452) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): add readiness workaround as expected by Camel framework [\#5450](https://github.com/apache/camel-k/pull/5450) ([squakez](https://github.com/squakez))
 - feat\(api\): show integration readiness [\#5448](https://github.com/apache/camel-k/pull/5448) ([squakez](https://github.com/squakez))
 - Enhance offline script and documentation [\#5447](https://github.com/apache/camel-k/pull/5447) ([claudio4j](https://github.com/claudio4j))
 - chore\(deps\): bump github.com/onsi/gomega from 1.33.0 to 1.33.1 [\#5444](https://github.com/apache/camel-k/pull/5444) ([dependabot[bot]](https://github.com/apps/dependabot))
