@@ -19,6 +19,7 @@ package repository
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
@@ -49,4 +50,17 @@ func TestGithubRepository(t *testing.T) {
 		assert.Equal(t, kameletName, kamelet.Name)
 	}
 
+}
+
+func TestDownloadKamelet(t *testing.T) {
+	c := &http.Client{}
+	kamelet, err := downloadGithubKamelet(
+		context.Background(),
+		// the appended parameter test the strength of the func which should load the kamelet regardless any
+		// additional parameter provided
+		"https://raw.githubusercontent.com/apache/camel-kamelets/main/kamelets/timer-source.kamelet.yaml?test=test",
+		c,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "timer-source", kamelet.Name)
 }
