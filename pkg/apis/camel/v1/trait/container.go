@@ -56,17 +56,17 @@ type ContainerTrait struct {
 	// The pull policy: Always|Never|IfNotPresent
 	// +kubebuilder:validation:Enum=Always;Never;IfNotPresent
 	ImagePullPolicy corev1.PullPolicy `property:"image-pull-policy" json:"imagePullPolicy,omitempty"`
-	// Security Context RunAsUser configuration: this value is automatically retrieved in Openshift clusters when not explicitly set.
+	// Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
 	RunAsUser *int64 `property:"run-as-user" json:"runAsUser,omitempty"`
-	// Security Context RunAsNonRoot configuration
+	// Security Context RunAsNonRoot configuration (default false).
 	RunAsNonRoot *bool `property:"run-as-non-root" json:"runAsNonRoot,omitempty"`
-	// Security Context SeccompProfileType configuration
+	// Security Context SeccompProfileType configuration (default RuntimeDefault).
 	// +kubebuilder:validation:Enum=Unconfined;RuntimeDefault
 	SeccompProfileType corev1.SeccompProfileType `property:"seccomp-profile-type" json:"seccompProfileType,omitempty"`
-	// Security Context AllowPrivilegeEscalation configuration
+	// Security Context AllowPrivilegeEscalation configuration (default false).
 	AllowPrivilegeEscalation *bool `property:"allow-privilege-escalation" json:"allowPrivilegeEscalation,omitempty"`
-	// Security Context Capabilities Drop configuration
+	// Security Context Capabilities Drop configuration (default ALL).
 	CapabilitiesDrop []corev1.Capability `property:"capabilities-drop" json:"capabilitiesDrop,omitempty"`
-	// Security Context Capabilities Add configuration
+	// Security Context Capabilities Add configuration (default none).
 	CapabilitiesAdd []corev1.Capability `property:"capabilities-add" json:"capabilitiesAdd,omitempty"`
 }

@@ -3235,6 +3235,11 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.RouteTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.SecurityContext != nil {
+		in, out := &in.SecurityContext, &out.SecurityContext
+		*out = new(trait.SecurityContextTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Service != nil {
 		in, out := &in.Service, &out.Service
 		*out = new(trait.ServiceTrait)

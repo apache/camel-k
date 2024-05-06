@@ -434,7 +434,7 @@ func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 func TestOnlySomeTraitsArePlatform(t *testing.T) {
 	c := NewTraitTestCatalog()
 	platformTraits := []string{
-		"builder", "camel", "jvm", "runtime", "container", "mount", "dependencies", "deployer",
+		"builder", "camel", "jvm", "runtime", "container", "security-context", "mount", "dependencies", "deployer",
 		"deployment", "environment", "error-handler", "kamelets", "openapi", "owner", "platform", "quarkus",
 	}
 
@@ -561,7 +561,7 @@ func TestExecutedTraitsCondition(t *testing.T) {
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",
-		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,mount,health,quarkus,jvm,owner",
+		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,health,quarkus,jvm,owner",
 	)
 	assert.Contains(t, conditions, expectedCondition)
 }

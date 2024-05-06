@@ -87,6 +87,7 @@
 ** xref:traits:registry.adoc[Registry]
 ** xref:traits:resume.adoc[Resume]
 ** xref:traits:route.adoc[Route]
+** xref:traits:security-context.adoc[Security Context]
 ** xref:traits:service-binding.adoc[Service Binding]
 ** xref:traits:service.adoc[Service]
 ** xref:traits:telemetry.adoc[Telemetry]

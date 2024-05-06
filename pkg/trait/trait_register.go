@@ -52,6 +52,7 @@ func init() {
 	AddToTraits(newQuarkusTrait)
 	AddToTraits(newRegistryTrait)
 	AddToTraits(newRouteTrait)
+	AddToTraits(newSecurityContextTrait)
 	AddToTraits(newServiceTrait)
 	AddToTraits(newServiceBindingTrait)
 	AddToTraits(newTolerationTrait)

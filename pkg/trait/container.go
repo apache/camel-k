@@ -47,11 +47,11 @@ const (
 	defaultContainerName = "integration"
 	defaultContainerPort = 8080
 	defaultServicePort   = 80
-	// default security context configuration
-	defaultRunAsNonRoot             = true
-	defaultSeccompProfileType       = corev1.SeccompProfileTypeRuntimeDefault
-	defaultAllowPrivilegeEscalation = false
-	defaultCapabilitiesDrop         = "ALL"
+
+	defaultContainerRunAsNonRoot             = false
+	defaultContainerSeccompProfileType       = corev1.SeccompProfileTypeRuntimeDefault
+	defaultContainerAllowPrivilegeEscalation = false
+	defaultContainerCapabilitiesDrop         = "ALL"
 )
 
 type containerTrait struct {
@@ -67,10 +67,10 @@ func newContainerTrait() Trait {
 			ServicePort:              defaultServicePort,
 			ServicePortName:          defaultContainerPortName,
 			Name:                     defaultContainerName,
-			RunAsNonRoot:             pointer.Bool(defaultRunAsNonRoot),
-			SeccompProfileType:       defaultSeccompProfileType,
-			AllowPrivilegeEscalation: pointer.Bool(defaultAllowPrivilegeEscalation),
-			CapabilitiesDrop:         []corev1.Capability{defaultCapabilitiesDrop},
+			RunAsNonRoot:             pointer.Bool(defaultContainerRunAsNonRoot),
+			SeccompProfileType:       defaultContainerSeccompProfileType,
+			AllowPrivilegeEscalation: pointer.Bool(defaultContainerAllowPrivilegeEscalation),
+			CapabilitiesDrop:         []corev1.Capability{defaultContainerCapabilitiesDrop},
 		},
 	}
 }
@@ -360,12 +360,12 @@ func (t *containerTrait) setSecurityContext(e *Environment, container *corev1.Co
 			return err
 		}
 		if isOpenShift {
-			securityContextUid, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
+			runAsUser, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
 			if err != nil {
 				return err
 			}
-			if securityContextUid != nil {
-				t.RunAsUser = securityContextUid
+			if runAsUser != nil {
+				t.RunAsUser = runAsUser
 			}
 		}
 	}
