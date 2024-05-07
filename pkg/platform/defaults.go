@@ -357,9 +357,17 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	}
 	setStatusAdditionalInfo(p)
 
+	buildConfig := &p.Status.Build.BuildConfiguration
+	if buildConfig.ImagePlatforms == nil {
+		if runtime.GOARCH == "arm64" {
+			buildConfig.ImagePlatforms = []string{"linux/arm64"}
+		}
+	}
+
 	if verbose {
 		log.Log.Infof("RuntimeVersion set to %s", p.Status.Build.RuntimeVersion)
 		log.Log.Infof("BaseImage set to %s", p.Status.Build.BaseImage)
+		log.Log.Infof("ImagePlatforms set to %s", buildConfig.ImagePlatforms)
 		log.Log.Infof("LocalRepository set to %s", p.Status.Build.Maven.LocalRepository)
 		log.Log.Infof("Timeout set to %s", p.Status.Build.GetTimeout())
 	}
