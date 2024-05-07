@@ -26,8 +26,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
-	"strconv"
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -87,14 +85,6 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	} else if settingsSecurityExists {
 		args = append(args, "-Dsettings.security="+settingsSecurityPath)
-	}
-
-	if !util.StringContainsPrefix(c.context.AdditionalArguments, "-Dmaven.artifact.threads") {
-		args = append(args, "-Dmaven.artifact.threads="+strconv.Itoa(runtime.GOMAXPROCS(0)))
-	}
-
-	if !util.StringSliceExists(c.context.AdditionalArguments, "-T") {
-		args = append(args, "-T", strconv.Itoa(runtime.GOMAXPROCS(0)))
 	}
 
 	cmd := exec.CommandContext(ctx, mvnCmd, args...)
