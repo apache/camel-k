@@ -1273,10 +1273,12 @@ func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 func (o *runCmdOptions) uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
 	return util.WithTempDir("camel-k", func(tmpDir string) error {
 		// #nosec G401
+		// nolint:gosec
 		if err := o.uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options, platform, artifactHTTPPath, dependency); err != nil {
 			return err
 		}
 		// #nosec G401
+		// nolint:gosec
 		return o.uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options, platform, artifactHTTPPath, dependency)
 	})
 }

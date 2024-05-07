@@ -127,7 +127,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 		}
 
 		if t.ResourceName == nil {
-			val := fmt.Sprintf("%s-lock", e.Integration.Name)
+			val := e.Integration.Name + "-lock"
 			t.ResourceName = &val
 		}
 
@@ -190,22 +190,22 @@ func (t *masterTrait) setCustomizerConfiguration(e *trait.Environment) {
 	if t.ResourceName != nil {
 		resourceName := t.ResourceName
 		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.kubernetesResourceName=%s", *resourceName)},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.kubernetesResourceNames=" + *resourceName},
 		)
 	}
 	if t.ResourceType != nil {
 		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.leaseResourceType=%s", *t.ResourceType)},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.leaseResourceType" + *t.ResourceType},
 		)
 	}
 	if t.LabelKey != nil {
 		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelKey=%s", *t.LabelKey)},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelKey=" + *t.LabelKey},
 		)
 	}
 	if t.LabelValue != nil {
 		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelValue=%s", *t.LabelValue)},
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelValue=" + *t.LabelValue},
 		)
 	}
 }
