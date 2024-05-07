@@ -40,7 +40,7 @@ func (in *MavenArtifact) GetDependencyID() string {
 	return mvn
 }
 
-// nolint: musttag // the name of the xml is dynamic
+//nolint:musttag // the name of the xml is dynamic
 type propertiesEntry struct {
 	XMLName xml.Name
 	Value   string `xml:",chardata"`
@@ -67,6 +67,7 @@ func (m Properties) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}
 
 	for k, v := range m {
+		//nolint:musttag
 		if err := e.Encode(propertiesEntry{XMLName: xml.Name{Local: k}, Value: v}); err != nil {
 			return err
 		}
@@ -100,6 +101,7 @@ func (m PluginProperties) MarshalXML(e *xml.Encoder, start xml.StartElement) err
 
 	for k, v := range m {
 		if v.Value != "" {
+			//nolint:musttag
 			if err := e.Encode(propertiesEntry{XMLName: xml.Name{Local: k}, Value: v.Value}); err != nil {
 				return err
 			}
@@ -112,6 +114,7 @@ func (m PluginProperties) MarshalXML(e *xml.Encoder, start xml.StartElement) err
 			}
 
 			for key, value := range v.Properties {
+				//nolint:musttag
 				if err := e.Encode(propertiesEntry{XMLName: xml.Name{Local: key}, Value: value}); err != nil {
 					return err
 				}

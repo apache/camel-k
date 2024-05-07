@@ -419,10 +419,10 @@ OS_LOWER := $(shell echo $(OS) | tr '[:upper:]' '[:lower:]')
 endif
 
 lint:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --deadline $(LINT_DEADLINE) --verbose
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --verbose
 
 lint-fix:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --deadline $(LINT_DEADLINE) --fix
+	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --fix
 
 dir-licenses:
 	./script/vendor-license-directory.sh
