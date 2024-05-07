@@ -4909,6 +4909,13 @@ PodSpec defines a group of Kubernetes resources.
 |Field
 |Description
 
+|`automountServiceAccountToken` +
+bool
+|
+
+
+AutomountServiceAccountToken
+
 |`volumes` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#volume-v1-core[[\]Kubernetes core/v1.Volume]*
 |

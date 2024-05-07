@@ -242,6 +242,9 @@ spec:
                         description: ActiveDeadlineSeconds
                         format: int64
                         type: integer
+                      automountServiceAccountToken:
+                        description: AutomountServiceAccountToken
+                        type: boolean
                       containers:
                         description: Containers
                         items:
