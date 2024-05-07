@@ -23,6 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
@@ -55,6 +56,17 @@ func (t *securityContextTrait) Configure(e *Environment) (bool, *TraitCondition,
 	}
 	if !e.IntegrationInRunningPhases() {
 		return false, nil, nil
+	}
+
+	// We better disable because "PodSecurityContext properties can affect non-user sidecar containers that come from Knative or your service mesh".
+	// https://knative.dev/docs/serving/configuration/feature-flags/#kubernetes-security-context
+	// The user should instead use container security context.
+	condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
+	if condition != nil && condition.Status == corev1.ConditionTrue {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage(
+			"SecurityContext",
+			"pod security context is disabled for Knative Service. PodSecurityContext properties can affect non-user sidecar containers that come from Knative or your service mesh. Use container security context instead.",
+		), nil
 	}
 
 	return true, nil, nil
