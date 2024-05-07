@@ -99,16 +99,14 @@ func TestDefaultPodKnativeSecurityContext(t *testing.T) {
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("deployment"))
 	assert.NotNil(t, environment.GetTrait("knative-service"))
-	assert.NotNil(t, environment.GetTrait("security-context"))
+	assert.Nil(t, environment.GetTrait("security-context"))
 
 	s := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
 		return service.Name == ServiceTestName
 	})
 
 	assert.NotNil(t, s)
-	assert.Equal(t, pointer.Bool(defaultPodRunAsNonRoot), s.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
-	assert.Nil(t, s.Spec.Template.Spec.SecurityContext.RunAsUser)
-	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, s.Spec.Template.Spec.SecurityContext.SeccompProfile.Type)
+	assert.Nil(t, s.Spec.Template.Spec.SecurityContext)
 }
 
 func TestUserPodSecurityContext(t *testing.T) {
