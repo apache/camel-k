@@ -111,10 +111,16 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+t.task.Image)
 	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
 	mavenArgs = append(mavenArgs, jib.JibMavenBaseImageCache+mavenDir+"/jib")
+
+	// Build the integration for the arch configured in the IntegrationPlatform.
+	// This can explicitly be configured with the `-t builder.platforms` trait.
+	// Building the integration for multiarch is deferred until the next major version (e.g. 3.x)
+
 	if t.task.Configuration.ImagePlatforms != nil {
 		platforms := strings.Join(t.task.Configuration.ImagePlatforms, ",")
 		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+platforms)
 	}
+
 	if t.task.Registry.Insecure {
 		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
 	}
