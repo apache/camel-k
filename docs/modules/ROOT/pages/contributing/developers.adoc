@@ -22,18 +22,19 @@ There are many ways you can contribute to Camel K, not only software development
 
 In order to build the project, you need to comply with the following requirements:
 
-* **Go version 1.16+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
+* **Go version 1.21+**: needed to compile and test the project. Refer to the https://golang.org/[Go website] for the installation.
 * **GNU Make**: used to define composite build actions. This should be already installed or available as a package if you have a good OS (https://www.gnu.org/software/make/).
 * **JDK version 17+**: the build requires JDK version 17 or above. This corresponds to the JDK version of the integration base image.
 * **Maven version 3.8+**: the build requires Maven 3.8 or above. This corresponds to the version defined in the `build/Dockerfile`.
 * **MinGW**: needed to compile the project on Windows. Refer to the https://www.mingw-w64.org/[MinGW website] for the installation.
 * **Windows Subsystem for Linux (WSL)**: for running Linux binary executables natively on Windows. Refer to https://docs.microsoft.com/en-us/windows/wsl/install[WSL Website] for installation. Alternatively, you can use https://www.cygwin.com/[Cygwin] or https://www.educative.io/edpresso/how-to-install-git-bash-in-windows[Git Bash].
+* **Docker**: the image build requires https://www.docker.com/[Docker] and the https://github.com/docker/buildx[buildx plugin].
 
 NOTE: MacOS users will need to use *gnu-sed* to successfully run the Make build scripts (e.g. for generating the Camel K bundle). Please install gnu-sed on your machine (e.g. `brew install gnu-sed`) and set your PATH accordingly to use gnu-sed with: `export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"`
 
 The Camel K Java runtime (camel-k-runtime) requires:
 
-* **Java 11**: needed for compilation
+* **Java 17**: needed for compilation
 * **Maven**: needed for building
 
 [[checks]]
