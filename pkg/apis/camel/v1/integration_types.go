@@ -23,7 +23,7 @@ import (
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-// Important: Run "make generate-deepcopy" to regenerate code after modifying this file
+// Important: Run "make generate" to regenerate code after modifying this file
 
 // +genclient
 // +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
@@ -283,6 +283,8 @@ type PodSpecTemplate struct {
 
 // PodSpec defines a group of Kubernetes resources.
 type PodSpec struct {
+	// AutomountServiceAccountToken
+	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty" protobuf:"varint,21,opt,name=automountServiceAccountToken"`
 	// Volumes
 	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge,retainKeys" patchMergeKey:"name" protobuf:"bytes,1,rep,name=volumes"`
 	// InitContainers
