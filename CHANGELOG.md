@@ -8,8 +8,11 @@
 
 - Build should enforce a required jdk version [\#5439](https://github.com/apache/camel-k/issues/5439)
 - Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
+- Release 2.3.1 [\#5430](https://github.com/apache/camel-k/issues/5430)
+- Health trait: Inconsistent Integration condition ready status [\#5351](https://github.com/apache/camel-k/issues/5351)
 - Make healt trait as default [\#5024](https://github.com/apache/camel-k/issues/5024)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
+- --port flag not working while running kamel integration in debug mode  [\#4443](https://github.com/apache/camel-k/issues/4443)
 
 ## [v2.3.1](https://github.com/apache/camel-k/tree/v2.3.1) (2024-04-29)
 
