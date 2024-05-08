@@ -101,7 +101,7 @@ func TestMasterOn(t *testing.T) {
 	err = mt.Apply(&environment)
 	require.NoError(t, err)
 	assert.Equal(t, "test-lock", environment.ApplicationProperties["camel.k.master.resourceName"])
-	assert.Equal(t, "ConfigMap", environment.ApplicationProperties["camel.k.master.resourceType"])
+	assert.Equal(t, leaseResourceType, environment.ApplicationProperties["camel.k.master.resourceType"])
 	assert.Equal(t, "camel.apache.org/integration", environment.ApplicationProperties["camel.k.master.labelKey"])
 	assert.Equal(t, "test", environment.ApplicationProperties["camel.k.master.labelValue"])
 	assert.Equal(t, "${camel.k.master.resourceName}", environment.ApplicationProperties["quarkus.camel.cluster.kubernetes.resource-name"])
