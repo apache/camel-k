@@ -142,6 +142,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 		operatorID := defaults.OperatorID()
 		if operatorID != "" {
 			if p, err := get(ctx, c, operatorNamespace, operatorID); err == nil {
+				log.Debugf("Found integration platform %s for operator %s in namespace %s", operatorID, operatorID, operatorNamespace)
 				return p, nil
 			}
 		}
@@ -156,7 +157,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 	for _, platform := range lst.Items {
 		platform := platform // pin
 		if IsActive(&platform) {
-			log.Debugf("Found active integration platform %s", platform.Name)
+			log.Debugf("Found active integration platform %s in namespace %s", platform.Name, namespace)
 			return &platform, nil
 		} else {
 			fallback = &platform
@@ -164,7 +165,7 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 	}
 
 	if fallback != nil {
-		log.Debugf("Found inactive integration platform %s", fallback.Name)
+		log.Debugf("Found inactive integration platform %s in namespace %s", fallback.Name, namespace)
 		return fallback, nil
 	}
 
