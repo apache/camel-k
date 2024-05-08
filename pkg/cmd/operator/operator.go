@@ -36,14 +36,12 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
-	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -61,7 +59,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/controller"
 	"github.com/apache/camel-k/v2/pkg/controller/synthetic"
-	"github.com/apache/camel-k/v2/pkg/event"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -145,20 +142,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	bootstrapClient, err := client.NewClientWithConfig(false, cfg)
 	exitOnError(err, "cannot initialize client")
 
-	// We do not rely on the event broadcaster managed by controller runtime,
-	// so that we can check the operator has been granted permission to create
-	// Events. This is required for the operator to be installable by standard
-	// admin users, that are not granted create permission on Events by default.
-	broadcaster := record.NewBroadcaster()
-	defer broadcaster.Shutdown()
-
-	if ok, err := kubernetes.CheckPermission(ctx, bootstrapClient, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
-		// Do not sink Events to the server as they'll be rejected
-		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
-		exitOnError(err, "cannot check permissions for creating Events")
-		log.Info("Event broadcasting is disabled because of missing permissions to create Events")
-	}
-
 	operatorNamespace := platform.GetOperatorNamespace()
 	if operatorNamespace == "" {
 		// Fallback to using the watch namespace when the operator is not in-cluster.
@@ -174,12 +157,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	// Set the operator container image if it runs in-container
 	platform.OperatorImage, err = getOperatorImage(ctx, bootstrapClient)
 	exitOnError(err, "cannot get operator container image")
-
-	if ok, err := kubernetes.CheckPermission(ctx, bootstrapClient, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
-		leaderElection = false
-		exitOnError(err, "cannot check permissions for creating Leases")
-		log.Info("The operator is not granted permissions to create Leases")
-	}
 
 	if !leaderElection {
 		log.Info("Leader election is disabled!")
@@ -223,7 +200,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	}
 
 	mgr, err := manager.New(cfg, manager.Options{
-		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
 		LeaderElectionNamespace:       operatorNamespace,
 		LeaderElectionID:              leaderElectionID,

@@ -734,6 +734,7 @@ bundle-index: opm yq
 	CSV_SKIPS=$(CSV_SKIP_RANGE) CSV_REPLACES=$(CSV_REPLACES) CHANNELS="$(CHANNELS)" \
 	./script/build_bundle_index.sh
 
+
 ## Location to install dependencies to
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)

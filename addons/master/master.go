@@ -77,12 +77,8 @@ func NewMasterTrait() trait.Trait {
 }
 
 const (
-	masterComponent = "master"
-)
-
-var (
-	leaseResourceType     = "Lease"
-	configMapResourceType = "ConfigMap"
+	masterComponent   = "master"
+	leaseResourceType = "Lease"
 )
 
 func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
@@ -132,15 +128,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 		}
 
 		if t.ResourceType == nil {
-			canUseLeases, err := t.canUseLeases(e)
-			if err != nil {
-				return false, nil, err
-			}
-			if canUseLeases {
-				t.ResourceType = &leaseResourceType
-			} else {
-				t.ResourceType = &configMapResourceType
-			}
+			t.ResourceType = pointer.String(leaseResourceType)
 		}
 
 		if t.LabelKey == nil {
@@ -228,10 +216,6 @@ func (t *masterTrait) setCatalogConfiguration(e *trait.Environment) {
 	for _, cp := range e.CamelCatalog.Runtime.Capabilities["master"].RuntimeProperties {
 		e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 	}
-}
-
-func (t *masterTrait) canUseLeases(e *trait.Environment) (bool, error) {
-	return kubernetes.CheckPermission(e.Ctx, t.Client, "coordination.k8s.io", "leases", e.Integration.Namespace, "", "create")
 }
 
 func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) []string {
