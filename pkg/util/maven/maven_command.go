@@ -44,17 +44,21 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
-		// Prepare maven wrapper helps when running the builder as Pod as it makes
-		// the builder container, Maven agnostic
-		if err := c.prepareMavenWrapper(ctx); err != nil {
-			return err
-		}
-	}
-
-	mvnCmd := "./mvnw"
+	mvnCmd := ""
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
+	}
+
+	if mvnCmd == "" {
+		if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
+			// Prepare maven wrapper helps when running the builder as Pod as it makes
+			// the builder container, Maven agnostic
+			if err := c.prepareMavenWrapper(ctx); err != nil {
+				return err
+			}
+		}
+
+		mvnCmd = "./mvnw"
 	}
 
 	args := make([]string, 0)
