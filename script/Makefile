@@ -19,6 +19,10 @@
 #
 SHELL := /bin/bash
 
+MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+PROJECT_PATH := $(patsubst %/,%,$(dir $(MKFILE_PATH)))
+LOCALBIN := $(PROJECT_PATH)/bin
+
 VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.4.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
@@ -29,6 +33,12 @@ CODEGEN_VERSION := v0.27.4
 OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
+LINTER_VERSION ?= v1.58.0
+GOVULNCHECK_VERSION ?= latest
+
+LINTER ?= $(LOCALBIN)/golangci-lint
+GOVULNCHECK ?= $(LOCALBIN)/govulncheck
+
 BASE_IMAGE := eclipse-temurin:17
 LOCAL_REPOSITORY := /etc/maven/m2
 IMAGE_NAME ?= docker.io/apache/camel-k
@@ -394,6 +404,7 @@ clean:
 	rm -f camel-k
 	rm -f kamel
 	rm -f *.test
+	rm -rf $(LOCALBIN)
 	rm -rf build/_maven_output
 	rm -rf build/_maven_overlay
 	rm -rf build/_output
@@ -418,11 +429,19 @@ OS := $(patsubst MINGW%,MSYS,$(OS))
 OS_LOWER := $(shell echo $(OS) | tr '[:upper:]' '[:lower:]')
 endif
 
-lint:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --verbose
+check: lint vuln
 
-lint-fix:
-	GOGC=$(LINT_GOGC) golangci-lint run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --fix
+.PHONY: lint
+lint: golangci-lint
+	GOGC=$(LINT_GOGC) $(LINTER) run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --verbose
+
+.PHONY: lint-fix
+lint-fix: golangci-lint
+	GOGC=$(LINT_GOGC) $(LINTER) run --config .golangci.yml --out-format colored-tab --timeout $(LINT_DEADLINE) --fix
+
+.PHONY: vuln
+vuln: govulncheck
+	@$(GOVULNCHECK) ./...
 
 dir-licenses:
 	./script/vendor-license-directory.sh
@@ -708,3 +727,19 @@ bundle-index: opm yq
 	OPM=$(OPM) BUNDLE_IMAGE=$(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) CSV_NAME=$(CSV_PRODUCTION_NAME) \
 	CSV_SKIPS=$(CSV_SKIP_RANGE) CSV_REPLACES=$(CSV_REPLACES) CHANNELS="$(CHANNELS)" \
 	./script/build_bundle_index.sh
+
+## Location to install dependencies to
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+
+.PHONY: golangci-lint
+golangci-lint: $(LINTER)
+$(LINTER): $(LOCALBIN)
+	@test -s $(LOCALBIN)/golangci-lint || \
+	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(LINTER_VERSION)
+
+.PHONY: govulncheck
+govulncheck: $(GOVULNCHECK)
+$(GOVULNCHECK): $(LOCALBIN)
+	@test -s $(GOVULNCHECK) || \
+	GOBIN=$(LOCALBIN) go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)

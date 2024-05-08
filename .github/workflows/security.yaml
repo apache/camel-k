@@ -51,9 +51,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           check-latest: true
-      - name: Install govulncheck
-        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - name: lint
         shell: bash
-      - name: Run govulncheck
-        run: govulncheck ./...
-        shell: bash
+        run: |
+          make vuln
