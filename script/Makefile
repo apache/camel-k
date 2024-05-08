@@ -38,6 +38,7 @@ GOVULNCHECK_VERSION ?= latest
 
 LINTER ?= $(LOCALBIN)/golangci-lint
 GOVULNCHECK ?= $(LOCALBIN)/govulncheck
+GOIMPORT ?= $(LOCALBIN)/goimports
 
 BASE_IMAGE := eclipse-temurin:17
 LOCAL_REPOSITORY := /etc/maven/m2
@@ -443,6 +444,11 @@ lint-fix: golangci-lint
 vuln: govulncheck
 	@$(GOVULNCHECK) ./...
 
+.PHONY: fmt
+fmt: goimport
+	$(GOIMPORT) -l -w .
+	go fmt ./...
+
 dir-licenses:
 	./script/vendor-license-directory.sh
 
@@ -743,3 +749,10 @@ govulncheck: $(GOVULNCHECK)
 $(GOVULNCHECK): $(LOCALBIN)
 	@test -s $(GOVULNCHECK) || \
 	GOBIN=$(LOCALBIN) go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
+
+.PHONY: goimport
+goimport: $(GOIMPORT)
+$(GOIMPORT): $(LOCALBIN)
+	@test -s $(LOCALBIN)/goimport || \
+	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/goimports@latest
+
