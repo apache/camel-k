@@ -24,10 +24,9 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
-// nolint: stylecheck
 type mavenLog struct {
 	Level            string `json:"level"`
-	Ts               string `json:"ts"`
+	TS               string `json:"ts"`
 	Logger           string `json:"logger"`
 	Msg              string `json:"msg"`
 	Class            string `json:"class"`
@@ -48,10 +47,10 @@ const (
 
 var mavenLogger = log.WithName("maven.build")
 
-func MavenLogHandler(s string) string {
-	mavenLog, parseError := parseLog(s)
+func LogHandler(s string) string {
+	l, parseError := parseLog(s)
 	if parseError == nil {
-		normalizeLog(mavenLog)
+		normalizeLog(l)
 	} else {
 		// Why we are ignoring the parsing errors here: there are a few scenarios where this would likely occur.
 		// For example, if something outside of Maven outputs something (i.e.: the JDK, a misbehaved plugin,
@@ -69,8 +68,13 @@ func MavenLogHandler(s string) string {
 
 func parseLog(line string) (mavenLog, error) {
 	var l mavenLog
+
 	err := json.Unmarshal([]byte(line), &l)
-	return l, err
+	if err != nil {
+		return l, err
+	}
+
+	return l, nil
 }
 
 func normalizeLog(mavenLog mavenLog) {

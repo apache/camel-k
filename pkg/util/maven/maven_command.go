@@ -143,7 +143,7 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
+	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
 }
 
 func NewContext(buildDir string) Context {
@@ -190,7 +190,7 @@ func (c *Context) AddSystemProperty(name string, value string) {
 }
 
 func generateProjectStructure(context Context, project Project) error {
-	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", project); err != nil {
+	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", &project); err != nil {
 		return err
 	}
 
@@ -244,7 +244,7 @@ func generateProjectStructure(context Context, project Project) error {
 func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
 	cmd.Dir = c.context.Path
-	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
+	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
 }
 
 // ParseGAV decodes the provided Maven GAV into the corresponding Dependency.
