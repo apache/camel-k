@@ -85,6 +85,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	pkgutil "github.com/apache/camel-k/v2/pkg/util"
 	v2util "github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -282,6 +283,17 @@ func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID strin
 	var installArgs []string
 
 	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID, "--skip-cluster-setup"}
+
+	if !pkgutil.StringSliceExists(args, "--build-timeout") {
+		//if --build-timeout is not explicitly passed as an argument, try to configure it
+		buildTimeout := os.Getenv("CAMEL_K_TEST_BUILD_TIMEOUT")
+		if buildTimeout == "" {
+			//default Build Timeout for tests
+			buildTimeout = "10m"
+		}
+		fmt.Printf("Setting build timeout to %s\n", buildTimeout)
+		installArgs = append(installArgs, "--build-timeout", buildTimeout)
+	}
 
 	if skipKameletCatalog {
 		installArgs = append(installArgs, "--skip-default-kamelets-setup")
