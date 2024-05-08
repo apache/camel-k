@@ -75,7 +75,7 @@ func (o *dumpCmdOptions) dump(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			tar.CreateTarFile([]string{file.Name()}, "dump."+file.Name()+"."+time.Now().Format(time.RFC3339)+".tar.gz", cmd)
+			tar.CreateTarFile([]string{file.Name()}, "dump."+file.Name()+"."+time.Now().Format(time.RFC3339)+".tar.gz", cmd.OutOrStdout())
 			return nil
 		})
 	} else {
