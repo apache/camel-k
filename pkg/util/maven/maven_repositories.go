@@ -28,7 +28,6 @@ var DefaultRepositories = defaultRepositories{}
 
 type defaultRepositories struct{}
 
-// nolint: unparam
 func (o defaultRepositories) apply(settings *Settings) error {
 	for _, repository := range defaultMavenRepositories() {
 		upsertRepository(repository, &settings.Profiles[0].Repositories)
@@ -38,9 +37,9 @@ func (o defaultRepositories) apply(settings *Settings) error {
 }
 
 func defaultMavenRepositories() []v1.Repository {
-	defaultRepositories := strings.Split(DefaultMavenRepositories, ",")
-	repositories := make([]v1.Repository, 0, len(defaultRepositories))
-	for _, repository := range defaultRepositories {
+	repos := strings.Split(DefaultMavenRepositories, ",")
+	repositories := make([]v1.Repository, 0, len(repos))
+	for _, repository := range repos {
 		repositories = append(repositories, NewRepository(repository))
 	}
 	return repositories

@@ -34,7 +34,7 @@ func TestRunAndLogErrorMvn(t *testing.T) {
 	}
 
 	cmd := exec.CommandContext(context.Background(), mavenCmd, "package", "-B")
-	err := util.RunAndLog(context.Background(), cmd, MavenLogHandler, MavenLogHandler)
+	err := util.RunAndLog(context.Background(), cmd, LogHandler, LogHandler)
 
 	require.Error(t, err)
 	require.ErrorContains(t, err, "[ERROR] The goal you specified requires a project to execute but there is no POM in this directory")

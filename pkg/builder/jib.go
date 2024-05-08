@@ -135,7 +135,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	cmd.Env = append(cmd.Env, fmt.Sprintf("XDG_CONFIG_HOME=%s/jib", mavenDir))
 	cmd.Dir = mavenDir
 
-	myerror := util.RunAndLog(ctx, cmd, maven.MavenLogHandler, maven.MavenLogHandler)
+	myerror := util.RunAndLog(ctx, cmd, maven.LogHandler, maven.LogHandler)
 
 	if myerror != nil {
 		log.Errorf(myerror, "jib integration image containerization did not run successfully")
