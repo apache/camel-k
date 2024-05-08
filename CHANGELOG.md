@@ -6,15 +6,29 @@
 
 **Closed issues:**
 
+- Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
+- Incorrect content of the build/\_maven\_overlay directory causes the build project failure [\#5466](https://github.com/apache/camel-k/issues/5466)
+- Make images does not work out of the box [\#5464](https://github.com/apache/camel-k/issues/5464)
 - Generate badges for deprecated traits [\#5424](https://github.com/apache/camel-k/issues/5424)
+- Cannot `make test-smoke` on arm64 out of the box [\#5362](https://github.com/apache/camel-k/issues/5362)
+- Simplify run cmd for archs other than amd64 [\#5292](https://github.com/apache/camel-k/issues/5292)
+- Pod SecurityContext default secure settings [\#5287](https://github.com/apache/camel-k/issues/5287)
 - Custom kamelets are not fetched from private GitHub repository [\#5173](https://github.com/apache/camel-k/issues/5173)
 - Keda integration not working with mounted secrets [\#4359](https://github.com/apache/camel-k/issues/4359)
 
 **Merged pull requests:**
 
+- chore: use the same make targhet for lkint and vuln check locally and on ci [\#5477](https://github.com/apache/camel-k/pull/5477) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore: update golagci-lint to v1.158.0 [\#5471](https://github.com/apache/camel-k/pull/5471) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(doc\): update developers doc [\#5470](https://github.com/apache/camel-k/pull/5470) ([lburgazzoli](https://github.com/lburgazzoli))
+- Incorrect content of the build/\_maven\_overlay directory causes the build project failure [\#5469](https://github.com/apache/camel-k/pull/5469) ([lburgazzoli](https://github.com/lburgazzoli))
+- Remove maven threads configuration based on GOMAXPROCS [\#5468](https://github.com/apache/camel-k/pull/5468) ([lburgazzoli](https://github.com/lburgazzoli))
+- feat\(trait\): enforce Pod and Container security context  [\#5461](https://github.com/apache/camel-k/pull/5461) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/term from 0.19.0 to 0.20.0 [\#5458](https://github.com/apache/camel-k/pull/5458) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(kamelets\): parse the url used to download kamelet [\#5457](https://github.com/apache/camel-k/pull/5457) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/text from 0.14.0 to 0.15.0 [\#5453](https://github.com/apache/camel-k/pull/5453) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Test fixes [\#5415](https://github.com/apache/camel-k/pull/5415) ([valdar](https://github.com/valdar))
+- fix\(\#5292\): Simplify run cmd for archs other than amd64 [\#5403](https://github.com/apache/camel-k/pull/5403) ([tdiesler](https://github.com/tdiesler))
 
 ## [2.3.2-nightly](https://github.com/apache/camel-k/tree/2.3.2-nightly) (2024-05-06)
 
