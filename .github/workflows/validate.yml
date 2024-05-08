@@ -50,10 +50,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           check-latest: true
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v4
-        env:
-          GOGC: 20
-        with:
-          version: v1.58.0
-          args: --verbose --timeout 15m --config .golangci.yml
+      - name: lint
+        shell: bash
+        run: |
+          make lint
