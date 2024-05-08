@@ -27,7 +27,6 @@ linters:
   enable-all: true
   disable:
     - cyclop
-    - deadcode
     - depguard
     - dupl
     - exhaustive
@@ -39,36 +38,22 @@ linters:
     - gochecknoglobals
     - gochecknoinits
     - gocognit
-    - goconst
     - gocyclo
     - godox
     - err113
     - gofumpt
-    - golint
     - gomnd
-    - gomoddirectives
-    - ifshort
-    - interfacer
     - ireturn
     - lll
-    - maligned
-    - nakedret
     - nestif
     - nilnil
     - nlreturn
     - nolintlint
-    - nosnakecase
     - paralleltest
     - revive
-    - rowserrcheck
-    - scopelint
-    - structcheck
-    - sqlclosecheck
     - tagalign
     - tagliatelle
-    - tenv
     - testpackage
-    - varcheck
     - varnamelen
     - wastedassign
     - whitespace
@@ -79,3 +64,4 @@ linters:
     #       lint violation make a lot of sense so we should re-enable the lints below and work to fix the findings
     - mnd
     - perfsprint
+    - goconst
