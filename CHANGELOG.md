@@ -13,11 +13,16 @@
 - Cannot `make test-smoke` on arm64 out of the box [\#5362](https://github.com/apache/camel-k/issues/5362)
 - Simplify run cmd for archs other than amd64 [\#5292](https://github.com/apache/camel-k/issues/5292)
 - Pod SecurityContext default secure settings [\#5287](https://github.com/apache/camel-k/issues/5287)
+- Review permission check  [\#5210](https://github.com/apache/camel-k/issues/5210)
 - Custom kamelets are not fetched from private GitHub repository [\#5173](https://github.com/apache/camel-k/issues/5173)
 - Keda integration not working with mounted secrets [\#4359](https://github.com/apache/camel-k/issues/4359)
 
 **Merged pull requests:**
 
+- cleanup golagci-lint configuration [\#5482](https://github.com/apache/camel-k/pull/5482) ([lburgazzoli](https://github.com/lburgazzoli))
+- cleanup pkg/util packages [\#5480](https://github.com/apache/camel-k/pull/5480) ([lburgazzoli](https://github.com/lburgazzoli))
+- Review permission check [\#5479](https://github.com/apache/camel-k/pull/5479) ([lburgazzoli](https://github.com/lburgazzoli))
+- fix\(maven\): move check for MAVEN\_CMD before maven wrapper setup [\#5478](https://github.com/apache/camel-k/pull/5478) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: use the same make targhet for lkint and vuln check locally and on ci [\#5477](https://github.com/apache/camel-k/pull/5477) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore: update golagci-lint to v1.158.0 [\#5471](https://github.com/apache/camel-k/pull/5471) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(doc\): update developers doc [\#5470](https://github.com/apache/camel-k/pull/5470) ([lburgazzoli](https://github.com/lburgazzoli))
