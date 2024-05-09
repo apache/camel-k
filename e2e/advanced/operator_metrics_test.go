@@ -262,6 +262,9 @@ func TestMetrics(t *testing.T) {
 				platformErroredCount = *platformErrored.Histogram.SampleCount
 			}
 
+			t.Logf("duration metric (integration platform) platformReconciliations=%d, platformReconciledCount=%d, platformRequeuedCount=%d platformErroredCount=%d",
+				platformReconciliations, platformReconciledCount, platformRequeuedCount, platformErroredCount)
+
 			g.Expect(platformReconciliations).To(BeNumerically("==", platformReconciledCount+platformRequeuedCount+platformErroredCount))
 
 			// Count the number of Integration reconciliations
@@ -322,6 +325,9 @@ func TestMetrics(t *testing.T) {
 				integrationErroredCount = *integrationErrored.Histogram.SampleCount
 			}
 
+			t.Logf("duration metric (integration) integrationReconciliations=%d, integrationReconciledCount=%d, integrationRequeuedCount=%d integrationErroredCount=%d",
+				integrationReconciliations, integrationReconciledCount, integrationRequeuedCount, integrationErroredCount)
+
 			g.Expect(integrationReconciliations).To(BeNumerically("==", integrationReconciledCount+integrationRequeuedCount+integrationErroredCount))
 
 			// Count the number of IntegrationKit reconciliations
@@ -368,6 +374,9 @@ func TestMetrics(t *testing.T) {
 				integrationKitRequeuedCount = *integrationKitRequeued.Histogram.SampleCount
 			}
 
+			t.Logf("duration metric (integration kit) integrationKitReconciliations=%d, integrationKitReconciledCount=%d, integrationKitRequeuedCount=%d",
+				integrationKitReconciliations, integrationKitReconciledCount, integrationKitRequeuedCount)
+
 			g.Expect(integrationKitReconciliations).To(BeNumerically("==", integrationKitReconciledCount+integrationKitRequeuedCount))
 
 			// Count the number of Build reconciliations
@@ -410,6 +419,9 @@ func TestMetrics(t *testing.T) {
 			if buildRequeued != nil {
 				buildRequeuedCount = *buildRequeued.Histogram.SampleCount
 			}
+
+			t.Logf("duration metric (build) buildReconciliations=%d, buildReconciledCount=%d, buildRequeuedCount=%d",
+				buildReconciliations, buildReconciledCount, buildRequeuedCount)
 
 			g.Expect(buildReconciliations).To(BeNumerically("==", buildReconciledCount+buildRequeuedCount))
 		})
