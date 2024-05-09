@@ -6,7 +6,13 @@
 
 **Closed issues:**
 
+- Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
+- Incorrect content of the build/\_maven\_overlay directory causes the build project failure [\#5466](https://github.com/apache/camel-k/issues/5466)
+- Make images does not work out of the box [\#5464](https://github.com/apache/camel-k/issues/5464)
 - Generate badges for deprecated traits [\#5424](https://github.com/apache/camel-k/issues/5424)
+- Cannot `make test-smoke` on arm64 out of the box [\#5362](https://github.com/apache/camel-k/issues/5362)
+- Simplify run cmd for archs other than amd64 [\#5292](https://github.com/apache/camel-k/issues/5292)
+- Pod SecurityContext default secure settings [\#5287](https://github.com/apache/camel-k/issues/5287)
 - Custom kamelets are not fetched from private GitHub repository [\#5173](https://github.com/apache/camel-k/issues/5173)
 - Keda integration not working with mounted secrets [\#4359](https://github.com/apache/camel-k/issues/4359)
 
