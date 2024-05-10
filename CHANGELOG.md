@@ -13,6 +13,7 @@
 - Cannot `make test-smoke` on arm64 out of the box [\#5362](https://github.com/apache/camel-k/issues/5362)
 - Simplify run cmd for archs other than amd64 [\#5292](https://github.com/apache/camel-k/issues/5292)
 - Pod SecurityContext default secure settings [\#5287](https://github.com/apache/camel-k/issues/5287)
+- Review permission check  [\#5210](https://github.com/apache/camel-k/issues/5210)
 - Custom kamelets are not fetched from private GitHub repository [\#5173](https://github.com/apache/camel-k/issues/5173)
 - Keda integration not working with mounted secrets [\#4359](https://github.com/apache/camel-k/issues/4359)
 
