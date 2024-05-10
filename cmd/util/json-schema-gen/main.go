@@ -25,6 +25,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	"github.com/apache/camel-k/v2/pkg/util"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -99,7 +101,7 @@ func generate(crdFilename, dslFilename, path string, isArray bool, destination s
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(destination, result, 0o600)
+	return os.WriteFile(destination, result, io.FilePerm600)
 }
 
 func remapRef(ref string) string {

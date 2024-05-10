@@ -45,6 +45,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
+const (
+	requeueAfterDuration = 2 * time.Second
+)
+
 // Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -316,7 +320,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	if targetPhase == v1.IntegrationKitPhaseWaitingForCatalog {
 		// Requeue
 		return reconcile.Result{
-			RequeueAfter: 2 * time.Second,
+			RequeueAfter: requeueAfterDuration,
 		}, nil
 	}
 

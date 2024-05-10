@@ -89,6 +89,11 @@ var (
 	}
 )
 
+const (
+	gcTraitID    = "gc"
+	gcTraitOrder = 1200
+)
+
 type gcTrait struct {
 	BaseTrait
 	traitv1.GCTrait `property:",squash"`
@@ -96,7 +101,7 @@ type gcTrait struct {
 
 func newGCTrait() Trait {
 	return &gcTrait{
-		BaseTrait: NewBaseTrait("gc", 1200),
+		BaseTrait: NewBaseTrait(gcTraitID, gcTraitOrder),
 	}
 }
 

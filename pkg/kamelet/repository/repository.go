@@ -144,6 +144,7 @@ func newFromURI(ctx context.Context, uri string) (KameletRepository, error) {
 		owner := parts[0]
 		repo := parts[1]
 		var path string
+
 		if len(parts) >= 3 {
 			path = strings.Join(parts[2:], "/")
 		}

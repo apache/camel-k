@@ -27,6 +27,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	"github.com/apache/camel-k/v2/pkg/client"
 	"go.uber.org/multierr"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -126,7 +128,7 @@ func MountSecretRegistryConfig(ctx context.Context, c client.Client, namespace, 
 	}
 
 	for file, content := range secret.Data {
-		if err := os.WriteFile(filepath.Join(dir, remap(file)), content, 0o600); err != nil {
+		if err := os.WriteFile(filepath.Join(dir, remap(file)), content, io.FilePerm600); err != nil {
 			if removeErr := os.RemoveAll(dir); removeErr != nil {
 				err = multierr.Append(err, removeErr)
 			}

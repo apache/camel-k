@@ -29,6 +29,11 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
+const (
+	pdbTraitID    = "pdb"
+	pdbTraitOrder = 900
+)
+
 type pdbTrait struct {
 	BaseTrait
 	traitv1.PDBTrait `property:",squash"`
@@ -36,7 +41,7 @@ type pdbTrait struct {
 
 func newPdbTrait() Trait {
 	return &pdbTrait{
-		BaseTrait: NewBaseTrait("pdb", 900),
+		BaseTrait: NewBaseTrait(pdbTraitID, pdbTraitOrder),
 	}
 }
 

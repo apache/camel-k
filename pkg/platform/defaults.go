@@ -42,8 +42,11 @@ import (
 	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
-// BuilderServiceAccount --.
-const BuilderServiceAccount = "camel-k-builder"
+const (
+	BuilderServiceAccount = "camel-k-builder"
+
+	defaultBuildTimeout = 5 * time.Minute
+)
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
 // Defaults are set in the status fields, not in the spec.
@@ -325,7 +328,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	// Build timeout
 	if p.Status.Build.GetTimeout().Duration == 0 {
 		p.Status.Build.Timeout = &metav1.Duration{
-			Duration: 5 * time.Minute,
+			Duration: defaultBuildTimeout,
 		}
 	} else {
 		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)

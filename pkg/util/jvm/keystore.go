@@ -30,6 +30,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
+const (
+	keystoreSize = 10
+)
+
 var (
 	logger = log.WithName("keytool")
 
@@ -75,5 +79,5 @@ func GenerateKeystore(ctx context.Context, keystoreDir, keystoreName, keystorePa
 // The keytool CLI mandates a password at least 6 characters long
 // to access any key stores.
 func NewKeystorePassword() string {
-	return util.RandomString(10)
+	return util.RandomString(keystoreSize)
 }

@@ -25,6 +25,9 @@ import (
 )
 
 const (
+	loggingTraitID    = "logging"
+	loggingTraitOrder = 800
+
 	envVarQuarkusConsoleColor     = "QUARKUS_CONSOLE_COLOR"
 	envVarQuarkusLogLevel         = "QUARKUS_LOG_LEVEL"
 	envVarQuarkusLogConsoleFormat = "QUARKUS_LOG_CONSOLE_FORMAT"
@@ -41,7 +44,7 @@ type loggingTrait struct {
 
 func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
-		BaseTrait: NewBaseTrait("logging", 800),
+		BaseTrait: NewBaseTrait(loggingTraitID, loggingTraitOrder),
 		LoggingTrait: traitv1.LoggingTrait{
 			Level: defaultLogLevel,
 		},

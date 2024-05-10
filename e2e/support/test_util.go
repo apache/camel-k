@@ -24,11 +24,12 @@ package support
 
 import (
 	"context"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/apache/camel-k/v2/pkg/util/log"
 
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"

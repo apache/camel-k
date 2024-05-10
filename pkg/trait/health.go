@@ -31,6 +31,9 @@ import (
 )
 
 const (
+	healthTraitID    = "health"
+	healthTraitOrder = 1700
+
 	defaultLivenessProbePath  = "/q/health/live"
 	defaultReadinessProbePath = "/q/health/ready"
 	defaultStartupProbePath   = "/q/health/started"
@@ -43,7 +46,7 @@ type healthTrait struct {
 
 func newHealthTrait() Trait {
 	return &healthTrait{
-		BaseTrait: NewBaseTrait("health", 1700),
+		BaseTrait: NewBaseTrait(healthTraitID, healthTraitOrder),
 		HealthTrait: traitv1.HealthTrait{
 			LivenessScheme:  string(corev1.URISchemeHTTP),
 			ReadinessScheme: string(corev1.URISchemeHTTP),

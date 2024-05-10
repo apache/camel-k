@@ -41,7 +41,9 @@ import (
 )
 
 const (
-	kameletsTraitID             = "kamelets"
+	kameletsTraitID    = "kamelets"
+	kameletsTraitOrder = 450
+
 	contentKey                  = "content"
 	KameletLocationProperty     = "camel.component.kamelet.location"
 	kameletLabel                = "camel.apache.org/kamelet"
@@ -68,7 +70,7 @@ type kameletsTrait struct {
 
 func newKameletsTrait() Trait {
 	return &kameletsTrait{
-		BaseTrait: NewBaseTrait("kamelets", 450),
+		BaseTrait: NewBaseTrait(kameletsTraitID, kameletsTraitOrder),
 	}
 }
 

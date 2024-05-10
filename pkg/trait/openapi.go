@@ -26,6 +26,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,6 +46,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/maven"
 )
 
+const (
+	openapiTraitID    = "openapi"
+	openapiTraitOrder = 300
+)
+
 type openAPITrait struct {
 	BasePlatformTrait
 	traitv1.OpenAPITrait `property:",squash"`
@@ -51,7 +58,7 @@ type openAPITrait struct {
 
 func newOpenAPITrait() Trait {
 	return &openAPITrait{
-		BasePlatformTrait: NewBasePlatformTrait("openapi", 300),
+		BasePlatformTrait: NewBasePlatformTrait(openapiTraitID, openapiTraitOrder),
 	}
 }
 
@@ -204,7 +211,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 	in := filepath.Join(tmpDir, resource.Name)
 	out := filepath.Join(tmpDir, "openapi-dsl.xml")
 
-	err = os.WriteFile(in, content, 0o400)
+	err = os.WriteFile(in, content, io.FilePerm400)
 	if err != nil {
 		return err
 	}

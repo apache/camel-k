@@ -30,6 +30,11 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
+const (
+	ingressTraitID    = "ingress"
+	ingressTraitOrder = 2400
+)
+
 type ingressTrait struct {
 	BaseTrait
 	traitv1.IngressTrait `property:",squash"`
@@ -37,7 +42,7 @@ type ingressTrait struct {
 
 func newIngressTrait() Trait {
 	return &ingressTrait{
-		BaseTrait: NewBaseTrait("ingress", 2400),
+		BaseTrait: NewBaseTrait(ingressTraitID, ingressTraitOrder),
 		IngressTrait: traitv1.IngressTrait{
 			Annotations: map[string]string{},
 			Host:        "",

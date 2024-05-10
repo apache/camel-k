@@ -35,6 +35,11 @@ import (
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
+const (
+	mountTraitID    = "mount"
+	mountTraitOrder = 1610
+)
+
 type mountTrait struct {
 	BasePlatformTrait
 	traitv1.MountTrait `property:",squash"`
@@ -43,7 +48,7 @@ type mountTrait struct {
 func newMountTrait() Trait {
 	return &mountTrait{
 		// Must follow immediately the container trait
-		BasePlatformTrait: NewBasePlatformTrait("mount", 1610),
+		BasePlatformTrait: NewBasePlatformTrait(mountTraitID, mountTraitOrder),
 	}
 }
 

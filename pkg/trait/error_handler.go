@@ -28,6 +28,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
+const (
+	errorHandlerTraitID    = "error-handler"
+	errorHandlerTraitOrder = 470
+)
+
 type errorHandlerTrait struct {
 	BasePlatformTrait
 	traitv1.ErrorHandlerTrait `property:",squash"`
@@ -36,7 +41,7 @@ type errorHandlerTrait struct {
 func newErrorHandlerTrait() Trait {
 	return &errorHandlerTrait{
 		// NOTE: Must run before dependency trait
-		BasePlatformTrait: NewBasePlatformTrait("error-handler", 470),
+		BasePlatformTrait: NewBasePlatformTrait(errorHandlerTraitID, errorHandlerTraitOrder),
 	}
 }
 

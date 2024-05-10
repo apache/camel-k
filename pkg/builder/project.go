@@ -25,6 +25,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/jvm"
@@ -57,6 +59,7 @@ type projectSteps struct {
 	CommonSteps []Step
 }
 
+//nolint:mnd
 var Project = projectSteps{
 	CleanUpBuildDir:         NewStep(ProjectGenerationPhase-1, cleanUpBuildDir),
 	GenerateJavaKeystore:    NewStep(ProjectGenerationPhase, generateJavaKeystore),
@@ -76,7 +79,7 @@ func cleanUpBuildDir(ctx *builderContext) error {
 		return err
 	}
 
-	return os.MkdirAll(ctx.Build.BuildDir, 0o700)
+	return os.MkdirAll(ctx.Build.BuildDir, io.FilePerm700)
 }
 
 func generateJavaKeystore(ctx *builderContext) error {

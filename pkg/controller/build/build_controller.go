@@ -39,6 +39,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
+const (
+	requeueAfterDuration    = 5 * time.Second
+	podRequeueAfterDuration = 1 * time.Second
+)
+
 // Add creates a new Build Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -224,13 +229,13 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 
 	if target.Status.Phase == v1.BuildPhaseScheduling || target.Status.Phase == v1.BuildPhaseFailed {
 		// Requeue scheduling (resp. failed) build so that it re-enters the build (resp. recovery) working queue
-		return reconcile.Result{RequeueAfter: 5 * time.Second}, nil
+		return reconcile.Result{RequeueAfter: requeueAfterDuration}, nil
 	}
 
 	if target.BuilderConfiguration().Strategy == v1.BuildStrategyPod &&
 		(target.Status.Phase == v1.BuildPhasePending || target.Status.Phase == v1.BuildPhaseRunning) {
 		// Requeue running Build to poll Pod and signal timeout
-		return reconcile.Result{RequeueAfter: 1 * time.Second}, nil
+		return reconcile.Result{RequeueAfter: podRequeueAfterDuration}, nil
 	}
 
 	return reconcile.Result{}, nil

@@ -27,6 +27,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
+const (
+	tolerationTraitID    = "toleration"
+	tolerationTraitOrder = 1200
+)
+
 type tolerationTrait struct {
 	BaseTrait
 	traitv1.TolerationTrait `property:",squash"`
@@ -34,7 +39,7 @@ type tolerationTrait struct {
 
 func newTolerationTrait() Trait {
 	return &tolerationTrait{
-		BaseTrait: NewBaseTrait("toleration", 1200),
+		BaseTrait: NewBaseTrait(tolerationTraitID, tolerationTraitOrder),
 	}
 }
 

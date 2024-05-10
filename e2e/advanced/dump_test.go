@@ -25,8 +25,9 @@ package advanced
 import (
 	"context"
 	"fmt"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"testing"
+
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	. "github.com/onsi/gomega"
 

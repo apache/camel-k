@@ -41,6 +41,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
+const (
+	requeueAfterDuration = 5 * time.Second
+)
+
 // Add creates a new Catalog Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -205,6 +209,6 @@ func (r *reconcileCatalog) Reconcile(ctx context.Context, request reconcile.Requ
 
 	// Requeue
 	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
+		RequeueAfter: requeueAfterDuration,
 	}, nil
 }

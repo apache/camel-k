@@ -31,6 +31,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
+const (
+	prometheusTraitID    = "prometheus"
+	prometheusTraitOrder = 1900
+)
+
 type prometheusTrait struct {
 	BaseTrait
 	traitv1.PrometheusTrait `property:",squash"`
@@ -38,7 +43,7 @@ type prometheusTrait struct {
 
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
-		BaseTrait: NewBaseTrait("prometheus", 1900),
+		BaseTrait: NewBaseTrait(prometheusTraitID, prometheusTraitOrder),
 		PrometheusTrait: traitv1.PrometheusTrait{
 			PodMonitor: pointer.Bool(true),
 		},

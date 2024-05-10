@@ -70,6 +70,7 @@ func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 			Kind:       "Broker",
 		}, nil
 	}
+
 	name := matchOrEmpty(uriRegexp, 2, uri)
 	if name == "" {
 		return v1.ObjectReference{}, fmt.Errorf("cannot find name in uri %s", uri)

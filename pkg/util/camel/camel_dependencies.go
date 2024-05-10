@@ -213,6 +213,8 @@ func addRegistryMavenDependency(project *maven.Project, dependency string) error
 	}
 	plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.8")
 	outputDirectory := "../context"
+
+	//nolint:mnd
 	isClasspath := len(mapping) == 3 && mapping[2] == "classpath"
 	if isClasspath {
 		outputDirectory = "src/main/resources"
