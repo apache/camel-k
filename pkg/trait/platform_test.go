@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
@@ -112,7 +113,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 	assert.Equal(t, 1, len(e.Resources.Items()))
 	defPlatform := v1.NewIntegrationPlatform("ns1", platform.DefaultPlatformName)
-	defPlatform.Labels = map[string]string{"app": "camel-k", "camel.apache.org/platform.generated": True}
+	defPlatform.Labels = map[string]string{"app": "camel-k", "camel.apache.org/platform.generated": boolean.TrueString}
 	assert.Contains(t, e.Resources.Items(), &defPlatform)
 }
 

@@ -34,6 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
@@ -376,7 +377,7 @@ func initializeConfigmapKameletSource(source v1.SourceSpec, hash, name, namespac
 				sourceLanguageAnnotation:            string(source.Language),
 				sourceNameAnnotation:                name,
 				sourceCompressionAnnotation:         strconv.FormatBool(source.Compression),
-				"camel.apache.org/source.generated": "true",
+				"camel.apache.org/source.generated": boolean.TrueString,
 				"camel.apache.org/source.type":      string(source.Type),
 				"camel.apache.org/source.digest":    hash,
 			},

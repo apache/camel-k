@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -80,8 +81,8 @@ func getLanguageSettings(e *Environment, language v1.Language) languageSettings 
 		}
 		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
 		return languageSettings{
-			native:                     native == "true",
-			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == "true",
+			native:                     native == boolean.TrueString,
+			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == boolean.TrueString,
 		}
 	}
 	log.Debugf("No loader could be found for the language %q, the legacy language settings are applied", string(language))

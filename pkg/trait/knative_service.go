@@ -30,6 +30,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
@@ -227,7 +228,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		// See:
 		// - https://knative.dev/v1.3-docs/eventing/custom-event-source/sinkbinding/create-a-sinkbinding/#optional-choose-sinkbinding-namespace-selection-behavior
 		// - https://github.com/knative/operator/blob/release-1.2/docs/configuration.md#specsinkbindingselectionmode
-		"bindings.knative.dev/include": "true",
+		"bindings.knative.dev/include": boolean.TrueString,
 	}
 	if t.Visibility != "" {
 		serviceLabels[knativeServingVisibilityLabel] = t.Visibility

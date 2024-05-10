@@ -24,6 +24,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"os"
 	"testing"
 
@@ -34,7 +35,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", "false")
+	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", boolean.FalseString)
 	if justCompile == "true" {
 		os.Exit(m.Run())
 	}

@@ -27,6 +27,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	image "github.com/apache/camel-k/v2/pkg/util/registry"
@@ -136,7 +137,7 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 			defaultPlatform.Labels = make(map[string]string)
 		}
 		defaultPlatform.Labels["app"] = "camel-k"
-		defaultPlatform.Labels["camel.apache.org/platform.generated"] = True
+		defaultPlatform.Labels["camel.apache.org/platform.generated"] = boolean.TrueString
 		// Cascade the operator id in charge to reconcile the Integration
 		if v1.GetOperatorIDAnnotation(e.Integration) != "" {
 			defaultPlatform.SetOperatorID(v1.GetOperatorIDAnnotation(e.Integration))

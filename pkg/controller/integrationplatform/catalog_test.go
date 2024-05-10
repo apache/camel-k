@@ -25,6 +25,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/resources"
@@ -91,7 +93,7 @@ func TestCreateCatalog(t *testing.T) {
 	require.NoError(t, err)
 
 	// use local Maven executable in tests
-	t.Setenv("MAVEN_WRAPPER", "false")
+	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)
 	_, ok := os.LookupEnv("MAVEN_CMD")
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
@@ -194,7 +196,7 @@ func TestCreateCatalogError(t *testing.T) {
 	require.NoError(t, err)
 
 	// use local Maven executable in tests
-	t.Setenv("MAVEN_WRAPPER", "false")
+	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)
 	_, ok := os.LookupEnv("MAVEN_CMD")
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")

@@ -87,6 +87,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	pkgutil "github.com/apache/camel-k/v2/pkg/util"
 	v2util "github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -285,10 +286,10 @@ func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID strin
 	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID, "--skip-cluster-setup"}
 
 	if !pkgutil.StringSliceExists(args, "--build-timeout") {
-		//if --build-timeout is not explicitly passed as an argument, try to configure it
+		// if --build-timeout is not explicitly passed as an argument, try to configure it
 		buildTimeout := os.Getenv("CAMEL_K_TEST_BUILD_TIMEOUT")
 		if buildTimeout == "" {
-			//default Build Timeout for tests
+			// default Build Timeout for tests
 			buildTimeout = "10m"
 		}
 		fmt.Printf("Setting build timeout to %s\n", buildTimeout)
@@ -2011,7 +2012,7 @@ func PlatformByName(t *testing.T, ctx context.Context, ns string, name string) f
 }
 
 func CopyIntegrationKits(t *testing.T, ctx context.Context, ns, operatorID string) error {
-	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_INTEGRATION_KITS"); ok && value == "false" {
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_INTEGRATION_KITS"); ok && value == boolean.FalseString {
 		fmt.Println("Copy integration kits optimization is disabled")
 		return nil
 	}
@@ -2046,7 +2047,7 @@ func CopyIntegrationKits(t *testing.T, ctx context.Context, ns, operatorID strin
 }
 
 func CopyCamelCatalog(t *testing.T, ctx context.Context, ns, operatorID string) error {
-	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_CATALOG"); ok && value == "false" {
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_CATALOG"); ok && value == boolean.FalseString {
 		fmt.Println("Copy catalog optimization is disabled")
 		return nil
 	}

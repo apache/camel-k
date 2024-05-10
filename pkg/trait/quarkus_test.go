@@ -20,6 +20,8 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/stretchr/testify/assert"
@@ -188,31 +190,31 @@ func TestGetLanguageSettingsWithLoaders(t *testing.T) {
 				Loaders: map[string]v1.CamelLoader{
 					"java": {
 						Metadata: map[string]string{
-							"native":                         "true",
-							"sources-required-at-build-time": "true",
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
 					"groovy": {
 						Metadata: map[string]string{
-							"native":                         "false",
-							"sources-required-at-build-time": "false",
+							"native":                         boolean.FalseString,
+							"sources-required-at-build-time": boolean.FalseString,
 						},
 					},
 					"js": {
 						Metadata: map[string]string{
-							"native":                         "true",
-							"sources-required-at-build-time": "false",
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.FalseString,
 						},
 					},
 					"kts": {
 						Metadata: map[string]string{
-							"native":                         "false",
-							"sources-required-at-build-time": "true",
+							"native":                         boolean.FalseString,
+							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
 					"jsh": {
 						Metadata: map[string]string{
-							"native": "true",
+							"native": boolean.TrueString,
 						},
 					},
 				},

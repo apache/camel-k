@@ -36,6 +36,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -43,9 +44,6 @@ import (
 )
 
 const (
-	True  = "true"
-	False = "false"
-
 	sourceLanguageAnnotation    = "camel.apache.org/source.language"
 	sourceLoaderAnnotation      = "camel.apache.org/source.loader"
 	sourceNameAnnotation        = "camel.apache.org/source.name"
@@ -482,7 +480,7 @@ func (e *Environment) addSourcesProperties() {
 			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
 		}
 		if s.Compression {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = "true"
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = boolean.TrueString
 		}
 
 		interceptors := make([]string, 0, len(s.Interceptors))

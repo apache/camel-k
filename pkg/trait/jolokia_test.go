@@ -28,6 +28,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
@@ -256,7 +257,7 @@ func TestAddBoolPointerOptionToJolokiaOptions(t *testing.T) {
 	trait.addToJolokiaOptions(options, "key", pointer.Bool(false))
 
 	assert.Len(t, options, 1)
-	assert.Equal(t, "false", options["key"])
+	assert.Equal(t, boolean.FalseString, options["key"])
 }
 
 func TestAddWrongTypeOptionToJolokiaOptionsDoesNothing(t *testing.T) {

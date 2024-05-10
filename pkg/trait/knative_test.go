@@ -41,6 +41,7 @@ import (
 	knativeapi "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	k8sutils "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -256,11 +257,11 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 
 	channel := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "", "")
 	assert.NotNil(t, channel)
-	assert.Equal(t, "false", channel.Metadata[knativeapi.CamelMetaKnativeReply])
+	assert.Equal(t, boolean.FalseString, channel.Metadata[knativeapi.CamelMetaKnativeReply])
 
 	broker := ne.FindService("evt.type", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, "", "")
 	assert.NotNil(t, broker)
-	assert.Equal(t, "false", broker.Metadata[knativeapi.CamelMetaKnativeReply])
+	assert.Equal(t, boolean.FalseString, broker.Metadata[knativeapi.CamelMetaKnativeReply])
 
 	assert.NotNil(t, environment.Resources.GetKnativeSubscription(func(subscription *messaging.Subscription) bool {
 		return assert.Equal(t, "channel-source-1-test", subscription.Name)

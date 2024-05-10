@@ -33,15 +33,16 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 )
 
 func TestMain(m *testing.M) {
-	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", "false")
-	if justCompile == "true" {
+	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", boolean.FalseString)
+	if justCompile == boolean.TrueString {
 		os.Exit(m.Run())
 	}
 
-	fastSetup := GetEnvOrDefault("CAMEL_K_E2E_FAST_SETUP", "false")
+	fastSetup := GetEnvOrDefault("CAMEL_K_E2E_FAST_SETUP", boolean.FalseString)
 	if fastSetup == "true" {
 		operatorID := platform.DefaultPlatformName
 		ns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
