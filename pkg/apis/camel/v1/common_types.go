@@ -61,6 +61,8 @@ type BuildConfiguration struct {
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 	// The list of platforms used in order to build a container image.
 	ImagePlatforms []string `property:"platforms" json:"platforms,omitempty"`
+	// The pod tolerations for the builder pod. Only used for `pod` strategy
+	Tolerations []corev1.Toleration `property:"tolerations" json:"tolerations,omitempty"`
 }
 
 // BuildStrategy specifies how the Build should be executed.

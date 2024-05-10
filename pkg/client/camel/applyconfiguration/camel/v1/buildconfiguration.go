@@ -20,6 +20,8 @@ limitations under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
@@ -37,6 +39,7 @@ type BuildConfigurationApplyConfiguration struct {
 	NodeSelector        map[string]string      `json:"nodeSelector,omitempty"`
 	Annotations         map[string]string      `json:"annotations,omitempty"`
 	ImagePlatforms      []string               `json:"platforms,omitempty"`
+	Tolerations         []corev1.Toleration    `json:"tolerations,omitempty"`
 }
 
 // BuildConfigurationApplyConfiguration constructs an declarative configuration of the BuildConfiguration type for use with
@@ -143,6 +146,16 @@ func (b *BuildConfigurationApplyConfiguration) WithAnnotations(entries map[strin
 func (b *BuildConfigurationApplyConfiguration) WithImagePlatforms(values ...string) *BuildConfigurationApplyConfiguration {
 	for i := range values {
 		b.ImagePlatforms = append(b.ImagePlatforms, values[i])
+	}
+	return b
+}
+
+// WithTolerations adds the given value to the Tolerations field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the Tolerations field.
+func (b *BuildConfigurationApplyConfiguration) WithTolerations(values ...corev1.Toleration) *BuildConfigurationApplyConfiguration {
+	for i := range values {
+		b.Tolerations = append(b.Tolerations, values[i])
 	}
 	return b
 }

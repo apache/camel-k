@@ -17,6 +17,10 @@ limitations under the License.
 
 package trait
 
+import (
+	corev1 "k8s.io/api/core/v1"
+)
+
 // The builder trait is internally used to determine the best strategy to
 // build and configure IntegrationKits.
 //
@@ -71,6 +75,8 @@ type BuilderTrait struct {
 	TasksLimitMemory []string `property:"tasks-limit-memory" json:"tasksLimitMemory,omitempty"`
 	// Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
+	// Defines tolerations for the builder pod.
+	Tolerations []corev1.Toleration `property:"tolerations" json:"tolerations,omitempty"`
 	// When using `pod` strategy, annotation to use for the builder pod.
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 	// The list of manifest platforms to use to build a container image (default `linux/amd64`).

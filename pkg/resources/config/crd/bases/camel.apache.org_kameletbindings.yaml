@@ -6789,6 +6789,11 @@ spec:
                               eligible to be scheduled on, based on labels on the
                               node.
                             type: object
+                          tolerations:
+                            description: List of tolerations applied to the builder pod
+                            items:
+                              type: object
+                            type: array
                           orderStrategy:
                             description: The build order strategy to use, either `dependencies`,
                               `fifo` or `sequential` (default `sequential`)

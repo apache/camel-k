@@ -106,6 +106,11 @@ spec:
                     description: The node selector for the builder pod. Only used
                       for `pod` strategy
                     type: object
+                  tolerations:
+                    description: List of tolerations applied to the builder pod
+                    items:
+                      type: object
+                    type: array
                   operatorNamespace:
                     description: The namespace where to run the builder Pod (must
                       be the same of the operator in charge of this Build reconciliation).
@@ -190,6 +195,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -300,6 +310,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -876,6 +891,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -957,6 +977,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -1066,6 +1091,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -1174,6 +1204,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -1741,6 +1776,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of
@@ -1819,6 +1859,11 @@ spec:
                               description: The node selector for the builder pod.
                                 Only used for `pod` strategy
                               type: object
+                            tolerations:
+                              description: List of tolerations applied to the builder pod
+                              items:
+                                type: object
+                              type: array
                             operatorNamespace:
                               description: The namespace where to run the builder
                                 Pod (must be the same of the operator in charge of

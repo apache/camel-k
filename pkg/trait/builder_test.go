@@ -448,6 +448,64 @@ func TestExistsTaskRequest(t *testing.T) {
 	assert.False(t, existsTaskRequest(tasks, "shouldfail"))
 }
 
+func TestBuilderWithNoTolerations(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+
+	active, condition, err := builderTrait.Configure(env)
+	require.NoError(t, err)
+
+	err = builderTrait.Apply(env)
+	require.NoError(t, err)
+
+	assert.True(t, active)
+	assert.Nil(t, condition)
+
+	assert.Nil(t, builderTrait.Tolerations)
+	assert.Nil(t, env.Pipeline[0].Builder.Configuration.Tolerations)
+}
+
+func TestBuilderWithTolerations(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+
+	builderTrait.Tolerations = []corev1.Toleration{
+		{
+			Key:      "key",
+			Operator: "Equal",
+			Value:    "value",
+			Effect:   "NoSchedule",
+		},
+	}
+
+	active, condition, err := builderTrait.Configure(env)
+	require.NoError(t, err)
+
+	err = builderTrait.Apply(env)
+	require.NoError(t, err)
+
+	assert.True(t, active)
+	assert.Nil(t, condition)
+
+	assert.Equal(t, []corev1.Toleration{
+		{
+			Key:      "key",
+			Operator: "Equal",
+			Value:    "value",
+			Effect:   "NoSchedule",
+		},
+	}, env.Pipeline[0].Builder.Configuration.Tolerations)
+
+	assert.Equal(t, []corev1.Toleration{
+		{
+			Key:      "key",
+			Operator: "Equal",
+			Value:    "value",
+			Effect:   "NoSchedule",
+		},
+	}, builderTrait.Tolerations)
+}
+
 func TestBuilderWithNoNodeSelector(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
 	builderTrait := createNominalBuilderTraitTest()
