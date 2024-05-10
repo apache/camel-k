@@ -18,6 +18,7 @@ limitations under the License.
 package aws
 
 import (
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -56,7 +57,7 @@ func TestAwsSecretsManagerTraitApply(t *testing.T) {
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
@@ -79,7 +80,7 @@ func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
@@ -119,7 +120,7 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "my-access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "my-secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
@@ -159,7 +160,7 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "my-access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "my-secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error), objects ...runtime.Object) *trait.Environment {

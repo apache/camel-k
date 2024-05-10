@@ -18,6 +18,7 @@ limitations under the License.
 package telemetry
 
 import (
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"testing"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -81,7 +82,7 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	assert.Equal(t, "service.name=Test", e.ApplicationProperties["camel.k.telemetry.serviceName"])
 	assert.Equal(t, "ratio", e.ApplicationProperties["camel.k.telemetry.sampler"])
 	assert.Equal(t, "0.001", e.ApplicationProperties["camel.k.telemetry.samplerRatio"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.k.telemetry.samplerParentBased"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.k.telemetry.samplerParentBased"])
 	assert.Equal(t, "${camel.k.telemetry.endpoint}", e.ApplicationProperties["quarkus.opentelemetry.tracer.exporter.otlp.endpoint"])
 	assert.Equal(t, "${camel.k.telemetry.serviceName}", e.ApplicationProperties["quarkus.opentelemetry.tracer.resource-attributes"])
 	assert.Equal(t, "${camel.k.telemetry.sampler}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler"])

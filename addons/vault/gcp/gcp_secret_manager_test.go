@@ -18,6 +18,7 @@ limitations under the License.
 package gcp
 
 import (
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"testing"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,7 +50,7 @@ func TestGcpSecretManagerTraitApply(t *testing.T) {
 
 	assert.Equal(t, "project-gcp", e.ApplicationProperties["camel.vault.gcp.projectId"])
 	assert.Equal(t, "file:////usr/local/serviceaccount.json", e.ApplicationProperties["camel.vault.gcp.serviceAccountKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
 }
 
 func TestGcpSecretManagerTraitNoDefaultCreds(t *testing.T) {
@@ -70,7 +71,7 @@ func TestGcpSecretManagerTraitNoDefaultCreds(t *testing.T) {
 
 	assert.Equal(t, "project-gcp", e.ApplicationProperties["camel.vault.gcp.projectId"])
 	assert.Equal(t, "file:////usr/local/serviceaccount.json", e.ApplicationProperties["camel.vault.gcp.serviceAccountKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
 }
 
 func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *trait.Environment {

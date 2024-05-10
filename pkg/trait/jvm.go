@@ -24,6 +24,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -162,7 +164,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 			if meta.Labels == nil {
 				meta.Labels = make(map[string]string)
 			}
-			meta.Labels["camel.apache.org/debug"] = "true"
+			meta.Labels["camel.apache.org/debug"] = boolean.TrueString
 		})
 	}
 

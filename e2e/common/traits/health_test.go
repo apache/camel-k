@@ -198,7 +198,7 @@ func TestHealthTrait(t *testing.T) {
 			// lastTransitionTime: "2021-12-08T20:12:14Z"
 			// message: 'containers with unready status: [integration]'
 			// reason: ContainersNotReady
-			// status: "False"
+			// status: False
 			// type: Ready
 			//
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(

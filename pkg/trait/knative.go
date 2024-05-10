@@ -24,6 +24,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -220,7 +222,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 				knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 				knativeapi.CamelMetaKnativeKind:       ref.Kind,
-				knativeapi.CamelMetaKnativeReply:      "false",
+				knativeapi.CamelMetaKnativeReply:      boolean.FalseString,
 			}
 			if pointer.BoolDeref(t.FilterSourceChannels, false) {
 				meta[knativeapi.CamelMetaFilterPrefix+knativeHistoryHeader] = loc.Host
@@ -294,7 +296,7 @@ func (t *knativeTrait) configureEndpoints(e *Environment, env *knativeapi.CamelE
 				knativeapi.CamelMetaEndpointKind:      string(knativeapi.CamelEndpointKindSource),
 				knativeapi.CamelMetaKnativeAPIVersion: serving.SchemeGroupVersion.String(),
 				knativeapi.CamelMetaKnativeKind:       "Service",
-				// knative.reply is left to default ("true") in case of simple service
+				// knative.reply is left to default (boolean.TrueString) in case of simple service
 			},
 		}
 		env.Services = append(env.Services, svc)
@@ -347,7 +349,7 @@ func (t *knativeTrait) configureEvents(e *Environment, env *knativeapi.CamelEnvi
 						knativeapi.CamelMetaKnativeAPIVersion: ref.APIVersion,
 						knativeapi.CamelMetaKnativeKind:       ref.Kind,
 						knativeapi.CamelMetaKnativeName:       ref.Name,
-						knativeapi.CamelMetaKnativeReply:      "false",
+						knativeapi.CamelMetaKnativeReply:      boolean.FalseString,
 					},
 				}
 				env.Services = append(env.Services, svc)

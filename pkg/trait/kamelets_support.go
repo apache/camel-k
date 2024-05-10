@@ -22,6 +22,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/cmd/source"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -85,7 +86,7 @@ func newBundleConfigmap(name, namespace string, id int) *corev1.ConfigMap {
 				kubernetes.ConfigMapTypeLabel: KameletBundleType,
 			},
 			Annotations: map[string]string{
-				kubernetes.ConfigMapAutogenLabel: "true",
+				kubernetes.ConfigMapAutogenLabel: boolean.TrueString,
 			},
 		},
 		Data: map[string]string{},

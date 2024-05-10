@@ -33,6 +33,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/reference"
 )
@@ -112,7 +113,7 @@ func (t *serviceBindingTrait) setCatalogConfiguration(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	e.ApplicationProperties["camel.k.serviceBinding.enabled"] = True
+	e.ApplicationProperties["camel.k.serviceBinding.enabled"] = boolean.TrueString
 	for _, cp := range e.CamelCatalog.Runtime.Capabilities["service-binding"].RuntimeProperties {
 		e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 	}
@@ -123,7 +124,7 @@ func (t *serviceBindingTrait) setProperties(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
+	e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = boolean.TrueString
 }
 
 func (t *serviceBindingTrait) getContext(e *Environment) (pipeline.Context, error) {
@@ -224,7 +225,7 @@ func createSecret(ctx pipeline.Context, ns, integrationName string) *corev1.Secr
 			Name:      name,
 			Labels: map[string]string{
 				v1.IntegrationLabel: integrationName,
-				serviceBindingLabel: "true",
+				serviceBindingLabel: boolean.TrueString,
 			},
 			Annotations: map[string]string{
 				serviceBindingMountPointAnnotation: camel.ServiceBindingsMountPath,

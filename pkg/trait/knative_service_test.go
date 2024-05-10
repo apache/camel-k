@@ -34,6 +34,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -178,7 +179,7 @@ func TestKnativeService(t *testing.T) {
 
 	assert.Equal(t, "file:/etc/camel/sources/routes.js", environment.ApplicationProperties["camel.k.sources[0].location"])
 	assert.Equal(t, "js", environment.ApplicationProperties["camel.k.sources[0].language"])
-	assert.Equal(t, "true", environment.ApplicationProperties["camel.k.sources[0].compressed"])
+	assert.Equal(t, boolean.TrueString, environment.ApplicationProperties["camel.k.sources[0].compressed"])
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF", filepath.FromSlash("/etc/camel/application.properties"))
 	test.EnvVarHasValue(t, spec.Containers[0].Env, "CAMEL_K_CONF_D", filepath.FromSlash("/etc/camel/conf.d"))
 }
@@ -590,10 +591,10 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 	return environment
 }
 func TestServiceAnnotation(t *testing.T) {
-	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": "true"}
+	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": boolean.TrueString}
 
 	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
-		Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
+		Annotations: map[string]string{"haproxy.router.openshift.io/balance": boolean.TrueString},
 	})
 
 	traitsCatalog := environment.Catalog

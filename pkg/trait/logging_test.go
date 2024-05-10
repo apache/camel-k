@@ -30,6 +30,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -119,9 +120,9 @@ func TestEmptyLoggingTrait(t *testing.T) {
 
 	assert.Equal(t, "INFO", env.ApplicationProperties["camel.k.logging.level"])
 	assert.Equal(t, "", env.ApplicationProperties["camel.k.logging.format"])
-	assert.Equal(t, "false", env.ApplicationProperties["camel.k.logging.json"])
+	assert.Equal(t, boolean.FalseString, env.ApplicationProperties["camel.k.logging.json"])
 	assert.Equal(t, "", env.ApplicationProperties["camel.k.logging.jsonPrettyPrint"])
-	assert.Equal(t, "true", env.ApplicationProperties["camel.k.logging.color"])
+	assert.Equal(t, boolean.TrueString, env.ApplicationProperties["camel.k.logging.color"])
 
 	assert.Equal(t, "${camel.k.logging.level}", env.ApplicationProperties["quarkus.log.level"])
 	assert.Equal(t, "", env.ApplicationProperties["quarkus.log.console.format"])
@@ -141,8 +142,8 @@ func TestJsonLoggingTrait(t *testing.T) {
 
 	assert.Equal(t, "TRACE", env.ApplicationProperties["camel.k.logging.level"])
 	assert.Equal(t, "%d{HH:mm:ss} %-5p (%t) %s%e%n", env.ApplicationProperties["camel.k.logging.format"])
-	assert.Equal(t, "true", env.ApplicationProperties["camel.k.logging.json"])
-	assert.Equal(t, "true", env.ApplicationProperties["camel.k.logging.jsonPrettyPrint"])
+	assert.Equal(t, boolean.TrueString, env.ApplicationProperties["camel.k.logging.json"])
+	assert.Equal(t, boolean.TrueString, env.ApplicationProperties["camel.k.logging.jsonPrettyPrint"])
 	assert.Equal(t, "", env.ApplicationProperties["camel.k.logging.color"])
 
 	assert.Equal(t, "${camel.k.logging.level}", env.ApplicationProperties["quarkus.log.level"])

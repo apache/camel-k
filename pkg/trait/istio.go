@@ -20,6 +20,8 @@ package trait
 import (
 	"strconv"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/utils/pointer"
 
@@ -78,7 +80,7 @@ func (t *istioTrait) injectIstioAnnotation(annotations map[string]string, includ
 	}
 	annotations[istioOutboundIPRangesAnnotation] = t.Allow
 	if includeInject {
-		annotations[istioSidecarInjectAnnotation] = True
+		annotations[istioSidecarInjectAnnotation] = boolean.TrueString
 	}
 	if t.Inject != nil {
 		annotations[istioSidecarInjectAnnotation] = strconv.FormatBool(*t.Inject)

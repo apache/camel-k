@@ -21,6 +21,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
 )
 
@@ -84,16 +85,16 @@ func (l loggingTrait) setEnvConfiguration(e *Environment) {
 	}
 
 	if pointer.BoolDeref(l.JSON, false) {
-		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, True)
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, boolean.TrueString)
 		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
-			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, True)
+			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, boolean.TrueString)
 		}
 	} else {
 		// If the trait is false OR unset, we default to false.
-		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, False)
+		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, boolean.FalseString)
 
 		if pointer.BoolDeref(l.Color, true) {
-			envvar.SetVal(&e.EnvVars, envVarQuarkusConsoleColor, True)
+			envvar.SetVal(&e.EnvVars, envVarQuarkusConsoleColor, boolean.TrueString)
 		}
 	}
 }
@@ -107,15 +108,15 @@ func (l loggingTrait) setCatalogConfiguration(e *Environment) {
 		e.ApplicationProperties["camel.k.logging.format"] = l.Format
 	}
 	if pointer.BoolDeref(l.JSON, false) {
-		e.ApplicationProperties["camel.k.logging.json"] = True
+		e.ApplicationProperties["camel.k.logging.json"] = boolean.TrueString
 		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
-			e.ApplicationProperties["camel.k.logging.jsonPrettyPrint"] = True
+			e.ApplicationProperties["camel.k.logging.jsonPrettyPrint"] = boolean.TrueString
 		}
 	} else {
 		// If the trait is false OR unset, we default to false.
-		e.ApplicationProperties["camel.k.logging.json"] = False
+		e.ApplicationProperties["camel.k.logging.json"] = boolean.FalseString
 		if pointer.BoolDeref(l.Color, true) {
-			e.ApplicationProperties["camel.k.logging.color"] = True
+			e.ApplicationProperties["camel.k.logging.color"] = boolean.TrueString
 		}
 	}
 

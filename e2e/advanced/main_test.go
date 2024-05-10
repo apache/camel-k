@@ -24,6 +24,7 @@ package advanced
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"os"
 	"testing"
 
@@ -37,12 +38,12 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", "false")
+	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", boolean.FalseString)
 	if justCompile == "true" {
 		os.Exit(m.Run())
 	}
 
-	fastSetup := GetEnvOrDefault("CAMEL_K_E2E_FAST_SETUP", "false")
+	fastSetup := GetEnvOrDefault("CAMEL_K_E2E_FAST_SETUP", boolean.FalseString)
 	if fastSetup == "true" {
 		operatorID := platform.DefaultPlatformName
 		ns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)

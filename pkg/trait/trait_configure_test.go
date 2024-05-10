@@ -28,6 +28,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 )
 
 func TestTraitConfiguration(t *testing.T) {
@@ -70,7 +71,7 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
 					"trait.camel.apache.org/cron.concurrency-policy":    "annotated-policy",
-					"trait.camel.apache.org/environment.container-meta": "true",
+					"trait.camel.apache.org/environment.container-meta": boolean.TrueString,
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -134,7 +135,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 				Annotations: map[string]string{
 					"trait.camel.apache.org/cron.components":         "cmp3",
 					"trait.camel.apache.org/cron.concurrency-policy": "policy2",
-					"trait.camel.apache.org/builder.verbose":         "true",
+					"trait.camel.apache.org/builder.verbose":         boolean.TrueString,
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
