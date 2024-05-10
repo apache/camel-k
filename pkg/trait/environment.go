@@ -35,6 +35,9 @@ type environmentTrait struct {
 }
 
 const (
+	environmentTraitID    = "environment"
+	environmentTraitOrder = 800
+
 	envVarNamespace            = "NAMESPACE"
 	envVarPodName              = "POD_NAME"
 	envVarOperatorID           = "CAMEL_K_OPERATOR_ID"
@@ -54,7 +57,7 @@ const (
 
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
-		BasePlatformTrait: NewBasePlatformTrait("environment", 800),
+		BasePlatformTrait: NewBasePlatformTrait(environmentTraitID, environmentTraitOrder),
 		EnvironmentTrait: traitv1.EnvironmentTrait{
 			ContainerMeta: pointer.Bool(true),
 		},

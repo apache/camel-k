@@ -35,6 +35,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const (
+	scraperPeriodicTimeout = 2 * time.Second
+)
+
 // SelectorScraper scrapes all pods with a given selector.
 type SelectorScraper struct {
 	client               kubernetes.Interface
@@ -91,7 +95,7 @@ func (s *SelectorScraper) periodicSynchronize(ctx context.Context, out *bufio.Wr
 		if err := clientCloser(); err != nil {
 			s.L.Error(err, "Unable to close the client")
 		}
-	case <-time.After(2 * time.Second):
+	case <-time.After(scraperPeriodicTimeout):
 		go s.periodicSynchronize(ctx, out, clientCloser)
 	}
 }

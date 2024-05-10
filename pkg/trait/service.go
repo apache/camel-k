@@ -30,16 +30,19 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
+const (
+	serviceTraitID    = "service"
+	serviceTraitOrder = 1500
+)
+
 type serviceTrait struct {
 	BaseTrait
 	traitv1.ServiceTrait `property:",squash"`
 }
 
-const serviceTraitID = "service"
-
 func newServiceTrait() Trait {
 	return &serviceTrait{
-		BaseTrait: NewBaseTrait(serviceTraitID, 1500),
+		BaseTrait: NewBaseTrait(serviceTraitID, serviceTraitOrder),
 	}
 }
 

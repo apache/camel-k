@@ -30,6 +30,13 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
+const (
+	jolokiaTraitID    = "jolokia"
+	jolokiaTraitOrder = 1800
+
+	defaultJolokiaPort = 8778
+)
+
 type jolokiaTrait struct {
 	BaseTrait
 	traitv1.JolokiaTrait `property:",squash"`
@@ -37,9 +44,9 @@ type jolokiaTrait struct {
 
 func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
-		BaseTrait: NewBaseTrait("jolokia", 1800),
+		BaseTrait: NewBaseTrait(jolokiaTraitID, jolokiaTraitOrder),
 		JolokiaTrait: traitv1.JolokiaTrait{
-			Port: 8778,
+			Port: defaultJolokiaPort,
 		},
 	}
 }

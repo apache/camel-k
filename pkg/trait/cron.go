@@ -36,6 +36,17 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
+const (
+	cronTraitID               = "cron"
+	cronTraitOrder            = 1000
+	cronStrategySelectorOrder = 1000
+
+	defaultCronActiveDeadlineSeconds   = int64(60)
+	defaultCronBackoffLimit            = int32(2)
+	genericCronComponent               = "cron"
+	genericCronComponentFallbackScheme = "quartz"
+)
+
 type cronTrait struct {
 	BaseTrait
 	traitv1.CronTrait `property:",squash"`
@@ -52,11 +63,6 @@ type cronInfo struct {
 // cronExtractor extracts cron information from a Camel URI.
 type cronExtractor func(string) *cronInfo
 
-const (
-	genericCronComponent               = "cron"
-	genericCronComponentFallbackScheme = "quartz"
-)
-
 var (
 	camelTimerPeriodMillis = regexp.MustCompile(`^[0-9]+$`)
 
@@ -69,7 +75,7 @@ var (
 
 func newCronTrait() Trait {
 	return &cronTrait{
-		BaseTrait: NewBaseTrait("cron", 1000),
+		BaseTrait: NewBaseTrait(cronTraitID, cronTraitOrder),
 	}
 }
 
@@ -215,12 +221,12 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 		}
 	}
 
-	activeDeadline := int64(60)
+	activeDeadline := defaultCronActiveDeadlineSeconds
 	if t.ActiveDeadlineSeconds != nil {
 		activeDeadline = *t.ActiveDeadlineSeconds
 	}
 
-	backoffLimit := int32(2)
+	backoffLimit := defaultCronBackoffLimit
 	if t.BackoffLimit != nil {
 		backoffLimit = *t.BackoffLimit
 	}
@@ -285,7 +291,7 @@ func (t *cronTrait) SelectControllerStrategy(e *Environment) (*ControllerStrateg
 }
 
 func (t *cronTrait) ControllerStrategySelectorOrder() int {
-	return 1000
+	return cronStrategySelectorOrder
 }
 
 // Gathering cron information
@@ -380,6 +386,7 @@ func getCronForURI(camelURI string) *cronInfo {
 
 // timerToCronInfo converts a timer endpoint to a Kubernetes cron schedule
 
+//nolint:mnd
 func timerToCronInfo(camelURI string) *cronInfo {
 	if uri.GetQueryParameter(camelURI, "delay") != "" ||
 		uri.GetQueryParameter(camelURI, "repeatCount") != "" ||

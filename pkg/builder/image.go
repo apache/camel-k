@@ -22,6 +22,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -88,7 +90,7 @@ func executableDockerfile(ctx *builderContext) error {
 		USER nonroot
 	`)
 
-	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, io.FilePerm400)
 	if err != nil {
 		return err
 	}
@@ -112,7 +114,7 @@ func jvmDockerfile(ctx *builderContext) error {
 		USER 1000
 	`)
 
-	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, io.FilePerm400)
 	if err != nil {
 		return err
 	}
@@ -154,7 +156,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 
 	contextDir := filepath.Join(ctx.Path, ContextDir)
 
-	err = os.MkdirAll(contextDir, 0o700)
+	err = os.MkdirAll(contextDir, io.FilePerm700)
 	if err != nil {
 		return err
 	}

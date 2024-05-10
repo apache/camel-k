@@ -44,18 +44,20 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
+const (
+	knativeTraitID       = "knative"
+	knativeTraitOrder    = 400
+	knativeHistoryHeader = "ce-knativehistory"
+)
+
 type knativeTrait struct {
 	BaseTrait
 	traitv1.KnativeTrait `property:",squash"`
 }
 
-const (
-	knativeHistoryHeader = "ce-knativehistory"
-)
-
 func newKnativeTrait() Trait {
 	t := &knativeTrait{
-		BaseTrait: NewBaseTrait("knative", 400),
+		BaseTrait: NewBaseTrait(knativeTraitID, knativeTraitOrder),
 	}
 
 	return t

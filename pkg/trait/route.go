@@ -34,6 +34,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
+const (
+	routeTraitID    = "route"
+	routeTraitOrder = 2200
+)
+
 type routeTrait struct {
 	BaseTrait
 	traitv1.RouteTrait `property:",squash"`
@@ -42,7 +47,7 @@ type routeTrait struct {
 
 func newRouteTrait() Trait {
 	return &routeTrait{
-		BaseTrait: NewBaseTrait("route", 2200),
+		BaseTrait: NewBaseTrait(routeTraitID, routeTraitOrder),
 		RouteTrait: traitv1.RouteTrait{
 			Annotations: map[string]string{},
 		},

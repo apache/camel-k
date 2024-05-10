@@ -36,7 +36,8 @@ import (
 )
 
 const (
-	builderTraitID = "builder"
+	builderTraitID    = "builder"
+	builderTraitOrder = 600
 )
 
 var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
@@ -48,7 +49,7 @@ type builderTrait struct {
 
 func newBuilderTrait() Trait {
 	return &builderTrait{
-		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BasePlatformTrait: NewBasePlatformTrait(builderTraitID, builderTraitOrder),
 	}
 }
 

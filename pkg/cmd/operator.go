@@ -24,7 +24,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const operatorCommand = "operator"
+const (
+	operatorCommand       = "operator"
+	defaultHealthPort     = 8081
+	defaultMonitoringPort = 8080
+)
 
 func newCmdOperator(rootCmdOptions *RootCmdOptions) (*cobra.Command, *operatorCmdOptions) {
 	options := operatorCmdOptions{}
@@ -38,8 +42,8 @@ func newCmdOperator(rootCmdOptions *RootCmdOptions) (*cobra.Command, *operatorCm
 		Run:     options.run,
 	}
 
-	cmd.Flags().Int32("health-port", 8081, "The port of the health endpoint")
-	cmd.Flags().Int32("monitoring-port", 8080, "The port of the metrics endpoint")
+	cmd.Flags().Int32("health-port", defaultHealthPort, "The port of the health endpoint")
+	cmd.Flags().Int32("monitoring-port", defaultMonitoringPort, "The port of the metrics endpoint")
 	cmd.Flags().Bool("leader-election", true, "Use leader election")
 	cmd.Flags().String("leader-election-id", "", "Use the given ID as the leader election Lease name")
 

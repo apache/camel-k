@@ -60,8 +60,8 @@ METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
-LINT_GOGC := 20
-LINT_DEADLINE := 10m
+LINT_GOGC ?= 20
+LINT_DEADLINE ?= 10m
 DEBUG_MODE ?= false
 OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 

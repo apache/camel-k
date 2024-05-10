@@ -35,7 +35,9 @@ import (
 )
 
 const (
-	knativeServiceTraitID = "knative-service"
+	knativeServiceTraitID               = "knative-service"
+	knativeServiceTraitOrder            = 1400
+	knativeServiceStrategySelectorOrder = 100
 
 	// Auto-scaling annotations.
 	knativeServingClassAnnotation    = "autoscaling.knative.dev/class"
@@ -58,7 +60,7 @@ var _ ControllerStrategySelector = &knativeServiceTrait{}
 
 func newKnativeServiceTrait() Trait {
 	return &knativeServiceTrait{
-		BaseTrait: NewBaseTrait(knativeServiceTraitID, 1400),
+		BaseTrait: NewBaseTrait(knativeServiceTraitID, knativeServiceTraitOrder),
 		KnativeServiceTrait: traitv1.KnativeServiceTrait{
 			Annotations: map[string]string{},
 		},
@@ -173,7 +175,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 }
 
 func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
-	return 100
+	return knativeServiceStrategySelectorOrder
 }
 
 func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, error) {

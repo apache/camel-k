@@ -33,6 +33,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
+const (
+	pullSecretTraitID    = "pull-secret"
+	pullSecretTraitOrder = 1700
+)
+
 type pullSecretTrait struct {
 	BaseTrait
 	traitv1.PullSecretTrait `property:",squash"`
@@ -40,7 +45,7 @@ type pullSecretTrait struct {
 
 func newPullSecretTrait() Trait {
 	return &pullSecretTrait{
-		BaseTrait: NewBaseTrait("pull-secret", 1700),
+		BaseTrait: NewBaseTrait(pullSecretTraitID, pullSecretTraitOrder),
 	}
 }
 

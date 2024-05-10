@@ -32,6 +32,11 @@ import (
 	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
+const (
+	platformTraitID    = "platform"
+	platformTraitOrder = 100
+)
+
 type platformTrait struct {
 	BasePlatformTrait
 	traitv1.PlatformTrait `property:",squash"`
@@ -39,7 +44,7 @@ type platformTrait struct {
 
 func newPlatformTrait() Trait {
 	return &platformTrait{
-		BasePlatformTrait: NewBasePlatformTrait("platform", 100),
+		BasePlatformTrait: NewBasePlatformTrait(platformTraitID, platformTraitOrder),
 	}
 }
 

@@ -28,13 +28,20 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
+const (
+	defaultRecoveryBackoffMinDuration = 5 * time.Second
+	defaultRecoveryBackoffMaxDuration = 1 * time.Second
+	defaultRecoveryBackoffFactor      = 2
+	defaultRecoveryMaxAttempt         = 5
+)
+
 func newErrorRecoveryAction() Action {
 	// TODO: externalize options
 	return &errorRecoveryAction{
 		backOff: backoff.Backoff{
-			Min:    5 * time.Second,
-			Max:    1 * time.Minute,
-			Factor: 2,
+			Min:    defaultRecoveryBackoffMinDuration,
+			Max:    defaultRecoveryBackoffMaxDuration,
+			Factor: defaultRecoveryBackoffFactor,
 			Jitter: false,
 		},
 	}
@@ -59,8 +66,7 @@ func (action *errorRecoveryAction) Handle(ctx context.Context, build *v1.Build) 
 			Reason: build.Status.Error,
 			Time:   metav1.Now(),
 			Recovery: v1.FailureRecovery{
-				Attempt:    0,
-				AttemptMax: 5,
+				AttemptMax: defaultRecoveryMaxAttempt,
 			},
 		}
 		return build, nil

@@ -37,6 +37,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
+const (
+	buildTimeout = 10 * time.Minute
+)
+
 // NewBuildAction creates a new build request handling action for the kit.
 func NewBuildAction() Action {
 	return &buildAction{}
@@ -112,7 +116,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 		if layout := labels[v1.IntegrationKitLayoutLabel]; env.Platform.Spec.Build.Timeout == nil && layout == v1.IntegrationKitLayoutNativeSources {
 			// Increase the timeout to a sensible default
 			timeout = metav1.Duration{
-				Duration: 10 * time.Minute,
+				Duration: buildTimeout,
 			}
 		}
 

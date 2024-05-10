@@ -18,11 +18,47 @@
 linters-settings:
   lll:
     line-length: 170
+  mnd:
+    checks:
+      - argument
+      - case
+      - operation
+      - return
+      - assign
+    ignored-functions:
+      - '^len\.'
+      - '^strings\.SplitN$'
+      - '^matchOrEmpty$'
+      - '^make$'
+    ignored-files:
+      # ignore install files that are part of features being deprecated
+      # such ass install anc the kamel cli
+      #
+      # files are individually listed as if any new file is added or those not listed here are amended
+      # then best practices must be followed
+      - 'pkg/install/cluster.go'
+      - 'pkg/cmd/install.go'
+      - 'pkg/cmd/debug.go'
+      - 'pkg/cmd/describe.go'
+      - 'pkg/cmd/describe_integration.go'
+      - 'pkg/cmd/describe_kamelet.go'
+      - 'pkg/cmd/dump.go'
+      - 'pkg/cmd/get.go'
+      - 'pkg/cmd/install.go'
+      - 'pkg/cmd/log.go'
+      - 'pkg/cmd/kamelet_get.go'
+      - 'pkg/cmd/kit_get.go'
+      - 'pkg/cmd/uninstall.go'
+      - 'pkg/cmd/run_support.go'
+      # seems to be used only by the "kamel cli" command
+      - 'pkg/util/kubernetes/log/pod_scraper.go'
+      - 'pkg/util/indentedwriter/writer.go'
 run:
   tests: false
 issues:
   exclude-files:
     - test_support.go
+
 linters:
   enable-all: true
   disable:
@@ -62,6 +98,5 @@ linters:
     - execinquery
     # TODO: too much work at this stage as many files are impacted by the lint suggestions, however the reported
     #       lint violation make a lot of sense so we should re-enable the lints below and work to fix the findings
-    - mnd
     - perfsprint
     - goconst

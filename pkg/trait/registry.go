@@ -38,6 +38,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	registryTraitID    = "registry"
+	registryTraitOrder = 1650
+)
+
 type registryTrait struct {
 	BaseTrait
 	traitv1.RegistryTrait `property:",squash"`
@@ -45,7 +50,7 @@ type registryTrait struct {
 
 func newRegistryTrait() Trait {
 	return &registryTrait{
-		BaseTrait: NewBaseTrait("registry", 1650),
+		BaseTrait: NewBaseTrait(registryTraitID, registryTraitOrder),
 	}
 }
 

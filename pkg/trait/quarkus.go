@@ -36,16 +36,16 @@ import (
 )
 
 const (
-	quarkusTraitID                    = "quarkus"
+	quarkusTraitID    = "quarkus"
+	quarkusTraitOrder = 1700
+
+	fastJarPackageType       quarkusPackageType = "fast-jar"
+	nativeSourcesPackageType quarkusPackageType = "native-sources"
+
 	QuarkusNativeDefaultBaseImageName = "quay.io/quarkus/quarkus-micro-image:2.0"
 )
 
 type quarkusPackageType string
-
-const (
-	fastJarPackageType       quarkusPackageType = "fast-jar"
-	nativeSourcesPackageType quarkusPackageType = "native-sources"
-)
 
 var kitPriority = map[quarkusPackageType]string{
 	fastJarPackageType:       "1000",
@@ -100,7 +100,7 @@ func getLegacyLanguageSettings(language v1.Language) languageSettings {
 
 func newQuarkusTrait() Trait {
 	return &quarkusTrait{
-		BasePlatformTrait: NewBasePlatformTrait(quarkusTraitID, 1700),
+		BasePlatformTrait: NewBasePlatformTrait(quarkusTraitID, quarkusTraitOrder),
 	}
 }
 

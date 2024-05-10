@@ -26,10 +26,11 @@ import (
 	"context"
 	"testing"
 
+	"io/ioutil"
+
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
 )
 
 func TestOpenAPIService(t *testing.T) {

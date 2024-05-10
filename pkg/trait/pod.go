@@ -33,6 +33,8 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
+const podTraitOrder = 1800
+
 type podTrait struct {
 	BaseTrait
 	traitv1.PodTrait `property:",squash"`
@@ -40,7 +42,7 @@ type podTrait struct {
 
 func newPodTrait() Trait {
 	return &podTrait{
-		BaseTrait: NewBaseTrait("pod", 1800),
+		BaseTrait: NewBaseTrait("pod", podTraitOrder),
 	}
 }
 

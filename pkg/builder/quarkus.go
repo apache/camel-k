@@ -24,6 +24,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -221,7 +223,7 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 }
 
 func computeApplicationProperties(appPropertiesPath string, applicationProperties map[string]string) error {
-	f, err := os.OpenFile(appPropertiesPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(appPropertiesPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, io.FilePerm644)
 	if err != nil {
 		return fmt.Errorf("failure while opening/creating application.properties: %w", err)
 	}

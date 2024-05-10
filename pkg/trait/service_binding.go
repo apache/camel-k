@@ -38,6 +38,9 @@ import (
 )
 
 const (
+	serviceBindingTraitID    = "service-binding"
+	serviceBindingTraitOrder = 250
+
 	serviceBindingMountPointAnnotation = "camel.apache.org/serviceBinding.mount-point"
 	serviceBindingLabel                = "camel.apache.org/serviceBinding"
 )
@@ -59,7 +62,7 @@ type serviceBindingTrait struct {
 
 func newServiceBindingTrait() Trait {
 	return &serviceBindingTrait{
-		BaseTrait: NewBaseTrait("service-binding", 250),
+		BaseTrait: NewBaseTrait(serviceBindingTraitID, serviceBindingTraitOrder),
 	}
 }
 
