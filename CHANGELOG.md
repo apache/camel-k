@@ -19,6 +19,7 @@
 
 **Merged pull requests:**
 
+- feat\(lint\): enabe magic number detector \(mld\) [\#5496](https://github.com/apache/camel-k/pull/5496) ([lburgazzoli](https://github.com/lburgazzoli))
 - chore\(tools\): update golangci-lint to v1.58.1 [\#5495](https://github.com/apache/camel-k/pull/5495) ([lburgazzoli](https://github.com/lburgazzoli))
 - fix\(tests\): Minor fix to incremental\_build\_test.go after fixing of copykits. [\#5494](https://github.com/apache/camel-k/pull/5494) ([valdar](https://github.com/valdar))
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.19.0 to 1.19.1 [\#5492](https://github.com/apache/camel-k/pull/5492) ([dependabot[bot]](https://github.com/apps/dependabot))
