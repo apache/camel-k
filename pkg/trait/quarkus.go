@@ -321,7 +321,7 @@ func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKi
 		Builder: traits.Builder.DeepCopy(),
 		Camel:   traits.Camel.DeepCopy(),
 		Quarkus: traits.Quarkus.DeepCopy(),
-		// nolint: staticcheck
+
 		Registry: traits.Registry.DeepCopy(),
 	}
 

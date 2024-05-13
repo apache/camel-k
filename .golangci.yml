@@ -91,7 +91,6 @@ linters:
     - nestif
     - nilnil
     - nlreturn
-    - nolintlint
     - paralleltest
     - revive
     - tagalign

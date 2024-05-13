@@ -40,8 +40,8 @@ func (in *MavenArtifact) GetDependencyID() string {
 	return mvn
 }
 
-//nolint:musttag // the name of the xml is dynamic
 type propertiesEntry struct {
+	// the name of the xml is dynamic, hence no tags are configured for the field
 	XMLName xml.Name
 	Value   string `xml:",chardata"`
 }

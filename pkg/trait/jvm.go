@@ -92,7 +92,9 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	return true, nil, nil
 }
 
-// nolint: maintidx // TODO: refactor the code
+// TODO: refactor the code
+//
+//nolint:maintidx
 func (t *jvmTrait) Apply(e *Environment) error {
 	kit := e.IntegrationKit
 

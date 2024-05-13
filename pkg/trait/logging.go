@@ -29,10 +29,9 @@ const (
 	loggingTraitID    = "logging"
 	loggingTraitOrder = 800
 
-	envVarQuarkusConsoleColor     = "QUARKUS_CONSOLE_COLOR"
-	envVarQuarkusLogLevel         = "QUARKUS_LOG_LEVEL"
-	envVarQuarkusLogConsoleFormat = "QUARKUS_LOG_CONSOLE_FORMAT"
-	// nolint: gosec // no sensitive credentials
+	envVarQuarkusConsoleColor              = "QUARKUS_CONSOLE_COLOR"
+	envVarQuarkusLogLevel                  = "QUARKUS_LOG_LEVEL"
+	envVarQuarkusLogConsoleFormat          = "QUARKUS_LOG_CONSOLE_FORMAT"
 	envVarQuarkusLogConsoleJSON            = "QUARKUS_LOG_CONSOLE_JSON"
 	envVarQuarkusLogConsoleJSONPrettyPrint = "QUARKUS_LOG_CONSOLE_JSON_PRETTY_PRINT"
 	defaultLogLevel                        = "INFO"
