@@ -138,7 +138,7 @@ func (action *buildAction) handleBuildSubmitted(ctx context.Context, kit *v1.Int
 			}
 		}
 
-		// nolint: contextcheck
+		//nolint:contextcheck
 		if buildConfig.Strategy == v1.BuildStrategyPod {
 			err = platform.CreateBuilderServiceAccount(env.Ctx, env.Client, env.Platform)
 			if err != nil {

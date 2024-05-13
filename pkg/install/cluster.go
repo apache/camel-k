@@ -295,9 +295,7 @@ func WaitForAllCrdInstallation(ctx context.Context, clientProvider client.Provid
 	}
 }
 
-// TODO those error codes are a little bit obscure, what do they mean ? it would be better to return an custom error
-//
-//nolint:mnd
+// TODO those error codes are a little bit obscure, what do they mean ? it would be better to return an custom error.
 func areAllCrdInstalled(c client.Client) (int, error) {
 	if ok, err := isCrdInstalled(c, "IntegrationPlatform", "v1"); err != nil {
 		return 1, fmt.Errorf("error installing IntegrationPlatform CRDs: %w", err)

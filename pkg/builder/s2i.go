@@ -191,7 +191,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		err = s2i.WaitForS2iBuildCompletion(ctx, t.c, &s2iBuild)
 		if err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-				// nolint: contextcheck
+				//nolint:contextcheck
 				if err := s2i.CancelBuild(context.Background(), t.c, &s2iBuild); err != nil {
 					log.Errorf(err, "cannot cancel s2i Build: %s/%s", s2iBuild.Namespace, s2iBuild.Name)
 				}

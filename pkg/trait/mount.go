@@ -191,7 +191,6 @@ func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 }
 
 // Deprecated: to be removed in future releases.
-// nolint: staticcheck
 func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition {
 	featureUsed := false
 	if trait := e.Catalog.GetTrait(kameletsTraitID); trait != nil {

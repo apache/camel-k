@@ -21,8 +21,7 @@ package trait
 //
 // See https://jolokia.org/reference/html/agents.html
 //
-// +camel-k:trait=jolokia
-// nolint: tagliatelle
+// +camel-k:trait=jolokia.
 type JolokiaTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// The PEM encoded CA certification file path, used to verify client certificates,

@@ -23,8 +23,7 @@ import corev1 "k8s.io/api/core/v1"
 //
 // It also provides configuration for Services associated to the container.
 //
-// +camel-k:trait=container
-// nolint: tagliatelle
+// +camel-k:trait=container.
 type ContainerTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// To automatically enable the trait

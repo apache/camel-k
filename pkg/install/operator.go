@@ -355,7 +355,7 @@ func installNamespacedRoleBinding(ctx context.Context, c client.Client, collecti
 	if err != nil {
 		return err
 	}
-	// nolint: forcetypeassert
+	//nolint:forcetypeassert
 	target := obj.(*rbacv1.RoleBinding)
 
 	bound := false
