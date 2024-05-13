@@ -62,6 +62,10 @@ issues:
 linters:
   enable-all: true
   disable:
+    # this linter checks for unnecessary newlines at the start and end of functions, etc.,
+    # however sometimes spaces helps readability
+    - whitespace
+    # https://github.com/apache/camel-k/issues/5486
     - cyclop
     - depguard
     - dupl
@@ -92,7 +96,6 @@ linters:
     - testpackage
     - varnamelen
     - wastedassign
-    - whitespace
     - wrapcheck
     - wsl
     # TODO: too much work at this stage as many files are impacted by the lint suggestions, however the reported
