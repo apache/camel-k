@@ -39,7 +39,7 @@ public class JsonLog extends AbstractEventSpy {
                     ((MutablePlexusContainer) container).setLoggerManager(new Slf4jLoggerManager());
                 }
 
-                LoggerFactory.getLogger("json-logging").warn("Json Logging initialized");
+                LoggerFactory.getLogger(getClass()).debug("Json Logging initialized");
             }
         } catch (Exception e) {
             e.printStackTrace();
