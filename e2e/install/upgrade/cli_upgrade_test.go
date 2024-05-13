@@ -96,7 +96,12 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		// Check the IntegrationPlatform has been reconciled
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
-
+		// Check the Integration Pod is not rolling a new Pod automatically
+		// This is extremely important as we don't want an upgrade to restart any Integration, unless specified by the user
+		var numberOfPods = func(pods *int32) bool {
+			return *pods == 1
+		}
+		g.Consistently(IntegrationPodsNumbers(t, ctx, ns, name), 1*time.Minute, 1*time.Second).Should(Satisfy(numberOfPods))
 		// Check the Integration hasn't been upgraded
 		g.Consistently(IntegrationVersion(t, ctx, ns, name), 5*time.Second, 1*time.Second).Should(Equal(version))
 
