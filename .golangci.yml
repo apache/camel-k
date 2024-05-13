@@ -58,16 +58,18 @@ run:
 issues:
   exclude-files:
     - test_support.go
-
 linters:
   enable-all: true
   disable:
     # this linter checks for unnecessary newlines at the start and end of functions, etc.,
     # however sometimes spaces helps readability
     - whitespace
-    # this linter checks the struct tags but does not handle struct embedding which sauses
+    # this linter checks the struct tags but does not handle struct embedding which causes
     # a large number of false finding
     - tagliatelle
+    # this linter reports long lines but since there is no standard way to split then,
+    # then we will disable it for now
+    - lll
     # https://github.com/apache/camel-k/issues/5486
     - cyclop
     - depguard
@@ -87,7 +89,6 @@ linters:
     - gofumpt
     - gomnd
     - ireturn
-    - lll
     - nestif
     - nilnil
     - nlreturn
