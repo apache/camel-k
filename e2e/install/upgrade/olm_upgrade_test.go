@@ -201,6 +201,13 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 			// Clear the KAMEL_BIN environment variable so that the current version is used from now on
 			g.Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
 
+			// Check the Integration Pod is not rolling a new Pod automatically
+			// This is extremely important as we don't want an upgrade to restart any Integration, unless specified by the user
+			var numberOfPods = func(pods *int32) bool {
+				return *pods == 1
+			}
+			g.Consistently(IntegrationPodsNumbers(t, ctx, ns, name), 1*time.Minute, 1*time.Second).Should(Satisfy(numberOfPods))
+
 			// Check the Integration hasn't been upgraded
 			g.Consistently(IntegrationVersion(t, ctx, ns, name), 5*time.Second, 1*time.Second).
 				Should(ContainSubstring(prevIPVersionPrefix))
