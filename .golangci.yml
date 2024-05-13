@@ -95,7 +95,6 @@ linters:
     - tagliatelle
     - testpackage
     - varnamelen
-    - wastedassign
     - wrapcheck
     - wsl
     # TODO: too much work at this stage as many files are impacted by the lint suggestions, however the reported
