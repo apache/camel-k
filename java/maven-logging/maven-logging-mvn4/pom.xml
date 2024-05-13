@@ -126,6 +126,12 @@
         <version>${maven.version}</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-embedder</artifactId>
+        <version>${maven.version}</version>
+        <scope>provided</scope>
+      </dependency>
 
       <!-- dependency for JSR 330 annotation -->
       <dependency>
