@@ -207,6 +207,7 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 				return *pods == 1
 			}
 			g.Consistently(IntegrationPodsNumbers(t, ctx, ns, name), 1*time.Minute, 1*time.Second).Should(Satisfy(numberOfPods))
+			g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			// Check the Integration hasn't been upgraded
 			g.Consistently(IntegrationVersion(t, ctx, ns, name), 5*time.Second, 1*time.Second).

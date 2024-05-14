@@ -1056,6 +1056,16 @@ func IntegrationVersion(t *testing.T, ctx context.Context, ns string, name strin
 	}
 }
 
+func IntegrationRuntimeVersion(t *testing.T, ctx context.Context, ns string, name string) func() string {
+	return func() string {
+		it := Integration(t, ctx, ns, name)()
+		if it == nil {
+			return ""
+		}
+		return it.Status.RuntimeVersion
+	}
+}
+
 func IntegrationTraitProfile(t *testing.T, ctx context.Context, ns string, name string) func() v1.TraitProfile {
 	return func() v1.TraitProfile {
 		it := Integration(t, ctx, ns, name)()
