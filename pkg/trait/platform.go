@@ -18,14 +18,12 @@ limitations under the License.
 package trait
 
 import (
-	"fmt"
-
+	"github.com/apache/camel-k/v2/pkg/install"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -116,47 +114,64 @@ func (t *platformTrait) Apply(e *Environment) error {
 
 func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlatform, error) {
 	pl, err := platform.GetForResource(e.Ctx, t.Client, e.Integration)
-	if err != nil && apierrors.IsNotFound(err) && pointer.BoolDeref(t.CreateDefault, false) {
-		platformName := e.Integration.Status.Platform
-		if platformName == "" {
-			platformName = defaults.OperatorID()
-		}
-
-		if platformName == "" {
-			platformName = platform.DefaultPlatformName
-		}
-		namespace := e.Integration.Namespace
-		if pointer.BoolDeref(t.Global, false) {
-			operatorNamespace := platform.GetOperatorNamespace()
-			if operatorNamespace != "" {
-				namespace = operatorNamespace
-			}
-		}
-		defaultPlatform := v1.NewIntegrationPlatform(namespace, platformName)
-		if defaultPlatform.Labels == nil {
-			defaultPlatform.Labels = make(map[string]string)
-		}
-		defaultPlatform.Labels["app"] = "camel-k"
-		defaultPlatform.Labels["camel.apache.org/platform.generated"] = boolean.TrueString
-		// Cascade the operator id in charge to reconcile the Integration
-		if v1.GetOperatorIDAnnotation(e.Integration) != "" {
-			defaultPlatform.SetOperatorID(v1.GetOperatorIDAnnotation(e.Integration))
-		}
-		pl = &defaultPlatform
+	if err != nil && !apierrors.IsNotFound(err) {
+		return nil, err
+	}
+	if apierrors.IsNotFound(err) && pointer.BoolDeref(t.CreateDefault, false) {
+		pl = t.createDefaultPlatform(e)
 		e.Resources.Add(pl)
 
-		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
-		if err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, namespace); err != nil && !apierrors.IsAlreadyExists(err) {
-			t.L.Info(fmt.Sprintf("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", namespace))
-		}
-
-		return pl, nil
+		t.installViewerRole(e, pl)
 	}
 
-	return pl, err
+	if err != nil {
+		return nil, err
+	}
+
+	return pl, nil
 }
 
 // RequiresIntegrationPlatform overrides base class method.
 func (t *platformTrait) RequiresIntegrationPlatform() bool {
 	return false
+}
+
+func (t *platformTrait) createDefaultPlatform(e *Environment) *v1.IntegrationPlatform {
+	platformName := e.Integration.Status.Platform
+	if platformName == "" {
+		platformName = defaults.OperatorID()
+	}
+
+	if platformName == "" {
+		platformName = platform.DefaultPlatformName
+	}
+	namespace := e.Integration.Namespace
+	if pointer.BoolDeref(t.Global, false) {
+		operatorNamespace := platform.GetOperatorNamespace()
+		if operatorNamespace != "" {
+			namespace = operatorNamespace
+		}
+	}
+
+	defaultPlatform := v1.NewIntegrationPlatform(namespace, platformName)
+	if defaultPlatform.Labels == nil {
+		defaultPlatform.Labels = make(map[string]string)
+	}
+	defaultPlatform.Labels["app"] = "camel-k"
+	defaultPlatform.Labels["camel.apache.org/platform.generated"] = boolean.TrueString
+
+	// Cascade the operator id in charge to reconcile the Integration
+	if v1.GetOperatorIDAnnotation(e.Integration) != "" {
+		defaultPlatform.SetOperatorID(v1.GetOperatorIDAnnotation(e.Integration))
+	}
+
+	return &defaultPlatform
+}
+
+func (t *platformTrait) installViewerRole(e *Environment, itp *v1.IntegrationPlatform) {
+	// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
+	err := install.IntegrationPlatformViewerRole(e.Ctx, t.Client, itp.Namespace)
+	if err != nil && !apierrors.IsAlreadyExists(err) {
+		t.L.Infof("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", itp.Namespace)
+	}
 }

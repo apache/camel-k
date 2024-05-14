@@ -501,6 +501,10 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 		if container == nil {
 			return readyPods, false, fmt.Errorf("integration container not found in Pod %s/%s", pod.Namespace, pod.Name)
 		}
+
+		// TODO: this code must be moved to a dedicated function
+		//
+		//nolint:nestif
 		if probe := container.ReadinessProbe; probe != nil && probe.HTTPGet != nil {
 			body, err := proxyGetHTTPProbe(ctx, action.client, probe, pod, container)
 			// When invoking the HTTP probe, the kubernetes client exposes a very

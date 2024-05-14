@@ -82,15 +82,21 @@ func mapRequiredRouteData(from runtime.Object, to runtime.Object) {
 }
 
 func mapRequiredKnativeServiceV1Data(from runtime.Object, to runtime.Object) {
-	if fromC, ok := from.(*serving.Service); ok {
-		if toC, ok := to.(*serving.Service); ok {
-			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
-				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/creator", v)
-			}
-			if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
-				v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/lastModifier", v)
-			}
-		}
+	fromC, fromOk := from.(*serving.Service)
+	if !fromOk {
+		return
+	}
+
+	toC, toOk := to.(*serving.Service)
+	if !toOk {
+		return
+	}
+
+	if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/creator"]; present {
+		v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/creator", v)
+	}
+	if v, present := fromC.ObjectMeta.Annotations["serving.knative.dev/lastModifier"]; present {
+		v1.SetAnnotation(&toC.ObjectMeta, "serving.knative.dev/lastModifier", v)
 	}
 }
 

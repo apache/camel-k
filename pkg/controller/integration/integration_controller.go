@@ -239,32 +239,35 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 func integrationProfileEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, profile *v1.IntegrationProfile) []reconcile.Request {
 	var requests []reconcile.Request
 
-	if profile.Status.Phase == v1.IntegrationProfilePhaseReady {
-		list := &v1.IntegrationList{}
+	if profile.Status.Phase != v1.IntegrationProfilePhaseReady {
+		return requests
+	}
 
-		// Do global search in case of global operator
-		var opts []ctrl.ListOption
-		if !platform.IsCurrentOperatorGlobal() {
-			opts = append(opts, ctrl.InNamespace(profile.Namespace))
-		}
+	list := &v1.IntegrationList{}
 
-		if err := c.List(ctx, list, opts...); err != nil {
-			log.Error(err, "Failed to list integrations")
-			return requests
-		}
+	// Do global search in case of global operator
+	var opts []ctrl.ListOption
 
-		for i := range list.Items {
-			integration := list.Items[i]
-			if integration.Status.Phase == v1.IntegrationPhaseRunning && v1.GetIntegrationProfileAnnotation(&integration) == profile.Name {
-				if profileNamespace := v1.GetIntegrationProfileNamespaceAnnotation(&integration); profileNamespace == "" || profileNamespace == profile.Namespace {
-					log.Infof("IntegrationProfile %s changed, notify integration: %s", profile.Name, integration.Name)
-					requests = append(requests, reconcile.Request{
-						NamespacedName: types.NamespacedName{
-							Namespace: integration.Namespace,
-							Name:      integration.Name,
-						},
-					})
-				}
+	if !platform.IsCurrentOperatorGlobal() {
+		opts = append(opts, ctrl.InNamespace(profile.Namespace))
+	}
+
+	if err := c.List(ctx, list, opts...); err != nil {
+		log.Error(err, "Failed to list integrations")
+		return requests
+	}
+
+	for i := range list.Items {
+		integration := list.Items[i]
+		if integration.Status.Phase == v1.IntegrationPhaseRunning && v1.GetIntegrationProfileAnnotation(&integration) == profile.Name {
+			if profileNamespace := v1.GetIntegrationProfileNamespaceAnnotation(&integration); profileNamespace == "" || profileNamespace == profile.Namespace {
+				log.Infof("IntegrationProfile %s changed, notify integration: %s", profile.Name, integration.Name)
+				requests = append(requests, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Namespace: integration.Namespace,
+						Name:      integration.Name,
+					},
+				})
 			}
 		}
 	}
@@ -438,25 +441,29 @@ func watchCronJobResources(b *builder.Builder) {
 
 func watchKnativeResources(ctx context.Context, c client.Client, b *builder.Builder) error {
 	// Watch for the owned Knative Services conditionally
-	if ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); err != nil {
+	ok, err := kubernetes.IsAPIResourceInstalled(c, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name())
+	if err != nil {
 		return err
-	} else if ok {
-		// Check for permission to watch the Knative Service resource
-		checkCtx, cancel := context.WithTimeout(ctx, time.Minute)
-		defer cancel()
-		if ok, err = kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
-			return err
-		} else if ok {
-			log.Info("KnativeService resources installed in the cluster. RBAC privileges assigned correctly, you can use Knative features.")
-			b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
-		} else {
-			log.Info(` KnativeService resources installed in the cluster. However Camel K operator has not the required RBAC privileges. You can't use Knative features.
-				Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for Camel K managed Knative Services.`)
-		}
-	} else {
+	}
+	if !ok {
 		log.Info(`KnativeService resources are not installed in the cluster. You can't use Knative features. If you install Knative Serving resources after the
 			Camel K operator, make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for
 			Camel K managed Knative Services.`)
+
+		return nil
+	}
+
+	// Check for permission to watch the Knative Service resource
+	checkCtx, cancel := context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+	if ok, err = kubernetes.CheckPermission(checkCtx, c, serving.GroupName, "services", platform.GetOperatorWatchNamespace(), "", "watch"); err != nil {
+		return err
+	} else if ok {
+		log.Info("KnativeService resources installed in the cluster. RBAC privileges assigned correctly, you can use Knative features.")
+		b.Owns(&servingv1.Service{}, builder.WithPredicates(StatusChangedPredicate{}))
+	} else {
+		log.Info(` KnativeService resources installed in the cluster. However Camel K operator has not the required RBAC privileges. You can't use Knative features.
+				Make sure to apply the required RBAC privileges and restart the Camel K Operator Pod to be able to watch for Camel K managed Knative Services.`)
 	}
 
 	return nil
@@ -529,31 +536,34 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
-		if a.CanHandle(target) {
-			targetLog.Debugf("Invoking action %s", a.Name())
+		if !a.CanHandle(target) {
+			continue
+		}
 
-			newTarget, err := a.Handle(ctx, target)
-			if err != nil {
+		targetLog.Debugf("Invoking action %s", a.Name())
+
+		newTarget, err := a.Handle(ctx, target)
+		if err != nil {
+			camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
+			// Update the integration (mostly just to update its phase) if the new instance is returned
+			if newTarget != nil {
+				_ = r.update(ctx, &instance, newTarget, &targetLog)
+			}
+			return reconcile.Result{}, err
+		}
+
+		if newTarget != nil {
+			if err := r.update(ctx, &instance, newTarget, &targetLog); err != nil {
 				camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
-				// Update the integration (mostly just to update its phase) if the new instance is returned
-				if newTarget != nil {
-					_ = r.update(ctx, &instance, newTarget, &targetLog)
-				}
 				return reconcile.Result{}, err
 			}
-
-			if newTarget != nil {
-				if err := r.update(ctx, &instance, newTarget, &targetLog); err != nil {
-					camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
-					return reconcile.Result{}, err
-				}
-			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyIntegrationUpdated(ctx, r.client, r.recorder, &instance, newTarget)
-			break
 		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyIntegrationUpdated(ctx, r.client, r.recorder, &instance, newTarget)
+
+		break
 	}
 
 	return reconcile.Result{}, nil

@@ -89,66 +89,68 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if pointer.BoolDeref(t.Auto, true) {
-		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
+	if !pointer.BoolDeref(t.Auto, true) {
+		return true, nil, nil
+	}
+
+	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
+	if err != nil {
+		return false, nil, err
+	}
+	if len(t.ChannelSources) == 0 {
+		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeChannel, "from")
 		if err != nil {
 			return false, nil, err
 		}
-		if len(t.ChannelSources) == 0 {
-			items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeChannel, "from")
-			if err != nil {
-				return false, nil, err
-			}
-			t.ChannelSources = items
+		t.ChannelSources = items
+	}
+	if len(t.ChannelSinks) == 0 {
+		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeChannel, "to")
+		if err != nil {
+			return false, nil, err
 		}
-		if len(t.ChannelSinks) == 0 {
-			items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeChannel, "to")
-			if err != nil {
-				return false, nil, err
-			}
-			t.ChannelSinks = items
+		t.ChannelSinks = items
+	}
+	if len(t.EndpointSources) == 0 {
+		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEndpoint, "from")
+		if err != nil {
+			return false, nil, err
 		}
-		if len(t.EndpointSources) == 0 {
-			items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEndpoint, "from")
-			if err != nil {
-				return false, nil, err
-			}
-			t.EndpointSources = items
+		t.EndpointSources = items
+	}
+	if len(t.EndpointSinks) == 0 {
+		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEndpoint, "to")
+		if err != nil {
+			return false, nil, err
 		}
-		if len(t.EndpointSinks) == 0 {
-			items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEndpoint, "to")
-			if err != nil {
-				return false, nil, err
-			}
-			t.EndpointSinks = items
+		t.EndpointSinks = items
+	}
+	if len(t.EventSources) == 0 {
+		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEvent, "from")
+		if err != nil {
+			return false, nil, err
 		}
-		if len(t.EventSources) == 0 {
-			items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEvent, "from")
-			if err != nil {
-				return false, nil, err
-			}
-			t.EventSources = items
+		t.EventSources = items
+	}
+	if len(t.EventSinks) == 0 {
+		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEvent, "to")
+		if err != nil {
+			return false, nil, err
 		}
-		if len(t.EventSinks) == 0 {
-			items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEvent, "to")
-			if err != nil {
-				return false, nil, err
-			}
-			t.EventSinks = items
-		}
-		hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 || len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSources) > 0 || len(t.EventSinks) > 0
-		t.Enabled = &hasKnativeEndpoint
-		if !hasKnativeEndpoint {
-			return false, nil, nil
-		}
-		if t.FilterSourceChannels == nil {
-			// Filtering is no longer used by default
-			t.FilterSourceChannels = pointer.Bool(false)
-		}
-		if t.SinkBinding == nil {
-			allowed := t.isSinkBindingAllowed(e)
-			t.SinkBinding = &allowed
-		}
+		t.EventSinks = items
+	}
+	hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 || len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSources) > 0 || len(t.EventSinks) > 0
+	t.Enabled = &hasKnativeEndpoint
+	if !hasKnativeEndpoint {
+		return false, nil, nil
+	}
+	if t.FilterSourceChannels == nil {
+		// Filtering is no longer used by default
+		t.FilterSourceChannels = pointer.Bool(false)
+	}
+	if t.SinkBinding == nil {
+		allowed := t.isSinkBindingAllowed(e)
+		t.SinkBinding = &allowed
 	}
 
 	return true, nil, nil
@@ -190,31 +192,33 @@ func (t *knativeTrait) Apply(e *Environment) error {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 	}
 
-	if e.IntegrationInRunningPhases() {
-		env := knativeapi.NewCamelEnvironment()
-		if t.Configuration != "" {
-			if err := env.Deserialize(t.Configuration); err != nil {
-				return err
-			}
-		}
-		if err := t.configureChannels(e, &env); err != nil {
+	if !e.IntegrationInRunningPhases() {
+		return nil
+	}
+
+	env := knativeapi.NewCamelEnvironment()
+	if t.Configuration != "" {
+		if err := env.Deserialize(t.Configuration); err != nil {
 			return err
 		}
-		if err := t.configureEndpoints(e, &env); err != nil {
-			return err
-		}
-		if err := t.configureEvents(e, &env); err != nil {
-			return err
-		}
-		if err := t.configureSinkBinding(e, &env); err != nil {
-			return err
-		}
-		if e.ApplicationProperties == nil {
-			e.ApplicationProperties = make(map[string]string)
-		}
-		for k, v := range env.ToCamelProperties() {
-			e.ApplicationProperties[k] = v
-		}
+	}
+	if err := t.configureChannels(e, &env); err != nil {
+		return err
+	}
+	if err := t.configureEndpoints(e, &env); err != nil {
+		return err
+	}
+	if err := t.configureEvents(e, &env); err != nil {
+		return err
+	}
+	if err := t.configureSinkBinding(e, &env); err != nil {
+		return err
+	}
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	for k, v := range env.ToCamelProperties() {
+		e.ApplicationProperties[k] = v
 	}
 
 	return nil
@@ -436,56 +440,60 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 	err := t.withServiceDo(false, e, env, services, serviceType, knativeapi.CamelEndpointKindSink, func(ref *corev1.ObjectReference, serviceURI string, _ func() (*url.URL, error)) error {
 		// Mark the service which will be used as SinkBinding
 		env.SetSinkBinding(ref.Name, knativeapi.CamelEndpointKindSink, serviceType, ref.APIVersion, ref.Kind)
-		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
-			e.PostStepProcessors = append(e.PostStepProcessors, func(e *Environment) error {
-				sinkBindingInjected := false
-				e.Resources.Visit(func(object runtime.Object) {
-					gvk := object.GetObjectKind().GroupVersionKind()
-					if gvk.Kind == "SinkBinding" && strings.Contains(gvk.Group, "knative") {
-						sinkBindingInjected = true
-					}
-				})
-				if sinkBindingInjected {
-					return nil
-				}
 
-				controller := e.Resources.GetController(func(object ctrl.Object) bool {
-					return true
-				})
-				if controller != nil && !reflect.ValueOf(controller).IsNil() {
-					gvk := controller.GetObjectKind().GroupVersionKind()
-					av, k := gvk.ToAPIVersionAndKind()
-					source := corev1.ObjectReference{
-						Kind:       k,
-						Namespace:  e.Integration.Namespace,
-						Name:       e.Integration.Name,
-						APIVersion: av,
-					}
-					target := corev1.ObjectReference{
-						Kind:       ref.Kind,
-						Namespace:  e.Integration.Namespace,
-						Name:       ref.Name,
-						APIVersion: ref.APIVersion,
-					}
-
-					if pointer.BoolDeref(t.NamespaceLabel, true) {
-						// set the namespace label to allow automatic sinkbinding injection
-						enabled, err := knativeutil.EnableKnativeBindInNamespace(e.Ctx, e.Client, e.Integration.Namespace)
-						if err != nil {
-							t.L.Errorf(err, "Error setting label 'bindings.knative.dev/include=true' in namespace: %s", e.Integration.Namespace)
-						} else if enabled {
-							t.L.Infof("Label 'bindings.knative.dev/include=true' set in namespace: %s", e.Integration.Namespace)
-						}
-					}
-
-					// Add the SinkBinding in first position, to make sure it is created
-					// before the reference source, so that the SinkBinding webhook has
-					// all the information to perform injection.
-					e.Resources.AddFirst(knativeutil.CreateSinkBinding(source, target))
-				}
-				return nil
-			})
+		if !e.IntegrationInPhase(v1.IntegrationPhaseDeploying, v1.IntegrationPhaseRunning) {
+			return nil
 		}
+
+		e.PostStepProcessors = append(e.PostStepProcessors, func(e *Environment) error {
+			sinkBindingInjected := false
+			e.Resources.Visit(func(object runtime.Object) {
+				gvk := object.GetObjectKind().GroupVersionKind()
+				if gvk.Kind == "SinkBinding" && strings.Contains(gvk.Group, "knative") {
+					sinkBindingInjected = true
+				}
+			})
+			if sinkBindingInjected {
+				return nil
+			}
+
+			controller := e.Resources.GetController(func(object ctrl.Object) bool {
+				return true
+			})
+			if controller != nil && !reflect.ValueOf(controller).IsNil() {
+				gvk := controller.GetObjectKind().GroupVersionKind()
+				av, k := gvk.ToAPIVersionAndKind()
+				source := corev1.ObjectReference{
+					Kind:       k,
+					Namespace:  e.Integration.Namespace,
+					Name:       e.Integration.Name,
+					APIVersion: av,
+				}
+				target := corev1.ObjectReference{
+					Kind:       ref.Kind,
+					Namespace:  e.Integration.Namespace,
+					Name:       ref.Name,
+					APIVersion: ref.APIVersion,
+				}
+
+				if pointer.BoolDeref(t.NamespaceLabel, true) {
+					// set the namespace label to allow automatic sinkbinding injection
+					enabled, err := knativeutil.EnableKnativeBindInNamespace(e.Ctx, e.Client, e.Integration.Namespace)
+					if err != nil {
+						t.L.Errorf(err, "Error setting label 'bindings.knative.dev/include=true' in namespace: %s", e.Integration.Namespace)
+					} else if enabled {
+						t.L.Infof("Label 'bindings.knative.dev/include=true' set in namespace: %s", e.Integration.Namespace)
+					}
+				}
+
+				// Add the SinkBinding in first position, to make sure it is created
+				// before the reference source, so that the SinkBinding webhook has
+				// all the information to perform injection.
+				e.Resources.AddFirst(knativeutil.CreateSinkBinding(source, target))
+			}
+			return nil
+		})
+
 		return nil
 	})
 

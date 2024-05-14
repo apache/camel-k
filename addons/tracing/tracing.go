@@ -95,32 +95,34 @@ func (t *tracingTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondit
 		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
-		if t.Endpoint == "" {
-			for _, locator := range discovery.TracingLocators {
-				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
-				if err != nil {
-					return false, nil, err
-				}
-				if endpoint != "" {
-					t.L.Infof("Using tracing endpoint: %s", endpoint)
-					t.Endpoint = endpoint
-					break
-				}
+	if !pointer.BoolDeref(t.Auto, true) {
+		return true, nil, nil
+	}
+
+	if t.Endpoint == "" {
+		for _, locator := range discovery.TracingLocators {
+			endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
+			if err != nil {
+				return false, nil, err
+			}
+			if endpoint != "" {
+				t.L.Infof("Using tracing endpoint: %s", endpoint)
+				t.Endpoint = endpoint
+				break
 			}
 		}
+	}
 
-		if t.ServiceName == "" {
-			t.ServiceName = e.Integration.Name
-		}
+	if t.ServiceName == "" {
+		t.ServiceName = e.Integration.Name
+	}
 
-		if t.SamplerType == nil {
-			t.SamplerType = &defaultSamplerType
-		}
+	if t.SamplerType == nil {
+		t.SamplerType = &defaultSamplerType
+	}
 
-		if t.SamplerParam == nil {
-			t.SamplerParam = &defaultSamplerParam
-		}
+	if t.SamplerParam == nil {
+		t.SamplerParam = &defaultSamplerParam
 	}
 
 	return true, nil, nil

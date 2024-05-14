@@ -137,10 +137,11 @@ func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition
 
 func (t *kedaTrait) Apply(e *trait.Environment) error {
 	if e.IntegrationInPhase(camelv1.IntegrationPhaseInitialization) {
-		if t.HackControllerReplicas == nil || *t.HackControllerReplicas {
-			if err := t.hackControllerReplicas(e); err != nil {
-				return err
-			}
+		if !pointer.BoolDeref(t.HackControllerReplicas, false) {
+			return nil
+		}
+		if err := t.hackControllerReplicas(e); err != nil {
+			return err
 		}
 	} else if e.IntegrationInRunningPhases() {
 		if err := t.addScalingResources(e); err != nil {

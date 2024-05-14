@@ -101,46 +101,19 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 			"the runtime provider %s does not declare 'cron' capability",
 		), nil
 	}
+
 	if pointer.BoolDeref(t.Auto, true) {
-		globalCron, err := t.getGlobalCron(e)
+		err := t.autoConfigure(e)
 		if err != nil {
-			return false, NewIntegrationCondition(
-				"Cron",
-				v1.IntegrationConditionCronJobAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionCronJobNotAvailableReason,
-				err.Error(),
-			), err
-		}
-
-		if t.Schedule == "" && globalCron != nil {
-			t.Schedule = globalCron.schedule
-		}
-
-		if globalCron != nil {
-			configuredComponents := strings.FieldsFunc(t.Components, func(c rune) bool { return c == ',' })
-			for _, c := range globalCron.components {
-				util.StringSliceUniqueAdd(&configuredComponents, c)
-			}
-			t.Components = strings.Join(configuredComponents, ",")
-		}
-
-		if t.ConcurrencyPolicy == "" {
-			t.ConcurrencyPolicy = string(batchv1.ForbidConcurrent)
-		}
-
-		if (t.Schedule == "" && t.Components == "") && t.Fallback == nil {
-			// If there's at least a `cron` endpoint, add a fallback implementation
-			fromURIs, err := t.getSourcesFromURIs(e)
-			if err != nil {
-				return false, nil, err
-			}
-			for _, fromURI := range fromURIs {
-				if uri.GetComponent(fromURI) == genericCronComponent {
-					t.Fallback = pointer.Bool(true)
-					break
-				}
-			}
+			return false,
+				NewIntegrationCondition(
+					"Cron",
+					v1.IntegrationConditionCronJobAvailable,
+					corev1.ConditionFalse,
+					v1.IntegrationConditionCronJobNotAvailableReason,
+					err.Error(),
+				),
+				err
 		}
 	}
 
@@ -175,6 +148,45 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	return t.Schedule != "", nil, nil
+}
+
+func (t *cronTrait) autoConfigure(e *Environment) error {
+	globalCron, err := t.getGlobalCron(e)
+	if err != nil {
+		return err
+	}
+
+	if t.Schedule == "" && globalCron != nil {
+		t.Schedule = globalCron.schedule
+	}
+
+	if globalCron != nil {
+		configuredComponents := strings.FieldsFunc(t.Components, func(c rune) bool { return c == ',' })
+		for _, c := range globalCron.components {
+			util.StringSliceUniqueAdd(&configuredComponents, c)
+		}
+		t.Components = strings.Join(configuredComponents, ",")
+	}
+
+	if t.ConcurrencyPolicy == "" {
+		t.ConcurrencyPolicy = string(batchv1.ForbidConcurrent)
+	}
+
+	if (t.Schedule == "" && t.Components == "") && t.Fallback == nil {
+		// If there's at least a `cron` endpoint, add a fallback implementation
+		fromURIs, err := t.getSourcesFromURIs(e)
+		if err != nil {
+			return err
+		}
+		for _, fromURI := range fromURIs {
+			if uri.GetComponent(fromURI) == genericCronComponent {
+				t.Fallback = pointer.Bool(true)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 func (t *cronTrait) Apply(e *Environment) error {

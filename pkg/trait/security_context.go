@@ -88,24 +88,38 @@ func (t *securityContextTrait) setSecurityContext(e *Environment, podSpec *corev
 			Type: t.SeccompProfileType,
 		},
 	}
-	if t.RunAsUser == nil {
-		// get security context UID from Openshift when non configured by the user
-		isOpenShift, err := openshift.IsOpenShift(e.Client)
-		if err != nil {
-			return err
-		}
-		if isOpenShift {
-			runAsUser, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
-			if err != nil {
-				return err
-			}
-			if runAsUser != nil {
-				t.RunAsUser = runAsUser
-			}
-		}
+
+	runAsUser, err := t.getUser(e)
+	if err != nil {
+		return err
 	}
+
+	t.RunAsUser = runAsUser
+
 	sc.RunAsUser = t.RunAsUser
 	podSpec.SecurityContext = &sc
 
 	return nil
+}
+
+func (t *securityContextTrait) getUser(e *Environment) (*int64, error) {
+	if t.RunAsUser != nil {
+		return t.RunAsUser, nil
+	}
+
+	// get security context UID from Openshift when non.configured by the user
+	isOpenShift, err := openshift.IsOpenShift(e.Client)
+	if err != nil {
+		return nil, err
+	}
+	if !isOpenShift {
+		return nil, nil
+	}
+
+	runAsUser, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return runAsUser, nil
 }

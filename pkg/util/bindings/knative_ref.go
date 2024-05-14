@@ -86,6 +86,9 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	}
 
 	var serviceURI string
+
+	// TODO: refactor
+	//nolint:nestif
 	if *serviceType == knativeapis.CamelServiceTypeEvent {
 		if props["name"] == "" {
 			props["name"] = e.Ref.Name
@@ -190,6 +193,8 @@ func (k V1alpha1KnativeRefBindingProvider) Translate(ctx V1alpha1BindingContext,
 	}
 
 	var serviceURI string
+
+	//nolint:nestif
 	if *serviceType == knativeapis.CamelServiceTypeEvent {
 		if props["name"] == "" {
 			props["name"] = e.Ref.Name
