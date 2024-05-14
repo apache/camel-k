@@ -24,9 +24,10 @@ package advanced
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"os"
 	"testing"
+
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	. "github.com/onsi/gomega"
 

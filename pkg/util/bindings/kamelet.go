@@ -41,6 +41,8 @@ func (k BindingConverter) ID() string {
 }
 
 // Translate --.
+//
+//nolint:dupl
 func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
@@ -189,6 +191,8 @@ func (k V1alpha1BindingConverter) ID() string {
 
 // Translate -- .
 // Deprecated.
+//
+//nolint:dupl
 func (k V1alpha1BindingConverter) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs

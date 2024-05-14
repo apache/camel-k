@@ -73,7 +73,6 @@ linters:
     # https://github.com/apache/camel-k/issues/5486
     - cyclop
     - depguard
-    - dupl
     - exhaustive
     - exhaustivestruct
     - exhaustruct

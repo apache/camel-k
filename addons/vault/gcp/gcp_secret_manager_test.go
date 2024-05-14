@@ -18,8 +18,9 @@ limitations under the License.
 package gcp
 
 import (
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"testing"
+
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
