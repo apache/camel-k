@@ -72,7 +72,9 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		RefreshClient(t)
 
 		// Check the IntegrationPlatform has been reconciled
-		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(version))
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutShort).Should(Equal(version))
+		prevRuntimeVersion := Platform(t, ctx, ns)().Status.Build.RuntimeVersion
 
 		// Run the Integration
 		name := RandomizedSuffixName("yaml")
@@ -104,6 +106,8 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		g.Consistently(IntegrationPodsNumbers(t, ctx, ns, name), 1*time.Minute, 1*time.Second).Should(Satisfy(numberOfPods))
 		// Check the Integration hasn't been upgraded
 		g.Consistently(IntegrationVersion(t, ctx, ns, name), 5*time.Second, 1*time.Second).Should(Equal(version))
+		g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationRuntimeVersion(t, ctx, ns, name)).Should(Equal(prevRuntimeVersion))
 
 		// Force the Integration upgrade
 		g.Expect(Kamel(t, ctx, "rebuild", name, "-n", ns).Execute()).To(Succeed())
@@ -112,6 +116,12 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		g.Eventually(DefaultCamelCatalogPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
 		// Check the Integration version has been upgraded
 		g.Eventually(IntegrationVersion(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(defaults.Version))
+		// Check the IntegrationPlatform has been reconciled
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutShort).Should(Equal(defaults.Version))
+		newRuntimeVersion := Platform(t, ctx, ns)().Status.Build.RuntimeVersion
+		// The new operator may change the original default runtime version/provider (if they changed in the new operator version)
+		g.Eventually(IntegrationRuntimeVersion(t, ctx, ns, name)).Should(Equal(newRuntimeVersion))
 
 		// Check the previous kit is not garbage collected
 		g.Eventually(Kits(t, ctx, ns, KitWithVersion(version))).Should(HaveLen(1))
