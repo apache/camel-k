@@ -14,16 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import java.util.Map;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.health.HealthCheckResultBuilder;
+import org.apache.camel.impl.health.AbstractHealthCheck;
 
 public class NeverReady extends RouteBuilder {
     @Override
     public void configure() throws Exception {
-        from("timer:tick").id("never-ready")
-            .to("controlbus:route?routeId=never-ready&action=stop&async=true")
-            .setHeader("m").constant("string!")
-            .setBody().simple("Magic${header.m}")
-            .log("${body}");
+        getCamelContext().getRegistry().bind("NeverReadyCheck", new NeverReadyHealthCheck("never-ready"));
+    }
+
+    private static class NeverReadyHealthCheck extends AbstractHealthCheck {
+
+        protected NeverReadyHealthCheck(String id) {
+            super(id);
+        }
+
+        @Override
+        protected void doCall(HealthCheckResultBuilder builder, Map<String, Object> options) {
+            builder.down();
+        }
     }
 }
