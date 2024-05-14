@@ -18,8 +18,9 @@ limitations under the License.
 package aws
 
 import (
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"testing"
+
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"

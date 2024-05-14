@@ -122,6 +122,7 @@ func (t *affinityTrait) addNodeAffinity(_ *Environment, podSpec *corev1.PodSpec)
 	return nil
 }
 
+//nolint:dupl
 func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) error {
 	if !pointer.BoolDeref(t.PodAffinity, false) && len(t.PodAffinityLabels) == 0 {
 		return nil
@@ -173,6 +174,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) 
 	return nil
 }
 
+//nolint:dupl
 func (t *affinityTrait) addPodAntiAffinity(e *Environment, podSpec *corev1.PodSpec) error {
 	if !pointer.BoolDeref(t.PodAntiAffinity, false) && len(t.PodAntiAffinityLabels) == 0 {
 		return nil

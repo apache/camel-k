@@ -173,14 +173,26 @@ func integrationKitEnqueueRequestsFromMapFunc(ctx context.Context, c client.Clie
 	return requests
 }
 
-func configmapEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, cm *corev1.ConfigMap) []reconcile.Request {
-	var requests []reconcile.Request
+func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctrl.Object) []reconcile.Request {
+	requests := make([]reconcile.Request, 0)
+
+	var storageType utilResource.StorageType
+
+	switch res.(type) {
+	case *corev1.ConfigMap:
+		storageType = utilResource.StorageTypeConfigmap
+	case *corev1.Secret:
+		storageType = utilResource.StorageTypeSecret
+	default:
+		return requests
+	}
 
 	// Do global search in case of global operator (it may be using a global platform)
 	list := &v1.IntegrationList{}
-	var opts []ctrl.ListOption
+
+	opts := make([]ctrl.ListOption, 0)
 	if !platform.IsCurrentOperatorGlobal() {
-		opts = append(opts, ctrl.InNamespace(cm.Namespace))
+		opts = append(opts, ctrl.InNamespace(res.GetNamespace()))
 	}
 
 	if err := c.List(ctx, list, opts...); err != nil {
@@ -195,7 +207,7 @@ func configmapEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, c
 		}
 		for _, c := range integration.Spec.Traits.Mount.Configs {
 			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
-				if conf.StorageType() == utilResource.StorageTypeConfigmap && conf.Name() == cm.Name {
+				if conf.StorageType() == storageType && conf.Name() == res.GetName() {
 					found = true
 					break
 				}
@@ -203,64 +215,15 @@ func configmapEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, c
 		}
 		for _, r := range integration.Spec.Traits.Mount.Resources {
 			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
-				if conf.StorageType() == utilResource.StorageTypeConfigmap && conf.Name() == cm.Name {
+				if conf.StorageType() == storageType && conf.Name() == res.GetName() {
 					found = true
 					break
 				}
 			}
 		}
+
 		if found {
-			log.Infof("Configmap %s updated, wake-up integration: %s", cm.Name, integration.Name)
-			requests = append(requests, reconcile.Request{
-				NamespacedName: types.NamespacedName{
-					Namespace: integration.Namespace,
-					Name:      integration.Name,
-				},
-			})
-		}
-	}
-
-	return requests
-}
-
-func secretEnqueueRequestsFromMapFunc(ctx context.Context, c client.Client, sec *corev1.Secret) []reconcile.Request {
-	var requests []reconcile.Request
-
-	// Do global search in case of global operator (it may be using a global platform)
-	list := &v1.IntegrationList{}
-	var opts []ctrl.ListOption
-	if !platform.IsCurrentOperatorGlobal() {
-		opts = append(opts, ctrl.InNamespace(sec.Namespace))
-	}
-
-	if err := c.List(ctx, list, opts...); err != nil {
-		log.Error(err, "Failed to list integrations")
-		return requests
-	}
-
-	for _, integration := range list.Items {
-		found := false
-		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, true) {
-			continue
-		}
-		for _, c := range integration.Spec.Traits.Mount.Configs {
-			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
-				if conf.StorageType() == utilResource.StorageTypeSecret && conf.Name() == sec.Name {
-					found = true
-					break
-				}
-			}
-		}
-		for _, r := range integration.Spec.Traits.Mount.Resources {
-			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
-				if conf.StorageType() == utilResource.StorageTypeSecret && conf.Name() == sec.Name {
-					found = true
-					break
-				}
-			}
-		}
-		if found {
-			log.Infof("Secret %s updated, wake-up integration: %s", sec.Name, integration.Name)
+			log.Infof("%s %s updated, wake-up integration: %s", res.GetObjectKind(), res.GetName(), integration.Name)
 			requests = append(requests, reconcile.Request{
 				NamespacedName: types.NamespacedName{
 					Namespace: integration.Namespace,
@@ -425,7 +388,7 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve Configmap")
 					return []reconcile.Request{}
 				}
-				return configmapEnqueueRequestsFromMapFunc(ctx, c, cm)
+				return enqueueRequestsFromConfigFunc(ctx, c, cm)
 			}),
 			builder.WithPredicates(predicate.NewPredicateFuncs(func(object ctrl.Object) bool {
 				return object.GetLabels()["camel.apache.org/integration"] != ""
@@ -438,7 +401,7 @@ func watchIntegrationResources(c client.Client, b *builder.Builder) {
 					log.Error(fmt.Errorf("type assertion failed: %v", a), "Failed to retrieve to retrieve Secret")
 					return []reconcile.Request{}
 				}
-				return secretEnqueueRequestsFromMapFunc(ctx, c, secret)
+				return enqueueRequestsFromConfigFunc(ctx, c, secret)
 			}),
 			builder.WithPredicates(predicate.NewPredicateFuncs(func(object ctrl.Object) bool {
 				return object.GetLabels()["camel.apache.org/integration"] != ""

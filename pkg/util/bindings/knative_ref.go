@@ -42,6 +42,8 @@ func (k KnativeRefBindingProvider) ID() string {
 }
 
 // Translate --.
+//
+//nolint:dupl
 func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
@@ -144,6 +146,8 @@ func (k V1alpha1KnativeRefBindingProvider) ID() string {
 
 // Translate --.
 // Deprecated.
+//
+//nolint:dupl
 func (k V1alpha1KnativeRefBindingProvider) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
