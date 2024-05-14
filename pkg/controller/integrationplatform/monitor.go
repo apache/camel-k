@@ -46,6 +46,7 @@ func (action *monitorAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady || platform.Status.Phase == v1.IntegrationPlatformPhaseError
 }
 
+//nolint:nestif
 func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	// Just track the version of the operator in the platform resource
 	if platform.Status.Version != defaults.Version {
@@ -53,6 +54,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		action.L.Info("IntegrationPlatform version updated", "version", platform.Status.Version)
 	}
 
+	// TODO: refactor the phase transition as it is hard to reason
 	platformPhase := v1.IntegrationPlatformPhaseReady
 
 	// Refresh applied configuration

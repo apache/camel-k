@@ -68,6 +68,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		return nil, err
 	}
 
+	//nolint:nestif
 	if pod == nil {
 		switch build.Status.Phase {
 

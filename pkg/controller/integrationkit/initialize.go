@@ -64,50 +64,66 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 	if err != nil {
 		return nil, err
 	}
+
 	kit.Status.Version = defaults.Version
 
-	if kit.Spec.Image == "" {
-		// Wait for CamelCatalog to be ready
-		catalog, err := kubernetes.GetCamelCatalog(
-			ctx,
-			action.client,
-			fmt.Sprintf("camel-catalog-%s", strings.ToLower(env.RuntimeVersion)),
-			kit.Namespace,
-		)
+	if kit.Spec.Image != "" {
+		return kit, nil
+	}
 
-		if err != nil {
-			if k8serrors.IsNotFound(err) {
-				// If the catalog is not available, likely it was required to be created
-				// by Integration trait, so we'll need to wait for it the be available
-				kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
-				return kit, nil
-			}
-			return nil, err
-		}
-
-		if catalog.Status.Phase == v1.CamelCatalogPhaseError {
-			errorReason := fmt.Sprintf("Camel Catalog %s error", catalog.Spec.Runtime.Version)
-			kit.Status.Phase = v1.IntegrationKitPhaseError
-			kit.Status.SetErrorCondition(
-				v1.IntegrationKitConditionCatalogAvailable,
-				errorReason,
-				fmt.Errorf("%s", catalog.Status.GetCondition(v1.CamelCatalogConditionReady).Reason),
-			)
-			// Adding the failure in order to include this info in the Integration as well
-			kit.Status.Failure = &v1.Failure{
-				Reason: errorReason,
-				Time:   metav1.Now(),
-			}
-			return kit, nil
-		}
-
-		if catalog.Status.Phase != v1.CamelCatalogPhaseReady {
-			kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
-			return kit, nil
-		}
-		// now the kit can be built
-		kit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
+	if err := action.image(ctx, env, kit); err != nil {
+		return nil, err
 	}
 
 	return kit, nil
+}
+
+func (action *initializeAction) image(ctx context.Context, env *trait.Environment, kit *v1.IntegrationKit) error {
+	// Wait for CamelCatalog to be ready
+	catalog, err := kubernetes.GetCamelCatalog(
+		ctx,
+		action.client,
+		fmt.Sprintf("camel-catalog-%s", strings.ToLower(env.RuntimeVersion)),
+		kit.Namespace,
+	)
+
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			// If the catalog is not available, likely it was required to be created
+			// by Integration trait, so we'll need to wait for it to be available
+			kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
+			return nil
+		}
+
+		return err
+	}
+
+	if catalog.Status.Phase == v1.CamelCatalogPhaseError {
+		errorReason := fmt.Sprintf("Camel Catalog %s error", catalog.Spec.Runtime.Version)
+
+		kit.Status.Phase = v1.IntegrationKitPhaseError
+		kit.Status.SetErrorCondition(
+			v1.IntegrationKitConditionCatalogAvailable,
+			errorReason,
+			fmt.Errorf("%s", catalog.Status.GetCondition(v1.CamelCatalogConditionReady).Reason),
+		)
+
+		// Adding the failure in order to include this info in the Integration as well
+		kit.Status.Failure = &v1.Failure{
+			Reason: errorReason,
+			Time:   metav1.Now(),
+		}
+
+		return nil
+	}
+
+	if catalog.Status.Phase != v1.CamelCatalogPhaseReady {
+		kit.Status.Phase = v1.IntegrationKitPhaseWaitingForCatalog
+		return nil
+	}
+
+	// now the kit can be built
+	kit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
+
+	return nil
 }

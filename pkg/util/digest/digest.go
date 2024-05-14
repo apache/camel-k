@@ -150,6 +150,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	return digest, nil
 }
 
+//nolint:nestif
 func computeForTraits(hash hash.Hash, traits v1.Traits) error {
 	specTraitsMap, err := toMap(traits)
 	if err != nil {

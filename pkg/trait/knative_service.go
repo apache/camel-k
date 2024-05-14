@@ -315,6 +315,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		isUpdateRequired = true
 	}
 
+	//nolint:nestif
 	if isUpdateRequired {
 		if replicas == nil {
 			if t.MinScale != nil && *t.MinScale > 0 {

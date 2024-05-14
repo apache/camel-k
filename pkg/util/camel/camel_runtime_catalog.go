@@ -187,20 +187,19 @@ func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.Cam
 	var uriSplit []string
 
 	// Decode URI using formats http://my-site/test?param=value or log:info
-	if strings.Contains(uri, ":") {
+	switch {
+	case strings.Contains(uri, ":"):
 		uriSplit = strings.SplitN(uri, ":", 2)
 		if len(uriSplit) < 2 {
 			return nil, nil
 		}
-	} else {
-		if strings.Contains(uri, "?") {
-			uriSplit = strings.SplitN(uri, "?", 2)
-			if len(uriSplit) < 2 {
-				return nil, nil
-			}
-		} else {
-			uriSplit = append(uriSplit, uri)
+	case strings.Contains(uri, "?"):
+		uriSplit = strings.SplitN(uri, "?", 2)
+		if len(uriSplit) < 2 {
+			return nil, nil
 		}
+	default:
+		uriSplit = append(uriSplit, uri)
 	}
 
 	uriStart := uriSplit[0]

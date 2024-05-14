@@ -239,6 +239,7 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationKit(target)
 
+	//nolint:nestif
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 		rlog.Debug("Preparing to shift integration kit phase")
 		if target.IsExternal() || target.IsSynthetic() {
@@ -283,38 +284,41 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
-		if a.CanHandle(target) {
-			targetLog.Infof("Invoking action %s", a.Name())
-
-			newTarget, err := a.Handle(ctx, target)
-
-			if err != nil {
-				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
-				return reconcile.Result{}, err
-			}
-
-			if newTarget != nil {
-				if res, err := r.update(ctx, &instance, newTarget); err != nil {
-					camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
-					return res, err
-				}
-
-				targetPhase = newTarget.Status.Phase
-
-				if targetPhase != instance.Status.Phase {
-					targetLog.Info(
-						"State transition",
-						"phase-from", instance.Status.Phase,
-						"phase-to", targetPhase,
-					)
-				}
-			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyIntegrationKitUpdated(ctx, r.client, r.recorder, &instance, newTarget)
-			break
+		if !a.CanHandle(target) {
+			continue
 		}
+
+		targetLog.Infof("Invoking action %s", a.Name())
+
+		newTarget, err := a.Handle(ctx, target)
+
+		if err != nil {
+			camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+			return reconcile.Result{}, err
+		}
+
+		if newTarget != nil {
+			if res, err := r.update(ctx, &instance, newTarget); err != nil {
+				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+				return res, err
+			}
+
+			targetPhase = newTarget.Status.Phase
+
+			if targetPhase != instance.Status.Phase {
+				targetLog.Info(
+					"State transition",
+					"phase-from", instance.Status.Phase,
+					"phase-to", targetPhase,
+				)
+			}
+		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyIntegrationKitUpdated(ctx, r.client, r.recorder, &instance, newTarget)
+
+		break
 	}
 
 	if targetPhase == v1.IntegrationKitPhaseWaitingForCatalog {

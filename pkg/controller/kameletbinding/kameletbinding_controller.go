@@ -193,31 +193,34 @@ func (r *ReconcileKameletBinding) Reconcile(ctx context.Context, request reconci
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
-		if a.CanHandle(target) {
-			targetLog.Debugf("Invoking action %s", a.Name())
+		if !a.CanHandle(target) {
+			continue
+		}
 
-			target, err = a.Handle(ctx, target)
-			if err != nil {
+		targetLog.Debugf("Invoking action %s", a.Name())
+
+		target, err = a.Handle(ctx, target)
+		if err != nil {
+			camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
+			// Update the binding (mostly just to update its phase) if the new instance is returned
+			if target != nil {
+				_ = r.update(ctx, &instance, target, &targetLog)
+			}
+			return reconcile.Result{}, err
+		}
+
+		if target != nil {
+			if err := r.update(ctx, &instance, target, &targetLog); err != nil {
 				camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
-				// Update the binding (mostly just to update its phase) if the new instance is returned
-				if target != nil {
-					_ = r.update(ctx, &instance, target, &targetLog)
-				}
 				return reconcile.Result{}, err
 			}
-
-			if target != nil {
-				if err := r.update(ctx, &instance, target, &targetLog); err != nil {
-					camelevent.NotifyKameletBindingError(ctx, r.client, r.recorder, &instance, target, err)
-					return reconcile.Result{}, err
-				}
-			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyKameletBindingUpdated(ctx, r.client, r.recorder, &instance, target)
-			break
 		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyKameletBindingUpdated(ctx, r.client, r.recorder, &instance, target)
+
+		break
 	}
 
 	return reconcile.Result{}, nil

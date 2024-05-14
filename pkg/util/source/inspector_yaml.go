@@ -62,6 +62,7 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	return nil
 }
 
+//nolint:nestif
 func (i YAMLInspector) parseStep(key string, content interface{}, meta *Metadata) error {
 	switch key {
 	case "rest":

@@ -27,33 +27,37 @@ import (
 )
 
 func maybeErrorHandler(errHandlConf *v1alpha1.ErrorHandlerSpec, bindingContext bindings.V1alpha1BindingContext) (*bindings.Binding, error) {
-	var errorHandlerBinding *bindings.Binding
-	if errHandlConf != nil {
-		errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse error handler: %w", err)
-		}
-		// We need to get the translated URI from any referenced resource (ie, kamelets)
-		if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeSink {
-			errorHandlerBinding, err = bindings.TranslateV1alpha1(bindingContext, bindings.V1alpha1EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
-			if err != nil {
-				return nil, fmt.Errorf("could not determine error handler URI: %w", err)
-			}
-		} else {
-			// Create a new binding otherwise in order to store error handler application properties
-			errorHandlerBinding = &bindings.Binding{
-				ApplicationProperties: make(map[string]string),
-			}
-		}
 
-		err = setErrorHandlerConfiguration(errorHandlerBinding, errorHandlerSpec)
-		if err != nil {
-			return nil, fmt.Errorf("could not set integration error handler: %w", err)
-		}
-
-		return errorHandlerBinding, nil
+	if errHandlConf == nil {
+		return nil, nil
 	}
-	return nil, nil
+
+	var errorHandlerBinding *bindings.Binding
+
+	errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse error handler: %w", err)
+	}
+
+	// We need to get the translated URI from any referenced resource (ie, kamelets)
+	if errorHandlerSpec.Type() == v1alpha1.ErrorHandlerTypeSink {
+		errorHandlerBinding, err = bindings.TranslateV1alpha1(bindingContext, bindings.V1alpha1EndpointContext{Type: v1alpha1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
+		if err != nil {
+			return nil, fmt.Errorf("could not determine error handler URI: %w", err)
+		}
+	} else {
+		// Create a new binding otherwise in order to store error handler application properties
+		errorHandlerBinding = &bindings.Binding{
+			ApplicationProperties: make(map[string]string),
+		}
+	}
+
+	err = setErrorHandlerConfiguration(errorHandlerBinding, errorHandlerSpec)
+	if err != nil {
+		return nil, fmt.Errorf("could not set integration error handler: %w", err)
+	}
+
+	return errorHandlerBinding, nil
 }
 
 func parseErrorHandler(rawMessage v1alpha1.RawMessage) (v1alpha1.ErrorHandler, error) {

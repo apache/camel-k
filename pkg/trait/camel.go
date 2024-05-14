@@ -80,6 +80,7 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	return true, nil, nil
 }
 
+//nolint:nestif
 func (t *camelTrait) Apply(e *Environment) error {
 	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() {
 		// Synthetic Integration Kit

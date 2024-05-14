@@ -110,37 +110,39 @@ func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAwsSecretsManager)
 	}
 
-	if environment.IntegrationInRunningPhases() {
-		hits := rex.FindAllStringSubmatch(t.AccessKey, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key", "The access Key provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.aws.accessKey"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.aws.accessKey"] = t.AccessKey
+	if !environment.IntegrationInRunningPhases() {
+		return nil
+	}
+
+	hits := rex.FindAllStringSubmatch(t.AccessKey, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key", "The access Key provided is not valid")
+		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+			return err
+		} else if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.aws.accessKey"] = string([]byte(secretValue))
 		}
-		hits = rex.FindAllStringSubmatch(t.SecretKey, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key", "The secret Key provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.aws.secretKey"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.aws.secretKey"] = t.SecretKey
+	} else {
+		environment.ApplicationProperties["camel.vault.aws.accessKey"] = t.AccessKey
+	}
+	hits = rex.FindAllStringSubmatch(t.SecretKey, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key", "The secret Key provided is not valid")
+		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+			return err
+		} else if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.aws.secretKey"] = string([]byte(secretValue))
 		}
-		environment.ApplicationProperties["camel.vault.aws.region"] = t.Region
-		environment.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"] = strconv.FormatBool(*t.UseDefaultCredentialsProvider)
-		environment.ApplicationProperties["camel.vault.aws.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
-		environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
-		environment.ApplicationProperties["camel.vault.aws.refreshPeriod"] = t.RefreshPeriod
-		if t.Secrets != "" {
-			environment.ApplicationProperties["camel.vault.aws.secrets"] = t.Secrets
-		}
+	} else {
+		environment.ApplicationProperties["camel.vault.aws.secretKey"] = t.SecretKey
+	}
+	environment.ApplicationProperties["camel.vault.aws.region"] = t.Region
+	environment.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"] = strconv.FormatBool(*t.UseDefaultCredentialsProvider)
+	environment.ApplicationProperties["camel.vault.aws.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
+	environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
+	environment.ApplicationProperties["camel.vault.aws.refreshPeriod"] = t.RefreshPeriod
+	if t.Secrets != "" {
+		environment.ApplicationProperties["camel.vault.aws.secrets"] = t.Secrets
 	}
 
 	return nil

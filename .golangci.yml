@@ -58,6 +58,17 @@ run:
 issues:
   exclude-files:
     - test_support.go
+  exclude-rules:
+    # Exclude some linters from running on deprecated code.
+    - path: pkg/cmd
+      linters:
+        - nestif
+    - path: pkg/install
+      linters:
+        - nestif
+    - path: pkg/util/olm
+      linters:
+        - nestif
 linters:
   enable-all: true
   disable:
@@ -90,7 +101,6 @@ linters:
     - err113
     - gomnd
     - ireturn
-    - nestif
     - nilnil
     - nlreturn
     - paralleltest

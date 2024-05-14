@@ -133,51 +133,54 @@ func (t *containerTrait) Apply(e *Environment) error {
 }
 
 func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
-	if t.Image != "" {
-		if e.Integration.Spec.IntegrationKit != nil {
-			return fmt.Errorf(
-				"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
-				e.Integration.Spec.IntegrationKit)
-		}
-
-		kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
-		kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
-		kit.Spec.Image = t.Image
-
-		// Add some information for post-processing, this may need to be refactored
-		// to a proper data structure
-		kit.Labels = map[string]string{
-			v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypeSynthetic,
-			kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
-			kubernetes.CamelCreatorLabelName:      e.Integration.Name,
-			kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
-			kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
-		}
-
-		if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
-			v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
-		}
-
-		if v, ok := e.Integration.Annotations[v1.IntegrationProfileAnnotation]; ok {
-			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileAnnotation, v)
-
-			if v, ok := e.Integration.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
-				v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, v)
-			} else {
-				// set integration profile namespace to the integration namespace.
-				// this is because the kit may live in another namespace and needs to resolve the integration profile from the integration namespace.
-				v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
-			}
-		}
-
-		operatorID := defaults.OperatorID()
-		if operatorID != "" {
-			kit.SetOperatorID(operatorID)
-		}
-
-		e.Resources.Add(kit)
-		e.Integration.SetIntegrationKit(kit)
+	if t.Image == "" {
+		return nil
 	}
+
+	if e.Integration.Spec.IntegrationKit != nil {
+		return fmt.Errorf(
+			"unsupported configuration: a container image has been set in conjunction with an IntegrationKit %v",
+			e.Integration.Spec.IntegrationKit)
+	}
+
+	kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
+	kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
+	kit.Spec.Image = t.Image
+
+	// Add some information for post-processing, this may need to be refactored
+	// to a proper data structure
+	kit.Labels = map[string]string{
+		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypeSynthetic,
+		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
+		kubernetes.CamelCreatorLabelName:      e.Integration.Name,
+		kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
+		kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
+	}
+
+	if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
+		v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
+	}
+
+	if v, ok := e.Integration.Annotations[v1.IntegrationProfileAnnotation]; ok {
+		v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileAnnotation, v)
+
+		if v, ok := e.Integration.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
+			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, v)
+		} else {
+			// set integration profile namespace to the integration namespace.
+			// this is because the kit may live in another namespace and needs to resolve the integration profile from the integration namespace.
+			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
+		}
+	}
+
+	operatorID := defaults.OperatorID()
+	if operatorID != "" {
+		kit.SetOperatorID(operatorID)
+	}
+
+	e.Resources.Add(kit)
+	e.Integration.SetIntegrationKit(kit)
+
 	return nil
 }
 
@@ -355,24 +358,38 @@ func (t *containerTrait) setSecurityContext(e *Environment, container *corev1.Co
 		AllowPrivilegeEscalation: t.AllowPrivilegeEscalation,
 		Capabilities:             &corev1.Capabilities{Drop: t.CapabilitiesDrop, Add: t.CapabilitiesAdd},
 	}
-	if t.RunAsUser == nil {
-		// get security context UID from Openshift when non configured by the user
-		isOpenShift, err := openshift.IsOpenShift(e.Client)
-		if err != nil {
-			return err
-		}
-		if isOpenShift {
-			runAsUser, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
-			if err != nil {
-				return err
-			}
-			if runAsUser != nil {
-				t.RunAsUser = runAsUser
-			}
-		}
+
+	runAsUser, err := t.getUser(e)
+	if err != nil {
+		return err
 	}
+
+	t.RunAsUser = runAsUser
+
 	sc.RunAsUser = t.RunAsUser
 	container.SecurityContext = &sc
 
 	return nil
+}
+
+func (t *containerTrait) getUser(e *Environment) (*int64, error) {
+	if t.RunAsUser != nil {
+		return t.RunAsUser, nil
+	}
+
+	// get security context UID from Openshift when non.configured by the user
+	isOpenShift, err := openshift.IsOpenShift(e.Client)
+	if err != nil {
+		return nil, err
+	}
+	if !isOpenShift {
+		return nil, nil
+	}
+
+	runAsUser, err := openshift.GetOpenshiftUser(e.Ctx, e.Client, e.Integration.Namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	return runAsUser, nil
 }

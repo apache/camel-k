@@ -61,36 +61,40 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 	}
 
 	if pointer.BoolDeref(t.Auto, true) {
-		if t.SecretName == "" {
-			secret := e.Platform.Status.Build.Registry.Secret
-			if secret != "" {
-				key := ctrl.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
-				obj := corev1.Secret{}
-				if err := t.Client.Get(e.Ctx, key, &obj); err != nil {
-					return false, nil, err
-				}
-				if obj.Type == corev1.SecretTypeDockerConfigJson {
-					t.SecretName = secret
-				}
-			}
-		}
-		if t.ImagePullerDelegation == nil {
-			var isOpenShift bool
-			if t.Client != nil {
-				var err error
-				isOpenShift, err = openshift.IsOpenShift(t.Client)
-				if err != nil {
-					return false, nil, err
-				}
-			}
-			isOperatorGlobal := platform.IsCurrentOperatorGlobal()
-			isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform) != e.Integration.Namespace
-			needsDelegation := isOpenShift && isOperatorGlobal && isKitExternal
-			t.ImagePullerDelegation = &needsDelegation
+		err := t.autoConfigure(e)
+		if err != nil {
+			return false, nil, err
 		}
 	}
 
 	return t.SecretName != "" || pointer.BoolDeref(t.ImagePullerDelegation, false), nil, nil
+}
+func (t *pullSecretTrait) autoConfigure(e *Environment) error {
+	if t.SecretName == "" {
+		s, err := t.resolveSecret(e)
+		if err != nil {
+			return err
+		}
+
+		t.SecretName = s
+	}
+
+	if t.ImagePullerDelegation == nil {
+		var isOpenShift bool
+		if t.Client != nil {
+			var err error
+			isOpenShift, err = openshift.IsOpenShift(t.Client)
+			if err != nil {
+				return err
+			}
+		}
+		isOperatorGlobal := platform.IsCurrentOperatorGlobal()
+		isKitExternal := e.Integration.GetIntegrationKitNamespace(e.Platform) != e.Integration.Namespace
+		needsDelegation := isOpenShift && isOperatorGlobal && isKitExternal
+		t.ImagePullerDelegation = &needsDelegation
+	}
+
+	return nil
 }
 
 func (t *pullSecretTrait) Apply(e *Environment) error {
@@ -163,4 +167,23 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 			},
 		},
 	}
+}
+
+func (t *pullSecretTrait) resolveSecret(e *Environment) (string, error) {
+	secret := e.Platform.Status.Build.Registry.Secret
+	if secret == "" {
+		return "", nil
+	}
+
+	key := ctrl.ObjectKey{Namespace: e.Platform.Namespace, Name: secret}
+	obj := corev1.Secret{}
+	if err := t.Client.Get(e.Ctx, key, &obj); err != nil {
+		return "", err
+	}
+
+	if obj.Type != corev1.SecretTypeDockerConfigJson {
+		return "", nil
+	}
+
+	return secret, nil
 }

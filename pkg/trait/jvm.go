@@ -227,7 +227,7 @@ func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
 func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, error) {
 	var args []string
 
-	//nolint:dupl
+	//nolint:dupl,nestif
 	if HTTPProxy := envvar.Get(container.Env, "HTTP_PROXY"); HTTPProxy != nil {
 		u, err := url.Parse(HTTPProxy.Value)
 		if err != nil {
@@ -247,7 +247,7 @@ func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, erro
 		}
 	}
 
-	//nolint:dupl
+	//nolint:dupl,nestif
 	if HTTPSProxy := envvar.Get(container.Env, "HTTPS_PROXY"); HTTPSProxy != nil {
 		u, err := url.Parse(HTTPSProxy.Value)
 		if err != nil {

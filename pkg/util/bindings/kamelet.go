@@ -52,93 +52,95 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 	if err != nil {
 		return nil, err
 	}
+
 	// it translates only Kamelet refs
-	if e.Ref.Kind == v1.KameletKind && gv.Group == v1.SchemeGroupVersion.Group {
-		kameletName := url.PathEscape(e.Ref.Name)
-
-		props, err := e.Properties.GetPropertyMap()
-		if err != nil {
-			return nil, err
-		}
-
-		id, idPresent := props[v1.KameletIDProperty]
-		if idPresent {
-			delete(props, v1.KameletIDProperty)
-		} else {
-			id = endpointCtx.GenerateID()
-		}
-
-		binding := Binding{}
-		binding.ApplicationProperties = make(map[string]string)
-		for k, v := range props {
-			propKey := fmt.Sprintf("camel.kamelet.%s.%s.%s", kameletName, id, k)
-			binding.ApplicationProperties[propKey] = v
-		}
-
-		dataTypeActionKamelet := ctx.Metadata[v1.KameletDataTypeLabel]
-		if dataTypeActionKamelet == "" {
-			dataTypeActionKamelet = defaultDataTypeActionKamelet
-		}
-
-		switch endpointCtx.Type {
-		case v1.EndpointTypeAction:
-			steps := make([]map[string]interface{}, 0)
-
-			if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
-				steps = append(steps, in)
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			steps = append(steps, map[string]interface{}{
-				"kamelet": map[string]interface{}{
-					"name": fmt.Sprintf("%s/%s", kameletName, url.PathEscape(id)),
-				},
-			})
-
-			if out, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotOut, dataTypeActionKamelet); out != nil {
-				steps = append(steps, out)
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			if len(steps) > 1 {
-				binding.Step = map[string]interface{}{
-					"pipeline": map[string]interface{}{
-						"id":    fmt.Sprintf("%s-pipeline", id),
-						"steps": steps,
-					},
-				}
-			} else if len(steps) == 1 {
-				binding.Step = steps[0]
-			}
-		case v1.EndpointTypeSource:
-			if out, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotOut, dataTypeActionKamelet); out != nil {
-				binding.Step = out
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
-		case v1.EndpointTypeSink:
-			if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
-				binding.Step = in
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
-		default:
-			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
-		}
-
-		return &binding, nil
+	if e.Ref.Kind != v1.KameletKind || gv.Group != v1.SchemeGroupVersion.Group {
+		return nil, nil
 	}
-	return nil, nil
+
+	kameletName := url.PathEscape(e.Ref.Name)
+
+	props, err := e.Properties.GetPropertyMap()
+	if err != nil {
+		return nil, err
+	}
+
+	id, idPresent := props[v1.KameletIDProperty]
+	if idPresent {
+		delete(props, v1.KameletIDProperty)
+	} else {
+		id = endpointCtx.GenerateID()
+	}
+
+	binding := Binding{}
+	binding.ApplicationProperties = make(map[string]string)
+	for k, v := range props {
+		propKey := fmt.Sprintf("camel.kamelet.%s.%s.%s", kameletName, id, k)
+		binding.ApplicationProperties[propKey] = v
+	}
+
+	dataTypeActionKamelet := ctx.Metadata[v1.KameletDataTypeLabel]
+	if dataTypeActionKamelet == "" {
+		dataTypeActionKamelet = defaultDataTypeActionKamelet
+	}
+
+	switch endpointCtx.Type {
+	case v1.EndpointTypeAction:
+		steps := make([]map[string]interface{}, 0)
+
+		if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
+			steps = append(steps, in)
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		steps = append(steps, map[string]interface{}{
+			"kamelet": map[string]interface{}{
+				"name": fmt.Sprintf("%s/%s", kameletName, url.PathEscape(id)),
+			},
+		})
+
+		if out, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotOut, dataTypeActionKamelet); out != nil {
+			steps = append(steps, out)
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		if len(steps) > 1 {
+			binding.Step = map[string]interface{}{
+				"pipeline": map[string]interface{}{
+					"id":    fmt.Sprintf("%s-pipeline", id),
+					"steps": steps,
+				},
+			}
+		} else if len(steps) == 1 {
+			binding.Step = steps[0]
+		}
+	case v1.EndpointTypeSource:
+		if out, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotOut, dataTypeActionKamelet); out != nil {
+			binding.Step = out
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+	case v1.EndpointTypeSink:
+		if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
+			binding.Step = in
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+	default:
+		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+	}
+
+	return &binding, nil
 }
 
 // DataTypeStep --.
@@ -203,92 +205,93 @@ func (k V1alpha1BindingConverter) Translate(ctx V1alpha1BindingContext, endpoint
 		return nil, err
 	}
 	// it translates only Kamelet refs
-	if e.Ref.Kind == v1.KameletKind && gv.Group == v1.SchemeGroupVersion.Group {
-		kameletName := url.PathEscape(e.Ref.Name)
-
-		props, err := e.Properties.GetPropertyMap()
-		if err != nil {
-			return nil, err
-		}
-
-		id, idPresent := props[v1.KameletIDProperty]
-		if idPresent {
-			delete(props, v1.KameletIDProperty)
-		} else {
-			id = endpointCtx.GenerateID()
-		}
-
-		binding := Binding{}
-		binding.ApplicationProperties = make(map[string]string)
-		for k, v := range props {
-			propKey := fmt.Sprintf("camel.kamelet.%s.%s.%s", kameletName, id, k)
-			binding.ApplicationProperties[propKey] = v
-		}
-
-		dataTypeActionKamelet := ctx.Metadata[v1.KameletDataTypeLabel]
-		if dataTypeActionKamelet == "" {
-			dataTypeActionKamelet = defaultDataTypeActionKamelet
-		}
-
-		switch endpointCtx.Type {
-		case v1alpha1.EndpointTypeAction:
-			steps := make([]map[string]interface{}, 0)
-
-			if in, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotIn, dataTypeActionKamelet); in != nil {
-				steps = append(steps, in)
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			steps = append(steps, map[string]interface{}{
-				"kamelet": map[string]interface{}{
-					"name": fmt.Sprintf("%s/%s", kameletName, url.PathEscape(id)),
-				},
-			})
-
-			if out, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotOut, dataTypeActionKamelet); out != nil {
-				steps = append(steps, out)
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			if len(steps) > 1 {
-				binding.Step = map[string]interface{}{
-					"pipeline": map[string]interface{}{
-						"id":    fmt.Sprintf("%s-pipeline", id),
-						"steps": steps,
-					},
-				}
-			} else if len(steps) == 1 {
-				binding.Step = steps[0]
-			}
-		case v1alpha1.EndpointTypeSource:
-			if out, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotOut, dataTypeActionKamelet); out != nil {
-				binding.Step = out
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
-		case v1alpha1.EndpointTypeSink:
-			if in, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotIn, dataTypeActionKamelet); in != nil {
-				binding.Step = in
-				for k, v := range applicationProperties {
-					binding.ApplicationProperties[k] = v
-				}
-			}
-
-			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
-		default:
-			binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
-		}
-
-		return &binding, nil
+	if e.Ref.Kind != v1.KameletKind || gv.Group != v1.SchemeGroupVersion.Group {
+		return nil, nil
 	}
-	return nil, nil
+
+	kameletName := url.PathEscape(e.Ref.Name)
+
+	props, err := e.Properties.GetPropertyMap()
+	if err != nil {
+		return nil, err
+	}
+
+	id, idPresent := props[v1.KameletIDProperty]
+	if idPresent {
+		delete(props, v1.KameletIDProperty)
+	} else {
+		id = endpointCtx.GenerateID()
+	}
+
+	binding := Binding{}
+	binding.ApplicationProperties = make(map[string]string)
+	for k, v := range props {
+		propKey := fmt.Sprintf("camel.kamelet.%s.%s.%s", kameletName, id, k)
+		binding.ApplicationProperties[propKey] = v
+	}
+
+	dataTypeActionKamelet := ctx.Metadata[v1.KameletDataTypeLabel]
+	if dataTypeActionKamelet == "" {
+		dataTypeActionKamelet = defaultDataTypeActionKamelet
+	}
+
+	switch endpointCtx.Type {
+	case v1alpha1.EndpointTypeAction:
+		steps := make([]map[string]interface{}, 0)
+
+		if in, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotIn, dataTypeActionKamelet); in != nil {
+			steps = append(steps, in)
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		steps = append(steps, map[string]interface{}{
+			"kamelet": map[string]interface{}{
+				"name": fmt.Sprintf("%s/%s", kameletName, url.PathEscape(id)),
+			},
+		})
+
+		if out, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotOut, dataTypeActionKamelet); out != nil {
+			steps = append(steps, out)
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		if len(steps) > 1 {
+			binding.Step = map[string]interface{}{
+				"pipeline": map[string]interface{}{
+					"id":    fmt.Sprintf("%s-pipeline", id),
+					"steps": steps,
+				},
+			}
+		} else if len(steps) == 1 {
+			binding.Step = steps[0]
+		}
+	case v1alpha1.EndpointTypeSource:
+		if out, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotOut, dataTypeActionKamelet); out != nil {
+			binding.Step = out
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+	case v1alpha1.EndpointTypeSink:
+		if in, applicationProperties := k.DataTypeStep(e, id, v1alpha1.TypeSlotIn, dataTypeActionKamelet); in != nil {
+			binding.Step = in
+			for k, v := range applicationProperties {
+				binding.ApplicationProperties[k] = v
+			}
+		}
+
+		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+	default:
+		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+	}
+
+	return &binding, nil
 }
 
 // DataTypeStep -- .

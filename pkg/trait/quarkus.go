@@ -376,6 +376,7 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	// The LoadCamelQuarkusCatalog is required to have catalog information available by the builder
 	packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
 
+	//nolint:nestif
 	if native {
 		if nativePackageType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackageType != "" {
 			buildTask.Maven.Properties["quarkus.package.type"] = nativePackageType

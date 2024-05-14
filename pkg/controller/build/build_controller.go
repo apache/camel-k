@@ -21,6 +21,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/apache/camel-k/v2/pkg/util/log"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -180,51 +182,32 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 		a.InjectLogger(targetLog)
 		a.InjectRecorder(r.recorder)
 
-		if a.CanHandle(target) {
-			targetLog.Debugf("Invoking action %s", a.Name())
+		if !a.CanHandle(target) {
+			continue
+		}
 
-			newTarget, err := a.Handle(ctx, target)
+		targetLog.Debugf("Invoking action %s", a.Name())
+
+		newTarget, err := a.Handle(ctx, target)
+		if err != nil {
+			camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
+			return reconcile.Result{}, err
+		}
+
+		if newTarget != nil {
+			err := r.update(ctx, targetLog, &instance, newTarget)
 			if err != nil {
-				camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
 			}
 
-			if newTarget != nil {
-				if err := r.update(ctx, &instance, newTarget); err != nil {
-					camelevent.NotifyBuildError(ctx, r.client, r.recorder, &instance, newTarget, err)
-					return reconcile.Result{}, err
-				}
-
-				if newTarget.Status.Phase != instance.Status.Phase {
-					targetLog.Info(
-						"State transition",
-						"phase-from", instance.Status.Phase,
-						"phase-to", newTarget.Status.Phase,
-					)
-
-					if newTarget.Status.Phase == v1.BuildPhaseError || newTarget.Status.Phase == v1.BuildPhaseFailed {
-						reason := string(newTarget.Status.Phase)
-
-						if newTarget.Status.Failure != nil {
-							reason = newTarget.Status.Failure.Reason
-						}
-
-						targetLog.Info(
-							"Build error",
-							"reason", reason,
-							"error-message", newTarget.Status.Error)
-					}
-				}
-
-				target = newTarget
-			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyBuildUpdated(ctx, r.client, r.recorder, &instance, newTarget)
-
-			break
+			target = newTarget
 		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyBuildUpdated(ctx, r.client, r.recorder, &instance, newTarget)
+
+		break
 	}
 
 	if target.Status.Phase == v1.BuildPhaseScheduling || target.Status.Phase == v1.BuildPhaseFailed {
@@ -241,9 +224,34 @@ func (r *reconcileBuild) Reconcile(ctx context.Context, request reconcile.Reques
 	return reconcile.Result{}, nil
 }
 
-func (r *reconcileBuild) update(ctx context.Context, base *v1.Build, target *v1.Build) error {
+func (r *reconcileBuild) update(ctx context.Context, l log.Logger, base *v1.Build, target *v1.Build) error {
 	target.Status.ObservedGeneration = base.Generation
-	err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 
-	return err
+	if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base)); err != nil {
+		camelevent.NotifyBuildError(ctx, r.client, r.recorder, base, target, err)
+		return err
+	}
+
+	if target.Status.Phase != base.Status.Phase {
+		l.Info(
+			"State transition",
+			"phase-from", base.Status.Phase,
+			"phase-to", target.Status.Phase,
+		)
+
+		if target.Status.Phase == v1.BuildPhaseError || target.Status.Phase == v1.BuildPhaseFailed {
+			reason := string(target.Status.Phase)
+
+			if target.Status.Failure != nil {
+				reason = target.Status.Failure.Reason
+			}
+
+			l.Info(
+				"Build error",
+				"reason", reason,
+				"error-message", target.Status.Error)
+		}
+	}
+
+	return nil
 }

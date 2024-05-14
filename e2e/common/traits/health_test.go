@@ -77,7 +77,13 @@ func TestHealthTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 
 			pods := IntegrationPods(t, ctx, ns, name)()
+
+			t.Logf("Stopping routes for integration %s/%s (%d)", ns, name, len(pods))
+
 			for i, pod := range pods {
+
+				t.Logf("Stopping route on integration pod %s/%s", pod.Namespace, pod.Name)
+
 				// Stop the Camel route
 				request := map[string]string{
 					"type":      "exec",
@@ -100,6 +106,8 @@ func TestHealthTrait(t *testing.T) {
 				g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
 					WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
 					WithTransform(IntegrationConditionMessage, Equal(fmt.Sprintf("%d/3 pods are not ready", i+1)))))
+
+				t.Logf("Route on integration pod %s/%s stopped", pod.Namespace, pod.Name)
 			}
 
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
