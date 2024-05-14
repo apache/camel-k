@@ -26,7 +26,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -363,9 +362,7 @@ func TestHealthTrait(t *testing.T) {
 			name := RandomizedSuffixName("never-ready")
 
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/NeverReady.java", "--name", name, "-t", "health.enabled=true",
-				// TODO remove these workaround properties when https://issues.apache.org/jira/browse/CAMEL-20244 is fixed
-				"-p", "camel.route-controller.unhealthyOnRestarting=true",
-				"-p", "camel.route-controller.unhealthyOnExhausted=true",
+				"-p", "camel.health.routesEnabled=false",
 			).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -391,7 +388,7 @@ func TestHealthTrait(t *testing.T) {
 					var r *v1.HealthCheckResponse
 
 					for h := range c.Pods[0].Health {
-						if c.Pods[0].Health[h].Name == "camel-routes" {
+						if c.Pods[0].Health[h].Name == "never-ready" {
 							r = &c.Pods[0].Health[h]
 						}
 					}
@@ -409,14 +406,15 @@ func TestHealthTrait(t *testing.T) {
 						return false
 					}
 
-					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "never-ready"
+					return r.Status == v1.HealthCheckStatusDown && data["check.kind"].(string) == "READINESS"
 				}))
 		})
 
 		t.Run("Startup condition with never ready route", func(t *testing.T) {
 			name := RandomizedSuffixName("startup-probe-never-ready-route")
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/NeverReady.java", "--name", name, "-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/NeverReady.java", "--name", name,
+				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
@@ -439,7 +437,7 @@ func TestHealthTrait(t *testing.T) {
 					var r *v1.HealthCheckResponse
 
 					for h := range c.Pods[0].Health {
-						if c.Pods[0].Health[h].Name == "camel-routes" && c.Pods[0].Health[h].Status == "DOWN" {
+						if c.Pods[0].Health[h].Name == "never-ready" && c.Pods[0].Health[h].Status == "DOWN" {
 							r = &c.Pods[0].Health[h]
 						}
 					}
@@ -457,23 +455,15 @@ func TestHealthTrait(t *testing.T) {
 						return false
 					}
 
-					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "never-ready"
+					return data["check.kind"].(string) == "READINESS"
 				}))
-
-			Satisfy(func(events *corev1.EventList) bool {
-				for e := range events.Items {
-					if events.Items[e].Type == "Warning" && events.Items[e].Reason == "Unhealthy" && strings.Contains(events.Items[e].Message, "Startup probe failed") {
-						return true
-					}
-				}
-				return false
-			})
 		})
 
 		t.Run("Startup condition with ready route", func(t *testing.T) {
 			name := RandomizedSuffixName("startup-probe-ready-route")
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name,
+				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
@@ -481,14 +471,6 @@ func TestHealthTrait(t *testing.T) {
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(And(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
 				WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
-
-			Satisfy(func(is *v1.IntegrationSpec) bool {
-				if *is.Traits.Health.Enabled == true && *is.Traits.Health.StartupProbeEnabled == true && is.Traits.Health.StartupTimeout == 60 {
-					return true
-				}
-				return false
-			})
-
 		})
 
 		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
