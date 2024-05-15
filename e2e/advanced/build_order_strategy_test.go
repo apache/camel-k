@@ -59,8 +59,8 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		integrationC := RandomizedSuffixName("java-c")
 		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", integrationC, "-d", "camel:cron", "-d", "camel:zipfile").Execute()).To(Succeed())
 
-		integrationZ := RandomizedSuffixName("groovy-z")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/timer-source.groovy", "--name", integrationZ).Execute()).To(Succeed())
+		integrationZ := RandomizedSuffixName("yaml-z")
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/timer-source.yaml", "--name", integrationZ).Execute()).To(Succeed())
 
 		g.Eventually(IntegrationKit(t, ctx, ns, integrationB), TestTimeoutMedium).ShouldNot(BeEmpty())
 		g.Eventually(IntegrationKit(t, ctx, ns, integrationC), TestTimeoutMedium).ShouldNot(BeEmpty())
@@ -132,8 +132,8 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 			"-d", "camel:joor",
 		).Execute()).To(Succeed())
 
-		integrationZ := RandomizedSuffixName("groovy-z")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/timer-source.groovy",
+		integrationZ := RandomizedSuffixName("yaml-z")
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/timer-source.yaml",
 			"--name", integrationZ,
 		).Execute()).To(Succeed())
 
