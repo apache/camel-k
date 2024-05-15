@@ -200,7 +200,7 @@ func TestRunRoutes(t *testing.T) {
 			routeTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "route")
 			g.Expect(routeTrait).ToNot(BeNil())
 			g.Expect(len(routeTrait)).To(Equal(1))
-			g.Expect(routeTrait["enabled"]).To(Equal(true))
+			g.Expect(routeTrait["annotations"]).ToNot(BeNil())
 
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
 		})
