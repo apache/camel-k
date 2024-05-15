@@ -19,6 +19,7 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): Route trait schema valid in OCP [\#5506](https://github.com/apache/camel-k/pull/5506) ([gansheer](https://github.com/gansheer))
 -  Re evaluate golanci-lint exclusions \(execinquery,whitespace,wastedassign,tagliatelle,nolintlint,lll\)" [\#5502](https://github.com/apache/camel-k/pull/5502) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat\(lint\): enabe goconst linter [\#5499](https://github.com/apache/camel-k/pull/5499) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat\(lint\): enabe magic number detector \(mld\) [\#5496](https://github.com/apache/camel-k/pull/5496) ([lburgazzoli](https://github.com/lburgazzoli))
