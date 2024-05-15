@@ -28,15 +28,18 @@ https://camel.apache.org/camel-k/next/installation/installation.html[Installatio
 
 You can use Camel DSL to define your `Integration`. Just save it in a file and use `kamel` command line interface (https://github.com/apache/camel-k/releases/latest[download latest release]) to run it. As an example, just try running:
 
-[source,groovy]
-.hello.groovy
+[source,yaml]
+.hello.yaml
 ----
-from('timer:tick?period=3000')
-  .setBody().constant('Hello world from Camel K')
-  .to('log:info')
+- from:
+    uri: "timer:tick?period=3000"
+    steps:
+      - setBody:
+          constant: "Hello world from Camel K"
+      - to: "log:info"
 ----
 ----
-kamel run hello.groovy
+kamel run hello.yaml
 ----
 
 You can even run your integrations in a `dev` mode. Change the code and see the **changes automatically applied (instantly)** to the remote integration pod! We have provided link:/examples[more examples] that you can use to inspire your next `Integration` development.

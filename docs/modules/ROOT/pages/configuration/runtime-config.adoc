@@ -20,19 +20,23 @@ kubectl create configmap my-cm --from-literal=my-configmap-key="configmap conten
 
 We want to use the materialized file in an integration:
 
-[source,groovy]
-.config-configmap-route.groovy
+[source,yaml]
+.config-configmap-route.yaml
 ----
-from('timer:configmap')
-    .setBody()
-        .simple("resource:classpath:my-configmap-key")
-    .log('configmap content is: ${body}')
+- from:
+    uri: "timer:configmap"
+    steps:
+      - setBody:
+          simple: "resource:classpath:my-configmap-key"
+      - setBody:
+          simple: "configmap content is: ${body}"
+      - to: "log:info"
 ----
 
 You can see that we're expecting to use a _my-configmap-key_ file stored somewhere in the classpath. In order to materialize the `Configmap` will be as easy as running the `--config` _configmap_ syntax:
 
 ----
-kamel run --config configmap:my-cm config-configmap-route.groovy
+kamel run --config configmap:my-cm config-configmap-route.yaml
 ----
 
 As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Configmap` 's content.
@@ -52,19 +56,23 @@ kubectl create secret generic my-sec --from-literal=my-secret-key="very top secr
 
 We want to use the materialized secret file in an integration:
 
-[source,groovy]
-.config-secret-route.groovy
+[source,yaml]
+.config-secret-route.yaml
 ----
-from('timer:secret')
-    .setBody()
-        .simple("resource:classpath:my-secret-key")
-    .log('secret content is: ${body}')
+- from:
+    uri: "timer:secret"
+    steps:
+      - setBody:
+          simple: "resource:classpath:my-secret-key"
+      - setBody:
+          simple: "secret content is: ${body}"
+      - to: "log:info"
 ----
 
 You can see that we're expecting to use a _my-secret-key_ file stored somewhere in the classpath. In order to materialize the `Secret` will be as easy as running the `--config` _secret_ syntax:
 
 ----
-kamel run --config secret:my-sec config-secret-route.groovy
+kamel run --config secret:my-sec config-secret-route.yaml
 ----
 
 As soon as the `Integration` starts, the `Camel K` operator will take care to mount a volume with the `Secret` 's content.
@@ -77,29 +85,33 @@ NOTE: you can provide a `Secret` which is not yet available on the cluster. The 
 Each `Configmap`/`Secret` will be parsed as a property file and you will be able to use those properties inside your `Route` definition or, more in general, as you would do with any other xref:configuration/runtime-properties.adoc[runtime property]. As an example, you can create the following `Secret`:
 
 [source,text]
-.my.properties
+.secret.properties
 ----
 my.key.1=hello
 my.key.2=world
 ----
+
 ----
-kubectl create secret generic my-secret-properties --from-file=my.properties
+kubectl create secret generic my-secret-properties --from-file=secret.properties
 ----
 
 In our `Integration` we can simply refer the properties defined in the `Secret` as we would do with any other property:
 
-[source,groovy]
-.config-secret-property-route.groovy
+[source,yaml]
+.config-secret-property-route.yaml
 ----
-from('timer:secret')
-    .routeId('secret')
-    .log('{{my.key.1}} {{my.key.2}}')
+- from:
+    uri: "timer:secret"
+    steps:
+      - setBody:
+          simple: "{{my.key.1}} {{my.key.2}}"
+      - to: "log:info"
 ----
 
 We just have to provide the `--config` we are willing to use:
 
 ----
-kamel run --config secret:my-secret-properties config-secret-property-route.groovy
+kamel run --config secret:my-secret-properties config-secret-property-route.yaml
 ----
 
 [[runtime-config-keys]]
@@ -115,19 +127,23 @@ kubectl create secret generic my-sec-multi --from-literal=my-secret-key="very to
 
 In our `Integration` we plan to use only one of the resources of the `Secret`:
 
-[source,groovy]
-.config-secret-key-route.groovy
+[source,yaml]
+.config-secret-key-route.yaml
 ----
-from('timer:secret')
-    .setBody()
-        .simple("resource:classpath:my-secret-key-2")
-    .log('secret content is: ${body}')
+- from:
+    uri: "timer:secret"
+    steps:
+      - setBody:
+          simple: "resource:classpath:my-secret-key-2"
+      - setBody:
+          simple: "secret content is: ${body}"
+      - to: "log:info"
 ----
 
 Let's use the _key_ filtering:
 
 ----
-kamel run --config secret:my-sec-multi/my-secret-key-2 config-secret-key-route.groovy
+kamel run --config secret:my-sec-multi/my-secret-key-2 config-secret-key-route.yaml
 ----
 
 You may check in the `Integration` `Pod` that only the _my-secret-key-2_ data has been mounted.

@@ -18,7 +18,7 @@ NOTE: The owner trait is a *platform trait* and cannot be disabled by the user.
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait owner.[key]=[value] --trait owner.[key2]=[value2] integration.groovy
+$ kamel run --trait owner.[key]=[value] --trait owner.[key2]=[value2] integration.yaml
 ----
 The following configuration options are available:
 

@@ -24,19 +24,26 @@ Users of Camel K can instantly run integration code written in Camel DSL on thei
 [[how-it-works]]
 == How It Works
 
-Just write a _helloworld.groovy_ integration file with the following content:
+Just write a _helloworld.yaml_ integration file with the following content:
 
-```groovy
-from('timer:tick?period=3000')
-  .setBody().constant('Hello world from Camel K')
-  .to('log:info')
-```
+[source,yaml]
+----
+- from:
+    uri: "timer:tick"
+    parameters:
+      period: "3000"
+    steps:
+      - setBody:
+          simple: "Hello world from Camel K"
+      - to: "log:info"
+----
 
 You can then execute the following command:
 
-```
-kamel run helloworld.groovy
-```
+[source]
+----
+kamel run helloworld.yaml
+----
 
 The integration code immediately runs in the cloud. **Nothing else** is needed.
 
