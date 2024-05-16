@@ -19,6 +19,8 @@ name: native
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CAMEL_K_TEST_TIMEOUT_LONG: 30m
+  CAMEL_K_TEST_TIMEOUT_VERY_LONG: 60m
 
 on:
   pull_request:
