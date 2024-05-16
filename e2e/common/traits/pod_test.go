@@ -92,7 +92,7 @@ func TestPodTrait(t *testing.T) {
 			test := tc[i]
 
 			t.Run(test.name, func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PodTest.groovy", "--name", name, "--pod-template", test.templateName).Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PodTest.yaml", "--name", name, "--pod-template", test.templateName).Execute()).To(Succeed())
 
 				// check integration is deployed
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
