@@ -39,6 +39,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
@@ -95,6 +96,26 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return nil, err
 	} else if changed != nil {
 		return changed, nil
+	}
+
+	// We must skip the rest of operations if the target operator version is different
+	// from the expected Integration operator version. This is likely happening
+	// when the user upgrades from an operator version to another. Given that the new operator may
+	// introduce changes in the Deployment or other resources we cannot perform the rest of reconciliation safely.
+	if integration.Status.Version != defaults.Version {
+		integration.Status.SetConditions(
+			v1.IntegrationCondition{
+				Type:   v1.IntegrationConditionUpgradeRequired,
+				Status: corev1.ConditionTrue,
+				Reason: v1.IntegrationConditionUpgradeRequiredReason,
+				Message: fmt.Sprintf(
+					"This Integration requires a rebuild operation in order to be effectively reconciled by the new %s operator."+
+						"In the while, the operator won't be able to perform any Integration reconciliation",
+					defaults.Version,
+				),
+			},
+		)
+		return integration, nil
 	}
 
 	// Check if an IntegrationKit with higher priority is ready

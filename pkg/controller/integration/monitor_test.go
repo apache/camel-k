@@ -128,6 +128,28 @@ func TestMonitorFailureIntegration(t *testing.T) {
 	assert.Equal(t, v1.IntegrationConditionInitializationFailedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }
 
+func TestMonitorIntegrationDuringOperatorUpgrade(t *testing.T) {
+	c, it, err := nominalEnvironment()
+	require.NoError(t, err)
+
+	// Simulate a different version on which this Integration
+	// was supposedly coming from
+	it.Status.Version = "1.1.1"
+	hash, _ := digest.ComputeForIntegration(it, nil, nil)
+	it.Status.Digest = hash
+
+	a := monitorAction{}
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "monitor", a.Name())
+	assert.True(t, a.CanHandle(it))
+	handledIt, err := a.Handle(context.TODO(), it)
+	require.NoError(t, err)
+	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
+	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
+	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionUpgradeRequired).Status)
+}
+
 func nominalEnvironment() (client.Client, *v1.Integration, error) {
 	catalog := &v1.CamelCatalog{
 		TypeMeta: metav1.TypeMeta{
@@ -181,6 +203,7 @@ func nominalEnvironment() (client.Client, *v1.Integration, error) {
 			Name:      "my-it",
 		},
 		Status: v1.IntegrationStatus{
+			Version:        defaults.Version,
 			RuntimeVersion: defaults.DefaultRuntimeVersion,
 			Phase:          v1.IntegrationPhaseRunning,
 			IntegrationKit: &corev1.ObjectReference{

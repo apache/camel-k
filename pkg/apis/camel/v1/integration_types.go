@@ -183,6 +183,8 @@ const (
 	IntegrationConditionProbesAvailable IntegrationConditionType = "ProbesAvailable"
 	// IntegrationConditionTraitInfo --.
 	IntegrationConditionTraitInfo IntegrationConditionType = "TraitInfo"
+	// IntegrationConditionUpgradeRequired --.
+	IntegrationConditionUpgradeRequired IntegrationConditionType = "UpgradeRequired"
 
 	// IntegrationConditionKitAvailableReason --.
 	IntegrationConditionKitAvailableReason string = "IntegrationKitAvailable"
@@ -254,6 +256,8 @@ const (
 	IntegrationConditionKameletsNotAvailableReason string = "KameletsNotAvailable"
 	// IntegrationConditionImportingKindAvailableReason used (as false) if we're trying to import an unsupported kind.
 	IntegrationConditionImportingKindAvailableReason string = "ImportingKindAvailable"
+	// IntegrationConditionUpgradeRequiredReason --.
+	IntegrationConditionUpgradeRequiredReason string = "UpgradeRequired"
 )
 
 // IntegrationCondition describes the state of a resource at a certain point.
