@@ -98,7 +98,11 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check the Integration hasn't been upgraded
-		g.Consistently(IntegrationVersion(t, ctx, ns, name), 5*time.Second, 1*time.Second).Should(Equal(version))
+		g.Consistently(IntegrationVersion(t, ctx, ns, name), 15*time.Second, 3*time.Second).Should(Equal(version))
+		// Make sure that any Pod rollout is completing successfully
+		// otherwise we are probably in front of a non breaking compatibility change
+		g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+			2*time.Minute, 15*time.Second).Should(Equal(corev1.ConditionTrue))
 
 		// Force the Integration upgrade
 		g.Expect(Kamel(t, ctx, "rebuild", name, "-n", ns).Execute()).To(Succeed())
