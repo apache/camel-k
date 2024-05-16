@@ -12,6 +12,8 @@ kamel install --force --olm=false
 
 This operation will install all the required configuration for the new operator version, replacing the previous one. Mind that the `Integration` resources running won't be affected, so they will keep running with the default runtime details provided in the previous operator version.
 
+However you must notice that the deployment resources linked to an Integration (ie, Deployment, Knative-Service or CronJob) can change, if the new operator is setting any new configuration. This would lead to a transparent Pod rollout for all the existing Integrations at their very first reconciliation loop cycle (when the new operator will takeover from the previous one).
+
 [[helms-crds]]
 == CRD Upgrades (Helm upgrade)
 
