@@ -73,12 +73,12 @@ func (t *environmentTrait) Configure(e *Environment) (bool, *TraitCondition, err
 }
 
 func (t *environmentTrait) Apply(e *Environment) error {
-	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, defaults.Version)
+	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, e.Integration.Status.Version)
 	envvar.SetVal(&e.EnvVars, envVarOperatorID, defaults.OperatorID())
 	if e.Integration != nil {
 		envvar.SetVal(&e.EnvVars, envVarCamelKIntegration, e.Integration.Name)
 	}
-	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
+	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.Integration.Status.RuntimeVersion)
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, camel.ConfigConfigmapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, camel.ConfigSecretsMountPath)
 
