@@ -71,7 +71,7 @@ func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	return pointer.BoolDeref(t.Enabled, true), nil, nil
+	return pointer.BoolDeref(t.Enabled, false), nil, nil
 }
 
 func (t *healthTrait) Apply(e *Environment) error {
