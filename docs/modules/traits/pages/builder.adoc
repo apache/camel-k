@@ -18,7 +18,7 @@ NOTE: The builder trait is a *platform trait* and cannot be disabled by the user
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait builder.[key]=[value] --trait builder.[key2]=[value2] integration.groovy
+$ kamel run --trait builder.[key]=[value] --trait builder.[key2]=[value2] integration.yaml
 ----
 The following configuration options are available:
 
@@ -144,5 +144,5 @@ Node selectors can be specified when running an integration with the CLI:
 
 [source,console]
 ----
-$ kamel run --trait builder.node-selector.'size'=large integration.groovy
+$ kamel run --trait builder.node-selector.'size'=large integration.yaml
 ----

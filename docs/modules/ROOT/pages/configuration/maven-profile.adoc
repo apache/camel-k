@@ -19,7 +19,7 @@ kubectl create cm my-maven-profile --from-file my-profile.xml
 Once the Configmap/Secret is ready, then, you can use it to run your integration:
 
 ```
-kamel run hello.groovy -t builder.maven-profile=configmap:my-maven-profile/my-profile.xml
+kamel run hello.yaml -t builder.maven-profile=configmap:my-maven-profile/my-profile.xml
 ```
 
 The profile will be added to your integration's project generated pom file. What will be changed in the `mvn package` execution will depend on your profile definition.

@@ -16,9 +16,10 @@ from('timer:tick')
 
 You can run it with the standard command:
 
-```
+[source]
+----
 kamel run example.groovy
-```
+----
 
 == Configuring the Application
 

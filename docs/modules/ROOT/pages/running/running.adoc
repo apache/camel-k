@@ -6,27 +6,33 @@ and have the `kamel` CLI correctly configured.
 
 Ensure you're connected to the cluster by executing a simple command using the Kubernetes CLI:
 
-```
+[source]
+----
 kubectl get pod
-```
+----
 
 Just replace `kubectl` with `oc` if you're using OpenShift. If everything is correctly configured you should get a response from the Kubernetes API
 server (you should see at least the `camel-k-operator` running).
 
-You are now ready to create your first integration using Camel K. Just create a new Groovy file with the following content:
+You are now ready to create your first integration using Camel K. Just create a new Yaml file with the following content:
 
-.hello.groovy
-```groovy
-from('timer:tick?period=3000')
-  .setBody().constant('Hello world from Camel K')
-  .to('log:info')
-```
+[source,yaml]
+.run-hello.yaml
+----
+- from:
+    uri: "timer:tick?period=3000"
+    steps:
+      - setBody:
+          constant: "Hello world from Camel K"
+      - to: "log:info"
+----
 
 You can run it on the cluster by executing:
 
-```
-kamel run hello.groovy
-```
+[source]
+----
+kamel run run-hello.yaml
+----
 
 Integrations can be written in any supported Camel DSL. We are collecting examples in our https://github.com/apache/camel-k/[Camel K GitHub repository].
 
