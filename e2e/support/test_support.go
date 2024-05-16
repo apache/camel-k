@@ -130,12 +130,12 @@ const ExpectedOSClusterRoles = 1
 
 var TestDefaultNamespace = "default"
 
-var TestTimeoutShort = 5 * time.Minute
-var TestTimeoutMedium = 20 * time.Minute
-var TestTimeoutLong = 30 * time.Minute
+var TestTimeoutShort = 1 * time.Minute
+var TestTimeoutMedium = 3 * time.Minute
+var TestTimeoutLong = 5 * time.Minute
 
 // TestTimeoutVeryLong should be used only for testing native builds.
-var TestTimeoutVeryLong = 60 * time.Minute
+var TestTimeoutVeryLong = 15 * time.Minute
 
 var NoOlmOperatorImage string
 
@@ -235,14 +235,6 @@ func init() {
 		}
 	}
 
-	if imageNoOlm, ok := os.LookupEnv("CAMEL_K_TEST_NO_OLM_OPERATOR_IMAGE"); ok {
-		if imageNoOlm != "" {
-			NoOlmOperatorImage = imageNoOlm
-		} else {
-			fmt.Printf("Can't parse CAMEL_K_TEST_NO_OLM_OPERATOR_IMAGE. Using default value from kamel")
-		}
-	}
-
 	if value, ok := os.LookupEnv("CAMEL_K_TEST_TIMEOUT_LONG"); ok {
 		if duration, err = time.ParseDuration(value); err == nil {
 			TestTimeoutLong = duration
@@ -251,6 +243,21 @@ func init() {
 		}
 	}
 
+	if value, ok := os.LookupEnv("CAMEL_K_TEST_TIMEOUT_VERY_LONG"); ok {
+		if duration, err = time.ParseDuration(value); err == nil {
+			TestTimeoutVeryLong = duration
+		} else {
+			fmt.Printf("Can't parse CAMEL_K_TEST_TIMEOUT_VERY_LONG. Using default value: %s", TestTimeoutVeryLong)
+		}
+	}
+
+	if imageNoOlm, ok := os.LookupEnv("CAMEL_K_TEST_NO_OLM_OPERATOR_IMAGE"); ok {
+		if imageNoOlm != "" {
+			NoOlmOperatorImage = imageNoOlm
+		} else {
+			fmt.Printf("Can't parse CAMEL_K_TEST_NO_OLM_OPERATOR_IMAGE. Using default value from kamel")
+		}
+	}
 	// Gomega settings
 	gomega.SetDefaultEventuallyTimeout(TestTimeoutShort)
 	// Disable object truncation on test results
