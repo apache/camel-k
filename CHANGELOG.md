@@ -15,6 +15,7 @@
 - Pod SecurityContext default secure settings [\#5287](https://github.com/apache/camel-k/issues/5287)
 - Review permission check  [\#5210](https://github.com/apache/camel-k/issues/5210)
 - Custom kamelets are not fetched from private GitHub repository [\#5173](https://github.com/apache/camel-k/issues/5173)
+- Kamelet: Consider restricting the Kamelet route to only allow `from` or `route` [\#5118](https://github.com/apache/camel-k/issues/5118)
 - Keda integration not working with mounted secrets [\#4359](https://github.com/apache/camel-k/issues/4359)
 
 ## [2.3.2-nightly](https://github.com/apache/camel-k/tree/2.3.2-nightly) (2024-05-06)
