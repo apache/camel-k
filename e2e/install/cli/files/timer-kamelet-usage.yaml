@@ -1,5 +1,3 @@
-# camel-k: language=yaml
-
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +16,6 @@
 # ---------------------------------------------------------------------------
 
 - from:
-    uri: "file:/etc/camel/resources/my-sec/?fileName=my-secret-key&noop=true&idempotent=false"
+    uri: "kamelet:my-own-timer-source?message=Hello+world"
     steps:
-      - setBody:
-          simple: "resource file content is: ${body}"
-      - to: "log:info"
+      - to: "log:info?showAll=false"
