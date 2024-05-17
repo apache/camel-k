@@ -9,6 +9,7 @@
 - Operator restart Integrations on upgrade [\#5491](https://github.com/apache/camel-k/issues/5491)
 - Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
 - Incorrect content of the build/\_maven\_overlay directory causes the build project failure [\#5466](https://github.com/apache/camel-k/issues/5466)
+- Integration fails to retrieve the publish task and the image digest on OCP [\#5465](https://github.com/apache/camel-k/issues/5465)
 - Make images does not work out of the box [\#5464](https://github.com/apache/camel-k/issues/5464)
 - Generate badges for deprecated traits [\#5424](https://github.com/apache/camel-k/issues/5424)
 - Cannot `make test-smoke` on arm64 out of the box [\#5362](https://github.com/apache/camel-k/issues/5362)
@@ -22,8 +23,13 @@
 **Merged pull requests:**
 
 - \(\#5489\) Use yaml in e2e common [\#5517](https://github.com/apache/camel-k/pull/5517) ([tdiesler](https://github.com/tdiesler))
+- chore\(trait\): revert default health enabled [\#5516](https://github.com/apache/camel-k/pull/5516) ([squakez](https://github.com/squakez))
+- fix\(trait\): environment variables [\#5515](https://github.com/apache/camel-k/pull/5515) ([squakez](https://github.com/squakez))
+- doc: upgrade deployment procedure [\#5514](https://github.com/apache/camel-k/pull/5514) ([squakez](https://github.com/squakez))
+- fix\(ci\): configurable timeouts [\#5512](https://github.com/apache/camel-k/pull/5512) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Route trait schema valid in OCP [\#5506](https://github.com/apache/camel-k/pull/5506) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Tekton test permission failure with olm install command [\#5505](https://github.com/apache/camel-k/pull/5505) ([gansheer](https://github.com/gansheer))
+- fix\(tests\): fixed flaky Readiness condition with never ready route test in e2e/common/traits/health\_test.go [\#5503](https://github.com/apache/camel-k/pull/5503) ([valdar](https://github.com/valdar))
 -  Re evaluate golanci-lint exclusions \(execinquery,whitespace,wastedassign,tagliatelle,nolintlint,lll\)" [\#5502](https://github.com/apache/camel-k/pull/5502) ([lburgazzoli](https://github.com/lburgazzoli))
 - feat\(lint\): enabe goconst linter [\#5499](https://github.com/apache/camel-k/pull/5499) ([lburgazzoli](https://github.com/lburgazzoli))
 - \(\#5489\) Groovy \> Yaml [\#5497](https://github.com/apache/camel-k/pull/5497) ([tdiesler](https://github.com/tdiesler))
