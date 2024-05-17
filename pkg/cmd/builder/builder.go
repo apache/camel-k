@@ -25,6 +25,8 @@ import (
 	"runtime"
 	"syscall"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -104,7 +106,7 @@ func exitOnError(err error, msg string) {
 
 func writeTerminationMessage(message string) {
 	// #nosec G306
-	err := os.WriteFile(terminationMessagePath, []byte(message), 0o644)
+	err := os.WriteFile(terminationMessagePath, []byte(message), io.FilePerm644)
 	if err != nil {
 		log.Error(err, "cannot write termination message")
 	}

@@ -27,6 +27,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
+const (
+	dependenciesTraitID    = "dependencies"
+	dependenciesTraitOrder = 500
+)
+
 type dependenciesTrait struct {
 	BasePlatformTrait
 	traitv1.DependenciesTrait `property:",squash"`
@@ -34,7 +39,7 @@ type dependenciesTrait struct {
 
 func newDependenciesTrait() Trait {
 	return &dependenciesTrait{
-		BasePlatformTrait: NewBasePlatformTrait("dependencies", 500),
+		BasePlatformTrait: NewBasePlatformTrait(dependenciesTraitID, dependenciesTraitOrder),
 	}
 }
 

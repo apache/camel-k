@@ -87,7 +87,8 @@ type OperatorStorageConfiguration struct {
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present.
-// nolint: maintidx // TODO: refactor the code
+//
+//nolint:maintidx,goconst
 func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
 	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
@@ -354,7 +355,7 @@ func installNamespacedRoleBinding(ctx context.Context, c client.Client, collecti
 	if err != nil {
 		return err
 	}
-	// nolint: forcetypeassert
+	//nolint:forcetypeassert
 	target := obj.(*rbacv1.RoleBinding)
 
 	bound := false

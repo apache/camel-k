@@ -357,7 +357,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 		}
 	}
 	if o.Logs || o.Dev || o.Wait {
-		// nolint: errcheck
+		//nolint:errcheck
 		go watch.HandleIntegrationEvents(o.Context, c, integration, func(event *corev1.Event) bool {
 			fmt.Fprintln(cmd.OutOrStdout(), event.Message)
 			return true
@@ -1244,7 +1244,8 @@ func (o *runCmdOptions) uploadAsMavenArtifact(dependency maven.Dependency, path 
 
 // Currently swallows errors because our Project model is incomplete.
 // Most of the time it is irrelevant for our use case (GAV).
-// nolint:errcheck
+//
+//nolint:errcheck
 func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 	var project maven.Project
 	file, err := os.Open(path)
@@ -1270,15 +1271,12 @@ func extractGavFromPom(path string, gav maven.Dependency) maven.Dependency {
 	return gav
 }
 
+//nolint:gosec
 func (o *runCmdOptions) uploadChecksumFiles(path string, options spectrum.Options, platform *v1.IntegrationPlatform, artifactHTTPPath string, dependency maven.Dependency) error {
 	return util.WithTempDir("camel-k", func(tmpDir string) error {
-		// #nosec G401
-		// nolint:gosec
 		if err := o.uploadChecksumFile(md5.New(), tmpDir, "_md5", path, options, platform, artifactHTTPPath, dependency); err != nil {
 			return err
 		}
-		// #nosec G401
-		// nolint:gosec
 		return o.uploadChecksumFile(sha1.New(), tmpDir, "_sha1", path, options, platform, artifactHTTPPath, dependency)
 	})
 }

@@ -24,6 +24,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,7 +43,13 @@ import (
 )
 
 const (
-	jvmTraitID = "jvm"
+	jvmTraitID    = "jvm"
+	jvmTraitOrder = 2000
+
+	defaultMaxMemoryScale               = 6
+	defaultMaxMemoryPercentage          = int64(50)
+	lowMemoryThreshold                  = 300
+	lowMemoryMAxMemoryDefaultPercentage = int64(25)
 )
 
 type jvmTrait struct {
@@ -51,7 +59,7 @@ type jvmTrait struct {
 
 func newJvmTrait() Trait {
 	return &jvmTrait{
-		BaseTrait: NewBaseTrait(jvmTraitID, 2000),
+		BaseTrait: NewBaseTrait(jvmTraitID, jvmTraitOrder),
 		JVMTrait: traitv1.JVMTrait{
 			DebugAddress: "*:5005",
 			PrintCommand: pointer.Bool(true),
@@ -84,7 +92,9 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	return true, nil, nil
 }
 
-// nolint: maintidx // TODO: refactor the code
+// TODO: refactor the code
+//
+//nolint:maintidx
 func (t *jvmTrait) Apply(e *Environment) error {
 	kit := e.IntegrationKit
 
@@ -156,7 +166,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 			if meta.Labels == nil {
 				meta.Labels = make(map[string]string)
 			}
-			meta.Labels["camel.apache.org/debug"] = "true"
+			meta.Labels["camel.apache.org/debug"] = boolean.TrueString
 		})
 	}
 
@@ -227,11 +237,12 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	// be performed in-container, based on CGroups memory resource control files.
 	if memory, hasLimit := container.Resources.Limits[corev1.ResourceMemory]; !hasHeapSizeOption && hasLimit {
 		// Simple heuristic that caps the maximum heap size to 50% of the memory limit
-		percentage := int64(50)
+		percentage := defaultMaxMemoryPercentage
 		// Unless the memory limit is lower than 300M, in which case we leave more room for the non-heap memory
-		if resource.NewScaledQuantity(300, 6).Cmp(memory) > 0 {
-			percentage = 25
+		if resource.NewScaledQuantity(lowMemoryThreshold, defaultMaxMemoryScale).Cmp(memory) > 0 {
+			percentage = lowMemoryMAxMemoryDefaultPercentage
 		}
+		//nolint:mnd
 		memScaled := memory.ScaledValue(resource.Mega) * percentage / 100
 		args = append(args, fmt.Sprintf("-Xmx%dM", memScaled))
 	}

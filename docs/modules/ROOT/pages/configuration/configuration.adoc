@@ -7,17 +7,22 @@ The property value can be used inside Camel K integrations using the *property p
 
 The syntax for properties has the form `{{my.property}}`, for example:
 
-[source,groovy]
-.props.groovy
+[source,yaml]
+.property-route.yaml
 ----
-from('timer:props?period=1000')
-    .log('{{my.message}}')
+- from:
+    uri: "timer:props"
+    steps:
+      - setBody:
+          simple: "{{my.message}}"
+      - to: "log:info"
 ----
 
 In order to give a value to the `my.message` property you can pass it using the command line:
 
-```
-kamel run --property my.message="Hello World" props.groovy
-```
+[source]
+----
+kamel run --property my.message="Hello World" property-route.yaml
+----
 
 For more details and advanced use cases, see the xref:configuration/runtime-properties.adoc[runtime properties] section.

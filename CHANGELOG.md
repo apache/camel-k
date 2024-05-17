@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Operator restart Integrations on upgrade [\#5491](https://github.com/apache/camel-k/issues/5491)
 - Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
 - Incorrect content of the build/\_maven\_overlay directory causes the build project failure [\#5466](https://github.com/apache/camel-k/issues/5466)
 - Make images does not work out of the box [\#5464](https://github.com/apache/camel-k/issues/5464)
@@ -15,10 +16,21 @@
 - Pod SecurityContext default secure settings [\#5287](https://github.com/apache/camel-k/issues/5287)
 - Review permission check  [\#5210](https://github.com/apache/camel-k/issues/5210)
 - Custom kamelets are not fetched from private GitHub repository [\#5173](https://github.com/apache/camel-k/issues/5173)
+- Kamelet: Consider restricting the Kamelet route to only allow `from` or `route` [\#5118](https://github.com/apache/camel-k/issues/5118)
 - Keda integration not working with mounted secrets [\#4359](https://github.com/apache/camel-k/issues/4359)
 
 **Merged pull requests:**
 
+- \(\#5489\) Use yaml in e2e common [\#5517](https://github.com/apache/camel-k/pull/5517) ([tdiesler](https://github.com/tdiesler))
+- fix\(e2e\): Route trait schema valid in OCP [\#5506](https://github.com/apache/camel-k/pull/5506) ([gansheer](https://github.com/gansheer))
+- fix\(e2e\): Tekton test permission failure with olm install command [\#5505](https://github.com/apache/camel-k/pull/5505) ([gansheer](https://github.com/gansheer))
+-  Re evaluate golanci-lint exclusions \(execinquery,whitespace,wastedassign,tagliatelle,nolintlint,lll\)" [\#5502](https://github.com/apache/camel-k/pull/5502) ([lburgazzoli](https://github.com/lburgazzoli))
+- feat\(lint\): enabe goconst linter [\#5499](https://github.com/apache/camel-k/pull/5499) ([lburgazzoli](https://github.com/lburgazzoli))
+- \(\#5489\) Groovy \> Yaml [\#5497](https://github.com/apache/camel-k/pull/5497) ([tdiesler](https://github.com/tdiesler))
+- feat\(lint\): enabe magic number detector \(mld\) [\#5496](https://github.com/apache/camel-k/pull/5496) ([lburgazzoli](https://github.com/lburgazzoli))
+- chore\(tools\): update golangci-lint to v1.58.1 [\#5495](https://github.com/apache/camel-k/pull/5495) ([lburgazzoli](https://github.com/lburgazzoli))
+- fix\(tests\): Minor fix to incremental\_build\_test.go after fixing of copykits. [\#5494](https://github.com/apache/camel-k/pull/5494) ([valdar](https://github.com/valdar))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.19.0 to 1.19.1 [\#5492](https://github.com/apache/camel-k/pull/5492) ([dependabot[bot]](https://github.com/apps/dependabot))
 - cleanup golagci-lint configuration [\#5482](https://github.com/apache/camel-k/pull/5482) ([lburgazzoli](https://github.com/lburgazzoli))
 - cleanup pkg/util packages [\#5480](https://github.com/apache/camel-k/pull/5480) ([lburgazzoli](https://github.com/lburgazzoli))
 - Review permission check [\#5479](https://github.com/apache/camel-k/pull/5479) ([lburgazzoli](https://github.com/lburgazzoli))
@@ -34,6 +46,7 @@
 - chore\(deps\): bump golang.org/x/text from 0.14.0 to 0.15.0 [\#5453](https://github.com/apache/camel-k/pull/5453) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Test fixes [\#5415](https://github.com/apache/camel-k/pull/5415) ([valdar](https://github.com/valdar))
 - fix\(\#5292\): Simplify run cmd for archs other than amd64 [\#5403](https://github.com/apache/camel-k/pull/5403) ([tdiesler](https://github.com/tdiesler))
+- feat\(4893\) YAML DSL route configuration support [\#5369](https://github.com/apache/camel-k/pull/5369) ([realMartinez](https://github.com/realMartinez))
 
 ## [2.3.2-nightly](https://github.com/apache/camel-k/tree/2.3.2-nightly) (2024-05-06)
 
@@ -45,7 +58,6 @@
 - Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
 - Release 2.3.1 [\#5430](https://github.com/apache/camel-k/issues/5430)
 - Health trait: Inconsistent Integration condition ready status [\#5351](https://github.com/apache/camel-k/issues/5351)
-- Make healt trait as default [\#5024](https://github.com/apache/camel-k/issues/5024)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 - --port flag not working while running kamel integration in debug mode  [\#4443](https://github.com/apache/camel-k/issues/4443)
 

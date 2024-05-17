@@ -28,6 +28,11 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
+const (
+	ownerTraitID    = "owner"
+	ownerTraitOrder = 2500
+)
+
 type ownerTrait struct {
 	BaseTrait
 	traitv1.OwnerTrait `property:",squash"`
@@ -35,7 +40,7 @@ type ownerTrait struct {
 
 func newOwnerTrait() Trait {
 	return &ownerTrait{
-		BaseTrait: NewBaseTrait("owner", 2500),
+		BaseTrait: NewBaseTrait(ownerTraitID, ownerTraitOrder),
 	}
 }
 

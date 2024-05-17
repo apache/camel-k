@@ -233,7 +233,6 @@ func DecodeValueSource(input string, defaultKey string, errorMessage string) (Va
 		}
 	}
 
-	// nolint: gosec // sub[3] and sub[0] cannot be out of bounds
 	if len(sub) >= 2 {
 		key := defaultKey
 		if len(sub) == 4 && sub[3] != "" {

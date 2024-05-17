@@ -35,6 +35,8 @@ import (
 
 const (
 	CamelPropertiesType = "camel-properties"
+	camelTraitID        = "camel"
+	camelTraitOrder     = 200
 )
 
 type camelTrait struct {
@@ -44,7 +46,7 @@ type camelTrait struct {
 
 func newCamelTrait() Trait {
 	return &camelTrait{
-		BasePlatformTrait: NewBasePlatformTrait("camel", 200),
+		BasePlatformTrait: NewBasePlatformTrait(camelTraitID, camelTraitOrder),
 	}
 }
 

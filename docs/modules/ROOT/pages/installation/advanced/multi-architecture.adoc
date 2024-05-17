@@ -21,14 +21,14 @@ The logs should indicate the architecture at the start of the operator pod:
 
 === Example
 
-Once you've installed the operator you will need to specify the platform target you whish to use. This is required as each of the different publishing tasks may need to know how to create a manifest accordingly. You can use `builder.platforms` trait option to control this behavior.
+The operator will by default build integrations for the same platform it is running on. It is however also possible to explicitly define the set of target platforms integrations should be built for. You can use `builder.platforms` trait option to control this behavior.
 
 NOTE: you can set the property at IntegrationPlatform level to have it for all Integrations.
 
-Send the groovy file to kamel operator to build, publish and run it
+Send the integration to the kamel operator to build, publish and run it
 [source,shell]
 ----
-kamel run hello.groovy -t builder.platforms=linux/arm64 -t builder.platforms=linux/amd64
+kamel run hello.yaml -t builder.platforms=linux/arm64 -t builder.platforms=linux/amd64
 ----
 
 You should observe base image in the logs of the operator pod:

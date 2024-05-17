@@ -23,6 +23,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	"github.com/apache/camel-k/v2/pkg/util"
 	p "github.com/gertd/go-pluralize"
 
@@ -147,7 +149,7 @@ func (cfg *Config) Delete(path string) {
 func (cfg *Config) Save() error {
 	root := filepath.Dir(cfg.location)
 	if _, err := os.Stat(root); os.IsNotExist(err) {
-		if e := os.MkdirAll(root, 0o600); e != nil {
+		if e := os.MkdirAll(root, io.FilePerm600); e != nil {
 			return e
 		}
 	}
@@ -156,7 +158,7 @@ func (cfg *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(cfg.location, data, 0o600)
+	return os.WriteFile(cfg.location, data, io.FilePerm600)
 }
 
 func (cfg *Config) navigate(values map[string]interface{}, prefix string, create bool) map[string]interface{} {

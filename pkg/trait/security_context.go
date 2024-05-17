@@ -29,7 +29,8 @@ import (
 )
 
 const (
-	securityContextTraitID = "security-context"
+	securityContextTraitID   = "security-context"
+	securityContextTraitOder = 1600
 
 	defaultPodRunAsNonRoot       = false
 	defaultPodSeccompProfileType = corev1.SeccompProfileTypeRuntimeDefault
@@ -42,7 +43,7 @@ type securityContextTrait struct {
 
 func newSecurityContextTrait() Trait {
 	return &securityContextTrait{
-		BasePlatformTrait: NewBasePlatformTrait(securityContextTraitID, 1600),
+		BasePlatformTrait: NewBasePlatformTrait(securityContextTraitID, securityContextTraitOder),
 		SecurityContextTrait: traitv1.SecurityContextTrait{
 			RunAsNonRoot:       pointer.Bool(defaultPodRunAsNonRoot),
 			SeccompProfileType: defaultPodSeccompProfileType,

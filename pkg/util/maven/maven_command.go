@@ -252,6 +252,8 @@ func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 // The artifact id is in the form of:
 //
 //	<groupId>:<artifactId>[:<packagingType>]:(<version>)[:<classifier>]
+//
+//nolint:mnd
 func ParseGAV(gav string) (Dependency, error) {
 	dep := Dependency{}
 	res := strings.Split(gav, ":")

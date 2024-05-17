@@ -205,6 +205,13 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 			g.Consistently(IntegrationVersion(t, ctx, ns, name), 5*time.Second, 1*time.Second).
 				Should(ContainSubstring(prevIPVersionPrefix))
 
+			// Make sure that any Pod rollout is completing successfully
+			// otherwise we are probably in front of a non breaking compatibility change
+			g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady),
+				2*time.Minute, 15*time.Second).Should(Equal(corev1.ConditionTrue))
+			g.Consistently(IntegrationConditionStatus(t, ctx, ns, kbindName, v1.IntegrationConditionReady),
+				2*time.Minute, 15*time.Second).Should(Equal(corev1.ConditionTrue))
+
 			// Rebuild the Integration
 			g.Expect(Kamel(t, ctx, "rebuild", "--all", "-n", ns).Execute()).To(Succeed())
 			if prevCSVVersion.Version.String() >= "2" {
@@ -244,9 +251,9 @@ func TestOLMOperatorUpgrade(t *testing.T) {
 			// Check the Integration runs correctly
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, kbindName)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, kbindName, v1.IntegrationConditionReady), TestTimeoutLong).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, kbindName, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 
 			// Clean up

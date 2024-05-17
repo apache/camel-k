@@ -19,8 +19,7 @@ package trait
 
 // The Mount trait can be used to configure volumes mounted on the Integration Pods.
 //
-// +camel-k:trait=mount
-// nolint: tagliatelle
+// +camel-k:trait=mount.
 type MountTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// A list of configuration pointing to configmap/secret.

@@ -24,6 +24,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
+	"github.com/apache/camel-k/v2/pkg/util/io"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -221,7 +225,7 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 }
 
 func computeApplicationProperties(appPropertiesPath string, applicationProperties map[string]string) error {
-	f, err := os.OpenFile(appPropertiesPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(appPropertiesPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, io.FilePerm644)
 	if err != nil {
 		return fmt.Errorf("failure while opening/creating application.properties: %w", err)
 	}
@@ -234,12 +238,12 @@ func computeApplicationProperties(appPropertiesPath string, applicationPropertie
 		applicationProperties = make(map[string]string)
 	}
 	// disable quarkus banner
-	applicationProperties["quarkus.banner.enabled"] = "false"
+	applicationProperties["quarkus.banner.enabled"] = boolean.FalseString
 	// camel-quarkus does route discovery at startup, but we don't want
 	// this to happen as routes are loaded at runtime and looking for
 	// routes at build time may try to load camel-k-runtime routes builder
 	// proxies which in some case may fail.
-	applicationProperties["quarkus.camel.routes-discovery.enabled"] = "false"
+	applicationProperties["quarkus.camel.routes-discovery.enabled"] = boolean.FalseString
 	// required for to resolve data type transformers at runtime with service discovery
 	// the different Camel runtimes use different resource paths for the service lookup
 	applicationProperties["quarkus.camel.service.discovery.include-patterns"] = "META-INF/services/org/apache/camel/datatype/converter/*,META-INF/services/org/apache/camel/datatype/transformer/*,META-INF/services/org/apache/camel/transformer/*"

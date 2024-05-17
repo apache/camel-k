@@ -87,4 +87,4 @@ spec:
             resource: source-repo
       params:
         - name: file
-          value: "examples/tekton/hello.groovy"
+          value: "examples/tekton/hello.yaml"

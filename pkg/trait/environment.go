@@ -35,6 +35,9 @@ type environmentTrait struct {
 }
 
 const (
+	environmentTraitID    = "environment"
+	environmentTraitOrder = 800
+
 	envVarNamespace            = "NAMESPACE"
 	envVarPodName              = "POD_NAME"
 	envVarOperatorID           = "CAMEL_K_OPERATOR_ID"
@@ -54,7 +57,7 @@ const (
 
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
-		BasePlatformTrait: NewBasePlatformTrait("environment", 800),
+		BasePlatformTrait: NewBasePlatformTrait(environmentTraitID, environmentTraitOrder),
 		EnvironmentTrait: traitv1.EnvironmentTrait{
 			ContainerMeta: pointer.Bool(true),
 		},
@@ -70,12 +73,12 @@ func (t *environmentTrait) Configure(e *Environment) (bool, *TraitCondition, err
 }
 
 func (t *environmentTrait) Apply(e *Environment) error {
-	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, defaults.Version)
+	envvar.SetVal(&e.EnvVars, envVarCamelKVersion, e.Integration.Status.Version)
 	envvar.SetVal(&e.EnvVars, envVarOperatorID, defaults.OperatorID())
 	if e.Integration != nil {
 		envvar.SetVal(&e.EnvVars, envVarCamelKIntegration, e.Integration.Name)
 	}
-	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.RuntimeVersion)
+	envvar.SetVal(&e.EnvVars, envVarCamelKRuntimeVersion, e.Integration.Status.RuntimeVersion)
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, camel.ConfigConfigmapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, camel.ConfigSecretsMountPath)
 

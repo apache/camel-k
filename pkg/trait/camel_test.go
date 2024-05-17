@@ -26,6 +26,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -134,8 +135,8 @@ func createNominalCamelTest(withSources bool) (*camelTrait, *Environment) {
 				Loaders: map[string]v1.CamelLoader{
 					"java": {
 						Metadata: map[string]string{
-							"native":                         "true",
-							"sources-required-at-build-time": "true",
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
 				},
@@ -269,7 +270,7 @@ func TestCamelTraitSyntheticIntegration(t *testing.T) {
 	trait, environment := createNominalCamelTest(true)
 	environment.Integration.Status = v1.IntegrationStatus{}
 	environment.Integration.Annotations = make(map[string]string)
-	environment.Integration.Annotations[v1.IntegrationSyntheticLabel] = "true"
+	environment.Integration.Annotations[v1.IntegrationSyntheticLabel] = boolean.TrueString
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)

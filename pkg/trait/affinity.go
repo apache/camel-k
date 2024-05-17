@@ -31,6 +31,11 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
+const (
+	affinityTraitID    = "affinity"
+	affinityTraitOrder = 1500
+)
+
 type affinityTrait struct {
 	BaseTrait
 	traitv1.AffinityTrait `property:",squash"`
@@ -38,7 +43,7 @@ type affinityTrait struct {
 
 func newAffinityTrait() Trait {
 	return &affinityTrait{
-		BaseTrait: NewBaseTrait("affinity", 1500),
+		BaseTrait: NewBaseTrait(affinityTraitID, affinityTraitOrder),
 		AffinityTrait: traitv1.AffinityTrait{
 			PodAffinity:     pointer.Bool(false),
 			PodAntiAffinity: pointer.Bool(false),

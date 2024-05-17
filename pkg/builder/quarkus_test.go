@@ -25,6 +25,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -146,7 +148,7 @@ func TestGenerateQuarkusProjectWithBuildTimeProperties(t *testing.T) {
 	err = generateQuarkusProject(&builderContext)
 	require.NoError(t, err)
 	// use local Maven executable in tests
-	t.Setenv("MAVEN_WRAPPER", "false")
+	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)
 	_, ok := os.LookupEnv("MAVEN_CMD")
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
@@ -205,7 +207,7 @@ func TestGenerateQuarkusProjectWithNativeSources(t *testing.T) {
 	err = generateQuarkusProject(&builderContext)
 	require.NoError(t, err)
 	// use local Maven executable in tests
-	t.Setenv("MAVEN_WRAPPER", "false")
+	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)
 	_, ok := os.LookupEnv("MAVEN_CMD")
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")
@@ -281,7 +283,7 @@ func TestBuildQuarkusRunner(t *testing.T) {
 	err = sanitizeDependencies(&builderContext)
 	require.NoError(t, err)
 	// use local Maven executable in tests
-	t.Setenv("MAVEN_WRAPPER", "false")
+	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)
 	_, ok := os.LookupEnv("MAVEN_CMD")
 	if !ok {
 		t.Setenv("MAVEN_CMD", "mvn")

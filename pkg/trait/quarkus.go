@@ -30,22 +30,23 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 const (
-	quarkusTraitID                    = "quarkus"
+	quarkusTraitID    = "quarkus"
+	quarkusTraitOrder = 1700
+
+	fastJarPackageType       quarkusPackageType = "fast-jar"
+	nativeSourcesPackageType quarkusPackageType = "native-sources"
+
 	QuarkusNativeDefaultBaseImageName = "quay.io/quarkus/quarkus-micro-image:2.0"
 )
 
 type quarkusPackageType string
-
-const (
-	fastJarPackageType       quarkusPackageType = "fast-jar"
-	nativeSourcesPackageType quarkusPackageType = "native-sources"
-)
 
 var kitPriority = map[quarkusPackageType]string{
 	fastJarPackageType:       "1000",
@@ -80,8 +81,8 @@ func getLanguageSettings(e *Environment, language v1.Language) languageSettings 
 		}
 		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
 		return languageSettings{
-			native:                     native == "true",
-			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == "true",
+			native:                     native == boolean.TrueString,
+			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == boolean.TrueString,
 		}
 	}
 	log.Debugf("No loader could be found for the language %q, the legacy language settings are applied", string(language))
@@ -100,7 +101,7 @@ func getLegacyLanguageSettings(language v1.Language) languageSettings {
 
 func newQuarkusTrait() Trait {
 	return &quarkusTrait{
-		BasePlatformTrait: NewBasePlatformTrait(quarkusTraitID, 1700),
+		BasePlatformTrait: NewBasePlatformTrait(quarkusTraitID, quarkusTraitOrder),
 	}
 }
 
@@ -320,7 +321,7 @@ func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKi
 		Builder: traits.Builder.DeepCopy(),
 		Camel:   traits.Camel.DeepCopy(),
 		Quarkus: traits.Quarkus.DeepCopy(),
-		// nolint: staticcheck
+
 		Registry: traits.Registry.DeepCopy(),
 	}
 

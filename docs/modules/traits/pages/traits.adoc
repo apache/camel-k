@@ -15,9 +15,10 @@ Each trait has a unique ID that can be used to configure it using the command li
 
 E.g. in order to disable the creation of a Service for a integration, a user can execute:
 
-```
-kamel run --trait service.enabled=false file.groovy
-```
+[source]
+----
+kamel run --trait service.enabled=false file.yaml
+----
 
 The flag `--trait` can be also abbreviated with `-t`.
 

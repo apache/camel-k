@@ -43,7 +43,9 @@ import (
 )
 
 const (
-	containerTraitID     = "container"
+	containerTraitID    = "container"
+	containerTraitOrder = 1600
+
 	defaultContainerName = "integration"
 	defaultContainerPort = 8080
 	defaultServicePort   = 80
@@ -61,7 +63,7 @@ type containerTrait struct {
 
 func newContainerTrait() Trait {
 	return &containerTrait{
-		BasePlatformTrait: NewBasePlatformTrait(containerTraitID, 1600),
+		BasePlatformTrait: NewBasePlatformTrait(containerTraitID, containerTraitOrder),
 		ContainerTrait: traitv1.ContainerTrait{
 			Port:                     defaultContainerPort,
 			ServicePort:              defaultServicePort,

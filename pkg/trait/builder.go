@@ -25,6 +25,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	corev1 "k8s.io/api/core/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -36,7 +38,8 @@ import (
 )
 
 const (
-	builderTraitID = "builder"
+	builderTraitID    = "builder"
+	builderTraitOrder = 600
 )
 
 var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
@@ -48,7 +51,7 @@ type builderTrait struct {
 
 func newBuilderTrait() Trait {
 	return &builderTrait{
-		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BasePlatformTrait: NewBasePlatformTrait(builderTraitID, builderTraitOrder),
 	}
 }
 
@@ -406,7 +409,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 
 	// Build time property required by master capability
 	if e.IntegrationKit.HasCapability("master") && e.CamelCatalog.Runtime.Capabilities["master"].BuildTimeProperties != nil {
-		task.Maven.Properties["camel.k.master.enabled"] = "true"
+		task.Maven.Properties["camel.k.master.enabled"] = boolean.TrueString
 		for _, cp := range e.CamelCatalog.Runtime.Capabilities["master"].BuildTimeProperties {
 			task.Maven.Properties[CapabilityPropertyKey(cp.Key, task.Maven.Properties)] = cp.Value
 		}

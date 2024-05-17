@@ -29,7 +29,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
 )
 
-const flowsInternalSourceName = "camel-k-embedded-flow.yaml"
+const (
+	initTraitID    = "init"
+	initTraitOrder = 1
+
+	flowsInternalSourceName = "camel-k-embedded-flow.yaml"
+)
 
 type initTrait struct {
 	BaseTrait
@@ -38,7 +43,7 @@ type initTrait struct {
 
 func NewInitTrait() Trait {
 	return &initTrait{
-		BaseTrait: NewBaseTrait("init", 1),
+		BaseTrait: NewBaseTrait(initTraitID, initTraitOrder),
 	}
 }
 

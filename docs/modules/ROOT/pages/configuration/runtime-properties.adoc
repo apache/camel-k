@@ -8,17 +8,21 @@ During the execution of an `Integration` you can provide a single property or a 
 
 Imagine you have a generic `Route` and you set a placeholder for certain information (ie, _my.message_ variable):
 
-[source,groovy]
-.property-route.groovy
+[source,yaml]
+.property-route.yaml
 ----
-from('timer:property')
-    .log('property content is: {{my.message}}')
+- from:
+    uri: "timer:property"
+    steps:
+      - setBody:
+          simple: "property content is: {{my.message}}"
+      - to: "log:info"
 ----
 
 The simplest way to replace that variable with a real value is to use the `--property` flag (also shortcut by `-p`):
 
 ----
-kamel run -p my.message=test-property property-route.groovy
+kamel run -p my.message=test-property property-route.yaml
 ----
 
 At runtime, that variable will be substituted by the value you've provided. You can provide more than one single `property` at once by just adding the flag repeatedly (ie, `--property prop1=val1 --property prop2=val2 ...`)
@@ -26,17 +30,23 @@ At runtime, that variable will be substituted by the value you've provided. You 
 You can also use runtime properties in Camel endpoints, for example to make the timer
 period configurable you can do as follows:
 
-[source,groovy]
-.property-route.groovy
+[source,yaml]
+.config-property-route.yaml
 ----
-from('timer:property?period={{triggerPeriod}}')
-    .log('property content is: {{my.message}}')
+- from:
+    uri: "timer:property"
+    parameters:
+      period: "{{triggerPeriod}}"
+    steps:
+      - setBody:
+          simple: "property content is: {{my.message}}"
+      - to: "log:info"
 ----
 
 The simplest way to replace that variable with a real value is to use the `--property` flag (also shortcut by `-p`):
 
 ----
-kamel run -p my.message=test-property -p triggerPeriod=3000 property-route.groovy
+kamel run -p my.message=test-property -p triggerPeriod=3000 config-property-route.yaml
 ----
 
 [[runtime-props-file]]
@@ -45,24 +55,27 @@ kamel run -p my.message=test-property -p triggerPeriod=3000 property-route.groov
 Another way to provide more property configuration at once is to use a *property file*.
 
 [source,properties]
-.my.properties
+.config.properties
 ----
 my.key.1=hello
 my.key.2=world
 ----
 
-[source,groovy]
-.property-route.groovy
+[source,yaml]
+.config-property-file-route.yaml
 ----
-from('timer:property-file')
-    .routeId('property-file')
-    .log('property file content is: {{my.key.1}} {{my.key.2}}')
+- from:
+    uri: "timer:property-file'"
+    steps:
+      - setBody:
+          simple: "property file content is: {{my.key.1}} {{my.key.2}}"
+      - to: "log:info"
 ----
 
 You'll need to provide a `property` _file_ flag when launching the application:
 
 ----
-kamel run --property file:my.properties property-route.groovy
+kamel run --property file:config.properties config-property-file-route.yaml
 ----
 
 The property file is parsed and its properties configured on the `Integration`. As soon as the application starts, you will see the log with the expected configuration.
@@ -80,17 +93,23 @@ kubectl create configmap my-cm-rp --from-literal=name="Will Smith" --from-litera
 
 In our `Integration` we can simply refer to the properties defined in the `ConfigMap` as we'd do with any other property:
 
-[source,groovy]
-.property-configmap-route.groovy
+[source,yaml]
+.config-property-configmap-route.yaml
 ----
-from('timer:property?period={{period}}')
-    .log('Hello {{name}}!')
+- from:
+    uri: "timer:property"
+    parameters:
+      period: "{{period}}"
+    steps:
+      - setBody:
+          simple: "Hello {{name}}!"
+      - to: "log:info"
 ----
 
 Then we launch the `run` command with the `--property` flag whose value matches with the appropriate syntax to refer to `my-cm-rp`:
 
 ----
-kamel run --property configmap:my-cm-rp property-configmap-route.groovy
+kamel run --property configmap:my-cm-rp config-property-configmap-route.yaml
 ----
 
 The key-value pairs of the `ConfigMap` are loaded and used as runtime properties of the `Integration`. As soon as the application starts, you will see the log with the expected message.
@@ -122,7 +141,7 @@ kubectl create configmap my-cm-rps --from-file=some.properties
 Then we launch the `run` command with the `--property` flag whose value matches with the appropriate syntax to refer to `my-cm-rps`:
 
 ----
-kamel run --property configmap:my-cm-rps property-configmap-route.groovy
+kamel run --property configmap:my-cm-rps config-property-configmap-route.yaml
 ----
 
 The value of the key-value of the `ConfigMap` is loaded as a property file and used as runtime properties of the `Integration`. As soon as the application starts, you will see the log with the expected message.

@@ -24,6 +24,7 @@ package advanced
 
 import (
 	"fmt"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"os"
 	"testing"
 
@@ -37,12 +38,12 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", "false")
+	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", boolean.FalseString)
 	if justCompile == "true" {
 		os.Exit(m.Run())
 	}
 
-	fastSetup := GetEnvOrDefault("CAMEL_K_E2E_FAST_SETUP", "false")
+	fastSetup := GetEnvOrDefault("CAMEL_K_E2E_FAST_SETUP", boolean.FalseString)
 	if fastSetup == "true" {
 		operatorID := platform.DefaultPlatformName
 		ns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
@@ -64,7 +65,7 @@ func TestMain(m *testing.M) {
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/timer-source.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/timer-source.yaml").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-source"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "timer-source", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "timer-source"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))

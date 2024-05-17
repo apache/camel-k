@@ -21,6 +21,8 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -454,7 +456,7 @@ func TestInjectServersIntoDefaultMavenSettings(t *testing.T) {
 			Username: "jpoth",
 			Password: "changeit",
 			Configuration: v1.Properties{
-				"allowInsecureRegistries": "false",
+				"allowInsecureRegistries": boolean.FalseString,
 			},
 		},
 	}
@@ -480,7 +482,7 @@ func TestInjectServersIntoCustomMavenSettings(t *testing.T) {
 			Username: "jpoth",
 			Password: "changeit",
 			Configuration: v1.Properties{
-				"allowInsecureRegistries": "false",
+				"allowInsecureRegistries": boolean.FalseString,
 			},
 		},
 	}

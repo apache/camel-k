@@ -20,6 +20,8 @@ package telemetry
 import (
 	"fmt"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	"k8s.io/utils/pointer"
 
 	corev1 "k8s.io/api/core/v1"
@@ -161,9 +163,9 @@ func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
 		e.ApplicationProperties["camel.k.telemetry.samplerRatio"] = t.SamplerRatio
 	}
 	if pointer.BoolDeref(t.SamplerParentBased, true) {
-		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = "true"
+		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = boolean.TrueString
 	} else {
-		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = "false"
+		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = boolean.FalseString
 	}
 
 	for _, cp := range e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties {
@@ -195,7 +197,7 @@ func (t *telemetryTrait) setProperties(e *trait.Environment) {
 			if pointer.BoolDeref(t.SamplerParentBased, true) {
 				e.ApplicationProperties[appPropSamplerParentBased] = "true"
 			} else {
-				e.ApplicationProperties[appPropSamplerParentBased] = "false"
+				e.ApplicationProperties[appPropSamplerParentBased] = boolean.FalseString
 			}
 		}
 	}

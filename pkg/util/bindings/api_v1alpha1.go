@@ -38,8 +38,9 @@ type V1alpha1BindingProvider interface {
 }
 
 // V1alpha1BindingContext --
-// nolint: containedctx
 // Deprecated.
+//
+//nolint:containedctx
 type V1alpha1BindingContext struct {
 	Ctx       context.Context
 	Client    client.Client

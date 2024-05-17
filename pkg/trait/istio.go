@@ -20,12 +20,19 @@ package trait
 import (
 	"strconv"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/utils/pointer"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+)
+
+const (
+	istioTraitID    = "istio"
+	istioTraitOrder = 2300
 )
 
 type istioTrait struct {
@@ -40,7 +47,7 @@ const (
 
 func newIstioTrait() Trait {
 	return &istioTrait{
-		BaseTrait: NewBaseTrait("istio", 2300),
+		BaseTrait: NewBaseTrait(istioTraitID, istioTraitOrder),
 		IstioTrait: traitv1.IstioTrait{
 			Allow: "10.0.0.0/8,172.16.0.0/12,192.168.0.0/16",
 		},
@@ -73,7 +80,7 @@ func (t *istioTrait) injectIstioAnnotation(annotations map[string]string, includ
 	}
 	annotations[istioOutboundIPRangesAnnotation] = t.Allow
 	if includeInject {
-		annotations[istioSidecarInjectAnnotation] = True
+		annotations[istioSidecarInjectAnnotation] = boolean.TrueString
 	}
 	if t.Inject != nil {
 		annotations[istioSidecarInjectAnnotation] = strconv.FormatBool(*t.Inject)

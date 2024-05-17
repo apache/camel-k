@@ -33,7 +33,7 @@ CODEGEN_VERSION := v0.27.4
 OPERATOR_SDK_VERSION := v1.28.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-LINTER_VERSION ?= v1.58.0
+LINTER_VERSION ?= v1.58.1
 GOVULNCHECK_VERSION ?= latest
 
 LINTER ?= $(LOCALBIN)/golangci-lint
@@ -60,8 +60,8 @@ METADATA_IMAGE_NAME := $(CUSTOM_IMAGE)-metadata
 BUNDLE_IMAGE_NAME ?= $(CUSTOM_IMAGE)-bundle
 RELEASE_GIT_REMOTE := origin
 GIT_COMMIT := $(shell if [ -d .git ]; then git rev-list -1 HEAD; else echo "$(CUSTOM_VERSION)"; fi)
-LINT_GOGC := 20
-LINT_DEADLINE := 10m
+LINT_GOGC ?= 20
+LINT_DEADLINE ?= 10m
 DEBUG_MODE ?= false
 OPENSHIFT_REGISTRY := image-registry.openshift-image-registry.svc:5000
 

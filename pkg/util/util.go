@@ -35,6 +35,8 @@ import (
 	"strings"
 	"time"
 
+	io2 "github.com/apache/camel-k/v2/pkg/util/io"
+
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 	"go.uber.org/multierr"
 
@@ -283,7 +285,7 @@ func CopyFile(src, dst string) (int64, error) {
 	// in the container may not be the same as the one owning the files
 	//
 	// #nosec G301
-	if err = os.MkdirAll(path.Dir(dst), 0o755); err != nil {
+	if err = os.MkdirAll(path.Dir(dst), io2.FilePerm755); err != nil {
 		return 0, err
 	}
 
@@ -426,7 +428,7 @@ func CreateDirectory(directory string) error {
 
 	if !directoryExists {
 		// #nosec G301
-		if err := os.MkdirAll(directory, 0o755); err != nil {
+		if err := os.MkdirAll(directory, io2.FilePerm755); err != nil {
 			return err
 		}
 	}
@@ -501,7 +503,7 @@ func MapToYAML(src map[string]interface{}) ([]byte, error) {
 }
 
 func WriteToFile(filePath string, fileContents string) error {
-	err := os.WriteFile(filePath, []byte(fileContents), 0o400)
+	err := os.WriteFile(filePath, []byte(fileContents), io2.FilePerm400)
 	if err != nil {
 		return fmt.Errorf("error writing file: %v", filePath)
 	}
@@ -611,7 +613,7 @@ func WithFileReader(name string, consumer func(reader io.Reader) error) error {
 
 // WithFileContent a safe wrapper to process a file content.
 func WithFileContent(name string, consumer func(file *os.File, data []byte) error) error {
-	return WithFile(name, os.O_RDWR|os.O_CREATE, 0o644, func(file *os.File) error {
+	return WithFile(name, os.O_RDWR|os.O_CREATE, io2.FilePerm644, func(file *os.File) error {
 		content, err := ReadFile(name)
 		if err != nil {
 			return err
@@ -626,7 +628,7 @@ func WriteFileWithContent(filePath string, content []byte) error {
 	fileDir := path.Dir(filePath)
 
 	// Create dir if not present
-	err := os.MkdirAll(fileDir, 0o700)
+	err := os.MkdirAll(fileDir, io2.FilePerm700)
 	if err != nil {
 		return fmt.Errorf("could not create dir for file "+filePath+": %w", err)
 	}

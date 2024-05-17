@@ -31,8 +31,14 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
+)
+
+const (
+	mountTraitID    = "mount"
+	mountTraitOrder = 1610
 )
 
 type mountTrait struct {
@@ -43,7 +49,7 @@ type mountTrait struct {
 func newMountTrait() Trait {
 	return &mountTrait{
 		// Must follow immediately the container trait
-		BasePlatformTrait: NewBasePlatformTrait("mount", 1610),
+		BasePlatformTrait: NewBasePlatformTrait(mountTraitID, mountTraitOrder),
 	}
 }
 
@@ -178,14 +184,13 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 
 func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 	e.Resources.VisitSecret(func(secret *corev1.Secret) {
-		if secret.Labels[serviceBindingLabel] == "true" {
+		if secret.Labels[serviceBindingLabel] == boolean.TrueString {
 			t.Configs = append(t.Configs, "secret:"+secret.Name)
 		}
 	})
 }
 
 // Deprecated: to be removed in future releases.
-// nolint: staticcheck
 func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition {
 	featureUsed := false
 	if trait := e.Catalog.GetTrait(kameletsTraitID); trait != nil {

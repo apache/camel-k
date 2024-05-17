@@ -53,7 +53,7 @@ func TestOpenAPI(t *testing.T) {
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi", cmDataProps)
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.yaml").Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "petstore"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))

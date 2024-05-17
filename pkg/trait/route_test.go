@@ -33,6 +33,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -552,13 +553,13 @@ func TestRoute_WithCustomServicePort(t *testing.T) {
 }
 
 func TestRouteAnnotation(t *testing.T) {
-	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": "true"}
+	annotationsTest := map[string]string{"haproxy.router.openshift.io/balance": boolean.TrueString}
 
 	name := xid.New().String()
 	environment := createTestRouteEnvironment(t, name)
 	environment.Integration.Spec.Traits = v1.Traits{
 		Route: &traitv1.RouteTrait{
-			Annotations: map[string]string{"haproxy.router.openshift.io/balance": "true"},
+			Annotations: map[string]string{"haproxy.router.openshift.io/balance": boolean.TrueString},
 		},
 	}
 

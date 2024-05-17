@@ -35,6 +35,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/patch"
 )
 
+const (
+	deployerTraitID    = "deployer"
+	deployerTraitOrder = 900
+)
+
 type deployerTrait struct {
 	BasePlatformTrait
 	traitv1.DeployerTrait `property:",squash"`
@@ -46,7 +51,7 @@ var hasServerSideApply = true
 
 func newDeployerTrait() Trait {
 	return &deployerTrait{
-		BasePlatformTrait: NewBasePlatformTrait("deployer", 900),
+		BasePlatformTrait: NewBasePlatformTrait(deployerTraitID, deployerTraitOrder),
 	}
 }
 

@@ -64,7 +64,8 @@ func isExistingFile(uri string) (bool, error) {
 			return false, nil
 		}
 
-		if _, ok := err.(*fs.PathError); ok && runtime.GOOS == "windows" { // nolint
+		//nolint:errorlint
+		if _, ok := err.(*fs.PathError); ok && runtime.GOOS == "windows" {
 			// Windows returns a PathError rather than NotExist is path is invalid
 			return false, nil
 		}

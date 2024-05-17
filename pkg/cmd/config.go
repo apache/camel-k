@@ -45,7 +45,6 @@ const (
 	ConfigFolderUsed ConfigFolder = "used"
 )
 
-// nolint: unparam
 func newCmdConfig(rootCmdOptions *RootCmdOptions) (*cobra.Command, *configCmdOptions) {
 	options := configCmdOptions{}
 	cmd := cobra.Command{

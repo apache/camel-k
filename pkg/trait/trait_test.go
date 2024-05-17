@@ -33,6 +33,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -382,8 +383,8 @@ func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
 				Loaders: map[string]v1.CamelLoader{
 					"java": {
 						Metadata: map[string]string{
-							"native":                         "true",
-							"sources-required-at-build-time": "true",
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
 				},
@@ -561,7 +562,7 @@ func TestExecutedTraitsCondition(t *testing.T) {
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
 		"TraitConfiguration",
-		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,health,quarkus,jvm,owner",
+		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,quarkus,jvm,owner",
 	)
 	assert.Contains(t, conditions, expectedCondition)
 }
