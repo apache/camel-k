@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Operator restart Integrations on upgrade [\#5491](https://github.com/apache/camel-k/issues/5491)
 - Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
 - Incorrect content of the build/\_maven\_overlay directory causes the build project failure [\#5466](https://github.com/apache/camel-k/issues/5466)
 - Make images does not work out of the box [\#5464](https://github.com/apache/camel-k/issues/5464)
@@ -28,7 +29,6 @@
 - Missing license header files [\#5433](https://github.com/apache/camel-k/issues/5433)
 - Release 2.3.1 [\#5430](https://github.com/apache/camel-k/issues/5430)
 - Health trait: Inconsistent Integration condition ready status [\#5351](https://github.com/apache/camel-k/issues/5351)
-- Make healt trait as default [\#5024](https://github.com/apache/camel-k/issues/5024)
 - Provide default value in a specific field for trait properties in CRD [\#4726](https://github.com/apache/camel-k/issues/4726)
 - --port flag not working while running kamel integration in debug mode  [\#4443](https://github.com/apache/camel-k/issues/4443)
 
