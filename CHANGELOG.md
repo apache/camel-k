@@ -9,6 +9,7 @@
 - Operator restart Integrations on upgrade [\#5491](https://github.com/apache/camel-k/issues/5491)
 - Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
 - Incorrect content of the build/\_maven\_overlay directory causes the build project failure [\#5466](https://github.com/apache/camel-k/issues/5466)
+- Integration fails to retrieve the publish task and the image digest on OCP [\#5465](https://github.com/apache/camel-k/issues/5465)
 - Make images does not work out of the box [\#5464](https://github.com/apache/camel-k/issues/5464)
 - Generate badges for deprecated traits [\#5424](https://github.com/apache/camel-k/issues/5424)
 - Cannot `make test-smoke` on arm64 out of the box [\#5362](https://github.com/apache/camel-k/issues/5362)
