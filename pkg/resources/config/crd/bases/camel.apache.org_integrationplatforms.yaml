@@ -992,6 +992,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessProbe:
+                        description: The liveness probe path to use (default provided
+                          by the Catalog runtime used).
+                        type: string
                       livenessProbeEnabled:
                         description: Configures the liveness probe for the integration
                           container (default `false`).
@@ -1024,6 +1028,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessProbe:
+                        description: The readiness probe path to use (default provided
+                          by the Catalog runtime used).
+                        type: string
                       readinessProbeEnabled:
                         description: Configures the readiness probe for the integration
                           container (default `true`).
@@ -1056,6 +1064,10 @@ spec:
                         description: How often to perform the startup probe.
                         format: int32
                         type: integer
+                      startupProbe:
+                        description: The startup probe path to use (default provided
+                          by the Catalog runtime used).
+                        type: string
                       startupProbeEnabled:
                         description: Configures the startup probe for the integration
                           container (default `false`).
@@ -2903,6 +2915,10 @@ spec:
                         description: How often to perform the liveness probe.
                         format: int32
                         type: integer
+                      livenessProbe:
+                        description: The liveness probe path to use (default provided
+                          by the Catalog runtime used).
+                        type: string
                       livenessProbeEnabled:
                         description: Configures the liveness probe for the integration
                           container (default `false`).
@@ -2935,6 +2951,10 @@ spec:
                         description: How often to perform the readiness probe.
                         format: int32
                         type: integer
+                      readinessProbe:
+                        description: The readiness probe path to use (default provided
+                          by the Catalog runtime used).
+                        type: string
                       readinessProbeEnabled:
                         description: Configures the readiness probe for the integration
                           container (default `true`).
@@ -2967,6 +2987,10 @@ spec:
                         description: How often to perform the startup probe.
                         format: int32
                         type: integer
+                      startupProbe:
+                        description: The startup probe path to use (default provided
+                          by the Catalog runtime used).
+                        type: string
                       startupProbeEnabled:
                         description: Configures the startup probe for the integration
                           container (default `false`).

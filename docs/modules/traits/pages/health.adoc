@@ -55,6 +55,10 @@ The following configuration options are available:
 | int32
 | Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
 
+| health.liveness-probe
+| string
+| The liveness probe path to use (default provided by the Catalog runtime used).
+
 | health.readiness-probe-enabled
 | bool
 | Configures the readiness probe for the integration container (default `true`).
@@ -83,6 +87,10 @@ The following configuration options are available:
 | int32
 | Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
 
+| health.readiness-probe
+| string
+| The readiness probe path to use (default provided by the Catalog runtime used).
+
 | health.startup-probe-enabled
 | bool
 | Configures the startup probe for the integration container (default `false`).
@@ -110,6 +118,10 @@ The following configuration options are available:
 | health.startup-failure-threshold
 | int32
 | Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
+
+| health.startup-probe
+| string
+| The startup probe path to use (default provided by the Catalog runtime used).
 
 |===
 
