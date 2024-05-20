@@ -78,6 +78,12 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, NewIntegrationConditionUserDisabled("Knative"), nil
 	}
 	if e.CamelCatalog == nil {
+		if t.isForcefullyEnabled() {
+			// Likely a sourceless Integration. Here we must verify the user has forcefully enabled the feature in order to turn it on
+			// as we don't have the possibility to scan the Integration source to verify if there is any endpoint suitable with
+			// Knative
+			return true, nil, nil
+		}
 		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
@@ -146,6 +152,11 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 
 	return true, nil, nil
+}
+
+// This is true only when the user set the enabled flag on and the auto flag off
+func (t *knativeTrait) isForcefullyEnabled() bool {
+	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
 }
 
 func filterMetaItems(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, cst knativeapi.CamelServiceType, uriType string) ([]string, error) {
