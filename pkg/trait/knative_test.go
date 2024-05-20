@@ -752,6 +752,60 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 	return environment
 }
 
+func NewFakeEnvironmentForSyntheticKit(t *testing.T) Environment {
+	t.Helper()
+	client, _ := NewFakeClient("ns")
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		Catalog: traitCatalog,
+		Client:  client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: pointer.Bool(true),
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	return environment
+}
+
 func NewFakeClient(namespace string) (client.Client, error) {
 	channelSourceURL, err := apis.ParseURL("http://channel-source-1.host/")
 	if err != nil {
@@ -954,4 +1008,24 @@ func fromCamelProperties(appProps map[string]string) (*knativeapi.CamelEnvironme
 	}
 
 	return &env, nil
+}
+
+func TestKnativeSyntheticKitDefault(t *testing.T) {
+	e := NewFakeEnvironmentForSyntheticKit(t)
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	ok, condition, err := knTrait.Configure(&e)
+	require.NoError(t, err)
+	assert.False(t, ok)
+	assert.NotNil(t, condition)
+}
+
+func TestKnativeSyntheticKitEnabled(t *testing.T) {
+	e := NewFakeEnvironmentForSyntheticKit(t)
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	knTrait.Enabled = pointer.Bool(true)
+	knTrait.Auto = pointer.Bool(false)
+	ok, condition, err := knTrait.Configure(&e)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
 }
