@@ -192,7 +192,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 	return nil, nil
 }
 
-// This is true only when the user set the enabled flag on and the auto flag off
+// This is true only when the user set the enabled flag on and the auto flag off.
 func (t *knativeServiceTrait) isForcefullyEnabled() bool {
 	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
 }

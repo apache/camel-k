@@ -154,7 +154,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	return true, nil, nil
 }
 
-// This is true only when the user set the enabled flag on and the auto flag off
+// This is true only when the user set the enabled flag on and the auto flag off.
 func (t *knativeTrait) isForcefullyEnabled() bool {
 	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
 }
