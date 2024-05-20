@@ -148,13 +148,30 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) || e.CamelCatalog == nil {
-		// explicitly disabled or sourceless Integration (missing catalog)
+	if !pointer.BoolDeref(t.Enabled, true) {
+		// explicitly disabled by the user
 		return nil, nil
 	}
 
 	// Knative serving is required
 	if ok, _ := knative.IsServingInstalled(e.Client); !ok {
+		if t.isForcefullyEnabled() {
+			// User has forcefully request to use this feature.
+			// Warn the user that he requested a feature but it cannot be fulfilled due to missing
+			// API installation
+			return nil, fmt.Errorf("missing Knative Service API, cannot enable Knative service trait")
+		}
+		return nil, nil
+	}
+
+	if e.CamelCatalog == nil {
+		if t.isForcefullyEnabled() {
+			// Likely a sourceless Integration. Here we must verify the user has forcefully enabled the feature in order to turn it on
+			// as we don't have the possibility to scan the Integration source to verify if there is any endpoint suitable with
+			// Knative
+			knativeServiceStrategy := ControllerStrategyKnativeService
+			return &knativeServiceStrategy, nil
+		}
 		return nil, nil
 	}
 
@@ -173,6 +190,11 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 		return &knativeServiceStrategy, nil
 	}
 	return nil, nil
+}
+
+// This is true only when the user set the enabled flag on and the auto flag off
+func (t *knativeServiceTrait) isForcefullyEnabled() bool {
+	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
 }
 
 func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
