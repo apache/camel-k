@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
@@ -117,6 +118,47 @@ func TestHealthTrait(t *testing.T) {
 	assert.NotNil(t, d.Spec.Template.Spec.Containers[0].StartupProbe)
 	assert.Equal(t, "/q/health/started", d.Spec.Template.Spec.Containers[0].StartupProbe.HTTPGet.Path)
 
+}
+
+func createNominalHealthTrait(t *testing.T) (*healthTrait, *Environment) {
+	t.Helper()
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+	trait, _ := newHealthTrait().(*healthTrait)
+
+	environment := &Environment{
+		CamelCatalog: catalog,
+		Catalog:      NewCatalog(nil),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:       "integration-name",
+				Generation: 1,
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+
+	deployment := appsv1.Deployment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Deployment",
+			APIVersion: appsv1.SchemeGroupVersion.String(),
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{Name: "integration"},
+					},
+				},
+			},
+		},
+	}
+	environment.Resources.Add(&deployment)
+
+	return trait, environment
 }
 
 func TestApplyHealthTraitSyntheticKit(t *testing.T) {
