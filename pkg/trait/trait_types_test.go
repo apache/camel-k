@@ -22,8 +22,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestMultilinePropertiesHandled(t *testing.T) {
@@ -163,4 +171,167 @@ func TestCapabilityPropertyKey(t *testing.T) {
 	}
 	camelPropertyKeyDynamic := CapabilityPropertyKey(`quarkus.camel.cluster.kubernetes.labels."${camel.k.master.labelKey}"`, vars)
 	assert.Equal(t, `quarkus.camel.cluster.kubernetes.labels."org.apache.camel/integration"`, camelPropertyKeyDynamic)
+}
+
+func TestDetermineControllerStrategyDefault(t *testing.T) {
+	e := createTestEnvironment(t, v1.DefaultTraitProfile)
+	strategy, err := e.DetermineControllerStrategy()
+	require.NoError(t, err)
+	assert.Equal(t, DefaultControllerStrategy, strategy)
+}
+
+func TestDetermineControllerStrategyAutoKnative(t *testing.T) {
+	e := createTestEnvironment(t, v1.TraitProfileKnative)
+	strategy, err := e.DetermineControllerStrategy()
+	require.NoError(t, err)
+	assert.Equal(t, ControllerStrategyKnativeService, strategy)
+}
+
+func TestDetermineControllerStrategySyntheticKitDefault(t *testing.T) {
+	e := createSyntethicKitTestEnvironment(t, v1.TraitProfileKnative)
+	strategy, err := e.DetermineControllerStrategy()
+	require.NoError(t, err)
+	assert.Equal(t, DefaultControllerStrategy, strategy)
+}
+
+func TestDetermineControllerStrategySyntheticKitForceKnative(t *testing.T) {
+	e := createSyntethicKitTestEnvironment(t, v1.TraitProfileKnative)
+	e.Integration.Spec.Traits = v1.Traits{
+		KnativeService: &trait.KnativeServiceTrait{
+			Trait: trait.Trait{
+				Enabled: pointer.Bool(true),
+			},
+			Auto: pointer.Bool(false),
+		},
+	}
+	e.Platform.ResyncStatusFullConfig()
+	_, err := e.Catalog.apply(e)
+	require.NoError(t, err)
+
+	strategy, err := e.DetermineControllerStrategy()
+	require.NoError(t, err)
+	assert.Equal(t, ControllerStrategyKnativeService, strategy)
+}
+
+func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+	t.Helper()
+
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	environment := &Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "default",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: profile,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.js",
+							Content: `from("direct:test").log("hello")`,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "rests.xml",
+							Content: `<rest path="/test"></rest>`,
+						},
+						Language: v1.LanguageXML,
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterKubernetes,
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+
+	environment.Platform.ResyncStatusFullConfig()
+
+	_, err = traitCatalog.apply(environment)
+	require.NoError(t, err)
+
+	return environment
+}
+
+func createSyntethicKitTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
+	t.Helper()
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+	environment := &Environment{
+		Catalog: traitCatalog,
+		Client:  client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "default",
+			},
+			Status: v1.IntegrationStatus{
+				// default init runtime value
+				RuntimeProvider: v1.RuntimeProviderQuarkus,
+				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				Phase:           v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: profile,
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: map[string]string{
+					v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeSynthetic,
+				},
+			},
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterKubernetes,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+
+	environment.Platform.ResyncStatusFullConfig()
+
+	_, err := traitCatalog.apply(environment)
+	require.NoError(t, err)
+
+	return environment
 }
