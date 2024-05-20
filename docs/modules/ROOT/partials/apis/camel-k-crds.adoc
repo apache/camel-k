@@ -7034,6 +7034,13 @@ int32
 
 Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
 
+|`livenessProbe` +
+string
+|
+
+
+The liveness probe path to use (default provided by the Catalog runtime used).
+
 |`readinessProbeEnabled` +
 bool
 |
@@ -7083,6 +7090,13 @@ int32
 
 Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
 
+|`readinessProbe` +
+string
+|
+
+
+The readiness probe path to use (default provided by the Catalog runtime used).
+
 |`startupProbeEnabled` +
 bool
 |
@@ -7131,6 +7145,13 @@ int32
 
 
 Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
+
+|`startupProbe` +
+string
+|
+
+
+The startup probe path to use (default provided by the Catalog runtime used).
 
 
 |===
