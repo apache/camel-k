@@ -118,3 +118,33 @@ func TestHealthTrait(t *testing.T) {
 	assert.Equal(t, "/q/health/started", d.Spec.Template.Spec.Containers[0].StartupProbe.HTTPGet.Path)
 
 }
+
+func TestApplyHealthTraitSyntheticKit(t *testing.T) {
+	enabled := true
+	ht, environment := createNominalHealthTrait(t)
+	// Simulate a synthetic Kit which has not catalog attached
+	environment.CamelCatalog = nil
+	ht.Enabled = &enabled
+	ht.LivenessProbeEnabled = &enabled
+	ht.ReadinessProbeEnabled = &enabled
+	ht.StartupProbeEnabled = &enabled
+	ht.LivenessProbe = "/my-live"
+	ht.ReadinessProbe = "/my-ready"
+	ht.StartupProbe = "/my-startup"
+	configured, condition, err := ht.Configure(environment)
+	assert.True(t, configured)
+	assert.Nil(t, err)
+	assert.Nil(t, condition)
+
+	err = ht.Apply(environment)
+	assert.Nil(t, err)
+	assert.Equal(t, "/my-live", environment.GetIntegrationContainer().LivenessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTP, environment.GetIntegrationContainer().StartupProbe.HTTPGet.Scheme)
+	assert.Equal(t, "8080", environment.GetIntegrationContainer().StartupProbe.HTTPGet.Port.String())
+	assert.Equal(t, "/my-ready", environment.GetIntegrationContainer().ReadinessProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTP, environment.GetIntegrationContainer().StartupProbe.HTTPGet.Scheme)
+	assert.Equal(t, "8080", environment.GetIntegrationContainer().StartupProbe.HTTPGet.Port.String())
+	assert.Equal(t, "/my-startup", environment.GetIntegrationContainer().StartupProbe.HTTPGet.Path)
+	assert.Equal(t, corev1.URISchemeHTTP, environment.GetIntegrationContainer().StartupProbe.HTTPGet.Scheme)
+	assert.Equal(t, "8080", environment.GetIntegrationContainer().StartupProbe.HTTPGet.Port.String())
+}
