@@ -105,14 +105,15 @@ func TestRunRoutes(t *testing.T) {
 		t.Run("Route unsecure http works", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			route := Route(t, ctx, ns, integrationName)
-			g.Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).ShouldNot(BeNil())
 			// must wait a little time after route is created, before doing an http request,
 			// otherwise the route is unavailable and the http request will fail
 			time.Sleep(waitBeforeHttpRequest)
+			route := Route(t, ctx, ns, integrationName)
 			url := fmt.Sprintf("http://%s/hello?name=Simple", route().Spec.Host)
 			g.Eventually(httpRequest(url, false), TestTimeoutShort).Should(Equal("Hello Simple"))
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
 		// =============================
@@ -121,14 +122,15 @@ func TestRunRoutes(t *testing.T) {
 		t.Run("Route Edge https works", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "route.tls-termination=edge").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			route := Route(t, ctx, ns, integrationName)
-			g.Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).ShouldNot(BeNil())
 			// must wait a little time after route is created, before an http request,
 			// otherwise the route is unavailable and the http request will fail
 			time.Sleep(waitBeforeHttpRequest)
+			route := Route(t, ctx, ns, integrationName)
 			url := fmt.Sprintf("https://%s/hello?name=TLS_Edge", route().Spec.Host)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello TLS_Edge"))
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
 		// =============================
@@ -137,15 +139,16 @@ func TestRunRoutes(t *testing.T) {
 		t.Run("Route Edge (custom certificate) https works", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "route.tls-termination=edge", "-t", "route.tls-certificate-secret="+refCert, "-t", "route.tls-key-secret="+refKey).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			route := Route(t, ctx, ns, integrationName)
-			g.Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).ShouldNot(BeNil())
 			// must wait a little time after route is created, before an http request,
 			// otherwise the route is unavailable and the http request will fail
 			time.Sleep(waitBeforeHttpRequest)
+			route := Route(t, ctx, ns, integrationName)
 			code := "TLS_EdgeCustomCertificate"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
 		// =============================
@@ -154,15 +157,16 @@ func TestRunRoutes(t *testing.T) {
 		t.Run("Route passthrough https works", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "--resource", "secret:"+secretName+"@/etc/ssl/"+secretName, "-p", "quarkus.http.ssl.certificate.files=/etc/ssl/"+secretName+"/tls.crt", "-p", "quarkus.http.ssl.certificate.key-files=/etc/ssl/"+secretName+"/tls.key", "-t", "route.tls-termination=passthrough", "-t", "container.port=8443").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			route := Route(t, ctx, ns, integrationName)
-			g.Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).ShouldNot(BeNil())
 			// must wait a little time after route is created, before an http request,
 			// otherwise the route is unavailable and the http request will fail
 			time.Sleep(waitBeforeHttpRequest)
+			route := Route(t, ctx, ns, integrationName)
 			code := "TLS_Passthrough"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
 		// =============================
@@ -171,26 +175,27 @@ func TestRunRoutes(t *testing.T) {
 		t.Run("Route Reencrypt https works", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "--resource", "secret:"+secretName+"@/etc/ssl/"+secretName, "-p", "quarkus.http.ssl.certificate.files=/etc/ssl/"+secretName+"/tls.crt", "-p", "quarkus.http.ssl.certificate.key-files=/etc/ssl/"+secretName+"/tls.key", "-t", "route.tls-termination=reencrypt", "-t", "route.tls-destination-ca-certificate-secret="+refCert, "-t", "route.tls-certificate-secret="+refCert, "-t", "route.tls-key-secret="+refKey, "-t", "container.port=8443").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-
-			route := Route(t, ctx, ns, integrationName)
-			g.Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).ShouldNot(BeNil())
 			// must wait a little time after route is created, before an http request,
 			// otherwise the route is unavailable and the http request will fail
+			route := Route(t, ctx, ns, integrationName)
 			time.Sleep(waitBeforeHttpRequest)
 			code := "TLS_Reencrypt"
 			url := fmt.Sprintf("https://%s/hello?name=%s", route().Spec.Host, code)
 			g.Eventually(httpRequest(url, true), TestTimeoutShort).Should(Equal("Hello " + code))
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).Should(BeNil())
 		})
 
 		t.Run("Route annotations added", func(t *testing.T) {
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).Should(BeNil())
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "route.annotations.'haproxy.router.openshift.io/balance'=roundrobin").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			route := RouteFull(t, ctx, ns, integrationName)()
-			g.Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
+			g.Eventually(Route(t, ctx, ns, integrationName), TestTimeoutMedium).ShouldNot(BeNil())
 			// must wait a little time after route is created, before an http request,
 			// otherwise the route is unavailable and the http request will fail
 			time.Sleep(waitBeforeHttpRequest)
+			route := RouteFull(t, ctx, ns, integrationName)()
 			var annotations = route.ObjectMeta.Annotations
 			g.Expect(annotations["haproxy.router.openshift.io/balance"]).To(Equal("roundrobin"))
 
