@@ -21,7 +21,7 @@ NOTE: The platform trait is a *platform trait* and cannot be disabled by the use
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait platform.[key]=[value] --trait platform.[key2]=[value2] integration.groovy
+$ kamel run --trait platform.[key]=[value] --trait platform.[key2]=[value2] integration.yaml
 ----
 The following configuration options are available:
 
