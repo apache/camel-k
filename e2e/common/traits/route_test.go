@@ -152,7 +152,7 @@ func TestRunRoutes(t *testing.T) {
 		// TLS Route Passthrough
 		// =============================
 		t.Run("Route passthrough https works", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "--resource", "secret:"+secretName+"@/etc/ssl/"+secretName, "-p", "quarkus.http.ssl.certificate.file=/etc/ssl/"+secretName+"/tls.crt", "-p", "quarkus.http.ssl.certificate.key-file=/etc/ssl/"+secretName+"/tls.key", "-t", "route.tls-termination=passthrough", "-t", "container.port=8443").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "--resource", "secret:"+secretName+"@/etc/ssl/"+secretName, "-p", "quarkus.http.ssl.certificate.files=/etc/ssl/"+secretName+"/tls.crt", "-p", "quarkus.http.ssl.certificate.key-files=/etc/ssl/"+secretName+"/tls.key", "-t", "route.tls-termination=passthrough", "-t", "container.port=8443").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			route := Route(t, ctx, ns, integrationName)
 			g.Eventually(route, TestTimeoutMedium).ShouldNot(BeNil())
@@ -169,7 +169,7 @@ func TestRunRoutes(t *testing.T) {
 		// TLS Route Reencrypt
 		// =============================
 		t.Run("Route Reencrypt https works", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "--resource", "secret:"+secretName+"@/etc/ssl/"+secretName, "-p", "quarkus.http.ssl.certificate.file=/etc/ssl/"+secretName+"/tls.crt", "-p", "quarkus.http.ssl.certificate.key-file=/etc/ssl/"+secretName+"/tls.key", "-t", "route.tls-termination=reencrypt", "-t", "route.tls-destination-ca-certificate-secret="+refCert, "-t", "route.tls-certificate-secret="+refCert, "-t", "route.tls-key-secret="+refKey, "-t", "container.port=8443").Execute()).To(Succeed())
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "--resource", "secret:"+secretName+"@/etc/ssl/"+secretName, "-p", "quarkus.http.ssl.certificate.files=/etc/ssl/"+secretName+"/tls.crt", "-p", "quarkus.http.ssl.certificate.key-files=/etc/ssl/"+secretName+"/tls.key", "-t", "route.tls-termination=reencrypt", "-t", "route.tls-destination-ca-certificate-secret="+refCert, "-t", "route.tls-certificate-secret="+refCert, "-t", "route.tls-key-secret="+refKey, "-t", "container.port=8443").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, integrationName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
 			route := Route(t, ctx, ns, integrationName)
