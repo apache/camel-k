@@ -112,6 +112,10 @@ if you need to execute them. Useful only with `pod` strategy.
 | map[string]string
 | Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
 
+| builder.tolerations
+| []k8s.io/api/core/v1.Toleration
+| Defines tolerations for the builder pod.
+
 | builder.annotations
 | map[string]string
 | When using `pod` strategy, annotation to use for the builder pod.

@@ -665,6 +665,13 @@ Annotation to use for the builder pod. Only used for `pod` strategy
 
 The list of platforms used in order to build a container image.
 
+|`tolerations` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#toleration-v1-core[[\]Kubernetes core/v1.Toleration]*
+|
+
+
+The pod tolerations for the builder pod. Only used for `pod` strategy
+
 
 |===
 
@@ -6342,6 +6349,13 @@ map[string]string
 
 
 Defines a set of nodes the builder pod is eligible to be scheduled on, based on labels on the node.
+
+|`tolerations` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#toleration-v1-core[[\]Kubernetes core/v1.Toleration]*
+|
+
+
+Defines tolerations for the builder pod.
 
 |`annotations` +
 map[string]string
