@@ -58,15 +58,12 @@ func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !pointer.BoolDeref(l.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Logging"), nil
 	}
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 
 	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (l loggingTrait) Apply(e *Environment) error {
-	if e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties != nil {
+	if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties != nil {
 		l.setCatalogConfiguration(e)
 	} else {
 		l.setEnvConfiguration(e)

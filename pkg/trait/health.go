@@ -56,11 +56,9 @@ func newHealthTrait() Trait {
 }
 
 func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	if e.Integration == nil ||
-		!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
+		(!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases()) ||
+		!pointer.BoolDeref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -71,7 +69,36 @@ func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	return pointer.BoolDeref(t.Enabled, false), nil, nil
+	t.setProbesValues(e)
+
+	return true, nil, nil
+}
+
+func (t *healthTrait) setProbesValues(e *Environment) {
+	if t.LivenessProbe == "" {
+		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+			t.LivenessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultLivenessProbePath"]
+		} else {
+			// Deprecated: to be removed
+			t.LivenessProbe = defaultLivenessProbePath
+		}
+	}
+	if t.ReadinessProbe == "" {
+		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+			t.ReadinessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultReadinessProbePath"]
+		} else {
+			// Deprecated: to be removed
+			t.ReadinessProbe = defaultReadinessProbePath
+		}
+	}
+	if t.StartupProbe == "" {
+		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+			t.StartupProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultStartupProbePath"]
+		} else {
+			// Deprecated: to be removed
+			t.StartupProbe = defaultStartupProbePath
+		}
+	}
 }
 
 func (t *healthTrait) Apply(e *Environment) error {
@@ -103,38 +130,30 @@ func (t *healthTrait) Apply(e *Environment) error {
 	p := intstr.FromInt32(containerPort.ContainerPort)
 	port = &p
 
-	if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
-		t.setCatalogConfiguration(container, port, e.CamelCatalog.Runtime.Capabilities["health"].Metadata)
-	} else {
-		t.setDefaultConfiguration(container, port)
+	return t.setProbes(container, port)
+}
+
+func (t *healthTrait) setProbes(container *corev1.Container, port *intstr.IntOrString) error {
+	if pointer.BoolDeref(t.LivenessProbeEnabled, false) {
+		if t.LivenessProbe == "" {
+			return fmt.Errorf("you need to configure a liveness probe explicitly or in your catalog")
+		}
+		container.LivenessProbe = t.newLivenessProbe(port, t.LivenessProbe)
+	}
+	if pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
+		if t.ReadinessProbe == "" {
+			return fmt.Errorf("you need to configure a readiness probe explicitly or in your catalog")
+		}
+		container.ReadinessProbe = t.newReadinessProbe(port, t.ReadinessProbe)
+	}
+	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
+		if t.StartupProbe == "" {
+			return fmt.Errorf("you need to configure a startup probe explicitly or in your catalog")
+		}
+		container.StartupProbe = t.newStartupProbe(port, t.StartupProbe)
 	}
 
 	return nil
-}
-
-func (t *healthTrait) setCatalogConfiguration(container *corev1.Container, port *intstr.IntOrString, metadata map[string]string) {
-	if pointer.BoolDeref(t.LivenessProbeEnabled, false) {
-		container.LivenessProbe = t.newLivenessProbe(port, metadata["defaultLivenessProbePath"])
-	}
-	if pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
-		container.ReadinessProbe = t.newReadinessProbe(port, metadata["defaultReadinessProbePath"])
-	}
-	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
-		container.StartupProbe = t.newStartupProbe(port, metadata["defaultStartupProbePath"])
-	}
-}
-
-// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
-func (t *healthTrait) setDefaultConfiguration(container *corev1.Container, port *intstr.IntOrString) {
-	if pointer.BoolDeref(t.LivenessProbeEnabled, false) {
-		container.LivenessProbe = t.newLivenessProbe(port, defaultLivenessProbePath)
-	}
-	if pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
-		container.ReadinessProbe = t.newReadinessProbe(port, defaultReadinessProbePath)
-	}
-	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
-		container.StartupProbe = t.newStartupProbe(port, defaultStartupProbePath)
-	}
 }
 
 func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *corev1.Probe {
