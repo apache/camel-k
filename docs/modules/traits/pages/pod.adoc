@@ -32,7 +32,7 @@ The value from the template overwrites the `TEST_VARIABLE` environment variable,
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait pod.[key]=[value] integration.groovy
+$ kamel run --trait pod.[key]=[value] integration.yaml
 ----
 The following configuration options are available:
 

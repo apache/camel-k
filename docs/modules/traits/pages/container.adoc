@@ -19,7 +19,7 @@ NOTE: The container trait is a *platform trait* and cannot be disabled by the us
 Trait properties can be specified when running any integration with the CLI:
 [source,console]
 ----
-$ kamel run --trait container.[key]=[value] --trait container.[key2]=[value2] integration.groovy
+$ kamel run --trait container.[key]=[value] --trait container.[key2]=[value2] integration.yaml
 ----
 The following configuration options are available:
 
