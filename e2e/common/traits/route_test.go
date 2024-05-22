@@ -203,7 +203,6 @@ func TestRunRoutes(t *testing.T) {
 			g.Eventually(UnstructuredIntegration(t, ctx, ns, integrationName)).ShouldNot(BeNil())
 			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, integrationName)()
 			routeTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "route")
-			fmt.Printf("len(routeTrait): %d\n", len(routeTrait))
 			g.Expect(routeTrait).ToNot(BeNil())
 			g.Expect(len(routeTrait)).To(Equal(1))
 			g.Expect(routeTrait["annotations"]).ToNot(BeNil())
