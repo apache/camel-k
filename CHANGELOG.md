@@ -6,7 +6,11 @@
 
 **Merged pull requests:**
 
+- chore: Remove useless print [\#5536](https://github.com/apache/camel-k/pull/5536) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump github.com/go-logr/logr from 1.4.1 to 1.4.2 [\#5532](https://github.com/apache/camel-k/pull/5532) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(e2e\): Deprecated SSL quarkus configuration [\#5530](https://github.com/apache/camel-k/pull/5530) ([gansheer](https://github.com/gansheer))
 - fix\(trait\): camel catalog regression [\#5524](https://github.com/apache/camel-k/pull/5524) ([squakez](https://github.com/squakez))
+- \(\#5489\) Use yaml in e2e install [\#5518](https://github.com/apache/camel-k/pull/5518) ([tdiesler](https://github.com/tdiesler))
 - \(\#5489\) Use yaml in e2e common [\#5517](https://github.com/apache/camel-k/pull/5517) ([tdiesler](https://github.com/tdiesler))
 - chore\(trait\): revert default health enabled [\#5516](https://github.com/apache/camel-k/pull/5516) ([squakez](https://github.com/squakez))
 - fix\(trait\): environment variables [\#5515](https://github.com/apache/camel-k/pull/5515) ([squakez](https://github.com/squakez))
