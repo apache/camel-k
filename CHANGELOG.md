@@ -6,6 +6,7 @@
 
 **Merged pull requests:**
 
+- Fix offline script to use maven settings and option to skip ssl verification [\#5538](https://github.com/apache/camel-k/pull/5538) ([claudio4j](https://github.com/claudio4j))
 - chore: Remove useless print [\#5536](https://github.com/apache/camel-k/pull/5536) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/go-logr/logr from 1.4.1 to 1.4.2 [\#5532](https://github.com/apache/camel-k/pull/5532) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): Deprecated SSL quarkus configuration [\#5530](https://github.com/apache/camel-k/pull/5530) ([gansheer](https://github.com/gansheer))
