@@ -17,11 +17,17 @@
 
 set -e
 
+if [[ "$OSTYPE" != "linux"* ]]; then
+    echo "ERROR: This script is intended to run in linux. You may try to edit and tweak it to run in other OS."
+    exit 1
+fi
+
 mvnCmd=$(which mvn)
+central_repo=https://repo1.maven.org/maven2
 remote_repo=https://repo1.maven.org/maven2
 start_time=$(date -u +"%s")
 
-while getopts ":v:m:r:d:" opt; do
+while getopts ":v:m:r:d:s" opt; do
   case "${opt}" in
     m)
       mvnCmd="${OPTARG}"
@@ -33,7 +39,10 @@ while getopts ":v:m:r:d:" opt; do
       runtime_version="${OPTARG}"
       ;;
     d)
-      offline_dir="${OPTARG}"
+      offline_new_dir="${OPTARG}"
+      ;;
+    s)
+      skip_https="-k"
       ;;
     *)
       ;;
@@ -43,26 +52,27 @@ shift $((OPTIND-1))
 
 if [ -z ${runtime_version} ]; then
     echo "usage: $0 -v <Camel K Runtime version> [optional parameters]"
-    echo "  -m path to mvn command"
-    echo "  -r URL address of the maven repository manager"
-    echo "  -d local directory to add the offline dependencies"
+    echo "  -m </usr/share/bin/mvn>   - Path to mvn command"
+    echo "  -r <http://my-repo.com>   - URL address of the maven repository manager"
+    echo "  -d </var/tmp/offline-1.2> - Local directory to add the offline dependencies"
+    echo "  -s                        - Skip Certificate validation"
     exit 1
 fi
 
-offline=./_offline-${runtime_version}
-if [ ! -z ${offline_dir} ]; then
-    offline=${offline_dir}
+offline_dir=./_offline-${runtime_version}
+if [ ! -z ${offline_new_dir} ]; then
+    offline_dir=${offline_new_dir}
 fi
 
-offline_repo=${offline}/repo
+offline_repo=${offline_dir}/repo
 
 # the pom.xml is the one containing all the dependencies from the camel-catalog file
 # it is used when running the go-offline and quarkus:go-offline goals to resolve all dependencies
-pom=${offline}/pom.xml
+pom=${offline_dir}/pom.xml
 # the pom-min.xml is used to actually build the project
 # it was noted that some transitive dependencies are not correctly resolve when using the go-offlilne plugin goals
 # then this was required to resolve some transitive dependencies.
-pom_min=${offline}/pom-min.xml
+pom_min=${offline_dir}/pom-min.xml
 
 ############# SETUP MAVEN
 # get the maven version used by camel-k-operator
@@ -86,23 +96,41 @@ mkdir -p ${offline_repo}
 rm -f ${pom} 2> /dev/null
 
 $mvnCmd --version | grep "Apache Maven"
+
+# setup the maven settings in case there is a custom maven repository url
+if [[ "${central_repo}" != "${remote_repo}" ]]; then
+    curl -sfSL https://raw.githubusercontent.com/apache/camel-k/release-2.3.x/script/maven-settings-offline-template.xml -o ${offline_dir}/maven-settings-offline-template.xml
+    sed "s,_local-maven-proxy_,${remote_repo},g;/<mirrors>/,/<\/mirrors>/d" ${offline_dir}/maven-settings-offline-template.xml > ${offline_dir}/custom-maven-settings.xml
+
+fi
+
 ## END SETUP MAVEN
 
 ############# SETUP CAMEL CATALOG
+echo "INFO: downloading catalog for Camel K Runtime ${runtime_version}"
 url=${remote_repo}/org/apache/camel/k/camel-k-catalog/${runtime_version}/camel-k-catalog-${runtime_version}-catalog.yaml
-response_code=$(curl -o /dev/null --silent -Iw '%{http_code}' ${url})
 
+if [ -z "${skip_https}" ]; then
+  # validate if there are certificate issues connecting with curl
+  cert_problem=$(curl --no-progress-meter -o /dev/null -LI -w '%{http_code}' ${url} 2>&1|grep -i 'SSL certificate problem'|head -1)
+  if [ ! -z "${cert_problem}" ]; then
+      echo "ERROR: There is a problem to connect to the maven repository: ${cert_problem}"
+      echo "You can set the parameter -s to skip certificate validation."
+      exit 1
+  fi
+fi
+
+response_code=$(curl --no-progress-meter -o /dev/null --silent -LI ${skip_https} -w '%{http_code}' ${url} 2>&1)
 if [ 200 != ${response_code} ]; then
     echo "ERROR: Camel K Runtime version ${runtime_version} catalog doesn't exist at ${url}"
     exit 1
 fi
-catalog="${offline}/camel-catalog-${runtime_version}.yaml"
-echo "INFO: downloading catalog for Camel K Runtime ${runtime_version}"
-curl -sfSL ${url} -o ${catalog}
+catalog="${offline_dir}/camel-catalog-${runtime_version}.yaml"
+curl -sfSL ${skip_https} ${url} -o ${catalog}
 ## END SETUP CAMEL CATALOG
 
 ############# SETUP POM PROJECT
-ckr_version=$(yq .spec.runtime.version $catalog)
+ckr_version=$(yq .spec.runtime.version ${catalog})
 cq_version=$(yq '.spec.runtime.metadata."camel-quarkus.version"' $catalog)
 quarkus_version=$(yq '.spec.runtime.metadata."quarkus.version"' $catalog)
 jibVersion=$(curl -s https://raw.githubusercontent.com/apache/camel-k/release-2.3.x/pkg/util/jib/configuration.go|grep 'const JibMavenPluginVersionDefault'|cut -d\" -f2)
@@ -146,7 +174,7 @@ sed 's/- //g' $catalog | grep "groupId\|artifactId" | paste -d " "  - - |awk '{p
     a=$(echo $line|cut -d: -f2);
 
     # there is no opentracing extension in CEQ, but it was present at the time camel-catalog, skipping it.
-    if [[ $a == *opentracing ]]; then
+    if [[ $a == *opentracing ]] || [[ $a == *camel-quarkus-beanio ]]; then
         continue;
     fi
 
@@ -286,8 +314,8 @@ cat <<EOF >> ${pom_min}
 EOF
 
 # add a single route to compile
-mkdir -p ${offline}/src/main/java/foo
-cat <<EOF > ${offline}/src/main/java/foo/Foo.java
+mkdir -p ${offline_dir}/src/main/java/foo
+cat <<EOF > ${offline_dir}/src/main/java/foo/Foo.java
 package foo;
 
 import java.lang.Exception;
@@ -309,14 +337,23 @@ EOF
 # resolve and download artifacts in parallel
 perf_params="-Dmaven.artifact.threads=6 -T 6 -Daether.dependencyCollector.impl=bf"
 silent="-ntp -Dsilent=true"
-$mvnCmd ${perf_params} ${silent} -Dmaven.repo.local=$offline_repo dependency:go-offline quarkus:go-offline -f ${pom}
-$mvnCmd ${perf_params} ${silent} -Dmaven.repo.local=$offline_repo package -f ${pom_min}
+mvn_skip_ssl=""
+if [ ! -z "${skip_https}" ]; then
+    mvn_skip_ssl="-Dmaven.wagon.http.ssl.insecure=true"
+fi
+settings_param=""
+if [[ "${central_repo}" != "${remote_repo}" ]]; then
+    settings_param="-s ${offline_dir}/custom-maven-settings.xml"
+fi
+
+$mvnCmd ${perf_params} ${silent} ${mvn_skip_ssl} ${settings_param} -Dmaven.repo.local=$offline_repo dependency:go-offline quarkus:go-offline -f ${pom}
+$mvnCmd ${perf_params} ${silent} ${mvn_skip_ssl} ${settings_param} -Dmaven.repo.local=$offline_repo package -f ${pom_min}
 
 # remove _remote.repositories as they interfere with the original repo resolver when running in the camel-k-operator pod
 find $offline_repo -type f -name _remote.repositories -delete
 
 # we can bundle into a single archive now
-offline_file=${offline}/camel-k-runtime-$runtime_version-maven-offline.tar.gz
+offline_file=${offline_dir}/camel-k-runtime-$runtime_version-maven-offline.tar.gz
 echo "INFO: building ${offline_file} archive"
 tar -czf ${offline_file} -C $offline_repo .
 
