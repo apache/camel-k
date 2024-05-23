@@ -31,7 +31,8 @@ type BuilderTrait struct {
 	// The strategy to use, either `pod` or `routine` (default `routine`)
 	// +kubebuilder:validation:Enum=pod;routine
 	Strategy string `property:"strategy" json:"strategy,omitempty"`
-	// Specify a base image
+	// Specify a base image. In order to have the application working properly it must be a container image which has a Java JDK
+	// installed and ready to use on path (ie `/usr/bin/java`).
 	BaseImage string `property:"base-image" json:"baseImage,omitempty"`
 	// Use the incremental image build option, to reuse existing containers (default `true`)
 	IncrementalImageBuild *bool `property:"incremental-image-build" json:"incrementalImageBuild,omitempty"`

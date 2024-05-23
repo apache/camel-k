@@ -6234,7 +6234,8 @@ string
 |
 
 
-Specify a base image
+Specify a base image. In order to have the application working properly it must be a container image which has a Java JDK
+installed and ready to use on path (ie `/usr/bin/java`).
 
 |`incrementalImageBuild` +
 bool
@@ -7306,6 +7307,7 @@ bool
 
 
 Prints the command used the start the JVM in the container logs (default `true`)
+Deprecated: no longer in use.
 
 |`debugAddress` +
 string
@@ -7327,6 +7329,13 @@ string
 
 
 Additional JVM classpath (use `Linux` classpath separator)
+
+|`jar` +
+string
+|
+
+
+The Jar dependency which will run the application. Leave it empty for managed Integrations.
 
 
 |===
