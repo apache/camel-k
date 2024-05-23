@@ -437,7 +437,6 @@ func TestConfigureTraits(t *testing.T) {
 	_, err := test.ExecuteCommand(rootCmd, "run",
 		"--trait", "affinity.pod-affinity=false",
 		"--trait", "environment.container-meta=false",
-		"--trait", "jvm.print-command=false",
 		"--trait", "prometheus.pod-monitor=false",
 		"example.js")
 	if err != nil {
@@ -455,10 +454,9 @@ func TestConfigureTraits(t *testing.T) {
 	require.NoError(t, err)
 	traitMap, err := trait.ToTraitMap(traits)
 	require.NoError(t, err)
-	assert.Len(t, traitMap, 4)
+	assert.Len(t, traitMap, 3)
 	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.JVM, &traitv1.JVMTrait{PrintCommand: pointer.Bool(false)})
 	assertTraitConfiguration(t, traits.Prometheus, &traitv1.PrometheusTrait{PodMonitor: pointer.Bool(false)})
 }
 

@@ -1184,6 +1184,16 @@ func KitImage(t *testing.T, ctx context.Context, ns, name string) func() string 
 	}
 }
 
+func KitRootImage(t *testing.T, ctx context.Context, ns, name string) func() string {
+	return func() string {
+		kit := Kit(t, ctx, ns, name)()
+		if kit == nil {
+			return ""
+		}
+		return kit.Status.RootImage
+	}
+}
+
 func KitCondition(t *testing.T, ctx context.Context, ns string, name string, conditionType v1.IntegrationKitConditionType) func() *v1.IntegrationKitCondition {
 	return func() *v1.IntegrationKitCondition {
 		kt := Kit(t, ctx, ns, name)()

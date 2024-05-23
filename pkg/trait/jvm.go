@@ -24,8 +24,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,14 +60,15 @@ func newJvmTrait() Trait {
 		BaseTrait: NewBaseTrait(jvmTraitID, jvmTraitOrder),
 		JVMTrait: traitv1.JVMTrait{
 			DebugAddress: "*:5005",
-			PrintCommand: pointer.Bool(true),
 		},
 	}
 }
 
 func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	// Deprecated: the JVM has to be a platform trait and the user should not be able to disable it
 	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled("JVM"), nil
+		notice := userDisabledMessage + "; this configuration is deprecated and may be removed within next releases"
+		return false, NewIntegrationCondition("JVM", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, notice), nil
 	}
 	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
@@ -82,19 +81,18 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() {
-		return false, NewIntegrationConditionPlatformDisabledWithMessage("JVM", "integration kit was not created via Camel K operator"), nil
+	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() && t.Jar == "" {
+		// We skip this trait since we cannot make any assumption on the container Java tooling running
+		// for the synthetic IntegrationKit
+		return false, NewIntegrationConditionPlatformDisabledWithMessage(
+			"JVM",
+			"integration kit was not created via Camel K operator and the user did not provide the jar to execute",
+		), nil
 	}
 
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	return true, nil, nil
 }
 
-// TODO: refactor the code
-//
-//nolint:maintidx
 func (t *jvmTrait) Apply(e *Environment) error {
 	kit := e.IntegrationKit
 
@@ -115,75 +113,120 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		return fmt.Errorf("unable to find integration kit for integration %s", e.Integration.Name)
 	}
 
-	classpath := sets.NewSet()
-
-	classpath.Add("./resources")
-	classpath.Add(filepath.ToSlash(camel.ConfigResourcesMountPath))
-	classpath.Add(filepath.ToSlash(camel.ResourcesDefaultMountPath))
-	if t.Classpath != "" {
-		classpath.Add(strings.Split(t.Classpath, ":")...)
-	}
-
-	for _, artifact := range kit.Status.Artifacts {
-		classpath.Add(artifact.Target)
-	}
-
-	if kit.IsExternal() {
-		// In case of an external created kit, we do not have any information about
-		// the classpath, so we assume the all jars in /deployments/dependencies/ have
-		// to be taken into account.
-		dependencies := filepath.Join(builder.DeploymentDir, builder.DependenciesDir)
-		classpath.Add(
-			dependencies+"/*",
-			dependencies+"/app/*",
-			dependencies+"/lib/boot/*",
-			dependencies+"/lib/main/*",
-			dependencies+"/quarkus/*",
-		)
-	}
-
 	container := e.GetIntegrationContainer()
 	if container == nil {
-		return fmt.Errorf("unable to find integration container: %s", e.Integration.Name)
+		return fmt.Errorf("unable to find a container for %s Integration", e.Integration.Name)
 	}
 
 	// Build the container command
 	// Other traits may have already contributed some arguments
 	args := container.Args
 
-	// Remote debugging
 	if pointer.BoolDeref(t.Debug, false) {
-		suspend := "n"
-		if pointer.BoolDeref(t.DebugSuspend, false) {
-			suspend = "y"
-		}
-		args = append(args,
-			fmt.Sprintf("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%s",
-				suspend, t.DebugAddress))
-
-		// Add label to mark the pods with debug enabled
-		e.Resources.VisitPodTemplateMeta(func(meta *metav1.ObjectMeta) {
-			if meta.Labels == nil {
-				meta.Labels = make(map[string]string)
-			}
-			meta.Labels["camel.apache.org/debug"] = boolean.TrueString
-		})
+		debugArgs := t.enableDebug(e)
+		args = append(args, debugArgs)
 	}
 
 	hasHeapSizeOption := false
 	// Add JVM options
 	if len(t.Options) > 0 {
 		hasHeapSizeOption = util.StringSliceContainsAnyOf(t.Options, "-Xmx", "-XX:MaxHeapSize", "-XX:MinRAMPercentage", "-XX:MaxRAMPercentage")
-
 		args = append(args, t.Options...)
 	}
 
-	// Translate HTTP proxy environment variables, that are set by the environment trait,
-	// into corresponding JVM system properties.
+	// Tune JVM maximum heap size based on the container memory limit, if any.
+	// This is configured off-container, thus is limited to explicit user configuration.
+	// We may want to inject a wrapper script into the container image, so that it can
+	// be performed in-container, based on CGroups memory resource control files.
+	if memory, hasLimit := container.Resources.Limits[corev1.ResourceMemory]; !hasHeapSizeOption && hasLimit {
+		// Simple heuristic that caps the maximum heap size to 50% of the memory limit
+		percentage := defaultMaxMemoryPercentage
+		// Unless the memory limit is lower than 300M, in which case we leave more room for the non-heap memory
+		if resource.NewScaledQuantity(lowMemoryThreshold, defaultMaxMemoryScale).Cmp(memory) > 0 {
+			percentage = lowMemoryMAxMemoryDefaultPercentage
+		}
+		//nolint:mnd
+		memScaled := memory.ScaledValue(resource.Mega) * percentage / 100
+		args = append(args, fmt.Sprintf("-Xmx%dM", memScaled))
+	}
+
+	httpProxyArgs, err := t.prepareHTTPProxy(container)
+	if err != nil {
+		return err
+	}
+	if httpProxyArgs != nil {
+		args = append(args, httpProxyArgs...)
+	}
+
+	// If user provided the jar, we will execute on the container something like
+	// java -Dxyx ... -cp ... -jar my-app.jar
+	// For this reason it's imporant that the container is a java based container able to run a Camel (hence Java) application
+	container.WorkingDir = builder.DeploymentDir
+	container.Command = []string{"java"}
+	classpathItems := t.prepareClasspathItems(container)
+	if t.Jar != "" {
+		// User is providing the Jar to execute explicitly
+		args = append(args, "-cp", strings.Join(classpathItems, ":"))
+		args = append(args, "-jar", t.Jar)
+	} else {
+		if e.CamelCatalog == nil {
+			return fmt.Errorf("cannot execute trait: missing Camel catalog")
+		}
+		kitDepsDirs := getKitDependenciesDirectories(kit)
+		classpathItems = append(classpathItems, kitDepsDirs...)
+		args = append(args, "-cp", strings.Join(classpathItems, ":"))
+		args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
+	}
+	container.Args = args
+
+	return nil
+}
+
+func (t *jvmTrait) enableDebug(e *Environment) string {
+	suspend := "n"
+	if pointer.BoolDeref(t.DebugSuspend, false) {
+		suspend = "y"
+	}
+	// Add label to mark the pods with debug enabled
+	e.Resources.VisitPodTemplateMeta(func(meta *metav1.ObjectMeta) {
+		if meta.Labels == nil {
+			meta.Labels = make(map[string]string)
+		}
+		meta.Labels["camel.apache.org/debug"] = "true"
+	})
+
+	return fmt.Sprintf("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%s",
+		suspend, t.DebugAddress)
+}
+
+func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
+	classpath := sets.NewSet()
+	classpath.Add("./resources")
+	classpath.Add(filepath.ToSlash(camel.ConfigResourcesMountPath))
+	classpath.Add(filepath.ToSlash(camel.ResourcesDefaultMountPath))
+	if t.Classpath != "" {
+		classpath.Add(strings.Split(t.Classpath, ":")...)
+	}
+	// Add mounted resources to the class path
+	for _, m := range container.VolumeMounts {
+		classpath.Add(m.MountPath)
+	}
+	items := classpath.List()
+	// Keep class path sorted so that it's consistent over reconciliation cycles
+	sort.Strings(items)
+
+	return items
+}
+
+// Translate HTTP proxy environment variables, that are set by the environment trait,
+// into corresponding JVM system properties.
+func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, error) {
+	var args []string
+
 	if HTTPProxy := envvar.Get(container.Env, "HTTP_PROXY"); HTTPProxy != nil {
 		u, err := url.Parse(HTTPProxy.Value)
 		if err != nil {
-			return err
+			return args, err
 		}
 		if !util.StringSliceContainsAnyOf(t.Options, "http.proxyHost") {
 			args = append(args, fmt.Sprintf("-Dhttp.proxyHost=%q", u.Hostname()))
@@ -202,7 +245,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	if HTTPSProxy := envvar.Get(container.Env, "HTTPS_PROXY"); HTTPSProxy != nil {
 		u, err := url.Parse(HTTPSProxy.Value)
 		if err != nil {
-			return err
+			return args, err
 		}
 		if !util.StringSliceContainsAnyOf(t.Options, "https.proxyHost") {
 			args = append(args, fmt.Sprintf("-Dhttps.proxyHost=%q", u.Hostname()))
@@ -231,44 +274,18 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		}
 	}
 
-	// Tune JVM maximum heap size based on the container memory limit, if any.
-	// This is configured off-container, thus is limited to explicit user configuration.
-	// We may want to inject a wrapper script into the container image, so that it can
-	// be performed in-container, based on CGroups memory resource control files.
-	if memory, hasLimit := container.Resources.Limits[corev1.ResourceMemory]; !hasHeapSizeOption && hasLimit {
-		// Simple heuristic that caps the maximum heap size to 50% of the memory limit
-		percentage := defaultMaxMemoryPercentage
-		// Unless the memory limit is lower than 300M, in which case we leave more room for the non-heap memory
-		if resource.NewScaledQuantity(lowMemoryThreshold, defaultMaxMemoryScale).Cmp(memory) > 0 {
-			percentage = lowMemoryMAxMemoryDefaultPercentage
-		}
-		//nolint:mnd
-		memScaled := memory.ScaledValue(resource.Mega) * percentage / 100
-		args = append(args, fmt.Sprintf("-Xmx%dM", memScaled))
+	return args, nil
+}
+
+// getKitDependenciesDirectories returns the list of directories, scanning the dependencies list.
+func getKitDependenciesDirectories(kit *v1.IntegrationKit) []string {
+	s := sets.NewSet()
+	for _, dep := range kit.Status.Artifacts {
+		path := filepath.Dir(dep.Target)
+		s.Add(fmt.Sprintf("%s/*", path))
 	}
+	values := s.List()
+	sort.Strings(values)
 
-	// Add mounted resources to the class path
-	for _, m := range container.VolumeMounts {
-		classpath.Add(m.MountPath)
-	}
-	items := classpath.List()
-	// Keep class path sorted so that it's consistent over reconciliation cycles
-	sort.Strings(items)
-	args = append(args, "-cp", strings.Join(items, ":"))
-
-	args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
-
-	if pointer.BoolDeref(t.PrintCommand, false) {
-		args = append([]string{"exec", "java"}, args...)
-		container.Command = []string{"/bin/sh", "-c"}
-		cmd := strings.Join(args, " ")
-		container.Args = []string{"echo " + cmd + " && " + cmd}
-	} else {
-		container.Command = []string{"java"}
-		container.Args = args
-	}
-
-	container.WorkingDir = builder.DeploymentDir
-
-	return nil
+	return values
 }
