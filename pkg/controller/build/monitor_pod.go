@@ -362,7 +362,7 @@ func publishTaskImageName(tasks []v1.Task) string {
 	case t.Jib != nil:
 		return t.Jib.Image
 	case t.S2i != nil:
-		return t.S2i.Name
+		return t.S2i.Image
 	}
 
 	return ""
