@@ -42,6 +42,10 @@ func (action *errorAction) CanHandle(kit *v1.IntegrationKit) bool {
 }
 
 func (action *errorAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
+	if kit.IsExternal() || kit.IsSynthetic() {
+		// do nothing, it's not a managed kit
+		return nil, nil
+	}
 	hash, err := digest.ComputeForIntegrationKit(kit)
 	if err != nil {
 		return nil, err

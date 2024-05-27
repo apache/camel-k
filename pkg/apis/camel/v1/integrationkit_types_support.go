@@ -18,8 +18,12 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
+	"path/filepath"
+	"sort"
 	"strconv"
 
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -203,6 +207,19 @@ func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 		res = append(res, c)
 	}
 	return res
+}
+
+// GetDependenciesPaths returns the set of dependency paths.
+func (in *IntegrationKitStatus) GetDependenciesPaths() []string {
+	s := sets.NewSet()
+	for _, dep := range in.Artifacts {
+		path := filepath.Dir(dep.Target)
+		s.Add(fmt.Sprintf("%s/*", path))
+	}
+	values := s.List()
+	sort.Strings(values)
+
+	return values
 }
 
 func (c IntegrationKitCondition) GetType() string {

@@ -117,7 +117,9 @@ spec:
     kind: IntegrationKit
     name: my-it-test-kit
     namespace: prod-namespace
-  traits: {}
+  traits:
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
 status: {}
 `, output)
 }
@@ -127,6 +129,12 @@ func nominalIntegration(name string) (v1.Integration, v1.IntegrationKit) {
 	it.Status.Phase = v1.IntegrationPhaseRunning
 	it.Status.Image = "my-special-image"
 	ik := v1.NewIntegrationKit("default", name+"-kit")
+	ik.Status = v1.IntegrationKitStatus{
+		Artifacts: []v1.Artifact{
+			{Target: "/path/to/artifact-1/a-1.jar"},
+			{Target: "/path/to/artifact-2/a-2.jar"},
+		},
+	}
 	it.Status.IntegrationKit = &corev1.ObjectReference{
 		Namespace: ik.Namespace,
 		Name:      ik.Name,
@@ -178,7 +186,9 @@ spec:
       kind: IntegrationKit
       name: my-kb-test-kit
       namespace: prod-namespace
-    traits: {}
+    traits:
+      jvm:
+        classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
   sink: {}
   source: {}
 status: {}
@@ -249,7 +259,9 @@ spec:
     kind: IntegrationKit
     name: my-it-test-kit
     namespace: prod-namespace
-  traits: {}
+  traits:
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
 status: {}
 `, output)
 }
@@ -308,7 +320,9 @@ spec:
       kind: IntegrationKit
       name: my-kb-test-kit
       namespace: prod-namespace
-    traits: {}
+    traits:
+      jvm:
+        classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
   sink: {}
   source: {}
 status: {}
@@ -400,7 +414,9 @@ spec:
     kind: IntegrationKit
     name: my-it-test-kit
     namespace: prod
-  traits: {}
+  traits:
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
 status: {}
 `, output)
 	// Verify also when the operator Id is set in the integration
@@ -439,7 +455,9 @@ spec:
     kind: IntegrationKit
     name: my-it-test-kit
     namespace: prod
-  traits: {}
+  traits:
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
 status: {}
 `, output)
 }

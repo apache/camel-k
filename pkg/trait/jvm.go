@@ -160,7 +160,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 	// If user provided the jar, we will execute on the container something like
 	// java -Dxyx ... -cp ... -jar my-app.jar
-	// For this reason it's imporant that the container is a java based container able to run a Camel (hence Java) application
+	// For this reason it's important that the container is a java based container able to run a Camel (hence Java) application
 	container.WorkingDir = builder.DeploymentDir
 	container.Command = []string{"java"}
 	classpathItems := t.prepareClasspathItems(container)
@@ -172,7 +172,11 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		if e.CamelCatalog == nil {
 			return fmt.Errorf("cannot execute trait: missing Camel catalog")
 		}
-		kitDepsDirs := getKitDependenciesDirectories(kit)
+		kitDepsDirs := kit.Status.GetDependenciesPaths()
+		if len(kitDepsDirs) == 0 {
+			// Use legacy Camel Quarkus expected structure
+			kitDepsDirs = getLegacyCamelQuarkusDependenciesPaths()
+		}
 		classpathItems = append(classpathItems, kitDepsDirs...)
 		args = append(args, "-cp", strings.Join(classpathItems, ":"))
 		args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
@@ -277,15 +281,12 @@ func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, erro
 	return args, nil
 }
 
-// getKitDependenciesDirectories returns the list of directories, scanning the dependencies list.
-func getKitDependenciesDirectories(kit *v1.IntegrationKit) []string {
-	s := sets.NewSet()
-	for _, dep := range kit.Status.Artifacts {
-		path := filepath.Dir(dep.Target)
-		s.Add(fmt.Sprintf("%s/*", path))
+// Deprecated: to be removed as soon as version 2.3.x is no longer supported.
+func getLegacyCamelQuarkusDependenciesPaths() []string {
+	return []string{
+		"dependencies/*",
+		"dependencies/lib/boot/*",
+		"dependencies/lib/main/*",
+		"dependencies/quarkus/*",
 	}
-	values := s.List()
-	sort.Strings(values)
-
-	return values
 }

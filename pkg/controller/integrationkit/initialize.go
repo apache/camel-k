@@ -49,12 +49,21 @@ func (action *initializeAction) CanHandle(kit *v1.IntegrationKit) bool {
 }
 
 func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
+	action.L.Info("Initializing IntegrationKit")
+	if kit.Spec.Image != "" {
+		// Synthetic Kit
+		action.L.Info("Synthetic Kit, won't be able to build or monitor this one.")
+		kit.Status.Phase = v1.IntegrationKitPhaseReady
+		kit.Status.Image = kit.Spec.Image
+
+		return kit, nil
+	}
+
+	// Managed Kit
 	env, err := trait.Apply(ctx, action.client, nil, kit)
 	if err != nil {
 		return nil, err
 	}
-
-	action.L.Info("Initializing IntegrationKit")
 	kit.Status.Version = defaults.Version
 
 	if kit.Spec.Image == "" {
@@ -98,13 +107,6 @@ func (action *initializeAction) Handle(ctx context.Context, kit *v1.IntegrationK
 		}
 		// now the kit can be built
 		kit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
-	} else {
-		// but in case it has been created from an image, mark the
-		// kit as ready
-		kit.Status.Phase = v1.IntegrationKitPhaseReady
-
-		// and set the image to be used
-		kit.Status.Image = kit.Spec.Image
 	}
 
 	return kit, nil
