@@ -27,7 +27,7 @@ spec:
       name: event-source
     dataTypes:
       out:
-        format: binary
+        format: "application-octet-stream"
   steps:
     - ref:
         kind: Kamelet
@@ -40,4 +40,4 @@ spec:
       name: event-sink
     dataTypes:
       in:
-        format: string
+        format: "text-plain"
