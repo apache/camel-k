@@ -300,7 +300,11 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", crMountPath, rdMountPath),
+		fmt.Sprintf(
+			"./resources:%s:%s:/mount/path:dependencies/*",
+			crMountPath,
+			rdMountPath,
+		),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -331,7 +335,7 @@ func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path", crMountPath, rdMountPath),
+		fmt.Sprintf("./resources:%s:%s:/mount/path:dependencies/*", crMountPath, rdMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, s.Spec.Template.Spec.Containers[0].Args)
 }
@@ -398,7 +402,7 @@ func TestApplyJvmTraitWithExternalKitType(t *testing.T) {
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s", crMountPath, rdMountPath),
+		fmt.Sprintf("./resources:%s:%s:dependencies/*", crMountPath, rdMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -435,7 +439,7 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s", crMountPath, rdMountPath, "/path/to/another/dep.jar", "/path/to/my-dep.jar"),
+		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s:dependencies/*", crMountPath, rdMountPath, "/path/to/another/dep.jar", "/path/to/my-dep.jar"),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -556,6 +560,9 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 				},
 			},
 			Status: v1.IntegrationKitStatus{
+				Artifacts: []v1.Artifact{
+					{Target: "dependencies/my-dep.jar"},
+				},
 				Phase: v1.IntegrationKitPhaseReady,
 			},
 		},
@@ -563,27 +570,4 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	}
 
 	return trait, environment
-}
-
-func TestGetKitDependenciesDirectories(t *testing.T) {
-	kit := &v1.IntegrationKit{
-		Status: v1.IntegrationKitStatus{
-			Artifacts: []v1.Artifact{
-				{Target: "my-dir1/lib/mytest.jar"},
-				{Target: "my-dir1/lib/mytest2.jar"},
-				{Target: "my-dir1/lib/mytest3.jar"},
-				{Target: "my-dir2/lib/mytest4.jar"},
-				{Target: "my-dir1/lib2/mytest5.jar"},
-				{Target: "my-dir/mytest6.jar"},
-				{Target: "my-dir/mytest7.jar"},
-			},
-			Phase: v1.IntegrationKitPhaseReady,
-		},
-	}
-	paths := getKitDependenciesDirectories(kit)
-	assert.Len(t, paths, 4)
-	assert.Equal(t, "my-dir/*", paths[0])
-	assert.Equal(t, "my-dir1/lib/*", paths[1])
-	assert.Equal(t, "my-dir1/lib2/*", paths[2])
-	assert.Equal(t, "my-dir2/lib/*", paths[3])
 }
