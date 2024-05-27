@@ -75,11 +75,7 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	// mount trait needs to be executed only when it has sources attached or any trait configuration
-	return len(e.Integration.AllSources()) > 0 ||
-		len(t.Configs) > 0 ||
-		len(t.Resources) > 0 ||
-		len(t.Volumes) > 0, condition, nil
+	return true, condition, nil
 }
 
 func (t *mountTrait) Apply(e *Environment) error {
@@ -119,10 +115,8 @@ func (t *mountTrait) Apply(e *Environment) error {
 	}
 
 	if visited {
-		// Volumes declared in the Integration resources (we skip for synthetic kits)
-		if e.IntegrationKit == nil || !e.IntegrationKit.IsSynthetic() {
-			e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
-		}
+		// Volumes declared in the Integration resources
+		e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
 		// Volumes declared in the trait config/resource options
 		err := t.configureVolumesAndMounts(volumes, &container.VolumeMounts)
 		if err != nil {
