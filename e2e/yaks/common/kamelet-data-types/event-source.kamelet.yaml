@@ -30,8 +30,10 @@ spec:
       default: string
       types:
         string:
-          mediaType: plain/text
+          format: "text-plain"
+          mediaType: text/plain
         binary:
+          format: "application-octet-stream"
           mediaType: application/octet-stream
   dependencies:
     - "camel:core"

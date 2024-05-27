@@ -34,9 +34,9 @@ spec:
         name: log-action
       dataTypes:
         in:
-          format: binary
+          format: "application-octet-stream"
         out:
-          format: string
+          format: "text-plain"
   sink:
     ref:
       kind: Kamelet
