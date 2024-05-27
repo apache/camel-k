@@ -82,14 +82,18 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Kamelets"), nil
 	}
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
+	if t.MountPoint == "" {
+		t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
+	}
 	if pointer.BoolDeref(t.Auto, true) {
+		if e.CamelCatalog == nil {
+			// Cannot execute this trait for synthetic IntegrationKit. In order to use it, the
+			// user has to specify forcefully auto=false option and pass a list of kamelets explicitly
+			return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+		}
 		kamelets, err := kamelets.ExtractKameletFromSources(e.Ctx, e.Client, e.CamelCatalog, e.Resources, e.Integration)
 		if err != nil {
 			return false, nil, err
@@ -98,10 +102,6 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		if len(kamelets) > 0 {
 			sort.Strings(kamelets)
 			t.List = strings.Join(kamelets, ",")
-		}
-
-		if t.MountPoint == "" {
-			t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
 		}
 	}
 

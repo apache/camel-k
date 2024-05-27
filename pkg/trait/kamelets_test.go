@@ -31,6 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/pointer"
 )
 
 func TestConfigurationNoKameletsUsed(t *testing.T) {
@@ -529,6 +530,12 @@ func TestKameletConditionTrue(t *testing.T) {
 	assert.Equal(t, corev1.ConditionTrue, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
 	assert.Contains(t, cond.Message, "[none,timer] found")
+
+	kameletsBundle := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Labels[kubernetes.ConfigMapTypeLabel] == KameletBundleType
+	})
+	assert.NotNil(t, kameletsBundle)
+	assert.Contains(t, kameletsBundle.Data, "timer.kamelet.yaml", "uri: timer:tick")
 }
 
 func createKameletsTestEnvironment(flow string, objects ...runtime.Object) (*kameletsTrait, *Environment) {
@@ -575,4 +582,81 @@ func templateOrFail(template map[string]interface{}) *v1.Template {
 	}
 	t := v1.Template{RawMessage: data}
 	return &t
+}
+
+func TestKameletSyntheticKitConditionTrue(t *testing.T) {
+	trait, environment := createKameletsTestEnvironment(
+		"",
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "timer-source",
+			},
+			Spec: v1.KameletSpec{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+			},
+		})
+	environment.CamelCatalog = nil
+	environment.Integration.Spec.Sources = nil
+	trait.Auto = pointer.Bool(false)
+	trait.List = "timer-source"
+
+	enabled, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
+	assert.NotNil(t, cond)
+	assert.Equal(t, corev1.ConditionTrue, cond.Status)
+	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
+	assert.Contains(t, cond.Message, "[timer-source] found")
+
+	kameletsBundle := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Labels[kubernetes.ConfigMapTypeLabel] == KameletBundleType
+	})
+	assert.NotNil(t, kameletsBundle)
+	assert.Contains(t, kameletsBundle.Data, "timer-source.kamelet.yaml", "uri: timer:tick")
+}
+
+func TestKameletSyntheticKitAutoConditionFalse(t *testing.T) {
+	trait, environment := createKameletsTestEnvironment(
+		"",
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "timer-source",
+			},
+			Spec: v1.KameletSpec{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+			},
+		})
+	environment.CamelCatalog = nil
+	environment.Integration.Spec.Sources = nil
+	trait.List = "timer-source"
+
+	// Auto=true by default, so, we will need to skip as
+	// we cannot parse sources
+
+	enabled, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.False(t, enabled)
+	assert.NotNil(t, condition)
+
+	kameletsBundle := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Labels[kubernetes.ConfigMapTypeLabel] == KameletBundleType
+	})
+	assert.Nil(t, kameletsBundle)
 }
