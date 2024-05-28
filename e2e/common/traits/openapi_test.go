@@ -24,7 +24,7 @@ package traits
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -39,6 +39,12 @@ import (
 func TestOpenAPI(t *testing.T) {
 	t.Parallel()
 
+	/*
+		kubectl create configmap my-openapi --from-file=./e2e/common/traits/files/openapi/petstore-api.yaml
+
+		kamel run --dev --name=petstore --open-api configmap:my-openapi ./e2e/common/traits/files/openapi/petstore.yaml
+	*/
+
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-traits-openapi"
 		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
@@ -47,7 +53,7 @@ func TestOpenAPI(t *testing.T) {
 
 		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		openapiContent, err := ioutil.ReadFile("./files/openapi/petstore-api.yaml")
+		openapiContent, err := os.ReadFile("./files/openapi/petstore-api.yaml")
 		require.NoError(t, err)
 		var cmDataProps = make(map[string]string)
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)

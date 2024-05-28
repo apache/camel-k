@@ -33,6 +33,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+/*
+	go test -v -tags=integration ./e2e/knative --run TestOpenAPIService
+*/
+
 func TestOpenAPIService(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		openapiContent, err := ioutil.ReadFile("./files/petstore-api.yaml")

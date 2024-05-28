@@ -215,9 +215,9 @@ func writeFields(t *types.Type, traitID string, content *[]string) {
 	res = append(res, "[source,console]")
 	res = append(res, "----")
 	if len(t.Members) > 1 {
-		res = append(res, fmt.Sprintf("$ kamel run --trait %s.[key]=[value] --trait %s.[key2]=[value2] integration.groovy", traitID, traitID))
+		res = append(res, fmt.Sprintf("$ kamel run --trait %s.[key]=[value] --trait %s.[key2]=[value2] integration.yaml", traitID, traitID))
 	} else {
-		res = append(res, fmt.Sprintf("$ kamel run --trait %s.[key]=[value] integration.groovy", traitID))
+		res = append(res, fmt.Sprintf("$ kamel run --trait %s.[key]=[value] integration.yaml", traitID))
 	}
 	res = append(res, "----")
 	res = append(res, "The following configuration options are available:", "")

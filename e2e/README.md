@@ -33,7 +33,7 @@ Test suite that cover the different installation procedures we offer and any upg
 
 ### Knative
 
-Test suite that cover the features associated with Knative. This test will assume the presence of a namespaced operator (installation provided by the same test execution suite) togheter with Knative operator configuration.
+Test suite that cover the features associated with Knative. This test will assume the presence of a namespaced operator (installation provided by the same test execution suite) together with Knative operator configuration.
 
 ### Native
 
@@ -45,7 +45,7 @@ Test suite that cover the features associated with Telemetry feature. The test e
 
 ### Yaks
 
-Test suite that cover certain Knative features togheter with YAKS operator.
+Test suite that cover certain Knative features together with YAKS operator.
 
 ## Environment variables
 

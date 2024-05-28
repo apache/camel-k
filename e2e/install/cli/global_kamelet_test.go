@@ -45,7 +45,7 @@ func TestRunGlobalKamelet(t *testing.T) {
 
 				g.Expect(KamelInstallWithID(t, ctx, operatorID, ns2, "--skip-operator-setup", "--olm=false")).To(Succeed())
 
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns2, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns2, "files/timer-kamelet-usage.yaml").Execute()).To(Succeed())
 				g.Eventually(IntegrationPodPhase(t, ctx, ns2, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationLogs(t, ctx, ns2, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 				g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns2).Execute()).To(Succeed())
@@ -60,7 +60,7 @@ func TestRunGlobalKamelet(t *testing.T) {
 			WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns3 string) {
 				g.Expect(KamelInstallWithID(t, ctx, operatorID, ns3, "--skip-operator-setup", "--olm=false")).To(Succeed())
 
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns3, "files/timer-kamelet-usage.groovy").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns3, "files/timer-kamelet-usage.yaml").Execute()).To(Succeed())
 				g.Eventually(IntegrationPodPhase(t, ctx, ns3, "timer-kamelet-usage"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationLogs(t, ctx, ns3, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 				g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns3).Execute()).To(Succeed())
