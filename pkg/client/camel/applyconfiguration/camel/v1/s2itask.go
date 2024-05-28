@@ -22,9 +22,9 @@ package v1
 // S2iTaskApplyConfiguration represents an declarative configuration of the S2iTask type for use
 // with apply.
 type S2iTaskApplyConfiguration struct {
-	BaseTaskApplyConfiguration `json:",inline"`
-	ContextDir                 *string `json:"contextDir,omitempty"`
-	Tag                        *string `json:"tag,omitempty"`
+	BaseTaskApplyConfiguration    `json:",inline"`
+	PublishTaskApplyConfiguration `json:",inline"`
+	Tag                           *string `json:"tag,omitempty"`
 }
 
 // S2iTaskApplyConfiguration constructs an declarative configuration of the S2iTask type for use with
@@ -54,6 +54,30 @@ func (b *S2iTaskApplyConfiguration) WithConfiguration(value *BuildConfigurationA
 // If called multiple times, the ContextDir field is set to the value of the last call.
 func (b *S2iTaskApplyConfiguration) WithContextDir(value string) *S2iTaskApplyConfiguration {
 	b.ContextDir = &value
+	return b
+}
+
+// WithBaseImage sets the BaseImage field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the BaseImage field is set to the value of the last call.
+func (b *S2iTaskApplyConfiguration) WithBaseImage(value string) *S2iTaskApplyConfiguration {
+	b.BaseImage = &value
+	return b
+}
+
+// WithImage sets the Image field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Image field is set to the value of the last call.
+func (b *S2iTaskApplyConfiguration) WithImage(value string) *S2iTaskApplyConfiguration {
+	b.Image = &value
+	return b
+}
+
+// WithRegistry sets the Registry field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Registry field is set to the value of the last call.
+func (b *S2iTaskApplyConfiguration) WithRegistry(value *RegistrySpecApplyConfiguration) *S2iTaskApplyConfiguration {
+	b.Registry = value
 	return b
 }
 

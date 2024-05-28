@@ -179,9 +179,8 @@ type SpectrumTask struct {
 
 // S2iTask is used to configure S2I.
 type S2iTask struct {
-	BaseTask `json:",inline"`
-	// can be useful to share info with other tasks
-	ContextDir string `json:"contextDir,omitempty"`
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
 	// used by the ImageStream
 	Tag string `json:"tag,omitempty"`
 }

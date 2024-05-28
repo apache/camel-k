@@ -43,18 +43,7 @@ type jibTask struct {
 var _ Task = &jibTask{}
 
 func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
-	status := v1.BuildStatus{}
-
-	baseImage := t.build.Status.BaseImage
-	if baseImage == "" {
-		baseImage = t.task.BaseImage
-	}
-	status.BaseImage = baseImage
-	rootImage := t.build.Status.RootImage
-	if rootImage == "" {
-		rootImage = t.task.BaseImage
-	}
-	status.RootImage = rootImage
+	status := initializeStatusFrom(t.build.Status, t.task.BaseImage)
 
 	contextDir := t.task.ContextDir
 	if contextDir == "" {
@@ -80,14 +69,14 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	if !exists || empty {
 		// this can only indicate that there are no more resources to add to the base image,
 		// because transitive resolution is the same even if spec differs.
-		log.Infof("No new image to build, reusing existing image %s", baseImage)
-		status.Image = baseImage
-		return status
+		status.Image = status.BaseImage
+		log.Infof("No new image to build, reusing existing image %s", status.Image)
+		return *status
 	}
 	mavenDir := strings.ReplaceAll(contextDir, ContextDir, "maven")
 
 	log.Debugf("Registry address: %s", t.task.Registry.Address)
-	log.Debugf("Base image: %s", baseImage)
+	log.Debugf("Base image: %s", status.BaseImage)
 
 	registryConfigDir := ""
 	if t.task.Registry.Secret != "" {
@@ -109,7 +98,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 	mavenArgs = append(mavenArgs, strings.Split(string(mavenCommand), " ")...)
 	mavenArgs = append(mavenArgs, "-P", "jib")
 	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+t.task.Image)
-	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
+	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+status.BaseImage)
 	mavenArgs = append(mavenArgs, jib.JibMavenBaseImageCache+mavenDir+"/jib")
 
 	// Build the integration for the arch configured in the IntegrationPlatform.
@@ -160,7 +149,7 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		}
 	}
 
-	return status
+	return *status
 }
 
 func cleanRegistryConfig(registryConfigDir string) error {

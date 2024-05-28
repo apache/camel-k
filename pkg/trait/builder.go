@@ -298,6 +298,10 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Name:          "s2i",
 				Configuration: *taskConfOrDefault(tasksConf, "s2i"),
 			},
+			PublishTask: v1.PublishTask{
+				BaseImage: t.getBaseImage(e),
+				Image:     imageName,
+			},
 			Tag: e.IntegrationKit.ResourceVersion,
 		}})
 	}
