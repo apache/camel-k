@@ -6,6 +6,9 @@
 
 **Merged pull requests:**
 
+- fix\(trait\): jolokia link [\#5554](https://github.com/apache/camel-k/pull/5554) ([squakez](https://github.com/squakez))
+- chore\(ci\): Knative 1.14.0 [\#5551](https://github.com/apache/camel-k/pull/5551) ([squakez](https://github.com/squakez))
+- fix\(traits\): don't skip for synthetic kits [\#5548](https://github.com/apache/camel-k/pull/5548) ([squakez](https://github.com/squakez))
 - Fix offline script to use maven settings and option to skip ssl verification [\#5538](https://github.com/apache/camel-k/pull/5538) ([claudio4j](https://github.com/claudio4j))
 - chore: Remove useless print [\#5536](https://github.com/apache/camel-k/pull/5536) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/go-logr/logr from 1.4.1 to 1.4.2 [\#5532](https://github.com/apache/camel-k/pull/5532) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -44,16 +47,18 @@
 - fix\(\#5292\): Simplify run cmd for archs other than amd64 [\#5403](https://github.com/apache/camel-k/pull/5403) ([tdiesler](https://github.com/tdiesler))
 - feat\(4893\) YAML DSL route configuration support [\#5369](https://github.com/apache/camel-k/pull/5369) ([realMartinez](https://github.com/realMartinez))
 
-## [v2.3.2](https://github.com/apache/camel-k/tree/v2.3.2) (2024-05-21)
+## [v2.3.2](https://github.com/apache/camel-k/tree/v2.3.2) (2024-05-28)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.3.2...v2.3.2)
 
-## [camel-k-crds-2.3.2](https://github.com/apache/camel-k/tree/camel-k-crds-2.3.2) (2024-05-21)
+## [camel-k-crds-2.3.2](https://github.com/apache/camel-k/tree/camel-k-crds-2.3.2) (2024-05-28)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.3.2-nightly...camel-k-crds-2.3.2)
 
 **Closed issues:**
 
+- Jolokia trait link missing [\#5540](https://github.com/apache/camel-k/issues/5540)
+- Incorrect status handling of beersource when it can not connect to its 3rd party web-service [\#5528](https://github.com/apache/camel-k/issues/5528)
 - Knative service not working when using sourceless Integration in v2.3.1 [\#5519](https://github.com/apache/camel-k/issues/5519)
 - Operator restart Integrations on upgrade [\#5491](https://github.com/apache/camel-k/issues/5491)
 - Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
