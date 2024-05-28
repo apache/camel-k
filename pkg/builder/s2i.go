@@ -59,7 +59,7 @@ type s2iTask struct {
 var _ Task = &s2iTask{}
 
 func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
-	status := v1.BuildStatus{}
+	status := initializeStatusFrom(t.build.Status, t.task.BaseImage)
 
 	bc := &buildv1.BuildConfig{
 		TypeMeta: metav1.TypeMeta{
@@ -220,7 +220,7 @@ func (t *s2iTask) Do(ctx context.Context) v1.BuildStatus {
 		return status.Failed(err)
 	}
 
-	return status
+	return *status
 }
 
 func (t *s2iTask) getControllerReference() metav1.Object {

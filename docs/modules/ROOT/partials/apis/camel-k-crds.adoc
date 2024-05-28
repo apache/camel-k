@@ -5032,6 +5032,7 @@ Properties -- .
 * <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
 * <<#_camel_apache_org_v1_JibTask, JibTask>>
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+* <<#_camel_apache_org_v1_S2iTask, S2iTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
 
 PublishTask image publish configuration.
@@ -5341,12 +5342,12 @@ S2iTask is used to configure S2I.
 
 
 
-|`contextDir` +
-string
-|
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
 
 
-can be useful to share info with other tasks
+
 
 |`tag` +
 string
