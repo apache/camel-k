@@ -42,8 +42,6 @@ func TestKamelCLIPromote(t *testing.T) {
 	// Dev environment namespace
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsDev string) {
 		operatorDevID := "camel-k-cli-promote-dev"
-		g.Expect(CopyCamelCatalog(t, ctx, nsDev, operatorDevID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, nsDev, operatorDevID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, ctx, operatorDevID, nsDev)).To(Succeed())
 		g.Eventually(SelectedPlatformPhase(t, ctx, nsDev, operatorDevID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
@@ -90,8 +88,6 @@ func TestKamelCLIPromote(t *testing.T) {
 		// Prod environment namespace
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsProd string) {
 			operatorProdID := "camel-k-cli-promote-prod"
-			g.Expect(CopyCamelCatalog(t, ctx, nsProd, operatorProdID)).To(Succeed())
-			g.Expect(CopyIntegrationKits(t, ctx, nsProd, operatorProdID)).To(Succeed())
 			g.Expect(KamelInstallWithID(t, ctx, operatorProdID, nsProd)).To(Succeed())
 			g.Eventually(PlatformPhase(t, ctx, nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
