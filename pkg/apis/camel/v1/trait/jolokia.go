@@ -18,8 +18,10 @@ limitations under the License.
 package trait
 
 // The Jolokia trait activates and configures the Jolokia Java agent.
+// This trait is useful to enable JMX access to Camel application.
+// Make sure you have the right privileges to perform such an action on the cluster.
 //
-// See https://jolokia.org/reference/html/agents.html
+// See https://jolokia.org/reference/html/manual/agents.html
 //
 // +camel-k:trait=jolokia.
 type JolokiaTrait struct {
