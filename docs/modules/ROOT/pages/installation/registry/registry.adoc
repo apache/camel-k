@@ -37,7 +37,7 @@ metadata:
     app: camel-k
   name: camel-k
 spec:
-  pipeline:
+  build:
     registry:
       address: registry-host.io
       organization: your-user-id-or-org
