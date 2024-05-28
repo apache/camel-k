@@ -29,14 +29,23 @@ import (
 	"os/exec"
 
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 	t.Parallel()
+
+	ocp, err := openshift.IsOpenShift(TestClient(t))
+	require.NoError(t, err)
+	if ocp {
+		t.Skip("Avoid running on OpenShift, when in this platform, it correctly sets the configuration to run as unprivileged as possible and the pod runs fine.")
+		return
+	}
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-failing-deploy"
@@ -60,7 +69,6 @@ func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
 				"--overwrite",
 				"ns",
 				nsRestr,
-				"pod-security.kubernetes.io/enforce=baseline",
 				"pod-security.kubernetes.io/enforce-version=latest",
 				"pod-security.kubernetes.io/enforce=restricted",
 				"pod-security.kubernetes.io/warn-version=latest",
