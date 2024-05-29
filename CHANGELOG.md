@@ -1,15 +1,17 @@
 # Changelog
 
-## [v2.3.2](https://github.com/apache/camel-k/tree/v2.3.2) (2024-05-21)
+## [v2.3.2](https://github.com/apache/camel-k/tree/v2.3.2) (2024-05-28)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.3.2...v2.3.2)
 
-## [camel-k-crds-2.3.2](https://github.com/apache/camel-k/tree/camel-k-crds-2.3.2) (2024-05-21)
+## [camel-k-crds-2.3.2](https://github.com/apache/camel-k/tree/camel-k-crds-2.3.2) (2024-05-28)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.3.2-nightly...camel-k-crds-2.3.2)
 
 **Closed issues:**
 
+- Jolokia trait link missing [\#5540](https://github.com/apache/camel-k/issues/5540)
+- Incorrect status handling of beersource when it can not connect to its 3rd party web-service [\#5528](https://github.com/apache/camel-k/issues/5528)
 - Knative service not working when using sourceless Integration in v2.3.1 [\#5519](https://github.com/apache/camel-k/issues/5519)
 - Operator restart Integrations on upgrade [\#5491](https://github.com/apache/camel-k/issues/5491)
 - Remove maven threads configuration based on GOMAXPROCS [\#5467](https://github.com/apache/camel-k/issues/5467)
