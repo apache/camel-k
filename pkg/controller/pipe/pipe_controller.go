@@ -237,15 +237,6 @@ func (r *ReconcilePipe) update(ctx context.Context, base *v1.Pipe, target *v1.Pi
 			"phase-from", base.Status.Phase,
 			"phase-to", target.Status.Phase,
 		)
-
-		if target.Status.Phase == v1.PipePhaseError {
-			if cond := target.Status.GetCondition(v1.PipeIntegrationConditionError); cond != nil {
-				log.Info(
-					"Integration error",
-					"reason", cond.GetReason(),
-					"error-message", cond.GetMessage())
-			}
-		}
 	}
 
 	return nil
