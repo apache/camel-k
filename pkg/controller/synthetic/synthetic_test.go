@@ -118,12 +118,11 @@ func TestNonManagedDeployment(t *testing.T) {
 	}
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         "apps/v1",
-			Kind:               "Deployment",
-			Name:               deploy.Name,
-			UID:                deploy.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: "apps/v1",
+			Kind:       "Deployment",
+			Name:       deploy.Name,
+			UID:        deploy.UID,
+			Controller: &controller,
 		},
 	}
 	expectedIt.SetOwnerReferences(references)
@@ -178,12 +177,11 @@ func TestNonManagedCronJob(t *testing.T) {
 	})
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         "batch/v1",
-			Kind:               "CronJob",
-			Name:               cron.Name,
-			UID:                cron.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: "batch/v1",
+			Kind:       "CronJob",
+			Name:       cron.Name,
+			UID:        cron.UID,
+			Controller: &controller,
 		},
 	}
 	expectedIt.SetOwnerReferences(references)
@@ -237,12 +235,11 @@ func TestNonManagedKnativeService(t *testing.T) {
 	})
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         servingv1.SchemeGroupVersion.String(),
-			Kind:               "Service",
-			Name:               ksvc.Name,
-			UID:                ksvc.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: servingv1.SchemeGroupVersion.String(),
+			Kind:       "Service",
+			Name:       ksvc.Name,
+			UID:        ksvc.UID,
+			Controller: &controller,
 		},
 	}
 	expectedIt.SetOwnerReferences(references)
