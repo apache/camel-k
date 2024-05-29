@@ -40,8 +40,7 @@ import (
 )
 
 var (
-	controller         = true
-	blockOwnerDeletion = true
+	controller = true
 )
 
 // ManageSyntheticIntegrations is the controller for synthetic Integrations. Consider that the lifecycle of the objects are driven
@@ -206,12 +205,11 @@ func (app *nonManagedCamelDeployment) Integration() *v1.Integration {
 	}
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         "apps/v1",
-			Kind:               "Deployment",
-			Name:               app.deploy.Name,
-			UID:                app.deploy.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: "apps/v1",
+			Kind:       "Deployment",
+			Name:       app.deploy.Name,
+			UID:        app.deploy.UID,
+			Controller: &controller,
 		},
 	}
 	it.SetOwnerReferences(references)
@@ -251,12 +249,11 @@ func (app *NonManagedCamelCronjob) Integration() *v1.Integration {
 	}
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         "batch/v1",
-			Kind:               "CronJob",
-			Name:               app.cron.Name,
-			UID:                app.cron.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: "batch/v1",
+			Kind:       "CronJob",
+			Name:       app.cron.Name,
+			UID:        app.cron.UID,
+			Controller: &controller,
 		},
 	}
 	it.SetOwnerReferences(references)
@@ -281,12 +278,11 @@ func (app *NonManagedCamelKnativeService) Integration() *v1.Integration {
 	}
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         servingv1.SchemeGroupVersion.String(),
-			Kind:               "Service",
-			Name:               app.ksvc.Name,
-			UID:                app.ksvc.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: servingv1.SchemeGroupVersion.String(),
+			Kind:       "Service",
+			Name:       app.ksvc.Name,
+			UID:        app.ksvc.UID,
+			Controller: &controller,
 		},
 	}
 	it.SetOwnerReferences(references)
