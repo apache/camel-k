@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.3.2...HEAD)
+
+**Closed issues:**
+
+- JVM trait refactoring [\#5476](https://github.com/apache/camel-k/issues/5476)
+
 ## [v2.3.2](https://github.com/apache/camel-k/tree/v2.3.2) (2024-05-28)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.3.2...v2.3.2)
