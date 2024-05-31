@@ -58,13 +58,13 @@ func TestNewPipeError(t *testing.T) {
 	assert.True(t, a.CanHandle(pipe))
 	handledPipe, err := a.Handle(context.TODO(), pipe)
 	require.Error(t, err)
-	assert.Equal(t, "could not determine source URI: no ref or URI specified in endpoint", err.Error())
+	assert.Equal(t, "no ref or URI specified in endpoint", err.Error())
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
 	cond := handledPipe.Status.GetCondition(v1.PipeConditionReady)
 	assert.NotNil(t, cond)
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
 	assert.Equal(t, "IntegrationError", cond.Reason)
-	assert.Equal(t, "could not determine source URI: no ref or URI specified in endpoint", cond.Message)
+	assert.Equal(t, "no ref or URI specified in endpoint", cond.Message)
 }
 
 func TestNewPipeWithComponentsCreating(t *testing.T) {
@@ -218,4 +218,65 @@ func templateOrFail(template map[string]interface{}) *v1.Template {
 	}
 	t := v1.Template{RawMessage: data}
 	return &t
+}
+
+func TestNewPipeUnsupportedRef(t *testing.T) {
+	svc := &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-svc",
+			Namespace: "ns",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{},
+			Selector: map[string]string{
+				v1.IntegrationLabel: "my-pipe",
+			},
+		},
+	}
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe",
+		},
+		Spec: v1.PipeSpec{
+			Source: v1.Endpoint{
+				URI: pointer.String("timer:tick"),
+			},
+			Sink: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					APIVersion: svc.APIVersion,
+					Kind:       svc.Kind,
+					Namespace:  svc.Namespace,
+					Name:       svc.Name,
+				},
+			},
+		},
+	}
+	c, err := test.NewFakeClient(pipe)
+	require.NoError(t, err)
+
+	a := NewInitializeAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "initialize", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.Error(t, err)
+	assert.Equal(t, "could not find any suitable binding provider for v1/Service my-svc in namespace ns. "+
+		"Bindings available: [\"kamelet\" \"knative-uri\" \"camel-uri\" \"knative-ref\"]", err.Error())
+	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
+	cond := handledPipe.Status.GetCondition(v1.PipeConditionReady)
+	assert.NotNil(t, cond)
+	assert.Equal(t, corev1.ConditionFalse, cond.Status)
+	assert.Equal(t, "IntegrationError", cond.Reason)
+	assert.Equal(t, "could not find any suitable binding provider for v1/Service my-svc in namespace ns. "+
+		"Bindings available: [\"kamelet\" \"knative-uri\" \"camel-uri\" \"knative-ref\"]", cond.Message)
 }

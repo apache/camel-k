@@ -110,10 +110,7 @@ func TestPipe(t *testing.T) {
 			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
 			g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
 			g.Eventually(PipeCondition(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
-				WithTransform(PipeConditionMessage, And(
-					ContainSubstring("could not determine source URI"),
-					ContainSubstring("no ref or URI specified in endpoint"),
-				)))
+				WithTransform(PipeConditionMessage, ContainSubstring("no ref or URI specified in endpoint")))
 		})
 
 		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())

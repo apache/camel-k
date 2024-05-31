@@ -245,7 +245,7 @@ func TestPipeIntegrationErrorFromPipeErrorPhase(t *testing.T) {
 	require.Error(t, err)
 	assert.Equal(t, v1.PipePhaseError, handledPipe.Status.Phase)
 	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
-	assert.Equal(t, "could not determine source URI: no ref or URI specified in endpoint", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
+	assert.Equal(t, "no ref or URI specified in endpoint", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
 }
 
 func TestPipeIntegrationCreatingFromPipeErrorPhase(t *testing.T) {

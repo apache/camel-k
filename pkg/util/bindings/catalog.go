@@ -19,11 +19,13 @@ package bindings
 
 import (
 	"errors"
+	"fmt"
 	"sort"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"k8s.io/utils/pointer"
 )
 
 var bindingProviders []BindingProvider
@@ -56,17 +58,28 @@ func V1alpha1RegisterBindingProvider(bp V1alpha1BindingProvider) {
 
 // Translate execute all chained binding providers, returning the first success or the first error.
 func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1.Endpoint) (*Binding, error) {
+	availableBindings := make([]string, len(bindingProviders))
 	if err := validateEndpoint(ctx, endpoint); err != nil {
 		return nil, err
 	}
 
-	for _, bp := range bindingProviders {
+	for i, bp := range bindingProviders {
+		availableBindings[i] = bp.ID()
 		b, err := bp.Translate(ctx, endpointCtx, endpoint)
 		if b != nil || err != nil {
 			return b, err
 		}
 	}
-	return nil, nil
+
+	// If no success we return an error with the actual list of available binding providers
+	var errorMessage string
+	if endpoint.Ref != nil {
+		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s/%s %s in namespace %s. Bindings available: %q",
+			endpoint.Ref.APIVersion, endpoint.Ref.Kind, endpoint.Ref.Name, endpoint.Ref.Namespace, availableBindings)
+	} else if pointer.StringDeref(endpoint.URI, "") != "" {
+		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s", *endpoint.URI)
+	}
+	return nil, fmt.Errorf(errorMessage)
 }
 
 func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {
