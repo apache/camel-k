@@ -24,6 +24,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
@@ -98,6 +99,10 @@ kind: IntegrationKit
 metadata:
   creationTimestamp: null
   labels:
+    camel.apache.org/cloned.from.kind: IntegrationKit
+    camel.apache.org/cloned.from.name: my-it-test-kit
+    camel.apache.org/cloned.from.namespace: default
+    camel.apache.org/cloned.from.version: "999"
     camel.apache.org/kit.type: external
   name: my-it-test-kit
   namespace: prod-namespace
@@ -166,6 +171,10 @@ kind: IntegrationKit
 metadata:
   creationTimestamp: null
   labels:
+    camel.apache.org/cloned.from.kind: IntegrationKit
+    camel.apache.org/cloned.from.name: my-kb-test-kit
+    camel.apache.org/cloned.from.namespace: default
+    camel.apache.org/cloned.from.version: "999"
     camel.apache.org/kit.type: external
   name: my-kb-test-kit
   namespace: prod-namespace
@@ -236,6 +245,10 @@ kind: IntegrationKit
 metadata:
   creationTimestamp: null
   labels:
+    camel.apache.org/cloned.from.kind: IntegrationKit
+    camel.apache.org/cloned.from.name: my-it-test-kit
+    camel.apache.org/cloned.from.namespace: default
+    camel.apache.org/cloned.from.version: "999"
     camel.apache.org/kit.type: external
   name: my-it-test-kit
   namespace: prod-namespace
@@ -296,6 +309,10 @@ kind: IntegrationKit
 metadata:
   creationTimestamp: null
   labels:
+    camel.apache.org/cloned.from.kind: IntegrationKit
+    camel.apache.org/cloned.from.name: my-kb-test-kit
+    camel.apache.org/cloned.from.namespace: default
+    camel.apache.org/cloned.from.version: "999"
     camel.apache.org/kit.type: external
   name: my-kb-test-kit
   namespace: prod-namespace
@@ -393,6 +410,10 @@ metadata:
     camel.apache.org/operator.id: my-prod-operator
   creationTimestamp: null
   labels:
+    camel.apache.org/cloned.from.kind: IntegrationKit
+    camel.apache.org/cloned.from.name: my-it-test-kit
+    camel.apache.org/cloned.from.namespace: default
+    camel.apache.org/cloned.from.version: "999"
     camel.apache.org/kit.type: external
   name: my-it-test-kit
   namespace: prod
@@ -434,6 +455,10 @@ metadata:
     camel.apache.org/operator.id: my-prod-operator
   creationTimestamp: null
   labels:
+    camel.apache.org/cloned.from.kind: IntegrationKit
+    camel.apache.org/cloned.from.name: my-it-test-kit
+    camel.apache.org/cloned.from.namespace: default
+    camel.apache.org/cloned.from.version: "999"
     camel.apache.org/kit.type: external
   name: my-it-test-kit
   namespace: prod
@@ -455,6 +480,64 @@ spec:
     kind: IntegrationKit
     name: my-it-test-kit
     namespace: prod
+  traits:
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
+status: {}
+`, output)
+}
+
+func TestIntegrationKitWithLabels(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
+	defaultKit.Labels = map[string]string{
+		kubernetes.CamelCreatorLabelKind:      "Integration",
+		kubernetes.CamelCreatorLabelName:      "my-original-it-name",
+		kubernetes.CamelCreatorLabelNamespace: "my-original-it-namespace",
+		kubernetes.CamelCreatorLabelVersion:   "my-original-it-version",
+	}
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: IntegrationKit
+metadata:
+  creationTimestamp: null
+  labels:
+    camel.apache.org/cloned.from.kind: IntegrationKit
+    camel.apache.org/cloned.from.name: my-it-test-kit
+    camel.apache.org/cloned.from.namespace: default
+    camel.apache.org/cloned.from.version: "999"
+    camel.apache.org/kit.type: external
+  name: my-it-test-kit
+  namespace: prod-namespace
+spec:
+  image: my-special-image
+  traits: {}
+status: {}
+---
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  creationTimestamp: null
+  name: my-it-test
+  namespace: prod-namespace
+spec:
+  integrationKit:
+    kind: IntegrationKit
+    name: my-it-test-kit
+    namespace: prod-namespace
   traits:
     jvm:
       classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
