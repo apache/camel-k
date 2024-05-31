@@ -87,31 +87,9 @@ func (t *jibTask) Do(ctx context.Context) v1.BuildStatus {
 		}
 	}
 
-	// TODO refactor maven code to avoid creating a file to pass command args
-	mavenCommand, err := util.ReadFile(filepath.Join(mavenDir, "MAVEN_CONTEXT"))
+	mavenArgs, err := buildJibMavenArgs(mavenDir, t.task.Image, status.BaseImage, t.task.Registry.Insecure, t.task.Configuration.ImagePlatforms)
 	if err != nil {
 		return status.Failed(err)
-	}
-
-	mavenArgs := make([]string, 0)
-	mavenArgs = append(mavenArgs, jib.JibMavenGoal)
-	mavenArgs = append(mavenArgs, strings.Split(string(mavenCommand), " ")...)
-	mavenArgs = append(mavenArgs, "-P", "jib")
-	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+t.task.Image)
-	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+status.BaseImage)
-	mavenArgs = append(mavenArgs, jib.JibMavenBaseImageCache+mavenDir+"/jib")
-
-	// Build the integration for the arch configured in the IntegrationPlatform.
-	// This can explicitly be configured with the `-t builder.platforms` trait.
-	// Building the integration for multiarch is deferred until the next major version (e.g. 3.x)
-
-	if t.task.Configuration.ImagePlatforms != nil {
-		platforms := strings.Join(t.task.Configuration.ImagePlatforms, ",")
-		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+platforms)
-	}
-
-	if t.task.Registry.Insecure {
-		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
 	}
 
 	mvnCmd := "./mvnw"
@@ -160,4 +138,33 @@ func cleanRegistryConfig(registryConfigDir string) error {
 		return err
 	}
 	return nil
+}
+
+// buildJibMavenArgs build the jib execution expected parameters.
+func buildJibMavenArgs(mavenDir, image, baseImage string, insecureRegistry bool, imagePlatforms []string) ([]string, error) {
+	// TODO refactor maven code to avoid creating a file to pass command args
+	mavenCommand, err := util.ReadFile(filepath.Join(mavenDir, "MAVEN_CONTEXT"))
+	if err != nil {
+		return nil, err
+	}
+
+	mavenArgs := make([]string, 0)
+	mavenArgs = append(mavenArgs, jib.JibMavenGoal)
+	mavenArgs = append(mavenArgs, "-Djib.disableUpdateChecks=true")
+	mavenArgs = append(mavenArgs, strings.Split(string(mavenCommand), " ")...)
+	mavenArgs = append(mavenArgs, "-P", "jib")
+	mavenArgs = append(mavenArgs, jib.JibMavenToImageParam+image)
+	mavenArgs = append(mavenArgs, jib.JibMavenFromImageParam+baseImage)
+	mavenArgs = append(mavenArgs, jib.JibMavenBaseImageCache+mavenDir+"/jib")
+
+	if imagePlatforms != nil {
+		platforms := strings.Join(imagePlatforms, ",")
+		mavenArgs = append(mavenArgs, jib.JibMavenFromPlatforms+platforms)
+	}
+
+	if insecureRegistry {
+		mavenArgs = append(mavenArgs, jib.JibMavenInsecureRegistries+"true")
+	}
+
+	return mavenArgs, nil
 }
