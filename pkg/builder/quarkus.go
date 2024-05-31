@@ -216,6 +216,7 @@ func BuildQuarkusRunnerCommon(ctx context.Context, mc maven.Context, project mav
 		return err
 	}
 	mc.AddArgument("package")
+	mc.AddArgument("-Dmaven.test.skip=true")
 	// Run the Maven goal
 	if err := project.Command(mc).Do(ctx); err != nil {
 		return fmt.Errorf("failure while building project: %w", err)
