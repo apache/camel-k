@@ -108,16 +108,16 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 
 	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, binding.Spec.Source)
 	if err != nil {
-		return nil, fmt.Errorf("could not determine source URI: %w", err)
+		return nil, err
 	}
 	to, err := bindings.Translate(bindingContext, endpointTypeSinkContext, binding.Spec.Sink)
 	if err != nil {
-		return nil, fmt.Errorf("could not determine sink URI: %w", err)
+		return nil, err
 	}
 	// error handler is optional
 	errorHandler, err := maybeErrorHandler(binding.Spec.ErrorHandler, bindingContext)
 	if err != nil {
-		return nil, fmt.Errorf("could not determine error handler: %w", err)
+		return nil, err
 	}
 
 	steps := make([]*bindings.Binding, 0, len(binding.Spec.Steps))
