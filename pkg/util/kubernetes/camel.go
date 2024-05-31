@@ -29,11 +29,17 @@ import (
 
 const (
 	CamelCreatorLabelPrefix = "camel.apache.org/created.by"
+	CamelClonedLabelPrefix  = "camel.apache.org/cloned.from"
 
 	CamelCreatorLabelKind      = CamelCreatorLabelPrefix + ".kind"
 	CamelCreatorLabelName      = CamelCreatorLabelPrefix + ".name"
 	CamelCreatorLabelNamespace = CamelCreatorLabelPrefix + ".namespace"
 	CamelCreatorLabelVersion   = CamelCreatorLabelPrefix + ".version"
+
+	CamelClonedLabelKind      = CamelClonedLabelPrefix + ".kind"
+	CamelClonedLabelName      = CamelClonedLabelPrefix + ".name"
+	CamelClonedLabelNamespace = CamelClonedLabelPrefix + ".namespace"
+	CamelClonedLabelVersion   = CamelClonedLabelPrefix + ".version"
 )
 
 // FilterCamelCreatorLabels is used to inherit the creator information among resources.

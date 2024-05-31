@@ -105,7 +105,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 							Namespace: ns,
 							Name:      "external",
 							Labels: map[string]string{
-								"camel.apache.org/kit.type": v1.IntegrationKitTypeExternal,
+								v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeExternal,
 							},
 							Annotations: map[string]string{
 								"camel.apache.org/operator.id": operator2,
