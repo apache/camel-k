@@ -2685,7 +2685,46 @@ func CreateOperatorRoleBinding(t *testing.T, ctx context.Context, ns string) err
 	return nil
 }
 
-func CreateKamelPod(t *testing.T, ctx context.Context, ns string, name string, command ...string) error {
+// CreateKamelPodWithIntegrationSource generates and deploy a Pod from current Camel K controller image that will run a `kamel xxxx` command.
+// The integration parameter represent an Integration source file contained in a ConfigMap or Secret defined and mounted on the as a Volume.
+func CreateKamelPodWithIntegrationSource(t *testing.T, ctx context.Context, ns string, name string, integration v1.ValueSource, command ...string) error {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
+
+	var volumes []corev1.Volume
+	if integration.SecretKeyRef != nil {
+		volumes = []corev1.Volume{
+			{
+				Name: "integration-source-volume",
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: integration.SecretKeyRef.Name,
+					},
+				},
+			},
+		}
+	} else {
+		volumes = []corev1.Volume{
+			{
+				Name: "integration-source-volume",
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: integration.ConfigMapKeyRef.LocalObjectReference,
+					},
+				},
+			},
+		}
+	}
+
+	var volumeMounts []corev1.VolumeMount
+	volumeMounts = []corev1.VolumeMount{
+		{
+			Name:      "integration-source-volume",
+			MountPath: "/tmp/",
+			ReadOnly:  true,
+		},
+	}
+
 	args := command
 	for _, hook := range KamelHooks {
 		args = hook(args)
@@ -2704,11 +2743,13 @@ func CreateKamelPod(t *testing.T, ctx context.Context, ns string, name string, c
 			RestartPolicy:      corev1.RestartPolicyNever,
 			Containers: []corev1.Container{
 				{
-					Name:    "kamel-runner",
-					Image:   TestImageName + ":" + TestImageVersion,
-					Command: append([]string{"kamel"}, args...),
+					Name:         "kamel-runner",
+					Image:        TestImageName + ":" + TestImageVersion,
+					Command:      append([]string{"kamel"}, args...),
+					VolumeMounts: volumeMounts,
 				},
 			},
+			Volumes: volumes,
 		},
 	}
 	return TestClient(t).Create(ctx, &pod)
