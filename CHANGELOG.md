@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Kamelet data type test failling with updated 4.4.1 kamelet [\#5553](https://github.com/apache/camel-k/issues/5553)
 - JVM trait refactoring [\#5476](https://github.com/apache/camel-k/issues/5476)
 
 ## [v2.3.2](https://github.com/apache/camel-k/tree/v2.3.2) (2024-05-28)
