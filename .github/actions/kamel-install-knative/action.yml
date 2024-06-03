@@ -23,4 +23,4 @@ runs:
     - name: Install Knative
       shell: bash
       run: |
-        ./.github/actions/kamel-install-knative/install-knative.sh
+        ./e2e/knative/files/setup.sh
