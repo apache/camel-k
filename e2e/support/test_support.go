@@ -285,6 +285,9 @@ func KamelInstallWithIDAndKameletCatalog(t *testing.T, ctx context.Context, oper
 }
 
 func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) error {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
+
 	kamelInstallMutex.Lock()
 	defer kamelInstallMutex.Unlock()
 
@@ -2688,8 +2691,6 @@ func CreateOperatorRoleBinding(t *testing.T, ctx context.Context, ns string) err
 // CreateKamelPodWithIntegrationSource generates and deploy a Pod from current Camel K controller image that will run a `kamel xxxx` command.
 // The integration parameter represent an Integration source file contained in a ConfigMap or Secret defined and mounted on the as a Volume.
 func CreateKamelPodWithIntegrationSource(t *testing.T, ctx context.Context, ns string, name string, integration v1.ValueSource, command ...string) error {
-	// This line prevents controller-runtime from complaining about log.SetLogger never being called
-	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 
 	var volumes []corev1.Volume
 	if integration.SecretKeyRef != nil {
