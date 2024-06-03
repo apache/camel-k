@@ -8,13 +8,20 @@
 
 - Kamelet data type test failling with updated 4.4.1 kamelet [\#5553](https://github.com/apache/camel-k/issues/5553)
 - Promote Integration operator warning [\#5541](https://github.com/apache/camel-k/issues/5541)
+- Pipe not correctly reconciled after updating it [\#5531](https://github.com/apache/camel-k/issues/5531)
 - Disable Jib telemetry/update check [\#5481](https://github.com/apache/camel-k/issues/5481)
 - JVM trait refactoring [\#5476](https://github.com/apache/camel-k/issues/5476)
+- Skip surefire when building the IntegrationKit [\#5472](https://github.com/apache/camel-k/issues/5472)
+- Expand Integration pod template spec [\#5395](https://github.com/apache/camel-k/issues/5395)
 
 **Merged pull requests:**
 
+- chore\(deps\): bump fabric8-version from 6.12.1 to 6.13.0 in /java/crds [\#5572](https://github.com/apache/camel-k/pull/5572) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/spf13/viper from 1.18.2 to 1.19.0 [\#5571](https://github.com/apache/camel-k/pull/5571) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(cmd\): promote correct labels [\#5568](https://github.com/apache/camel-k/pull/5568) ([squakez](https://github.com/squakez))
+- chore\(builder\): add -DskipTests [\#5567](https://github.com/apache/camel-k/pull/5567) ([squakez](https://github.com/squakez))
 - chore\(builder\): Jib disableUpdateChecks = true [\#5566](https://github.com/apache/camel-k/pull/5566) ([squakez](https://github.com/squakez))
+- fix\(ctrl\): Pipe rebuild after error phase [\#5565](https://github.com/apache/camel-k/pull/5565) ([squakez](https://github.com/squakez))
 - chore\(e2e\): revert a commented test [\#5564](https://github.com/apache/camel-k/pull/5564) ([squakez](https://github.com/squakez))
 - fix\(ctrl\): synthetic Integration cannot set blockOwnerDeletion [\#5561](https://github.com/apache/camel-k/pull/5561) ([squakez](https://github.com/squakez))
 - fix\(e2e\): Data type action kamelet transformer error [\#5557](https://github.com/apache/camel-k/pull/5557) ([gansheer](https://github.com/gansheer))
@@ -59,6 +66,7 @@
 - chore\(deps\): bump golang.org/x/term from 0.19.0 to 0.20.0 [\#5458](https://github.com/apache/camel-k/pull/5458) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(kamelets\): parse the url used to download kamelet [\#5457](https://github.com/apache/camel-k/pull/5457) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump golang.org/x/text from 0.14.0 to 0.15.0 [\#5453](https://github.com/apache/camel-k/pull/5453) ([dependabot[bot]](https://github.com/apps/dependabot))
+- kind/feature/5395/expand pod template spec [\#5445](https://github.com/apache/camel-k/pull/5445) ([hernanDatgDev](https://github.com/hernanDatgDev))
 - Test fixes [\#5415](https://github.com/apache/camel-k/pull/5415) ([valdar](https://github.com/valdar))
 - fix\(\#5292\): Simplify run cmd for archs other than amd64 [\#5403](https://github.com/apache/camel-k/pull/5403) ([tdiesler](https://github.com/tdiesler))
 - feat\(4893\) YAML DSL route configuration support [\#5369](https://github.com/apache/camel-k/pull/5369) ([realMartinez](https://github.com/realMartinez))
