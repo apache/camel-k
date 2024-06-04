@@ -1297,7 +1297,7 @@ github.com/apache/camel-k/v2/pkg/controller/pipe/initialize.go:61:					initializ
 github.com/apache/camel-k/v2/pkg/controller/pipe/initialize.go:95:					propagateIcon						75.0%
 github.com/apache/camel-k/v2/pkg/controller/pipe/initialize.go:110:					findIcon						75.0%
 github.com/apache/camel-k/v2/pkg/controller/pipe/initialize.go:138:					patchPipeIconAnnotations				76.9%
-github.com/apache/camel-k/v2/pkg/controller/pipe/integration.go:46:					CreateIntegrationFor					67.1%
+github.com/apache/camel-k/v2/pkg/controller/pipe/integration.go:46:					CreateIntegrationFor					68.5%
 github.com/apache/camel-k/v2/pkg/controller/pipe/integration.go:213:					configureBinding					81.8%
 github.com/apache/camel-k/v2/pkg/controller/pipe/integration.go:235:					determineTraitProfile					36.8%
 github.com/apache/camel-k/v2/pkg/controller/pipe/monitor.go:35:						NewMonitorAction					100.0%
@@ -1850,12 +1850,12 @@ github.com/apache/camel-k/v2/pkg/util/bindings/camel_uri.go:66:						ID							10
 github.com/apache/camel-k/v2/pkg/util/bindings/camel_uri.go:72:						Translate						0.0%
 github.com/apache/camel-k/v2/pkg/util/bindings/camel_uri.go:92:						Order							100.0%
 github.com/apache/camel-k/v2/pkg/util/bindings/camel_uri.go:97:						init							100.0%
-github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:32:						RegisterBindingProvider					100.0%
-github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:47:						V1alpha1RegisterBindingProvider				100.0%
-github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:58:						Translate						71.4%
-github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:72:						validateEndpoint					88.9%
-github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:91:						TranslateV1alpha1					0.0%
-github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:106:						validateEndpointV1alpha1				0.0%
+github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:34:						RegisterBindingProvider					100.0%
+github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:49:						V1alpha1RegisterBindingProvider				100.0%
+github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:60:						Translate						50.0%
+github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:85:						validateEndpoint					88.9%
+github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:104:						TranslateV1alpha1					0.0%
+github.com/apache/camel-k/v2/pkg/util/bindings/catalog.go:119:						validateEndpointV1alpha1				0.0%
 github.com/apache/camel-k/v2/pkg/util/bindings/kamelet.go:39:						ID							100.0%
 github.com/apache/camel-k/v2/pkg/util/bindings/kamelet.go:46:						Translate						84.0%
 github.com/apache/camel-k/v2/pkg/util/bindings/kamelet.go:147:						DataTypeStep						100.0%
