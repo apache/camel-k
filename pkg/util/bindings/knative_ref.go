@@ -18,7 +18,6 @@ limitations under the License.
 package bindings
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 
@@ -85,30 +84,7 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 		props["kind"] = e.Ref.Kind
 	}
 
-	var serviceURI string
-
-	// TODO: refactor
-	//nolint:nestif
-	if *serviceType == knativeapis.CamelServiceTypeEvent {
-		if props["name"] == "" {
-			props["name"] = e.Ref.Name
-		}
-		if eventType, ok := props["type"]; ok {
-			// consume prop
-			delete(props, "type")
-			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, eventType)
-		} else {
-			if endpointCtx.Type == v1.EndpointTypeSink || endpointCtx.Type == v1.EndpointTypeAction {
-				// Allowing no event type, but it can fail. See https://github.com/apache/camel-k/v2-runtime/issues/536
-				serviceURI = fmt.Sprintf("knative:%s", *serviceType)
-			} else {
-				return nil, errors.New(`property "type" must be provided when reading from the Broker`)
-			}
-		}
-	} else {
-		serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
-	}
-
+	serviceURI := fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
 	serviceURI = uri.AppendParameters(serviceURI, props)
 	return &Binding{
 		URI: serviceURI,
@@ -192,29 +168,7 @@ func (k V1alpha1KnativeRefBindingProvider) Translate(ctx V1alpha1BindingContext,
 		props["kind"] = e.Ref.Kind
 	}
 
-	var serviceURI string
-
-	//nolint:nestif
-	if *serviceType == knativeapis.CamelServiceTypeEvent {
-		if props["name"] == "" {
-			props["name"] = e.Ref.Name
-		}
-		if eventType, ok := props["type"]; ok {
-			// consume prop
-			delete(props, "type")
-			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, eventType)
-		} else {
-			if endpointCtx.Type == v1alpha1.EndpointTypeSink || endpointCtx.Type == v1alpha1.EndpointTypeAction {
-				// Allowing no event type, but it can fail. See https://github.com/apache/camel-k/v2-runtime/issues/536
-				serviceURI = fmt.Sprintf("knative:%s", *serviceType)
-			} else {
-				return nil, errors.New(`property "type" must be provided when reading from the Broker`)
-			}
-		}
-	} else {
-		serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
-	}
-
+	serviceURI := fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
 	serviceURI = uri.AppendParameters(serviceURI, props)
 	return &Binding{
 		URI: serviceURI,

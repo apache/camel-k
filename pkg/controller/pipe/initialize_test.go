@@ -20,6 +20,7 @@ package pipe
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -279,4 +280,49 @@ func TestNewPipeUnsupportedRef(t *testing.T) {
 	assert.Equal(t, "IntegrationError", cond.Reason)
 	assert.Equal(t, "could not find any suitable binding provider for v1/Service my-svc in namespace ns. "+
 		"Bindings available: [\"kamelet\" \"knative-uri\" \"camel-uri\" \"knative-ref\"]", cond.Message)
+}
+
+func TestNewPipeWithBrokerPlain(t *testing.T) {
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe",
+		},
+		Spec: v1.PipeSpec{
+			Source: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "Broker",
+					APIVersion: "eventing.knative.dev/v1",
+					Name:       "my-broker",
+				},
+			},
+			Sink: v1.Endpoint{
+				URI: pointer.String("log:info"),
+			},
+		},
+	}
+	c, err := test.NewFakeClient(pipe)
+	require.NoError(t, err)
+
+	a := NewInitializeAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "initialize", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.NoError(t, err)
+	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
+	expectedIT := v1.NewIntegration(pipe.Namespace, pipe.Name)
+	err = c.Get(context.Background(), ctrl.ObjectKeyFromObject(&expectedIT), &expectedIT)
+	require.NoError(t, err)
+	flow, err := json.Marshal(expectedIT.Spec.Flows[0].RawMessage)
+	require.NoError(t, err)
+	// Json marshal encode HTML chars by default
+	unescapedFlow := strings.ReplaceAll(string(flow), "\\u0026", "&")
+	assert.Equal(t, "{\"route\":{\"from\":{\"steps\":[{\"to\":\"log:info\"}],"+
+		"\"uri\":\"knative:event/my-broker?apiVersion=eventing.knative.dev%2Fv1&kind=Broker\"},\"id\":\"binding\"}}", unescapedFlow)
 }

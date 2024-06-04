@@ -39,11 +39,11 @@ func TestKnativeRefBinding(t *testing.T) {
 			endpoint: camelv1.Endpoint{
 				Ref: &v1.ObjectReference{
 					Kind:       "Broker",
-					Name:       "default",
+					Name:       "mybroker",
 					APIVersion: "eventing.knative.dev/v1",
 				},
 			},
-			uri: "knative:event?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
+			uri: "knative:event/mybroker?apiVersion=eventing.knative.dev%2Fv1&kind=Broker",
 		},
 		{
 			endpoint: camelv1.Endpoint{

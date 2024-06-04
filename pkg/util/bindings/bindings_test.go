@@ -124,7 +124,7 @@ func TestBindings(t *testing.T) {
 					"type": "myeventtype",
 				}),
 			},
-			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
+			uri: "knative:event/default?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&type=myeventtype",
 		},
 		{
 			endpointType: v1.EndpointTypeSource,
