@@ -33,7 +33,7 @@ This is the list of the groups we are using (please, notice that they can slight
     * advanced (`make test-advanced`)
     * install (`make test-install`, `make test-install-olm` and `make test-install-upgrade`)
     * knative (`make test-knative`)
-    * native (`make test-quarkus-native` and `make test-quarkus-native-high-memory`)
+    * native (`make test-quarkus-native`)
     * telemetry (`make test-telemetry`)
 
 Each group tests a specific feature of Camel K. Typically any new test should be falling under the `common` group, unless it belongs to any other category or it requires some particular customization. As an example, `telemetry` requires the configuration of an OTLP Collector, reason why it requires its own group. If the test still is a common one but needs to perform customization on the Camel K Operator, then, it should be developed under `advanced`: as an example, we have there tests which requires the configuration of a Maven proxy.
