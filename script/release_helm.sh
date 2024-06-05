@@ -19,8 +19,9 @@ set -e
 
 location=$(dirname $0)
 rootdir=$(realpath $location/..)
-targetdir=$rootdir/docs/charts
 version=$1
+targetdir=$rootdir/docs/charts/$version
+helm_index=$rootdir/docs/charts/index.yaml
 
 mkdir -p $targetdir
 
@@ -28,4 +29,7 @@ cd $rootdir/helm
 
 helm package ./camel-k --version $version
 mv camel-k-*.tgz $targetdir/
-helm repo index $targetdir --url https://apache.github.io/camel-k/charts/
+helm repo index $targetdir --url https://apache.github.io/camel-k/charts/ --merge $helm_index
+# Required to prevent https://github.com/helm/helm/issues/7363
+mv $targetdir/* $targetdir/../.
+rm -rf $targetdir
