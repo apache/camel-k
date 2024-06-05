@@ -8,11 +8,14 @@
 
 - Kamelet data type test failling with updated 4.4.1 kamelet [\#5553](https://github.com/apache/camel-k/issues/5553)
 - Promote Integration operator warning [\#5541](https://github.com/apache/camel-k/issues/5541)
+- Pipe with Addressable as `sink` does crash and does not report anything on the status  [\#5535](https://github.com/apache/camel-k/issues/5535)
 - Pipe not correctly reconciled after updating it [\#5531](https://github.com/apache/camel-k/issues/5531)
+- Release 2.3.2 [\#5520](https://github.com/apache/camel-k/issues/5520)
 - Disable Jib telemetry/update check [\#5481](https://github.com/apache/camel-k/issues/5481)
 - JVM trait refactoring [\#5476](https://github.com/apache/camel-k/issues/5476)
 - Skip surefire when building the IntegrationKit [\#5472](https://github.com/apache/camel-k/issues/5472)
 - Expand Integration pod template spec [\#5395](https://github.com/apache/camel-k/issues/5395)
+- Add E2E workflow using Windows runner for testing Camel K CLI client and local run [\#3364](https://github.com/apache/camel-k/issues/3364)
 
 ## [v2.3.2](https://github.com/apache/camel-k/tree/v2.3.2) (2024-05-28)
 
