@@ -355,25 +355,18 @@ test-builder: do-build
 	go test -timeout 30m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN) $(GOTESTFMT)
 
 #
-# Telemetry tests that require the configuration of telemtry endpoints
+# Telemetry tests that require the configuration of telemetry endpoints
 #
 test-telemetry: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(TEST_TELEMETRY_RUN) $(GOTESTFMT)
 
 #
-# Quarkus native test which require a lower memory resources
+# Quarkus native test (requires certain CPU and memory conditions)
 #
 test-quarkus-native: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 180m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN) $(GOTESTFMT)
-
-#
-# Quarkus native test which require a higher memory resources
-#
-test-quarkus-native-high-memory: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 180m -v ./e2e/native -tags=integration,high_memory $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
 	@echo "####### Building kamel CLI for linux/$(IMAGE_ARCH) architecture..."
