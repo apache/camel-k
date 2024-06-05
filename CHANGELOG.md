@@ -6,11 +6,14 @@
 
 **Closed issues:**
 
+- Helm release script overrides all index dates [\#5575](https://github.com/apache/camel-k/issues/5575)
 - Kamelet data type test failling with updated 4.4.1 kamelet [\#5553](https://github.com/apache/camel-k/issues/5553)
+- Add a canonical script that installs Knative [\#5545](https://github.com/apache/camel-k/issues/5545)
 - Promote Integration operator warning [\#5541](https://github.com/apache/camel-k/issues/5541)
 - Pipe with Addressable as `sink` does crash and does not report anything on the status  [\#5535](https://github.com/apache/camel-k/issues/5535)
 - Pipe not correctly reconciled after updating it [\#5531](https://github.com/apache/camel-k/issues/5531)
 - Release 2.3.2 [\#5520](https://github.com/apache/camel-k/issues/5520)
+- Tekton Task e2e test rewrite [\#5509](https://github.com/apache/camel-k/issues/5509)
 - Disable Jib telemetry/update check [\#5481](https://github.com/apache/camel-k/issues/5481)
 - JVM trait refactoring [\#5476](https://github.com/apache/camel-k/issues/5476)
 - Skip surefire when building the IntegrationKit [\#5472](https://github.com/apache/camel-k/issues/5472)
@@ -19,12 +22,20 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): merge helm with older index [\#5591](https://github.com/apache/camel-k/pull/5591) ([squakez](https://github.com/squakez))
+- fix\(ci\): OLM annotation syntax [\#5586](https://github.com/apache/camel-k/pull/5586) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump golang.org/x/text from 0.15.0 to 0.16.0 [\#5585](https://github.com/apache/camel-k/pull/5585) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/term from 0.20.0 to 0.21.0 [\#5584](https://github.com/apache/camel-k/pull/5584) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.20.0 to 0.21.0 [\#5583](https://github.com/apache/camel-k/pull/5583) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(ci\): Upgrade opentelemetry-collector to last v0.x [\#5582](https://github.com/apache/camel-k/pull/5582) ([gansheer](https://github.com/gansheer))
+- fix\(e2e\): Ensures Maven proxy test is not infra dependant [\#5581](https://github.com/apache/camel-k/pull/5581) ([gansheer](https://github.com/gansheer))
 - chore: bump last released version [\#5578](https://github.com/apache/camel-k/pull/5578) ([squakez](https://github.com/squakez))
 - chore\(helm\): release 2.3.2 [\#5576](https://github.com/apache/camel-k/pull/5576) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.53.0 to 0.54.0 [\#5574](https://github.com/apache/camel-k/pull/5574) ([dependabot[bot]](https://github.com/apps/dependabot))
 - \(\#5545\) Add a canonical script that installs Knative [\#5573](https://github.com/apache/camel-k/pull/5573) ([tdiesler](https://github.com/tdiesler))
 - chore\(deps\): bump fabric8-version from 6.12.1 to 6.13.0 in /java/crds [\#5572](https://github.com/apache/camel-k/pull/5572) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/spf13/viper from 1.18.2 to 1.19.0 [\#5571](https://github.com/apache/camel-k/pull/5571) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(e2e\): Rewrite tekton test to use run command [\#5570](https://github.com/apache/camel-k/pull/5570) ([gansheer](https://github.com/gansheer))
 - fix\(pipe\): don't panic if no binding available [\#5569](https://github.com/apache/camel-k/pull/5569) ([squakez](https://github.com/squakez))
 - fix\(cmd\): promote correct labels [\#5568](https://github.com/apache/camel-k/pull/5568) ([squakez](https://github.com/squakez))
 - chore\(builder\): add -DskipTests [\#5567](https://github.com/apache/camel-k/pull/5567) ([squakez](https://github.com/squakez))
