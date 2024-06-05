@@ -37,6 +37,7 @@ import (
 	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/olm"
 
@@ -186,6 +187,22 @@ func TestMavenProxy(t *testing.T) {
 		}
 
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		// Check that operator pod has env_vars
+		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
+			if envVar := envvar.Get(op.Spec.Containers[0].Env, "HTTP_PROXY"); envVar != nil {
+				return envVar.Value == fmt.Sprintf("http://%s", hostname)
+			}
+			return false
+
+		}), TestTimeoutShort).Should(BeTrue())
+		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
+			if envVar := envvar.Get(op.Spec.Containers[0].Env, "NO_PROXY"); envVar != nil {
+				return envVar.Value == strings.Join(noProxy, ",")
+			}
+			return false
+
+		}), TestTimeoutShort).Should(BeTrue())
 
 		// Run the Integration
 		name := RandomizedSuffixName("java")
