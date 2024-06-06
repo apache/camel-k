@@ -6,11 +6,14 @@
 
 **Closed issues:**
 
+- Helm release script overrides all index dates [\#5575](https://github.com/apache/camel-k/issues/5575)
 - Kamelet data type test failling with updated 4.4.1 kamelet [\#5553](https://github.com/apache/camel-k/issues/5553)
+- Add a canonical script that installs Knative [\#5545](https://github.com/apache/camel-k/issues/5545)
 - Promote Integration operator warning [\#5541](https://github.com/apache/camel-k/issues/5541)
 - Pipe with Addressable as `sink` does crash and does not report anything on the status  [\#5535](https://github.com/apache/camel-k/issues/5535)
 - Pipe not correctly reconciled after updating it [\#5531](https://github.com/apache/camel-k/issues/5531)
 - Release 2.3.2 [\#5520](https://github.com/apache/camel-k/issues/5520)
+- Tekton Task e2e test rewrite [\#5509](https://github.com/apache/camel-k/issues/5509)
 - Disable Jib telemetry/update check [\#5481](https://github.com/apache/camel-k/issues/5481)
 - JVM trait refactoring [\#5476](https://github.com/apache/camel-k/issues/5476)
 - Skip surefire when building the IntegrationKit [\#5472](https://github.com/apache/camel-k/issues/5472)
