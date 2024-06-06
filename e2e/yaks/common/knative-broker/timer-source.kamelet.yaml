@@ -15,39 +15,42 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-config:
-  namespace:
-    temporary: true
-  runtime:
-    env:
-      - name: YAKS_CAMEL_AUTO_REMOVE_RESOURCES
-        value: false
-      - name: YAKS_CAMELK_AUTO_REMOVE_RESOURCES
-        value: false
-      - name: YAKS_KAMELETS_AUTO_REMOVE_RESOURCES
-        value: false
-      - name: YAKS_KUBERNETES_AUTO_REMOVE_RESOURCES
-        value: false
-      - name: YAKS_KNATIVE_AUTO_REMOVE_RESOURCES
-        value: false
-    resources:
-      - event-source-pipe.yaml
-      - log-sink-pipe.yaml
-      - source-filter-pipe.yaml
-      - no-filter-pipe.yaml
-    settings:
-      loggers:
-        - name: INTEGRATION_STATUS
-          level: INFO
-        - name: INTEGRATION_LOGS
-          level: INFO
-  dump:
-    enabled: true
-    failedOnly: true
-    includes:
-      - app=camel-k
-pre:
-  - name: installation
-    run: |
-      kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
-      kubectl apply -f log-sink.kamelet.yaml -n $YAKS_NAMESPACE
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: timer-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+    title: "Timer"
+    description: "Produces periodic events with a custom payload"
+    required:
+      - message
+    properties:
+      period:
+        title: Period
+        description: The time interval between two events
+        type: integer
+        default: 1000
+      message:
+        title: Message
+        description: The message to generate
+        type: string
+  dataTypes:
+    out:
+      types:
+        json:
+          mediaType: application/json
+          schema:
+            id: text.camel.apache.org
+            type: string
+  template:
+    from:
+      uri: timer:tick
+      parameters:
+        period: "{{period}}"
+      steps:
+        - setBody:
+            constant: "{{message}}"
+        - to: "kamelet:sink"

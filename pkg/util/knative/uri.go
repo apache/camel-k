@@ -84,7 +84,7 @@ func ExtractObjectReference(uri string) (v1.ObjectReference, error) {
 	}, nil
 }
 
-// ExtractEventType extract the eventType from a event URI.
+// ExtractEventType extract the eventType from an event URI.
 func ExtractEventType(uri string) string {
 	return matchOrEmpty(uriRegexp, 2, uri)
 }

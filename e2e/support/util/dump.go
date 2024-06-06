@@ -35,9 +35,12 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
+	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
@@ -200,6 +203,41 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			return err
 		}
 		t.Logf("---\n%s\n---\n", string(pdata))
+	}
+
+	// Knative resources
+	if installed, _ := knative.IsEventingInstalled(c); installed {
+		var trgs eventingv1.TriggerList
+		err = c.List(ctx, &trgs)
+		if err != nil {
+			return err
+		}
+		t.Logf("Found %d Knative trigger:\n", len(trgs.Items))
+		for _, p := range trgs.Items {
+			ref := p
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
+		}
+	}
+
+	if installed, _ := knative.IsServingInstalled(c); installed {
+		var ksrvs servingv1.ServiceList
+		err = c.List(ctx, &ksrvs)
+		if err != nil {
+			return err
+		}
+		t.Logf("Found %d Knative services:\n", len(ksrvs.Items))
+		for _, p := range ksrvs.Items {
+			ref := p
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
+		}
 	}
 
 	// CamelCatalogs

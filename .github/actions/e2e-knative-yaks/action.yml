@@ -106,7 +106,7 @@ runs:
     uses: ./.github/actions/kamel-install-yaks
     with:
       image-name: "docker.io/citrusframework/yaks"
-      version: 0.14.3
+      version: 0.19.1
 
   - id: report-problematic
     name: List Tests Marked As Problematic

@@ -103,6 +103,6 @@ fi
 kubectl get crds | grep camel | awk '{print $1}' | xargs kubectl delete crd &> /dev/null
 
 #
-# Remove KNative resources
+# Remove Knative resources
 #
 ./.github/actions/kamel-cleanup/cleanup-knative.sh
