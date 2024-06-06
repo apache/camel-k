@@ -143,7 +143,6 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		// Account for the Build metrics
 		observeBuildResult(build, build.Status.Phase, buildCreator, duration)
 
-		build.Status.Image = publishTaskImageName(build.Spec.Tasks)
 		// operator supported publishing tasks should provide the digest in the builder command process execution
 		if !operatorSupportedPublishingStrategy(build.Spec.Tasks) {
 			build.Status.Digest = publishTaskDigest(build.Spec.Tasks, pod.Status.ContainerStatuses)
@@ -347,25 +346,6 @@ func publishTask(tasks []v1.Task) *v1.Task {
 	}
 
 	return nil
-}
-
-func publishTaskImageName(tasks []v1.Task) string {
-	t := publishTask(tasks)
-	if t == nil {
-		return ""
-	}
-	switch {
-	case t.Custom != nil:
-		return t.Custom.PublishingImage
-	case t.Spectrum != nil:
-		return t.Spectrum.Image
-	case t.Jib != nil:
-		return t.Jib.Image
-	case t.S2i != nil:
-		return t.S2i.Image
-	}
-
-	return ""
 }
 
 func publishTaskName(tasks []v1.Task) string {
