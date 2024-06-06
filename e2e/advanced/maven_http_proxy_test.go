@@ -238,7 +238,7 @@ func TestMavenProxyNotPresent(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		hostname := fmt.Sprintf("%s.%s.svc", "proxy", ns)
+		hostname := fmt.Sprintf("%s.%s.svc", "proxy-fake", ns)
 
 		svc := Service(t, ctx, TestDefaultNamespace, "kubernetes")()
 		g.Expect(svc).NotTo(BeNil())
@@ -270,8 +270,8 @@ func TestMavenProxyNotPresent(t *testing.T) {
 		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		// Should not be able to build
-		g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
-		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).
+		g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).
 			Should(Equal(corev1.ConditionFalse))
 
 		// Clean up
