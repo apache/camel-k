@@ -7622,12 +7622,29 @@ spec:
                             items:
                               type: string
                             type: array
+                          filterEventType:
+                            description: 'Enables the default filtering for the Knative
+                              trigger using the event type If this is true, the created
+                              Knative trigger uses the event type as a filter on the
+                              event stream when no other filter criteria is given.
+                              (default: true)'
+                            type: boolean
                           filterSourceChannels:
                             description: Enables filtering on events based on the
                               header "ce-knativehistory". Since this header has been
                               removed in newer versions of Knative, filtering is disabled
                               by default.
                             type: boolean
+                          filters:
+                            description: Sets filter attributes on the event stream
+                              (such as event type, source, subject and so on). A list
+                              of key-value pairs that represent filter attributes
+                              and its values. The syntax is KEY=VALUE, e.g., `source="my.source"`.
+                              Filter attributes get set on the Knative trigger that
+                              is being created as part of this integration.
+                            items:
+                              type: string
+                            type: array
                           namespaceLabel:
                             description: 'Enables the camel-k-operator to set the
                               "bindings.knative.dev/include=true" label to the namespace

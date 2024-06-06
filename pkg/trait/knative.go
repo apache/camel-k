@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -501,40 +502,52 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 }
 
 func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference, eventType string, path string) error {
-	// TODO extend to additional filters too, to filter them at source and not at destination
 	found := e.Resources.HasKnativeTrigger(func(trigger *eventing.Trigger) bool {
 		return trigger.Spec.Broker == ref.Name &&
-			trigger.Spec.Filter != nil &&
-			trigger.Spec.Filter.Attributes["type"] == eventType // can be also missing
+			trigger.Name == knativeutil.GetTriggerName(ref.Name, e.Integration.Name, eventType)
 	})
-	if !found {
-		if ref.Namespace == "" {
-			ref.Namespace = e.Integration.Namespace
-		}
 
-		controllerStrategy, err := e.DetermineControllerStrategy()
+	if found {
+		return nil
+	}
+
+	if ref.Namespace == "" {
+		ref.Namespace = e.Integration.Namespace
+	}
+
+	controllerStrategy, err := e.DetermineControllerStrategy()
+	if err != nil {
+		return err
+	}
+
+	var attributes = make(map[string]string)
+	for _, filterExpression := range t.Filters {
+		key, value := property.SplitPropertyFileEntry(filterExpression)
+		attributes[key] = value
+	}
+
+	if _, eventTypeSpecified := attributes["type"]; !eventTypeSpecified && pointer.BoolDeref(t.FilterEventType, true) && eventType != "" {
+		// Apply default trigger filter attribute for the event type
+		attributes["type"] = eventType
+	}
+
+	var trigger *eventing.Trigger
+	switch controllerStrategy {
+	case ControllerStrategyKnativeService:
+		trigger, err = knativeutil.CreateKnativeServiceTrigger(*ref, e.Integration.Name, eventType, path, attributes)
 		if err != nil {
 			return err
 		}
-
-		var trigger *eventing.Trigger
-		switch controllerStrategy {
-		case ControllerStrategyKnativeService:
-			trigger, err = knativeutil.CreateKnativeServiceTrigger(*ref, e.Integration.Name, eventType, path)
-			if err != nil {
-				return err
-			}
-		case ControllerStrategyDeployment:
-			trigger, err = knativeutil.CreateServiceTrigger(*ref, e.Integration.Name, eventType, path)
-			if err != nil {
-				return err
-			}
-		default:
-			return fmt.Errorf("failed to create Knative trigger: unsupported controller strategy %s", controllerStrategy)
+	case ControllerStrategyDeployment:
+		trigger, err = knativeutil.CreateServiceTrigger(*ref, e.Integration.Name, eventType, path, attributes)
+		if err != nil {
+			return err
 		}
-
-		e.Resources.Add(trigger)
+	default:
+		return fmt.Errorf("failed to create Knative trigger: unsupported controller strategy %s", controllerStrategy)
 	}
+
+	e.Resources.Add(trigger)
 
 	return nil
 }

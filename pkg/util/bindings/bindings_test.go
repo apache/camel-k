@@ -125,6 +125,12 @@ func TestBindings(t *testing.T) {
 				}),
 			},
 			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
+			traits: v1.Traits{
+				Knative: &traitv1.KnativeTrait{
+					Filters:         []string{"type=myeventtype"},
+					FilterEventType: pointer.Bool(true),
+				},
+			},
 		},
 		{
 			endpointType: v1.EndpointTypeSource,

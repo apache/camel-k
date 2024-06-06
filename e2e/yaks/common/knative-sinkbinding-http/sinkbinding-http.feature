@@ -6,4 +6,4 @@ Feature: Camel K can run source HTTP endpoint in sinkbinding mode
       | delayBetweenAttempts | 3000 |
 
   Scenario: Integration knative-service starts with no errors
-    Given wait for condition=Ready on Kubernetes custom resource integration/rest2channel in integration.camel.apache.org/v1
+    Given Camel K integration rest2channel should be running

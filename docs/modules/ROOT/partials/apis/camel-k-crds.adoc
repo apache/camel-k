@@ -7737,6 +7737,24 @@ Enables the camel-k-operator to set the "bindings.knative.dev/include=true" labe
 As Knative requires this label to perform injection of K_SINK URL into the service.
 If this is false, the integration pod may start and fail, read the SinkBinding Knative documentation. (default: true)
 
+|`filters` +
+[]string
+|
+
+
+Sets filter attributes on the event stream (such as event type, source, subject and so on).
+A list of key-value pairs that represent filter attributes and its values.
+The syntax is KEY=VALUE, e.g., `source="my.source"`.
+Filter attributes get set on the Knative trigger that is being created as part of this integration.
+
+|`filterEventType` +
+bool
+|
+
+
+Enables the default filtering for the Knative trigger using the event type
+If this is true, the created Knative trigger uses the event type as a filter on the event stream when no other filter criteria is given. (default: true)
+
 
 |===
 

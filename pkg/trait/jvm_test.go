@@ -309,7 +309,7 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
 
-func TestApplyJvmTraitWithKNativeResource(t *testing.T) {
+func TestApplyJvmTraitWithKnativeResource(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 
 	s := serving.Service{}

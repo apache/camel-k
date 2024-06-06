@@ -340,7 +340,7 @@ test-install-upgrade: do-build
 	go test -timeout 30m -v ./e2e/install/upgrade -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
 
 #
-# Knative tests that require the presence of KNative configuration
+# Knative tests that require the presence of Knative configuration
 #
 test-knative: do-build
 	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
