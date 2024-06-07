@@ -20,7 +20,7 @@ Alternatively, you can quickly deploy the Prometheus operator by running:
 
 [source,console]
 ----
-$ kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
+$ kubectl create -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/main/bundle.yaml
 ----
 
 WARNING: Beware this installs the operator in the `default` namespace. You must download the file locally and replace the `namespace` fields to deploy the resources into another namespace. This also installs the version from the `main` branch, which you can change in the URL by choosing a stable release version.
