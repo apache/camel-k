@@ -20,7 +20,7 @@
 SHELL := /bin/bash
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 2.3.3-SNAPSHOT
+VERSION ?= 2.3.3
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.3.2
 DEFAULT_RUNTIME_VERSION := 3.8.1
