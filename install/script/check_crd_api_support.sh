@@ -1,1 +1,0 @@
-../../script/check_crd_api_support.sh

@@ -15,8 +15,22 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-- op: remove
-  path: /spec/template/spec/containers/0/env/0/valueFrom
-- op: add
-  path: /spec/template/spec/containers/0/env/0/value
-  value: '""'
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    # Registry is required unless your cluster has KEP-1755 enabled and you want to use the local registry.
+    # This is a feature recommended for development purpose only.
+    # more info at https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
+    registry:
+      # For minikube local cluster you can enable one with
+      #
+      # $ minikube addons enable registry
+      #
+      # and get the value from
+      # $ kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'
+      #
+      address: registry-host.io
+      insecure: true

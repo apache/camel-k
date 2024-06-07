@@ -43,13 +43,10 @@ func TestCLIOperatorUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
 		g.Expect(ok).To(BeTrue())
-
 		image, ok := os.LookupEnv("KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE")
 		g.Expect(ok).To(BeTrue())
-
 		kamel, ok := os.LookupEnv("RELEASED_KAMEL_BIN")
 		g.Expect(ok).To(BeTrue())
-
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		g.Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
 

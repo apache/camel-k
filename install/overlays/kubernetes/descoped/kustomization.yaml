@@ -18,16 +18,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- ../config/rbac
+- ../../../base
+- ../../../base/config/rbac/descoped
+- integration-platform.yaml
 
-transformers:
-- |-
-  apiVersion: builtin
-  kind: PatchTransformer
-  metadata:
-    name: fix-local-registry-rbac-namespace
-  patch: '[{"op": "replace", "path": "/metadata/namespace", "value": "kube-public"}]'
+namespace: camel-k
+
+patches:
+- path: patch-watch-namespace-global.yaml
   target:
-    group: rbac.authorization.k8s.io
-    kind: RoleBinding
-    name: camel-k-operator-local-registry
+    kind: Deployment
