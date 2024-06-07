@@ -76,7 +76,7 @@ var ContainerPropertiesDirectory = "/etc/camel/conf.d"
 var ContainerRoutesDirectory = "/etc/camel/sources"
 
 // ContainerResourcesDirectory --.
-var ContainerResourcesDirectory = "/etc/camel/resources"
+var ContainerResourcesDirectory = "/etc/camel/resources.d"
 
 // ContainerQuarkusDirectoryName --.
 const ContainerQuarkusDirectoryName = "/quarkus"

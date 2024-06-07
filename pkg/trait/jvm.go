@@ -205,8 +205,12 @@ func (t *jvmTrait) enableDebug(e *Environment) string {
 
 func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
 	classpath := sets.NewSet()
+	// Deprecated: replaced by /etc/camel/resources.d/[_configmaps/_secrets] (camel.ResourcesConfigmapsMountPath/camel.ResourcesSecretsMountPath).
 	classpath.Add("./resources")
-	classpath.Add(filepath.ToSlash(camel.ConfigResourcesMountPath))
+	classpath.Add(filepath.ToSlash(camel.ResourcesConfigmapsMountPath))
+	classpath.Add(filepath.ToSlash(camel.ResourcesSecretsMountPath))
+	// Deprecated: replaced by /etc/camel/resources.d/[_configmaps/_secrets] (camel.ResourcesConfigmapsMountPath/camel.ResourcesSecretsMountPath).
+	//nolint: staticcheck
 	classpath.Add(filepath.ToSlash(camel.ResourcesDefaultMountPath))
 	if t.Classpath != "" {
 		classpath.Add(strings.Split(t.Classpath, ":")...)
