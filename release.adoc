@@ -115,7 +115,7 @@ Commit and push the changes done so far.
 
 ```
 git add *
-git commit -m "preparing for next release"
+git commit -m "chore(release): preparing for next release"
 # assuming you're on release branch and have write permissions
 git push
 ```
@@ -279,7 +279,7 @@ Once the release process is complete, we must prepare the configuration for next
 ```
 git pull
 make bump VERSION=<new-version>-SNAPSHOT LAST_RELEASED_VERSION=<replace-version>
-git commit -a -m "chore: bump next version to <new-version>-SNAPSHOT"
+git commit -a -m "chore(release): bump next version to <new-version>-SNAPSHOT"
 git push origin HEAD:release-a.b.x
 ```
 Where <new-version> represents the new version you want to bump and <replace-version> the version that was previously released.
@@ -290,7 +290,7 @@ If you're releasing a minor or a major version, then, you need also to bump the 
 git checkout main
 git pull
 make bump VERSION=<new-version>-SNAPSHOT LAST_RELEASED_VERSION=<replace-version>
-git commit -a -m "chore: bump next version to <new-version>-SNAPSHOT"
+git commit -a -m "chore(release): bump next version to <new-version>-SNAPSHOT"
 git push origin HEAD:main
 ```
 Now, the release process is completed. Thanks for taking care. Make sure to remove the local repository on your machine to avoid any further update on the project by mistake.
