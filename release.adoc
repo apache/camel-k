@@ -115,7 +115,7 @@ Commit and push the changes done so far.
 
 ```
 git add *
-git commit -m "preparing for next release"
+git commit -m "chore(release): preparing for next release"
 # assuming you're on release branch and have write permissions
 git push
 ```
