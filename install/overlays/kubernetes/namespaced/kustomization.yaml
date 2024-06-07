@@ -14,17 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-#
-# * patch-integration-platform.yaml
-# customizes the integration platform custom resource
-# Edit the patch manually to add required configuration
-#
 resources:
-- ../config/samples/bases/camel_v1_integrationplatform.yaml
+- ../../../base
+- ../../../base/config/rbac/namespaced
+- integration-platform.yaml
 
-patchesStrategicMerge:
-- ../config/samples/patch-integration-platform.yaml
+namespace: default
+
+# You can provide any required adjustement here. Take the following as references:
+# patchesStrategicMerge:
+# - patch-toleration.yaml
+# - patch-node-selector.yaml
+# - patch-resource-requirements.yaml
+# patches:
+# - path: patch-log-level.yaml
+#   target:
+#     kind: Deployment

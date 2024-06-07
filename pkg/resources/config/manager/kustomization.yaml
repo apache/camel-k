@@ -21,12 +21,3 @@ kind: Kustomization
 resources:
 - operator-deployment.yaml
 - operator-service-account.yaml
-
-patchesStrategicMerge:
-- patch-toleration.yaml
-- patch-node-selector.yaml
-- patch-resource-requirements.yaml
-patches:
-- path: patch-log-level.yaml
-  target:
-    kind: Deployment
