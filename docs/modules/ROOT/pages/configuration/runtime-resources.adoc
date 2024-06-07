@@ -24,14 +24,14 @@ We want to use the materialized file in an integration:
 .resource-configmap-route.yaml
 ----
 - from:
-    uri: "file:/etc/camel/resources/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false"
+    uri: "file:/etc/camel/resources.d/_configmaps/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false"
     steps:
       - setBody:
           simple: "resource file content is: ${body}"
       - to: "log:info"
 ----
 
-You can see that we're expecting to use a _my-configmap-key_ file stored in the default resource location (_/etc/camel/resources/_). In order to materialize the `Configmap` will be as easy as running the `--resource` _configmap_ syntax:
+You can see that we're expecting to use a _my-configmap-key_ file stored in the default resource location (_/etc/camel/resources.d/_configmaps/_). In order to materialize the `Configmap` will be as easy as running the `--resource` _configmap_ syntax:
 
 ----
 kamel run --resource configmap:my-cm resource-configmap-route.yaml
@@ -58,14 +58,14 @@ We want to use the materialized secret file in an integration:
 .resource-secret-route.yaml
 ----
 - from:
-    uri: "file:/etc/camel/resources/my-sec/?fileName=my-secret-key&noop=true&idempotent=false"
+    uri: "file:/etc/camel/resources.d/_secrets/my-sec/?fileName=my-secret-key&noop=true&idempotent=false"
     steps:
       - setBody:
           simple: "secret file content is: ${body}"
       - to: "log:info"
 ----
 
-You can see that we're expecting to use a _my-secret-key_ file stored in the default resource location (_/etc/camel/resources/_). In order to materialize the `Secret` will be as easy as running the `--resource` _secret_ syntax:
+You can see that we're expecting to use a _my-secret-key_ file stored in the default resource location (_/etc/camel/resources.d/_secrets/_). In order to materialize the `Secret` will be as easy as running the `--resource` _secret_ syntax:
 
 ----
 kamel run --resource secret:my-sec resource-secret-route.yaml

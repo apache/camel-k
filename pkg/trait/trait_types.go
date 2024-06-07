@@ -53,6 +53,10 @@ const (
 	// Knative does not want name=http, it only supports http1 (HTTP/1) and h2c (HTTP/2)
 	// https://github.com/knative/specs/blob/main/specs/serving/runtime-contract.md#protocols-and-ports
 	defaultKnativeContainerPortName = "h2c"
+
+	secretStorageType    = "secret"
+	configmapStorageType = "configmap"
+	pvcStorageType       = "pvc"
 )
 
 var capabilityDynamicProperty = regexp.MustCompile(`(\$\{([^}]*)\})`)
@@ -569,8 +573,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	// User provided configmaps
 	for _, configmaps := range e.collectConfigurations("configmap") {
 		refName := kubernetes.SanitizeLabel(configmaps["value"])
-		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], "configmap", configmaps["resourceType"])
-		vol := getVolume(refName, "configmap", configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
+		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], configmapStorageType, configmaps["resourceType"])
+		vol := getVolume(refName, configmapStorageType, configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
 		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)
@@ -581,8 +585,8 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	// User provided secrets
 	for _, secret := range e.collectConfigurations("secret") {
 		refName := kubernetes.SanitizeLabel(secret["value"])
-		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], "secret", secret["resourceType"])
-		vol := getVolume(refName, "secret", secret["value"], secret["resourceKey"], secret["resourceKey"])
+		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], secretStorageType, secret["resourceType"])
+		vol := getVolume(refName, secretStorageType, secret["value"], secret["resourceKey"], secret["resourceKey"])
 		mnt := getMount(refName, mountPath, "", true)
 
 		*vols = append(*vols, *vol)
@@ -601,7 +605,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		mountPath := configParts[1]
 		volumeName := pvcName + "-data"
 
-		vol := getVolume(volumeName, "pvc", pvcName, "", "")
+		vol := getVolume(volumeName, pvcStorageType, pvcName, "", "")
 		mnt := getMount(volumeName, mountPath, "", false)
 		*vols = append(*vols, *vol)
 		*mnts = append(*mnts, *mnt)
@@ -615,19 +619,19 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 		VolumeSource: corev1.VolumeSource{},
 	}
 	switch storageType {
-	case "configmap":
+	case configmapStorageType:
 		volume.VolumeSource.ConfigMap = &corev1.ConfigMapVolumeSource{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: storageName,
 			},
 			Items: items,
 		}
-	case "secret":
+	case secretStorageType:
 		volume.VolumeSource.Secret = &corev1.SecretVolumeSource{
 			SecretName: storageName,
 			Items:      items,
 		}
-	case "pvc":
+	case pvcStorageType:
 		volume.VolumeSource.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
 			ClaimName: storageName,
 		}
@@ -671,10 +675,14 @@ func getMountPoint(resourceName string, mountPoint string, storagetype, resource
 		return mountPoint
 	}
 	if resourceType == "data" {
-		return filepath.Join(camel.ResourcesDefaultMountPath, resourceName)
+		defaultResourceMountPoint := camel.ResourcesConfigmapsMountPath
+		if storagetype == secretStorageType {
+			defaultResourceMountPoint = camel.ResourcesSecretsMountPath
+		}
+		return filepath.Join(defaultResourceMountPoint, resourceName)
 	}
 	defaultMountPoint := camel.ConfigConfigmapsMountPath
-	if storagetype == "secret" {
+	if storagetype == secretStorageType {
 		defaultMountPoint = camel.ConfigSecretsMountPath
 	}
 

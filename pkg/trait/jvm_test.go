@@ -37,7 +37,9 @@ import (
 )
 
 var (
-	crMountPath = filepath.ToSlash(camel.ConfigResourcesMountPath)
+	cmrMountPath = filepath.ToSlash(camel.ResourcesConfigmapsMountPath)
+	scrMountPath = filepath.ToSlash(camel.ResourcesSecretsMountPath)
+	// Deprecated.
 	rdMountPath = filepath.ToSlash(camel.ResourcesDefaultMountPath)
 )
 
@@ -131,7 +133,7 @@ func TestConfigureJvmTraitExecutableSourcelessContainerWithJar(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s", crMountPath, rdMountPath),
+		fmt.Sprintf("./resources:%s:%s:%s", rdMountPath, cmrMountPath, scrMountPath),
 		"-jar", "my-path/to/my-app.jar",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -172,7 +174,7 @@ func TestConfigureJvmTraitExecutableSourcelessContainerWithJarAndOptions(t *test
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-Xmx1234M", "-Dmy-prop=abc",
-		"-cp", "./resources:/etc/camel/conf.d/_resources:/etc/camel/resources:deps/a.jar:deps/b.jar",
+		"-cp", "./resources:/etc/camel/resources:/etc/camel/resources.d/_configmaps:/etc/camel/resources.d/_secrets:deps/a.jar:deps/b.jar",
 		"-jar", "my-path/to/my-app.jar",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -206,7 +208,7 @@ func TestConfigureJvmTraitWithJar(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s", crMountPath, rdMountPath),
+		fmt.Sprintf("./resources:%s:%s:%s", rdMountPath, cmrMountPath, scrMountPath),
 		"-jar", "my-path/to/my-app.jar",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -246,7 +248,7 @@ func TestConfigureJvmTraitWithJarAndConfigs(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-Xmx1234M", "-Dmy-prop=abc",
-		"-cp", "./resources:/etc/camel/conf.d/_resources:/etc/camel/resources:deps/a.jar:deps/b.jar",
+		"-cp", "./resources:/etc/camel/resources:/etc/camel/resources.d/_configmaps:/etc/camel/resources.d/_secrets:deps/a.jar:deps/b.jar",
 		"-jar", "my-path/to/my-app.jar",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -301,9 +303,10 @@ func TestApplyJvmTraitWithDeploymentResource(t *testing.T) {
 	assert.Equal(t, []string{
 		"-cp",
 		fmt.Sprintf(
-			"./resources:%s:%s:/mount/path:dependencies/*",
-			crMountPath,
+			"./resources:%s:%s:%s:/mount/path:dependencies/*",
 			rdMountPath,
+			cmrMountPath,
+			scrMountPath,
 		),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
@@ -335,7 +338,8 @@ func TestApplyJvmTraitWithKnativeResource(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path:dependencies/*", crMountPath, rdMountPath),
+		fmt.Sprintf("./resources:%s:%s:%s:/mount/path:dependencies/*",
+			rdMountPath, cmrMountPath, scrMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, s.Spec.Template.Spec.Containers[0].Args)
 }
@@ -402,7 +406,7 @@ func TestApplyJvmTraitWithExternalKitType(t *testing.T) {
 
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:dependencies/*", crMountPath, rdMountPath),
+		fmt.Sprintf("./resources:%s:%s:%s:dependencies/*", rdMountPath, cmrMountPath, scrMountPath),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
@@ -439,7 +443,9 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{
 		"-cp",
-		fmt.Sprintf("./resources:%s:%s:/mount/path:%s:%s:dependencies/*", crMountPath, rdMountPath, "/path/to/another/dep.jar", "/path/to/my-dep.jar"),
+		fmt.Sprintf("./resources:%s:%s:%s:/mount/path:%s:%s:dependencies/*",
+			rdMountPath, cmrMountPath, scrMountPath,
+			"/path/to/another/dep.jar", "/path/to/my-dep.jar"),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }

@@ -29,14 +29,17 @@ import (
 )
 
 var (
-	BasePath                  = "/etc/camel"
-	ConfDPath                 = filepath.Join(BasePath, "conf.d")
-	SourcesMountPath          = filepath.Join(BasePath, "sources")
-	ResourcesDefaultMountPath = filepath.Join(BasePath, "resources")
-	ConfigResourcesMountPath  = filepath.Join(ConfDPath, "_resources")
-	ConfigConfigmapsMountPath = filepath.Join(ConfDPath, "_configmaps")
-	ConfigSecretsMountPath    = filepath.Join(ConfDPath, "_secrets")
-	ServiceBindingsMountPath  = filepath.Join(ConfDPath, "_servicebindings")
+	BasePath         = "/etc/camel"
+	ConfDPath        = filepath.Join(BasePath, "conf.d")
+	ResourcesDPath   = filepath.Join(BasePath, "resources.d")
+	SourcesMountPath = filepath.Join(BasePath, "sources")
+	// Deprecated: replaced by /etc/camel/resources.d/[_configmaps/_secrets] (ResourcesConfigmapsMountPath/ResourcesSecretsMountPath).
+	ResourcesDefaultMountPath    = filepath.Join(BasePath, "resources")
+	ResourcesConfigmapsMountPath = filepath.Join(ResourcesDPath, "_configmaps")
+	ResourcesSecretsMountPath    = filepath.Join(ResourcesDPath, "_secrets")
+	ConfigConfigmapsMountPath    = filepath.Join(ConfDPath, "_configmaps")
+	ConfigSecretsMountPath       = filepath.Join(ConfDPath, "_secrets")
+	ServiceBindingsMountPath     = filepath.Join(ConfDPath, "_servicebindings")
 )
 
 func findBestMatch(catalogs []v1.CamelCatalog, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
