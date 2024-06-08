@@ -41,11 +41,7 @@ Each group tests a specific feature of Camel K. Typically any new test should be
 It's important to know that a subset of `common` named `test-smoke` is used as smoke test in the nightly release process. We want to keep this group of test as fast as possible.
 
 === Configure End To End tests runs with env vars
-Some e2e test runs parameters can be configured usually with env vars.
-Most of them are located at https://github.com/apache/camel-k/tree/main/e2e/support/test_support.go[e2e/support/test_support.go] in `init` and `kamelInstallWithContext` functions.
-A list of the most commonly used:
-
-* `CAMEL_K_TEST_SKIP_PROBLEMATIC`: set it to `true` to skip tests that might fail.
+For some e2e test runs parameters can be configured usually with env vars. Refer to the Camel K End-To-End test https://github.com/apache/camel-k/tree/main/e2e#environment-variables[environment-variables].
 
 [[testing-operator]]
 == Testing Operator under development
