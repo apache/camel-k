@@ -95,12 +95,6 @@ runs:
       catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
       catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
 
-  - id: report-problematic
-    name: List Tests Marked As Problematic
-    uses: ./.github/actions/kamel-report-problematic
-    with:
-      test-suite: namespace/upgrade
-
   - name: Run IT
     shell: bash
     run: |
