@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - ImagePullBackOff Error for pod build strategy and s2i publish strategy [\#5595](https://github.com/apache/camel-k/issues/5595)
+- Custom kamelets from GitHub repositories are not applied to cluster. [\#5174](https://github.com/apache/camel-k/issues/5174)
 
 ## [v2.3.3](https://github.com/apache/camel-k/tree/v2.3.3) (2024-06-07)
 
