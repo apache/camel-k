@@ -37,4 +37,4 @@ patchesStrategicMerge:
 images:
 - name: docker.io/apache/camel-k
   newName: docker.io/apache/camel-k
-  newTag: 2.3.3-SNAPSHOT
+  newTag: 2.3.4-SNAPSHOT
