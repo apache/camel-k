@@ -19,13 +19,15 @@ apiVersion: camel.apache.org/v1
 kind: IntegrationPlatform
 metadata:
   name: camel-k
+  labels:
+    app: "camel-k"
 spec:
   build:
     # Registry is required unless your cluster has KEP-1755 enabled and you want to use the local registry.
     # This is a feature recommended for development purpose only.
     # more info at https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry
     registry:
-      # For minikube local cluster you can enable one with
+      # For minikube local cluster you can enable a local registry with
       #
       # $ minikube addons enable registry
       #

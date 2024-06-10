@@ -20,7 +20,6 @@ kind: Kustomization
 resources:
 - ../../../base
 - ../../../base/config/rbac/descoped
-- integration-platform.yaml
 
 namespace: camel-k
 
