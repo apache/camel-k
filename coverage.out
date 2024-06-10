@@ -2165,8 +2165,8 @@ github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:155:					AddProfile
 github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:160:					NewDependency						0.0%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:178:					NewRepository						83.3%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:214:					NewMirror						88.9%
-github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:30:					apply							0.0%
-github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:52:					parseProxyFromEnvVar					0.0%
+github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:30:					apply							84.6%
+github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:52:					parseProxyFromEnvVar					94.7%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_repositories.go:31:					apply							100.0%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_repositories.go:39:					defaultMavenRepositories				100.0%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_repositories.go:48:					Repositories						100.0%
@@ -2334,4 +2334,4 @@ github.com/apache/camel-k/v2/pkg/util/util.go:651:							WithTempDir						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:666:							ConfigTreePropertySplit					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:687:							trimQuotes						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:698:							NavigateConfigTree					0.0%
-total:													(statements)						39.6%
+total:													(statements)						39.8%
