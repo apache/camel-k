@@ -60,19 +60,25 @@ func TestKustomizeNamespaced(t *testing.T) {
 				fmt.Sprintf("s/namespace: .*/namespace: %s/", ns),
 				fmt.Sprintf("%s/overlays/kubernetes/namespaced/kustomization.yaml", kustomizeDir),
 			))
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"sed",
-				"-i",
-				fmt.Sprintf("s/address: .*/address: %s/", registry),
-				fmt.Sprintf("%s/overlays/kubernetes/namespaced/integration-platform.yaml", kustomizeDir),
-			))
-
 		ExpectExecSucceed(t, g, Kubectl(
 			"apply",
 			"-k",
 			fmt.Sprintf("%s/overlays/kubernetes/namespaced", kustomizeDir),
 			"--server-side",
+		))
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"sed",
+				"-i",
+				fmt.Sprintf("s/address: .*/address: %s/", registry),
+				fmt.Sprintf("%s/overlays/platform/integration-platform.yaml", kustomizeDir),
+			))
+		ExpectExecSucceed(t, g, Kubectl(
+			"apply",
+			"-k",
+			fmt.Sprintf("%s/overlays/platform", kustomizeDir),
+			"-n",
+			ns,
 		))
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
@@ -106,7 +112,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 		// Test operator only uninstall
 		ExpectExecSucceed(t, g, Kubectl(
 			"delete",
-			"deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles",
+			"deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform",
 			"-l",
 			"app=camel-k",
 			"-n",
@@ -152,19 +158,25 @@ func TestKustomizeDescoped(t *testing.T) {
 				fmt.Sprintf("s/namespace: .*/namespace: %s/", ns),
 				fmt.Sprintf("%s/overlays/kubernetes/descoped/kustomization.yaml", kustomizeDir),
 			))
-		ExpectExecSucceed(t, g,
-			exec.Command(
-				"sed",
-				"-i",
-				fmt.Sprintf("s/address: .*/address: %s/", registry),
-				fmt.Sprintf("%s/overlays/kubernetes/descoped/integration-platform.yaml", kustomizeDir),
-			))
-
 		ExpectExecSucceed(t, g, Kubectl(
 			"apply",
 			"-k",
 			fmt.Sprintf("%s/overlays/kubernetes/descoped", kustomizeDir),
 			"--server-side",
+		))
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"sed",
+				"-i",
+				fmt.Sprintf("s/address: .*/address: %s/", registry),
+				fmt.Sprintf("%s/overlays/platform/integration-platform.yaml", kustomizeDir),
+			))
+		ExpectExecSucceed(t, g, Kubectl(
+			"apply",
+			"-k",
+			fmt.Sprintf("%s/overlays/platform", kustomizeDir),
+			"-n",
+			ns,
 		))
 
 		// Refresh the test client to account for the newly installed CRDs
@@ -217,7 +229,7 @@ func TestKustomizeDescoped(t *testing.T) {
 			// Test operator only uninstall
 			ExpectExecSucceed(t, g, Kubectl(
 				"delete",
-				"deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles",
+				"deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform",
 				"-l",
 				"app=camel-k",
 				"-n",

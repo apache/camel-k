@@ -66,7 +66,7 @@ func TestKustomizeUpgrade(t *testing.T) {
 		g.Eventually(CRDs(t)).Should(HaveLen(0))
 
 		// Should both install the CRDs and kamel in the given namespace
-		g.Expect(Kamel(t, ctx, "install", "-n", ns, "--global").Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "install", "-n", ns, "--global", "--olm=false", "--force").Execute()).To(Succeed())
 		// Check the operator pod is running
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		// Refresh the test client to account for the newly installed CRDs
@@ -101,19 +101,12 @@ func TestKustomizeUpgrade(t *testing.T) {
 					fmt.Sprintf("s/namespace: .*/namespace: %s/", ns),
 					fmt.Sprintf("%s/overlays/kubernetes/descoped/kustomization.yaml", kustomizeDir),
 				))
-			ExpectExecSucceed(t, g,
-				exec.Command(
-					"sed",
-					"-i",
-					fmt.Sprintf("s/address: .*/address: %s/", registry),
-					fmt.Sprintf("%s/overlays/kubernetes/descoped/integration-platform.yaml", kustomizeDir),
-				))
-
 			ExpectExecSucceed(t, g, Kubectl(
 				"apply",
 				"-k",
 				fmt.Sprintf("%s/overlays/kubernetes/descoped", kustomizeDir),
 				"--server-side",
+				"--wait",
 				"--force-conflicts",
 			))
 

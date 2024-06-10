@@ -20,11 +20,10 @@ kind: Kustomization
 resources:
 - ../../../base
 - ../../../base/config/rbac/namespaced
-- integration-platform.yaml
 
 namespace: default
 
-# You can provide any required adjustement here. Take the following as references:
+# You can provide any required adjustments here. Take the following as references:
 # patchesStrategicMerge:
 # - patch-toleration.yaml
 # - patch-node-selector.yaml
