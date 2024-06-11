@@ -18,13 +18,22 @@
 # ---------------------------------------------------------------------------
 
 - from:
-    uri: "timer:yaml"
-    parameters:
-      period: "5000"
+    uri: "direct:listPets"
     steps:
-      - setHeader:
-          name: "m"
-          constant: "string!"
       - setBody:
-          simple: "Magic${header.m}"
+          simple: "listPets"
+      - to: "log:info"
+
+- from:
+    uri: "direct:createPets"
+    steps:
+      - setBody:
+          simple: "createPets"
+      - to: "log:info"
+
+- from:
+    uri: "direct:showPetById"
+    steps:
+      - setBody:
+          simple: "showPetById"
       - to: "log:info"

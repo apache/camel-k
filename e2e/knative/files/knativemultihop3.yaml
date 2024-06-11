@@ -1,5 +1,4 @@
 # camel-k: language=yaml
-
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,13 +17,13 @@
 # ---------------------------------------------------------------------------
 
 - from:
-    uri: "timer:yaml"
-    parameters:
-      period: "5000"
+    uri: "knative:channel/messages"
     steps:
-      - setHeader:
-          name: "m"
-          constant: "string!"
-      - setBody:
-          simple: "Magic${header.m}"
-      - to: "log:info"
+      - log: "From messages: ${body}"
+      - to: "log:messages?showHeaders=true"
+
+- from:
+    uri: "knative:channel/words"
+    steps:
+      - log: "From words: ${body}"
+      - to: "log:words?showHeaders=true"
