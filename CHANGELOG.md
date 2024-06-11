@@ -6,7 +6,10 @@
 
 **Closed issues:**
 
+- Cannot execute 'kamel install' to a GKE cluster [\#5611](https://github.com/apache/camel-k/issues/5611)
 - ImagePullBackOff Error for pod build strategy and s2i publish strategy [\#5595](https://github.com/apache/camel-k/issues/5595)
+- NettySecureServer may not be able to access keystore [\#5546](https://github.com/apache/camel-k/issues/5546)
+- Remove CAMEL\_K\_TEST\_SKIP\_PROBLEMATIC flag [\#5484](https://github.com/apache/camel-k/issues/5484)
 - Custom kamelets from GitHub repositories are not applied to cluster. [\#5174](https://github.com/apache/camel-k/issues/5174)
 
 ## [v2.3.3](https://github.com/apache/camel-k/tree/v2.3.3) (2024-06-07)
