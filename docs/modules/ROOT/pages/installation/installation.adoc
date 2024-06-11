@@ -62,12 +62,12 @@ https://kustomize.io[Kustomize] provides a declarative approach to the configura
 If you don't need to provide any configuration nor the registry (ie, in Openshift), you can apply this simple one liner:
 
 ```
-$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/openshift/descoped?ref=v2.4.0 --server-side
 ```
 
 You can specify as `ref` parameter the version you're willing to install (ie, `v2.4.0`). The command above will install a descoped (global) operator in the camel-k namespace.
 
-NOTE: if you're not installing in Openshift you will need to manually change the IntegrationPlatform registry configuration as the operator won't be able to find any valid registry address.
+NOTE: if you're not installing in Openshift you will need to manually change the IntegrationPlatform registry configuration as the operator won't be able to find any valid registry address (see section below).
 
 === Custom configuration procedure
 

@@ -40,16 +40,16 @@ import (
 )
 
 func TestKustomizeNamespaced(t *testing.T) {
+	g := NewWithT(t)
+	CheckLocalInstallRegistry(t, g)
 	// TODO, likely we need to adjust this test with a Kustomize overlay for Openshift
 	// which would not require the registry setting
 	registry := os.Getenv("KIND_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	ctx := TestContext()
-	g := NewWithT(t)
 	g.Expect(registry).NotTo(Equal(""))
-	// Ensure no CRDs are already installed: we can skip to check as it may fail
-	// if no CRDs was previously installed.
-	UninstallAll(t, ctx)
+	// Ensure no CRDs are already installed
+	Cleanup(t, ctx)
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// We must change a few values in the Kustomize config
@@ -83,7 +83,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 		// Refresh the test client to account for the newly installed CRDs
 		RefreshClient(t)
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPodPhase(t, ctx, ns)).Should(Equal(corev1.PodRunning))
 		// Check if restricted security context has been applied
 		operatorPod := OperatorPod(t, ctx, ns)()
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(
@@ -105,7 +105,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 
 		// Test a simple integration is running
 		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml")).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -119,6 +119,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 			ns,
 		))
 		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
+		g.Eventually(Platform(t, ctx, ns)).Should(BeNil())
 		g.Eventually(Integration(t, ctx, ns, "yaml"), TestTimeoutShort).ShouldNot(BeNil())
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
@@ -138,16 +139,16 @@ func TestKustomizeNamespaced(t *testing.T) {
 }
 
 func TestKustomizeDescoped(t *testing.T) {
+	g := NewWithT(t)
+	CheckLocalInstallRegistry(t, g)
 	// TODO, likely we need to adjust this test with a Kustomize overlay for Openshift
 	// which would not require the registry setting
 	registry := os.Getenv("KIND_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	ctx := TestContext()
-	g := NewWithT(t)
 	g.Expect(registry).NotTo(Equal(""))
-	// Ensure no CRDs are already installed: we can skip to check as it may fail
-	// if no CRDs was previously installed.
-	UninstallAll(t, ctx)
+	// Ensure no CRDs are already installed
+	Cleanup(t, ctx)
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// We must change a few values in the Kustomize config
@@ -184,7 +185,7 @@ func TestKustomizeDescoped(t *testing.T) {
 
 		podFunc := OperatorPod(t, ctx, ns)
 		g.Eventually(podFunc).ShouldNot(BeNil())
-		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(OperatorPodPhase(t, ctx, ns)).Should(Equal(corev1.PodRunning))
 		pod := podFunc()
 
 		containers := pod.Spec.Containers
@@ -222,7 +223,7 @@ func TestKustomizeDescoped(t *testing.T) {
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
 			// Test a simple integration is running
 			g.Expect(KamelRun(t, ctx, nsIntegration, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, "yaml")).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -236,6 +237,7 @@ func TestKustomizeDescoped(t *testing.T) {
 				ns,
 			))
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
+			g.Eventually(Platform(t, ctx, ns)).Should(BeNil())
 			g.Eventually(Integration(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).ShouldNot(BeNil())
 			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
