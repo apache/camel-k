@@ -15,6 +15,10 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+# Run integration test:
+#
+# yaks run -v ./e2e/yaks/common/kamelet-binding-http/kamelet-binding-http.feature
+
 config:
   namespace:
     temporary: true
@@ -23,9 +27,9 @@ pre:
   run: |
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
 
-    kamel run display.groovy -w -n $YAKS_NAMESPACE
+    kamel run display.yaml -w -n $YAKS_NAMESPACE
     cat timer-source-binding-display.yaml | sed  's/{namespace}/'"${YAKS_NAMESPACE}"'/' | kubectl apply -n $YAKS_NAMESPACE -f -
-    kubectl wait kameletbinding timer-source-binding-display --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
+    kubectl wait pipe timer-source-binding-display --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

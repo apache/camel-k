@@ -1,3 +1,4 @@
+# camel-k: language=yaml
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,20 +16,11 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-# Run integration test:
-#
-# yaks run -v ./e2e/yaks/common/kamelet/kamelet.feature
+# timer-source is defined in the default Camel Kamelets catalog
 
-config:
-  namespace:
-    temporary: true
-pre:
-- name: installation
-  run: |
-    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f echo-sink.kamelet.yaml -n $YAKS_NAMESPACE
-    kamel run source-sink.yaml -w -n $YAKS_NAMESPACE
-post:
-  - name: print dump
-    if: env:CI=true && failure()
-    run: yaks dump --includes app=camel-k
+- from:
+    uri: "kamelet:timer-source?message=Camel+K"
+    steps:
+      - to: "kamelet:echo-sink"
+      - to: "kamelet:echo-sink?prefix=nice+"
+      - log: "${body}"
