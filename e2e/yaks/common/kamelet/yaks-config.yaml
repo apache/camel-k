@@ -15,6 +15,10 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+# Run integration test:
+#
+# YAKS_NAMESPACE=default yaks run -v ./e2e/yaks/common/kamelet/yaks-config.yaml
+
 config:
   namespace:
     temporary: true
@@ -23,7 +27,7 @@ pre:
   run: |
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f echo-sink.kamelet.yaml -n $YAKS_NAMESPACE
-    kamel run source-sink.groovy -w -n $YAKS_NAMESPACE
+    kamel run source-sink.yaml -w -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

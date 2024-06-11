@@ -1,3 +1,4 @@
+# camel-k: language=yaml
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,23 +16,9 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-# Run integration test:
-#
-# YAKS_NAMESPACE=default yaks run -v ./e2e/yaks/common/knative-sinkbinding/yaks-config.yaml
+# timer-source is defined in the default Camel Kamelets catalog
 
-config:
-  namespace:
-    temporary: true
-pre:
-- name: installation
-  run: |
-    kubectl apply -n $YAKS_NAMESPACE -f messages-channel.yaml
-
-    kamel run receiver.yaml -w -n $YAKS_NAMESPACE
-    kamel run source.yaml -w -n $YAKS_NAMESPACE -t knative.sink-binding=true
-
-    kubectl wait integration --all --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
-post:
-  - name: print dump
-    if: env:CI=true && failure()
-    run: yaks dump --includes app=camel-k
+- from:
+    uri: "kamelet:timer-source?message=Camel+K"
+    steps:
+      - log: "${body}"
