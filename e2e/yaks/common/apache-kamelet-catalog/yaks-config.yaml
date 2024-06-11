@@ -15,13 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+# Run integration test:
+#
+# yaks run -v ./e2e/yaks/common/apache-kamelet-catalog/kamelet.feature
+
 config:
   namespace:
     temporary: true
 pre:
 - name: installation
   run: |
-    kamel run logger.groovy -w -n $YAKS_NAMESPACE
+    kamel run logger.yaml -w -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

@@ -40,7 +40,7 @@ echo -n "Checking yq ... "
 if which yq > /dev/null 2>&1; then
   echo "ok"
 else
-  echo "not installed. (see https://mikefarah.gitbook.io/yq)"
+  echo "not found. (see https://mikefarah.gitbook.io/yq)"
   exit 1
 fi
 
