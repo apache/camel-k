@@ -24,6 +24,7 @@ package support
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -123,4 +124,14 @@ func UninstallAll(t *testing.T, ctx context.Context) error {
 // UninstallFromNamespace Removes operator from given namespace
 func UninstallFromNamespace(t *testing.T, ctx context.Context, ns string) error {
 	return Kamel(t, ctx, "uninstall", "--olm=false", "-n", ns).Execute()
+}
+
+func CheckLocalInstallRegistry(t *testing.T, g *WithT) {
+	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
+	if KAMEL_INSTALL_REGISTRY != "" {
+		t.Logf("Detected a local registry for Camel K %s. Setting custom image accordingly.", KAMEL_INSTALL_REGISTRY)
+		customImage := fmt.Sprintf("%s/apache/camel-k", KAMEL_INSTALL_REGISTRY)
+		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
+		ExpectExecSucceed(t, g, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
+	}
 }

@@ -19,9 +19,9 @@ name: install
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  CAMEL_K_TEST_TIMEOUT_SHORT: 3m
+  CAMEL_K_TEST_TIMEOUT_SHORT: 5m
   CAMEL_K_TEST_TIMEOUT_MEDIUM: 10m
-  
+
 on:
   pull_request:
     branches:

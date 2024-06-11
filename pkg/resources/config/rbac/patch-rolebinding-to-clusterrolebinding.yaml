@@ -23,4 +23,3 @@
   value: ClusterRole
 - op: add
   path: /subjects/0/namespace
-  value: placeholder
