@@ -1874,15 +1874,15 @@ github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:27:				NewR
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:92:				HasArtifact						85.7%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:108:				HasLoaderByArtifact					85.7%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:124:				IsValidArtifact						100.0%
-github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:129:				GetArtifactByScheme					0.0%
+github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:129:				GetArtifactByScheme					75.0%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:139:				GetArtifactByDataFormat					0.0%
-github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:149:				GetScheme						0.0%
+github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:149:				GetScheme						100.0%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:155:				GetLanguageDependency					0.0%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:161:				GetJavaTypeDependency					0.0%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:167:				VisitArtifacts						0.0%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:176:				VisitSchemes						0.0%
-github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:185:				DecodeComponent						0.0%
-github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:199:				IsResolvable						88.9%
+github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:185:				DecodeComponent						85.7%
+github.com/apache/camel-k/v2/pkg/util/camel/camel_runtime_catalog.go:214:				IsResolvable						88.9%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_types.go:36:						Len							100.0%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_types.go:42:						Less							100.0%
 github.com/apache/camel-k/v2/pkg/util/camel/camel_types.go:48:						Swap							100.0%
@@ -2133,8 +2133,8 @@ github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:155:					AddProfile
 github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:160:					NewDependency						0.0%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:178:					NewRepository						83.3%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_project.go:214:					NewMirror						88.9%
-github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:30:					apply							0.0%
-github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:52:					parseProxyFromEnvVar					0.0%
+github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:30:					apply							84.6%
+github.com/apache/camel-k/v2/pkg/util/maven/maven_proxies.go:52:					parseProxyFromEnvVar					94.7%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_repositories.go:32:					apply							100.0%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_repositories.go:40:					defaultMavenRepositories				100.0%
 github.com/apache/camel-k/v2/pkg/util/maven/maven_repositories.go:49:					Repositories						100.0%
@@ -2302,4 +2302,4 @@ github.com/apache/camel-k/v2/pkg/util/util.go:649:							WithTempDir						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:664:							ConfigTreePropertySplit					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:685:							trimQuotes						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:696:							NavigateConfigTree					0.0%
-total:													(statements)						38.5%
+total:													(statements)						38.8%
