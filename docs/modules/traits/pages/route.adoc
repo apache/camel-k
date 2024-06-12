@@ -116,7 +116,7 @@ Refer to the OpenShift route documentation for additional information.
 
 == Examples
 
-These examples uses *secrets* to store the certificates and keys to be referenced in the integrations. Read OpenShift route documentation for detailed information about routes. The https://github.com/apache/camel-k/blob/main/examples/http/PlatformHttpServer.java[PlatformHttpServer.java] is the integration example. 
+These examples uses *secrets* to store the certificates and keys to be referenced in the integrations. Read OpenShift route documentation for detailed information about routes. https://github.com/apache/camel-k-examples/blob/main/generic-examples/http/PlatformHttpServer.java[PlatformHttpServer.java] is the integration example.
 
 As a requirement to run these examples, you should have a `secret` with a key and certificate.
 
@@ -134,6 +134,7 @@ For all examples, you can use the following curl command to make an HTTP request
 
 [source,console]
 curl -k https://platform-http-server-`oc config view --minify -o 'jsonpath={..namespace}'`.`oc get dnses/cluster -ojsonpath='{.spec.baseDomain}'`/hello?name=Camel-K
+
 
 * To add an *edge* route using secrets, use the parameters ending in `-secret` to set the secret name which contains the certificate. This route example trait references a secret named `my-combined-certs` which contains two keys named `tls.key` and `tls.crt`.
 +
