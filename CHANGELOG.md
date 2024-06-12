@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/2.3.4-nightly...HEAD)
+
+**Closed issues:**
+
+- Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
+- Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
+- Support YAML DSL routes configuration [\#4893](https://github.com/apache/camel-k/issues/4893)
+- Deprecate `kamel install` and promote Kustomize-based installation to primary method [\#3865](https://github.com/apache/camel-k/issues/3865)
+
 ## [2.3.4-nightly](https://github.com/apache/camel-k/tree/2.3.4-nightly) (2024-06-10)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.3.3...2.3.4-nightly)
@@ -29,7 +40,10 @@
 
 **Closed issues:**
 
+- Consistently support "cloudEventsType" property in Pipes source/sink [\#5577](https://github.com/apache/camel-k/issues/5577)
+- property "type" must be provided when reading from the Broker [\#5529](https://github.com/apache/camel-k/issues/5529)
 - Join native checks into one [\#5526](https://github.com/apache/camel-k/issues/5526)
+- Knative Trigger creation is only based on event type attribute [\#5446](https://github.com/apache/camel-k/issues/5446)
 
 ## [2.3.3-nightly](https://github.com/apache/camel-k/tree/2.3.3-nightly) (2024-06-05)
 
