@@ -6,20 +6,29 @@
 
 **Closed issues:**
 
+- Service/KService not created for vertx-websocket consumers [\#5628](https://github.com/apache/camel-k/issues/5628)
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
+- Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
+- Move deprecated v1alpha1.KameletBinding tests to v1.Pipe [\#5490](https://github.com/apache/camel-k/issues/5490)
 - Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)
 - Remove health readiness workaround when fixed in Camel [\#5451](https://github.com/apache/camel-k/issues/5451)
 - Support YAML DSL routes configuration [\#4893](https://github.com/apache/camel-k/issues/4893)
+- Kustomize installation does not work [\#4528](https://github.com/apache/camel-k/issues/4528)
+- Kustomize default [\#4135](https://github.com/apache/camel-k/issues/4135)
 - Deprecate `kamel install` and promote Kustomize-based installation to primary method [\#3865](https://github.com/apache/camel-k/issues/3865)
 
 **Merged pull requests:**
 
+- feat\(ci\): bring back Quarkus native execution on PR and pushes [\#5626](https://github.com/apache/camel-k/pull/5626) ([squakez](https://github.com/squakez))
 - doc: Fix Camel K examples links [\#5625](https://github.com/apache/camel-k/pull/5625) ([gansheer](https://github.com/gansheer))
+- \(\#5490\) Move deprecated v1alpha1.KameletBinding tests to v1.Pipe [\#5624](https://github.com/apache/camel-k/pull/5624) ([tdiesler](https://github.com/tdiesler))
 - Revisit final operator install message [\#5622](https://github.com/apache/camel-k/pull/5622) ([tdiesler](https://github.com/tdiesler))
 - \(\#5489\) Migrate groovy =\> yaml for ./e2e/yaks [\#5618](https://github.com/apache/camel-k/pull/5618) ([tdiesler](https://github.com/tdiesler))
 - \(\#5489\) Migrate groovy =\> yaml for ./e2e/knative [\#5614](https://github.com/apache/camel-k/pull/5614) ([tdiesler](https://github.com/tdiesler))
+- fix\(install\): simplify kustomize procedure [\#5610](https://github.com/apache/camel-k/pull/5610) ([squakez](https://github.com/squakez))
+- feat\(core\): Mount configmap/secret resources in dedicated resources.d [\#5605](https://github.com/apache/camel-k/pull/5605) ([gansheer](https://github.com/gansheer))
 - fix: Improve Knative trigger filter [\#5597](https://github.com/apache/camel-k/pull/5597) ([christophd](https://github.com/christophd))
 
 ## [2.3.4-nightly](https://github.com/apache/camel-k/tree/2.3.4-nightly) (2024-06-10)
