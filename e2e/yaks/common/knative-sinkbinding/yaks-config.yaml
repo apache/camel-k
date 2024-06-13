@@ -15,10 +15,6 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-# Run integration test:
-#
-# yaks run -v ./e2e/yaks/common/knative-sinkbinding/sinkbinding.feature
-
 config:
   namespace:
     temporary: true

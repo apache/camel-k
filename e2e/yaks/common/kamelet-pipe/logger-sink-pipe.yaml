@@ -15,23 +15,18 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+apiVersion: camel.apache.org/v1
+kind: Pipe
 metadata:
-  name: timer-source-binding-br
+  name: logger-sink-pipe
 spec:
   source:
     ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: timer-source
-    properties:
-      message: Hello Custom Event from sample-broker
-      period: 1000
+      kind: InMemoryChannel
+      apiVersion: messaging.knative.dev/v1
+      name: messages
   sink:
     ref:
-      kind: Broker
-      apiVersion: eventing.knative.dev/v1
-      name: sample-broker
-    properties:
-      type: custom-type
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: logger-sink

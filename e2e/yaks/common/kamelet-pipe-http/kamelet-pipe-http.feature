@@ -5,11 +5,11 @@ Feature: Camel K can bind Kamelets via HTTP
       | maxAttempts          | 40   |
       | delayBetweenAttempts | 3000 |
 
-  Scenario: KameletBinding to a HTTP URI should use CloudEvents
+  Scenario: Pipe to a HTTP URI should use CloudEvents
     Given Camel K integration display is running
     Then Camel K integration display should print type: org.apache.camel.event
     Then Camel K integration display should print Hello
 
   Scenario: Remove resources
     Given delete Camel K integration display
-    Given delete KameletBinding timer-source-binding-display
+    Given delete Pipe timer-source-pipe

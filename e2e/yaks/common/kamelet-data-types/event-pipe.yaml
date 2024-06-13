@@ -15,22 +15,29 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-config:
-  namespace:
-    temporary: true
-pre:
-- name: installation
-  run: |
-    kubectl apply -f messages-channel.yaml -n $YAKS_NAMESPACE
-
-    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f logger-sink.kamelet.yaml -n $YAKS_NAMESPACE
-
-    kubectl apply -f timer-source-binding-kb.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f logger-sink-binding-kb.yaml -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding timer-source-binding-kb --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding logger-sink-binding-kb --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
-post:
-  - name: print dump
-    if: env:CI=true && failure()
-    run: yaks dump --includes app=camel-k
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: event-pipe
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: event-source
+    dataTypes:
+      out:
+        format: "application-octet-stream"
+  steps:
+    - ref:
+        kind: Kamelet
+        apiVersion: camel.apache.org/v1
+        name: log-action
+  sink:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: event-sink
+    dataTypes:
+      in:
+        format: "text-plain"
