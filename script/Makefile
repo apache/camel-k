@@ -762,3 +762,74 @@ $(GOIMPORT): $(LOCALBIN)
 	@test -s $(LOCALBIN)/goimport || \
 	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/goimports@latest
 
+#####
+# START Local installation procedure. Handy for development purpose
+#####
+
+KUSTOMIZE_DIR = "install/overlays/kubernetes/descoped"
+MINIKUBE_REGISTRY = "$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')"
+DEFAULT_NS = "camel-k"
+
+.PHONY: install install-k8s-global install-k8s-ns install-openshift-global install-openshift-ns
+
+install-operator:
+ifndef NAMESPACE
+	@echo "WARN: no namespace specified, using default namespace $(DEFAULT_NS)"
+	$(eval NAMESPACE=$(DEFAULT_NS))
+endif
+	cd $(KUSTOMIZE_DIR) && kustomize edit set namespace $(NAMESPACE)
+	cd install/overlays/platform && kustomize edit set namespace $(NAMESPACE)
+	kubectl apply -k $(KUSTOMIZE_DIR) --server-side
+
+install-registry:
+ifdef REGISTRY
+	@echo "INFO: Setting IntegrationPlatform container registry to $(REGISTRY)"
+	@sed -i 's/address: .*/address: $(REGISTRY)/' install/overlays/platform/integration-platform.yaml
+	kubectl apply -k install/overlays/platform --server-side -n $(NAMESPACE)
+else
+# verify if a minikube registry is existing by any chance, and set it automatically in such a case
+ifneq ($(MINIKUBE_REGISTRY), "")
+	@echo "INFO: Looks like you're on Minikube. Setting IntegrationPlatform container registry to $(MINIKUBE_REGISTRY)"
+	@sed -i 's/address: .*/address: $(MINIKUBE_REGISTRY)/' install/overlays/platform/integration-platform.yaml
+	kubectl apply -k install/overlays/platform --server-side -n $(NAMESPACE)
+endif
+endif
+
+install-clean-kustomize:
+# we must revert any change done by Kustomize in order to avoid they are committed by mistake in source code repository
+	@echo "INFO: reverting changes done by Kustomization"
+	git checkout -- install/overlays/platform/kustomization.yaml
+	git checkout -- install/overlays/platform/integration-platform.yaml
+	git checkout -- $(KUSTOMIZE_DIR)/kustomization.yaml
+
+install-k8s-global: DEFAULT_NS="camel-k"
+install-k8s-global: KUSTOMIZE_DIR="install/overlays/kubernetes/descoped"
+install-k8s-global: install-operator install-registry install-clean-kustomize
+
+install-k8s-ns: DEFAULT_NS="default"
+install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/namespaced"
+install-k8s-ns: install-operator install-registry install-clean-kustomize
+
+install-openshift-global: DEFAULT_NS="camel-k"
+install-openshift-global: KUSTOMIZE_DIR="install/overlays/openshift/descoped"
+install-openshift-global: install-operator install-clean-kustomize
+
+install-openshift-ns: DEFAULT_NS="default"
+install-openshift-ns: KUSTOMIZE_DIR="install/overlays/openshift/namespaced"
+install-openshift-ns: install-operator install-clean-kustomize
+
+uninstall:
+ifdef NAMESPACE
+	kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k -n $(NAMESPACE)
+else
+	kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k
+endif
+
+uninstall-crds:
+	kubectl delete crd -l app=camel-k
+
+uninstall-all: uninstall uninstall-crds
+
+#####
+# END Local installation procedure. Handy for development purpose
+#####
