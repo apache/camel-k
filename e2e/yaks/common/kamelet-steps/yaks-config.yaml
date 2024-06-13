@@ -23,8 +23,8 @@ pre:
   run: |
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f prefix-action.kamelet.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f steps-binding.yaml -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding steps-binding --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
+    kubectl apply -f steps-pipe.yaml -n $YAKS_NAMESPACE
+    kubectl wait pipe steps-pipe --for=condition=Ready --timeout=10m -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

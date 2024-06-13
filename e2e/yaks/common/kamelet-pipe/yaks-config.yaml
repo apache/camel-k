@@ -15,17 +15,22 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1
-kind: Pipe
-metadata:
-  name: timer-source-binding-display
-spec:
-  source:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: timer-source
-    properties:
-      message: Hello
-  sink:
-    uri: http://display.{namespace}.svc.cluster.local
+config:
+  namespace:
+    temporary: true
+pre:
+- name: installation
+  run: |
+    kubectl apply -f messages-channel.yaml -n $YAKS_NAMESPACE
+
+    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
+    kubectl apply -f logger-sink.kamelet.yaml -n $YAKS_NAMESPACE
+
+    kubectl apply -f timer-source-pipe.yaml -n $YAKS_NAMESPACE
+    kubectl apply -f logger-sink-pipe.yaml -n $YAKS_NAMESPACE
+    kubectl wait pipe timer-source-pipe --for=condition=Ready --timeout=5m -n $YAKS_NAMESPACE
+    kubectl wait pipe logger-sink-pipe --for=condition=Ready --timeout=5m -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

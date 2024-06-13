@@ -15,21 +15,23 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-config:
-  namespace:
-    temporary: true
-pre:
-- name: installation
-  run: |
-    kubectl apply -f sample-broker.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f logger-sink.kamelet.yaml -n $YAKS_NAMESPACE
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: properties-pipe
 
-    kubectl apply -f timer-source-binding-br.yaml -n $YAKS_NAMESPACE
-    kubectl apply -f logger-sink-binding-br.yaml -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding timer-source-binding-br --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
-    kubectl wait kameletbinding logger-sink-binding-br --for=condition=Ready --timeout=15m -n $YAKS_NAMESPACE
-post:
-  - name: print dump
-    if: env:CI=true && failure()
-    run: yaks dump --includes app=camel-k
+spec:
+  source:
+    ref:
+      apiVersion: camel.apache.org/v1
+      kind: Kamelet
+      name: timer-source
+    properties:
+      message: |
+        {
+          "content": "thecontent",
+          "key2": "val2"
+        }
+      contentType: "application/json"
+  sink:
+    uri: http://probe-service/events

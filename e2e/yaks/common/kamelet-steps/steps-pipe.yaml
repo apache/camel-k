@@ -15,16 +15,30 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-config:
-  namespace:
-    temporary: true
-pre:
-- name: installation
-  run: |
-    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
-
-    kubectl apply -f properties-binding.yaml -n $YAKS_NAMESPACE
-post:
-  - name: print dump
-    if: env:CI=true && failure()
-    run: yaks dump --includes app=camel-k
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: steps-pipe
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: timer-source
+    properties:
+      message: "Camel"
+  steps:
+  - ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: prefix-action
+    properties:
+      prefix: "Apache"
+  - ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: prefix-action
+    properties:
+      prefix: "Hello"
+  sink:
+    uri: log:info

@@ -9,7 +9,7 @@ Feature: Ensure that Kamelets support multiline configuration
 
   Scenario: Wait for binding to start
     Given create Kubernetes service probe-service with target port 8080
-    Then Camel K integration properties-binding should be running
+    Then Camel K integration properties-pipe should be running
 
   Scenario: Verify binding
     Given HTTP server "probe-service"
@@ -26,4 +26,4 @@ Feature: Ensure that Kamelets support multiline configuration
 
   Scenario: Remove resources
     Given delete Kubernetes service probe-service
-    Given delete KameletBinding properties-binding
+    Given delete Pipe properties-pipe

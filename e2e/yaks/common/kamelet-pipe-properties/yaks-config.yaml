@@ -15,18 +15,15 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
-metadata:
-  name: logger-sink-binding-kb
-spec:
-  source:
-    ref:
-      kind: InMemoryChannel
-      apiVersion: messaging.knative.dev/v1
-      name: messages
-  sink:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: logger-sink
+config:
+  namespace:
+    temporary: true
+pre:
+- name: installation
+  run: |
+    kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
+    kubectl apply -f properties-pipe.yaml -n $YAKS_NAMESPACE
+post:
+  - name: print dump
+    if: env:CI=true && failure()
+    run: yaks dump --includes app=camel-k

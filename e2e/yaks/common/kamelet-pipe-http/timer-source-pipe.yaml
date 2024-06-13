@@ -15,29 +15,17 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+apiVersion: camel.apache.org/v1
+kind: Pipe
 metadata:
-  name: event-binding
+  name: timer-source-pipe
 spec:
   source:
     ref:
       kind: Kamelet
       apiVersion: camel.apache.org/v1
-      name: event-source
-    dataTypes:
-      out:
-        format: "application-octet-stream"
-  steps:
-    - ref:
-        kind: Kamelet
-        apiVersion: camel.apache.org/v1
-        name: log-action
+      name: timer-source
+    properties:
+      message: Hello
   sink:
-    ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: event-sink
-    dataTypes:
-      in:
-        format: "text-plain"
+    uri: http://display.{namespace}.svc.cluster.local

@@ -29,7 +29,7 @@ config:
         - name: INTEGRATION_LOGS
           level: INFO
     resources:
-      - event-binding.yaml
+      - event-pipe.yaml
       - timer-to-log.yaml
 pre:
 - name: installation

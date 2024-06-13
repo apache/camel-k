@@ -15,10 +15,10 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+apiVersion: camel.apache.org/v1
+kind: Pipe
 metadata:
-  name: steps-binding
+  name: timer-source-pipe
 spec:
   source:
     ref:
@@ -26,19 +26,10 @@ spec:
       apiVersion: camel.apache.org/v1
       name: timer-source
     properties:
-      message: "Camel"
-  steps:
-  - ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: prefix-action
-    properties:
-      prefix: "Apache"
-  - ref:
-      kind: Kamelet
-      apiVersion: camel.apache.org/v1
-      name: prefix-action
-    properties:
-      prefix: "Hello"
+      message: Hello Kamelets
+      period: 1000
   sink:
-    uri: log:info
+    ref:
+      kind: InMemoryChannel
+      apiVersion: messaging.knative.dev/v1
+      name: messages
