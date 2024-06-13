@@ -24,14 +24,26 @@ For other cluster types you may check the specific documentation. As soon as you
 make images
 ----
 
-This command will build and publish your actual Camel K development version to the container registry. At this stage installing the Camel K development version will be as easy as a typical installation:
+This command will build and publish your actual Camel K development version to the container registry. At this stage installing the Camel K development version will be as easy as a typical installation. We are supporting a series of makefile targets to let you easily install the operator on your local cluster in one single line. These targets are though to cover plain Kubernetes and Openshift cluster in either global (default in `camel-k` namespace) and namespaced (default in `default` namespace) installation:
 
 [source]
 ----
-./kamel install
+make install-k8s-global (default in camel-k namespace)
+make install-k8s-ns (default in default namespace)
+make install-openshift-global (default in camel-k namespace)
+make install-openshift-ns (default in default namespace)
 ----
 
-You can provide any customization required such as `--log-level`, `--operator-id`, etcetera. Mind that you need to use `./kamel` in order to use the development binary you've just built, as tipically, `kamel` is the production CLI you have installed in your binary path.
+Those targets may use two variables, `NAMESPACE` and `REGISTRY` in order to let you specify the namespace where to install the operator and the container registry to use. For instance:
+
+[source]
+----
+NAMESPACE=test REGISTRY=1.2.3.4 make install
+----
+
+Will install a global operator in the `test` namespace with the registry located at IP 1.2.3.4. Mind that when you're using Minikube, the target will be able to automatically detect any existing local registry and set it up for you. For more complex customization you'll need to use the regular Kustomization installation procedure.
+
+In order to uninstall the local operator you can also run `make uninstall` (will keep CRDs) and `make uninstall-all` (will remove CRDs and consequently any running Integration). You can use variable `NAMESPACE` as well if the operator was installed in a namespace different than default.
 
 [[local-camel-k-runtime]]
 === Local Camel K runtime
