@@ -267,7 +267,7 @@ func TestMavenProxyNotPresent(t *testing.T) {
 
 		// Run the Integration
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		// Should not be able to build
 		g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
@@ -275,7 +275,7 @@ func TestMavenProxyNotPresent(t *testing.T) {
 			Should(Equal(corev1.ConditionFalse))
 
 		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
