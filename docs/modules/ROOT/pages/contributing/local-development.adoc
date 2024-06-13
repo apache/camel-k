@@ -38,7 +38,7 @@ Those targets may use two variables, `NAMESPACE` and `REGISTRY` in order to let 
 
 [source]
 ----
-NAMESPACE=test REGISTRY=1.2.3.4 make install
+NAMESPACE=test REGISTRY=1.2.3.4 make install-k8s-global
 ----
 
 Will install a global operator in the `test` namespace with the registry located at IP 1.2.3.4. Mind that when you're using Minikube, the target will be able to automatically detect any existing local registry and set it up for you. For more complex customization you'll need to use the regular Kustomization installation procedure.
