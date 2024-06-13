@@ -7,7 +7,10 @@
 **Closed issues:**
 
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
+- Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
+- Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)
+- Remove health readiness workaround when fixed in Camel [\#5451](https://github.com/apache/camel-k/issues/5451)
 - Support YAML DSL routes configuration [\#4893](https://github.com/apache/camel-k/issues/4893)
 - Deprecate `kamel install` and promote Kustomize-based installation to primary method [\#3865](https://github.com/apache/camel-k/issues/3865)
 
