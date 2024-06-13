@@ -175,7 +175,7 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	}
 	catalog := trait.NewCatalog(client)
 
-	return validateTraits(catalog, extractTraitNames(o.Traits))
+	return trait.ValidateTraits(catalog, extractTraitNames(o.Traits))
 }
 
 func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
@@ -236,7 +236,7 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 			binding.Spec.Integration = &v1.IntegrationSpec{}
 		}
 		catalog := trait.NewCatalog(client)
-		if err := configureTraits(o.Traits, &binding.Spec.Integration.Traits, catalog); err != nil {
+		if err := trait.ConfigureTraits(o.Traits, &binding.Spec.Integration.Traits, catalog); err != nil {
 			return err
 		}
 	}

@@ -297,7 +297,7 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 	}
 	catalog := trait.NewCatalog(client)
 
-	return validateTraits(catalog, extractTraitNames(o.Traits))
+	return trait.ValidateTraits(catalog, extractTraitNames(o.Traits))
 }
 
 func filterBuildPropertyFiles(maybePropertyFiles []string) []string {
@@ -561,7 +561,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 
 	if len(o.Traits) > 0 {
 		catalog := trait.NewCatalog(c)
-		if err := configureTraits(o.Traits, &integration.Spec.Traits, catalog); err != nil {
+		if err := trait.ConfigureTraits(o.Traits, &integration.Spec.Traits, catalog); err != nil {
 			return nil, err
 		}
 	}
