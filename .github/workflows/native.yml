@@ -19,16 +19,26 @@ name: native
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  CAMEL_K_TEST_TIMEOUT_LONG: 30m
+  CAMEL_K_TEST_TIMEOUT_SHORT: 5m
+  CAMEL_K_TEST_TIMEOUT_MEDIUM: 10m
+  CAMEL_K_TEST_TIMEOUT_LONG: 15m
   CAMEL_K_TEST_TIMEOUT_VERY_LONG: 60m
 
 on:
   pull_request:
-    types:
-      - labeled
-      - opened
-      - synchronize
-      - reopened
+    branches:
+      - main
+      - "release-*"
+    paths-ignore:
+      - 'docs/**'
+      - 'java/**'
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
+  push:
     branches:
       - main
       - "release-*"
@@ -66,7 +76,6 @@ concurrency:
 
 jobs:
   quarkus-native:
-    if: contains(github.event.pull_request.labels.*.name, 'trigger native test')
     runs-on: ubuntu-latest
 
     steps:
