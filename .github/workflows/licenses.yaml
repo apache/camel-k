@@ -15,33 +15,38 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: security
+name: licenses
 
 on:
   pull_request:
     branches:
       - main
       - "release-*"
-    paths:
-      - '**.go'
-      - '**.sum'
-      - '**.mod'
+    paths-ignore:
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
   push:
     branches:
       - main
       - "release-*"
-    paths:
-      - '**.go'
-      - '**.sum'
-      - '**.mod'
-  workflow_dispatch:
+    paths-ignore:
+      - 'proposals/**'
+      - '**.md'
+      - '**.adoc'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  security:
+  licenses:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -51,7 +56,7 @@ jobs:
         with:
           go-version-file: 'go.mod'
           check-latest: true
-      - name: vuln
+      - name: licenses
         shell: bash
         run: |
-          make vuln
+          make check-licenses
