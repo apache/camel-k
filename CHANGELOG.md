@@ -6,12 +6,18 @@
 
 **Closed issues:**
 
+- Service/KService not created for vertx-websocket consumers [\#5628](https://github.com/apache/camel-k/issues/5628)
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
+- Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
+- Move deprecated v1alpha1.KameletBinding tests to v1.Pipe [\#5490](https://github.com/apache/camel-k/issues/5490)
 - Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)
 - Remove health readiness workaround when fixed in Camel [\#5451](https://github.com/apache/camel-k/issues/5451)
+- Dependency Service Discovery for Camel K [\#5196](https://github.com/apache/camel-k/issues/5196)
 - Support YAML DSL routes configuration [\#4893](https://github.com/apache/camel-k/issues/4893)
+- Kustomize installation does not work [\#4528](https://github.com/apache/camel-k/issues/4528)
+- Kustomize default [\#4135](https://github.com/apache/camel-k/issues/4135)
 - Deprecate `kamel install` and promote Kustomize-based installation to primary method [\#3865](https://github.com/apache/camel-k/issues/3865)
 
 ## [2.3.4-nightly](https://github.com/apache/camel-k/tree/2.3.4-nightly) (2024-06-10)
