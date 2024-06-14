@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,10 +85,6 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	// start from the integration spec defined in the binding
 	if binding.Spec.Integration != nil {
 		it.Spec = *binding.Spec.Integration.DeepCopy()
-	}
-
-	if &it.Spec != nil && traits != nil {
-		it.Spec = v1.IntegrationSpec{}
 	}
 
 	if traits != nil {
@@ -226,52 +221,7 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 
 // extractAndDeleteTraits will extract the annotation traits into v1.Traits struct, removing from the value from the input map.
 func extractAndDeleteTraits(c client.Client, annotations map[string]string) (*v1.Traits, error) {
-	// structure that will be marshalled into a v1.Traits as it was a kamel run command
-	catalog := trait.NewCatalog(c)
-	traitsPlainParams := []string{}
-	for k, v := range annotations {
-		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-			key := strings.ReplaceAll(k, v1.TraitAnnotationPrefix, "")
-			traitId := strings.Split(key, ".")[0]
-			if err := trait.ValidateTrait(catalog, traitId); err != nil {
-				return nil, err
-			}
-			traitArrayParams := extractAsArray(v)
-			for _, param := range traitArrayParams {
-				traitsPlainParams = append(traitsPlainParams, fmt.Sprintf("%s=%s", key, param))
-			}
-			delete(annotations, k)
-		}
-	}
-	if len(traitsPlainParams) == 0 {
-		return nil, nil
-	}
-	var traits v1.Traits
-	if err := trait.ConfigureTraits(traitsPlainParams, &traits, catalog); err != nil {
-		return nil, err
-	}
-
-	return &traits, nil
-}
-
-// extractTraitValue can detect if the value is an array representation as ["prop1=1", "prop2=2"] and
-// return an array with the values or with the single value passed as a parameter.
-func extractAsArray(value string) []string {
-	if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
-		arrayValue := []string{}
-		data := value[1 : len(value)-1]
-		vals := strings.Split(data, ",")
-		for _, v := range vals {
-			prop := strings.Trim(v, " ")
-			if strings.HasPrefix(prop, `"`) && strings.HasSuffix(prop, `"`) {
-				prop = prop[1 : len(prop)-1]
-			}
-			arrayValue = append(arrayValue, prop)
-		}
-		return arrayValue
-	}
-
-	return []string{value}
+	return trait.ExtractAndMaybeDeleteTraits(c, annotations, true)
 }
 
 func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) error {
