@@ -70,25 +70,6 @@ func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
 }
 
-func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
-	quarkusTrait, environment := createNominalQuarkusTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
-
-	v1.SetAnnotation(&environment.Integration.ObjectMeta, v1.TraitAnnotationPrefix+"quarkus.foo", "camel-k")
-
-	configured, condition, err := quarkusTrait.Configure(environment)
-	assert.True(t, configured)
-	require.NoError(t, err)
-	assert.Nil(t, condition)
-
-	err = quarkusTrait.Apply(environment)
-	require.NoError(t, err)
-	assert.Len(t, environment.IntegrationKits, 1)
-	assert.Equal(t, v1.IntegrationKitLayoutFastJar, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel])
-	assert.Equal(t, "camel-k", environment.IntegrationKits[0].Annotations[v1.TraitAnnotationPrefix+"quarkus.foo"])
-
-}
-
 func TestQuarkusTraitBuildModeOrder(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 	quarkusTrait.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode, traitv1.JvmQuarkusMode}

@@ -47,7 +47,7 @@ import (
 // Add creates a new KameletBinding Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
-	return add(mgr, newReconciler(mgr, c))
+	return add(mgr, newReconciler(mgr, c), c)
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -65,14 +65,14 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	c, err := controller.New("kamelet-binding-controller", mgr, controller.Options{Reconciler: r})
+func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
+	ctrl, err := controller.New("kamelet-binding-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
 	// Watch for changes to primary resource KameletBinding
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1alpha1.KameletBinding{}),
+	err = ctrl.Watch(source.Kind(mgr.GetCache(), &v1alpha1.KameletBinding{}),
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -87,7 +87,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 				// If traits have changed, the reconciliation loop must kick in as
 				// traits may have impact
-				sameTraits, err := trait.KameletBindingsHaveSameTraits(oldKameletBinding, newKameletBinding)
+				sameTraits, err := trait.KameletBindingsHaveSameTraits(c, oldKameletBinding, newKameletBinding)
 				if err != nil {
 					Log.ForKameletBinding(newKameletBinding).Error(
 						err,
@@ -114,7 +114,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch Integration to propagate changes downstream
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Integration{}),
+	err = ctrl.Watch(source.Kind(mgr.GetCache(), &v1.Integration{}),
 		handler.EnqueueRequestForOwner(
 			mgr.GetScheme(),
 			mgr.GetRESTMapper(),

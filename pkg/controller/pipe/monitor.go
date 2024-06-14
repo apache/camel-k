@@ -72,7 +72,7 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	integrationProfileNamespaceChanged := v1.GetIntegrationProfileNamespaceAnnotation(pipe) != "" &&
 		(v1.GetIntegrationProfileNamespaceAnnotation(pipe) != v1.GetIntegrationProfileNamespaceAnnotation(&it))
 
-	sameTraits, err := trait.IntegrationAndPipeSameTraits(&it, pipe)
+	sameTraits, err := trait.IntegrationAndPipeSameTraits(action.client, &it, pipe)
 	if err != nil {
 		return nil, err
 	}

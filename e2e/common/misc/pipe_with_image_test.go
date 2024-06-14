@@ -55,10 +55,9 @@ func TestPipeWithImage(t *testing.T) {
 
 			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations, And(
+			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations,
 				HaveKeyWithValue("test", "1"),
-				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage),
-			)))
+			))
 			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).
@@ -73,10 +72,9 @@ func TestPipeWithImage(t *testing.T) {
 			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink", "--annotation", "trait.camel.apache.org/container.image="+expectedImage, "--annotation", "trait.camel.apache.org/jvm.enabled=false", "--annotation", "trait.camel.apache.org/kamelets.enabled=false", "--annotation", "trait.camel.apache.org/dependencies.enabled=false", "--annotation", "test=2", "--name", bindingID).Execute()).To(Succeed())
 			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
 				Should(gstruct.PointTo(BeNumerically("==", 1)))
-			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations, And(
+			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations,
 				HaveKeyWithValue("test", "2"),
-				HaveKeyWithValue("trait.camel.apache.org/container.image", expectedImage),
-			)))
+			))
 			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
 				Should(Equal(expectedImage))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).

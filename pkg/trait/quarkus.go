@@ -20,7 +20,6 @@ package trait
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/rs/xid"
 
@@ -275,11 +274,6 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 			// set integration profile namespace to the integration namespace.
 			// this is because the kit may live in another namespace and needs to resolve the integration profile from the integration namespace.
 			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
-		}
-	}
-	for k, v := range integration.Annotations {
-		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-			v1.SetAnnotation(&kit.ObjectMeta, k, v)
 		}
 	}
 	operatorID := defaults.OperatorID()

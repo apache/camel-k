@@ -85,7 +85,7 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-func integrationUpdateFunc(old *v1.Integration, it *v1.Integration) bool {
+func integrationUpdateFunc(c client.Client, old *v1.Integration, it *v1.Integration) bool {
 	// Observe the time to first readiness metric
 	previous := old.Status.GetCondition(v1.IntegrationConditionReady)
 	next := it.Status.GetCondition(v1.IntegrationConditionReady)
@@ -99,7 +99,7 @@ func integrationUpdateFunc(old *v1.Integration, it *v1.Integration) bool {
 	updateIntegrationPhase(it.Name, string(it.Status.Phase))
 	// If traits have changed, the reconciliation loop must kick in as
 	// traits may have impact
-	sameTraits, err := trait.IntegrationsHaveSameTraits(old, it)
+	sameTraits, err := trait.IntegrationsHaveSameTraits(c, old, it)
 	if err != nil {
 		Log.ForIntegration(it).Error(
 			err,
@@ -324,7 +324,7 @@ func add(ctx context.Context, mgr manager.Manager, c client.Client, r reconcile.
 						return false
 					}
 
-					return integrationUpdateFunc(old, it)
+					return integrationUpdateFunc(c, old, it)
 				},
 				DeleteFunc: func(e event.DeleteEvent) bool {
 					// Evaluates to false if the object has been confirmed deleted
