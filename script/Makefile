@@ -397,9 +397,13 @@ endif
 	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_TAG)
 
 build-compile-integration-tests:
+ifndef NOTEST
 	@echo "####### Compiling integration tests..."
 	export CAMEL_K_E2E_JUST_COMPILE="true"; \
 	go test -run nope -tags="integration" ./e2e/...
+else
+	@echo "####### Skipping e2e test compile..."
+endif
 
 clean:
 	# disable gomodules when executing go clean:
