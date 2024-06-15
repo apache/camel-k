@@ -31,7 +31,6 @@ import (
 
 func init() {
 	// Let's use the STAGING_RUNTIME_REPO if available
-	runtimeRepo := os.Getenv("STAGING_RUNTIME_REPO")
 	if runtimeRepo != "" {
 		KamelHooks = append(KamelHooks, func(args []string) []string {
 			if len(args) > 0 && args[0] == "install" {
