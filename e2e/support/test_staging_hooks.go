@@ -30,16 +30,14 @@ import (
 )
 
 func init() {
-	// Let's use the STAGING_RUNTIME_REPO if available
-	runtimeRepo := os.Getenv("STAGING_RUNTIME_REPO")
-	if runtimeRepo != "" {
+	
 		KamelHooks = append(KamelHooks, func(args []string) []string {
 			if len(args) > 0 && args[0] == "install" {
 				args = append(args, fmt.Sprintf("--maven-repository=%s", runtimeRepo))
 			}
 			return args
 		})
-	}
+	
 
 	// this hook can be also used to test a released version of the operator, e.g. the staging version during a voting period
 	// Uncomment the following lines and change references to enable the hook

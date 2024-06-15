@@ -90,7 +90,6 @@ OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE := docker.io/camelk/camel-k
-STAGING_RUNTIME_REPO :=
 
 # Kamelets options
 INSTALL_DEFAULT_KAMELETS ?= true
@@ -169,7 +168,6 @@ bump-replace:
 	@mvn -f java/crds/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@mvn -f java/maven-logging/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
-	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
 
 bump: bump-replace codegen bundle
 
@@ -271,7 +269,7 @@ endif
 # the time to complete (they are used also as smoke test for nightly release)
 #
 test-common: do-build
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -timeout 90m -v ./e2e/common/... -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
@@ -283,7 +281,6 @@ test-smoke: do-build
 	if [[ $$TEST_SKIP_AFTER_FAILURE_COUNT = "" ]]; then \
 		TEST_SKIP_AFTER_FAILURE_COUNT=0; \
 	fi; \
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	echo "TEST_COMMON_PARALLEL_COUNT=$$TEST_COMMON_PARALLEL_COUNT"; \
 	echo "TEST_SKIP_AFTER_FAILURE_COUNT=$$TEST_SKIP_AFTER_FAILURE_COUNT"; \
 	go test -timeout 10m -count=1 -v ./e2e/common/main_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
@@ -311,7 +308,7 @@ test-smoke: do-build
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
 test-advanced: do-build
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -timeout 90m -v ./e2e/advanced -tags=integration -parallel=$(TEST_ADVANCED_PARALLEL_COUNT) $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
@@ -319,7 +316,7 @@ test-advanced: do-build
 # Installation procedure test using CLi and Kustomize methodologies
 #
 test-install: do-build
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -timeout 40m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 40m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 40m -v ./e2e/install/helm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
@@ -329,21 +326,18 @@ test-install: do-build
 # Installation procedure test using OLM (requires cluster to be setup accordingly)
 #
 test-install-olm: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 30m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
 
 #
 # Upgrade procedure test (requires cluster to be setup accordingly, ie OLM)
 #
 test-install-upgrade: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 30m -v ./e2e/install/upgrade -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
 
 #
 # Knative tests that require the presence of Knative configuration
 #
 test-knative: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
@@ -351,21 +345,18 @@ test-knative: do-build
 # Builder tests that require a custom build strategy
 #
 test-builder: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
 	go test -timeout 30m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN) $(GOTESTFMT)
 
 #
 # Telemetry tests that require the configuration of telemetry endpoints
 #
 test-telemetry: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(TEST_TELEMETRY_RUN) $(GOTESTFMT)
 
 #
 # Quarkus native test (requires certain CPU and memory conditions)
 #
 test-quarkus-native: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 180m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN) $(GOTESTFMT)
 
 build-kamel:
@@ -384,7 +375,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 endif
 
 build-resources:
-	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) 
 
 bundle-kamelets:
 	@echo "Preparing Kamelets bundle resource..."
@@ -479,7 +470,7 @@ images: build maven-overlay bundle-kamelets image-build build-kamel-platform
 
 image-build:
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
-	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
+	./script/package_maven_artifacts.sh -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
@@ -581,7 +572,7 @@ release-kustomize:
 	./script/release_kustomize.sh
 
 get-staging-repo:
-	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
+	@echo https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots
 
 .PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
