@@ -7633,6 +7633,16 @@ Automatically deploy the integration as Knative service when all conditions hold
 * Integration is using the Knative profile
 * All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
 
+|`timeoutSeconds` +
+int64
+|
+
+
+The maximum duration in seconds that the request instance is allowed to respond to a request.
+This field propagates to the integration pod's terminationGracePeriodSeconds
+
+Refer to the Knative documentation for more information.
+
 
 |===
 

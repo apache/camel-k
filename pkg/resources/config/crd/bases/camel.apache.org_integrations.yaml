@@ -7445,6 +7445,13 @@ spec:
                           default and must be expressed as a Golang `time.Duration`
                           string representation, rounded to a second precision.
                         type: string
+                      timeoutSeconds:
+                        description: "The maximum duration in seconds that the request
+                          instance is allowed to respond to a request. This field
+                          propagates to the integration pod's terminationGracePeriodSeconds
+                          \n Refer to the Knative documentation for more information."
+                        format: int64
+                        type: integer
                       visibility:
                         description: "Setting `cluster-local`, Knative service becomes
                           a private service. Specifically, this option applies the

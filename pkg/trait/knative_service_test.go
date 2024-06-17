@@ -518,6 +518,22 @@ func TestKnativeServiceWithVisibility(t *testing.T) {
 	assert.Equal(t, ksvc.Labels[knativeServingVisibilityLabel], "cluster-local")
 }
 
+func TestKnativeServiceWithTimeoutSeconds(t *testing.T) {
+	timeoutSeconds := int64(44)
+	environment := createKnativeServiceTestEnvironment(t, &traitv1.KnativeServiceTrait{
+		TimeoutSeconds: &timeoutSeconds,
+	})
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative-service"))
+
+	ksvc := environment.Resources.GetKnativeService(func(service *serving.Service) bool {
+		return service.Name == KnativeServiceTestName
+	})
+	assert.NotNil(t, ksvc)
+
+	assert.Equal(t, *ksvc.Spec.Template.Spec.TimeoutSeconds, int64(44))
+}
+
 func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeServiceTrait) *Environment {
 	t.Helper()
 
