@@ -8,6 +8,7 @@
 
 - Service/KService not created for vertx-websocket consumers [\#5628](https://github.com/apache/camel-k/issues/5628)
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
+- Trait annotations saved on the IntegrationKit resource [\#5620](https://github.com/apache/camel-k/issues/5620)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
 - maven-settings-offline-template.xml does not contain license [\#5603](https://github.com/apache/camel-k/issues/5603)
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
@@ -26,6 +27,10 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump org.apache.maven.plugins:maven-surefire-plugin from 3.2.5 to 3.3.0 in /java/crds [\#5644](https://github.com/apache/camel-k/pull/5644) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump k8s.io/klog/v2 from 2.120.1 to 2.130.0 [\#5643](https://github.com/apache/camel-k/pull/5643) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/spf13/cobra from 1.8.0 to 1.8.1 [\#5642](https://github.com/apache/camel-k/pull/5642) ([dependabot[bot]](https://github.com/apps/dependabot))
+- fix\(traits\): annotations refactoring  [\#5637](https://github.com/apache/camel-k/pull/5637) ([squakez](https://github.com/squakez))
 - chore\(release\): fix missing licenses [\#5630](https://github.com/apache/camel-k/pull/5630) ([gansheer](https://github.com/gansheer))
 - feat\(ci\): local installation procedure [\#5629](https://github.com/apache/camel-k/pull/5629) ([squakez](https://github.com/squakez))
 - feat\(ci\): bring back Quarkus native execution on PR and pushes [\#5626](https://github.com/apache/camel-k/pull/5626) ([squakez](https://github.com/squakez))
