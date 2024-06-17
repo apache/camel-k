@@ -399,7 +399,7 @@ func TestIntegrationAndPipeSameTraits(t *testing.T) {
 	pipe := &v1.Pipe{
 		ObjectMeta: metav1.ObjectMeta{
 			Annotations: map[string]string{
-				"trait.camel.apache.org/camel.runtime-version": "1.2.3",
+				v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
 			},
 		},
 	}

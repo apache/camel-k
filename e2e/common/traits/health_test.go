@@ -253,10 +253,10 @@ func TestHealthTrait(t *testing.T) {
 
 			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, source, sink, "-p",
 				"source.message=Magicstring!", "-p", "sink.loggerName=binding",
-				"--annotation", "trait.camel.apache.org/health.enabled=true",
-				"--annotation", "trait.camel.apache.org/jolokia.enabled=true",
-				"--annotation", "trait.camel.apache.org/jolokia.use-ssl-client-authentication=false",
-				"--annotation", "trait.camel.apache.org/jolokia.protocol=http", "--name", name).Execute()).To(Succeed())
+				"--trait", "health.enabled=true",
+				"--trait", "jolokia.enabled=true",
+				"--trait", "jolokia.use-ssl-client-authentication=false",
+				"--trait", "jolokia.protocol=http", "--name", name).Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))

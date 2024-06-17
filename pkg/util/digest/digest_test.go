@@ -42,8 +42,8 @@ func TestDigestUsesAnnotations(t *testing.T) {
 	assert.Equal(t, digest1, digest2)
 
 	it.Annotations = map[string]string{
-		"another.annotation":                   "hello",
-		"trait.camel.apache.org/cron.fallback": "true",
+		"another.annotation":                       "hello",
+		v1.TraitAnnotationPrefix + "cron.fallback": "true",
 	}
 	digest3, err := ComputeForIntegration(&it, nil, nil)
 	require.NoError(t, err)

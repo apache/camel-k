@@ -92,7 +92,7 @@ func TestPipe(t *testing.T) {
 			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink",
 				"-p", "source.message=hello from test",
 				"-p", "sink.loggerName=integrationLogger",
-				"--annotation", "trait.camel.apache.org/camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",
+				"--trait", "camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",
 				"--name", "kb-with-traits").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
