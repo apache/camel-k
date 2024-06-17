@@ -18,6 +18,7 @@
 - Remove health readiness workaround when fixed in Camel [\#5451](https://github.com/apache/camel-k/issues/5451)
 - Dependency Service Discovery for Camel K [\#5196](https://github.com/apache/camel-k/issues/5196)
 - Mount configmap/secret resources to a dedicated resources.d durectory [\#5181](https://github.com/apache/camel-k/issues/5181)
+-  Add missing functionalities and resolve possible discrepancies  [\#4951](https://github.com/apache/camel-k/issues/4951)
 - Support YAML DSL routes configuration [\#4893](https://github.com/apache/camel-k/issues/4893)
 - Kustomize installation does not work [\#4528](https://github.com/apache/camel-k/issues/4528)
 - Kustomize default [\#4135](https://github.com/apache/camel-k/issues/4135)
