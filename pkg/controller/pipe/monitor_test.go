@@ -339,7 +339,7 @@ func TestPipeIntegrationPipeTraitAnnotations(t *testing.T) {
 			Namespace: "ns",
 			Name:      "my-pipe",
 			Annotations: map[string]string{
-				"trait.camel.apache.org/camel.runtime-version": "1.2.3",
+				v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
 			},
 		},
 		Spec: v1.PipeSpec{

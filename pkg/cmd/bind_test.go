@@ -199,6 +199,30 @@ status: {}
 `, output)
 }
 
+func TestBindTraitsArray(t *testing.T) {
+	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+		"-t", "camel.properties=a=1", "-t", "camel.properties=b=2")
+	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+    trait.camel.apache.org/camel.properties: '[a=1,b=2]'
+  creationTimestamp: null
+  name: my-to-my
+spec:
+  sink:
+    uri: my:dst
+  source:
+    uri: my:src
+status: {}
+`, output)
+}
+
 func TestBindSteps(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
 	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
