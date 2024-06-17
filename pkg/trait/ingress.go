@@ -20,14 +20,13 @@ package trait
 import (
 	"errors"
 	"fmt"
+
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
-	"strings"
-
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
 const (
@@ -128,7 +127,7 @@ func (t *ingressTrait) Apply(e *Environment) error {
 		},
 	}
 
-	if len(t.TLSHosts) > 0 || len(strings.TrimSpace(t.TLSSecretName)) > 0 {
+	if len(t.TLSHosts) > 0 && t.TLSSecretName != "" {
 		ingress.Spec.TLS = []networkingv1.IngressTLS{
 			{
 				Hosts:      t.TLSHosts,
