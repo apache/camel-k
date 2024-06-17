@@ -23,7 +23,17 @@ package cli
 import (
 	"github.com/apache/camel-k/v2/e2e/support"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"os"
 )
 
-var operatorNS = support.TestDefaultNamespace + "-cli"
-var operatorID = platform.DefaultPlatformName + "-cli"
+var operatorNS string
+var operatorID string
+
+func init() {
+	operatorNS = os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
+	if operatorNS == "default" {
+		operatorNS = support.TestDefaultNamespace + "-cli"
+	}
+
+	operatorID = support.GetEnvOrDefault("CAMEL_K_OPERATOR_ID", platform.DefaultPlatformName+"-cli")
+}
