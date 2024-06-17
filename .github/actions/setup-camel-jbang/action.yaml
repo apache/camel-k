@@ -42,7 +42,8 @@ runs:
       run: |
         jbang trust add https://github.com/apache/camel/
         jbang app install camel@apache/camel
-        camel version set '4.4.1'
+        camel version set '4.4.2'
+        echo "kamelets-version=4.4.2" >> $HOME/.camel-jbang-user.properties
 
     - id: check-camel-jbang
       name: Check JBang Camel app
