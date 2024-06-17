@@ -41,4 +41,8 @@ type IngressTrait struct {
 	PathType *networkingv1.PathType `property:"path-type" json:"pathType,omitempty"`
 	// To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
+	// To configure tls hosts
+	TLSHosts []string `property:"tls-hosts" json:"tlsHosts,omitempty"`
+	// To configure tls secret name
+	TLSSecretName string `property:"tls-secret-name" json:"tlsSecretName,omitempty"`
 }
