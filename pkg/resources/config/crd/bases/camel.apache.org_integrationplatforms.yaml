@@ -1166,6 +1166,14 @@ spec:
                         - Prefix
                         - ImplementationSpecific
                         type: string
+                      tlsHosts:
+                        description: To configure tls hosts
+                        items:
+                          type: string
+                        type: array
+                      tlsSecretName:
+                        description: To configure tls secret name
+                        type: string
                     type: object
                   istio:
                     description: The configuration of Istio trait
@@ -3179,6 +3187,14 @@ spec:
                         - Exact
                         - Prefix
                         - ImplementationSpecific
+                        type: string
+                      tlsHosts:
+                        description: To configure tls hosts
+                        items:
+                          type: string
+                        type: array
+                      tlsSecretName:
+                        description: To configure tls secret name
                         type: string
                     type: object
                   istio:
