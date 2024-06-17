@@ -7228,6 +7228,20 @@ bool
 
 To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 
+|`tlsHosts` +
+[]string
+|
+
+
+To configure tls hosts
+
+|`tlsSecretName` +
+string
+|
+
+
+To configure tls secret name
+
 
 |===
 
