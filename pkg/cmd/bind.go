@@ -232,17 +232,16 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(o.Traits) > 0 {
-		if binding.Spec.Integration == nil {
-			binding.Spec.Integration = &v1.IntegrationSpec{}
+		if binding.Annotations == nil {
+			binding.Annotations = make(map[string]string)
 		}
-		catalog := trait.NewCatalog(client)
-		if err := trait.ConfigureTraits(o.Traits, &binding.Spec.Integration.Traits, catalog); err != nil {
-			return err
+		for _, t := range o.Traits {
+			kv := strings.Split(t, "=")
+			if len(kv) != 2 {
+				return fmt.Errorf("could not parse trait configuration %s, expected format 'trait.property=value'", t)
+			}
+			binding.Annotations[v1.TraitAnnotationPrefix+kv[0]] = kv[1]
 		}
-	}
-
-	if binding.Annotations == nil {
-		binding.Annotations = make(map[string]string)
 	}
 
 	if o.ServiceAccount != "" {
