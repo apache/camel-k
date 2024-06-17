@@ -91,8 +91,8 @@ func TestKustomizeUpgrade(t *testing.T) {
 
 			// Upgrade the operator by installing the current version
 			registry := os.Getenv("KIND_REGISTRY")
-			kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 			g.Expect(registry).NotTo(Equal(""))
+			kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 			// We must change a few values in the Kustomize config
 			ExpectExecSucceed(t, g,
 				exec.Command(
