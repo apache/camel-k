@@ -60,12 +60,6 @@ runs:
       otlp-collector-image-name: otel/opentelemetry-collector
       otlp-collector-image-version: 0.102.0
 
-  - id: report-problematic
-    name: List Tests Marked As Problematic
-    uses: ./.github/actions/kamel-report-problematic
-    with:
-      test-suite: global/common
-
   - id: run-it
     name: Run IT
     shell: bash

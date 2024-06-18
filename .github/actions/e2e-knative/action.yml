@@ -57,12 +57,6 @@ runs:
   - name: Install Knative
     uses: ./.github/actions/kamel-install-knative
 
-  - id: install-kamel-cluster-setup
-    name: Install Kamel Cluster Setup
-    uses: ./.github/actions/kamel-install-cluster-setup
-    with:
-      kube-admin-user-ctx: ${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}
-
   - id: run-it
     name: Run IT
     shell: bash

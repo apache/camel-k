@@ -8,7 +8,6 @@ You can set some environment variables to change the behavior of the E2E test su
 
 | Env                                     | Default                                 | Description                                                                                                                                   |
 |-----------------------------------------|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| CAMEL_K_TEST_SKIP_PROBLEMATIC           | false                                   | Skips tests that are marked to be problematic (flaky) on certain environments (e.g. on OpenShift).                                            |
 | CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE | false                                   | Used to not remove the temporary test namespaces after the test run. Enables better analysis of resources after the test                      |
 | CAMEL_K_TEST_LOG_LEVEL                  | info                                    | Logging level used to run the tests and used in Maven commands run by the operator (if level is `debug` the Maven commands use `-X` option).  |
 | CAMEL_K_TEST_MAVEN_CLI_OPTIONS          | {}                                      | Maven CLI options used to run Camel K integrations during the tests.                                                                          |

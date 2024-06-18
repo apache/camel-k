@@ -293,7 +293,7 @@ func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID strin
 
 	var installArgs []string
 
-	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID, "--skip-cluster-setup"}
+	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID}
 
 	if !pkgutil.StringSliceExists(args, "--build-timeout") {
 		// if --build-timeout is not explicitly passed as an argument, try to configure it
