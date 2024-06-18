@@ -8,6 +8,7 @@
 
 - Service/KService not created for vertx-websocket consumers [\#5628](https://github.com/apache/camel-k/issues/5628)
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
+- Trait annotations saved on the IntegrationKit resource [\#5620](https://github.com/apache/camel-k/issues/5620)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
 - maven-settings-offline-template.xml does not contain license [\#5603](https://github.com/apache/camel-k/issues/5603)
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
