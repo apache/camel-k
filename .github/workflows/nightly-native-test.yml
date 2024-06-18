@@ -41,12 +41,14 @@ jobs:
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-latest
     steps:
+
     - name: "Checkout code"
       uses: actions/checkout@v4
       with:
         ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
+
     - name: Quarkus native test
       uses: ./.github/actions/e2e-native
       with:

@@ -37,12 +37,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Automatic updates on ${{ matrix.ref-branch }} branch
     steps:
+
     - name: "Checkout code"
       uses: actions/checkout@v4
       with:
         ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
+
     - name: "Run upgrade action"
       uses: ./.github/actions/automatic-updates
       with:

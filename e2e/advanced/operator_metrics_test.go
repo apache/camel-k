@@ -27,7 +27,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"os"
 	"testing"
 	"time"
 
@@ -45,19 +44,8 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-/*
-* TODO
-* The duration_seconds tests keep randomly failing on OCP4 with slightly different duration values
-* May need to lessen the strict checking parameters
-*
-* Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
- */
 func TestMetrics(t *testing.T) {
 	t.Parallel()
-
-	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-		t.Skip("WARNING: Test marked as problematic ... skipping")
-	}
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := RandomizedSuffixName("java")

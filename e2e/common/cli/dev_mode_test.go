@@ -38,17 +38,6 @@ import (
 
 func TestRunDevMode(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		/*
-		 * TODO
-		 * The changing of the yaml file constant from "string" to "magic" is not being
-		 * picked up when deploying on OCP4 and so the test is failing.
-		 *
-		 * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
-		 */
-		if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-			t.Skip("WARNING: Test marked as problematic ... skipping")
-		}
-
 		t.Run("run yaml dev mode", func(t *testing.T) {
 			ctx, cancel := context.WithCancel(ctx)
 			defer cancel()

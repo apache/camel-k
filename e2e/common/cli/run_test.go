@@ -181,16 +181,7 @@ func TestKamelCLIRun(t *testing.T) {
 	})
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		/*
-		 * TODO
-		 * The dependency cannot be read by maven while building. See #3708
-		 *
-		 * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
-		 */
 		t.Run("Run with http dependency", func(t *testing.T) {
-			if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-				t.Skip("WARNING: Test marked as problematic ... skipping")
-			}
 			// Requires a local integration platform in order to resolve the insecure registry
 			// Install platform (use the installer to get staging if present)
 			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--skip-operator-setup")).To(Succeed())
@@ -208,16 +199,7 @@ func TestKamelCLIRun(t *testing.T) {
 	})
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		/*
-		 * TODO
-		 * The dependency cannot be read by maven while building. See #3708
-		 *
-		 * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
-		 */
 		t.Run("Run with http dependency using options", func(t *testing.T) {
-			if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-				t.Skip("WARNING: Test marked as problematic ... skipping")
-			}
 			// Requires a local integration platform in order to resolve the insecure registry
 			// Install platform (use the installer to get staging if present)
 			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--skip-operator-setup")).To(Succeed())
