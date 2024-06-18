@@ -53,22 +53,6 @@ on:
       - 'NOTICE'
 
   workflow_dispatch:
-    inputs:
-      log-level:
-        description: 'Set the operator log level (info or debug)'
-        required: false
-      pre-built-kamel-image:
-        description: 'Kamel image url for skipping building of kamel stages. Used for debugging'
-        required: false
-      skip-problematic:
-        description: 'Whether tests marked as problematic should be skipped - false by default (sets CAMEL_K_TEST_SKIP_PROBLEMATIC)'
-        required: false
-        default: false
-      test-filters:
-        description: |
-          Filter the tests in this test suite by assigning the test pattern to TEST_NATIVE_RUN,
-          eg. TEST_NATIVE_RUN=TestBasic will only run tests prefixed with 'TestBasic'
-        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}

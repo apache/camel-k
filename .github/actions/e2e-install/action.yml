@@ -41,20 +41,6 @@ runs:
       cluster-config-data: ${{ inputs.cluster-config-data }}
       cluster-kube-config-data: ${{ inputs.cluster-kube-config-data }}
 
-  #
-  # Try and ensure the cluster is in a vanilla state before
-  # starting in on an installation
-  #
-  - id: pre-clean-cluster
-    name: Pre Clean Cluster
-    uses: ./.github/actions/kamel-cleanup
-    if: ${{ always() }}
-    with:
-      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
-      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
-      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
-      global-operator-namespace: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}
-
   - id: build-kamel
     name: Build Kamel
     uses: ./.github/actions/kamel-build
@@ -74,24 +60,6 @@ runs:
     with:
       kube-admin-user-ctx: ${{ steps.config-cluster.outputs.cluster-kube-admin-user-ctx }}
 
-  - id: preflight-test
-    name: Preflight Check Test
-    uses: ./.github/actions/kamel-preflight-test
-    with:
-      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
-      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
-      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
-      image-registry-host: ${{ steps.config-cluster.outputs.cluster-image-registry-pull-host }}
-      image-name: ${{ steps.build-kamel.outputs.build-binary-local-image-name }}
-      image-registry-insecure: ${{steps.config-cluster.outputs.cluster-image-registry-insecure }}
-      image-version: ${{ steps.build-kamel.outputs.build-binary-local-image-version }}
-
-  - id: report-problematic
-    name: List Tests Marked As Problematic
-    uses: ./.github/actions/kamel-report-problematic
-    with:
-      test-suite: namespace/install
-
   - id: run-it
     name: Run IT
     shell: bash
@@ -106,12 +74,3 @@ runs:
         -s "${{steps.config-cluster.outputs.cluster-image-registry-insecure }}" \
         -v "${{ steps.build-kamel.outputs.build-binary-local-image-version }}" \
         -x "${{ env.CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE }}"
-
-  - name: Cleanup
-    uses: ./.github/actions/kamel-cleanup
-    if: ${{ always() }}
-    with:
-      catalog-source-name: ${{ steps.config-cluster.outputs.cluster-catalog-source-name }}
-      catalog-source-namespace: ${{ steps.config-cluster.outputs.cluster-catalog-source-namespace }}
-      image-namespace: ${{ steps.config-cluster.outputs.cluster-image-namespace }}
-      global-operator-namespace: ${{ steps.config-cluster.outputs.cluster-global-operator-namespace }}
