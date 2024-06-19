@@ -45,7 +45,7 @@ func TestKameletChange(t *testing.T) {
 		knChannel := "test-kamelet-messages"
 		knChannelConf := fmt.Sprintf("%s:InMemoryChannel:%s", messaging.SchemeGroupVersion.String(), knChannel)
 		timerSource := "my-timer-source"
-		g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, timerSource)()).To(Succeed())
+		g.Expect(CreateTimerKameletWithID(t, ctx, operatorID, ns, timerSource)()).To(Succeed())
 		g.Expect(CreateKnativeChannel(t, ctx, ns, knChannel)()).To(Succeed())
 		// Consumer route that will read from the Knative channel
 		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/test-kamelet-display.yaml", "-w").Execute()).To(Succeed())

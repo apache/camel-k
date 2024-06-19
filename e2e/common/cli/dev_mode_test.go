@@ -34,6 +34,7 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	"github.com/apache/camel-k/v2/e2e/support/util"
+	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
 func TestRunDevMode(t *testing.T) {
@@ -48,7 +49,7 @@ func TestRunDevMode(t *testing.T) {
 			file := util.MakeTempCopy(t, "files/yaml.yaml")
 			name := RandomizedSuffixName("yaml")
 
-			kamelRun := KamelRunWithContext(t, ctx, operatorID, ns, file, "--name", name, "--dev")
+			kamelRun := KamelRunWithContext(t, ctx, platform.DefaultPlatformName, ns, file, "--name", name, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!", "Magicjordan!")
@@ -56,7 +57,7 @@ func TestRunDevMode(t *testing.T) {
 			args := os.Args
 			defer func() { os.Args = args }()
 
-			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
+			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", platform.DefaultPlatformName, file, "--name", name, "--dev"}
 			go kamelRun.Execute()
 
 			g.Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), TestTimeoutMedium).Should(BeTrue())
@@ -76,7 +77,7 @@ func TestRunDevMode(t *testing.T) {
 
 			remoteFile := "https://raw.githubusercontent.com/apache/camel-k/b29333f0a878d5d09fb3965be8fe586d77dd95d0/e2e/common/files/yaml.yaml"
 			name := RandomizedSuffixName("yaml")
-			kamelRun := KamelRunWithContext(t, ctx, operatorID, ns, remoteFile, "--name", name, "--dev")
+			kamelRun := KamelRunWithContext(t, ctx, platform.DefaultPlatformName, ns, remoteFile, "--name", name, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
@@ -84,7 +85,7 @@ func TestRunDevMode(t *testing.T) {
 			args := os.Args
 			defer func() { os.Args = args }()
 
-			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, remoteFile, "--name", name, "--dev"}
+			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", platform.DefaultPlatformName, remoteFile, "--name", name, "--dev"}
 
 			go kamelRun.Execute()
 
@@ -94,17 +95,11 @@ func TestRunDevMode(t *testing.T) {
 		// This test makes sure that `kamel run --dev` runs in seconds after initial build is
 		// already done for the same integration.
 		t.Run("dev mode rebuild in seconds", func(t *testing.T) {
-			/*
-			 * !!! NOTE !!!
-			 * If you find this test flaky, instead of thinking it as simply unstable, investigate
-			 * why it does not finish in a few seconds and remove the bottlenecks which are lagging
-			 * the integration startup.
-			 */
 			name := RandomizedSuffixName("yaml")
 
 			// First run (warm up)
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 			g.Eventually(Integration(t, ctx, ns, name)).Should(BeNil())
@@ -119,7 +114,7 @@ func TestRunDevMode(t *testing.T) {
 
 			file := util.MakeTempCopy(t, "files/yaml.yaml")
 
-			kamelRun := KamelRunWithContext(t, ctx, operatorID, ns, file, "--name", name, "--dev")
+			kamelRun := KamelRunWithContext(t, ctx, platform.DefaultPlatformName, ns, file, "--name", name, "--dev")
 			kamelRun.SetOut(pipew)
 
 			logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!")
@@ -127,7 +122,7 @@ func TestRunDevMode(t *testing.T) {
 			args := os.Args
 			defer func() { os.Args = args }()
 
-			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
+			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", platform.DefaultPlatformName, file, "--name", name, "--dev"}
 
 			go kamelRun.Execute()
 
@@ -136,7 +131,5 @@ func TestRunDevMode(t *testing.T) {
 			g.Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), timeout).Should(BeTrue())
 			g.Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

@@ -36,22 +36,12 @@ import (
 
 func TestRunSimpleGroovyExamples(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-runtimes-groovy"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		t.Run("run groovy", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/groovy.groovy").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "groovy"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "groovy", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

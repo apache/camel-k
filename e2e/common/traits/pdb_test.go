@@ -45,17 +45,9 @@ import (
 
 func TestPodDisruptionBudgetTrait(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-pdb"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "pdb.enabled=true", "-t", "pdb.min-available=2").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "pdb.enabled=true", "-t", "pdb.min-available=2").Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -149,9 +141,6 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 				Name: pods[0].Name,
 			},
 		})).To(Succeed())
-
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

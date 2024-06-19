@@ -43,18 +43,10 @@ import (
 
 func TestHealthTrait(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-health"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		t.Run("Readiness condition with stopped route scaled", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
 				"-t", "health.enabled=true",
 				"-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false",
 				"-t", "jolokia.protocol=http", "--name", name).Execute()).To(Succeed())
@@ -148,14 +140,11 @@ func TestHealthTrait(t *testing.T) {
 				}))
 
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-
-			// Clean-up
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Readiness condition with stopped route", func(t *testing.T) {
 			name := RandomizedSuffixName("java")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java",
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
 				"-t", "health.enabled=true",
 				"-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false",
 				"-t", "jolokia.protocol=http", "--name", name).Execute()).To(Succeed())
@@ -238,9 +227,6 @@ func TestHealthTrait(t *testing.T) {
 				}))
 
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-
-			// Clean-up
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("Readiness condition with stopped binding", func(t *testing.T) {
@@ -248,10 +234,10 @@ func TestHealthTrait(t *testing.T) {
 			source := RandomizedSuffixName("my-health-timer-source")
 			sink := RandomizedSuffixName("my-health-log-sink")
 
-			g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, source)()).To(Succeed())
-			g.Expect(CreateLogKamelet(t, ctx, operatorID, ns, sink)()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, ctx, ns, source)()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, ctx, ns, sink)()).To(Succeed())
 
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, source, sink, "-p",
+			g.Expect(KamelBind(t, ctx, ns, source, sink, "-p",
 				"source.message=Magicstring!", "-p", "sink.loggerName=binding",
 				"--trait", "health.enabled=true",
 				"--trait", "jolokia.enabled=true",
@@ -356,17 +342,12 @@ func TestHealthTrait(t *testing.T) {
 
 					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
 				}))
-
-			// Clean-up
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-			g.Expect(DeleteKamelet(t, ctx, ns, source)).To(Succeed())
-			g.Expect(DeleteKamelet(t, ctx, ns, sink)).To(Succeed())
 		})
 
 		t.Run("Readiness condition with never ready route", func(t *testing.T) {
 			name := RandomizedSuffixName("never-ready")
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/NeverReady.java", "--name", name, "-t", "health.enabled=true",
+			g.Expect(KamelRun(t, ctx, ns, "files/NeverReady.java", "--name", name, "-t", "health.enabled=true",
 				"-p", "camel.health.routesEnabled=false",
 			).Execute()).To(Succeed())
 
@@ -418,7 +399,7 @@ func TestHealthTrait(t *testing.T) {
 		t.Run("Startup condition with never ready route", func(t *testing.T) {
 			name := RandomizedSuffixName("startup-probe-never-ready-route")
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/NeverReady.java", "--name", name,
+			g.Expect(KamelRun(t, ctx, ns, "files/NeverReady.java", "--name", name,
 				"-t", "health.enabled=true",
 				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
 
@@ -468,7 +449,7 @@ func TestHealthTrait(t *testing.T) {
 		t.Run("Startup condition with ready route", func(t *testing.T) {
 			name := RandomizedSuffixName("startup-probe-ready-route")
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name,
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
 				"-t", "health.enabled=true",
 				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
 
@@ -479,7 +460,5 @@ func TestHealthTrait(t *testing.T) {
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
 				WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

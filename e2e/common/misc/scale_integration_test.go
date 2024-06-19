@@ -43,15 +43,8 @@ func TestIntegrationScale(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-integration-scale"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -123,7 +116,7 @@ func TestIntegrationScale(t *testing.T) {
 			// Save resources by deleting the integration
 			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", "pre-built", "-t", fmt.Sprintf("container.image=%s", image)).Execute()).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Expect(ScaleIntegration(t, ctx, ns, "pre-built", 0)).To(Succeed())
@@ -131,10 +124,6 @@ func TestIntegrationScale(t *testing.T) {
 			g.Expect(ScaleIntegration(t, ctx, ns, "pre-built", 1)).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, "pre-built"), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "pre-built"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-
-			g.Expect(Kamel(t, ctx, "delete", "pre-built", "-n", ns).Execute()).To(Succeed())
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

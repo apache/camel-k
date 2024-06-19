@@ -36,21 +36,10 @@ import (
 
 func TestCamelTrait(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-camel"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		t.Run("properties changes should not rebuild", func(t *testing.T) {
-
-			g.Expect(Kamel(t, ctx, "reset", "-n", ns).Execute()).To(Succeed())
-
 			name := RandomizedSuffixName("java")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 			// checking the integration status
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -58,17 +47,11 @@ func TestCamelTrait(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			integrationKit := IntegrationKit(t, ctx, ns, name)()
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-p", "a=1").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-p", "a=1").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			g.Eventually(IntegrationKit(t, ctx, ns, name)).Should(Equal(integrationKit))
-
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
-			g.Eventually(Integration(t, ctx, ns, name), TestTimeoutLong).Should(BeNil())
 		})
-
-		// Clean-up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

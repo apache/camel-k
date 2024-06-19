@@ -41,7 +41,6 @@ import (
 
 func TestClientFunctionalities(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		cfg, err := config.GetConfig()
 		require.NoError(t, err)
@@ -66,7 +65,5 @@ func TestClientFunctionalities(t *testing.T) {
 
 		err = camel.CamelV1().Integrations(ns).Delete(ctx, "dummy", metav1.DeleteOptions{})
 		require.NoError(t, err)
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

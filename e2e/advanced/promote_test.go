@@ -72,14 +72,14 @@ func TestKamelCLIPromote(t *testing.T) {
 		})
 
 		t.Run("kamelet integration dev", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, ctx, operatorDevID, nsDev, "my-own-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKameletWithID(t, ctx, operatorDevID, nsDev, "my-own-timer-source")()).To(Succeed())
 			g.Expect(KamelRunWithID(t, ctx, operatorDevID, nsDev, "./files/timer-kamelet-usage.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, nsDev, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, nsDev, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 		})
 
 		t.Run("binding dev", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, ctx, operatorDevID, nsDev, "kb-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKameletWithID(t, ctx, operatorDevID, nsDev, "kb-timer-source")()).To(Succeed())
 			g.Expect(KamelBindWithID(t, ctx, operatorDevID, nsDev, "kb-timer-source", "log:info", "-p", "source.message=my-kamelet-binding-rocks").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, nsDev, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, nsDev, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))
@@ -148,7 +148,7 @@ func TestKamelCLIPromote(t *testing.T) {
 			})
 
 			t.Run("kamelet integration promotion", func(t *testing.T) {
-				g.Expect(CreateTimerKamelet(t, ctx, operatorProdID, nsProd, "my-own-timer-source")()).To(Succeed())
+				g.Expect(CreateTimerKameletWithID(t, ctx, operatorProdID, nsProd, "my-own-timer-source")()).To(Succeed())
 				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "timer-kamelet-usage", "--to", nsProd).Execute()).To(Succeed())
 				g.Eventually(IntegrationPodPhase(t, ctx, nsProd, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationLogs(t, ctx, nsProd, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
@@ -161,7 +161,7 @@ func TestKamelCLIPromote(t *testing.T) {
 			})
 
 			t.Run("binding promotion", func(t *testing.T) {
-				g.Expect(CreateTimerKamelet(t, ctx, operatorProdID, nsProd, "kb-timer-source")()).To(Succeed())
+				g.Expect(CreateTimerKameletWithID(t, ctx, operatorProdID, nsProd, "kb-timer-source")()).To(Succeed())
 				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "kb-timer-source-to-log", "--to", nsProd).Execute()).To(Succeed())
 				g.Eventually(IntegrationPodPhase(t, ctx, nsProd, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationLogs(t, ctx, nsProd, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))

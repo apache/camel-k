@@ -48,7 +48,7 @@ func TestKamelCLIConfig(t *testing.T) {
 			g.Expect(Kamel(t, ctx, "config", "--default-namespace", ns).Execute()).To(Succeed())
 			_, err = os.Stat(cmd.DefaultConfigLocation)
 			require.NoError(t, err, "A file at "+cmd.DefaultConfigLocation+" was expected")
-			g.Expect(Kamel(t, ctx, "run", "--operator-id", operatorID, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).

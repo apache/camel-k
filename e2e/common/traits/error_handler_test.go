@@ -36,18 +36,10 @@ import (
 
 func TestErrorHandlerTrait(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-errorhandler"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		t.Run("Run errored integration with error handler", func(t *testing.T) {
 			name := RandomizedSuffixName("error-handler")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/ErroredRoute.java", "--name", name, "-t", "error-handler.enabled=true", "-t", "error-handler.ref=defaultErrorHandler", "-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder", "-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/ErroredRoute.java", "--name", name, "-t", "error-handler.enabled=true", "-t", "error-handler.ref=defaultErrorHandler", "-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder", "-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).ShouldNot(ContainSubstring("InvalidPayloadException"))
