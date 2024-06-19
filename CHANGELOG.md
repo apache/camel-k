@@ -6,12 +6,16 @@
 
 **Closed issues:**
 
+- Add TLS configuration in the ingress trait [\#5635](https://github.com/apache/camel-k/issues/5635)
+- Installation tests are unstable [\#5632](https://github.com/apache/camel-k/issues/5632)
+- Add license header file check workflow on PR in CI [\#5631](https://github.com/apache/camel-k/issues/5631)
 - Service/KService not created for vertx-websocket consumers [\#5628](https://github.com/apache/camel-k/issues/5628)
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
 - Trait annotations saved on the IntegrationKit resource [\#5620](https://github.com/apache/camel-k/issues/5620)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
 - maven-settings-offline-template.xml does not contain license [\#5603](https://github.com/apache/camel-k/issues/5603)
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
+- Nightly release note still define ARM64 specific instructions [\#5596](https://github.com/apache/camel-k/issues/5596)
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
 - Move deprecated v1alpha1.KameletBinding tests to v1.Pipe [\#5490](https://github.com/apache/camel-k/issues/5490)
 - Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)
@@ -24,6 +28,7 @@
 - Kustomize installation does not work [\#4528](https://github.com/apache/camel-k/issues/4528)
 - Kustomize default [\#4135](https://github.com/apache/camel-k/issues/4135)
 - Deprecate `kamel install` and promote Kustomize-based installation to primary method [\#3865](https://github.com/apache/camel-k/issues/3865)
+- Add e2e monitoring tests for vanilla Kubernetes [\#1667](https://github.com/apache/camel-k/issues/1667)
 
 ## [2.3.4-nightly](https://github.com/apache/camel-k/tree/2.3.4-nightly) (2024-06-10)
 
