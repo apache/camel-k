@@ -1617,7 +1617,7 @@ github.com/apache/camel-k/v2/pkg/trait/knative_service.go:133:						Apply							
 github.com/apache/camel-k/v2/pkg/trait/knative_service.go:150:						SelectControllerStrategy				86.4%
 github.com/apache/camel-k/v2/pkg/trait/knative_service.go:196:						isForcefullyEnabled					100.0%
 github.com/apache/camel-k/v2/pkg/trait/knative_service.go:200:						ControllerStrategySelectorOrder				100.0%
-github.com/apache/camel-k/v2/pkg/trait/knative_service.go:204:						getServiceFor						47.5%
+github.com/apache/camel-k/v2/pkg/trait/knative_service.go:204:						getServiceFor						49.2%
 github.com/apache/camel-k/v2/pkg/trait/logging.go:45:							newLoggingTraitTrait					100.0%
 github.com/apache/camel-k/v2/pkg/trait/logging.go:54:							Configure						60.0%
 github.com/apache/camel-k/v2/pkg/trait/logging.go:65:							Apply							100.0%

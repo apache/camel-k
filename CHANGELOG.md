@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Add TimeoutSeconds to knative-service trait [\#5652](https://github.com/apache/camel-k/issues/5652)
 - Add TLS configuration in the ingress trait [\#5635](https://github.com/apache/camel-k/issues/5635)
 - Installation tests are unstable [\#5632](https://github.com/apache/camel-k/issues/5632)
 - Add license header file check workflow on PR in CI [\#5631](https://github.com/apache/camel-k/issues/5631)
@@ -33,6 +34,7 @@
 **Merged pull requests:**
 
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.42 to 0.6.45 [\#5655](https://github.com/apache/camel-k/pull/5655) ([dependabot[bot]](https://github.com/apps/dependabot))
+- \(\#5652\) Added TimeoutSeconds to knative-serving trait [\#5653](https://github.com/apache/camel-k/pull/5653) ([hernanDatgDev](https://github.com/hernanDatgDev))
 - \(\#5635\) Add TLS configuration in the ingress trait [\#5650](https://github.com/apache/camel-k/pull/5650) ([romain-pfund](https://github.com/romain-pfund))
 - chore\(cmd\): remove deprecated .spec.integration usage [\#5649](https://github.com/apache/camel-k/pull/5649) ([squakez](https://github.com/squakez))
 - fix\(e2e\): always build bundle and set local config [\#5647](https://github.com/apache/camel-k/pull/5647) ([squakez](https://github.com/squakez))
