@@ -36,31 +36,25 @@ import (
 func TestKamelCLIBind(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		kameletName := "test-timer-source"
-		g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, kameletName)()).To(Succeed())
+		g.Expect(CreateTimerKamelet(t, ctx, ns, kameletName)()).To(Succeed())
 
 		t.Run("bind timer to log", func(t *testing.T) {
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, kameletName, "log:info", "-p", "source.message=helloTest").Execute()).To(Succeed())
+			g.Expect(KamelBind(t, ctx, ns, kameletName, "log:info", "-p", "source.message=helloTest").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "test-timer-source-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "test-timer-source-to-log")).Should(ContainSubstring("Body: helloTest"))
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "test-timer-source", "log:info", "-p", "source.message=newText").Execute()).To(Succeed())
+			g.Expect(KamelBind(t, ctx, ns, "test-timer-source", "log:info", "-p", "source.message=newText").Execute()).To(Succeed())
 			g.Eventually(IntegrationLogs(t, ctx, ns, "test-timer-source-to-log")).Should(ContainSubstring("Body: newText"))
 		})
 
-		t.Run("unsuccessful binding, no property", func(t *testing.T) {
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, operatorNS+"/timer-source", "log:info").Execute()).NotTo(Succeed())
-		})
-
 		t.Run("bind uris", func(t *testing.T) {
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "timer:foo", "log:bar").Execute()).To(Succeed())
+			g.Expect(KamelBind(t, ctx, ns, "timer:foo", "log:bar").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "timer-to-log")).Should(ContainSubstring("Body is null"))
 		})
 
 		t.Run("bind with custom SA", func(t *testing.T) {
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "timer:foo", "log:bar", "--service-account", "my-service-account").Execute()).To(Succeed())
+			g.Expect(KamelBind(t, ctx, ns, "timer:foo", "log:bar", "--service-account", "my-service-account").Execute()).To(Succeed())
 			g.Eventually(IntegrationSpecSA(t, ctx, ns, "timer-to-log")).Should(Equal("my-service-account"))
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

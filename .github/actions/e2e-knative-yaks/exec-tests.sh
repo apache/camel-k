@@ -122,5 +122,8 @@ export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
 export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 
+kubectl create ns camel-k
+REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+
 # Then run integration tests
 yaks test e2e/yaks/common

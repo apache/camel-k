@@ -46,20 +46,12 @@ import (
 
 func TestPrometheusTrait(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-prometheus"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		ocp, err := openshift.IsOpenShift(TestClient(t))
 		require.NoError(t, err)
 		// Do not create PodMonitor for the time being as CI test runs on OCP 3.11
 		createPodMonitor := false
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "-t", "prometheus.enabled=true", "-t", fmt.Sprintf("prometheus.pod-monitor=%v", createPodMonitor)).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "-t", "prometheus.enabled=true", "-t", fmt.Sprintf("prometheus.pod-monitor=%v", createPodMonitor)).Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -88,8 +80,6 @@ func TestPrometheusTrait(t *testing.T) {
 				g.Eventually(sm, TestTimeoutShort).ShouldNot(BeNil())
 			})
 		}
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

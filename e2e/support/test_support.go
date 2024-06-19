@@ -66,16 +66,11 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
-	configv1 "github.com/openshift/api/config/v1"
-	projectv1 "github.com/openshift/api/project/v1"
-	routev1 "github.com/openshift/api/route/v1"
 
 	"github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -93,6 +88,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
+	configv1 "github.com/openshift/api/config/v1"
+	projectv1 "github.com/openshift/api/project/v1"
+	routev1 "github.com/openshift/api/route/v1"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	// let's enable addons in all tests
 	_ "github.com/apache/camel-k/v2/addons"
@@ -144,6 +143,11 @@ var testClient client.Client
 
 var testSetupMutex = sync.Mutex{}
 var kamelInstallMutex = sync.Mutex{}
+
+func init() {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
+}
 
 // Only panic the test if absolutely necessary and there is
 // no test locus. In most cases, the test should fail gracefully
@@ -285,9 +289,6 @@ func KamelInstallWithIDAndKameletCatalog(t *testing.T, ctx context.Context, oper
 }
 
 func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) error {
-	// This line prevents controller-runtime from complaining about log.SetLogger never being called
-	logf.SetLogger(zap.New(zap.UseDevMode(true)))
-
 	kamelInstallMutex.Lock()
 	defer kamelInstallMutex.Unlock()
 
@@ -389,8 +390,6 @@ func KamelBindWithContext(t *testing.T, ctx context.Context, operatorID string, 
 }
 
 func KamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
-	// This line prevents controller-runtime from complaining about log.SetLogger never being called
-	logf.SetLogger(zap.New(zap.UseDevMode(true)))
 	var cmdArgs []string
 
 	cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
@@ -2796,7 +2795,11 @@ func CreateKnativeBroker(t *testing.T, ctx context.Context, ns string, name stri
 	Kamelets
 */
 
-func CreateKamelet(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(t *testing.T, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+	return CreateKameletWithID(t, platform.DefaultPlatformName, ctx, ns, name, template, properties, labels)
+}
+
+func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
 		kamelet := v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -2817,7 +2820,11 @@ func CreateKamelet(t *testing.T, operatorID string, ctx context.Context, ns stri
 	}
 }
 
-func CreateTimerKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
+func CreateTimerKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
+	return CreateTimerKameletWithID(t, ctx, platform.DefaultPlatformName, ns, name)
+}
+
+func CreateTimerKameletWithID(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -2840,7 +2847,7 @@ func CreateTimerKamelet(t *testing.T, ctx context.Context, operatorID string, ns
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
+	return CreateKameletWithID(t, operatorID, ctx, ns, name, flow, props, nil)
 }
 
 func DeleteKamelet(t *testing.T, ctx context.Context, ns string, name string) error {
@@ -3193,7 +3200,7 @@ func GetOutputStringAsync(cmd *cobra.Command) func() string {
 	}
 }
 
-func CreateLogKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
+func CreateLogKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -3211,7 +3218,7 @@ func CreateLogKamelet(t *testing.T, ctx context.Context, operatorID string, ns s
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
+	return CreateKamelet(t, ctx, ns, name, flow, props, nil)
 }
 
 func GetCIProcessID() string {

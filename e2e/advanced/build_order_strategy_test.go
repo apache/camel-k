@@ -44,7 +44,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--max-running-pipelines", "4", "--build-order-strategy", string(v1.BuildOrderStrategyDependencies))).To(Succeed())
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, "timer-source")()).To(Succeed())
+		g.Expect(CreateTimerKameletWithID(t, ctx, operatorID, ns, "timer-source")()).To(Succeed())
 
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", integrationA).Execute()).To(Succeed())
@@ -115,7 +115,7 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--build-order-strategy", string(v1.BuildOrderStrategyFIFO))).To(Succeed())
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, "timer-source")()).To(Succeed())
+		g.Expect(CreateTimerKameletWithID(t, ctx, operatorID, ns, "timer-source")()).To(Succeed())
 
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java",

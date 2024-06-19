@@ -39,15 +39,7 @@ import (
 
 func TestJVMTrait(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-jvm"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		// Store a configmap holding a jar
 		var cmData = make(map[string][]byte)
 		// We calculate the expected content
@@ -59,7 +51,7 @@ func TestJVMTrait(t *testing.T) {
 
 		t.Run("JVM trait classpath", func(t *testing.T) {
 			name := RandomizedSuffixName("classpath")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns,
+			g.Expect(KamelRun(t, ctx, ns,
 				"./files/jvm/Classpath.java",
 				"--name", name,
 				"--resource", "configmap:my-deps",
@@ -83,7 +75,7 @@ func TestJVMTrait(t *testing.T) {
 
 		t.Run("JVM trait classpath on deprecated path", func(t *testing.T) {
 			name := RandomizedSuffixName("classpath")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns,
+			g.Expect(KamelRun(t, ctx, ns,
 				"./files/jvm/Classpath.java",
 				"--name", name,
 				"-t", "mount.resources=configmap:my-deps/sample-1.0.jar@/etc/camel/resources",
@@ -107,7 +99,7 @@ func TestJVMTrait(t *testing.T) {
 
 		t.Run("JVM trait classpath on specific classpath", func(t *testing.T) {
 			name := RandomizedSuffixName("classpath")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns,
+			g.Expect(KamelRun(t, ctx, ns,
 				"./files/jvm/Classpath.java",
 				"--name", name,
 				"-t", "mount.resources=configmap:my-deps/sample-1.0.jar@/etc/other/resources",
@@ -128,7 +120,5 @@ func TestJVMTrait(t *testing.T) {
 			g.Expect(len(mountTrait)).To(Equal(1))
 			g.Expect(mountTrait["resources"]).To(ContainElements("configmap:my-deps/sample-1.0.jar@/etc/other/resources"))
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

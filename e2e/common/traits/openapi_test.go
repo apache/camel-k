@@ -33,33 +33,18 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestOpenAPI(t *testing.T) {
 	t.Parallel()
-
-	/*
-		kubectl create configmap my-openapi --from-file=./e2e/common/traits/files/openapi/petstore-api.yaml
-
-		kamel run --dev --name=petstore --open-api configmap:my-openapi ./e2e/common/traits/files/openapi/petstore.yaml
-	*/
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-openapi"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		openapiContent, err := os.ReadFile("./files/openapi/petstore-api.yaml")
 		require.NoError(t, err)
 		var cmDataProps = make(map[string]string)
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi", cmDataProps)
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.yaml").Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "petstore"), TestTimeoutLong).
 			Should(Equal(corev1.PodRunning))
@@ -72,7 +57,5 @@ func TestOpenAPI(t *testing.T) {
 			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

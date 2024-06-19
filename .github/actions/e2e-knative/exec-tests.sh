@@ -134,5 +134,8 @@ else
   export CAMEL_K_GLOBAL_OPERATOR_NS="default"
 fi
 
+kubectl create ns camel-k
+REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+
 # Then run integration tests
 DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-knative

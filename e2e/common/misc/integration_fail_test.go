@@ -37,18 +37,10 @@ import (
 
 func TestBadRouteIntegration(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-bad-route"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		t.Run("run bad java route", func(t *testing.T) {
 			name := RandomizedSuffixName("bad-route")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/BadRoute.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/BadRoute.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
@@ -72,7 +64,7 @@ func TestBadRouteIntegration(t *testing.T) {
 
 		t.Run("run missing dependency java route", func(t *testing.T) {
 			name := RandomizedSuffixName("java-route")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name,
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
 				"-d", "mvn:com.example:nonexistent:1.0", "-t", "health.enabled=false").Execute()).To(Succeed())
 			// Integration in error
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
@@ -90,7 +82,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			g.Eventually(BuildFailureRecoveryAttempt(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(5))
 
 			// Fixing the route should reconcile the Integration
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseRunning))
 			// New Kit success
 			kitRecoveryName := IntegrationKit(t, ctx, ns, name)()
@@ -104,7 +96,7 @@ func TestBadRouteIntegration(t *testing.T) {
 
 		t.Run("run invalid dependency java route", func(t *testing.T) {
 			name := RandomizedSuffixName("invalid-dependency")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-d", "camel:non-existent", "-t", "health.enabled=false").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-d", "camel:non-existent", "-t", "health.enabled=false").Execute()).To(Succeed())
 			// Integration in error with Initialization Failed condition
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
@@ -117,7 +109,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			g.Consistently(IntegrationKit(t, ctx, ns, name), 10*time.Second).Should(BeEmpty())
 
 			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
@@ -132,7 +124,7 @@ func TestBadRouteIntegration(t *testing.T) {
 
 		t.Run("run unresolvable component java route", func(t *testing.T) {
 			name := RandomizedSuffixName("unresolvable-route")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Unresolvable.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Unresolvable.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
 			// Integration in error with Initialization Failed condition
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
@@ -145,7 +137,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			g.Consistently(IntegrationKit(t, ctx, ns, name), 10*time.Second).Should(BeEmpty())
 
 			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
@@ -161,7 +153,7 @@ func TestBadRouteIntegration(t *testing.T) {
 		t.Run("run invalid java route", func(t *testing.T) {
 			name := RandomizedSuffixName("invalid-java-route")
 			// Skip the health check so we can quickly read from log
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/InvalidJava.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/InvalidJava.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
@@ -174,7 +166,7 @@ func TestBadRouteIntegration(t *testing.T) {
 			g.Eventually(KitPhase(t, ctx, integrationKitNamespace, kitName), TestTimeoutShort).Should(Equal(v1.IntegrationKitPhaseReady))
 
 			// Fixing the route should reconcile the Integration in Initialization Failed condition to Running
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "health.enabled=false").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
@@ -185,7 +177,5 @@ func TestBadRouteIntegration(t *testing.T) {
 			g.Expect(kitRecoveryName).To(Equal(kitName))
 
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

@@ -36,17 +36,9 @@ import (
 
 func TestRunExtraRepository(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-extra-repository"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat", "--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001", "--name", name).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--maven-repository", "https://maven.repository.redhat.com/ga@id=redhat", "--dependency", "mvn:org.jolokia:jolokia-core:1.7.1.redhat-00001", "--name", name).Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -55,7 +47,5 @@ func TestRunExtraRepository(t *testing.T) {
 			HaveExistingField("Repositories"),
 			HaveField("Repositories", ContainElements("https://maven.repository.redhat.com/ga@id=redhat")),
 		)))
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

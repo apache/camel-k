@@ -37,13 +37,9 @@ import (
 
 func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-quarkus-native"
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--build-timeout", "90m0s", "--maven-cli-option", "-Dquarkus.native.native-image-xmx=6g")).To(Succeed())
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		t.Run("unsupported integration source language", func(t *testing.T) {
 			name := RandomizedSuffixName("unsupported-js")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/JavaScript.js", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/JavaScript.js", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).
@@ -56,14 +52,11 @@ func TestNativeIntegrations(t *testing.T) {
 			g.Expect(quarkusTrait).ToNot(BeNil())
 			g.Expect(len(quarkusTrait)).To(Equal(1))
 			g.Expect(quarkusTrait["buildMode"]).ToNot(BeNil())
-
-			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("xml native support", func(t *testing.T) {
 			name := RandomizedSuffixName("xml-native")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Xml.xml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Xml.xml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -72,16 +65,11 @@ func TestNativeIntegrations(t *testing.T) {
 				Should(Equal(corev1.ConditionTrue))
 
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("XML Magicstring!"))
-
-			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("automatic rollout deployment from jvm to native kit", func(t *testing.T) {
-			// Let's make sure we start from a clean state
-			g.Expect(DeleteKits(t, ctx, ns)).To(Succeed())
 			name := RandomizedSuffixName("yaml-native")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-t", "quarkus.build-mode=jvm", "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name, "-t", "quarkus.build-mode=jvm", "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			// Check that two Kits are created with distinct layout
 			g.Eventually(Kits(t, ctx, ns, withFastJarLayout)).Should(HaveLen(1))
@@ -106,9 +94,6 @@ func TestNativeIntegrations(t *testing.T) {
 
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 
-			// ====================================
-			// !!! THE MOST TIME-CONSUMING PART !!!
-			// ====================================
 			// Check the native Kit is ready
 			g.Eventually(Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutVeryLong).Should(HaveLen(1))
@@ -130,7 +115,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			t.Run("yaml native should not rebuild", func(t *testing.T) {
 				name := RandomizedSuffixName("yaml-native-2")
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml2.yaml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+				g.Expect(KamelRun(t, ctx, ns, "files/yaml2.yaml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
@@ -141,10 +126,32 @@ func TestNativeIntegrations(t *testing.T) {
 				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!2"))
 				g.Eventually(IntegrationKit(t, ctx, ns, "yaml-native-2")).Should(Equal(IntegrationKit(t, ctx, ns, "yaml-native")()))
 			})
-
-			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
+	})
+}
+
+func TestNativeBinding(t *testing.T) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		message := "Magicstring!"
+		t.Run("binding with native build", func(t *testing.T) {
+			bindingName := "native-binding"
+			g.Expect(KamelBind(t, ctx, ns, "timer-source", "log-sink", "-p", "source.message="+message,
+				"--trait", "quarkus.build-mode=native", "--trait", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
+				"--name", bindingName).Execute()).To(Succeed())
+
+			g.Eventually(Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
+				TestTimeoutVeryLong).Should(HaveLen(1))
+
+			nativeKit := Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
+			g.Eventually(IntegrationKit(t, ctx, ns, bindingName), TestTimeoutShort).Should(Equal(nativeKit.Name))
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, bindingName), TestTimeoutShort).Should(ContainSubstring(message))
+
+			g.Eventually(IntegrationPod(t, ctx, ns, bindingName), TestTimeoutShort).
+				Should(WithTransform(getContainerCommand(),
+					MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+		})
 	})
 }

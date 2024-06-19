@@ -27,32 +27,28 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gstruct"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 func TestPipe(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-pipe"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		// Error Handler testing
 		t.Run("test error handler", func(t *testing.T) {
-			g.Expect(createErrorProducerKamelet(t, ctx, operatorID, ns, "my-own-error-producer-source")()).To(Succeed())
-			g.Expect(CreateLogKamelet(t, ctx, operatorID, ns, "my-own-log-sink")()).To(Succeed())
+			g.Expect(createErrorProducerKamelet(t, ctx, ns, "my-own-error-producer-source")()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, ctx, ns, "my-own-log-sink")()).To(Succeed())
 
 			t.Run("throw error test", func(t *testing.T) {
-				g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-error-producer-source", "my-own-log-sink",
+				g.Expect(KamelBind(t, ctx, ns, "my-own-error-producer-source", "my-own-log-sink",
 					"--error-handler", "sink:my-own-log-sink",
 					"-p", "source.message=throw Error",
 					"-p", "sink.loggerName=integrationLogger",
@@ -68,7 +64,7 @@ func TestPipe(t *testing.T) {
 			})
 
 			t.Run("don't throw error test", func(t *testing.T) {
-				g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-error-producer-source", "my-own-log-sink",
+				g.Expect(KamelBind(t, ctx, ns, "my-own-error-producer-source", "my-own-log-sink",
 					"--error-handler", "sink:my-own-log-sink",
 					"-p", "source.message=true",
 					"-p", "sink.loggerName=integrationLogger",
@@ -86,10 +82,10 @@ func TestPipe(t *testing.T) {
 
 		//Pipe with traits testing
 		t.Run("test Pipe with trait", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, "my-own-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKamelet(t, ctx, ns, "my-own-timer-source")()).To(Succeed())
 			// Log sink kamelet exists from previous test
 
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink",
+			g.Expect(KamelBind(t, ctx, ns, "my-own-timer-source", "my-own-log-sink",
 				"-p", "source.message=hello from test",
 				"-p", "sink.loggerName=integrationLogger",
 				"--trait", "camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",
@@ -113,11 +109,140 @@ func TestPipe(t *testing.T) {
 				WithTransform(PipeConditionMessage, ContainSubstring("no ref or URI specified in endpoint")))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 
-func createErrorProducerKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
+func TestPipeWithImage(t *testing.T) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		bindingID := "with-image-binding"
+
+		t.Run("run with initial image", func(t *testing.T) {
+			expectedImage := "quay.io/fuse_qe/echo-server:0.3.2"
+
+			g.Expect(KamelBind(t, ctx, ns, "my-own-timer-source", "my-own-log-sink",
+				"--trait", "container.image="+expectedImage, "--trait", "jvm.enabled=false",
+				"--trait", "kamelets.enabled=false", "--trait", "dependencies.enabled=false",
+				"--annotation", "test=1", "--name", bindingID).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations,
+				HaveKeyWithValue("test", "1"),
+			))
+			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
+				Should(Equal(expectedImage))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).
+				Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
+				Should(Equal(expectedImage))
+		})
+
+		t.Run("run with new image", func(t *testing.T) {
+			expectedImage := "quay.io/fuse_qe/echo-server:0.3.3"
+
+			g.Expect(KamelBind(t, ctx, ns, "my-own-timer-source", "my-own-log-sink",
+				"--trait", "container.image="+expectedImage, "--trait", "jvm.enabled=false",
+				"--trait", "kamelets.enabled=false", "--trait", "dependencies.enabled=false",
+				"--annotation", "test=2", "--name", bindingID).Execute()).To(Succeed())
+			g.Eventually(IntegrationGeneration(t, ctx, ns, bindingID)).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			g.Eventually(Integration(t, ctx, ns, bindingID)).Should(WithTransform(Annotations,
+				HaveKeyWithValue("test", "2"),
+			))
+			g.Eventually(IntegrationStatusImage(t, ctx, ns, bindingID)).
+				Should(Equal(expectedImage))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingID), TestTimeoutShort).
+				Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodImage(t, ctx, ns, bindingID)).
+				Should(Equal(expectedImage))
+		})
+	})
+}
+
+func TestPipeScale(t *testing.T) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		name := RandomizedSuffixName("timer2log")
+		g.Expect(KamelBind(t, ctx, ns, "timer-source?message=HelloPipe", "log-sink", "--name", name).Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("HelloPipe"))
+
+		t.Run("Update Pipe scale spec", func(t *testing.T) {
+			g.Expect(ScalePipe(t, ctx, ns, name, 3)).To(Succeed())
+			// Check the scale cascades into the Deployment scale
+			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(3))
+			// Check it also cascades into the Integration scale subresource Status field
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+			// Check it also cascades into the Pipe scale subresource Status field
+			g.Eventually(PipeStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+			// Check the readiness condition becomes truthy back
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			// Finally check the readiness condition becomes truthy back onPipe
+			g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		})
+
+		t.Run("ScalePipe with polymorphic client", func(t *testing.T) {
+			scaleClient, err := TestClient(t).ScalesClient()
+			g.Expect(err).To(BeNil())
+
+			// Patch the integration scale subresource
+			patch := "{\"spec\":{\"replicas\":2}}"
+			_, err = scaleClient.Scales(ns).Patch(ctx, v1.SchemeGroupVersion.WithResource("Pipes"), name, types.MergePatchType, []byte(patch), metav1.PatchOptions{})
+			g.Expect(err).To(BeNil())
+
+			// Check the readiness condition is still truthy as down-scaling
+			g.Expect(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+			// Check the Integration scale subresource Spec field
+			g.Eventually(IntegrationSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
+			// Then check it cascades into the Deployment scale
+			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(2))
+			// Check it cascades into the Integration scale subresource Status field
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
+			// Finally check it cascades into the Pipe scale subresource Status field
+			g.Eventually(PipeStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 2)))
+		})
+
+		t.Run("ScalePipe with Camel K client", func(t *testing.T) {
+			camel, err := versioned.NewForConfig(TestClient(t).GetConfig())
+			g.Expect(err).To(BeNil())
+
+			// Getter
+			PipeScale, err := camel.CamelV1().Pipes(ns).GetScale(ctx, name, metav1.GetOptions{})
+			g.Expect(err).To(BeNil())
+			g.Expect(PipeScale.Spec.Replicas).To(BeNumerically("==", 2))
+			g.Expect(PipeScale.Status.Replicas).To(BeNumerically("==", 2))
+
+			// Setter
+			PipeScale.Spec.Replicas = 1
+			_, err = camel.CamelV1().Pipes(ns).UpdateScale(ctx, name, PipeScale, metav1.UpdateOptions{})
+			g.Expect(err).To(BeNil())
+
+			// Check the readiness condition is still truthy as down-scaling inPipe
+			g.Expect(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady)()).To(Equal(corev1.ConditionTrue))
+			// Check the Pipe scale subresource Spec field
+			g.Eventually(PipeSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			// Check the readiness condition is still truthy as down-scaling
+			g.Expect(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)()).To(Equal(corev1.ConditionTrue))
+			// Check the Integration scale subresource Spec field
+			g.Eventually(IntegrationSpecReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+			// Then check it cascades into the Deployment scale
+			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(1))
+			// Finally check it cascades into the Integration scale subresource Status field
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 1)))
+		})
+	})
+}
+
+func createErrorProducerKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -145,5 +270,5 @@ func createErrorProducerKamelet(t *testing.T, ctx context.Context, operatorID st
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
+	return CreateKamelet(t, ctx, ns, name, flow, props, nil)
 }

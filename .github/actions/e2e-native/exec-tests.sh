@@ -127,5 +127,8 @@ if [ "${LOG_LEVEL}" == "debug" ]; then
   export CAMEL_K_TEST_MAVEN_CLI_OPTIONS="-X ${CAMEL_K_TEST_MAVEN_CLI_OPTIONS}"
 fi
 
+kubectl create ns camel-k
+REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+
 # Then run integration tests
 DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-quarkus-native

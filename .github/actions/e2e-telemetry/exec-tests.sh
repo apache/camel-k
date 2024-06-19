@@ -131,6 +131,9 @@ else
   export CAMEL_K_GLOBAL_OPERATOR_NS="default"
 fi
 
+kubectl create ns camel-k
+REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+
 # Then run all integration telemetry test rather than ending on first failure
 set -e
 exit_code=0
