@@ -150,3 +150,29 @@ Node selectors can be specified when running an integration with the CLI:
 ----
 $ kamel run --trait builder.node-selector.'size'=large integration.yaml
 ----
+
+== Tolerations
+
+With this trait you will also be able to define tolerations for the `builder` pod when using the `pod`` build strategy.
+Here is a simple example:
+
+.template.yaml
+[source,yaml]
+----
+  traits:
+    builder:
+      tolerations:
+        - key: "key"
+          operator: "Equal"
+          value: "value"
+          effect: "NoSchedule"
+----
+
+The `builder` pod will be created with a toleration that allows it to run on nodes with the `key` label equal to `value` and the `effect` set to `NoSchedule`.
+
+Tolerations can be specified when running an integration with the CLI:
+
+[source,console]
+----
+$ kamel run --trait builder.tolerations.[0].key=key --trait builder.tolerations.[0].operator=Equal --trait builder.tolerations.[0].value=value --trait builder.tolerations.[0].effect=NoSchedule integration.yaml
+----
