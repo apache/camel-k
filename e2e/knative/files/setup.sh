@@ -77,7 +77,7 @@ EVENTING_CORE="https://github.com/knative/eventing/releases/download/${EVENTING_
 IN_MEMORY_CHANNEL="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/in-memory-channel.yaml"
 CHANNEL_BROKER="https://github.com/knative/eventing/releases/download/${EVENTING_VERSION}/mt-channel-broker.yaml"
 
-KNATIVE_TEMP=$(mktemp -d knative-XXXX)
+KNATIVE_TEMP=$(mkdir -p ./build/_output && mktemp -d ./build/_output/knative-XXXX)
 
 # Serving CRDs
 #
