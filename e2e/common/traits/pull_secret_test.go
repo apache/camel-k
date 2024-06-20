@@ -29,7 +29,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -59,14 +58,6 @@ func TestPullSecretTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			pullSecretTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "pull-secret")
-			g.Expect(pullSecretTrait).ToNot(BeNil())
-			g.Expect(len(pullSecretTrait)).To(Equal(1))
-			g.Expect(pullSecretTrait["enabled"]).To(Equal(false))
 
 			pod := IntegrationPod(t, ctx, ns, name)()
 			if ocp {

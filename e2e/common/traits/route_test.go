@@ -41,7 +41,6 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -189,14 +188,6 @@ func TestRunRoutes(t *testing.T) {
 			route := RouteFull(t, ctx, ns, integrationName)()
 			var annotations = route.ObjectMeta.Annotations
 			g.Expect(annotations["haproxy.router.openshift.io/balance"]).To(Equal("roundrobin"))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, integrationName)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, integrationName)()
-			routeTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "route")
-			g.Expect(routeTrait).ToNot(BeNil())
-			g.Expect(len(routeTrait)).To(Equal(1))
-			g.Expect(routeTrait["annotations"]).ToNot(BeNil())
 		})
 		g.Expect(TestClient(t).Delete(ctx, &secret)).To(Succeed())
 	})

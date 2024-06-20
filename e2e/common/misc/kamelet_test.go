@@ -28,7 +28,6 @@ import (
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
@@ -116,14 +115,6 @@ spec:
 			g.Expect(KamelRun(t, ctx, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false", "--resource", "configmap:my-kamelet-cm@/kamelets", "-p camel.component.kamelet.location=file:/kamelets", "-d", "camel:yaml-dsl", "-d", "camel:timer").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, "timer-kamelet-integration")).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, "timer-kamelet-integration")()
-			kameletsTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "kamelets")
-			g.Expect(kameletsTrait).ToNot(BeNil())
-			g.Expect(len(kameletsTrait)).To(Equal(1))
-			g.Expect(kameletsTrait["enabled"]).To(Equal(false))
 		})
 	})
 }

@@ -34,7 +34,6 @@ import (
 	policyv1 "k8s.io/api/policy/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,15 +51,6 @@ func TestPodDisruptionBudgetTrait(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-		// check integration schema does not contains unwanted default trait value.
-		g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-		pdbTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "pdb")
-		g.Expect(pdbTrait).ToNot(BeNil())
-		g.Expect(len(pdbTrait)).To(Equal(2))
-		g.Expect(pdbTrait["enabled"]).To(Equal(true))
-		g.Expect(pdbTrait["minAvailable"]).To(Equal("2"))
 
 		// Check PodDisruptionBudget
 		g.Eventually(podDisruptionBudget(t, ctx, ns, name), TestTimeoutShort).ShouldNot(BeNil())

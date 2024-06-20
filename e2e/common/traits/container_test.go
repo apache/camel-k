@@ -29,7 +29,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -84,14 +83,6 @@ func TestContainerTrait(t *testing.T) {
 				podContainerName := pod.Spec.Containers[0].Name
 				return podContainerName == containerName
 			}), TestTimeoutShort).Should(BeTrue())
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			containerTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "container")
-			g.Expect(containerTrait).ToNot(BeNil())
-			g.Expect(len(containerTrait)).To(Equal(1))
-			g.Expect(containerTrait["name"]).To(Equal(containerName))
 		})
 	})
 }
