@@ -731,6 +731,13 @@ spec:
                           jobs executions will be counted as failed ones.
                         format: int64
                         type: integer
+                      timeZone:
+                        description: Specifies the timezone that the CronJob created
+                          by the integration should run on. Not used when fallback
+                          is set to true
+                        type: string
+                    required:
+                    - timeZone
                     type: object
                   dependencies:
                     description: The configuration of Dependencies trait
@@ -2643,6 +2650,13 @@ spec:
                           jobs executions will be counted as failed ones.
                         format: int64
                         type: integer
+                      timeZone:
+                        description: Specifies the timezone that the CronJob created
+                          by the integration should run on. Not used when fallback
+                          is set to true
+                        type: string
+                    required:
+                    - timeZone
                     type: object
                   dependencies:
                     description: The configuration of Dependencies trait

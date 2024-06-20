@@ -258,6 +258,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 		},
 		Spec: batchv1.CronJobSpec{
 			Schedule:                t.Schedule,
+			TimeZone:                &t.TimeZone,
 			ConcurrencyPolicy:       batchv1.ConcurrencyPolicy(t.ConcurrencyPolicy),
 			StartingDeadlineSeconds: t.StartingDeadlineSeconds,
 			JobTemplate: batchv1.JobTemplateSpec{

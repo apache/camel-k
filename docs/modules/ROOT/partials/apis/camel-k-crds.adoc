@@ -6712,6 +6712,14 @@ int32
 Specifies the number of retries before marking the job failed.
 It defaults to 2.
 
+|`timeZone` +
+string
+|
+
+
+Specifies the timezone that the CronJob created by the integration should run on.
+Not used when fallback is set to true
+
 
 |===
 

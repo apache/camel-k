@@ -74,4 +74,7 @@ type CronTrait struct {
 	// Specifies the number of retries before marking the job failed.
 	// It defaults to 2.
 	BackoffLimit *int32 `property:"backoff-limit" json:"backoffLimit,omitempty"`
+	// Specifies the timezone that the CronJob created by the integration should run on.
+	// Not used when fallback is set to true
+	TimeZone string `property:"timeZone" json:"timeZone"`
 }
