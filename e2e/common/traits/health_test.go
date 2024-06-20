@@ -86,6 +86,7 @@ func TestHealthTrait(t *testing.T) {
 
 				response, err := TestClient(t).CoreV1().RESTClient().Post().
 					AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
+					Timeout(30 * time.Second).
 					Body(body).
 					DoRaw(ctx)
 				g.Expect(err).To(BeNil())
@@ -167,6 +168,7 @@ func TestHealthTrait(t *testing.T) {
 
 			response, err := TestClient(t).CoreV1().RESTClient().Post().
 				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
+				Timeout(30 * time.Second).
 				Body(body).
 				DoRaw(ctx)
 			g.Expect(err).To(BeNil())
@@ -262,6 +264,7 @@ func TestHealthTrait(t *testing.T) {
 
 			response, err := TestClient(t).CoreV1().RESTClient().Post().
 				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
+				Timeout(30 * time.Second).
 				Body(body).
 				DoRaw(ctx)
 

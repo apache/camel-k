@@ -73,7 +73,9 @@ func TestMetrics(t *testing.T) {
 		g.Expect(logs).NotTo(BeEmpty())
 
 		response, err := TestClient(t).CoreV1().RESTClient().Get().
-			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, pod.Name)).DoRaw(ctx)
+			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, pod.Name)).
+			Timeout(30 * time.Second).
+			DoRaw(ctx)
 		g.Expect(err).To(BeNil())
 		metrics, err := parsePrometheusData(response)
 		g.Expect(err).To(BeNil())

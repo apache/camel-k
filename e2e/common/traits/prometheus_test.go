@@ -26,6 +26,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
@@ -58,6 +59,7 @@ func TestPrometheusTrait(t *testing.T) {
 		t.Run("Metrics endpoint works", func(t *testing.T) {
 			pod := IntegrationPod(t, ctx, ns, "java")
 			response, err := TestClient(t).CoreV1().RESTClient().Get().
+				Timeout(30 * time.Second).
 				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/q/metrics", ns, pod().Name)).DoRaw(ctx)
 			if err != nil {
 				assert.Fail(t, err.Error())
