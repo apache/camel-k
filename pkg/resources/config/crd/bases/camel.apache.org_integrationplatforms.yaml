@@ -571,7 +571,9 @@ spec:
                           for the builder pod.
                         type: object
                       baseImage:
-                        description: Specify a base image
+                        description: Specify a base image. In order to have the application
+                          working properly it must be a container image which has
+                          a Java JDK installed and ready to use on path (ie `/usr/bin/java`).
                         type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -1249,6 +1251,14 @@ spec:
                         - Prefix
                         - ImplementationSpecific
                         type: string
+                      tlsHosts:
+                        description: To configure tls hosts
+                        items:
+                          type: string
+                        type: array
+                      tlsSecretName:
+                        description: To configure tls secret name
+                        type: string
                     type: object
                   istio:
                     description: The configuration of Istio trait
@@ -1370,14 +1380,19 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      jar:
+                        description: The Jar dependency which will run the application.
+                          Leave it empty for managed Integrations.
+                        type: string
                       options:
                         description: A list of JVM options
                         items:
                           type: string
                         type: array
                       printCommand:
-                        description: Prints the command used the start the JVM in
-                          the container logs (default `true`)
+                        description: 'Prints the command used the start the JVM in
+                          the container logs (default `true`) Deprecated: no longer
+                          in use.'
                         type: boolean
                     type: object
                   kamelets:
@@ -1473,11 +1488,28 @@ spec:
                         items:
                           type: string
                         type: array
+                      filterEventType:
+                        description: 'Enables the default filtering for the Knative
+                          trigger using the event type If this is true, the created
+                          Knative trigger uses the event type as a filter on the event
+                          stream when no other filter criteria is given. (default:
+                          true)'
+                        type: boolean
                       filterSourceChannels:
                         description: Enables filtering on events based on the header
                           "ce-knativehistory". Since this header has been removed
                           in newer versions of Knative, filtering is disabled by default.
                         type: boolean
+                      filters:
+                        description: Sets filter attributes on the event stream (such
+                          as event type, source, subject and so on). A list of key-value
+                          pairs that represent filter attributes and its values. The
+                          syntax is KEY=VALUE, e.g., `source="my.source"`. Filter
+                          attributes get set on the Knative trigger that is being
+                          created as part of this integration.
+                        items:
+                          type: string
+                        type: array
                       namespaceLabel:
                         description: 'Enables the camel-k-operator to set the "bindings.knative.dev/include=true"
                           label to the namespace As Knative requires this label to
@@ -1557,6 +1589,13 @@ spec:
                           default and must be expressed as a Golang `time.Duration`
                           string representation, rounded to a second precision.
                         type: string
+                      timeoutSeconds:
+                        description: "The maximum duration in seconds that the request
+                          instance is allowed to respond to a request. This field
+                          propagates to the integration pod's terminationGracePeriodSeconds
+                          \n Refer to the Knative documentation for more information."
+                        format: int64
+                        type: integer
                       visibility:
                         description: "Setting `cluster-local`, Knative service becomes
                           a private service. Specifically, this option applies the
@@ -2646,7 +2685,9 @@ spec:
                           for the builder pod.
                         type: object
                       baseImage:
-                        description: Specify a base image
+                        description: Specify a base image. In order to have the application
+                          working properly it must be a container image which has
+                          a Java JDK installed and ready to use on path (ie `/usr/bin/java`).
                         type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:
@@ -3324,6 +3365,14 @@ spec:
                         - Prefix
                         - ImplementationSpecific
                         type: string
+                      tlsHosts:
+                        description: To configure tls hosts
+                        items:
+                          type: string
+                        type: array
+                      tlsSecretName:
+                        description: To configure tls secret name
+                        type: string
                     type: object
                   istio:
                     description: The configuration of Istio trait
@@ -3445,14 +3494,19 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      jar:
+                        description: The Jar dependency which will run the application.
+                          Leave it empty for managed Integrations.
+                        type: string
                       options:
                         description: A list of JVM options
                         items:
                           type: string
                         type: array
                       printCommand:
-                        description: Prints the command used the start the JVM in
-                          the container logs (default `true`)
+                        description: 'Prints the command used the start the JVM in
+                          the container logs (default `true`) Deprecated: no longer
+                          in use.'
                         type: boolean
                     type: object
                   kamelets:
@@ -3548,11 +3602,28 @@ spec:
                         items:
                           type: string
                         type: array
+                      filterEventType:
+                        description: 'Enables the default filtering for the Knative
+                          trigger using the event type If this is true, the created
+                          Knative trigger uses the event type as a filter on the event
+                          stream when no other filter criteria is given. (default:
+                          true)'
+                        type: boolean
                       filterSourceChannels:
                         description: Enables filtering on events based on the header
                           "ce-knativehistory". Since this header has been removed
                           in newer versions of Knative, filtering is disabled by default.
                         type: boolean
+                      filters:
+                        description: Sets filter attributes on the event stream (such
+                          as event type, source, subject and so on). A list of key-value
+                          pairs that represent filter attributes and its values. The
+                          syntax is KEY=VALUE, e.g., `source="my.source"`. Filter
+                          attributes get set on the Knative trigger that is being
+                          created as part of this integration.
+                        items:
+                          type: string
+                        type: array
                       namespaceLabel:
                         description: 'Enables the camel-k-operator to set the "bindings.knative.dev/include=true"
                           label to the namespace As Knative requires this label to
@@ -3632,6 +3703,13 @@ spec:
                           default and must be expressed as a Golang `time.Duration`
                           string representation, rounded to a second precision.
                         type: string
+                      timeoutSeconds:
+                        description: "The maximum duration in seconds that the request
+                          instance is allowed to respond to a request. This field
+                          propagates to the integration pod's terminationGracePeriodSeconds
+                          \n Refer to the Knative documentation for more information."
+                        format: int64
+                        type: integer
                       visibility:
                         description: "Setting `cluster-local`, Knative service becomes
                           a private service. Specifically, this option applies the

@@ -104,6 +104,14 @@ func TestSupplementalGroup(t *testing.T) {
 	assert.Contains(t, templateSpec.Spec.SecurityContext.SupplementalGroups, int64(666))
 }
 
+func TestAutomountServiceAccountToken(t *testing.T) {
+	templateString := `automountServiceAccountToken: false`
+	templateSpec := testPodTemplateSpec(t, templateString)
+
+	assert.NotNil(t, templateSpec.Spec.AutomountServiceAccountToken)
+	assert.False(t, *templateSpec.Spec.AutomountServiceAccountToken)
+}
+
 // nolint: unparam
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPodTrait().(*podTrait)

@@ -375,15 +375,14 @@ func (o *installCmdOptions) installOperator(cmd *cobra.Command, output *kubernet
 		}
 	}
 
-	strategy := ""
+	message := "Camel K installed in namespace " + namespace
 	if olm {
-		strategy = "via OLM subscription"
+		message += " via OLM subscription"
 	}
 	if o.Global {
-		fmt.Fprintln(cmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy, "(global mode)")
-	} else {
-		fmt.Fprintln(cmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy)
+		message += " (global mode)"
 	}
+	fmt.Fprintln(cmd.OutOrStdout(), message)
 
 	return nil
 }

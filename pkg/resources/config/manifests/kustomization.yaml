@@ -33,7 +33,6 @@ resources:
 
 patchesStrategicMerge:
 - patch-delete-user-cluster-role.yaml
-- patch-delete-pvc.yaml
 images:
 - name: docker.io/apache/camel-k
   newName: docker.io/apache/camel-k

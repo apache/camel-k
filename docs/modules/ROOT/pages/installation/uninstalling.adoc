@@ -1,7 +1,10 @@
 [[uninstalling]]
 = Uninstalling Camel K
 
-We're sad to see you go, but If you really need to, it is possible to completely uninstall Camel K from OpenShift or Kubernetes with the following command:
+We're sad to see you go, but If you really need to, it is possible to completely uninstall Camel K from your cluster. The uninstalling procedure typically removes the operator but keeps Custom Resource Definition and any Integration which was previously running. They can be removed by the user by an additional cleaning operation.
+
+[[cli]]
+== Uninstall via Kamel CLI
 
 [source]
 ----
@@ -12,11 +15,66 @@ This will uninstall all Camel K resources along with the operator from the clust
 
 NOTE:  By _default_ the resources possibly shared between clusters such as https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources[CustomResourceDefinitions (CRD)], https://kubernetes.io/docs/reference/access-authn-authz/rbac[ClusterRole] and https://docs.openshift.com/container-platform/4.1/applications/operators/olm-understanding-olm.html[Operator Lifecycle Manager(OLM)] will be  **excluded**. To force the inclusion of all resources you can use the **--all** flag. If the **--olm=false** option was specified during installation, which is the case when installing Camel K from sources on CRC, then it also must be used with the uninstall command.
 
+[[helms]]
+== Uninstall via Helm
+
+The Helm procedure takes care to delete only the operator Deployment:
+
+```
+$ helm uninstall camel-k
+```
+
+Check instructions on https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page to remove CRDs and any other installation resource.
+
+[[operatorhub]]
+== Uninstall via Operator Hub
+
+In order to uninstall via OLM, you'll need to identify and remove the Subscription custom resource related to Camel K. Check instructions on https://olm.operatorframework.io/docs/tasks/uninstall-operator/[uninstall an operator] page from OLM.
+
+[[kustomize]]
+== Uninstall via Kustomize
+
+Uninstalling via Kustomize may require you to store the configuration you've used at install time and delete the applied resources. However this is something we discourage as it may remove also the application that are running and you may not want to delete (see generic cleaning for an alternative approach).
+
+WARNING: this operation may remove CRDs and any application that is still running.
+
+```
+$ kustomize build 'overlays/my-configuration' | kubectl delete -f -
+```
+
+[[generic]]
+== Uninstall cleaning cluster resources
+
+Another alternative is to delete the resources the operator is using in a controlled way by cleaning them one by one.
+
+== Uninstall operator only (keeps CRDs and any running Integration)
+
+In order to remove the operator and any configuration resource it uses you'll need to perform the following cleaning operation:
+
+```
+$ kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k
+```
+
+NOTE: CRDs and Integration will be maintained alive and running.
+
+== Uninstall CRDs (and running Integration)
+
+In order to remove the CRDs you need to execute:
+
+```
+$ kubectl delete crd -l app=camel-k
+```
+
+NOTE: Integration will be garbage collected by the cluster and so any running application.
+
+[[verify]]
+== Verify your cluster
+
 To verify that all resources have been removed you can use the following command:
 
 [source]
 ----
-kubectl get all,pvc,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
+kubectl get all,configmap,rolebindings,clusterrolebindings,secrets,sa,roles,clusterroles,crd -l 'app=camel-k'
 NAME                                   READY   STATUS        RESTARTS   AGE
 clusterrole.rbac.authorization.k8s.io/camel-k:edit   2020-05-28T20:31:39Z
 

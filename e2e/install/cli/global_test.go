@@ -133,7 +133,7 @@ func TestRunGlobalInstall(t *testing.T) {
 						Namespace: ns5,
 						Name:      "external",
 						Labels: map[string]string{
-							"camel.apache.org/kit.type": v1.IntegrationKitTypeExternal,
+							v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeExternal,
 						},
 					},
 					Spec: v1.IntegrationKitSpec{

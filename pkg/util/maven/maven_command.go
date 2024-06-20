@@ -91,50 +91,11 @@ func (c *Command) Do(ctx context.Context) error {
 		args = append(args, "-Dsettings.security="+settingsSecurityPath)
 	}
 
+	mavenOptions, env := c.optionsFromEnv()
+
 	cmd := exec.CommandContext(ctx, mvnCmd, args...)
 	cmd.Dir = c.context.Path
-
-	var mavenOptions string
-	if len(c.context.ExtraMavenOpts) > 0 {
-		// Inherit the parent process environment
-		env := os.Environ()
-
-		mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
-		if !ok {
-			mavenOptions = strings.Join(c.context.ExtraMavenOpts, " ")
-			env = append(env, "MAVEN_OPTS="+mavenOptions)
-		} else {
-			var extraOptions []string
-			options := strings.Fields(mavenOpts)
-			for _, extraOption := range c.context.ExtraMavenOpts {
-				// Basic duplicated key detection, that should be improved
-				// to support a wider range of JVM options
-				key := strings.SplitN(extraOption, "=", 2)[0]
-				exists := false
-				for _, opt := range options {
-					if strings.HasPrefix(opt, key) {
-						exists = true
-
-						break
-					}
-				}
-				if !exists {
-					extraOptions = append(extraOptions, extraOption)
-				}
-			}
-
-			options = append(options, extraOptions...)
-			mavenOptions = strings.Join(options, " ")
-			for i, e := range env {
-				if strings.HasPrefix(e, "MAVEN_OPTS=") {
-					env[i] = "MAVEN_OPTS=" + mavenOptions
-					break
-				}
-			}
-		}
-
-		cmd.Env = env
-	}
+	cmd.Env = env
 
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
@@ -144,6 +105,53 @@ func (c *Command) Do(ctx context.Context) error {
 	}
 
 	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
+}
+
+func (c *Command) optionsFromEnv() (string, []string) {
+	if len(c.context.ExtraMavenOpts) == 0 {
+		return "", nil
+	}
+
+	var mavenOptions string
+
+	// Inherit the parent process environment
+	env := os.Environ()
+
+	mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
+	if !ok {
+		mavenOptions = strings.Join(c.context.ExtraMavenOpts, " ")
+		env = append(env, "MAVEN_OPTS="+mavenOptions)
+	} else {
+		var extraOptions []string
+		options := strings.Fields(mavenOpts)
+		for _, extraOption := range c.context.ExtraMavenOpts {
+			// Basic duplicated key detection, that should be improved
+			// to support a wider range of JVM options
+			key := strings.SplitN(extraOption, "=", 2)[0]
+			exists := false
+			for _, opt := range options {
+				if strings.HasPrefix(opt, key) {
+					exists = true
+
+					break
+				}
+			}
+			if !exists {
+				extraOptions = append(extraOptions, extraOption)
+			}
+		}
+
+		options = append(options, extraOptions...)
+		mavenOptions = strings.Join(options, " ")
+		for i, e := range env {
+			if strings.HasPrefix(e, "MAVEN_OPTS=") {
+				env[i] = "MAVEN_OPTS=" + mavenOptions
+				break
+			}
+		}
+	}
+
+	return mavenOptions, env
 }
 
 func NewContext(buildDir string) Context {

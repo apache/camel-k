@@ -213,7 +213,9 @@ spec:
                           for the builder pod.
                         type: object
                       baseImage:
-                        description: Specify a base image
+                        description: Specify a base image. In order to have the application
+                          working properly it must be a container image which has
+                          a Java JDK installed and ready to use on path (ie `/usr/bin/java`).
                         type: string
                       configuration:
                         description: 'Legacy trait configuration parameters. Deprecated:

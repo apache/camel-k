@@ -40,6 +40,8 @@ func (k KnativeURIBindingProvider) ID() string {
 }
 
 // Translate --.
+//
+//nolint:dupl
 func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris
@@ -111,6 +113,8 @@ func (k V1alpha1KnativeURIBindingProvider) ID() string {
 
 // Translate --.
 // Deprecated.
+//
+//nolint:dupl
 func (k V1alpha1KnativeURIBindingProvider) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris

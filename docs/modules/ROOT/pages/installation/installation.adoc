@@ -3,6 +3,11 @@
 
 Camel K allows us to run Camel integrations directly on a Kubernetes or OpenShift cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes (ie, Minikube or Kind).
 
+[[registry]]
+== Registry requirements
+
+Camel K may require a container registry which is used to store the images built for your applications. Certain clusters may use their internal container registry (ie, Openshift, Minikube or https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry[KEP-1755 compatible] clusters). If it's not the case for your cluster make sure to have a xref:installation/registry/registry.adoc#configuring-registry-install-time[container registry] available and set it according the specific installation methodology chosen.
+
 [[cli]]
 == Installation via Kamel CLI
 
@@ -17,70 +22,22 @@ Once you have put the `kamel` CLI in the path, log into your cluster using the s
 $ kamel install --olm=false
 ----
 
-NOTE: if you're not using Minikube or Openshift, make sure to have a xref:installation/registry/registry.adoc#configuring-registry-install-time[container registry] available and use also `--registry` parameter.
-
 This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace with the default settings.
 
 IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately, this operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
 For CRC, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for the first-time installation.
 
-[[kustomize]]
-== Installation via Kustomize
+[[helm]]
+== Installation via Helm Hub
 
-Camel K can be installed using https://kustomize.io[Kustomize], providing an interface for configuring more advanced features.
-
-**First you need to get the kustomize files**
+Camel K is also available in Helm Hub:
 
 ```
-# Clone the project repository
-$ https://github.com/apache/camel-k.git
-$ cd camel-k
-# You can use any release branch or skip this step to use it the last code on `main`
-$ git checkout release-a.b.x
-$ cd install
+$ helm repo add camel-k https://apache.github.io/camel-k/charts/
+$ helm install camel-k [--set platform.build.registry.address=<my-registry>] camel-k/camel-k
 ```
 
-**Next you need to apply configuration at cluster level**
-
-```
-$ kubectl kustomize --load-restrictor LoadRestrictionsNone setup-cluster/ | kubectl create -f -
-```
-
-**Then the roles and privileges needs to be added**
-
-```
-$ kubectl apply -k setup
-$ kubectl apply -k pkg/resources/config/rbac/namespaced
-# For openshift
-$ kubectl apply -k pkg/resources/config/rbac/openshift
-$ kubectl apply -k pkg/resources/config/rbac/openshift/namespaced
-```
-
-Should you want your operator operator to watch all namespaces (global operator), you will replace `pkg/resources/config/rbac/namespaced` by `pkg/resources/config/rbac/descoped` and `pkg/resources/config/rbac/openshift/namespaced` by `pkg/resources/config/rbac/openshift/descoped`.
-
-**Finally the operator can be deployed**
-
-```
-$ kubectl apply -k operator
-$ kubectl apply -k platform
-```
-
-By default the operator is configured to get the registry information from a Configmap expected the namespace `kube-public` like this example:
-
-```
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: local-registry-hosting
-  namespace: kube-public
-data:
-  localRegistryHosting.v1: |
-    hostFromContainerRuntime: "registry:5000"
-```
-
-NOTE: you probably want to edit the configuration. Please, do any change right after cloning the repository. Be careful to avoid making any modification in the `install/config` folder.
-
-More information on the xref:installation/advanced/kustomize.adoc[Kustomize Camel K installation procedure] page.
+More instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page.
 
 [[olm]]
 == Installation via Operator Hub
@@ -93,20 +50,52 @@ $ kubectl create -f https://operatorhub.io/install/camel-k.yaml
 
 You can edit the `Subscription` custom resource, setting the channel you want to use. From Camel K version 2 onward, we're going to provide an installation channel for each major version we're releasing (ie, `stable-v2`). This will simplify the upgrade process if you choose to perform an automatic upgrade.
 
-NOTE: Some Kubernetes clusters such as Openshift (or CRC) may let you to perform the same operation from a GUI as well. Refer to the cluster instruction to learn how to perform such action.
+NOTE: Some Kubernetes clusters such as Openshift may let you to perform the same operation from a GUI as well. Refer to the cluster instruction to learn how to perform such action from user interface.
 
+[[kustomize]]
+== Installation via Kustomize
 
-[[helm]]
-== Installation via Helm Hub
+https://kustomize.io[Kustomize] provides a declarative approach to the configuration customization of a Camel-K installation. Kustomize works either with a standalone executable or as a built-in to `kubectl`. The https://github.com/apache/camel-k/tree/main/install[/install] directory provides a series of base and overlays configuration that you can use. You can create your own overlays or customize the one available in the repository to accommodate your need.
 
-Camel K is also available in Helm Hub:
+=== One liner operator installation procedure
+
+If you don't need to provide any configuration nor the registry (ie, in Openshift), you can apply this simple one liner:
 
 ```
-$ helm repo add camel-k https://apache.github.io/camel-k/charts/
-$ helm install my-camel-k camel-k/camel-k
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/openshift/descoped?ref=v2.4.0 --server-side
 ```
 
-More instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page.
+You can specify as `ref` parameter the version you're willing to install (ie, `v2.4.0`). The command above will install a descoped (global) operator in the camel-k namespace.
+
+NOTE: if you're not installing in Openshift you will need to manually change the IntegrationPlatform registry configuration as the operator won't be able to find any valid registry address (see section below).
+
+=== Custom configuration procedure
+
+Most often you want to specify different parameters to configure the registry and other platform behaviors. In such case you can clone the project repository and use any of the overlays available, customizing to your needs.
+
+```
+# Clone the project repository
+$ https://github.com/apache/camel-k.git
+$ cd camel-k
+# You can use any release tag (recommended as it is immutable) or branch
+$ git checkout v2.4.0
+$ cd install/overlays
+```
+
+In this directory you may find a series of default configuration for Kubernetes, Openshift and any other sensible profile. For Kubernetes, you can see we have prepared a `descoped` configuration and a `namespaced` which are installing the operator globally or in a specific namespace.
+
+```
+# Default, use this namespace (edit `kustomize.yaml` to change it)
+$ kubectl create ns camel-k
+$ kubectl apply -k kubernetes/descoped --server-side
+# Change the registry address (edit the file for more configuration if required)
+$ sed -i 's/address: .*/address: my-registry-host.io/' kubernetes/descoped/integration-platform.yaml
+$ kubectl apply -k platform
+```
+
+NOTE: you don't need to set the platform if running on Openshift.
+
+The above command will install a global Camel K operator in the `camel-k` namespace using the container registry you've provided. The `server-side` option is required in order to prevent some error while installing CRDs. We need to apply a separate platform configuration as Kustomize may not be yet aware of the CRDs if done in the same step.
 
 [[test]]
 == Test your installation
@@ -127,8 +116,6 @@ Camel K installation is usually straightforward, but for certain cluster types y
 - xref:installation/platform/minikube.adoc[Minikube]
 - xref:installation/platform/openshift.adoc[OpenShift]
 - xref:installation/platform/crc.adoc[Red Hat CodeReady Containers (CRC)]
-
-NOTE: Minishift is no longer supported since Camel K 1.5.0. You can use xref:installation/platform/crc.adoc[CRC] for a local OpenShift cluster.
 
 [[fine-tuning]]
 == Fine Tuning

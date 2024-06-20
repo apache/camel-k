@@ -141,40 +141,10 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
-		log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
-		// Default to using OpenShift internal container images registry when using a strategy other than S2I
-		p.Status.Build.Registry.Address = defaults.OpenShiftRegistryAddress
 
-		// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
-		cm, err := createServiceCaBundleConfigMap(ctx, c, p)
+		err := configureForOpenShiftS2i(ctx, c, p)
 		if err != nil {
 			return err
-		}
-		log.Debugf("Integration Platform %s [%s]: setting registry certificate authority", p.Name, p.Namespace)
-		p.Status.Build.Registry.CA = cm.Name
-
-		// Default to using the registry secret that's configured for the builder service account
-		if p.Status.Build.Registry.Secret == "" {
-			log.Debugf("Integration Platform %s [%s]: setting registry secret", p.Name, p.Namespace)
-			// Bind the required role to push images to the registry
-			err := createBuilderRegistryRoleBinding(ctx, c, p)
-			if err != nil {
-				return err
-			}
-
-			sa := corev1.ServiceAccount{}
-			err = c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: BuilderServiceAccount}, &sa)
-			if err != nil {
-				return err
-			}
-			// We may want to read the secret keys instead of relying on the secret name scheme
-			for _, secret := range sa.Secrets {
-				if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
-					p.Status.Build.Registry.Secret = secret.Name
-
-					break
-				}
-			}
 		}
 	}
 	if p.Status.Build.Registry.Address == "" {
@@ -188,6 +158,47 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	log.Debugf("Final Registry Address: %s", p.Status.Build.Registry.Address)
+	return nil
+}
+
+func configureForOpenShiftS2i(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
+	log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
+	// Default to using OpenShift internal container images registry when using a strategy other than S2I
+	p.Status.Build.Registry.Address = defaults.OpenShiftRegistryAddress
+
+	// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
+	cm, err := createServiceCaBundleConfigMap(ctx, c, p)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("Integration Platform %s [%s]: setting registry certificate authority", p.Name, p.Namespace)
+	p.Status.Build.Registry.CA = cm.Name
+
+	// Default to using the registry secret that's configured for the builder service account
+	if p.Status.Build.Registry.Secret == "" {
+		log.Debugf("Integration Platform %s [%s]: setting registry secret", p.Name, p.Namespace)
+		// Bind the required role to push images to the registry
+		err := createBuilderRegistryRoleBinding(ctx, c, p)
+		if err != nil {
+			return err
+		}
+
+		sa := corev1.ServiceAccount{}
+		err = c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: BuilderServiceAccount}, &sa)
+		if err != nil {
+			return err
+		}
+		// We may want to read the secret keys instead of relying on the secret name scheme
+		for _, secret := range sa.Secrets {
+			if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
+				p.Status.Build.Registry.Secret = secret.Name
+
+				break
+			}
+		}
+	}
+
 	return nil
 }
 

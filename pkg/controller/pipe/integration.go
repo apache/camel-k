@@ -27,6 +27,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/trait"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -49,6 +50,10 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	annotations := util.CopyMap(binding.Annotations)
 	// avoid propagating the icon to the integration as it's heavyweight and not needed
 	delete(annotations, v1.AnnotationIcon)
+	traits, err := extractAndDeleteTraits(c, annotations)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal trait annotations %w", err)
+	}
 
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
@@ -82,6 +87,10 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 		it.Spec = *binding.Spec.Integration.DeepCopy()
 	}
 
+	if traits != nil {
+		it.Spec.Traits = *traits
+	}
+
 	// Set replicas (or override podspecable value) if present
 	if binding.Spec.Replicas != nil {
 		replicas := *binding.Spec.Replicas
@@ -108,16 +117,16 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 
 	from, err := bindings.Translate(bindingContext, endpointTypeSourceContext, binding.Spec.Source)
 	if err != nil {
-		return nil, fmt.Errorf("could not determine source URI: %w", err)
+		return nil, err
 	}
 	to, err := bindings.Translate(bindingContext, endpointTypeSinkContext, binding.Spec.Sink)
 	if err != nil {
-		return nil, fmt.Errorf("could not determine sink URI: %w", err)
+		return nil, err
 	}
 	// error handler is optional
 	errorHandler, err := maybeErrorHandler(binding.Spec.ErrorHandler, bindingContext)
 	if err != nil {
-		return nil, fmt.Errorf("could not determine error handler: %w", err)
+		return nil, err
 	}
 
 	steps := make([]*bindings.Binding, 0, len(binding.Spec.Steps))
@@ -208,6 +217,11 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedRoute})
 
 	return &it, nil
+}
+
+// extractAndDeleteTraits will extract the annotation traits into v1.Traits struct, removing from the value from the input map.
+func extractAndDeleteTraits(c client.Client, annotations map[string]string) (*v1.Traits, error) {
+	return trait.ExtractAndMaybeDeleteTraits(c, annotations, true)
 }
 
 func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) error {

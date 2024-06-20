@@ -40,8 +40,7 @@ import (
 )
 
 var (
-	controller         = true
-	blockOwnerDeletion = true
+	controller = true
 )
 
 // ManageSyntheticIntegrations is the controller for synthetic Integrations. Consider that the lifecycle of the objects are driven
@@ -62,41 +61,23 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 					log.Error(fmt.Errorf("type assertion failed: %v", obj), "Failed to retrieve Object on add event")
 					return
 				}
-				if !isManagedObject(ctrlObj) {
-					integrationName := ctrlObj.GetLabels()[v1.IntegrationLabel]
-					it, err := getSyntheticIntegration(ctx, c, ctrlObj.GetNamespace(), integrationName)
-					if err != nil {
-						if k8serrors.IsNotFound(err) {
-							adapter, err := nonManagedCamelApplicationFactory(ctrlObj)
-							if err != nil {
-								log.Errorf(err, "Some error happened while creating a Camel application adapter for %s", integrationName)
-							}
-							if err = createSyntheticIntegration(ctx, c, adapter.Integration()); err != nil {
-								log.Errorf(err, "Some error happened while creating a synthetic Integration %s", integrationName)
-							}
-							log.Infof("Created a synthetic Integration %s after %s resource object", it.GetName(), ctrlObj.GetName())
-						} else {
-							log.Errorf(err, "Some error happened while loading a synthetic Integration %s", integrationName)
-						}
-					} else {
-						log.Infof("Synthetic Integration %s is in phase %s. Skipping.", integrationName, it.Status.Phase)
-					}
+				if isManagedObject(ctrlObj) {
+					return
 				}
+
+				onAdd(ctx, c, ctrlObj)
 			},
 			DeleteFunc: func(obj interface{}) {
 				ctrlObj, ok := obj.(ctrl.Object)
 				if !ok {
-					log.Error(fmt.Errorf("type assertion failed: %v", obj), "Failed to retrieve Object on delete event")
+					log.Errorf(fmt.Errorf("type assertion failed: %v", obj), "Failed to retrieve Object on delete event")
 					return
 				}
-				if !isManagedObject(ctrlObj) {
-					integrationName := ctrlObj.GetLabels()[v1.IntegrationLabel]
-					// Importing label removed
-					if err = deleteSyntheticIntegration(ctx, c, ctrlObj.GetNamespace(), integrationName); err != nil {
-						log.Errorf(err, "Some error happened while deleting a synthetic Integration %s", integrationName)
-					}
-					log.Infof("Deleted synthetic Integration %s", integrationName)
+				if isManagedObject(ctrlObj) {
+					return
 				}
+
+				onDelete(ctx, c, ctrlObj)
 			},
 		})
 		if err != nil {
@@ -105,6 +86,43 @@ func ManageSyntheticIntegrations(ctx context.Context, c client.Client, cache cac
 	}
 
 	return nil
+}
+
+// TODO: refactor this code and remove lint exclusion
+//
+//nolint:nestif
+func onAdd(ctx context.Context, c client.Client, ctrlObj ctrl.Object) {
+	integrationName := ctrlObj.GetLabels()[v1.IntegrationLabel]
+	it, err := getSyntheticIntegration(ctx, c, ctrlObj.GetNamespace(), integrationName)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			adapter, err := nonManagedCamelApplicationFactory(ctrlObj)
+			if err != nil {
+				log.Errorf(err, "Some error happened while creating a Camel application adapter for %s", integrationName)
+			}
+
+			// TODO: looking at the code, nonManagedCamelApplicationFactory may return nil but the
+			//       previous error handler does not return/break so the code below may panic when
+			//       invoking adapter.Integration()
+			if err = createSyntheticIntegration(ctx, c, adapter.Integration()); err != nil {
+				log.Errorf(err, "Some error happened while creating a synthetic Integration %s", integrationName)
+			}
+			log.Infof("Created a synthetic Integration %s after %s resource object", it.GetName(), ctrlObj.GetName())
+		} else {
+			log.Errorf(err, "Some error happened while loading a synthetic Integration %s", integrationName)
+		}
+	} else {
+		log.Infof("Synthetic Integration %s is in phase %s. Skipping.", integrationName, it.Status.Phase)
+	}
+}
+
+func onDelete(ctx context.Context, c client.Client, ctrlObj ctrl.Object) {
+	integrationName := ctrlObj.GetLabels()[v1.IntegrationLabel]
+	// Importing label removed
+	if err := deleteSyntheticIntegration(ctx, c, ctrlObj.GetNamespace(), integrationName); err != nil {
+		log.Errorf(err, "Some error happened while deleting a synthetic Integration %s", integrationName)
+	}
+	log.Infof("Deleted synthetic Integration %s", integrationName)
 }
 
 func getInformers(ctx context.Context, cl client.Client, c cache.Cache) ([]cache.Informer, error) {
@@ -206,12 +224,11 @@ func (app *nonManagedCamelDeployment) Integration() *v1.Integration {
 	}
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         "apps/v1",
-			Kind:               "Deployment",
-			Name:               app.deploy.Name,
-			UID:                app.deploy.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: "apps/v1",
+			Kind:       "Deployment",
+			Name:       app.deploy.Name,
+			UID:        app.deploy.UID,
+			Controller: &controller,
 		},
 	}
 	it.SetOwnerReferences(references)
@@ -251,12 +268,11 @@ func (app *NonManagedCamelCronjob) Integration() *v1.Integration {
 	}
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         "batch/v1",
-			Kind:               "CronJob",
-			Name:               app.cron.Name,
-			UID:                app.cron.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: "batch/v1",
+			Kind:       "CronJob",
+			Name:       app.cron.Name,
+			UID:        app.cron.UID,
+			Controller: &controller,
 		},
 	}
 	it.SetOwnerReferences(references)
@@ -281,12 +297,11 @@ func (app *NonManagedCamelKnativeService) Integration() *v1.Integration {
 	}
 	references := []metav1.OwnerReference{
 		{
-			APIVersion:         servingv1.SchemeGroupVersion.String(),
-			Kind:               "Service",
-			Name:               app.ksvc.Name,
-			UID:                app.ksvc.UID,
-			Controller:         &controller,
-			BlockOwnerDeletion: &blockOwnerDeletion,
+			APIVersion: servingv1.SchemeGroupVersion.String(),
+			Kind:       "Service",
+			Name:       app.ksvc.Name,
+			UID:        app.ksvc.UID,
+			Controller: &controller,
 		},
 	}
 	it.SetOwnerReferences(references)

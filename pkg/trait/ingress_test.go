@@ -118,7 +118,101 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
 			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
 			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Nil(t, ingress.Spec.TLS)
 			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+		}
+	})
+
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func TestConfigureTLSIngressTraitWDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSHosts = []string{"host1.com", "host2.com"}
+	ingressTrait.TLSSecretName = "nginxWildcard"
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	assert.Len(t, environment.Resources.Items(), 2)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "service-name", ingress.Name)
+			assert.Equal(t, "namespace", ingress.Namespace)
+			assert.Len(t, ingress.Spec.Rules, 1)
+			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, "host1.com", ingress.Spec.TLS[0].Hosts[0])
+			assert.Equal(t, "host2.com", ingress.Spec.TLS[0].Hosts[1])
+			assert.Equal(t, "nginxWildcard", ingress.Spec.TLS[0].SecretName)
+		}
+	})
+
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func TestConfigureTLSWithoutHostsIngressTraitWDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSSecretName = "nginxWildcard"
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	assert.Len(t, environment.Resources.Items(), 2)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "service-name", ingress.Name)
+			assert.Equal(t, "namespace", ingress.Namespace)
+			assert.Len(t, ingress.Spec.Rules, 1)
+			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Nil(t, ingress.Spec.TLS)
+		}
+	})
+
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func TestConfigureTLSWithoutSecretNameIngressTraitWDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTest()
+	ingressTrait.TLSHosts = []string{"host1.com", "host2.com"}
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	assert.Len(t, environment.Resources.Items(), 2)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "service-name", ingress.Name)
+			assert.Equal(t, "namespace", ingress.Namespace)
+			assert.Len(t, ingress.Spec.Rules, 1)
+			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Nil(t, ingress.Spec.TLS)
 		}
 	})
 

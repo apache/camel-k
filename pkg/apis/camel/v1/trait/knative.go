@@ -60,4 +60,12 @@ type KnativeTrait struct {
 	// As Knative requires this label to perform injection of K_SINK URL into the service.
 	// If this is false, the integration pod may start and fail, read the SinkBinding Knative documentation. (default: true)
 	NamespaceLabel *bool `property:"namespace-label" json:"namespaceLabel,omitempty"`
+	// Sets filter attributes on the event stream (such as event type, source, subject and so on).
+	// A list of key-value pairs that represent filter attributes and its values.
+	// The syntax is KEY=VALUE, e.g., `source="my.source"`.
+	// Filter attributes get set on the Knative trigger that is being created as part of this integration.
+	Filters []string `property:"filters" json:"filters,omitempty"`
+	// Enables the default filtering for the Knative trigger using the event type
+	// If this is true, the created Knative trigger uses the event type as a filter on the event stream when no other filter criteria is given. (default: true)
+	FilterEventType *bool `property:"filter-event-type" json:"filterEventType,omitempty"`
 }

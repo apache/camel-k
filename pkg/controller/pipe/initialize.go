@@ -27,11 +27,13 @@ import (
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
 
+	"github.com/apache/camel-k/v2/pkg/client"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // NewInitializeAction returns a action that initializes the Pipe configuration when not provided by the user.
@@ -47,86 +49,77 @@ func (action *initializeAction) Name() string {
 	return "initialize"
 }
 
-func (action *initializeAction) CanHandle(binding *v1.Pipe) bool {
-	return binding.Status.Phase == v1.PipePhaseNone
+func (action *initializeAction) CanHandle(pipe *v1.Pipe) bool {
+	return pipe.Status.Phase == v1.PipePhaseNone
 }
 
-func (action *initializeAction) Handle(ctx context.Context, binding *v1.Pipe) (*v1.Pipe, error) {
+func (action *initializeAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pipe, error) {
 	action.L.Info("Initializing Pipe")
+	return initializePipe(ctx, action.client, action.L, pipe)
+}
 
-	if binding.Spec.Integration != nil {
-		action.L.Infof("Pipe %s is using deprecated .spec.integration parameter. Please, update and use annotation traits instead", binding.Name)
-		binding.Status.SetCondition(
+func initializePipe(ctx context.Context, c client.Client, l log.Logger, pipe *v1.Pipe) (*v1.Pipe, error) {
+	// Remove the previous conditions
+	pipe.Status = v1.PipeStatus{}
+	if pipe.Spec.Integration != nil {
+		l.Infof("Pipe %s is using deprecated .spec.integration parameter. Please, update and use annotation traits instead", pipe.Name)
+		pipe.Status.SetCondition(
 			v1.PipeIntegrationDeprecationNotice,
 			corev1.ConditionTrue,
 			".spec.integration parameter is deprecated",
 			".spec.integration parameter is deprecated. Use annotation traits instead",
 		)
 	}
-	it, err := CreateIntegrationFor(ctx, action.client, binding)
+	it, err := CreateIntegrationFor(ctx, c, pipe)
 	if err != nil {
-		binding.Status.Phase = v1.PipePhaseError
-		binding.Status.SetErrorCondition(v1.PipeIntegrationConditionError,
-			"Couldn't create an Integration custom resource", err)
-		return binding, err
+		pipe.Status.Phase = v1.PipePhaseError
+		pipe.Status.SetErrorCondition(
+			v1.PipeConditionReady,
+			"IntegrationError",
+			err,
+		)
+		return pipe, err
 	}
-
-	if _, err := kubernetes.ReplaceResource(ctx, action.client, it); err != nil {
+	if _, err := kubernetes.ReplaceResource(ctx, c, it); err != nil {
 		return nil, fmt.Errorf("could not create integration for Pipe: %w", err)
 	}
 
 	// propagate Kamelet icon (best effort)
-	action.propagateIcon(ctx, binding)
+	propagateIcon(ctx, c, l, pipe)
 
-	target := binding.DeepCopy()
+	target := pipe.DeepCopy()
 	target.Status.Phase = v1.PipePhaseCreating
 	return target, nil
 }
 
-func (action *initializeAction) propagateIcon(ctx context.Context, binding *v1.Pipe) {
-	icon, err := action.findIcon(ctx, binding)
+func propagateIcon(ctx context.Context, c client.Client, l log.Logger, pipe *v1.Pipe) {
+	icon, err := findIcon(ctx, c, pipe)
 	if err != nil {
-		action.L.Errorf(err, "cannot find icon for Pipe %q", binding.Name)
+		l.Errorf(err, "cannot find icon for Pipe %q", pipe.Name)
 		return
 	}
 	if icon == "" {
 		return
 	}
-	// compute patch
-	clone := binding.DeepCopy()
-	clone.Annotations = make(map[string]string)
-	for k, v := range binding.Annotations {
-		clone.Annotations[k] = v
-	}
-	if _, ok := clone.Annotations[v1.AnnotationIcon]; !ok {
-		clone.Annotations[v1.AnnotationIcon] = icon
-	}
-	p, err := patch.MergePatch(binding, clone)
-	if err != nil {
-		action.L.Errorf(err, "cannot compute patch to update icon for Binding %q", binding.Name)
-		return
-	}
-	if len(p) > 0 {
-		if err := action.client.Patch(ctx, clone, client.RawPatch(types.MergePatchType, p)); err != nil {
-			action.L.Errorf(err, "cannot apply merge patch to update icon for Pipe %q", binding.Name)
-			return
-		}
-	}
+
+	// We must patch this here as we're changing the resource annotations and not the resource status
+	err = patchPipeIconAnnotations(ctx, c, pipe, icon)
+	l.Errorf(err, "some error happened while patching icon annotation for Pipe %q", pipe.Name)
 }
 
-func (action *initializeAction) findIcon(ctx context.Context, binding *v1.Pipe) (string, error) {
+func findIcon(ctx context.Context, c client.Client, pipe *v1.Pipe) (string, error) {
 	var kameletRef *corev1.ObjectReference
-	if binding.Spec.Source.Ref != nil && binding.Spec.Source.Ref.Kind == "Kamelet" && strings.HasPrefix(binding.Spec.Source.Ref.APIVersion, "camel.apache.org/") {
-		kameletRef = binding.Spec.Source.Ref
-	} else if binding.Spec.Sink.Ref != nil && binding.Spec.Sink.Ref.Kind == "Kamelet" && strings.HasPrefix(binding.Spec.Sink.Ref.APIVersion, "camel.apache.org/") {
-		kameletRef = binding.Spec.Sink.Ref
+	if pipe.Spec.Source.Ref != nil && pipe.Spec.Source.Ref.Kind == "Kamelet" && strings.HasPrefix(pipe.Spec.Source.Ref.APIVersion, "camel.apache.org/") {
+		kameletRef = pipe.Spec.Source.Ref
+	} else if pipe.Spec.Sink.Ref != nil && pipe.Spec.Sink.Ref.Kind == "Kamelet" && strings.HasPrefix(pipe.Spec.Sink.Ref.APIVersion, "camel.apache.org/") {
+		kameletRef = pipe.Spec.Sink.Ref
 	}
 
 	if kameletRef == nil {
 		return "", nil
 	}
 
-	repo, err := repository.New(ctx, action.client, binding.Namespace, platform.GetOperatorNamespace())
+	repo, err := repository.New(ctx, c, pipe.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
 		return "", err
 	}
@@ -140,4 +133,26 @@ func (action *initializeAction) findIcon(ctx context.Context, binding *v1.Pipe) 
 	}
 
 	return kamelet.Annotations[v1.AnnotationIcon], nil
+}
+
+func patchPipeIconAnnotations(ctx context.Context, c client.Client, pipe *v1.Pipe, icon string) error {
+	clone := pipe.DeepCopy()
+	clone.Annotations = make(map[string]string)
+	for k, v := range pipe.Annotations {
+		clone.Annotations[k] = v
+	}
+	if _, ok := clone.Annotations[v1.AnnotationIcon]; !ok {
+		clone.Annotations[v1.AnnotationIcon] = icon
+	}
+	p, err := patch.MergePatch(pipe, clone)
+	if err != nil {
+		return err
+	}
+	if len(p) > 0 {
+		if err := c.Patch(ctx, clone, ctrl.RawPatch(types.MergePatchType, p)); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -80,30 +80,35 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	return true, nil, nil
 }
 
+//nolint:nestif
 func (t *camelTrait) Apply(e *Environment) error {
 	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() {
+		// Synthetic Integration Kit
+
 		// This is required as during init phase, the trait set by default these values
 		// which are widely used in the platform for different purposese.
 		if e.Integration != nil {
 			e.Integration.Status.RuntimeVersion = ""
 			e.Integration.Status.RuntimeProvider = ""
 		}
-		return nil
-	}
-	if e.CamelCatalog == nil {
-		if err := t.loadOrCreateCatalog(e, t.RuntimeVersion); err != nil {
-			return err
+	} else {
+		// Managed Integration
+		if e.CamelCatalog == nil {
+			if err := t.loadOrCreateCatalog(e, t.RuntimeVersion); err != nil {
+				return err
+			}
+		}
+		e.RuntimeVersion = e.CamelCatalog.Runtime.Version
+		if e.Integration != nil {
+			e.Integration.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
+			e.Integration.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
+		}
+		if e.IntegrationKit != nil {
+			e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
+			e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
 		}
 	}
-	e.RuntimeVersion = e.CamelCatalog.Runtime.Version
-	if e.Integration != nil {
-		e.Integration.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
-		e.Integration.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
-	}
-	if e.IntegrationKit != nil {
-		e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
-		e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
-	}
+
 	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases() {
 		// Get all resources
 		maps := t.computeConfigMaps(e)

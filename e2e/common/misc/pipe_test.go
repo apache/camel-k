@@ -92,7 +92,7 @@ func TestPipe(t *testing.T) {
 			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "my-own-timer-source", "my-own-log-sink",
 				"-p", "source.message=hello from test",
 				"-p", "sink.loggerName=integrationLogger",
-				"--annotation", "trait.camel.apache.org/camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",
+				"--trait", "camel.properties=[\"camel.prop1=a\",\"camel.prop2=b\"]",
 				"--name", "kb-with-traits").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "kb-with-traits"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -109,11 +109,8 @@ func TestPipe(t *testing.T) {
 			g.Eventually(err).Should(BeNil())
 			g.Eventually(PipePhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.PipePhaseError))
 			g.Eventually(PipeConditionStatus(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).ShouldNot(Equal(corev1.ConditionTrue))
-			g.Eventually(PipeCondition(t, ctx, ns, name, v1.PipeIntegrationConditionError), TestTimeoutShort).Should(
-				WithTransform(PipeConditionMessage, And(
-					ContainSubstring("could not determine source URI"),
-					ContainSubstring("no ref or URI specified in endpoint"),
-				)))
+			g.Eventually(PipeCondition(t, ctx, ns, name, v1.PipeConditionReady), TestTimeoutShort).Should(
+				WithTransform(PipeConditionMessage, ContainSubstring("no ref or URI specified in endpoint")))
 		})
 
 		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())

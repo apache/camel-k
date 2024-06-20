@@ -128,8 +128,4 @@ if [ "${LOG_LEVEL}" == "debug" ]; then
 fi
 
 # Then run integration tests
-if [ "${HIGH_MEMORY}" == "true" ]; then
-  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-quarkus-native-high-memory
-else
-  DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-quarkus-native
-fi
+DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-quarkus-native

@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -502,7 +503,7 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.Integrat
 	dstKit.Spec = *kit.Spec.DeepCopy()
 	dstKit.Annotations = cloneAnnotations(kit.Annotations, o.ToOperator)
 	dstKit.Labels = cloneLabels(kit.Labels)
-	dstKit.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
+	dstKit.Labels = alterKitLabels(dstKit.Labels, kit)
 	dstKit.Spec.Image = contImage
 	// Integration
 	dstIt := v1.NewIntegration(o.To, it.Name)
@@ -513,6 +514,20 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.Integrat
 		Namespace: dstKit.Namespace,
 		Name:      dstKit.Name,
 		Kind:      dstKit.Kind,
+	}
+	// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
+	// would get lost when creating the promoted IntegrationKit (which is in .status.artifacts). For this reason
+	// we must report it in the promoted Integration.
+	kitClasspath := kit.Status.GetDependenciesPaths()
+	if len(kitClasspath) > 0 {
+		if dstIt.Spec.Traits.JVM == nil {
+			dstIt.Spec.Traits.JVM = &traitv1.JVMTrait{}
+		}
+		jvmTrait := dstIt.Spec.Traits.JVM
+		if jvmTrait.Classpath != "" {
+			jvmTrait.Classpath += ":"
+		}
+		jvmTrait.Classpath += strings.Join(kitClasspath, ":")
 	}
 
 	return &dstIt, dstKit
@@ -547,6 +562,31 @@ func cloneLabels(lbs map[string]string) map[string]string {
 	return newMap
 }
 
+// Change labels expected by Integration Kit replacing the creator to reflect the
+// fact the new kit was cloned by another one instead.
+func alterKitLabels(lbs map[string]string, kit *v1.IntegrationKit) map[string]string {
+	lbs[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
+	if lbs[kubernetes.CamelCreatorLabelKind] != "" {
+		delete(lbs, kubernetes.CamelCreatorLabelKind)
+	}
+	if lbs[kubernetes.CamelCreatorLabelName] != "" {
+		delete(lbs, kubernetes.CamelCreatorLabelName)
+	}
+	if lbs[kubernetes.CamelCreatorLabelNamespace] != "" {
+		delete(lbs, kubernetes.CamelCreatorLabelNamespace)
+	}
+	if lbs[kubernetes.CamelCreatorLabelVersion] != "" {
+		delete(lbs, kubernetes.CamelCreatorLabelVersion)
+	}
+
+	lbs[kubernetes.CamelClonedLabelKind] = v1.IntegrationKitKind
+	lbs[kubernetes.CamelClonedLabelName] = kit.Name
+	lbs[kubernetes.CamelClonedLabelNamespace] = kit.Namespace
+	lbs[kubernetes.CamelClonedLabelVersion] = kit.ResourceVersion
+
+	return lbs
+}
+
 func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) (*v1.Pipe, *v1.IntegrationKit) {
 	contImage := it.Status.Image
 	// IntegrationKit
@@ -554,7 +594,7 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 	dstKit.Spec = *kit.Spec.DeepCopy()
 	dstKit.Annotations = cloneAnnotations(kit.Annotations, o.ToOperator)
 	dstKit.Labels = cloneLabels(kit.Labels)
-	dstKit.Labels["camel.apache.org/kit.type"] = v1.IntegrationKitTypeExternal
+	dstKit.Labels = alterKitLabels(dstKit.Labels, kit)
 	dstKit.Spec.Image = contImage
 	// Pipe
 	dst := v1.NewPipe(o.To, kb.Name)
@@ -583,6 +623,22 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 			}
 		}
 	}
+
+	// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
+	// would get lost when creating the promoted IntegrationKit (which is in .status.artifacts). For this reason
+	// we must report it in the promoted Integration.
+	kitClasspath := kit.Status.GetDependenciesPaths()
+	if len(kitClasspath) > 0 {
+		if dst.Spec.Integration.Traits.JVM == nil {
+			dst.Spec.Integration.Traits.JVM = &traitv1.JVMTrait{}
+		}
+		jvmTrait := dst.Spec.Integration.Traits.JVM
+		if jvmTrait.Classpath != "" {
+			jvmTrait.Classpath += ":"
+		}
+		jvmTrait.Classpath += strings.Join(kitClasspath, ":")
+	}
+
 	return &dst, dstKit
 }
 

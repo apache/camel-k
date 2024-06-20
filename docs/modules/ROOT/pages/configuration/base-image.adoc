@@ -1,0 +1,13 @@
+= Base image
+
+Camel K operator builds and containerize a Camel application in order to run it eventually on the cluster. It uses a base image on top of which it copies the Camel runtime dependencies built from the given source. The default image used is a JDK based image as the Java DSL requires a runtime compilation on the fly.
+
+You can change the base image in order to bring your own base image by changing the `.spec.build.baseImage` of your IntegrationPlatform resource.
+
+You can also change this parameter individually for each Integration you're running by overriding the platform default value with `builder.base-image` trait parameter.
+
+NOTE: if you change the base image, make sure it provides a JDK or a JRE (only if you are sure you don't use Java DSL)
+
+== "Distroless" container base images
+
+The classic container images such as Eclipse Temurin JDK (the one we use as a default base image at the time of writing this documentation) contains several tools that may not be very suitable for production environments. For this reason you can use a "distroless" container image which only contains the essential and is more secure and suitable for a production environment.

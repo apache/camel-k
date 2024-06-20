@@ -207,6 +207,28 @@ func TestApplyCamelTraitWithProperties(t *testing.T) {
 	}, userPropertiesCm.Data)
 }
 
+func TestApplyCamelTraitSyntheticKitWithProperties(t *testing.T) {
+	trait, environment := createNominalCamelTest(false)
+	trait.Properties = []string{"a=b", "c=d"}
+	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeSynthetic
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, configured)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+
+	userPropertiesCm := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Labels["camel.apache.org/properties.type"] == "user"
+	})
+	assert.NotNil(t, userPropertiesCm)
+	assert.Equal(t, map[string]string{
+		"application.properties": "a=b\nc=d\n",
+	}, userPropertiesCm.Data)
+}
+
 func TestApplyCamelTraitWithSources(t *testing.T) {
 	trait, environment := createNominalCamelTest(true)
 

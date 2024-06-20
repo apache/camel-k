@@ -150,6 +150,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 	return digest, nil
 }
 
+//nolint:nestif
 func computeForTraits(hash hash.Hash, traits v1.Traits) error {
 	specTraitsMap, err := toMap(traits)
 	if err != nil {
@@ -335,6 +336,7 @@ func sortedTraitsMapKeys(m map[string]map[string]interface{}) []string {
 	return res
 }
 
+// Deprecated: to be removed in future versions.
 func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
 	res := make([]string, 0, len(it.Annotations))
 	for k := range it.Annotations {

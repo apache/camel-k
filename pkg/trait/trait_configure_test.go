@@ -70,8 +70,8 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/cron.concurrency-policy":    "annotated-policy",
-					"trait.camel.apache.org/environment.container-meta": boolean.TrueString,
+					v1.TraitAnnotationPrefix + "cron.concurrency-policy":    "annotated-policy",
+					v1.TraitAnnotationPrefix + "environment.container-meta": boolean.TrueString,
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -99,7 +99,7 @@ func TestFailOnWrongTraitAnnotations(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/cron.missing-property": "the-value",
+					v1.TraitAnnotationPrefix + "cron.missing-property": "the-value",
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -116,8 +116,8 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 		Platform: &v1.IntegrationPlatform{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/cron.components": "cmp2",
-					"trait.camel.apache.org/cron.schedule":   "schedule2",
+					v1.TraitAnnotationPrefix + "cron.components": "cmp2",
+					v1.TraitAnnotationPrefix + "cron.schedule":   "schedule2",
 				},
 			},
 			Spec: v1.IntegrationPlatformSpec{
@@ -133,9 +133,9 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 		IntegrationKit: &v1.IntegrationKit{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/cron.components":         "cmp3",
-					"trait.camel.apache.org/cron.concurrency-policy": "policy2",
-					"trait.camel.apache.org/builder.verbose":         boolean.TrueString,
+					v1.TraitAnnotationPrefix + "cron.components":         "cmp3",
+					v1.TraitAnnotationPrefix + "cron.concurrency-policy": "policy2",
+					v1.TraitAnnotationPrefix + "builder.verbose":         boolean.TrueString,
 				},
 			},
 			Spec: v1.IntegrationKitSpec{
@@ -149,8 +149,8 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/cron.components":         "cmp4",
-					"trait.camel.apache.org/cron.concurrency-policy": "policy4",
+					v1.TraitAnnotationPrefix + "cron.components":         "cmp4",
+					v1.TraitAnnotationPrefix + "cron.concurrency-policy": "policy4",
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -178,8 +178,8 @@ func TestTraitListConfigurationFromAnnotations(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/jolokia.options":          `["opt1", "opt2"]`,
-					"trait.camel.apache.org/service-binding.services": `Binding:xxx`, // lenient
+					v1.TraitAnnotationPrefix + "jolokia.options":          `["opt1", "opt2"]`,
+					v1.TraitAnnotationPrefix + "service-binding.services": `Binding:xxx`, // lenient
 				},
 			},
 			Spec: v1.IntegrationSpec{
@@ -200,7 +200,7 @@ func TestTraitSplitConfiguration(t *testing.T) {
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: map[string]string{
-					"trait.camel.apache.org/owner.target-labels": "[\"opt1\", \"opt2\"]",
+					v1.TraitAnnotationPrefix + "owner.target-labels": "[\"opt1\", \"opt2\"]",
 				},
 			},
 			Spec: v1.IntegrationSpec{

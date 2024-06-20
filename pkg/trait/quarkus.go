@@ -20,7 +20,6 @@ package trait
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/rs/xid"
 
@@ -277,11 +276,6 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
 		}
 	}
-	for k, v := range integration.Annotations {
-		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-			v1.SetAnnotation(&kit.ObjectMeta, k, v)
-		}
-	}
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {
 		kit.SetOperatorID(operatorID)
@@ -376,6 +370,7 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	// The LoadCamelQuarkusCatalog is required to have catalog information available by the builder
 	packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
 
+	//nolint:nestif
 	if native {
 		if nativePackageType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackageType != "" {
 			buildTask.Maven.Properties["quarkus.package.type"] = nativePackageType

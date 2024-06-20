@@ -131,7 +131,8 @@ type PipeConditionType string
 const (
 	// PipeConditionReady --.
 	PipeConditionReady PipeConditionType = "Ready"
-	// PipeIntegrationConditionError is used to report the error on the generated Integration.
+	// PipeIntegrationConditionError -- .
+	// Deprecated: no longer in use.
 	PipeIntegrationConditionError PipeConditionType = "IntegrationError"
 	// PipeIntegrationDeprecationNotice is used to report the usage of a deprecated resource.
 	PipeIntegrationDeprecationNotice PipeConditionType = "DeprecationNotice"

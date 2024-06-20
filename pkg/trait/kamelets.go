@@ -82,14 +82,18 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if !pointer.BoolDeref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Kamelets"), nil
 	}
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
+	if t.MountPoint == "" {
+		t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
+	}
 	if pointer.BoolDeref(t.Auto, true) {
+		if e.CamelCatalog == nil {
+			// Cannot execute this trait for synthetic IntegrationKit. In order to use it, the
+			// user has to specify forcefully auto=false option and pass a list of kamelets explicitly
+			return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
+		}
 		kamelets, err := kamelets.ExtractKameletFromSources(e.Ctx, e.Client, e.CamelCatalog, e.Resources, e.Integration)
 		if err != nil {
 			return false, nil, err
@@ -98,10 +102,6 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		if len(kamelets) > 0 {
 			sort.Strings(kamelets)
 			t.List = strings.Join(kamelets, ",")
-		}
-
-		if t.MountPoint == "" {
-			t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
 		}
 	}
 
@@ -171,44 +171,47 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 }
 
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	if len(t.getKameletKeys()) > 0 {
-		kamelets, err := t.collectKamelets(e)
-		if err != nil {
-			return err
-		}
-		kb := newKameletBundle()
-		for _, key := range t.getKameletKeys() {
-			kamelet := kamelets[key]
-			if err := t.addKameletAsSource(e, kamelet); err != nil {
-				return err
-			}
-			// Adding dependencies from Kamelets
-			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
-			// Add to Kamelet bundle configmap
-			kb.add(kamelet)
-		}
-		bundleConfigmaps, err := kb.toConfigmaps(e.Integration.Name, e.Integration.Namespace)
-		if err != nil {
-			return err
-		}
-		// set kamelets runtime location
-		if e.ApplicationProperties == nil {
-			e.ApplicationProperties = map[string]string{}
-		}
-		for _, cm := range bundleConfigmaps {
-			kameletMountPoint := fmt.Sprintf("%s/%s", t.MountPoint, cm.Name)
-			cm.Annotations[kameletMountPointAnnotation] = kameletMountPoint
-			e.Resources.Add(cm)
-			if e.ApplicationProperties[KameletLocationProperty] == "" {
-				e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s", kameletMountPoint)
-			} else {
-				e.ApplicationProperties[KameletLocationProperty] += fmt.Sprintf(",file:%s", kameletMountPoint)
-			}
-		}
-		e.ApplicationProperties[KameletLocationProperty] += ",classpath:/kamelets"
-		// resort dependencies
-		sort.Strings(e.Integration.Status.Dependencies)
+	if len(t.getKameletKeys()) == 0 {
+		return nil
 	}
+
+	kamelets, err := t.collectKamelets(e)
+	if err != nil {
+		return err
+	}
+	kb := newKameletBundle()
+	for _, key := range t.getKameletKeys() {
+		kamelet := kamelets[key]
+		if err := t.addKameletAsSource(e, kamelet); err != nil {
+			return err
+		}
+		// Adding dependencies from Kamelets
+		util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
+		// Add to Kamelet bundle configmap
+		kb.add(kamelet)
+	}
+	bundleConfigmaps, err := kb.toConfigmaps(e.Integration.Name, e.Integration.Namespace)
+	if err != nil {
+		return err
+	}
+	// set kamelets runtime location
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = map[string]string{}
+	}
+	for _, cm := range bundleConfigmaps {
+		kameletMountPoint := fmt.Sprintf("%s/%s", t.MountPoint, cm.Name)
+		cm.Annotations[kameletMountPointAnnotation] = kameletMountPoint
+		e.Resources.Add(cm)
+		if e.ApplicationProperties[KameletLocationProperty] == "" {
+			e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s", kameletMountPoint)
+		} else {
+			e.ApplicationProperties[KameletLocationProperty] += fmt.Sprintf(",file:%s", kameletMountPoint)
+		}
+	}
+	e.ApplicationProperties[KameletLocationProperty] += ",classpath:/kamelets"
+	// resort dependencies
+	sort.Strings(e.Integration.Status.Dependencies)
+
 	return nil
 }
 

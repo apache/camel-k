@@ -24,7 +24,9 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
-	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -76,6 +78,52 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 	if props == nil {
 		props = make(map[string]string)
 	}
+
+	var filterEventType = true
+	var filterExpressions = make([]string, 0)
+	var serviceURI string
+
+	// TODO: refactor
+	//nolint:nestif
+	if *serviceType == knativeapis.CamelServiceTypeEvent {
+		if props["name"] == "" {
+			props["name"] = e.Ref.Name
+		}
+
+		if endpointCtx.Type == v1.EndpointTypeSource {
+			// Configure trigger filter attributes for the Knative event source
+			for key, value := range props {
+				if key == "cloudEventsType" {
+					// cloudEventsType is a synonym for type filter attribute
+					filterExpressions = append(filterExpressions, fmt.Sprintf("type=%s", value))
+				} else if key != "name" {
+					filterExpressions = append(filterExpressions, fmt.Sprintf("%s=%s", key, value))
+				}
+			}
+		}
+
+		if eventType, ok := props["type"]; ok {
+			// consume the type property and set it as URI path parameter
+			delete(props, "type")
+			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, eventType)
+		} else if cloudEventsType, found := props["cloudEventsType"]; found && endpointCtx.Type == v1.EndpointTypeSource {
+			// set the cloud events type as URI path parameter, but keep it also as URI query param
+			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, cloudEventsType)
+		} else {
+			filterEventType = false
+			serviceURI = fmt.Sprintf("knative:%s", *serviceType)
+		}
+	} else {
+		serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
+	}
+
+	// Remove filter attributes from props to avoid adding them to the service URI query params
+	for _, exp := range filterExpressions {
+		key, _ := property.SplitPropertyFileEntry(exp)
+		delete(props, key)
+	}
+
+	// Enrich service URI query params if not set
 	if props["apiVersion"] == "" {
 		props["apiVersion"] = e.Ref.APIVersion
 	}
@@ -83,31 +131,21 @@ func (k KnativeRefBindingProvider) Translate(ctx BindingContext, endpointCtx End
 		props["kind"] = e.Ref.Kind
 	}
 
-	var serviceURI string
-	if *serviceType == knativeapis.CamelServiceTypeEvent {
-		if props["name"] == "" {
-			props["name"] = e.Ref.Name
-		}
-		if eventType, ok := props["type"]; ok {
-			// consume prop
-			delete(props, "type")
-			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, eventType)
-		} else {
-			if endpointCtx.Type == v1.EndpointTypeSink || endpointCtx.Type == v1.EndpointTypeAction {
-				// Allowing no event type, but it can fail. See https://github.com/apache/camel-k/v2-runtime/issues/536
-				serviceURI = fmt.Sprintf("knative:%s", *serviceType)
-			} else {
-				return nil, errors.New(`property "type" must be provided when reading from the Broker`)
-			}
-		}
-	} else {
-		serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
+	serviceURI = uri.AppendParameters(serviceURI, props)
+	var binding = Binding{
+		URI: serviceURI,
 	}
 
-	serviceURI = uri.AppendParameters(serviceURI, props)
-	return &Binding{
-		URI: serviceURI,
-	}, nil
+	if endpointCtx.Type == v1.EndpointTypeSource && (len(filterExpressions) > 0 || !filterEventType) {
+		binding.Traits = v1.Traits{
+			Knative: &trait.KnativeTrait{
+				Filters:         filterExpressions,
+				FilterEventType: &filterEventType,
+			},
+		}
+	}
+
+	return &binding, nil
 }
 
 func isKnownKnativeResource(ref *corev1.ObjectReference) (bool, error) {
@@ -186,6 +224,8 @@ func (k V1alpha1KnativeRefBindingProvider) Translate(ctx V1alpha1BindingContext,
 	}
 
 	var serviceURI string
+
+	//nolint:nestif
 	if *serviceType == knativeapis.CamelServiceTypeEvent {
 		if props["name"] == "" {
 			props["name"] = e.Ref.Name

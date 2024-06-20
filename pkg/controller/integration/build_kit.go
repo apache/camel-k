@@ -62,52 +62,12 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	// IntegrationKit may be nil if its being upgraded
 	//
 	if integration.Status.IntegrationKit != nil {
-		// IntegrationKit fully defined so find it
-		action.L.Debugf("Finding integration kit %s for integration %s\n",
-			integration.Status.IntegrationKit.Name, integration.Name)
-		kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
-			integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+		it, err := action.checkIntegrationKit(ctx, integration)
 		if err != nil {
-			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
-				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+			return nil, err
 		}
 
-		if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
-			match, err := integrationMatches(ctx, action.client, integration, kit)
-			if err != nil {
-				return nil, fmt.Errorf("unable to match any integration kit with integration %s/%s: %w",
-					integration.Namespace, integration.Name, err)
-
-			} else if !match {
-				// We need to re-generate a kit, or search for a new one that
-				// matches the integration, so let's remove the association
-				// with the kit.
-
-				//
-				// All tests & conditionals check for a nil assignment
-				//
-				action.L.Debug("No match found between integration and integrationkit. Resetting integration's integrationkit to empty",
-					"integration", integration.Name,
-					"integrationkit", integration.Status.IntegrationKit.Name,
-					"namespace", integration.Namespace)
-				integration.SetIntegrationKit(nil)
-				return integration, nil
-			}
-		}
-
-		if kit.Status.Phase == v1.IntegrationKitPhaseError {
-			integration.Status.Phase = v1.IntegrationPhaseError
-			integration.SetIntegrationKit(kit)
-			return integration, nil
-		}
-
-		if kit.Status.Phase == v1.IntegrationKitPhaseReady {
-			integration.Status.Phase = v1.IntegrationPhaseDeploying
-			integration.SetIntegrationKit(kit)
-			return integration, nil
-		}
-
-		return nil, nil
+		return it, nil
 	}
 
 	action.L.Debug("No kit specified in integration status so looking up", "integration", integration.Name, "namespace", integration.Namespace)
@@ -139,7 +99,7 @@ kits:
 			k := &existingKits[i]
 
 			action.L.Debug("Comparing existing kit with environment", "env kit", kit.Name, "existing kit", k.Name)
-			match, err := kitMatches(&kit, k)
+			match, err := kitMatches(action.client, &kit, k)
 			if err != nil {
 				return nil, fmt.Errorf("error occurred matches integration kits with environment for integration %s/%s: %w",
 					integration.Namespace, integration.Name, err)
@@ -189,4 +149,59 @@ kits:
 	}
 
 	return integration, nil
+}
+
+func (action *buildKitAction) checkIntegrationKit(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
+
+	// IntegrationKit fully defined so find it
+	action.L.Debugf("Finding integration kit %s for integration %s\n",
+		integration.Status.IntegrationKit.Name, integration.Name)
+
+	kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
+		integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+	if err != nil {
+		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
+			integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+	}
+
+	if kit.Labels[v1.IntegrationKitTypeLabel] == v1.IntegrationKitTypePlatform {
+		match, err := integrationMatches(ctx, action.client, integration, kit)
+		if err != nil {
+			return nil, fmt.Errorf("unable to match any integration kit with integration %s/%s: %w",
+				integration.Namespace, integration.Name, err)
+
+		}
+
+		if !match {
+			// We need to re-generate a kit, or search for a new one that
+			// matches the integration, so let's remove the association
+			// with the kit.
+
+			//
+			// All tests & conditionals check for a nil assignment
+			//
+			action.L.Debug("No match found between integration and integrationkit. Resetting integration's integrationkit to empty",
+				"integration", integration.Name,
+				"integrationkit", integration.Status.IntegrationKit.Name,
+				"namespace", integration.Namespace)
+
+			integration.SetIntegrationKit(nil)
+
+			return integration, nil
+		}
+	}
+
+	if kit.Status.Phase == v1.IntegrationKitPhaseError {
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetIntegrationKit(kit)
+		return integration, nil
+	}
+
+	if kit.Status.Phase == v1.IntegrationKitPhaseReady {
+		integration.Status.Phase = v1.IntegrationPhaseDeploying
+		integration.SetIntegrationKit(kit)
+		return integration, nil
+	}
+
+	return nil, nil
 }

@@ -81,27 +81,6 @@ func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
-// ExpectExecError Expect a command error with an exit code of 1
-func ExpectExecError(t *testing.T, g *WithT, command *exec.Cmd) {
-	t.Helper()
-
-	var cmdOut strings.Builder
-	var cmdErr strings.Builder
-
-	defer func() {
-		if t.Failed() {
-			t.Logf("Output from exec command:\n%s\n", cmdOut.String())
-			t.Logf("Error from exec command:\n%s\n", cmdErr.String())
-		}
-	}()
-
-	session, err := gexec.Start(command, &cmdOut, &cmdErr)
-	session.Wait()
-	g.Eventually(session).ShouldNot(gexec.Exit(0))
-	require.NoError(t, err)
-	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
-}
-
 // Cleanup Clean up the cluster ready for the next set of tests
 func Cleanup(t *testing.T, ctx context.Context) {
 	// Remove the locally installed operator

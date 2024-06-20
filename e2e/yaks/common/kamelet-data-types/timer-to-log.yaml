@@ -15,8 +15,8 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+apiVersion: camel.apache.org/v1
+kind: Pipe
 metadata:
   name: timer-to-log
 spec:
@@ -34,9 +34,9 @@ spec:
         name: log-action
       dataTypes:
         in:
-          format: binary
+          format: "application-octet-stream"
         out:
-          format: string
+          format: "text-plain"
   sink:
     ref:
       kind: Kamelet

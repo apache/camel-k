@@ -23,7 +23,7 @@ pre:
   run: |
     kubectl apply -f timer-source.kamelet.yaml -n $YAKS_NAMESPACE
     kubectl apply -f echo-sink.kamelet.yaml -n $YAKS_NAMESPACE
-    kamel run source-sink.groovy -w -n $YAKS_NAMESPACE
+    kamel run source-sink.yaml -w -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

@@ -143,13 +143,13 @@ NOTE: this is a best effort analysis taking as reference the work available in v
 |v
 |x
 
-|KNative Service
+|Knative Service
 |x
 |x
 |x
 |v
 
-|KNative
+|Knative
 |x
 |v
 |x

@@ -18,7 +18,7 @@
 # ---------------------------------------------------------------------------
 
 - from:
-    uri: "file:/etc/camel/resources/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false"
+    uri: "file:/etc/camel/resources.d/_configmaps/my-cm/?fileName=my-configmap-key&noop=true&idempotent=false"
     steps:
       - setBody:
           simple: "resource file content is: ${body}"

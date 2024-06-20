@@ -4916,6 +4916,13 @@ PodSpec defines a group of Kubernetes resources.
 |Field
 |Description
 
+|`automountServiceAccountToken` +
+bool
+|
+
+
+AutomountServiceAccountToken
+
 |`volumes` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.28/#volume-v1-core[[\]Kubernetes core/v1.Volume]*
 |
@@ -5039,6 +5046,7 @@ Properties -- .
 * <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
 * <<#_camel_apache_org_v1_JibTask, JibTask>>
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+* <<#_camel_apache_org_v1_S2iTask, S2iTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
 
 PublishTask image publish configuration.
@@ -5348,12 +5356,12 @@ S2iTask is used to configure S2I.
 
 
 
-|`contextDir` +
-string
-|
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
 
 
-can be useful to share info with other tasks
+
 
 |`tag` +
 string
@@ -6241,7 +6249,8 @@ string
 |
 
 
-Specify a base image
+Specify a base image. In order to have the application working properly it must be a container image which has a Java JDK
+installed and ready to use on path (ie `/usr/bin/java`).
 
 |`incrementalImageBuild` +
 bool
@@ -7233,6 +7242,20 @@ bool
 
 To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 
+|`tlsHosts` +
+[]string
+|
+
+
+To configure tls hosts
+
+|`tlsSecretName` +
+string
+|
+
+
+To configure tls secret name
+
 
 |===
 
@@ -7320,6 +7343,7 @@ bool
 
 
 Prints the command used the start the JVM in the container logs (default `true`)
+Deprecated: no longer in use.
 
 |`debugAddress` +
 string
@@ -7342,6 +7366,13 @@ string
 
 Additional JVM classpath (use `Linux` classpath separator)
 
+|`jar` +
+string
+|
+
+
+The Jar dependency which will run the application. Leave it empty for managed Integrations.
+
 
 |===
 
@@ -7353,8 +7384,10 @@ Additional JVM classpath (use `Linux` classpath separator)
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
 The Jolokia trait activates and configures the Jolokia Java agent.
+This trait is useful to enable JMX access to Camel application.
+Make sure you have the right privileges to perform such an action on the cluster.
 
-See https://jolokia.org/reference/html/agents.html
+See https://jolokia.org/reference/html/manual/agents.html
 
 
 [cols="2,2a",options="header"]
@@ -7614,6 +7647,16 @@ Automatically deploy the integration as Knative service when all conditions hold
 * Integration is using the Knative profile
 * All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
 
+|`timeoutSeconds` +
+int64
+|
+
+
+The maximum duration in seconds that the request instance is allowed to respond to a request.
+This field propagates to the integration pod's terminationGracePeriodSeconds
+
+Refer to the Knative documentation for more information.
+
 
 |===
 
@@ -7731,6 +7774,24 @@ bool
 Enables the camel-k-operator to set the "bindings.knative.dev/include=true" label to the namespace
 As Knative requires this label to perform injection of K_SINK URL into the service.
 If this is false, the integration pod may start and fail, read the SinkBinding Knative documentation. (default: true)
+
+|`filters` +
+[]string
+|
+
+
+Sets filter attributes on the event stream (such as event type, source, subject and so on).
+A list of key-value pairs that represent filter attributes and its values.
+The syntax is KEY=VALUE, e.g., `source="my.source"`.
+Filter attributes get set on the Knative trigger that is being created as part of this integration.
+
+|`filterEventType` +
+bool
+|
+
+
+Enables the default filtering for the Knative trigger using the event type
+If this is true, the created Knative trigger uses the event type as a filter on the event stream when no other filter criteria is given. (default: true)
 
 
 |===

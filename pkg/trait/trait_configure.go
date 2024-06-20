@@ -36,6 +36,7 @@ func (c *Catalog) Configure(env *Environment) error {
 		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
 			return err
 		}
+		// Deprecated: to be removed in future version
 		if err := c.configureTraitsFromAnnotations(env.Platform.Annotations); err != nil {
 			return err
 		}
@@ -49,6 +50,7 @@ func (c *Catalog) Configure(env *Environment) error {
 		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
 			return err
 		}
+		// Deprecated: to be removed in future version
 		if err := c.configureTraitsFromAnnotations(env.IntegrationKit.Annotations); err != nil {
 			return err
 		}
@@ -57,6 +59,7 @@ func (c *Catalog) Configure(env *Environment) error {
 		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
 			return err
 		}
+		// Deprecated: to be removed in future version
 		if err := c.configureTraitsFromAnnotations(env.Integration.Annotations); err != nil {
 			return err
 		}
@@ -117,42 +120,45 @@ func decodeTrait(in map[string]interface{}, target Trait) error {
 	return json.Unmarshal(data, target)
 }
 
+// Deprecated: to be removed in future versions.
 func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) error {
 	options := make(map[string]map[string]interface{}, len(annotations))
 	for k, v := range annotations {
-		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-			configKey := strings.TrimPrefix(k, v1.TraitAnnotationPrefix)
-			if strings.Contains(configKey, ".") {
-				parts := strings.SplitN(configKey, ".", 2)
-				id := parts[0]
-				prop := parts[1]
-				if _, ok := options[id]; !ok {
-					options[id] = make(map[string]interface{})
-				}
+		if !strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+			continue
+		}
 
-				propParts := util.ConfigTreePropertySplit(prop)
-				var current = options[id]
-				if len(propParts) > 1 {
-					c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
-					if err != nil {
-						return err
-					}
-					if cc, ok := c.(map[string]interface{}); ok {
-						current = cc
-					} else {
-						return errors.New(`invalid array specification: to set an array value use the ["v1", "v2"] format`)
-					}
-				}
-				current[prop] = v
+		configKey := strings.TrimPrefix(k, v1.TraitAnnotationPrefix)
+		if !strings.Contains(configKey, ".") {
+			return fmt.Errorf("wrong format for trait annotation %q: missing trait ID", k)
+		}
 
+		parts := strings.SplitN(configKey, ".", 2)
+		id := parts[0]
+		prop := parts[1]
+		if _, ok := options[id]; !ok {
+			options[id] = make(map[string]interface{})
+		}
+
+		propParts := util.ConfigTreePropertySplit(prop)
+		var current = options[id]
+		if len(propParts) > 1 {
+			c, err := util.NavigateConfigTree(current, propParts[0:len(propParts)-1])
+			if err != nil {
+				return err
+			}
+			if cc, ok := c.(map[string]interface{}); ok {
+				current = cc
 			} else {
-				return fmt.Errorf("wrong format for trait annotation %q: missing trait ID", k)
+				return errors.New(`invalid array specification: to set an array value use the ["v1", "v2"] format`)
 			}
 		}
+		current[prop] = v
 	}
 	return c.configureFromOptions(options)
 }
 
+// Deprecated: to be removed in future versions.
 func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{}) error {
 	for id, config := range traits {
 		t := c.GetTrait(id)
@@ -166,6 +172,7 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{})
 	return nil
 }
 
+// Deprecated: to be removed in future versions.
 func configureTrait(id string, config map[string]interface{}, trait interface{}) error {
 	md := mapstructure.Metadata{}
 

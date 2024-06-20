@@ -94,51 +94,54 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseBuildingKit) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if pointer.BoolDeref(t.Auto, true) {
-		// Check if the master component has been used
-		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
-		if err != nil {
-			return false, nil, err
-		}
 
-		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-		if err != nil {
-			return false, nil, err
-		}
+	if !pointer.BoolDeref(t.Auto, true) {
+		return pointer.BoolDeref(t.Enabled, false), nil, nil
+	}
 
-		if t.Enabled == nil {
-			for _, endpoint := range meta.FromURIs {
-				if uri.GetComponent(endpoint) == masterComponent {
-					enabled := true
-					t.Enabled = &enabled
-				}
+	// Check if the master component has been used
+	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
+	if err != nil {
+		return false, nil, err
+	}
+
+	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	if err != nil {
+		return false, nil, err
+	}
+
+	if t.Enabled == nil {
+		for _, endpoint := range meta.FromURIs {
+			if uri.GetComponent(endpoint) == masterComponent {
+				enabled := true
+				t.Enabled = &enabled
 			}
-			// No master component, can skip the trait execution
-			if !pointer.BoolDeref(t.Enabled, false) {
-				return false, nil, nil
-			}
 		}
-		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
-			t.delegateDependencies = findAdditionalDependencies(e, meta)
+		// No master component, can skip the trait execution
+		if !pointer.BoolDeref(t.Enabled, false) {
+			return false, nil, nil
 		}
+	}
+	if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
+		t.delegateDependencies = findAdditionalDependencies(e, meta)
+	}
 
-		if t.ResourceName == nil {
-			val := e.Integration.Name + "-lock"
-			t.ResourceName = &val
-		}
+	if t.ResourceName == nil {
+		val := e.Integration.Name + "-lock"
+		t.ResourceName = &val
+	}
 
-		if t.ResourceType == nil {
-			t.ResourceType = pointer.String(leaseResourceType)
-		}
+	if t.ResourceType == nil {
+		t.ResourceType = pointer.String(leaseResourceType)
+	}
 
-		if t.LabelKey == nil {
-			val := v1.IntegrationLabel
-			t.LabelKey = &val
-		}
+	if t.LabelKey == nil {
+		val := v1.IntegrationLabel
+		t.LabelKey = &val
+	}
 
-		if t.LabelValue == nil {
-			t.LabelValue = &e.Integration.Name
-		}
+	if t.LabelValue == nil {
+		t.LabelValue = &e.Integration.Name
 	}
 
 	return pointer.BoolDeref(t.Enabled, false), nil, nil

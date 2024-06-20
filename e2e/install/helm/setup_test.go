@@ -38,13 +38,14 @@ import (
 )
 
 func TestHelmInstallRunUninstall(t *testing.T) {
+	// Ensure no CRDs are already installed
+	ctx := TestContext()
+	Cleanup(t, ctx)
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
-	customImage := fmt.Sprintf("%s/apache/camel-k", KAMEL_INSTALL_REGISTRY)
-
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		ExpectExecSucceed(t, g, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
+		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
+		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 		ExpectExecSucceed(t, g, Make(t, "release-helm"))
 		ExpectExecSucceed(t, g,
 			exec.Command(
@@ -62,7 +63,6 @@ func TestHelmInstallRunUninstall(t *testing.T) {
 		)
 
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-
 		// Check if restricted security context has been applyed
 		operatorPod := OperatorPod(t, ctx, ns)()
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.RunAsNonRoot).To(Equal(kubernetes.DefaultOperatorSecurityContext().RunAsNonRoot))

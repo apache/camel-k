@@ -45,7 +45,7 @@ func TestOpenAPIService(t *testing.T) {
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi-knative", cmDataProps)
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi-knative", "files/petstore.groovy").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi-knative", "files/petstore.yaml").Execute()).To(Succeed())
 
 		g.Eventually(KnativeService(t, ctx, ns, "petstore"), TestTimeoutLong).
 			Should(Not(BeNil()))

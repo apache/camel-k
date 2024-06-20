@@ -98,36 +98,40 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 	if e.CamelCatalog == nil {
 		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
+
+	if !pointer.BoolDeref(t.Auto, true) {
+		return true, nil, nil
+	}
+
 	var condition *trait.TraitCondition
-	if pointer.BoolDeref(t.Auto, true) {
-		if t.Endpoint == "" {
-			for _, locator := range discovery.TelemetryLocators {
-				endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
-				if err != nil {
-					return false, nil, err
-				}
-				if endpoint != "" {
-					t.L.Infof("Using tracing endpoint: %s", endpoint)
-					condition = trait.NewIntegrationCondition(
-						"Telemetry",
-						v1.IntegrationConditionTraitInfo,
-						corev1.ConditionTrue,
-						"TracingEndpoint",
-						endpoint,
-					)
-					t.Endpoint = endpoint
-					break
-				}
+
+	if t.Endpoint == "" {
+		for _, locator := range discovery.TelemetryLocators {
+			endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
+			if err != nil {
+				return false, nil, err
+			}
+			if endpoint != "" {
+				t.L.Infof("Using tracing endpoint: %s", endpoint)
+				condition = trait.NewIntegrationCondition(
+					"Telemetry",
+					v1.IntegrationConditionTraitInfo,
+					corev1.ConditionTrue,
+					"TracingEndpoint",
+					endpoint,
+				)
+				t.Endpoint = endpoint
+				break
 			}
 		}
+	}
 
-		if t.ServiceName == "" {
-			t.ServiceName = e.Integration.Name
-		}
+	if t.ServiceName == "" {
+		t.ServiceName = e.Integration.Name
+	}
 
-		if t.Sampler == "" {
-			t.Sampler = "on"
-		}
+	if t.Sampler == "" {
+		t.Sampler = "on"
 	}
 
 	return true, condition, nil
@@ -175,30 +179,32 @@ func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
 
 // Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
 func (t *telemetryTrait) setProperties(e *trait.Environment) {
-	if e.CamelCatalog != nil {
-		provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
-		properties := telemetryProperties[provider]
-		if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {
-			e.ApplicationProperties[appPropEnabled] = "true"
-		}
-		if appPropEndpoint := properties[propEndpoint]; appPropEndpoint != "" && t.Endpoint != "" {
-			e.ApplicationProperties[appPropEndpoint] = t.Endpoint
-		}
-		if appPropServiceName := properties[propServiceName]; appPropServiceName != "" && t.ServiceName != "" {
-			e.ApplicationProperties[appPropServiceName] = "service.name=" + t.ServiceName
-		}
-		if appPropSampler := properties[propSampler]; appPropSampler != "" && t.Sampler != "" {
-			e.ApplicationProperties[appPropSampler] = t.Sampler
-		}
-		if appPropSamplerRatio := properties[propSamplerRatio]; appPropSamplerRatio != "" && t.SamplerRatio != "" {
-			e.ApplicationProperties[appPropSamplerRatio] = t.SamplerRatio
-		}
-		if appPropSamplerParentBased := properties[propSamplerParentBased]; appPropSamplerParentBased != "" {
-			if pointer.BoolDeref(t.SamplerParentBased, true) {
-				e.ApplicationProperties[appPropSamplerParentBased] = "true"
-			} else {
-				e.ApplicationProperties[appPropSamplerParentBased] = boolean.FalseString
-			}
+	if e.CamelCatalog == nil {
+		return
+	}
+
+	provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
+	properties := telemetryProperties[provider]
+	if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {
+		e.ApplicationProperties[appPropEnabled] = "true"
+	}
+	if appPropEndpoint := properties[propEndpoint]; appPropEndpoint != "" && t.Endpoint != "" {
+		e.ApplicationProperties[appPropEndpoint] = t.Endpoint
+	}
+	if appPropServiceName := properties[propServiceName]; appPropServiceName != "" && t.ServiceName != "" {
+		e.ApplicationProperties[appPropServiceName] = "service.name=" + t.ServiceName
+	}
+	if appPropSampler := properties[propSampler]; appPropSampler != "" && t.Sampler != "" {
+		e.ApplicationProperties[appPropSampler] = t.Sampler
+	}
+	if appPropSamplerRatio := properties[propSamplerRatio]; appPropSamplerRatio != "" && t.SamplerRatio != "" {
+		e.ApplicationProperties[appPropSamplerRatio] = t.SamplerRatio
+	}
+	if appPropSamplerParentBased := properties[propSamplerParentBased]; appPropSamplerParentBased != "" {
+		if pointer.BoolDeref(t.SamplerParentBased, true) {
+			e.ApplicationProperties[appPropSamplerParentBased] = "true"
+		} else {
+			e.ApplicationProperties[appPropSamplerParentBased] = boolean.FalseString
 		}
 	}
 }

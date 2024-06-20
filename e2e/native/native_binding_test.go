@@ -1,5 +1,5 @@
-//go:build integration && !high_memory
-// +build integration,!high_memory
+//go:build integration
+// +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -40,7 +40,9 @@ func TestNativeBinding(t *testing.T) {
 		message := "Magicstring!"
 		t.Run("binding with native build", func(t *testing.T) {
 			bindingName := "native-binding"
-			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "timer-source", "log-sink", "-p", "source.message="+message, "--annotation", "trait.camel.apache.org/quarkus.build-mode=native", "--annotation", "trait.camel.apache.org/builder.tasks-limit-memory=quarkus-native:6.5Gi", "--name", bindingName).Execute()).To(Succeed())
+			g.Expect(KamelBindWithID(t, ctx, operatorID, ns, "timer-source", "log-sink", "-p", "source.message="+message,
+				"--trait", "quarkus.build-mode=native", "--trait", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
+				"--name", bindingName).Execute()).To(Succeed())
 
 			// ====================================
 			// !!! THE MOST TIME-CONSUMING PART !!!

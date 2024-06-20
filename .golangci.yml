@@ -58,6 +58,17 @@ run:
 issues:
   exclude-files:
     - test_support.go
+  exclude-rules:
+    # Exclude some linters from running on deprecated code.
+    - path: pkg/cmd
+      linters:
+        - nestif
+    - path: pkg/install
+      linters:
+        - nestif
+    - path: pkg/util/olm
+      linters:
+        - nestif
 linters:
   enable-all: true
   disable:
@@ -70,10 +81,12 @@ linters:
     # this linter reports long lines but since there is no standard way to split then,
     # then we will disable it for now
     - lll
+    # this linter enforces a stricter format than gofmt but since it is a non-standard tool,
+    # then we will disable it as it would require yet another tool to install and configure
+    - gofumpt
     # https://github.com/apache/camel-k/issues/5486
     - cyclop
     - depguard
-    - dupl
     - exhaustive
     - exhaustivestruct
     - exhaustruct
@@ -86,10 +99,8 @@ linters:
     - gocyclo
     - godox
     - err113
-    - gofumpt
     - gomnd
     - ireturn
-    - nestif
     - nilnil
     - nlreturn
     - paralleltest

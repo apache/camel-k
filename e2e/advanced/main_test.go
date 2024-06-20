@@ -24,9 +24,10 @@ package advanced
 
 import (
 	"fmt"
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"os"
 	"testing"
+
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	. "github.com/onsi/gomega"
 
@@ -38,6 +39,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
+
 	justCompile := GetEnvOrDefault("CAMEL_K_E2E_JUST_COMPILE", boolean.FalseString)
 	if justCompile == "true" {
 		os.Exit(m.Run())

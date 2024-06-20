@@ -29,6 +29,7 @@ type JVMTrait struct {
 	// Suspends the target JVM immediately before the main class is loaded
 	DebugSuspend *bool `property:"debug-suspend" json:"debugSuspend,omitempty"`
 	// Prints the command used the start the JVM in the container logs (default `true`)
+	// Deprecated: no longer in use.
 	PrintCommand *bool `property:"print-command" json:"printCommand,omitempty"`
 	// Transport address at which to listen for the newly launched JVM (default `*:5005`)
 	DebugAddress string `property:"debug-address" json:"debugAddress,omitempty"`
@@ -36,4 +37,6 @@ type JVMTrait struct {
 	Options []string `property:"options" json:"options,omitempty"`
 	// Additional JVM classpath (use `Linux` classpath separator)
 	Classpath string `property:"classpath" json:"classpath,omitempty"`
+	// The Jar dependency which will run the application. Leave it empty for managed Integrations.
+	Jar string `property:"jar" json:"jar,omitempty"`
 }

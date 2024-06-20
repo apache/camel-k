@@ -109,16 +109,13 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 	})
 }
 
-/*
 func TestRunBuildOrderStrategyFIFO(t *testing.T) {
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {x
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-build-order-fifo"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--build-order-strategy", string(v1.BuildOrderStrategyFIFO)).Execute()).To(Succeed())
-		g.Eventually(PlatformPhase(t, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--build-order-strategy", string(v1.BuildOrderStrategyFIFO))).To(Succeed())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		g.Expect(CreateTimerKamelet(t, ctx, ns, "timer-source")()).To(Succeed())
+		g.Expect(CreateTimerKamelet(t, ctx, operatorID, ns, "timer-source")()).To(Succeed())
 
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java",
@@ -166,7 +163,6 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 		g.Eventually(IntegrationLogs(t, ctx, ns, integrationZ), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		g.Eventually(Kit(t, ctx, ns, integrationKitNameZ)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 
-		g.Expect(Kamel(t, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
-*/

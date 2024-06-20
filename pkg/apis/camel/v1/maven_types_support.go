@@ -21,6 +21,7 @@ import (
 	"encoding/xml"
 )
 
+//nolint:nestif
 func (in *MavenArtifact) GetDependencyID() string {
 	mvn := "mvn:" + in.GroupID + ":" + in.ArtifactID
 	if in.Classifier != "" {

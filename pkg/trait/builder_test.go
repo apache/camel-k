@@ -90,6 +90,25 @@ func TestS2IBuilderTrait(t *testing.T) {
 	assert.NotNil(t, env.Pipeline[0].Builder)
 	assert.NotNil(t, env.Pipeline[1].Package)
 	assert.NotNil(t, env.Pipeline[2].S2i)
+	assert.Equal(t, "root-jdk-image", env.Pipeline[2].S2i.BaseImage)
+	assert.Empty(t, env.Pipeline[2].S2i.Registry)
+}
+
+func TestJibBuilderTrait(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	conditions, err := NewBuilderTestCatalog().apply(env)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, env.ExecutedTraits)
+	assert.NotNil(t, env.GetTrait("builder"))
+	assert.NotEmpty(t, env.Pipeline)
+	assert.Len(t, env.Pipeline, 3)
+	assert.NotNil(t, env.Pipeline[0].Builder)
+	assert.NotNil(t, env.Pipeline[1].Package)
+	assert.NotNil(t, env.Pipeline[2].Jib)
+	assert.Equal(t, "root-jdk-image", env.Pipeline[2].Jib.BaseImage)
+	assert.NotEmpty(t, env.Pipeline[2].Jib.Registry)
 }
 
 func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.IntegrationPlatformBuildPublishStrategy, buildStrategy v1.BuildStrategy) *Environment {
@@ -134,6 +153,7 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 					BuildConfiguration: v1.BuildConfiguration{
 						Strategy: buildStrategy,
 					},
+					BaseImage: "root-jdk-image",
 				},
 			},
 			Status: v1.IntegrationPlatformStatus{

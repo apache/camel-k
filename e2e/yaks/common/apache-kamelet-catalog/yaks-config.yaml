@@ -21,7 +21,7 @@ config:
 pre:
 - name: installation
   run: |
-    kamel run logger.groovy -w -n $YAKS_NAMESPACE
+    kamel run logger.yaml -w -n $YAKS_NAMESPACE
 post:
   - name: print dump
     if: env:CI=true && failure()

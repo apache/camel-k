@@ -46,8 +46,7 @@ func (action *monitorAction) Name() string {
 
 func (action *monitorAction) CanHandle(binding *v1.Pipe) bool {
 	return binding.Status.Phase == v1.PipePhaseCreating ||
-		(binding.Status.Phase == v1.PipePhaseError &&
-			binding.Status.GetCondition(v1.PipeIntegrationConditionError) == nil) ||
+		binding.Status.Phase == v1.PipePhaseError ||
 		binding.Status.Phase == v1.PipePhaseReady
 }
 
@@ -58,16 +57,8 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	}
 	it := v1.Integration{}
 	if err := action.client.Get(ctx, key, &it); err != nil && k8serrors.IsNotFound(err) {
-		target := pipe.DeepCopy()
-		// Rebuild the integration
-		target.Status.Phase = v1.PipePhaseNone
-		target.Status.SetCondition(
-			v1.PipeConditionReady,
-			corev1.ConditionFalse,
-			"",
-			"",
-		)
-		return target, nil
+		action.L.Info("Re-initializing Pipe")
+		return initializePipe(ctx, action.client, action.L, pipe)
 	} else if err != nil {
 		return nil, fmt.Errorf("could not load integration for Pipe %q: %w", pipe.Name, err)
 	}
@@ -81,7 +72,7 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	integrationProfileNamespaceChanged := v1.GetIntegrationProfileNamespaceAnnotation(pipe) != "" &&
 		(v1.GetIntegrationProfileNamespaceAnnotation(pipe) != v1.GetIntegrationProfileNamespaceAnnotation(&it))
 
-	sameTraits, err := trait.IntegrationAndPipeSameTraits(&it, pipe)
+	sameTraits, err := trait.IntegrationAndPipeSameTraits(action.client, &it, pipe)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +90,11 @@ func (action *monitorAction) Handle(ctx context.Context, pipe *v1.Pipe) (*v1.Pip
 	}
 	if err != nil {
 		pipe.Status.Phase = v1.PipePhaseError
-		pipe.Status.SetErrorCondition(v1.PipeIntegrationConditionError,
-			"Couldn't create an Integration custom resource", err)
+		pipe.Status.SetErrorCondition(
+			v1.PipeConditionReady,
+			"IntegrationError",
+			err,
+		)
 		return pipe, err
 	}
 

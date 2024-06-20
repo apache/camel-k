@@ -66,13 +66,14 @@ func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object)
 	}
 
 	if ip == nil {
-		if it, ok := o.(*v1.Integration); ok {
-			ip, err = getOrFindAny(ctx, c, it.Namespace, it.Status.Platform)
+		switch t := o.(type) {
+		case *v1.Integration:
+			ip, err = getOrFindAny(ctx, c, t.Namespace, t.Status.Platform)
 			if err != nil {
 				return nil, err
 			}
-		} else if ik, ok := o.(*v1.IntegrationKit); ok {
-			ip, err = getOrFindAny(ctx, c, ik.Namespace, ik.Status.Platform)
+		case *v1.IntegrationKit:
+			ip, err = getOrFindAny(ctx, c, t.Namespace, t.Status.Platform)
 			if err != nil {
 				return nil, err
 			}
@@ -88,7 +89,6 @@ func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object)
 
 	return ip, nil
 }
-
 func GetForName(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
 	return getOrFindAny(ctx, c, namespace, name)
 }

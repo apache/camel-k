@@ -26,6 +26,7 @@ import (
 // PodSpecApplyConfiguration represents an declarative configuration of the PodSpec type for use
 // with apply.
 type PodSpecApplyConfiguration struct {
+	AutomountServiceAccountToken  *bool                         `json:"automountServiceAccountToken,omitempty"`
 	Volumes                       []v1.Volume                   `json:"volumes,omitempty"`
 	InitContainers                []v1.Container                `json:"initContainers,omitempty"`
 	Containers                    []v1.Container                `json:"containers,omitempty"`
@@ -43,6 +44,14 @@ type PodSpecApplyConfiguration struct {
 // apply.
 func PodSpec() *PodSpecApplyConfiguration {
 	return &PodSpecApplyConfiguration{}
+}
+
+// WithAutomountServiceAccountToken sets the AutomountServiceAccountToken field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the AutomountServiceAccountToken field is set to the value of the last call.
+func (b *PodSpecApplyConfiguration) WithAutomountServiceAccountToken(value bool) *PodSpecApplyConfiguration {
+	b.AutomountServiceAccountToken = &value
+	return b
 }
 
 // WithVolumes adds the given value to the Volumes field in the declarative configuration

@@ -68,4 +68,9 @@ type KnativeServiceTrait struct {
 	// * Integration is using the Knative profile
 	// * All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
 	Auto *bool `property:"auto" json:"auto,omitempty"`
+	// The maximum duration in seconds that the request instance is allowed to respond to a request.
+	// This field propagates to the integration pod's terminationGracePeriodSeconds
+	//
+	// Refer to the Knative documentation for more information.
+	TimeoutSeconds *int64 `property:"timeout-seconds" json:"timeoutSeconds,omitempty"`
 }

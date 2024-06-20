@@ -24,6 +24,8 @@ env:
   CAMEL_K_TEST_TIMEOUT_LONG: 15m
   CAMEL_K_TEST_TIMEOUT_VERY_LONG: 60m
 
+# We can disable as at the moment we're running this check on each PR and push
+# We keep the source in case it is required to be enabled again in the future.
 on:
   schedule:
     - cron:  '45 3 * * *'
@@ -45,14 +47,8 @@ jobs:
         ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
-    - name: Lower mem native smoke tests
+    - name: Quarkus native test
       uses: ./.github/actions/e2e-native
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-    - name: Higher mem native smoke tests
-      uses: ./.github/actions/e2e-native
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-        high-memory: 'true'

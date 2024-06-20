@@ -86,23 +86,29 @@ func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityHashicorpVault)
 	}
 
-	if environment.IntegrationInRunningPhases() {
-		hits := rex.FindAllStringSubmatch(t.Token, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.Token, "hashicorp-vault-token", "The Hashicorp Vault Token provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.hashicorp.token"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.hashicorp.token"] = t.Token
-		}
-		environment.ApplicationProperties["camel.vault.hashicorp.host"] = t.Host
-		environment.ApplicationProperties["camel.vault.hashicorp.port"] = t.Port
-		environment.ApplicationProperties["camel.vault.hashicorp.engine"] = t.Engine
-		environment.ApplicationProperties["camel.vault.hashicorp.scheme"] = t.Scheme
+	if !environment.IntegrationInRunningPhases() {
+		return nil
 	}
+
+	hits := rex.FindAllStringSubmatch(t.Token, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.Token, "hashicorp-vault-token", "The Hashicorp Vault Token provided is not valid")
+
+		secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res)
+		if err != nil {
+			return err
+		}
+		if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.hashicorp.token"] = secretValue
+		}
+	} else {
+		environment.ApplicationProperties["camel.vault.hashicorp.token"] = t.Token
+	}
+
+	environment.ApplicationProperties["camel.vault.hashicorp.host"] = t.Host
+	environment.ApplicationProperties["camel.vault.hashicorp.port"] = t.Port
+	environment.ApplicationProperties["camel.vault.hashicorp.engine"] = t.Engine
+	environment.ApplicationProperties["camel.vault.hashicorp.scheme"] = t.Scheme
 
 	return nil
 }
