@@ -26,6 +26,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 
@@ -45,8 +46,6 @@ func TestJolokiaTrait(t *testing.T) {
 				"-t", "jolokia.use-ssl-client-authentication=false",
 				"-t", "jolokia.protocol=http",
 				"-t", "jolokia.extended-client-check=false",
-				// TODO check if the WA is valid
-				"--build-property", "jolokia=true",
 			).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -54,7 +53,9 @@ func TestJolokiaTrait(t *testing.T) {
 
 			pod := IntegrationPod(t, ctx, ns, name)
 			response, err := TestClient(t).CoreV1().RESTClient().Get().
-				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod().Name)).DoRaw(ctx)
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod().Name)).
+				Timeout(30 * time.Second).
+				DoRaw(ctx)
 			g.Expect(err).To(BeNil())
 			g.Expect(response).To(ContainSubstring(`"status":200`))
 		})
