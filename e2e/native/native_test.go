@@ -43,7 +43,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 		t.Run("unsupported integration source language", func(t *testing.T) {
 			name := RandomizedSuffixName("unsupported-js")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/JavaScript.js", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/JavaScript.js", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).
@@ -58,12 +58,12 @@ func TestNativeIntegrations(t *testing.T) {
 			g.Expect(quarkusTrait["buildMode"]).ToNot(BeNil())
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("xml native support", func(t *testing.T) {
 			name := RandomizedSuffixName("xml-native")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Xml.xml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Xml.xml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
@@ -74,14 +74,14 @@ func TestNativeIntegrations(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("XML Magicstring!"))
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("automatic rollout deployment from jvm to native kit", func(t *testing.T) {
 			// Let's make sure we start from a clean state
 			g.Expect(DeleteKits(t, ctx, ns)).To(Succeed())
 			name := RandomizedSuffixName("yaml-native")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-t", "quarkus.build-mode=jvm", "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-t", "quarkus.build-mode=jvm", "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			// Check that two Kits are created with distinct layout
 			g.Eventually(Kits(t, ctx, ns, withFastJarLayout)).Should(HaveLen(1))
@@ -130,7 +130,7 @@ func TestNativeIntegrations(t *testing.T) {
 
 			t.Run("yaml native should not rebuild", func(t *testing.T) {
 				name := RandomizedSuffixName("yaml-native-2")
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml2.yaml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
+				g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/yaml2.yaml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
 				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
@@ -143,7 +143,7 @@ func TestNativeIntegrations(t *testing.T) {
 			})
 
 			// Clean up
-			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 	})

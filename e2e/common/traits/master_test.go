@@ -48,22 +48,22 @@ func TestMasterTrait(t *testing.T) {
 		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		t.Run("master works", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Master.java").Execute()).To(Succeed())
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Master.java").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "master"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("only one integration with master runs", func(t *testing.T) {
 			nameFirst := RandomizedSuffixName("first")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Master.java", "--name", nameFirst,
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Master.java", "--name", nameFirst,
 				"--label", "leader-group=same", "-t", "master.label-key=leader-group", "-t", "master.label-value=same", "-t", "owner.target-labels=leader-group",
 			).Execute()).To(Succeed())
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameFirst, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, nameFirst), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 			// Start a second integration with the same lock (it should not start the route before 15 seconds)
 			nameSecond := RandomizedSuffixName("second")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Master.java", "--name", nameSecond,
+			g.Expect(CamelKRunWithID(t, ctx, operatorID, ns, "files/Master.java", "--name", nameSecond,
 				"--label", "leader-group=same", "-t", "master.label-key=leader-group", "-t", "master.label-value=same", "-t", "owner.target-labels=leader-group",
 				"-t", fmt.Sprintf("master.resource-name=%s-lock", nameFirst),
 			).Execute()).To(Succeed())
@@ -72,6 +72,6 @@ func TestMasterTrait(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameSecond, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		})
 
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Expect(CamelK(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
