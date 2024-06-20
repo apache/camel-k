@@ -42,6 +42,8 @@ type CronTrait struct {
 	// The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 	// mechanism to work correctly.
 	Schedule string `property:"schedule" json:"schedule,omitempty"`
+	// The timezone that the CronJob will run on
+	TimeZone *string `property:"timeZone" json:"timeZone,omitempty"`
 	// A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
 	// A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
 	// activated (it's present in the `org.apache.camel.k:camel-k-cron` library).

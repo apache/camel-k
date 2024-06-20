@@ -6646,6 +6646,13 @@ string
 The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 mechanism to work correctly.
 
+|`timeZone` +
+string
+|
+
+
+The timezone that the CronJob will run on
+
 |`components` +
 string
 |
