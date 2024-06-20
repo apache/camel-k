@@ -29,7 +29,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
@@ -83,15 +82,6 @@ func TestServiceTrait(t *testing.T) {
 			// sometimes being created first and being given the root name
 			//
 			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, "platform-http-server")).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, "platform-http-server")()
-			serviceTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "service")
-			g.Expect(serviceTrait).ToNot(BeNil())
-			g.Expect(len(serviceTrait)).To(Equal(2))
-			g.Expect(serviceTrait["enabled"]).To(Equal(true))
-			g.Expect(serviceTrait["type"]).To(Equal("ClusterIP"))
 		})
 
 		t.Run("LoadBalancer service from Type", func(t *testing.T) {

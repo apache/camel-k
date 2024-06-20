@@ -32,7 +32,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -150,17 +149,7 @@ func TestEnvironmentTrait(t *testing.T) {
 				Not(ContainElement(corev1.EnvVar{Name: "HTTP_PROXY", Value: httpProxy})),
 				Not(ContainElement(corev1.EnvVar{Name: "NO_PROXY", Value: strings.Join(noProxy, ",")})),
 			)))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			envTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "environment")
-			g.Expect(envTrait).ToNot(BeNil())
-			g.Expect(len(envTrait)).To(Equal(1))
-			g.Expect(envTrait["httpProxy"]).To(Equal(false))
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

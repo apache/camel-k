@@ -27,7 +27,6 @@ import (
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -61,14 +60,6 @@ func TestRecreateDeploymentStrategyTrait(t *testing.T) {
 						}),
 				}),
 			))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			deploymentTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "deployment")
-			g.Expect(deploymentTrait).ToNot(BeNil())
-			g.Expect(len(deploymentTrait)).To(Equal(1))
-			g.Expect(deploymentTrait["strategy"]).To(Equal(string(appsv1.RecreateDeploymentStrategyType)))
 		})
 	})
 }

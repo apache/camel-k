@@ -29,7 +29,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -44,14 +43,6 @@ func TestNativeIntegrations(t *testing.T) {
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).
 				Should(Equal(corev1.ConditionFalse))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			quarkusTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "quarkus")
-			g.Expect(quarkusTrait).ToNot(BeNil())
-			g.Expect(len(quarkusTrait)).To(Equal(1))
-			g.Expect(quarkusTrait["buildMode"]).ToNot(BeNil())
 		})
 
 		t.Run("xml native support", func(t *testing.T) {

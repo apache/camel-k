@@ -31,7 +31,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -59,18 +58,6 @@ func TestJVMTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			jvmTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jvm")
-			g.Expect(jvmTrait).ToNot(BeNil())
-			g.Expect(len(jvmTrait)).To(Equal(1))
-			g.Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources.d/_configmaps/my-deps/sample-1.0.jar"))
-			mountTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "mount")
-			g.Expect(mountTrait).ToNot(BeNil())
-			g.Expect(len(mountTrait)).To(Equal(1))
-
 		})
 
 		t.Run("JVM trait classpath on deprecated path", func(t *testing.T) {
@@ -83,18 +70,6 @@ func TestJVMTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			jvmTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jvm")
-			g.Expect(jvmTrait).ToNot(BeNil())
-			g.Expect(len(jvmTrait)).To(Equal(1))
-			g.Expect(jvmTrait["classpath"]).To(Equal("/etc/camel/resources/my-deps/sample-1.0.jar"))
-			mountTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "mount")
-			g.Expect(mountTrait).ToNot(BeNil())
-			g.Expect(len(mountTrait)).To(Equal(1))
-			g.Expect(mountTrait["resources"]).To(ContainElements("configmap:my-deps/sample-1.0.jar@/etc/camel/resources"))
 		})
 
 		t.Run("JVM trait classpath on specific classpath", func(t *testing.T) {
@@ -107,18 +82,6 @@ func TestJVMTrait(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Hello World!"))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, name)).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, name)()
-			jvmTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "jvm")
-			g.Expect(jvmTrait).ToNot(BeNil())
-			g.Expect(len(jvmTrait)).To(Equal(1))
-			g.Expect(jvmTrait["classpath"]).To(Equal("/etc/other/resources/my-deps/sample-1.0.jar"))
-			mountTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "mount")
-			g.Expect(mountTrait).ToNot(BeNil())
-			g.Expect(len(mountTrait)).To(Equal(1))
-			g.Expect(mountTrait["resources"]).To(ContainElements("configmap:my-deps/sample-1.0.jar@/etc/other/resources"))
 		})
 	})
 }

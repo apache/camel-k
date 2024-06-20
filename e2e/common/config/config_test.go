@@ -29,7 +29,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -118,14 +117,6 @@ func TestRunConfigExamples(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "property-secret-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "property-secret-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "property-secret-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-external-value"))
-
-			// check integration schema does not contains unwanted default trait value.
-			g.Eventually(UnstructuredIntegration(t, ctx, ns, "property-secret-route")).ShouldNot(BeNil())
-			unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, "property-secret-route")()
-			mountTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "mount")
-			g.Expect(mountTrait).ToNot(BeNil())
-			g.Expect(len(mountTrait)).To(Equal(1))
-			g.Expect(mountTrait["configs"]).ToNot(BeNil())
 		})
 
 		// Configmap

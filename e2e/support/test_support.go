@@ -56,7 +56,6 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -1043,28 +1042,6 @@ func Integration(t *testing.T, ctx context.Context, ns string, name string) func
 			return nil
 		}
 		return &it
-	}
-}
-
-func UnstructuredIntegration(t *testing.T, ctx context.Context, ns string, name string) func() *unstructured.Unstructured {
-	return func() *unstructured.Unstructured {
-		gvk := schema.GroupVersionKind{Group: v1.SchemeGroupVersion.Group, Version: v1.SchemeGroupVersion.Version, Kind: v1.IntegrationKind}
-		return UnstructuredObject(t, ctx, ns, name, gvk)()
-	}
-}
-
-func UnstructuredObject(t *testing.T, ctx context.Context, ns string, name string, gvk schema.GroupVersionKind) func() *unstructured.Unstructured {
-	return func() *unstructured.Unstructured {
-		object := &unstructured.Unstructured{}
-		object.SetNamespace(ns)
-		object.SetName(name)
-		object.SetGroupVersionKind(gvk)
-		if err := TestClient(t).Get(ctx, ctrl.ObjectKeyFromObject(object), object); err != nil && !k8serrors.IsNotFound(err) {
-			failTest(t, err)
-		} else if err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		}
-		return object
 	}
 }
 
@@ -2439,25 +2416,51 @@ func ConsoleCLIDownload(t *testing.T, ctx context.Context, name string) func() *
 	}
 }
 
+func operatorPods(t *testing.T, ctx context.Context, ns string) []corev1.Pod {
+	lst := corev1.PodList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+	}
+	opts := []ctrl.ListOption{
+		ctrl.MatchingLabels{
+			"camel.apache.org/component": "operator",
+		},
+	}
+	if ns != "" {
+		opts = append(opts, ctrl.InNamespace(ns))
+	}
+	if err := TestClient(t).List(ctx, &lst, opts...); err != nil {
+		failTest(t, err)
+	}
+	if len(lst.Items) == 0 {
+		return nil
+	}
+	return lst.Items
+}
+
 func OperatorPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
 	return func() *corev1.Pod {
-		lst := corev1.PodList{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Pod",
-				APIVersion: v1.SchemeGroupVersion.String(),
-			},
+		pods := operatorPods(t, ctx, ns)
+		return &pods[0]
+	}
+}
+
+// Return the first global operator Pod found in the cluster (if any).
+func OperatorPodGlobal(t *testing.T, ctx context.Context) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		pods := operatorPods(t, ctx, "")
+		for _, pod := range pods {
+			for _, envVar := range pod.Spec.Containers[0].Env {
+				if envVar.Name == "WATCH_NAMESPACE" {
+					if envVar.Value == "" {
+						return &pod
+					}
+				}
+			}
 		}
-		if err := TestClient(t).List(ctx, &lst,
-			ctrl.InNamespace(ns),
-			ctrl.MatchingLabels{
-				"camel.apache.org/component": "operator",
-			}); err != nil {
-			failTest(t, err)
-		}
-		if len(lst.Items) == 0 {
-			return nil
-		}
-		return &lst.Items[0]
+		return nil
 	}
 }
 

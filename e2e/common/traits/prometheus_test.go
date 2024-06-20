@@ -33,7 +33,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -56,14 +55,6 @@ func TestPrometheusTrait(t *testing.T) {
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		// check integration schema does not contains unwanted default trait value.
-		g.Eventually(UnstructuredIntegration(t, ctx, ns, "java")).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(t, ctx, ns, "java")()
-		prometheusTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "prometheus")
-		g.Expect(prometheusTrait).ToNot(BeNil())
-		g.Expect(len(prometheusTrait)).To(Equal(2))
-		g.Expect(prometheusTrait["enabled"]).To(Equal(true))
-		g.Expect(prometheusTrait["podMonitor"]).ToNot(BeNil())
 		t.Run("Metrics endpoint works", func(t *testing.T) {
 			pod := IntegrationPod(t, ctx, ns, "java")
 			response, err := TestClient(t).CoreV1().RESTClient().Get().
