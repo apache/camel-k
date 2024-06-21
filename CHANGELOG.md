@@ -22,6 +22,7 @@
 - Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)
 - Add a deploy make target [\#5460](https://github.com/apache/camel-k/issues/5460)
 - Remove health readiness workaround when fixed in Camel [\#5451](https://github.com/apache/camel-k/issues/5451)
+- Deprecate some of the camel.apache.org annotation in favor of k8s's recommended labels [\#5212](https://github.com/apache/camel-k/issues/5212)
 - Dependency Service Discovery for Camel K [\#5196](https://github.com/apache/camel-k/issues/5196)
 - Mount configmap/secret resources to a dedicated resources.d durectory [\#5181](https://github.com/apache/camel-k/issues/5181)
 -  Add missing functionalities and resolve possible discrepancies  [\#4951](https://github.com/apache/camel-k/issues/4951)
