@@ -52,7 +52,8 @@ func TestKameletChange(t *testing.T) {
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "test-kamelet-display")).Should(Equal(corev1.PodRunning))
 
 		// Create the Pipe
-		g.Expect(KamelBindWithID(t, ctx, operatorID, ns, timerSource, knChannelConf, "-p", "source.message=HelloKnative!", "--annotation", "trait.camel.apache.org/health.enabled=true", "--annotation", "trait.camel.apache.org/health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
+		g.Expect(KamelBindWithID(t, ctx, operatorID, ns, timerSource, knChannelConf, "-p", "source.message=HelloKnative!",
+			"--trait", "health.enabled=true", "--trait", "health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, timerPipe)).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		// Consume the message
@@ -65,7 +66,8 @@ func TestKameletChange(t *testing.T) {
 		))
 
 		// Update the Pipe
-		g.Expect(KamelBindWithID(t, ctx, operatorID, ns, timerSource, knChannelConf, "-p", "source.message=message is Hi", "--annotation", "trait.camel.apache.org/health.enabled=true", "--annotation", "trait.camel.apache.org/health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
+		g.Expect(KamelBindWithID(t, ctx, operatorID, ns, timerSource, knChannelConf, "-p", "source.message=message is Hi",
+			"--trait", "health.enabled=true", "--trait", "health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, timerPipe), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))

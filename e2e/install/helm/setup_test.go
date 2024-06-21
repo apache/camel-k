@@ -38,11 +38,13 @@ import (
 )
 
 func TestHelmInstallRunUninstall(t *testing.T) {
+	// Ensure no CRDs are already installed
+	ctx := TestContext()
+	Cleanup(t, ctx)
+	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
+
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// Ensure no CRDs are already installed
-		Cleanup(t, ctx)
-		KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
-		CheckLocalInstallRegistry(t, g)
+		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 		ExpectExecSucceed(t, g, Make(t, "release-helm"))
 		ExpectExecSucceed(t, g,

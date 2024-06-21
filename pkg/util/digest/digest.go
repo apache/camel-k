@@ -336,6 +336,7 @@ func sortedTraitsMapKeys(m map[string]map[string]interface{}) []string {
 	return res
 }
 
+// Deprecated: to be removed in future versions.
 func sortedTraitAnnotationsKeys(it *v1.Integration) []string {
 	res := make([]string, 0, len(it.Annotations))
 	for k := range it.Annotations {

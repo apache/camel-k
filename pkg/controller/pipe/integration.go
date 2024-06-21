@@ -27,6 +27,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/trait"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/platform"
@@ -49,6 +50,10 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	annotations := util.CopyMap(binding.Annotations)
 	// avoid propagating the icon to the integration as it's heavyweight and not needed
 	delete(annotations, v1.AnnotationIcon)
+	traits, err := extractAndDeleteTraits(c, annotations)
+	if err != nil {
+		return nil, fmt.Errorf("could not marshal trait annotations %w", err)
+	}
 
 	it := v1.Integration{
 		ObjectMeta: metav1.ObjectMeta{
@@ -80,6 +85,10 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	// start from the integration spec defined in the binding
 	if binding.Spec.Integration != nil {
 		it.Spec = *binding.Spec.Integration.DeepCopy()
+	}
+
+	if traits != nil {
+		it.Spec.Traits = *traits
 	}
 
 	// Set replicas (or override podspecable value) if present
@@ -208,6 +217,11 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	it.Spec.Flows = append(it.Spec.Flows, v1.Flow{RawMessage: encodedRoute})
 
 	return &it, nil
+}
+
+// extractAndDeleteTraits will extract the annotation traits into v1.Traits struct, removing from the value from the input map.
+func extractAndDeleteTraits(c client.Client, annotations map[string]string) (*v1.Traits, error) {
+	return trait.ExtractAndMaybeDeleteTraits(c, annotations, true)
 }
 
 func configureBinding(integration *v1.Integration, bindings ...*bindings.Binding) error {

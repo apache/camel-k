@@ -36,6 +36,7 @@ func (c *Catalog) Configure(env *Environment) error {
 		if err := c.configureTraits(env.Platform.Status.Traits); err != nil {
 			return err
 		}
+		// Deprecated: to be removed in future version
 		if err := c.configureTraitsFromAnnotations(env.Platform.Annotations); err != nil {
 			return err
 		}
@@ -49,6 +50,7 @@ func (c *Catalog) Configure(env *Environment) error {
 		if err := c.configureTraits(env.IntegrationKit.Spec.Traits); err != nil {
 			return err
 		}
+		// Deprecated: to be removed in future version
 		if err := c.configureTraitsFromAnnotations(env.IntegrationKit.Annotations); err != nil {
 			return err
 		}
@@ -57,6 +59,7 @@ func (c *Catalog) Configure(env *Environment) error {
 		if err := c.configureTraits(env.Integration.Spec.Traits); err != nil {
 			return err
 		}
+		// Deprecated: to be removed in future version
 		if err := c.configureTraitsFromAnnotations(env.Integration.Annotations); err != nil {
 			return err
 		}
@@ -117,6 +120,7 @@ func decodeTrait(in map[string]interface{}, target Trait) error {
 	return json.Unmarshal(data, target)
 }
 
+// Deprecated: to be removed in future versions.
 func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) error {
 	options := make(map[string]map[string]interface{}, len(annotations))
 	for k, v := range annotations {
@@ -154,6 +158,7 @@ func (c *Catalog) configureTraitsFromAnnotations(annotations map[string]string) 
 	return c.configureFromOptions(options)
 }
 
+// Deprecated: to be removed in future versions.
 func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{}) error {
 	for id, config := range traits {
 		t := c.GetTrait(id)
@@ -167,6 +172,7 @@ func (c *Catalog) configureFromOptions(traits map[string]map[string]interface{})
 	return nil
 }
 
+// Deprecated: to be removed in future versions.
 func configureTrait(id string, config map[string]interface{}, trait interface{}) error {
 	md := mapstructure.Metadata{}
 

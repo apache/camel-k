@@ -25,6 +25,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -174,6 +175,8 @@ func TestToTrait(t *testing.T) {
 }
 
 func TestSameTraits(t *testing.T) {
+	c, err := test.NewFakeClient()
+	require.NoError(t, err)
 	t.Run("empty traits", func(t *testing.T) {
 		oldKlb := &v1.Pipe{
 			Spec: v1.PipeSpec{
@@ -190,7 +193,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
 		require.NoError(t, err)
 		assert.True(t, ok)
 	})
@@ -219,7 +222,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
 		require.NoError(t, err)
 		assert.True(t, ok)
 	})
@@ -248,7 +251,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
 		require.NoError(t, err)
 		assert.False(t, ok)
 	})
@@ -273,7 +276,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
 		require.NoError(t, err)
 		assert.True(t, ok)
 	})
@@ -294,7 +297,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
 		require.NoError(t, err)
 		assert.True(t, ok)
 	})
@@ -319,7 +322,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
 		require.NoError(t, err)
 		assert.False(t, ok)
 	})
@@ -340,7 +343,7 @@ func TestSameTraits(t *testing.T) {
 			},
 		}
 
-		ok, err := PipesHaveSameTraits(oldKlb, newKlb)
+		ok, err := PipesHaveSameTraits(c, oldKlb, newKlb)
 		require.NoError(t, err)
 		assert.False(t, ok)
 	})
@@ -392,46 +395,28 @@ func TestHasMathchingTraitsMissing(t *testing.T) {
 	assert.True(t, b1)
 }
 
-func TestFromAnnotationsPlain(t *testing.T) {
-	meta := metav1.ObjectMeta{
-		Annotations: map[string]string{
-			"trait.camel.apache.org/trait.prop1": "hello1",
-			"trait.camel.apache.org/trait.prop2": "hello2",
+func TestIntegrationAndPipeSameTraits(t *testing.T) {
+	pipe := &v1.Pipe{
+		ObjectMeta: metav1.ObjectMeta{
+			Annotations: map[string]string{
+				v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
+			},
 		},
 	}
-	opt, err := FromAnnotations(&meta)
-	require.NoError(t, err)
-	tt, ok := opt.Get("trait")
-	assert.True(t, ok)
-	assert.Equal(t, "hello1", tt["prop1"])
-	assert.Equal(t, "hello2", tt["prop2"])
-}
 
-func TestFromAnnotationsArray(t *testing.T) {
-	meta := metav1.ObjectMeta{
-		Annotations: map[string]string{
-			"trait.camel.apache.org/trait.prop1": "[hello,world]",
-			// The func should trim empty spaces as well
-			"trait.camel.apache.org/trait.prop2": "[\"hello=1\", \"world=2\"]",
+	integration := &v1.Integration{
+		Spec: v1.IntegrationSpec{
+			Traits: v1.Traits{
+				Camel: &traitv1.CamelTrait{
+					RuntimeVersion: "1.2.3",
+				},
+			},
 		},
 	}
-	opt, err := FromAnnotations(&meta)
+	c, err := test.NewFakeClient(pipe, integration)
 	require.NoError(t, err)
-	tt, ok := opt.Get("trait")
-	assert.True(t, ok)
-	assert.Equal(t, []string{"hello", "world"}, tt["prop1"])
-	assert.Equal(t, []string{"\"hello=1\"", "\"world=2\""}, tt["prop2"])
-}
 
-func TestFromAnnotationsArrayEmpty(t *testing.T) {
-	meta := metav1.ObjectMeta{
-		Annotations: map[string]string{
-			"trait.camel.apache.org/trait.prop": "[]",
-		},
-	}
-	opt, err := FromAnnotations(&meta)
+	result, err := IntegrationAndPipeSameTraits(c, integration, pipe)
 	require.NoError(t, err)
-	tt, ok := opt.Get("trait")
-	assert.True(t, ok)
-	assert.Equal(t, []string{}, tt["prop"])
+	assert.True(t, result)
 }

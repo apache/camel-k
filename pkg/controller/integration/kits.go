@@ -121,11 +121,11 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 		return false, err
 	}
 
-	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(integration, pl)
+	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, pl)
 	if err != nil {
 		return false, err
 	}
-	ikc, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
+	ikc, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, kit)
 	if err != nil {
 		return false, err
 	}
@@ -170,7 +170,7 @@ func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *lo
 }
 
 // kitMatches returns whether the kit matches with the existing target kit.
-func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
+func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
 	version := kit.Status.Version
 	if version == "" {
 		// Defaults with the version that is going to be set during the kit initialization
@@ -184,11 +184,11 @@ func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error)
 	}
 
 	// We cannot have yet the status set
-	c1, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
+	c1, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, kit)
 	if err != nil {
 		return false, err
 	}
-	c2, err := trait.NewSpecTraitsOptionsForIntegrationKit(target)
+	c2, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, target)
 	if err != nil {
 		return false, err
 	}

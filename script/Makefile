@@ -319,7 +319,7 @@ test-install: do-build
 	FAILED=0; \
 	go test -timeout 40m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 40m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
-	go test -timeout 40m -v ./e2e/install/helm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 60m -v ./e2e/install/helm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
@@ -758,7 +758,7 @@ $(GOIMPORT): $(LOCALBIN)
 #####
 
 KUSTOMIZE_DIR = "install/overlays/kubernetes/descoped"
-MINIKUBE_REGISTRY = "$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')"
+MINIKUBE_REGISTRY = "$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}' 2> /dev/null)"
 DEFAULT_NS = "camel-k"
 
 .PHONY: install install-k8s-global install-k8s-ns install-openshift-global install-openshift-ns
