@@ -449,7 +449,7 @@ func TestConfigureTraits(t *testing.T) {
 	catalog := trait.NewCatalog(client)
 
 	traits := v1.Traits{}
-	err = configureTraits(runCmdOptions.Traits, &traits, catalog)
+	err = trait.ConfigureTraits(runCmdOptions.Traits, &traits, catalog)
 
 	require.NoError(t, err)
 	traitMap, err := trait.ToTraitMap(traits)

@@ -19,9 +19,11 @@ package integrationkit
 
 import (
 	"context"
+	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // NewMonitorAction creates a new monitoring handling action for the kit.
@@ -64,5 +66,29 @@ func (action *monitorAction) Handle(ctx context.Context, kit *v1.IntegrationKit)
 		return kit, nil
 	}
 
+	action.checkTraitAnnotationsDeprecatedNotice(kit)
+
 	return nil, nil
+}
+
+// Deprecated: to be removed in future versions, when we won't support any longer trait annotations into IntegrationKits.
+func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(integrationKit *v1.IntegrationKit) {
+	if integrationKit.Annotations != nil {
+		for k := range integrationKit.Annotations {
+			if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+				integrationKit.Status.SetCondition(
+					v1.IntegrationKitConditionType("AnnotationTraitsDeprecated"),
+					corev1.ConditionTrue,
+					"DeprecationNotice",
+					"Annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration instead.",
+				)
+
+				action.L.Infof(
+					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s integration kit instead.",
+					integrationKit.Name,
+				)
+				return
+			}
+		}
+	}
 }

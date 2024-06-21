@@ -40,18 +40,16 @@ import (
 )
 
 func TestKustomizeNamespaced(t *testing.T) {
-	g := NewWithT(t)
-	CheckLocalInstallRegistry(t, g)
 	// TODO, likely we need to adjust this test with a Kustomize overlay for Openshift
 	// which would not require the registry setting
-	registry := os.Getenv("KIND_REGISTRY")
+	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	ctx := TestContext()
-	g.Expect(registry).NotTo(Equal(""))
 	// Ensure no CRDs are already installed
 	Cleanup(t, ctx)
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		// We must change a few values in the Kustomize config
 		ExpectExecSucceed(t, g,
 			exec.Command(
@@ -70,7 +68,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 			exec.Command(
 				"sed",
 				"-i",
-				fmt.Sprintf("s/address: .*/address: %s/", registry),
+				fmt.Sprintf("s/address: .*/address: %s/", KAMEL_INSTALL_REGISTRY),
 				fmt.Sprintf("%s/overlays/platform/integration-platform.yaml", kustomizeDir),
 			))
 		ExpectExecSucceed(t, g, Kubectl(
@@ -100,7 +98,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 		)
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
-			return pl.Status.Build.Registry.Address == registry
+			return pl.Status.Build.Registry.Address == KAMEL_INSTALL_REGISTRY
 		}), TestTimeoutShort).Should(BeTrue())
 
 		// Test a simple integration is running
@@ -139,18 +137,16 @@ func TestKustomizeNamespaced(t *testing.T) {
 }
 
 func TestKustomizeDescoped(t *testing.T) {
-	g := NewWithT(t)
-	CheckLocalInstallRegistry(t, g)
 	// TODO, likely we need to adjust this test with a Kustomize overlay for Openshift
 	// which would not require the registry setting
-	registry := os.Getenv("KIND_REGISTRY")
+	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
 	ctx := TestContext()
-	g.Expect(registry).NotTo(Equal(""))
 	// Ensure no CRDs are already installed
 	Cleanup(t, ctx)
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		// We must change a few values in the Kustomize config
 		ExpectExecSucceed(t, g,
 			exec.Command(
@@ -169,7 +165,7 @@ func TestKustomizeDescoped(t *testing.T) {
 			exec.Command(
 				"sed",
 				"-i",
-				fmt.Sprintf("s/address: .*/address: %s/", registry),
+				fmt.Sprintf("s/address: .*/address: %s/", KAMEL_INSTALL_REGISTRY),
 				fmt.Sprintf("%s/overlays/platform/integration-platform.yaml", kustomizeDir),
 			))
 		ExpectExecSucceed(t, g, Kubectl(

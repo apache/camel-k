@@ -312,8 +312,56 @@ func TestPipeIntegrationCreatingFromPipeCreatingPhase(t *testing.T) {
 	// We calculate the integration the same way it does the operator
 	// as we don't expect it to change in this test.
 	it, err := CreateIntegrationFor(context.TODO(), c, pipe)
-	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	require.NoError(t, err)
+	it.Status.Phase = v1.IntegrationPhaseBuildingKit
+	c, err = test.NewFakeClient(pipe, it)
+	require.NoError(t, err)
+
+	a := NewMonitorAction()
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "monitor", a.Name())
+	assert.True(t, a.CanHandle(pipe))
+	handledPipe, err := a.Handle(context.TODO(), pipe)
+	require.NoError(t, err)
+	assert.Equal(t, v1.PipePhaseCreating, handledPipe.Status.Phase)
+	assert.Equal(t, corev1.ConditionFalse, handledPipe.Status.GetCondition(v1.PipeConditionReady).Status)
+	assert.Equal(t, "Integration \"my-pipe\" is in \"Creating\" phase", handledPipe.Status.GetCondition(v1.PipeConditionReady).Message)
+}
+
+func TestPipeIntegrationPipeTraitAnnotations(t *testing.T) {
+	pipe := &v1.Pipe{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.PipeKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pipe",
+			Annotations: map[string]string{
+				v1.TraitAnnotationPrefix + "camel.runtime-version": "1.2.3",
+			},
+		},
+		Spec: v1.PipeSpec{
+			Source: v1.Endpoint{
+				URI: pointer.String("timer:tick"),
+			},
+			Sink: v1.Endpoint{
+				URI: pointer.String("log:info"),
+			},
+		},
+		Status: v1.PipeStatus{
+			Phase: v1.PipePhaseCreating,
+		},
+	}
+
+	c, err := test.NewFakeClient(pipe)
+	require.NoError(t, err)
+	// We calculate the integration the same way it does the operator
+	// as we don't expect it to change in this test.
+	it, err := CreateIntegrationFor(context.TODO(), c, pipe)
+	require.NoError(t, err)
+	it.Status.Phase = v1.IntegrationPhaseBuildingKit
 	c, err = test.NewFakeClient(pipe, it)
 	require.NoError(t, err)
 

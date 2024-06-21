@@ -175,7 +175,7 @@ func (o *bindCmdOptions) validate(cmd *cobra.Command, args []string) error {
 	}
 	catalog := trait.NewCatalog(client)
 
-	return validateTraits(catalog, extractTraitNames(o.Traits))
+	return trait.ValidateTraits(catalog, extractTraitNames(o.Traits))
 }
 
 func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
@@ -232,17 +232,18 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(o.Traits) > 0 {
-		if binding.Spec.Integration == nil {
-			binding.Spec.Integration = &v1.IntegrationSpec{}
+		if binding.Annotations == nil {
+			binding.Annotations = make(map[string]string)
 		}
-		catalog := trait.NewCatalog(client)
-		if err := configureTraits(o.Traits, &binding.Spec.Integration.Traits, catalog); err != nil {
-			return err
-		}
-	}
 
-	if binding.Annotations == nil {
-		binding.Annotations = make(map[string]string)
+		for _, t := range o.Traits {
+			kv := strings.SplitN(t, "=", 2)
+			if len(kv) != 2 {
+				return fmt.Errorf("could not parse trait configuration %s, expected format 'trait.property=value'", t)
+			}
+			value := maybeBuildArrayNotation(binding.Annotations[v1.TraitAnnotationPrefix+kv[0]], kv[1])
+			binding.Annotations[v1.TraitAnnotationPrefix+kv[0]] = value
+		}
 	}
 
 	if o.ServiceAccount != "" {
@@ -284,6 +285,23 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		fmt.Fprintln(cmd.OutOrStdout(), `binding "`+name+`" updated`)
 	}
 	return nil
+}
+
+// buildArrayNotation is used to build an array annotation to support traits array configuration
+// for example, `-t camel.properties=a=1 -t camel.properties=b=2` would convert into annotation
+// `camel.properties=[a=1,b=2]“.
+func maybeBuildArrayNotation(array, value string) string {
+	fmt.Println(array, value)
+	if array == "" {
+		return value
+	}
+	// append
+	if strings.HasPrefix(array, "[") && strings.HasSuffix(array, "]") {
+		content := array[1:len(array)-1] + "," + value
+		return "[" + content + "]"
+	}
+	// init the array notation
+	return "[" + array + "," + value + "]"
 }
 
 func showPipeOutput(cmd *cobra.Command, binding *v1.Pipe, outputFormat string, scheme runtime.ObjectTyper) error {

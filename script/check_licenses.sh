@@ -29,7 +29,7 @@ check_licenses() {
 
 	set +e
     failed=0
-    find . -type f -name "$files" -print0 | while IFS= read -r -d '' file; do
+    while IFS= read -r -d '' file; do
         check=true
         for b in ${denylist[*]}; do
         	if [[ "$file" == *"$b"* ]]; then
@@ -44,7 +44,7 @@ check_licenses() {
     	  		failed=1
     		fi
     	fi
-    done
+    done < <(find . -type f -name "$files" -print0)
     set -e
 
     if [ $failed -ne 0 ]; then

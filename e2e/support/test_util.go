@@ -24,7 +24,6 @@ package support
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -82,27 +81,6 @@ func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
 }
 
-// ExpectExecError Expect a command error with an exit code of 1
-func ExpectExecError(t *testing.T, g *WithT, command *exec.Cmd) {
-	t.Helper()
-
-	var cmdOut strings.Builder
-	var cmdErr strings.Builder
-
-	defer func() {
-		if t.Failed() {
-			t.Logf("Output from exec command:\n%s\n", cmdOut.String())
-			t.Logf("Error from exec command:\n%s\n", cmdErr.String())
-		}
-	}()
-
-	session, err := gexec.Start(command, &cmdOut, &cmdErr)
-	session.Wait()
-	g.Eventually(session).ShouldNot(gexec.Exit(0))
-	require.NoError(t, err)
-	assert.Contains(t, strings.ToUpper(cmdErr.String()), "ERROR")
-}
-
 // Cleanup Clean up the cluster ready for the next set of tests
 func Cleanup(t *testing.T, ctx context.Context) {
 	// Remove the locally installed operator
@@ -124,14 +102,4 @@ func UninstallAll(t *testing.T, ctx context.Context) error {
 // UninstallFromNamespace Removes operator from given namespace
 func UninstallFromNamespace(t *testing.T, ctx context.Context, ns string) error {
 	return Kamel(t, ctx, "uninstall", "--olm=false", "-n", ns).Execute()
-}
-
-func CheckLocalInstallRegistry(t *testing.T, g *WithT) {
-	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
-	if KAMEL_INSTALL_REGISTRY != "" {
-		t.Logf("Detected a local registry for Camel K %s. Setting custom image accordingly.", KAMEL_INSTALL_REGISTRY)
-		customImage := fmt.Sprintf("%s/apache/camel-k", KAMEL_INSTALL_REGISTRY)
-		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
-		ExpectExecSucceed(t, g, Make(t, fmt.Sprintf("CUSTOM_IMAGE=%s", customImage), "set-version"))
-	}
 }

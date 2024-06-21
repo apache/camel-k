@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package trait
 
 import (
 	"encoding/json"
@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/mitchellh/mapstructure"
 )
@@ -38,18 +37,26 @@ var knownAddons = []string{"keda", "master", "strimzi", "3scale", "tracing"}
 
 var traitConfigRegexp = regexp.MustCompile(`^([a-z0-9-]+)((?:\.[a-z0-9-]+)(?:\[[0-9]+\]|\..+)*)=(.*)$`)
 
-func validateTraits(catalog *trait.Catalog, traits []string) error {
+func ValidateTrait(catalog *Catalog, trait string) error {
+	tr := catalog.GetTrait(trait)
+	if tr == nil {
+		return fmt.Errorf("trait %s does not exist in catalog", trait)
+	}
+
+	return nil
+}
+
+func ValidateTraits(catalog *Catalog, traits []string) error {
 	for _, t := range traits {
-		tr := catalog.GetTrait(t)
-		if tr == nil {
-			return fmt.Errorf("trait %s does not exist in catalog", t)
+		if err := ValidateTrait(catalog, t); err != nil {
+			return err
 		}
 	}
 
 	return nil
 }
 
-func configureTraits(options []string, traits interface{}, catalog trait.Finder) error {
+func ConfigureTraits(options []string, traits interface{}, catalog Finder) error {
 	config, err := optionsToMap(options)
 	if err != nil {
 		return err
@@ -144,7 +151,7 @@ func optionsToMap(options []string) (optionMap, error) {
 	return optionMap, nil
 }
 
-func configureAddons(config optionMap, traits interface{}, catalog trait.Finder) error {
+func configureAddons(config optionMap, traits interface{}, catalog Finder) error {
 	// Addon traits require raw message mapping
 	addons := make(map[string]v1.AddonTrait)
 	for id, props := range config {

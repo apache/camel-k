@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -131,7 +132,30 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return integration, err
 	}
 
+	action.checkTraitAnnotationsDeprecatedNotice(integration)
+
 	return action.monitorPods(ctx, environment, integration)
+}
+
+// Deprecated: to be removed in future versions, when we won't support any longer trait annotations into Integrations.
+func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(integration *v1.Integration) {
+	if integration.Annotations != nil {
+		for k := range integration.Annotations {
+			if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+				integration.Status.SetCondition(
+					v1.IntegrationConditionType("AnnotationTraitsDeprecated"),
+					corev1.ConditionTrue,
+					"DeprecationNotice",
+					"Annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration instead.",
+				)
+				action.L.Infof(
+					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s integration instead.",
+					integration.Name,
+				)
+				return
+			}
+		}
+	}
 }
 
 func (action *monitorAction) monitorPods(ctx context.Context, environment *trait.Environment, integration *v1.Integration) (*v1.Integration, error) {
