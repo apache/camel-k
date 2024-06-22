@@ -26,6 +26,7 @@
 - Dependency Service Discovery for Camel K [\#5196](https://github.com/apache/camel-k/issues/5196)
 - Mount configmap/secret resources to a dedicated resources.d durectory [\#5181](https://github.com/apache/camel-k/issues/5181)
 -  Add missing functionalities and resolve possible discrepancies  [\#4951](https://github.com/apache/camel-k/issues/4951)
+- Make the platform controller operator instantiate the camel k operator  [\#4950](https://github.com/apache/camel-k/issues/4950)
 - Support YAML DSL routes configuration [\#4893](https://github.com/apache/camel-k/issues/4893)
 - Kustomize installation does not work [\#4528](https://github.com/apache/camel-k/issues/4528)
 - Kustomize default [\#4135](https://github.com/apache/camel-k/issues/4135)
@@ -34,6 +35,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump k8s.io/klog/v2 from 2.130.0 to 2.130.1 [\#5665](https://github.com/apache/camel-k/pull/5665) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.42 to 0.6.45 [\#5655](https://github.com/apache/camel-k/pull/5655) ([dependabot[bot]](https://github.com/apps/dependabot))
 - \(\#5652\) Added TimeoutSeconds to knative-serving trait [\#5653](https://github.com/apache/camel-k/pull/5653) ([hernanDatgDev](https://github.com/hernanDatgDev))
 - \(\#5635\) Add TLS configuration in the ingress trait [\#5650](https://github.com/apache/camel-k/pull/5650) ([romain-pfund](https://github.com/romain-pfund))
