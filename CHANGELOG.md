@@ -20,11 +20,13 @@
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
 - Move deprecated v1alpha1.KameletBinding tests to v1.Pipe [\#5490](https://github.com/apache/camel-k/issues/5490)
 - Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)
+- Review CI setup and test executions scrips/make targets [\#5463](https://github.com/apache/camel-k/issues/5463)
 - Add a deploy make target [\#5460](https://github.com/apache/camel-k/issues/5460)
 - Remove health readiness workaround when fixed in Camel [\#5451](https://github.com/apache/camel-k/issues/5451)
 - Deprecate some of the camel.apache.org annotation in favor of k8s's recommended labels [\#5212](https://github.com/apache/camel-k/issues/5212)
 - Dependency Service Discovery for Camel K [\#5196](https://github.com/apache/camel-k/issues/5196)
 - Mount configmap/secret resources to a dedicated resources.d durectory [\#5181](https://github.com/apache/camel-k/issues/5181)
+- Ability to use timezones when using quartz component and CronJob strategy [\#5121](https://github.com/apache/camel-k/issues/5121)
 -  Add missing functionalities and resolve possible discrepancies  [\#4951](https://github.com/apache/camel-k/issues/4951)
 - Make the platform controller operator instantiate the camel k operator  [\#4950](https://github.com/apache/camel-k/issues/4950)
 - Add missing fields on IntegrationPlatform custom resource to support platform controller operator [\#4949](https://github.com/apache/camel-k/issues/4949)
@@ -37,6 +39,9 @@
 **Merged pull requests:**
 
 - chore\(deps\): bump k8s.io/klog/v2 from 2.130.0 to 2.130.1 [\#5665](https://github.com/apache/camel-k/pull/5665) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(\#5121\): adding timeZone property to the Cron trait spec [\#5664](https://github.com/apache/camel-k/pull/5664) ([lsergio](https://github.com/lsergio))
+- \(\#5463\) Add make targets: setup-knative, setup-yaks [\#5661](https://github.com/apache/camel-k/pull/5661) ([tdiesler](https://github.com/tdiesler))
+- fix\(e2e\): Telemetry rest-consumer service name [\#5660](https://github.com/apache/camel-k/pull/5660) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.42 to 0.6.45 [\#5655](https://github.com/apache/camel-k/pull/5655) ([dependabot[bot]](https://github.com/apps/dependabot))
 - \(\#5652\) Added TimeoutSeconds to knative-serving trait [\#5653](https://github.com/apache/camel-k/pull/5653) ([hernanDatgDev](https://github.com/hernanDatgDev))
 - \(\#5635\) Add TLS configuration in the ingress trait [\#5650](https://github.com/apache/camel-k/pull/5650) ([romain-pfund](https://github.com/romain-pfund))
