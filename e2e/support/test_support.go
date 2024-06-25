@@ -1131,6 +1131,34 @@ func IntegrationKitNamespace(t *testing.T, ctx context.Context, integrationNames
 	}
 }
 
+func IntegrationKitLayout(t *testing.T, ctx context.Context, ns string, name string) func() string {
+	return func() string {
+		it := Integration(t, ctx, ns, name)()
+		if it == nil {
+			return ""
+		}
+		if it.Status.IntegrationKit == nil {
+			return ""
+		}
+		kit := Kit(t, ctx, it.Status.IntegrationKit.Namespace, it.Status.IntegrationKit.Name)()
+		return kit.Labels[v1.IntegrationKitLayoutLabel]
+	}
+}
+
+func IntegrationKitStatusPhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.IntegrationKitPhase {
+	return func() v1.IntegrationKitPhase {
+		it := Integration(t, ctx, ns, name)()
+		if it == nil {
+			return v1.IntegrationKitPhaseNone
+		}
+		if it.Status.IntegrationKit == nil {
+			return v1.IntegrationKitPhaseNone
+		}
+		kit := Kit(t, ctx, it.Status.IntegrationKit.Namespace, it.Status.IntegrationKit.Name)()
+		return kit.Status.Phase
+	}
+}
+
 func Kit(t *testing.T, ctx context.Context, ns, name string) func() *v1.IntegrationKit {
 	return func() *v1.IntegrationKit {
 		kit := v1.NewIntegrationKit(ns, name)

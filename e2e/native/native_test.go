@@ -54,54 +54,37 @@ func TestNativeIntegrations(t *testing.T) {
 				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("XML Magicstring!"))
+
+			g.Eventually(IntegrationKitLayout(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationKitLayoutNativeSources))
 		})
 
 		t.Run("automatic rollout deployment from jvm to native kit", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml-native")
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name, "-t", "quarkus.build-mode=jvm", "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
-			// Check that two Kits are created with distinct layout
-			g.Eventually(Kits(t, ctx, ns, withFastJarLayout)).Should(HaveLen(1))
-			g.Eventually(Kits(t, ctx, ns, withNativeLayout)).Should(HaveLen(1))
-
 			// Check the fast-jar Kit is ready
-			g.Eventually(Kits(t, ctx, ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutLong).Should(HaveLen(1))
-
-			fastJarKit := Kits(t, ctx, ns, withFastJarLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
-			// Check the Integration uses the fast-jar Kit
-			g.Eventually(IntegrationKit(t, ctx, ns, name), TestTimeoutShort).Should(Equal(fastJarKit.Name))
-			// Check the Integration Pod uses the fast-jar Kit
-			g.Eventually(IntegrationPodImage(t, ctx, ns, name)).Should(Equal(fastJarKit.Status.Image))
+			g.Eventually(IntegrationKitLayout(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationKitLayoutFastJar))
+			g.Eventually(IntegrationKitStatusPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationKitPhaseReady))
 
 			// Check the Integration is ready
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(), ContainSubstring("java")))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
 
 			// Check the native Kit is ready
-			g.Eventually(Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutVeryLong).Should(HaveLen(1))
-
-			nativeKit := Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
-			// Check the Integration uses the native Kit
-			g.Eventually(IntegrationKit(t, ctx, ns, name), TestTimeoutShort).Should(Equal(nativeKit.Name))
-			// Check the Integration Pod uses the native Kit
-			g.Eventually(IntegrationPodImage(t, ctx, ns, name)).Should(Equal(nativeKit.Status.Image))
+			g.Eventually(IntegrationKitLayout(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(v1.IntegrationKitLayoutNativeSources))
+			g.Eventually(IntegrationKitStatusPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationKitPhaseReady))
 
 			// Check the Integration is still ready
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			t.Run("yaml native should not rebuild", func(t *testing.T) {
@@ -109,7 +92,7 @@ func TestNativeIntegrations(t *testing.T) {
 				g.Expect(KamelRun(t, ctx, ns, "files/yaml2.yaml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
-				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 					Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
 				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
@@ -131,18 +114,15 @@ func TestNativeBinding(t *testing.T) {
 				"--trait", "quarkus.build-mode=native", "--trait", "builder.tasks-limit-memory=quarkus-native:6.5Gi",
 				"--name", bindingName).Execute()).To(Succeed())
 
-			g.Eventually(Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady)),
-				TestTimeoutVeryLong).Should(HaveLen(1))
-
-			nativeKit := Kits(t, ctx, ns, withNativeLayout, KitWithPhase(v1.IntegrationKitPhaseReady))()[0]
-			g.Eventually(IntegrationKit(t, ctx, ns, bindingName), TestTimeoutShort).Should(Equal(nativeKit.Name))
-
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingName), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, bindingName), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, bindingName, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, bindingName), TestTimeoutShort).Should(ContainSubstring(message))
-
 			g.Eventually(IntegrationPod(t, ctx, ns, bindingName), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(),
 					MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
+
+			g.Eventually(IntegrationKitLayout(t, ctx, ns, bindingName), TestTimeoutShort).Should(Equal(v1.IntegrationKitLayoutNativeSources))
 		})
 	})
 }
