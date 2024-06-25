@@ -773,6 +773,9 @@ spec:
                           jobs executions will be counted as failed ones.
                         format: int64
                         type: integer
+                      timeZone:
+                        description: The timezone that the CronJob will run on
+                        type: string
                     type: object
                   dependencies:
                     description: The configuration of Dependencies trait
@@ -2727,6 +2730,9 @@ spec:
                           jobs executions will be counted as failed ones.
                         format: int64
                         type: integer
+                      timeZone:
+                        description: The timezone that the CronJob will run on
+                        type: string
                     type: object
                   dependencies:
                     description: The configuration of Dependencies trait

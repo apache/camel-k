@@ -235,6 +235,11 @@ func (in *ContainerTrait) DeepCopy() *ContainerTrait {
 func (in *CronTrait) DeepCopyInto(out *CronTrait) {
 	*out = *in
 	in.Trait.DeepCopyInto(&out.Trait)
+	if in.TimeZone != nil {
+		in, out := &in.TimeZone, &out.TimeZone
+		*out = new(string)
+		**out = **in
+	}
 	if in.Fallback != nil {
 		in, out := &in.Fallback, &out.Fallback
 		*out = new(bool)
