@@ -68,7 +68,3 @@ Test suite that cover the Quarkus Native build. As it is high resource consuming
 ### Telemetry
 
 Test suite that cover the features associated with Telemetry feature. The test execution takes care of installing the required configuration.
-
-### Yaks
-
-Test suite that cover certain Knative features together with YAKS operator.

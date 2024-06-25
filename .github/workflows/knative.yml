@@ -69,19 +69,3 @@ jobs:
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-
-  yaks-test:
-    runs-on: ubuntu-latest
-    steps:
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        submodules: recursive
-
-    - name: YAKS Tests
-      uses: ./.github/actions/e2e-knative-yaks
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
