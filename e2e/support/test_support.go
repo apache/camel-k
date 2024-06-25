@@ -2471,7 +2471,10 @@ func operatorPods(t *testing.T, ctx context.Context, ns string) []corev1.Pod {
 func OperatorPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
 	return func() *corev1.Pod {
 		pods := operatorPods(t, ctx, ns)
-		return &pods[0]
+		if len(pods) > 0 {
+			return &pods[0]
+		}
+		return nil
 	}
 }
 
