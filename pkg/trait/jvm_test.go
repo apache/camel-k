@@ -449,6 +449,49 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
+
+func TestApplyJvmTraitWithClasspathAndExistingContainerCPArg(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	trait.Classpath = "/path/to/my-dep.jar:/path/to/another/dep.jar"
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+							Args: []string{
+								"-cp",
+								"my-precious-lib.jar",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
+	configure, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, configure)
+	assert.Nil(t, condition)
+	err = trait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{
+		// WARN: we don't care if there are multiple classpath arguments
+		// as the application will use the second one
+		"-cp",
+		"my-precious-lib.jar",
+		"-cp",
+		fmt.Sprintf("my-precious-lib.jar:./resources:%s:%s:%s:%s:%s:dependencies/*",
+			rdMountPath, cmrMountPath, scrMountPath,
+			"/path/to/another/dep.jar", "/path/to/my-dep.jar"),
+		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
+	}, d.Spec.Template.Spec.Containers[0].Args)
+}
+
 func TestApplyJvmTraitKitMissing(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	environment.IntegrationKit = nil

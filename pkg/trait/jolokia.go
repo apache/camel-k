@@ -127,6 +127,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 		}
 	}
 	container.Args = append(container.Args, "-javaagent:"+jolokiaFilepath+"="+strings.Join(optionValues, ","))
+	container.Args = append(container.Args, "-cp", jolokiaFilepath)
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",

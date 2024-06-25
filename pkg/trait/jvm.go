@@ -204,6 +204,7 @@ func (t *jvmTrait) enableDebug(e *Environment) string {
 }
 
 func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
+	existingClasspaths := extractExistingClasspathItems(container)
 	classpath := sets.NewSet()
 	// Deprecated: replaced by /etc/camel/resources.d/[_configmaps/_secrets] (camel.ResourcesConfigmapsMountPath/camel.ResourcesSecretsMountPath).
 	classpath.Add("./resources")
@@ -223,7 +224,26 @@ func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
 	// Keep class path sorted so that it's consistent over reconciliation cycles
 	sort.Strings(items)
 
+	if existingClasspaths != nil {
+		existingClasspaths = append(existingClasspaths, items...)
+		return existingClasspaths
+	}
+
 	return items
+}
+
+// extractExistingClasspathItems returns any container classpath option (if exists).
+func extractExistingClasspathItems(container *corev1.Container) []string {
+	for i, arg := range container.Args {
+		if arg == "-cp" || arg == "-classpath" {
+			if i < len(container.Args) {
+				// return the next argument
+				return strings.Split(container.Args[i+1], ":")
+			}
+		}
+	}
+
+	return nil
 }
 
 // Translate HTTP proxy environment variables, that are set by the environment trait,
