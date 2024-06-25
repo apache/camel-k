@@ -55,6 +55,7 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 
 	assert.Equal(t, container.Args, []string{
 		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-agent-jvm-1.7.1.jar=discoveryEnabled=false,host=*,port=8778",
+		"-cp", "dependencies/lib/main/org.jolokia.jolokia-agent-jvm-1.7.1.jar",
 	})
 
 	assert.Len(t, container.Ports, 1)
@@ -85,6 +86,7 @@ func TestApplyJolokiaTraitForOpenShiftProfileShouldSucceed(t *testing.T) {
 			"clientPrincipal.1=cn=system:master-proxy,clientPrincipal.2=cn=hawtio-online.hawtio.svc," +
 			"clientPrincipal.3=cn=fuse-console.fuse.svc,discoveryEnabled=false,extendedClientCheck=true," +
 			"host=*,port=8778,protocol=https,useSslClientAuthentication=true",
+		"-cp", "dependencies/lib/main/org.jolokia.jolokia-agent-jvm-1.7.1.jar",
 	})
 
 	assert.Len(t, container.Ports, 1)
@@ -134,6 +136,7 @@ func TestApplyJolokiaTraitWithOptionShouldOverrideDefault(t *testing.T) {
 		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-agent-jvm-1.7.1.jar=caCert=.cacert,clientPrincipal=cn:any," +
 			"discoveryEnabled=true,extendedClientCheck=false,host=explicit-host,port=8778,protocol=http," +
 			"useSslClientAuthentication=false",
+		"-cp", "dependencies/lib/main/org.jolokia.jolokia-agent-jvm-1.7.1.jar",
 	})
 }
 
