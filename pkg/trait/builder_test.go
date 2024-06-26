@@ -684,3 +684,13 @@ func TestBuilderTraitPlatforms(t *testing.T) {
 
 	assert.Equal(t, []string{"linux/amd64", "linux/arm64"}, env.Pipeline[2].Jib.Configuration.ImagePlatforms)
 }
+
+func TestBuilderTraitOrderStrategy(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.OrderStrategy = "fifo"
+	err := builderTrait.Apply(env)
+	require.NoError(t, err)
+
+	assert.Equal(t, v1.BuildOrderStrategyFIFO, env.Pipeline[0].Builder.Configuration.OrderStrategy)
+}

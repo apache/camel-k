@@ -90,7 +90,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.BuildConfiguration.OrderStrategy == "" {
-		p.Status.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategySequential
+		p.Status.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyDependencies
 		log.Debugf("Integration Platform %s [%s]: setting build order strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.OrderStrategy)
 	}
 
