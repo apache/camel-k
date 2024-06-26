@@ -36,7 +36,7 @@ type BuilderTrait struct {
 	BaseImage string `property:"base-image" json:"baseImage,omitempty"`
 	// Use the incremental image build option, to reuse existing containers (default `true`)
 	IncrementalImageBuild *bool `property:"incremental-image-build" json:"incrementalImageBuild,omitempty"`
-	// The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default `sequential`)
+	// The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default is the platform default)
 	// +kubebuilder:validation:Enum=dependencies;fifo;sequential
 	OrderStrategy string `property:"order-strategy" json:"orderStrategy,omitempty"`
 	// When using `pod` strategy, the minimum amount of CPU required by the pod builder.

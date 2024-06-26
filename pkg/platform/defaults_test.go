@@ -49,7 +49,7 @@ func TestIntegrationPlatformDefaults(t *testing.T) {
 	assert.Equal(t, v1.IntegrationPlatformClusterKubernetes, ip.Status.Cluster)
 	assert.Equal(t, v1.TraitProfile(""), ip.Status.Profile)
 	assert.Equal(t, v1.BuildStrategyRoutine, ip.Status.Build.BuildConfiguration.Strategy)
-	assert.Equal(t, v1.BuildOrderStrategySequential, ip.Status.Build.BuildConfiguration.OrderStrategy)
+	assert.Equal(t, v1.BuildOrderStrategyDependencies, ip.Status.Build.BuildConfiguration.OrderStrategy)
 	assert.Equal(t, defaults.BaseImage(), ip.Status.Build.BaseImage)
 	assert.Equal(t, defaults.LocalRepository, ip.Status.Build.Maven.LocalRepository)
 	assert.Equal(t, int32(3), ip.Status.Build.MaxRunningBuilds) // default for build strategy routine

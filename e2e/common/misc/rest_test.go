@@ -62,7 +62,7 @@ func TestRunRest(t *testing.T) {
 				name := RandomizedSuffixName("Peter")
 				route := Route(t, ctx, ns, "rest-consumer")
 				g.Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
-				g.Eventually(RouteStatus(t, ctx, ns, "rest-consumer"), TestTimeoutMedium).Should(Equal("True"))
+				g.Eventually(RouteStatus(t, ctx, ns, "rest-consumer")).Should(Equal("True"))
 				url := fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name)
 				g.Eventually(httpRequest(url), TestTimeoutMedium).Should(Equal(fmt.Sprintf("%s Doe", name)))
 				g.Eventually(IntegrationLogs(t, ctx, ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
