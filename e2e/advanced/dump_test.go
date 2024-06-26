@@ -24,10 +24,7 @@ package advanced
 
 import (
 	"context"
-	"fmt"
 	"testing"
-
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
 	. "github.com/onsi/gomega"
 
@@ -47,14 +44,10 @@ func TestKamelCLIDump(t *testing.T) {
 			g.Expect(dump).To(ContainSubstring("Found 0 deployments:"))
 		})
 
-		t.Run("dump non-empty namespace", func(t *testing.T) {
-			operatorID := fmt.Sprintf("camel-k-%s", ns)
-			g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-			g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-			g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		InstallOperator(t, g, ns)
 
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+		t.Run("dump non-empty namespace", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml")).Should(ContainSubstring("Magicstring!"))
 

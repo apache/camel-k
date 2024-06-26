@@ -31,24 +31,19 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/olm"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 
-	configv1 "github.com/openshift/api/config/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -64,7 +59,6 @@ func TestMavenProxy(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		hostname := fmt.Sprintf("%s.%s.svc", "proxy", ns)
-
 		// Generate the TLS certificate
 		serialNumber := big.NewInt(util.RandomInt63())
 		cert := &x509.Certificate{
@@ -117,15 +111,12 @@ func TestMavenProxy(t *testing.T) {
 			},
 		}
 		g.Expect(TestClient(t).Create(ctx, secret)).To(Succeed())
-
 		// HTTPD ConfigMap
 		config := newHTTPDConfigMap(ns, hostname)
 		g.Expect(TestClient(t).Create(ctx, config)).To(Succeed())
-
 		// HTTPD Deployment
 		deployment := newHTTPDDeployment(ns, config.Name, secret.Name)
 		g.Expect(TestClient(t).Create(ctx, deployment)).To(Succeed())
-
 		service := newHTTPDService(deployment)
 		g.Expect(TestClient(t).Create(ctx, service)).To(Succeed())
 
@@ -150,43 +141,7 @@ func TestMavenProxy(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		// Install Camel K with the HTTP proxy
-		operatorID := "camel-k-maven-proxy"
-		olm, olmErr := olm.IsAPIAvailable(TestClient(t))
-		installed, inErr := kubernetes.IsAPIResourceInstalled(TestClient(t), configv1.GroupVersion.String(), reflect.TypeOf(configv1.Proxy{}).Name())
-		permission, pErr := kubernetes.CheckPermission(ctx, TestClient(t), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
-		olmInstall := pErr == nil && olmErr == nil && inErr == nil && olm && installed && permission
-		var defaultProxy configv1.Proxy
-		if olmInstall {
-			// use OLM autoconfiguration
-			defaultProxy = configv1.Proxy{}
-			key := ctrl.ObjectKey{
-				Name: "cluster",
-			}
-			g.Expect(TestClient(t).Get(ctx, key, &defaultProxy)).To(Succeed())
-
-			newProxy := defaultProxy.DeepCopy()
-			newProxy.Spec.HTTPProxy = fmt.Sprintf("http://%s", hostname)
-			newProxy.Spec.NoProxy = strings.Join(noProxy, ",")
-			g.Expect(TestClient(t).Update(ctx, newProxy))
-
-			defer func() {
-				//
-				// Patching the proxy back to default
-				// Note. A merge patch or client update making spec and status empty
-				//       does not work on some platforms, eg. OCP4
-				//
-				patch := []byte(`[{"op": "replace","path": "/spec","value": {}},{"op": "replace","path": "/status","value": {}}]`)
-				TestClient(t).Patch(ctx, &defaultProxy, ctrl.RawPatch(types.JSONPatchType, patch))
-			}()
-
-			// ENV values should be injected by the OLM
-			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-		} else {
-			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
-		}
-
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		InstallOperator(t, g, ns)
 
 		// Check that operator pod has env_vars
 		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
@@ -206,7 +161,7 @@ func TestMavenProxy(t *testing.T) {
 
 		// Run the Integration
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -224,13 +179,6 @@ func TestMavenProxy(t *testing.T) {
 		)
 		g.Expect(err).To(Succeed())
 		g.Expect(proxies.Items).To(HaveLen(1))
-
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-		g.Expect(TestClient(t).Delete(ctx, deployment)).To(Succeed())
-		g.Expect(TestClient(t).Delete(ctx, service)).To(Succeed())
-		g.Expect(TestClient(t).Delete(ctx, secret)).To(Succeed())
-		g.Expect(TestClient(t).Delete(ctx, config)).To(Succeed())
 	})
 }
 
@@ -238,8 +186,7 @@ func TestMavenProxyNotPresent(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		hostname := fmt.Sprintf("%s.%s.svc", "proxy-fake", ns)
-
+		//hostname := fmt.Sprintf("%s.%s.svc", "proxy-fake", ns)
 		svc := Service(t, ctx, TestDefaultNamespace, "kubernetes")()
 		g.Expect(svc).NotTo(BeNil())
 		// It may be needed to populate the values from the cluster, machine and service network CIDRs
@@ -250,32 +197,17 @@ func TestMavenProxyNotPresent(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		// Install Camel K with the HTTP proxy that does not exists
-		operatorID := "camel-k-maven-no-proxy"
-		olm, olmErr := olm.IsAPIAvailable(TestClient(t))
-		installed, inErr := kubernetes.IsAPIResourceInstalled(TestClient(t), configv1.GroupVersion.String(), reflect.TypeOf(configv1.Proxy{}).Name())
-		permission, pErr := kubernetes.CheckPermission(ctx, TestClient(t), configv1.GroupName, reflect.TypeOf(configv1.Proxy{}).Name(), "", "cluster", "edit")
-		olmInstall := pErr == nil && olmErr == nil && inErr == nil && olm && installed && permission
-		if olmInstall {
-			// ENV values should be injected by the OLM
-			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-		} else {
-			g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
-		}
-
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		InstallOperator(t, g, ns)
+		//g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
 
 		// Run the Integration
 		name := RandomizedSuffixName("java")
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
 
 		// Should not be able to build
 		g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable), TestTimeoutShort).
 			Should(Equal(corev1.ConditionFalse))
-
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

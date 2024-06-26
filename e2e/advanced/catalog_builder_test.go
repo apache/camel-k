@@ -40,10 +40,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		InstallOperator(t, g, ns)
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
@@ -59,7 +56,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			name := RandomizedSuffixName("java-1-15")
 			nonCompatibleCatalogName := "camel-catalog-1.15.0"
 			g.Expect(
-				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version=1.15.0").Execute()).To(Succeed())
+				KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version=1.15.0").Execute()).To(Succeed())
 
 			g.Eventually(CamelCatalog(t, ctx, ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
@@ -71,9 +68,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(KitCondition(t, ctx, ns, kitName, v1.IntegrationKitConditionCatalogAvailable)().Reason).Should(Equal("Camel Catalog 1.15.0 error"))
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
 			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)().Status).Should(Equal(corev1.ConditionFalse))
-
-			// Clean up
-			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
 		// Run an integration with a compatible catalog
@@ -88,7 +82,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).Should(BeNil())
 
 			g.Expect(
-				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
+				KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
 
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).ShouldNot(BeNil())
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
@@ -97,9 +91,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
-
-			// Clean up
-			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
 
 		t.Run("Run catalog container exists", func(t *testing.T) {
@@ -112,7 +103,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).Should(BeNil())
 
 			g.Expect(
-				KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
+				KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version="+compatibleVersion).Execute()).To(Succeed())
 
 			g.Eventually(CamelCatalog(t, ctx, ns, compatibleCatalogName)).ShouldNot(BeNil())
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, compatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseReady))
@@ -127,11 +118,6 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			// Clean up
-			g.Eventually(DeleteIntegrations(t, ctx, ns)).Should(Equal(0))
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

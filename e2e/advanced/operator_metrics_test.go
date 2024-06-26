@@ -42,19 +42,18 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
 func TestMetrics(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		name := RandomizedSuffixName("java")
-		operatorID := "camel-k-metrics"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--log-level", "debug")).To(Succeed())
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		//g.Expect(InstallOperator(t, ctx, operatorID, ns, "--log-level", "debug")).To(Succeed())
+		InstallOperator(t, g, ns)
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
+		name := RandomizedSuffixName("java")
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
@@ -62,7 +61,6 @@ func TestMetrics(t *testing.T) {
 
 		pod := OperatorPod(t, ctx, ns)()
 		g.Expect(pod).NotTo(BeNil())
-
 		// pod.Namespace could be different from ns if using global operator
 		fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
 		logOptions := &corev1.PodLogOptions{
@@ -200,7 +198,7 @@ func TestMetrics(t *testing.T) {
 				"LoggerName":       Equal("camel-k.controller.integrationplatform"),
 				"Message":          Equal("Reconciling IntegrationPlatform"),
 				"RequestNamespace": Equal(ns),
-				"RequestName":      Equal(operatorID),
+				"RequestName":      Equal(platform.DefaultPlatformName),
 			}))
 			g.Expect(err).To(BeNil())
 
@@ -538,9 +536,6 @@ func TestMetrics(t *testing.T) {
 				},
 			))
 		})
-
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

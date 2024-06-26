@@ -24,7 +24,6 @@ package advanced
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -36,32 +35,18 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestOperatorIDCamelCatalogReconciliation(t *testing.T) {
-	t.Parallel()
-
-	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--global", "--force")).To(Succeed())
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		g.Eventually(DefaultCamelCatalogPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))
-	})
-}
-
 func TestOperatorIDFiltering(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop1 string) {
 			operator1 := "operator-1"
-			g.Expect(CopyCamelCatalog(t, ctx, nsop1, operator1)).To(Succeed())
-			g.Expect(KamelInstallWithIDAndKameletCatalog(t, ctx, operator1, nsop1, "--global", "--force")).To(Succeed())
+			InstallOperatorWithID(t, g, nsop1, operator1)
 			g.Eventually(PlatformPhase(t, ctx, nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop2 string) {
 				operator2 := "operator-2"
-				g.Expect(CopyCamelCatalog(t, ctx, nsop2, operator2)).To(Succeed())
-				g.Expect(CopyIntegrationKits(t, ctx, nsop2, operator2)).To(Succeed())
-				g.Expect(KamelInstallWithIDAndKameletCatalog(t, ctx, operator2, nsop2, "--global", "--force")).To(Succeed())
+				InstallOperatorWithID(t, g, nsop2, operator2)
 				g.Eventually(PlatformPhase(t, ctx, nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {
@@ -135,7 +120,5 @@ func TestOperatorIDFiltering(t *testing.T) {
 				})
 			})
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
