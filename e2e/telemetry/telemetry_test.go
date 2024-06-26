@@ -36,15 +36,11 @@ import (
 
 func TestTelemetryTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-trait-telemetry"
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
 		// Check service is available
 		g.Eventually(ServicesByType(t, ctx, "otlp", corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
 
 		// Create integration and activate traces by telemetry trait
-
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns,
+		g.Expect(KamelRun(t, ctx, ns,
 			"files/rest-consumer.yaml", "--name", "rest-consumer",
 			"-t", "telemetry.enabled=true",
 			"-t", "telemetry.endpoint=http://opentelemetrycollector.otlp:4317").Execute()).To(Succeed())
@@ -52,7 +48,7 @@ func TestTelemetryTrait(t *testing.T) {
 
 		name := "Bob"
 		serviceName := fmt.Sprintf("rest-consumer.%s", ns)
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/rest-producer.yaml",
+		g.Expect(KamelRun(t, ctx, ns, "files/rest-producer.yaml",
 			"-p", fmt.Sprintf("serviceName=%s", serviceName),
 			"-p", "name="+name,
 			"--name", "rest-producer").Execute()).To(Succeed())
