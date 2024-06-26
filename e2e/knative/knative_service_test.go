@@ -44,7 +44,7 @@ func TestKnativeServiceURL(t *testing.T) {
 		t.FailNow()
 	}
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k"
+		operatorID := "camel-k-knative-service"
 		// Install without profile (should automatically detect the presence of Knative)
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
@@ -54,10 +54,9 @@ func TestKnativeServiceURL(t *testing.T) {
 		t.Run("run yaml on cluster profile", func(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knative2.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, "knative2"), TestTimeoutShort).Should(ContainSubstring("http://knative2.ns.domain"))
 			g.Eventually(IntegrationTraitProfile(t, ctx, ns, "knative2"), TestTimeoutShort).Should(Equal(v1.TraitProfile(string(cluster))))
 
-			g.Eventually(KnativeService(t, ctx, ns, "knative2")().Status.RouteStatusFields.URL.String(), TestTimeoutShort).Should(Equal(""))
+			g.Eventually(KnativeService(t, ctx, ns, "knative2")().Status.RouteStatusFields.URL.String(), TestTimeoutLong).Should(Equal("http://knative2.ns.domain"))
 
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 		})
