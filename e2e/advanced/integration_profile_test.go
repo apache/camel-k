@@ -20,13 +20,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package misc
+package advanced
 
 import (
 	"context"
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	. "github.com/onsi/gomega"
 
@@ -38,8 +37,12 @@ import (
 )
 
 func TestIntegrationProfile(t *testing.T) {
-	operatorID := platform.DefaultPlatformName
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-integration-profile"
+		InstallOperatorWithID(t, ctx, g, ns, operatorID)
+
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
 		integrationProfile.SetOperatorID(operatorID)
 		integrationProfile.Spec.Traits.Container = &traitv1.ContainerTrait{
@@ -60,7 +63,7 @@ func TestIntegrationProfile(t *testing.T) {
 			g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns1, "ipr-local"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
 			t.Run("Run integration with global integration profile", func(t *testing.T) {
-				g.Expect(KamelRun(t, ctx, ns1, "--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPod(t, ctx, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
 				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
@@ -81,7 +84,7 @@ func TestIntegrationProfile(t *testing.T) {
 			})
 
 			t.Run("Run integration with namespace local integration profile", func(t *testing.T) {
-				g.Expect(KamelRun(t, ctx, ns1, "--name", "limited", "--integration-profile", "ipr-local", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "limited", "--integration-profile", "ipr-local", "files/yaml.yaml").Execute()).To(Succeed())
 
 				g.Eventually(IntegrationPod(t, ctx, ns1, "limited"), TestTimeoutMedium).Should(Not(BeNil()))
 				g.Eventually(IntegrationPodHas(t, ctx, ns1, "limited", func(pod *corev1.Pod) bool {
@@ -103,7 +106,7 @@ func TestIntegrationProfile(t *testing.T) {
 			})
 
 			t.Run("Run integration without integration profile", func(t *testing.T) {
-				g.Expect(KamelRun(t, ctx, ns1, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
+				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
 				g.Eventually(IntegrationPod(t, ctx, ns1, "normal"), TestTimeoutShort).Should(Not(BeNil()))
 				g.Eventually(IntegrationPodHas(t, ctx, ns1, "normal", func(pod *corev1.Pod) bool {
 					if len(pod.Spec.Containers) != 1 {
@@ -118,8 +121,12 @@ func TestIntegrationProfile(t *testing.T) {
 }
 
 func TestIntegrationProfileInfluencesKit(t *testing.T) {
-	operatorID := platform.DefaultPlatformName
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-ipr-kit"
+		InstallOperatorWithID(t, ctx, g, ns, operatorID)
+
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
 		integrationProfile.SetOperatorID(operatorID)
 		integrationProfile.Spec.Traits.Builder = &traitv1.BuilderTrait{
@@ -129,7 +136,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
 		g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns, "ipr-global"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
 
-		g.Expect(KamelRun(t, ctx, ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
 		g.Eventually(IntegrationPod(t, ctx, ns, "normal"), TestTimeoutMedium).Should(Not(BeNil()))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "normal"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "normal", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -139,7 +146,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.BaseImage).Should(Equal(defaults.BaseImage()))
 		g.Eventually(Kit(t, ctx, ns, integrationKitName)().Status.RootImage).Should(Equal(defaults.BaseImage()))
 
-		g.Expect(KamelRun(t, ctx, ns, "--name", "simple", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "simple", "--integration-profile", "ipr-global", "files/yaml.yaml").Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPod(t, ctx, ns, "simple"), TestTimeoutMedium).Should(Not(BeNil()))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "simple"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -155,8 +162,12 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 }
 
 func TestPropagateIntegrationProfileChanges(t *testing.T) {
-	operatorID := platform.DefaultPlatformName
+	t.Parallel()
+
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-ipr-changes"
+		InstallOperatorWithID(t, ctx, g, ns, operatorID)
+
 		integrationProfile := v1.NewIntegrationProfile(ns, "debug-profile")
 		integrationProfile.SetOperatorID(operatorID)
 		integrationProfile.Spec.Traits.Container = &traitv1.ContainerTrait{

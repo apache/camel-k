@@ -24,6 +24,7 @@ package knative
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -136,8 +137,13 @@ func TestKnativePipes(t *testing.T) {
 
 func TestRunBroker(t *testing.T) {
 	WithNewTestNamespaceWithKnativeBroker(t, func(ctx context.Context, g *WithT, ns string) {
-		g.Expect(KamelRun(t, ctx, ns, "files/knativeevt1.yaml").Execute()).To(Succeed())
-		g.Expect(KamelRun(t, ctx, ns, "files/knativeevt2.yaml").Execute()).To(Succeed())
+		// This test require an adhoc operator to run properly
+		operatorID := fmt.Sprintf("camel-k-%s", ns)
+		InstallOperatorWithID(t, ctx, g, ns, operatorID)
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(camelv1.IntegrationPlatformPhaseReady))
+
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativeevt1.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativeevt2.yaml").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeevt1"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "knativeevt2"), TestTimeoutLong).Should(Equal(v1.PodRunning))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "knativeevt2"), TestTimeoutMedium).Should(ContainSubstring("Received 1: Hello 1"))

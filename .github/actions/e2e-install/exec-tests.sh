@@ -19,22 +19,19 @@
 
 ####
 #
-# Execute the install tests
+# Execute the upgrade tests
 #
 ####
 
 set -e
 
-while getopts ":b:c:i:l:n:q:s:v:x:" opt; do
+while getopts ":b:d:l:n:q:s:v:x:" opt; do
   case "${opt}" in
     b)
-      BUILD_CATALOG_SOURCE_NAME=${OPTARG}
+      KAMEL_BINARY=${OPTARG}
       ;;
-    c)
-      BUILD_CATALOG_SOURCE_NAMESPACE=${OPTARG}
-      ;;
-    i)
-      IMAGE_NAMESPACE=${OPTARG}
+    d)
+      BUNDLE_INDEX_IMAGE=${OPTARG}
       ;;
     l)
       REGISTRY_PULL_HOST=${OPTARG}
@@ -76,8 +73,13 @@ if [ -z "${IMAGE_VERSION}" ]; then
   exit 1
 fi
 
-if [ -z "${IMAGE_NAMESPACE}" ]; then
-  echo "Error: image-namespace not defined"
+if [ -z "${KAMEL_BINARY}" ]; then
+  echo "Error: kamel-binary not defined"
+  exit 1
+fi
+
+if [ -z "${BUNDLE_INDEX_IMAGE}" ]; then
+  echo "Error: bundle-index-image not defined"
   exit 1
 fi
 
@@ -91,36 +93,38 @@ if [ -z "${REGISTRY_INSECURE}" ]; then
   exit 1
 fi
 
+# Use the last released Kamel CLI
+export RELEASED_KAMEL_BIN=${KAMEL_BINARY}
+
+echo "Kamel version: $(${RELEASED_KAMEL_BIN} version)"
+
 # Cluster environment
 export CUSTOM_IMAGE=${IMAGE_NAME}
 export CUSTOM_VERSION=${IMAGE_VERSION}
 
-#
-# If bundle has been built and installed then use it
-#
-if [ -n "${BUILD_CATALOG_SOURCE_NAMESPACE}" ]; then
-  export KAMEL_INSTALL_OLM_SOURCE=${BUILD_CATALOG_SOURCE_NAME}
-  export KAMEL_INSTALL_OLM_SOURCE_NAMESPACE=${BUILD_CATALOG_SOURCE_NAMESPACE}
-  export KAMEL_INSTALL_OLM_CHANNEL="${NEW_XY_CHANNEL}"
-fi
-
-KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
-export KAMEL_INSTALL_MAVEN_REPOSITORIES
+# Configure install options
+export KAMEL_INSTALL_MAVEN_REPOSITORIES=$(make get-staging-repo)
 export KAMEL_INSTALL_REGISTRY=${REGISTRY_PULL_HOST}
 export KAMEL_INSTALL_REGISTRY_INSECURE=${REGISTRY_INSECURE}
-export KAMEL_INSTALL_OPERATOR_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 
 # Will only have an effect if olm=false
 # since, for OLM, the csv determines the policy
 # (see kamel-build-bundle/build-bundle-image.sh)
 export KAMEL_INSTALL_OPERATOR_IMAGE_PULL_POLICY="Always"
 
+# Despite building a bundle we don't want it installed immediately so no OLM_INDEX_BUNDLE var
+
+# Configure test options
 export CAMEL_K_TEST_LOG_LEVEL="${LOG_LEVEL}"
 if [ "${LOG_LEVEL}" == "debug" ]; then
   export CAMEL_K_TEST_MAVEN_CLI_OPTIONS="-X ${CAMEL_K_TEST_MAVEN_CLI_OPTIONS}"
 fi
-export CAMEL_K_TEST_IMAGE_NAME=${CUSTOM_IMAGE}
-export CAMEL_K_TEST_IMAGE_VERSION=${CUSTOM_VERSION}
+export CAMEL_K_PREV_IIB=quay.io/operatorhubio/catalog:latest
+export CAMEL_K_NEW_IIB=${BUNDLE_INDEX_IMAGE}
+export CAMEL_K_PREV_UPGRADE_CHANNEL=${PREV_XY_CHANNEL}
+export CAMEL_K_NEW_UPGRADE_CHANNEL=${NEW_XY_CHANNEL}
+export KAMEL_K_TEST_RELEASE_VERSION=$(make get-last-released-version)
+export KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE=${CUSTOM_IMAGE}:${CUSTOM_VERSION}
 export CAMEL_K_TEST_SAVE_FAILED_TEST_NAMESPACE=${SAVE_FAILED_TEST_NS}
 
 # Then run integration tests

@@ -40,7 +40,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).

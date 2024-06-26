@@ -43,7 +43,7 @@ type kitOptions struct {
 
 func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, buildOrderStrategy v1.BuildOrderStrategy) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		pl := Platform(t, ctx, ns)()
 		// set maximum number of running builds and order strategy
@@ -126,7 +126,7 @@ func TestKitMaxBuildLimitDependencies(t *testing.T) {
 
 func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		pl := Platform(t, ctx, ns)()
 		// set maximum number of running builds and order strategy

@@ -40,7 +40,7 @@ func TestRunIncrementalBuildRoutine(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
@@ -83,7 +83,7 @@ func TestRunIncrementalBuildPod(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
@@ -129,7 +129,7 @@ func TestRunIncrementalBuildOff(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
@@ -167,7 +167,7 @@ func TestRunIncrementalBuildWithDifferentBaseImages(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())

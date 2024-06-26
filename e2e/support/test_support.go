@@ -37,6 +37,7 @@ import (
 	"regexp"
 	"runtime/debug"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -136,6 +137,7 @@ var NoOlmOperatorImage string
 
 var testContext = context.TODO()
 var testClient client.Client
+var cmdMutex = sync.Mutex{}
 
 func init() {
 	// This line prevents controller-runtime from complaining about log.SetLogger never being called
@@ -278,7 +280,7 @@ func KamelRunWithID(t *testing.T, ctx context.Context, operatorID string, namesp
 }
 
 func KamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
-	return KamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
+	return kamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
 }
 
 func KamelBind(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
@@ -290,14 +292,15 @@ func KamelBindWithID(t *testing.T, ctx context.Context, operatorID string, names
 }
 
 func KamelBindWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
-	return KamelCommandWithContext(t, ctx, "bind", operatorID, namespace, args...)
+	return kamelCommandWithContext(t, ctx, "bind", operatorID, namespace, args...)
 }
 
-func KamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
-	var cmdArgs []string
+func kamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
+	// Avoid concurrent access to the CLI
+	cmdMutex.Lock()
+	defer cmdMutex.Unlock()
 
-	cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
-
+	cmdArgs := []string{command, "-n", namespace, "--operator-id", operatorID}
 	cmdArgs = append(cmdArgs, args...)
 	return KamelWithContext(t, ctx, cmdArgs...)
 }
@@ -1912,7 +1915,7 @@ func Platform(t *testing.T, ctx context.Context, ns string) func() *v1.Integrati
 	return func() *v1.IntegrationPlatform {
 		lst := v1.NewIntegrationPlatformList()
 		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
-			failTest(t, err)
+			return nil
 		}
 		if len(lst.Items) == 0 {
 			return nil

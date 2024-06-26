@@ -44,7 +44,7 @@ func TestKamelCLIDump(t *testing.T) {
 			g.Expect(dump).To(ContainSubstring("Found 0 deployments:"))
 		})
 
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		t.Run("dump non-empty namespace", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())

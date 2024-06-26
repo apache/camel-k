@@ -141,7 +141,7 @@ func TestMavenProxy(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		// Check that operator pod has env_vars
 		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
@@ -197,7 +197,7 @@ func TestMavenProxyNotPresent(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 		//g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
 
 		// Run the Integration

@@ -40,12 +40,9 @@ func TestBuilderTimeout(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
-		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
+		InstallOperator(t, ctx, g, ns)
 
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		pl := Platform(t, ctx, ns)()
 		// set a short timeout to simulate the build timeout
 		pl.Spec.Build.Timeout = &metav1.Duration{
@@ -86,7 +83,7 @@ func TestMavenProfile(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 		t.Run("Run maven profile", func(t *testing.T) {
 			name := RandomizedSuffixName("java-maven-profile")
 

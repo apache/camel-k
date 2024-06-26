@@ -136,6 +136,8 @@ fi
 
 kubectl create ns camel-k
 REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+# Let's wait for the IntegrationPlatform to be ready before starting any operation
+kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=45s
 
 # Then run integration tests
 DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-knative

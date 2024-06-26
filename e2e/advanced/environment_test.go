@@ -66,7 +66,7 @@ func TestEnvironmentTrait(t *testing.T) {
 
 		// Install Camel K with the HTTP proxy environment variable
 		//g.Expect(InstallOperator(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		t.Run("Run integration with default environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-default")

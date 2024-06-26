@@ -37,7 +37,7 @@ import (
 
 func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		// Update platform with parameters required by this test
 		pl := Platform(t, ctx, ns)()
@@ -113,7 +113,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 
 func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 		// Update platform with parameters required by this test
 		pl := Platform(t, ctx, ns)()
 		pl.Spec.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyFIFO
