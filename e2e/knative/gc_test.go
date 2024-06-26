@@ -36,7 +36,7 @@ import (
 func TestGarbageCollectResources(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		integration := "platform-http-server"
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, integration), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, integration, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
@@ -44,7 +44,7 @@ func TestGarbageCollectResources(t *testing.T) {
 		g.Eventually(ServiceType(t, ctx, ns, integration), TestTimeoutMedium).Should(Equal(corev1.ServiceTypeClusterIP))
 
 		// Update integration and enable knative service trait - existing arbitrary service should be garbage collected
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
 
 		g.Eventually(KnativeService(t, ctx, ns, integration), TestTimeoutShort).ShouldNot(BeNil())
 		g.Eventually(ServiceType(t, ctx, ns, integration), TestTimeoutShort).Should(Equal(corev1.ServiceTypeExternalName))
@@ -53,14 +53,12 @@ func TestGarbageCollectResources(t *testing.T) {
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, integration, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Disable knative service trait again - this time knative service should be garbage collected
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/PlatformHttpServer.java", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "knative-service.enabled=false").Execute()).To(Succeed())
 
 		g.Eventually(KnativeService(t, ctx, ns, integration), TestTimeoutMedium).Should(BeNil())
 		g.Eventually(ServiceType(t, ctx, ns, integration), TestTimeoutMedium).Should(Equal(corev1.ServiceTypeClusterIP))
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, integration), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, integration, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

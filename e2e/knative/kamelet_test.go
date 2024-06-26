@@ -45,14 +45,14 @@ func TestKameletChange(t *testing.T) {
 		knChannel := "test-kamelet-messages"
 		knChannelConf := fmt.Sprintf("%s:InMemoryChannel:%s", messaging.SchemeGroupVersion.String(), knChannel)
 		timerSource := "my-timer-source"
-		g.Expect(CreateTimerKameletWithID(t, ctx, operatorID, ns, timerSource)()).To(Succeed())
+		g.Expect(CreateTimerKamelet(t, ctx, ns, timerSource)()).To(Succeed())
 		g.Expect(CreateKnativeChannel(t, ctx, ns, knChannel)()).To(Succeed())
 		// Consumer route that will read from the Knative channel
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/test-kamelet-display.yaml", "-w").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/test-kamelet-display.yaml", "-w").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "test-kamelet-display")).Should(Equal(corev1.PodRunning))
 
 		// Create the Pipe
-		g.Expect(KamelBindWithID(t, ctx, operatorID, ns, timerSource, knChannelConf, "-p", "source.message=HelloKnative!",
+		g.Expect(KamelBind(t, ctx, ns, timerSource, knChannelConf, "-p", "source.message=HelloKnative!",
 			"--trait", "health.enabled=true", "--trait", "health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, timerPipe)).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, timerPipe, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -66,7 +66,7 @@ func TestKameletChange(t *testing.T) {
 		))
 
 		// Update the Pipe
-		g.Expect(KamelBindWithID(t, ctx, operatorID, ns, timerSource, knChannelConf, "-p", "source.message=message is Hi",
+		g.Expect(KamelBind(t, ctx, ns, timerSource, knChannelConf, "-p", "source.message=message is Hi",
 			"--trait", "health.enabled=true", "--trait", "health.readiness-initial-delay=10", "--name", timerPipe).Execute()).To(Succeed())
 
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, timerPipe), TestTimeoutLong).Should(Equal(corev1.PodRunning))
