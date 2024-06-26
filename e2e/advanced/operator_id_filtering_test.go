@@ -41,12 +41,12 @@ func TestOperatorIDFiltering(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop1 string) {
 			operator1 := "operator-1"
-			InstallOperatorWithID(t, g, nsop1, operator1)
+			InstallOperatorWithID(t, ctx, g, nsop1, operator1)
 			g.Eventually(PlatformPhase(t, ctx, nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop2 string) {
 				operator2 := "operator-2"
-				InstallOperatorWithID(t, g, nsop2, operator2)
+				InstallOperatorWithID(t, ctx, g, nsop2, operator2)
 				g.Eventually(PlatformPhase(t, ctx, nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {

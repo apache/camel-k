@@ -42,7 +42,8 @@ import (
 )
 
 var (
-	lock sync.Mutex
+	lock   sync.Mutex
+	lockID sync.Mutex
 )
 
 func init() {
@@ -68,7 +69,7 @@ func GetEnvOrDefault(key string, deflt string) string {
 
 // InstallOperator is in charge to install a namespaced operator. The func must be
 // executed in a critical section as there may be concurrent access to it.
-func InstallOperator(t *testing.T, g *WithT, ns string) {
+func InstallOperator(t *testing.T, ctx context.Context, g *WithT, ns string) {
 	lock.Lock()
 	defer lock.Unlock()
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
@@ -80,89 +81,23 @@ func InstallOperator(t *testing.T, g *WithT, ns string) {
 			fmt.Sprintf("REGISTRY=%s", KAMEL_INSTALL_REGISTRY),
 			"install-k8s-ns"),
 	)
+	// Let's make sure the operator has been deployed
+	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 }
 
 // InstallOperatorWitID is in charge to install a namespaced operator with a given operator ID name.
-func InstallOperatorWithID(t *testing.T, g *WithT, ns, operatorID string) {
-	t.Skip("Not yet supported")
-}
+func InstallOperatorWithID(t *testing.T, ctx context.Context, g *WithT, ns, operatorID string) {
+	lockID.Lock()
+	defer lockID.Unlock()
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../")
+	fmt.Printf("Setting operator ID property as %s\n", operatorID)
+	ExpectExecSucceed(t, g,
+		Make(t,
+			fmt.Sprintf("OPERATOR_ID=%s", operatorID),
+			"set-install-k8s-ns-operator-id"),
+	)
 
-func installOperatorWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string) error {
-	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
-	// os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
-	err := Make(t,
-		fmt.Sprintf("NAMESPACE=%s", namespace),
-		fmt.Sprintf("REGISTRY=%s", KAMEL_INSTALL_REGISTRY),
-		"install-k8s-ns").Run()
-	fmt.Println(err)
-	return err
-	/*
-		if !pkgutil.StringSliceExists(args, "--build-timeout") {
-			// if --build-timeout is not explicitly passed as an argument, try to configure it
-			buildTimeout := os.Getenv("CAMEL_K_TEST_BUILD_TIMEOUT")
-			if buildTimeout == "" {
-				// default Build Timeout for tests
-				buildTimeout = "10m"
-			}
-			fmt.Printf("Setting build timeout to %s\n", buildTimeout)
-			installArgs = append(installArgs, "--build-timeout", buildTimeout)
-		}
-
-		if skipKameletCatalog {
-			installArgs = append(installArgs, "--skip-default-kamelets-setup")
-		}
-
-		logLevel := os.Getenv("CAMEL_K_TEST_LOG_LEVEL")
-		if len(logLevel) > 0 {
-			fmt.Printf("Setting log-level to %s\n", logLevel)
-			installArgs = append(installArgs, "--log-level", logLevel)
-		}
-
-		mvnCLIOptions := os.Getenv("CAMEL_K_TEST_MAVEN_CLI_OPTIONS")
-		if len(mvnCLIOptions) > 0 {
-			// Split the string by spaces
-			mvnCLIArr := strings.Split(mvnCLIOptions, " ")
-			for _, mc := range mvnCLIArr {
-				mc = strings.Trim(mc, " ")
-				if len(mc) == 0 {
-					continue
-				}
-
-				fmt.Printf("Adding maven cli option %s\n", mc)
-				installArgs = append(installArgs, "--maven-cli-option", mc)
-			}
-		}
-
-		runtimeVersion := os.Getenv("CAMEL_K_TEST_RUNTIME_VERSION")
-		if runtimeVersion != "" {
-			fmt.Printf("Setting runtime version to %s\n", runtimeVersion)
-			installArgs = append(installArgs, "--runtime-version", runtimeVersion)
-		}
-		baseImage := os.Getenv("CAMEL_K_TEST_BASE_IMAGE")
-		if baseImage != "" {
-			fmt.Printf("Setting base image to %s\n", baseImage)
-			installArgs = append(installArgs, "--base-image", baseImage)
-		}
-		opImage := os.Getenv("CAMEL_K_TEST_OPERATOR_IMAGE")
-		if opImage != "" {
-			fmt.Printf("Setting operator image to %s\n", opImage)
-			installArgs = append(installArgs, "--operator-image", opImage)
-		}
-		opImagePullPolicy := os.Getenv("CAMEL_K_TEST_OPERATOR_IMAGE_PULL_POLICY")
-		if opImagePullPolicy != "" {
-			fmt.Printf("Setting operator image pull policy to %s\n", opImagePullPolicy)
-			installArgs = append(installArgs, "--operator-image-pull-policy", opImagePullPolicy)
-		}
-		if len(os.Getenv("CAMEL_K_TEST_MAVEN_CA_PEM_PATH")) > 0 {
-			certName := "myCert"
-			secretName := "maven-ca-certs"
-			CreateSecretDecoded(t, ctx, namespace, os.Getenv("CAMEL_K_TEST_MAVEN_CA_PEM_PATH"), secretName, certName)
-			installArgs = append(installArgs, "--maven-repository", os.Getenv("KAMEL_INSTALL_MAVEN_REPOSITORIES"),
-				"--maven-ca-secret", secretName+"/"+certName)
-		}
-
-		installArgs = append(installArgs, args...)
-	*/
+	InstallOperator(t, ctx, g, ns)
 }
 
 func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {

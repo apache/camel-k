@@ -56,7 +56,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  non-olm:
+  install-and-upgrade:
     runs-on: ubuntu-latest
     steps:
 
@@ -75,40 +75,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install helm
 
-    - name: Install (Non OLM)
+    - name: Install and upgrade
       uses: ./.github/actions/e2e-install
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-
-  olm:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        submodules: recursive
-
-    - name: Install (OLM)
-      uses: ./.github/actions/e2e-install-olm
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-
-  upgrade:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        submodules: recursive
-
-    - name: Upgrade
-      uses: ./.github/actions/e2e-install-upgrade
       with:
         cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
         cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}

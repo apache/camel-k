@@ -133,6 +133,8 @@ fi
 
 kubectl create ns camel-k
 REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+# Let's wait for the IntegrationPlatform to be ready before starting any operation
+kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=45s
 
 # Then run all integration telemetry test rather than ending on first failure
 set -e

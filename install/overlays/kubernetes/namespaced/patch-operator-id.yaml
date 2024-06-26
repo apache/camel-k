@@ -14,26 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
 
-resources:
-- ../../../base
-- ../../../base/config/rbac/namespaced
-
-namespace: default
-
-patches:
-- path: patch-operator-id.yaml
-  target:
-    kind: Deployment
-
-    # You can provide any required adjustments here. Take the following as references:
-# patchesStrategicMerge:
-# - patch-toleration.yaml
-# - patch-node-selector.yaml
-# - patch-resource-requirements.yaml
-# patches:
-# - path: patch-log-level.yaml
-#   target:
-#     kind: Deployment
+- op: add
+  path: /spec/template/spec/containers/0/env/2/value
+  value: camel-k

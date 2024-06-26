@@ -143,12 +143,22 @@ export CAMEL_K_E2E_FAST_SETUP="true"
 set -e
 exit_code=0
 if [ "${SMOKE_TEST_ONLY}" == "true" ]; then
+  kubectl create ns camel-k
+  REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+  # Let's wait for the IntegrationPlatform to be ready before starting any operation
+  kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=45s
+
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-smoke || exit_code=1
 elif [ "${CUSTOM_INSTALL_TEST}" == "true" ]; then
+  make install-crds
+
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-advanced || exit_code=1
 else
   kubectl create ns camel-k
   REGISTRY="${KAMEL_INSTALL_REGISTRY}" make install-k8s-global
+  # Let's wait for the IntegrationPlatform to be ready before starting any operation
+  kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=45s
+
   DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common || exit_code=1
 fi
 set +e

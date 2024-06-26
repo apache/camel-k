@@ -41,7 +41,7 @@ func TestTektonLikeBehavior(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		// Store a configmap holding an integration source
 		var cmData = make(map[string][]byte)

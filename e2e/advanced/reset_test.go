@@ -36,7 +36,7 @@ func TestKamelReset(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		InstallOperator(t, g, ns)
+		InstallOperator(t, ctx, g, ns)
 
 		t.Run("Reset the whole platform", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml1")
