@@ -24,6 +24,7 @@ package traits
 
 import (
 	"context"
+	"os/exec"
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -87,5 +88,46 @@ func TestRollingUpdateDeploymentStrategyTrait(t *testing.T) {
 				}),
 			))
 		})
+	})
+}
+
+func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		nsRestr := "restr"
+		// Create restricted namespace
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"kubectl",
+				"create",
+				"ns",
+				nsRestr,
+			),
+		)
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"kubectl",
+				"label",
+				"--overwrite",
+				"ns",
+				nsRestr,
+				"pod-security.kubernetes.io/enforce=baseline",
+				"pod-security.kubernetes.io/enforce-version=latest",
+				"pod-security.kubernetes.io/enforce=restricted",
+				"pod-security.kubernetes.io/warn-version=latest",
+				"pod-security.kubernetes.io/audit=restricted",
+				"pod-security.kubernetes.io/audit-version=latest",
+			),
+		)
+		// Create an Integration into a restricted namespace
+		name := RandomizedSuffixName("java-fail")
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
+		// Check the error is reported into the Integration
+		g.Eventually(IntegrationPhase(t, ctx, nsRestr, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+		g.Eventually(IntegrationCondition(t, ctx, nsRestr, name, v1.IntegrationConditionReady)().Status).
+			Should(Equal(corev1.ConditionFalse))
+		g.Eventually(IntegrationCondition(t, ctx, nsRestr, name, v1.IntegrationConditionReady)().Message).
+			Should(ContainSubstring("is forbidden: violates PodSecurity"))
 	})
 }

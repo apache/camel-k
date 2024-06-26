@@ -41,10 +41,7 @@ func TestTektonLikeBehavior(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-tekton-like"
-
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+		InstallOperator(t, g, ns)
 
 		// Store a configmap holding an integration source
 		var cmData = make(map[string][]byte)
@@ -63,7 +60,7 @@ func TestTektonLikeBehavior(t *testing.T) {
 		}
 		t.Run("Run tekton task like delegate build and run to operator", func(t *testing.T) {
 			name := RandomizedSuffixName("java-tekton-basic")
-			g.Expect(CreateKamelPodWithIntegrationSource(t, ctx, ns, "tekton-task-basic", integration, "run", "/tmp/Java.java", "--name", name, "--operator-id", operatorID)).To(Succeed())
+			g.Expect(CreateKamelPodWithIntegrationSource(t, ctx, ns, "tekton-task-basic", integration, "run", "/tmp/Java.java", "--name", name)).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -72,7 +69,7 @@ func TestTektonLikeBehavior(t *testing.T) {
 			name := RandomizedSuffixName("java-tekton-run")
 			// Use an external image as source
 			externalImage := "quay.io/fuse_qe/echo-server:0.3.3"
-			g.Expect(CreateKamelPodWithIntegrationSource(t, ctx, ns, "tekton-task-run", integration, "run", "/tmp/Java.java", "-t", "container.image="+externalImage, "--name", name, "--operator-id", operatorID)).To(Succeed())
+			g.Expect(CreateKamelPodWithIntegrationSource(t, ctx, ns, "tekton-task-run", integration, "run", "/tmp/Java.java", "-t", "container.image="+externalImage, "--name", name)).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Echo"))

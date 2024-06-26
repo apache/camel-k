@@ -40,9 +40,7 @@ func TestBuilderTimeout(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+		InstallOperator(t, g, ns)
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
@@ -66,7 +64,7 @@ func TestBuilderTimeout(t *testing.T) {
 
 		t.Run("run yaml", func(t *testing.T) {
 			name := RandomizedSuffixName("yaml")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name, "-t", "builder.strategy=pod").Execute()).To(Succeed())
 			// As the build hits timeout, it keeps trying building
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseBuildingKit))
 			integrationKitName := IntegrationKit(t, ctx, ns, name)()
@@ -88,6 +86,7 @@ func TestMavenProfile(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		InstallOperator(t, g, ns)
 		t.Run("Run maven profile", func(t *testing.T) {
 			name := RandomizedSuffixName("java-maven-profile")
 
