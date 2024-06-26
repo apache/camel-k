@@ -55,6 +55,7 @@ func TestKnativeServiceURL(t *testing.T) {
 			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knative2.yaml", "--profile", string(cluster)).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "knative2"), TestTimeoutShort).Should(ContainSubstring("http://knative2.ns.domain"))
+			g.Eventually(Integration(t, ctx, ns, "knative2")().Status.RouteStatusFields.URL.String(), TestTimeoutShort).Should(Equal(""))
 			g.Eventually(IntegrationTraitProfile(t, ctx, ns, "knative2"), TestTimeoutShort).Should(Equal(v1.TraitProfile(string(cluster))))
 
 			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
