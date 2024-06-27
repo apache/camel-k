@@ -54,6 +54,11 @@ const (
 	defaultContainerSeccompProfileType       = corev1.SeccompProfileTypeRuntimeDefault
 	defaultContainerAllowPrivilegeEscalation = false
 	defaultContainerCapabilitiesDrop         = "ALL"
+
+	defaultContainerResourceCPU    = "125m"
+	defaultContainerResourceMemory = "128Mi"
+	defaultContainerLimitCPU       = "500m"
+	defaultContainerLimitMemory    = "512Mi"
 )
 
 type containerTrait struct {
@@ -73,6 +78,10 @@ func newContainerTrait() Trait {
 			SeccompProfileType:       defaultContainerSeccompProfileType,
 			AllowPrivilegeEscalation: pointer.Bool(defaultContainerAllowPrivilegeEscalation),
 			CapabilitiesDrop:         []corev1.Capability{defaultContainerCapabilitiesDrop},
+			RequestCPU:               defaultContainerResourceCPU,
+			RequestMemory:            defaultContainerResourceMemory,
+			LimitCPU:                 defaultContainerLimitCPU,
+			LimitMemory:              defaultContainerLimitMemory,
 		},
 	}
 }

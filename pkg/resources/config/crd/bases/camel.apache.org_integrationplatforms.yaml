@@ -734,10 +734,12 @@ spec:
                         - IfNotPresent
                         type: string
                       limitCPU:
-                        description: The maximum amount of CPU required.
+                        description: The maximum amount of CPU to be provided (default
+                          500 millicores).
                         type: string
                       limitMemory:
-                        description: The maximum amount of memory required.
+                        description: The maximum amount of memory to be provided (default
+                          512 Mi).
                         type: string
                       name:
                         description: The main container name. It's named `integration`
@@ -753,10 +755,12 @@ spec:
                           the `expose` parameter is true.
                         type: string
                       requestCPU:
-                        description: The minimum amount of CPU required.
+                        description: The minimum amount of CPU required (default 125
+                          millicores).
                         type: string
                       requestMemory:
-                        description: The minimum amount of memory required.
+                        description: The minimum amount of memory required (default
+                          128 Mi).
                         type: string
                       runAsNonRoot:
                         description: Security Context RunAsNonRoot configuration (default
@@ -2766,10 +2770,12 @@ spec:
                         - IfNotPresent
                         type: string
                       limitCPU:
-                        description: The maximum amount of CPU required.
+                        description: The maximum amount of CPU to be provided (default
+                          500 millicores).
                         type: string
                       limitMemory:
-                        description: The maximum amount of memory required.
+                        description: The maximum amount of memory to be provided (default
+                          512 Mi).
                         type: string
                       name:
                         description: The main container name. It's named `integration`
@@ -2785,10 +2791,12 @@ spec:
                           the `expose` parameter is true.
                         type: string
                       requestCPU:
-                        description: The minimum amount of CPU required.
+                        description: The minimum amount of CPU required (default 125
+                          millicores).
                         type: string
                       requestMemory:
-                        description: The minimum amount of memory required.
+                        description: The minimum amount of memory required (default
+                          128 Mi).
                         type: string
                       runAsNonRoot:
                         description: Security Context RunAsNonRoot configuration (default

@@ -28,13 +28,13 @@ type ContainerTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// To automatically enable the trait
 	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// The minimum amount of CPU required.
+	// The minimum amount of CPU required (default 125 millicores).
 	RequestCPU string `property:"request-cpu" json:"requestCPU,omitempty"`
-	// The minimum amount of memory required.
+	// The minimum amount of memory required (default 128 Mi).
 	RequestMemory string `property:"request-memory" json:"requestMemory,omitempty"`
-	// The maximum amount of CPU required.
+	// The maximum amount of CPU to be provided (default 500 millicores).
 	LimitCPU string `property:"limit-cpu" json:"limitCPU,omitempty"`
-	// The maximum amount of memory required.
+	// The maximum amount of memory to be provided (default 512 Mi).
 	LimitMemory string `property:"limit-memory" json:"limitMemory,omitempty"`
 	// Can be used to enable/disable exposure via kubernetes Service.
 	Expose *bool `property:"expose" json:"expose,omitempty"`

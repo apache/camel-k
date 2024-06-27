@@ -34,25 +34,41 @@ The option accept a value in the following format `Key[=Value]:Effect[:Seconds]`
 While installing the Camel K operator, you can also specify the resources requests and limits to assign to the operator `Pod` with `--operator-resources` option. The option will expect the configuration as required by https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Kubernetes Resource Management].
 
 ```
-kamel install --operator-resources requests.cpu=256m --operator-resources limits.cpu=500m --operator-resources limits.memory=512Mi ...
+kamel install --operator-resources limits.cpu=8 --operator-resources limits.memory=32Gi ...
 ```
 
 The value expected by the option are in the form `requestType.requestResource=value` where `requestType` must be either `requests` or `limits`, `requestResource` must be either `cpu` or `memory` and `value` expressed in the numeric value as expected by the resource. You can specify more than one `operator-resources`.
 
 NOTE: if you specify a limit, but does not specify a request, Kubernetes automatically assigns a request that matches the limit.
 
-=== Suggested configuration
+=== Default Operator Pod configuration
 
-The main contributor to compute resources consumption is likely to be the Maven builds that are performed in the operator `Pod` (assuming you use the default build strategy). So the resource requirements should be defined accordingly. The following requirements are sensible defaults that should work in most cases:
+The main Camel K Operator Pod contributor resources consumption is likely to be the number of parallel builds that are performed in the operator `Pod`. So the resource requirements should be defined accordingly. The following requirements are sensible defaults that should work in most cases:
 
 ```
 resources:
-  limits:
-    cpu: "1"
-    memory: 1Gi
   requests:
-    cpu: 500m
-    memory: 512Mi
+    memory: "4Gi"
+    cpu: "1"
+  limits:
+    memory: "16Gi"
+    cpu: "4"
 ```
 
-Note that if you plan to perform **native builds**, then the memory requirements must be increased significantly. Also, the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
+Note that if you plan to perform **native builds**, then the memory requirements may be increased significantly. Also, the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
+
+=== Default Integration Pod configuration
+
+The resource set on the container here is highly dependant on what your application is doing. You can control this behavior by setting opportunely the resources on the Integration via container trait.
+
+Be aware that the default are actually the following:
+
+```
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "125m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+```

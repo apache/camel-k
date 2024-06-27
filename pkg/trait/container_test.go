@@ -27,6 +27,7 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/pointer"
@@ -740,6 +741,27 @@ func TestUserSecurityContext(t *testing.T) {
 	assert.Equal(t, pointer.Bool(true), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
 	assert.Equal(t, []corev1.Capability{"DROP"}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Equal(t, []corev1.Capability{"ADD"}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
+}
+
+func TestUserDefaultResources(t *testing.T) {
+	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	traitCatalog := NewCatalog(nil)
+	conditions, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("container"))
+
+	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+
+	assert.NotNil(t, d)
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.Equal(t, resource.MustParse("500m"), *d.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu())
+	assert.Equal(t, resource.MustParse("125m"), *d.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu())
+	assert.Equal(t, resource.MustParse("512Mi"), *d.Spec.Template.Spec.Containers[0].Resources.Limits.Memory())
+	assert.Equal(t, resource.MustParse("128Mi"), *d.Spec.Template.Spec.Containers[0].Resources.Requests.Memory())
 }
 
 func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
