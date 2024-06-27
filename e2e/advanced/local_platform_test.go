@@ -65,7 +65,7 @@ func TestLocalPlatform(t *testing.T) {
 				pl.SetOperatorID(operatorID)
 
 				pl.Spec.Traits.Container = &traitv1.ContainerTrait{
-					LimitCPU: "0.1",
+					LimitCPU: "0.2",
 				}
 			})).To(Succeed())
 

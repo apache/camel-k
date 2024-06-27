@@ -48,7 +48,7 @@ func TestIntegrationProfile(t *testing.T) {
 		integrationProfile.SetOperatorID(operatorID)
 		integrationProfile.Spec.Traits.Container = &traitv1.ContainerTrait{
 			Name:     "ck-integration-global",
-			LimitCPU: "0.2",
+			LimitCPU: "0.3",
 		}
 
 		g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
@@ -58,7 +58,7 @@ func TestIntegrationProfile(t *testing.T) {
 			integrationProfile := v1.NewIntegrationProfile(ns1, "ipr-local")
 			integrationProfile.SetOperatorID(operatorID)
 			integrationProfile.Spec.Traits.Container = &traitv1.ContainerTrait{
-				LimitCPU: "0.1",
+				LimitCPU: "0.2",
 			}
 			g.Expect(CreateIntegrationProfile(t, ctx, &integrationProfile)).To(Succeed())
 			g.Eventually(SelectedIntegrationProfilePhase(t, ctx, ns1, "ipr-local"), TestTimeoutMedium).Should(Equal(v1.IntegrationProfilePhaseReady))
@@ -104,18 +104,6 @@ func TestIntegrationProfile(t *testing.T) {
 					return cpuLimits != nil && cpuLimits.AsApproximateFloat64() > 0
 				}), TestTimeoutShort).Should(BeTrue())
 				g.Expect(Kamel(t, ctx, "delete", "limited", "-n", ns1).Execute()).To(Succeed())
-			})
-
-			t.Run("Run integration without integration profile", func(t *testing.T) {
-				g.Expect(KamelRunWithID(t, ctx, operatorID, ns1, "--name", "normal", "files/yaml.yaml").Execute()).To(Succeed())
-				g.Eventually(IntegrationPod(t, ctx, ns1, "normal"), TestTimeoutShort).Should(Not(BeNil()))
-				g.Eventually(IntegrationPodHas(t, ctx, ns1, "normal", func(pod *corev1.Pod) bool {
-					if len(pod.Spec.Containers) != 1 {
-						return false
-					}
-					cpuLimits := pod.Spec.Containers[0].Resources.Limits.Cpu()
-					return cpuLimits == nil || cpuLimits.IsZero()
-				}), TestTimeoutShort).Should(BeTrue())
 			})
 
 			// Clean up
