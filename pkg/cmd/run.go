@@ -532,10 +532,7 @@ func (o *runCmdOptions) createOrUpdateIntegration(cmd *cobra.Command, c client.C
 	}
 
 	o.applyLabels(integration)
-
-	if err := o.applyAnnotations(cmd, c, integration); err != nil {
-		return nil, err
-	}
+	o.applyAnnotations(integration)
 
 	if o.ContainerImage == "" {
 		// Resolve resources
@@ -657,19 +654,9 @@ func (o *runCmdOptions) applyLabels(it *v1.Integration) {
 	}
 }
 
-func (o *runCmdOptions) applyAnnotations(cmd *cobra.Command, c client.Client, it *v1.Integration) error {
+func (o *runCmdOptions) applyAnnotations(it *v1.Integration) {
 	if it.Annotations == nil {
 		it.Annotations = make(map[string]string)
-	}
-
-	if !isOfflineCommand(cmd) && o.OperatorID != "" {
-		if err := verifyOperatorID(o.Context, c, o.OperatorID); err != nil {
-			if o.Force {
-				o.PrintfVerboseErrf(cmd, "%s, use --force option or make sure to use a proper operator id", err.Error())
-			} else {
-				return err
-			}
-		}
 	}
 
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
@@ -692,8 +679,6 @@ func (o *runCmdOptions) applyAnnotations(cmd *cobra.Command, c client.Client, it
 			it.Annotations[parts[0]] = parts[1]
 		}
 	}
-
-	return nil
 }
 
 func (o *runCmdOptions) resolveSources(cmd *cobra.Command, sources []string, it *v1.Integration) error {

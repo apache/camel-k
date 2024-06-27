@@ -30,13 +30,11 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
 	p "github.com/gertd/go-pluralize"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -237,18 +235,4 @@ func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.S
 	}
 
 	return reflect.StructField{}, false
-}
-
-func verifyOperatorID(ctx context.Context, client client.Client, operatorID string) error {
-	if pl, err := platformutil.LookupForPlatformName(ctx, client, operatorID); err != nil {
-		if k8serrors.IsForbidden(err) {
-			return nil
-		}
-
-		return err
-	} else if pl == nil {
-		return fmt.Errorf("unable to find operator with given id [%s] - resource may not be reconciled and get stuck in waiting state", operatorID)
-	}
-
-	return nil
 }

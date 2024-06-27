@@ -250,16 +250,6 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 		binding.Spec.ServiceAccountName = o.ServiceAccount
 	}
 
-	if !isOfflineCommand(cmd) && o.OperatorID != "" {
-		if err := verifyOperatorID(o.Context, client, o.OperatorID); err != nil {
-			if o.Force {
-				o.PrintfVerboseErrf(cmd, "%s, use --force option or make sure to use a proper operator id", err.Error())
-			} else {
-				return err
-			}
-		}
-	}
-
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'
 	binding.SetOperatorID(strings.TrimSpace(o.OperatorID))
 
