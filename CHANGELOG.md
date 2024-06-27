@@ -8,6 +8,7 @@
 
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
 - Add TimeoutSeconds to knative-service trait [\#5652](https://github.com/apache/camel-k/issues/5652)
+- Explain how to clean registry [\#5645](https://github.com/apache/camel-k/issues/5645)
 - Add TLS configuration in the ingress trait [\#5635](https://github.com/apache/camel-k/issues/5635)
 - Installation tests are unstable [\#5632](https://github.com/apache/camel-k/issues/5632)
 - Add license header file check workflow on PR in CI [\#5631](https://github.com/apache/camel-k/issues/5631)
@@ -39,6 +40,9 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/prometheus/common from 0.54.0 to 0.55.0 [\#5673](https://github.com/apache/camel-k/pull/5673) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.45 to 0.6.46 [\#5672](https://github.com/apache/camel-k/pull/5672) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Document how to clean container registry and script to prune. [\#5670](https://github.com/apache/camel-k/pull/5670) ([claudio4j](https://github.com/claudio4j))
 - fix\(trait\): explicit jolokia agent dependency [\#5668](https://github.com/apache/camel-k/pull/5668) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.130.0 to 2.130.1 [\#5665](https://github.com/apache/camel-k/pull/5665) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(\#5121\): adding timeZone property to the Cron trait spec [\#5664](https://github.com/apache/camel-k/pull/5664) ([lsergio](https://github.com/lsergio))
@@ -48,6 +52,7 @@
 - \(\#5652\) Added TimeoutSeconds to knative-serving trait [\#5653](https://github.com/apache/camel-k/pull/5653) ([hernanDatgDev](https://github.com/hernanDatgDev))
 - \(\#5635\) Add TLS configuration in the ingress trait [\#5650](https://github.com/apache/camel-k/pull/5650) ([romain-pfund](https://github.com/romain-pfund))
 - chore\(cmd\): remove deprecated .spec.integration usage [\#5649](https://github.com/apache/camel-k/pull/5649) ([squakez](https://github.com/squakez))
+- chore\(e2e\) Add options to customize vars with ENVs in cli e2e tests [\#5648](https://github.com/apache/camel-k/pull/5648) ([mmajerni](https://github.com/mmajerni))
 - fix\(e2e\): always build bundle and set local config [\#5647](https://github.com/apache/camel-k/pull/5647) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump org.apache.maven.plugins:maven-surefire-plugin from 3.2.5 to 3.3.0 in /java/crds [\#5644](https://github.com/apache/camel-k/pull/5644) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.120.1 to 2.130.0 [\#5643](https://github.com/apache/camel-k/pull/5643) ([dependabot[bot]](https://github.com/apps/dependabot))
