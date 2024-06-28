@@ -8,6 +8,7 @@
 
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
 - Add TimeoutSeconds to knative-service trait [\#5652](https://github.com/apache/camel-k/issues/5652)
+- Explain how to clean registry [\#5645](https://github.com/apache/camel-k/issues/5645)
 - Add TLS configuration in the ingress trait [\#5635](https://github.com/apache/camel-k/issues/5635)
 - Installation tests are unstable [\#5632](https://github.com/apache/camel-k/issues/5632)
 - Add license header file check workflow on PR in CI [\#5631](https://github.com/apache/camel-k/issues/5631)
