@@ -69,11 +69,11 @@ func GetEnvOrDefault(key string, deflt string) string {
 // InstallOperator is in charge to install a namespaced operator. The func must be
 // executed in a critical section as there may be concurrent access to it.
 func InstallOperator(t *testing.T, ctx context.Context, g *WithT, ns string) {
-	InstallOperatorWithConf(t, ctx, g, ns, "", nil)
+	InstallOperatorWithConf(t, ctx, g, ns, "", false, nil)
 }
 
 // InstallOperatorWithConf is in charge to install a namespaced operator with additional configurations.
-func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, operatorID string, envs map[string]string) {
+func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, operatorID string, global bool, envs map[string]string) {
 	lock.Lock()
 	defer lock.Unlock()
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
@@ -96,9 +96,13 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 			args = append(args, fmt.Sprintf("ENV=%s", joinedArgs))
 		}
 	}
+	makeRule := "install-k8s-ns"
+	if global {
+		makeRule = "install-k8s-global"
+	}
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../")
 	ExpectExecSucceed(t, g,
-		Make(t, "install-k8s-ns", args...),
+		Make(t, makeRule, args...),
 	)
 	// Let's make sure the operator has been deployed
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())

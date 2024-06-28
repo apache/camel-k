@@ -41,7 +41,7 @@ func TestIntegrationProfile(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-integration-profile"
-		InstallOperatorWithConf(t, ctx, g, ns, operatorID, nil)
+		InstallOperatorWithConf(t, ctx, g, ns, operatorID, true, nil)
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
 		integrationProfile.SetOperatorID(operatorID)
@@ -125,7 +125,7 @@ func TestIntegrationProfileInfluencesKit(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-ipr-kit"
-		InstallOperatorWithConf(t, ctx, g, ns, operatorID, nil)
+		InstallOperatorWithConf(t, ctx, g, ns, operatorID, false, nil)
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "ipr-global")
 		integrationProfile.SetOperatorID(operatorID)
@@ -166,7 +166,7 @@ func TestPropagateIntegrationProfileChanges(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		operatorID := "camel-k-ipr-changes"
-		InstallOperatorWithConf(t, ctx, g, ns, operatorID, nil)
+		InstallOperatorWithConf(t, ctx, g, ns, operatorID, false, nil)
 
 		integrationProfile := v1.NewIntegrationProfile(ns, "debug-profile")
 		integrationProfile.SetOperatorID(operatorID)

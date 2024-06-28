@@ -24,8 +24,6 @@ package advanced
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -41,10 +39,11 @@ type kitOptions struct {
 	traits       []string
 }
 
-func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, buildOrderStrategy v1.BuildOrderStrategy) {
+func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, condition func(runningBuilds int) bool, buildOrderStrategy v1.BuildOrderStrategy) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
 
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		pl := Platform(t, ctx, ns)()
 		// set maximum number of running builds and order strategy
 		pl.Spec.Build.MaxRunningBuilds = maxRunningBuilds
@@ -53,6 +52,10 @@ func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, buildOrderStrategy v
 			t.Error(err)
 			t.FailNow()
 		}
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformHas(t, ctx, ns, func(pl *v1.IntegrationPlatform) bool {
+			return pl.Status.Build.MaxRunningBuilds == maxRunningBuilds
+		}), TestTimeoutShort).Should(BeTrue())
 
 		buildA := "integration-a"
 		buildB := "integration-b"
@@ -85,22 +88,11 @@ func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, buildOrderStrategy v
 			},
 		}, v1.BuildPhaseScheduling, v1.IntegrationKitPhaseNone)
 
-		var notExceedsMaxBuildLimit = func(runningBuilds int) bool {
-			return runningBuilds <= 2
-		}
-
-		limit := 0
-		for limit < 5 && BuildPhase(t, ctx, ns, buildA)() == v1.BuildPhaseRunning {
-			// verify that number of running builds does not exceed max build limit
-			g.Consistently(BuildsRunning(BuildPhase(t, ctx, ns, buildA), BuildPhase(t, ctx, ns, buildB), BuildPhase(t, ctx, ns, buildC)), TestTimeoutShort, 10*time.Second).Should(Satisfy(notExceedsMaxBuildLimit))
-			limit++
-		}
-
-		// make sure we have verified max build limit at least once
-		if limit == 0 {
-			t.Error(errors.New(fmt.Sprintf("Unexpected build phase '%s' for %s - not able to verify max builds limit", BuildPhase(t, ctx, ns, buildA)(), buildA)))
-			t.FailNow()
-		}
+		g.Consistently(BuildsRunning(
+			BuildPhase(t, ctx, ns, buildA),
+			BuildPhase(t, ctx, ns, buildB),
+			BuildPhase(t, ctx, ns, buildC),
+		), TestTimeoutShort, 10*time.Second).Should(Satisfy(condition))
 
 		// verify that all builds are successful
 		g.Eventually(BuildPhase(t, ctx, ns, buildA), TestTimeoutLong).Should(Equal(v1.BuildPhaseSucceeded))
@@ -113,15 +105,27 @@ func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, buildOrderStrategy v
 }
 
 func TestKitMaxBuildLimitSequential(t *testing.T) {
-	kitMaxBuildLimit(t, 2, v1.BuildOrderStrategySequential)
+	// We must verify we have at least 1 build at a time
+	var condition = func(runningBuilds int) bool {
+		return runningBuilds <= 1
+	}
+	kitMaxBuildLimit(t, 2, condition, v1.BuildOrderStrategySequential)
 }
 
 func TestKitMaxBuildLimitFIFO(t *testing.T) {
-	kitMaxBuildLimit(t, 2, v1.BuildOrderStrategyFIFO)
+	// We may have up to 2 parallel builds
+	var condition = func(runningBuilds int) bool {
+		return runningBuilds <= 2
+	}
+	kitMaxBuildLimit(t, 2, condition, v1.BuildOrderStrategyFIFO)
 }
 
 func TestKitMaxBuildLimitDependencies(t *testing.T) {
-	kitMaxBuildLimit(t, 2, v1.BuildOrderStrategyDependencies)
+	// We may have up to 2 parallel builds
+	var condition = func(runningBuilds int) bool {
+		return runningBuilds <= 2
+	}
+	kitMaxBuildLimit(t, 2, condition, v1.BuildOrderStrategyDependencies)
 }
 
 func TestMaxBuildLimitWaitingBuilds(t *testing.T) {

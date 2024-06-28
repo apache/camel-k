@@ -139,7 +139,7 @@ func TestRunBroker(t *testing.T) {
 	WithNewTestNamespaceWithKnativeBroker(t, func(ctx context.Context, g *WithT, ns string) {
 		// This test require an adhoc operator to run properly
 		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		InstallOperatorWithConf(t, ctx, g, ns, operatorID, nil)
+		InstallOperatorWithConf(t, ctx, g, ns, operatorID, false, nil)
 		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(camelv1.IntegrationPlatformPhaseReady))
 
 		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/knativeevt1.yaml").Execute()).To(Succeed())

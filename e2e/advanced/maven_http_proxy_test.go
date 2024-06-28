@@ -141,8 +141,12 @@ func TestMavenProxy(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		InstallOperator(t, ctx, g, ns)
-
+		InstallOperatorWithConf(t, ctx, g, ns, "", false,
+			map[string]string{
+				"HTTP_PROXY": fmt.Sprintf("http://%s", hostname),
+				"NO_PROXY":   strings.Join(noProxy, ","),
+			},
+		)
 		// Check that operator pod has env_vars
 		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
 			if envVar := envvar.Get(op.Spec.Containers[0].Env, "HTTP_PROXY"); envVar != nil {
@@ -186,7 +190,7 @@ func TestMavenProxyNotPresent(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		//hostname := fmt.Sprintf("%s.%s.svc", "proxy-fake", ns)
+		hostname := fmt.Sprintf("%s.%s.svc", "proxy-fake", ns)
 		svc := Service(t, ctx, TestDefaultNamespace, "kubernetes")()
 		g.Expect(svc).NotTo(BeNil())
 		// It may be needed to populate the values from the cluster, machine and service network CIDRs
@@ -197,9 +201,12 @@ func TestMavenProxyNotPresent(t *testing.T) {
 		}
 		noProxy = append(noProxy, svc.Spec.ClusterIPs...)
 
-		InstallOperator(t, ctx, g, ns)
-		//g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=http://%s", hostname), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
-
+		InstallOperatorWithConf(t, ctx, g, ns, "", false,
+			map[string]string{
+				"HTTP_PROXY": fmt.Sprintf("http://%s", hostname),
+				"NO_PROXY":   strings.Join(noProxy, ","),
+			},
+		)
 		// Run the Integration
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
