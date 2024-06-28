@@ -80,10 +80,11 @@ func (o *kameletAddRepoCommandOptions) run(cmd *cobra.Command, args []string) er
 	}
 	var platform *v1.IntegrationPlatform
 	if o.OperatorID == "" {
-		platform, err = o.findIntegrationPlatform(cmd, c)
-	} else {
-		platform, err = o.getIntegrationPlatform(cmd, c)
+		o.OperatorID = platformutil.DefaultPlatformName
 	}
+
+	platform, err = o.getIntegrationPlatform(cmd, c)
+
 	if err != nil {
 		return err
 	} else if platform == nil {

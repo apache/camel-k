@@ -42,7 +42,7 @@ func TestKamelCLIPromote(t *testing.T) {
 	// Dev environment namespace
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsDev string) {
 		operatorDevID := "camel-k-cli-promote-dev"
-		InstallOperatorWithConf(t, ctx, g, nsDev, operatorDevID, nil)
+		InstallOperatorWithConf(t, ctx, g, nsDev, operatorDevID, false, nil)
 		g.Eventually(SelectedPlatformPhase(t, ctx, nsDev, operatorDevID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Dev content configmap
@@ -88,7 +88,7 @@ func TestKamelCLIPromote(t *testing.T) {
 		// Prod environment namespace
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsProd string) {
 			operatorProdID := "camel-k-cli-promote-prod"
-			InstallOperatorWithConf(t, ctx, g, nsProd, operatorProdID, nil)
+			InstallOperatorWithConf(t, ctx, g, nsProd, operatorProdID, false, nil)
 			g.Eventually(PlatformPhase(t, ctx, nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			t.Run("no configmap in destination", func(t *testing.T) {

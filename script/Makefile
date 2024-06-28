@@ -747,6 +747,7 @@ set-operator-id:
 ifdef OPERATOR_ID
 	@echo "INFO: setting operator ID to $(OPERATOR_ID)"
 	@sed -i 's/name: .*/name: $(OPERATOR_ID)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
+	cd $(KUST_TMP)/install/overlays/platform/ && kustomize edit add annotation camel.apache.org/operator.id:$(OPERATOR_ID)
 	@sed -i 's/value: .*/value: $(OPERATOR_ID)/' $(KUST_TMP)/$(KUSTOMIZE_DIR)/patch-operator-id.yaml
 else
 	@echo "INFO: no operator ID variable \"OPERATOR_ID\" provided. Keeping default."

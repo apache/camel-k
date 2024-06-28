@@ -104,11 +104,5 @@ func TestOLMInstallation(t *testing.T) {
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.Capabilities).To(Equal(kubernetes.DefaultOperatorSecurityContext().Capabilities))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
-
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-		g.Expect(Kamel(t, ctx, "uninstall", "-n", ns).Execute()).To(Succeed())
-		// Clean up cluster-wide resources that are not removed by OLM
-		g.Expect(Kamel(t, ctx, "uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
 	})
 }
