@@ -42,8 +42,7 @@ import (
 )
 
 var (
-	lock   sync.Mutex
-	lockID sync.Mutex
+	lock sync.Mutex
 )
 
 func init() {
@@ -70,34 +69,39 @@ func GetEnvOrDefault(key string, deflt string) string {
 // InstallOperator is in charge to install a namespaced operator. The func must be
 // executed in a critical section as there may be concurrent access to it.
 func InstallOperator(t *testing.T, ctx context.Context, g *WithT, ns string) {
+	InstallOperatorWithConf(t, ctx, g, ns, "", nil)
+}
+
+// InstallOperatorWithConf is in charge to install a namespaced operator with additional configurations.
+func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, operatorID string, envs map[string]string) {
 	lock.Lock()
 	defer lock.Unlock()
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
+	args := []string{fmt.Sprintf("NAMESPACE=%s", ns)}
+	if KAMEL_INSTALL_REGISTRY != "" {
+		args = append(args, fmt.Sprintf("REGISTRY=%s", KAMEL_INSTALL_REGISTRY))
+	}
+	if operatorID != "" {
+		fmt.Printf("Setting operator ID property as %s\n", operatorID)
+		args = append(args, fmt.Sprintf("OPERATOR_ID=%s", operatorID))
+	}
+	if envs != nil {
+		envArgs := make([]string, len(envs))
+		for k, v := range envs {
+			envArgs = append(envArgs, fmt.Sprintf("%s=%s", k, v))
+		}
+		if len(envArgs) > 0 {
+			joinedArgs := strings.Join(envArgs, " ")
+			fmt.Printf("Setting operator env vars as %s\n", joinedArgs)
+			args = append(args, fmt.Sprintf("ENV=%s", joinedArgs))
+		}
+	}
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../")
-	fmt.Printf("Installing namespaced operator in namespace %s with registry %s\n", ns, KAMEL_INSTALL_REGISTRY)
 	ExpectExecSucceed(t, g,
-		Make(t,
-			fmt.Sprintf("NAMESPACE=%s", ns),
-			fmt.Sprintf("REGISTRY=%s", KAMEL_INSTALL_REGISTRY),
-			"install-k8s-ns"),
+		Make(t, "install-k8s-ns", args...),
 	)
 	// Let's make sure the operator has been deployed
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-}
-
-// InstallOperatorWitID is in charge to install a namespaced operator with a given operator ID name.
-func InstallOperatorWithID(t *testing.T, ctx context.Context, g *WithT, ns, operatorID string) {
-	lockID.Lock()
-	defer lockID.Unlock()
-	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../")
-	fmt.Printf("Setting operator ID property as %s\n", operatorID)
-	ExpectExecSucceed(t, g,
-		Make(t,
-			fmt.Sprintf("OPERATOR_ID=%s", operatorID),
-			"set-install-k8s-ns-operator-id"),
-	)
-
-	InstallOperator(t, ctx, g, ns)
 }
 
 func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {

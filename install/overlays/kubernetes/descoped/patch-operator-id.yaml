@@ -14,19 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ---------------------------------------------------------------------------
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
 
-resources:
-- ../../../base
-- ../../../base/config/rbac/descoped
-
-namespace: camel-k
-
-patches:
-- path: patch-watch-namespace-global.yaml
-  target:
-    kind: Deployment
-- path: patch-operator-id.yaml
-  target:
-    kind: Deployment
+- op: add
+  path: /spec/template/spec/containers/0/env/2/value
+  value: camel-k
