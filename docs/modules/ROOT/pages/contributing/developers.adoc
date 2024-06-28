@@ -57,7 +57,7 @@ This is a high-level overview of the project structure:
 [options="header"]
 |=======================
 | Path						| Content
-| https://github.com/apache/camel-k/tree/main/addons[/addons]       | Contains various of addons. 
+| https://github.com/apache/camel-k/tree/main/addons[/addons]       | Contains various of addons.
 | https://github.com/apache/camel-k/tree/main/build[/build]			| Contains the Docker and Maven build configuration.
 | https://github.com/apache/camel-k/tree/main/cmd[/cmd]			| Contains the entry points (the *main* functions) for the **camel-k** binary (manager) and the **kamel** client tool.
 | https://github.com/apache/camel-k/tree/main/docs[/docs]			| Contains the documentation website based on https://antora.org/[Antora].
@@ -130,19 +130,6 @@ For more detail on integration testing, refer to the following documentation:
 
 If you want to install everything you have in your source code and see it running on Kubernetes, you need to run the following command:
 
-=== For Red Hat CodeReady Containers (CRC)
-
-* You need to have https://docs.docker.com/get-docker/[Docker] installed and running (or connected to a Docker daemon)
-* You need to set up Docker daemon to https://docs.docker.com/registry/insecure/[trust] CRC's insecure Docker registry which is exposed by default through the route `default-route-openshift-image-registry.apps-crc.testing`. One way of doing that is to instruct the Docker daemon to trust the certificate:
-** `oc extract secret/router-ca --keys=tls.crt -n openshift-ingress-operator`: to extract the certificate
-** `sudo cp tls.crt /etc/docker/certs.d/default-route-openshift-image-registry.apps-crc.testing/ca.crt`: to copy the certificate for Docker daemon to trust
-** `docker login -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing`: to test that the certificate is trusted
-* Run `make install-crc`: to build the project and install it in the current namespace on CRC
-* You can specify a different namespace with `make install-crc project=myawesomeproject`
-* To uninstall Camel K, run `kamel uninstall --all --olm=false`
-
-The commands assume you have an already running CRC instance and logged in correctly.
-
 === For Minikube
 
 First remove any camel k operator you may have installed, otherwise it will conflict with the new one we will build and install.
@@ -150,7 +137,18 @@ First remove any camel k operator you may have installed, otherwise it will conf
 * Enable the `registry` minikube addon: `minikube addons enable registry`
 * Set the access to the internal minikube registry: `eval $(minikube docker-env)`
 * Run `make images` to build the project and install the image in the internal minikube registry
-* Install camel-k-operator: `./kamel install`
+* Install camel-k-operator: `make install-k8s-global`
+
+=== For Red Hat CodeReady Containers (CRC)
+
+* You need to have https://docs.docker.com/get-docker/[Docker] installed and running (or connected to a Docker daemon)
+* You need to set up Docker daemon to https://docs.docker.com/registry/insecure/[trust] CRC's insecure Docker registry which is exposed by default through the route `default-route-openshift-image-registry.apps-crc.testing`. One way of doing that is to instruct the Docker daemon to trust the certificate:
+** `oc extract secret/router-ca --keys=tls.crt -n openshift-ingress-operator`: to extract the certificate
+** `sudo cp tls.crt /etc/docker/certs.d/default-route-openshift-image-registry.apps-crc.testing/ca.crt`: to copy the certificate for Docker daemon to trust
+** `docker login -u kubeadmin -p $(oc whoami -t) default-route-openshift-image-registry.apps-crc.testing`: to test that the certificate is trusted
+* Run `make install-openshift-global`
+
+The commands assume you have an already running CRC instance and logged in correctly.
 
 === For remote Kubernetes/OpenShift clusters
 
@@ -158,10 +156,9 @@ If you have changed anything locally and want to apply the changes to a remote c
 
 [source]
 ----
-kamel install --operator-image=docker.io/myrepo/camel-k:2.4.0-SNAPSHOT --operator-image-pull-policy=Always --olm=false
+CUSTOM_IMAGE=docker.io/myrepo/camel-k CUSTOM_VERSION=2.4.0-SNAPSHOT make bundle
+make install-k8s-global
 ----
-
-Note `--olm=false` is necessary as otherwise the OLM bundle version is preferred.
 
 === Local Helm installation
 
