@@ -56,6 +56,21 @@ This should be within the standard convention adopted by https://docs.docker.com
 
 NOTE: you can configure Camel K to use an insecure private registry. However, your Kubernetes cluster may not be able to https://github.com/apache/camel-k/issues/4720#issuecomment-1708228367[pull images from an insecure registry without proper configuration].
 
+[[configuring-registry-list]]
+=== Special container registry requirements
+We have some hints that can help you configuring on the most common platforms:
+
+- xref:installation/registry/digitalocean.adoc[DigitalOcean]
+- xref:installation/registry/dockerhub.adoc[Docker Hub]
+- xref:installation/registry/github.adoc[Github Packages]
+- xref:installation/registry/gcr.adoc[Gcr.io]
+- xref:installation/registry/icr.adoc[IBM Container Registry]
+- xref:installation/registry/k3s.adoc[K3s]
+
+[[configuring-registry-run-it-yours]]
+== Run your own container registry
+You can also xref:installation/registry/own.adoc[run your own registry], but this option is recommended only for advanced use cases as it may requires certain changes in the cluster configuration, so, make sure to understand how each change may affect your cluster. As you've seen in the diagram above, the cluster has to be aware of the presence of the registry in order to pull the images pushed by the operator.
+
 [[pruning-registry]]
 == Pruning unused images from container registry
 
@@ -116,18 +131,3 @@ Untagged: 10.98.248.245/camel-k/camel-k-kit-cpth0mtf799b89lheom0@sha256:3857f8e3
 Deleted: sha256:1015a6b18f164e9b086337e69a98e5850149c158cb778bac6059984756dc0528
 Deleted: sha256:2f0d224916e77654c4401f6fc4b1147a9a6e3ccf713213c38e877d7b939bab81
 ```
-
-[[configuring-registry-list]]
-=== Special container registry requirements
-We have some hints that can help you configuring on the most common platforms:
-
-- xref:installation/registry/digitalocean.adoc[DigitalOcean]
-- xref:installation/registry/dockerhub.adoc[Docker Hub]
-- xref:installation/registry/github.adoc[Github Packages]
-- xref:installation/registry/gcr.adoc[Gcr.io]
-- xref:installation/registry/icr.adoc[IBM Container Registry]
-- xref:installation/registry/k3s.adoc[K3s]
-
-[[configuring-registry-run-it-yours]]
-== Run your own container registry
-You can also xref:installation/registry/own.adoc[run your own registry], but this option is recommended only for advanced use cases as it may requires certain changes in the cluster configuration, so, make sure to understand how each change may affect your cluster. As you've seen in the diagram above, the cluster has to be aware of the presence of the registry in order to pull the images pushed by the operator.
