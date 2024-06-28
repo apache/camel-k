@@ -37,7 +37,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-func TestEnvironmentTrait(t *testing.T) {
+func TestHTTPProxy(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
@@ -65,8 +65,12 @@ func TestEnvironmentTrait(t *testing.T) {
 		}
 
 		// Install Camel K with the HTTP proxy environment variable
-		//g.Expect(InstallOperator(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())
-		InstallOperator(t, ctx, g, ns)
+		InstallOperatorWithConf(t, ctx, g, ns, "",
+			map[string]string{
+				"HTTP_PROXY": httpProxy,
+				"NO_PROXY":   strings.Join(noProxy, ","),
+			},
+		)
 
 		t.Run("Run integration with default environment", func(t *testing.T) {
 			name := RandomizedSuffixName("java-default")

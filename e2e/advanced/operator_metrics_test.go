@@ -49,8 +49,12 @@ func TestMetrics(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		//g.Expect(InstallOperator(t, ctx, operatorID, ns, "--log-level", "debug")).To(Succeed())
-		InstallOperator(t, ctx, g, ns)
+		// Install Camel K with the log debug enabled
+		InstallOperatorWithConf(t, ctx, g, ns, "",
+			map[string]string{
+				"LOG_LEVEL": "debug",
+			},
+		)
 
 		name := RandomizedSuffixName("java")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())

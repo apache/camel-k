@@ -23,3 +23,8 @@ resources:
 - ../../../base/config/rbac/openshift/namespaced
 
 namespace: default
+
+patches:
+- path: patch-operator-id.yaml
+  target:
+    kind: Deployment

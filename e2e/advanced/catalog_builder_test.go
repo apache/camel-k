@@ -58,7 +58,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 			g.Expect(
 				KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "camel.runtime-version=1.15.0").Execute()).To(Succeed())
 
-			g.Eventually(CamelCatalog(t, ctx, ns, nonCompatibleCatalogName)).ShouldNot(BeNil())
+			g.Eventually(CamelCatalog(t, ctx, ns, nonCompatibleCatalogName), TestTimeoutMedium).ShouldNot(BeNil())
 			g.Eventually(CamelCatalogPhase(t, ctx, ns, nonCompatibleCatalogName)).Should(Equal(v1.CamelCatalogPhaseError))
 			g.Eventually(CamelCatalogCondition(t, ctx, ns, nonCompatibleCatalogName, v1.CamelCatalogConditionReady)().Message).Should(ContainSubstring("Container image tool missing in catalog"))
 

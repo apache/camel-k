@@ -737,11 +737,35 @@ DEFAULT_NS = "camel-k"
 
 .PHONY: install install-k8s-global install-k8s-ns install-openshift-global install-openshift-ns
 
-install-operator:
-	@echo "####### Installing operator..."
+clone-kustomize-dir:
 	$(eval KUST_TMP=$(shell mktemp -d))
 	@echo "... cloning installation files to $(KUST_TMP)"
 	cp -Lr install $(KUST_TMP)/.
+
+# the set-operator targets are mostly thought as an utility for the e2e which require certain operator settings
+set-operator-id:
+ifdef OPERATOR_ID
+	@echo "INFO: setting operator ID to $(OPERATOR_ID)"
+	@sed -i 's/name: .*/name: $(OPERATOR_ID)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
+	@sed -i 's/value: .*/value: $(OPERATOR_ID)/' $(KUST_TMP)/$(KUSTOMIZE_DIR)/patch-operator-id.yaml
+else
+	@echo "INFO: no operator ID variable \"OPERATOR_ID\" provided. Keeping default."
+endif
+
+# ENV is expected to be in the formal ENV="myvar1=v1 myvar2=v2 ..."
+set-operator-env:
+ifdef ENV
+	@for n in $(ENV); do \
+		k=$${n%=*}; \
+		v=$${n#*=}; \
+		echo "INFO: setting operator env var $${k}=$${v}"; \
+		cd $(KUST_TMP)/$(KUSTOMIZE_DIR) && kustomize edit add patch --kind Deployment --patch \
+		 	"[{\"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/env/-\", \"value\": {\"name\": \"$${k}\", \"value\": \"$${v}\"}}]"; \
+    done
+endif
+
+install-operator:
+	@echo "####### Installing operator..."
 ifndef NAMESPACE
 	@echo "WARN: no namespace specified, using default namespace $(DEFAULT_NS)"
 	$(eval NAMESPACE=$(DEFAULT_NS))
@@ -765,30 +789,21 @@ ifneq ($(MINIKUBE_REGISTRY), "")
 endif
 endif
 
-set-install-k8s-ns-operator-id:
-ifdef OPERATOR_ID
-	@echo "INFO: setting operator ID to $(OPERATOR_ID)"
-	@sed -i 's/name: .*/name: $(OPERATOR_ID)/' install/overlays/platform/integration-platform.yaml
-	@sed -i 's/value: .*/value: $(OPERATOR_ID)/' install/overlays/kubernetes/namespaced/patch-operator-id.yaml
-else
-	@echo "INFO: no operator ID variable \"OPERATOR_ID\" provided"
-endif
-
 install-k8s-global: DEFAULT_NS="camel-k"
 install-k8s-global: KUSTOMIZE_DIR="install/overlays/kubernetes/descoped"
-install-k8s-global: install-operator install-registry
+install-k8s-global: clone-kustomize-dir set-operator-id set-operator-env install-operator install-registry
 
 install-k8s-ns: DEFAULT_NS="default"
 install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/namespaced"
-install-k8s-ns: install-operator install-registry
+install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator install-registry
 
 install-openshift-global: DEFAULT_NS="camel-k"
 install-openshift-global: KUSTOMIZE_DIR="install/overlays/openshift/descoped"
-install-openshift-global: install-operator
+install-openshift-global: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 install-openshift-ns: DEFAULT_NS="default"
 install-openshift-ns: KUSTOMIZE_DIR="install/overlays/openshift/namespaced"
-install-openshift-ns: install-operator
+install-openshift-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 uninstall:
 ifdef NAMESPACE

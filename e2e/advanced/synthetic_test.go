@@ -60,11 +60,12 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// Install Camel K with the synthetic Integration feature variable
-		// g.Expect(InstallOperator(t, ctx, operatorID, ns,
-		// 	"--operator-env-vars", "CAMEL_K_SYNTHETIC_INTEGRATIONS=true",
-		// )).To(Succeed())
-		InstallOperator(t, ctx, g, ns)
+		// Install Camel K with the proper configuration support
+		InstallOperatorWithConf(t, ctx, g, ns, "",
+			map[string]string{
+				"CAMEL_K_SYNTHETIC_INTEGRATIONS": "true",
+			},
+		)
 		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
 			if envVar := envvar.Get(op.Spec.Containers[0].Env, "CAMEL_K_SYNTHETIC_INTEGRATIONS"); envVar != nil {
 				return envVar.Value == "true"
