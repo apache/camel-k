@@ -8,25 +8,6 @@ Camel K allows us to run Camel integrations directly on a Kubernetes or OpenShif
 
 Camel K may require a container registry which is used to store the images built for your applications. Certain clusters may use their internal container registry (ie, Openshift, Minikube or https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry[KEP-1755 compatible] clusters). If it's not the case for your cluster make sure to have a xref:installation/registry/registry.adoc#configuring-registry-install-time[container registry] available and set it according the specific installation methodology chosen.
 
-[[cli]]
-== Installation via Kamel CLI
-
-To start using Camel K you need the **"kamel"** CLI tool, that can be used to both configure the cluster and run integrations. Look into the https://github.com/apache/camel-k/releases[release page] for the latest version of the *camel-k-client* tool for your specific platform.
-
-Download and deflate the archive. It contains a small binary file named `kamel` that you should put into your system path. For example, if you're using Linux, you can put `kamel` in `/usr/bin`.
-
-Once you have put the `kamel` CLI in the path, log into your cluster using the standard `oc` (OpenShift) or `kubectl` (Kubernetes) client tool and execute the following command to install Camel K:
-
-[source]
-----
-$ kamel install --olm=false
-----
-
-This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace with the default settings.
-
-IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately, this operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
-For CRC, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for the first-time installation.
-
 [[helm]]
 == Installation via Helm Hub
 

@@ -59,10 +59,11 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     installCommand,
-		Short:   "Install Camel K on a Kubernetes cluster",
-		Long:    `Install Camel K on a Kubernetes or OpenShift cluster.`,
-		PreRunE: options.decode,
+		Use:        installCommand,
+		Short:      "Install Camel K on a Kubernetes cluster",
+		Long:       `Install Camel K on a Kubernetes or OpenShift cluster.`,
+		Deprecated: "consider using Kustomize, Helm or OLM (see https://camel.apache.org/camel-k/next/installation/installation.html)",
+		PreRunE:    options.decode,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err

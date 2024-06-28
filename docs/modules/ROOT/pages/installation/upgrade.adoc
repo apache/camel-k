@@ -5,17 +5,21 @@ Camel K is delivering new features with each new release, so, you'll be probably
 
 NOTE: you must notice that the deployment resources linked to an Integration (ie, Deployment, Knative-Service or CronJob) can change, if the new operator is setting any new configuration. This would lead to a transparent Pod rollout for all the existing Integrations at their very first reconciliation loop cycle (when the new operator will takeover from the previous one).
 
-[[cli]]
-== Upgrade via Kamel CLI
+[[kustomize]]
+== Upgrade via Kustomize
 
-The CLI needs to perform a forcefully installation on top of the existing installation. This is required in order to upgrade the CRDs and any other configuration in the new operator. You need to replace your `kamel` CLI binary with the new one released. Once you have replaced your new `kamel` you can proceed with the installation:
+If you want to upgrade via https://kustomize.io[Kustomize] you'll need to execute the same installation procedure you did for the previous version and add the `--force-conflicts` flag which will take care to overwrite any conflicting configuration (ie, rewriting the CRDs). Here an example for a descoped (global) installation procedure:
 
-[source]
-----
-kamel install --force --olm=false
-----
+```
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side --force-conflicts
+```
 
-[[helms]]
+[[operatorhub]]
+== Upgrade via Operator Hub
+
+Upgrading via https://operatorhub.io/[Operator Hub] may be automatically done by the cluster if this option was set at installation time. If not, you need to follow the instructions in the https://operatorhub.io/operator/camel-k[Camel K Operator Hub] page.
+
+[[helm]]
 == Upgrade via Helm
 
 Generally, when upgrading a patch or a minor version, we may introduce slight non-breaking compatibility changes in CRDs. These changes should be onboard-ed with the installation procedure you're using (CLI, OLM, Kustomize). However, you may want to control the upgrade of CRDs (for instance, upgrading in Helm, which, does not support CRDs upgrade out of the box). In this case, before doing the upgrade, you'll need to manually upgrade the CRDs, in order to use the new parameters expected by the new operator you're upgrading to. For Helm, this would turn in an operation like the following one:
@@ -27,20 +31,6 @@ $ tar xvzf camel-k-x.y.z.tgz
 $ kubectl replace -f camel-k/crds
 # Upgrade the `camel-k` Deployment
 $ helm upgrade camel-k/camel-k --version x.y.z
-```
-
-[[operatorhub]]
-== Upgrade via Operator Hub
-
-Upgrading via https://operatorhub.io/[Operator Hub] may be automatically done by the cluster if this option was set at installation time. If not, you need to follow the instructions in the https://operatorhub.io/operator/camel-k[Camel K Operator Hub] page.
-
-[[kustomize]]
-== Upgrade via Kustomize
-
-If you want to upgrade via https://kustomize.io[Kustomize] you'll need to execute the same installation procedure you did for the previous version and add the `--force-conflicts` flag which will take care to overwrite any conflicting configuration (ie, rewriting the CRDs). Here an example for a descoped (global) installation procedure:
-
-```
-$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side --force-conflicts
 ```
 
 NOTE: you may need to perform more configuration to reflect the same customization configuration done in the previous version installation.
@@ -59,7 +49,7 @@ Since Camel K version 2, we're able to run any Camel K runtime version from the 
 
 ----
 kamel run /tmp/Test.java -t camel.runtime-version=1.17.0
-kamel install --force //ie, version 2.0.0
+kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side --force-conflicts //ie, version 2.4.0
 kamel rebuild test
 kamel logs test
 [1] 2023-04-13 13:38:43,648 INFO  [org.apa.cam.k.Runtime] (main) Apache Camel K Runtime 1.17.0

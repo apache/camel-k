@@ -54,7 +54,7 @@ Camel K integrations are based on https://github.com/apache/camel-k-runtime[Came
 make images CAMEL_K_RUNTIME_DIR=<path/to/local/ck-runtime/project>
 ----
 
-Once this is done you need to re-install via `./kamel install`.
+Once this is done you need to re-install via `make install-k8s-global`.
 
 [[local-multi-arch]]
 === Local Multiple Architecture
