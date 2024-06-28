@@ -46,6 +46,15 @@ operator id:
 kubectl annotate integration timer-to-log camel.apache.org/operator.id=operator-2 --overwrite
 ----
 
+[[advanced-installation-caveat]]
+== Installation caveat
+
+In order to install more than one operator globally, you may need to change the ClusterRoleBindings to let more than one operator to have the RBAC set consistently. If you use a Kustomize installation approach, for example, you need to execute the following procedure to rename the roles and not conflicting between each other:
+
+```
+cd /install/base/config/rbac/descoped && kustomize edit set namesuffix -- -$OPERATOR_ID
+```
+
 [[advanced-installation-integration-profile]]
 == Apply custom IntegrationProfile settings
 
