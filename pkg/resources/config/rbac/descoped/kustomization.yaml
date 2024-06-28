@@ -36,3 +36,4 @@ resources:
 - operator-cluster-role-binding-podmonitors.yaml
 - operator-cluster-role-binding-strimzi.yaml
 - operator-cluster-role-binding.yaml
+nameSuffix: -my-operator

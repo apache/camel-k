@@ -396,6 +396,7 @@ func MakeWithContext(t *testing.T, rule string, args ...string) *exec.Cmd {
 	}
 
 	args = append([]string{"-C", makeDir, rule}, args...)
+	fmt.Println("Running make with arguments:", args)
 	return exec.Command("make", args...)
 }
 

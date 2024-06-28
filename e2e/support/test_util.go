@@ -98,6 +98,7 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 	}
 	makeRule := "install-k8s-ns"
 	if global {
+		fmt.Printf("Preparing for global installation")
 		makeRule = "install-k8s-global"
 	}
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../")
