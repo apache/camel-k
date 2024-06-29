@@ -17,6 +17,7 @@
 - Trait annotations saved on the IntegrationKit resource [\#5620](https://github.com/apache/camel-k/issues/5620)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
 - maven-settings-offline-template.xml does not contain license [\#5603](https://github.com/apache/camel-k/issues/5603)
+- Set default containers resources [\#5601](https://github.com/apache/camel-k/issues/5601)
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
 - Nightly release note still define ARM64 specific instructions [\#5596](https://github.com/apache/camel-k/issues/5596)
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
