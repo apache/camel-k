@@ -99,12 +99,36 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 		fmt.Printf("Preparing for global installation")
 		makeRule = "install-k8s-global"
 	}
+	// TODO make this a func input variable instead
 	os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../")
 	ExpectExecSucceed(t, g,
 		Make(t, makeRule, args...),
 	)
 	// Let's make sure the operator has been deployed
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+}
+
+// InstallOperator will delete operator resources from namespace (keeps CRDs).
+func UninstallOperator(t *testing.T, ctx context.Context, g *WithT, ns, makedir string) {
+	lock.Lock()
+	defer lock.Unlock()
+	args := []string{fmt.Sprintf("NAMESPACE=%s", ns)}
+
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makedir)
+	ExpectExecSucceed(t, g,
+		Make(t, "uninstall", args...),
+	)
+}
+
+// UninstallCRDs will delete Camel K installed CRDs.
+func UninstallCRDs(t *testing.T, ctx context.Context, g *WithT, makedir string) {
+	lock.Lock()
+	defer lock.Unlock()
+
+	os.Setenv("CAMEL_K_TEST_MAKE_DIR", makedir)
+	ExpectExecSucceed(t, g,
+		Make(t, "uninstall-crds"),
+	)
 }
 
 func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
