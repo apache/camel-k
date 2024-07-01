@@ -31,8 +31,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/log"
-
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gexec"
 	. "github.com/onsi/gomega/gstruct"
@@ -128,27 +126,4 @@ func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
 	g.Eventually(session).Should(gexec.Exit(0))
 	require.NoError(t, err)
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
-}
-
-// Cleanup Clean up the cluster ready for the next set of tests
-func Cleanup(t *testing.T, ctx context.Context) {
-	// Remove the locally installed operator
-	if err := UninstallAll(t, ctx); err != nil {
-		log.Error(err, "Failed to uninstall Camel K")
-	}
-
-	// Ensure the CRDs & ClusterRoles are reinstalled if not already
-	if err := Kamel(t, ctx, "install", "--olm=false", "--cluster-setup").Execute(); err != nil {
-		log.Error(err, "Failed to perform Camel K cluster setup")
-	}
-}
-
-// UninstallAll Removes all items
-func UninstallAll(t *testing.T, ctx context.Context) error {
-	return Kamel(t, ctx, "uninstall", "--olm=false", "--all").Execute()
-}
-
-// UninstallFromNamespace Removes operator from given namespace
-func UninstallFromNamespace(t *testing.T, ctx context.Context, ns string) error {
-	return Kamel(t, ctx, "uninstall", "--olm=false", "-n", ns).Execute()
 }

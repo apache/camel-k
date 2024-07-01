@@ -299,7 +299,7 @@ test-smoke:
 #
 test-advanced:
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -p=$(TEST_ADVANCED_PARALLEL_COUNT) -timeout 90m -v ./e2e/advanced --parallel 1 -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -p 1 -timeout 90m -v ./e2e/advanced --parallel $(TEST_ADVANCED_PARALLEL_COUNT) -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #

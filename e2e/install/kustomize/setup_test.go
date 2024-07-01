@@ -40,14 +40,8 @@ import (
 )
 
 func TestKustomizeNamespaced(t *testing.T) {
-	// TODO, likely we need to adjust this test with a Kustomize overlay for Openshift
-	// which would not require the registry setting
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
-	ctx := TestContext()
-	// Ensure no CRDs are already installed
-	Cleanup(t, ctx)
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		// We must change a few values in the Kustomize config
@@ -137,14 +131,8 @@ func TestKustomizeNamespaced(t *testing.T) {
 }
 
 func TestKustomizeDescoped(t *testing.T) {
-	// TODO, likely we need to adjust this test with a Kustomize overlay for Openshift
-	// which would not require the registry setting
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 	kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
-	ctx := TestContext()
-	// Ensure no CRDs are already installed
-	Cleanup(t, ctx)
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		// We must change a few values in the Kustomize config
