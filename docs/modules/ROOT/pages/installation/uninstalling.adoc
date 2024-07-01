@@ -49,11 +49,14 @@ Another alternative is to delete the resources the operator is using in a contro
 
 == Uninstall operator only (keeps CRDs and any running Integration)
 
-In order to remove the operator and any configuration resource it uses you'll need to perform the following cleaning operation:
+In order to remove the operator and any configuration resource it uses you'll need to perform the following cleaning operation. Here we're assuming you have installed an operator in the namespace camel-k:
 
 ```
-$ kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k
+$ kubectl delete deploy -l app=camel-k -n camel-k
+$ kubectl delete configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k -n camel-k
 ```
+
+Notice that you need to perform two operation to let the Kubernetes finalizers running in the Deployment object to complete before removing any required additional resource (ie, the ServiceAccount holding such privileges).
 
 NOTE: CRDs and Integration will be maintained alive and running.
 
