@@ -278,7 +278,7 @@ setup-knative:
 #
 test-common:
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 90m -v ./e2e/common/... -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 90m -v ./e2e/common/... --parallel $(TEST_COMMON_PARALLEL_COUNT) -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
@@ -289,6 +289,7 @@ test-smoke:
 	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 30m -v \
 		./e2e/common/languages \
 		./e2e/common/traits \
+		--parallel $(TEST_COMMON_PARALLEL_COUNT) \
 	  -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
@@ -297,7 +298,7 @@ test-smoke:
 #
 test-advanced:
 	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -p=$(TEST_ADVANCED_PARALLEL_COUNT) -timeout 90m -v ./e2e/advanced -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -p=$(TEST_ADVANCED_PARALLEL_COUNT) -timeout 90m -v ./e2e/advanced --parallel $(TEST_ADVANCED_PARALLEL_COUNT) -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
