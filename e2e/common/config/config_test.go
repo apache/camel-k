@@ -34,7 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestRunConfigExamples(t *testing.T) {
+func TestRunConfigProperties(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
@@ -119,8 +119,12 @@ func TestRunConfigExamples(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, "property-secret-route"), TestTimeoutShort).Should(ContainSubstring("my-secret-external-value"))
 		})
 
-		// Configmap
+	})
+}
 
+func TestRunConfigConfigmaps(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Store a configmap on the cluster
 		// kubectl create configmap my-cm --from-literal=my-configmap-key="my-configmap-content"
 
@@ -181,15 +185,18 @@ func TestRunConfigExamples(t *testing.T) {
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "config-configmap-properties-route", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "config-configmap-properties-route"), TestTimeoutShort).Should(ContainSubstring("hello world"))
 		})
+	})
+}
 
-		// Secret
-
+func TestRunConfigSecrets(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Store a secret on the cluster
 		// kubectl create secret generic my-sec --from-literal=my-secret-key="very top secret"
 
 		var secData = make(map[string]string)
 		secData["my-secret-key"] = "very top secret"
-		err = CreatePlainTextSecret(t, ctx, ns, "my-sec", secData)
+		err := CreatePlainTextSecret(t, ctx, ns, "my-sec", secData)
 		g.Expect(err).To(BeNil())
 
 		// Store a secret with multi values
@@ -227,8 +234,12 @@ func TestRunConfigExamples(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, ns, "config-secret-key-route"), TestTimeoutShort).Should(ContainSubstring(secDataMulti["my-secret-key-2"]))
 		})
 
-		// Build-Properties
+	})
+}
 
+func TestRunConfigBuildProperties(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("Build time property", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-route.yaml", "--build-property", "quarkus.application.name=my-super-application").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "build-property-route"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
@@ -265,7 +276,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from ConfigMap", func(t *testing.T) {
 			var cmData = make(map[string]string)
 			cmData["quarkus.application.name"] = "my-cool-application"
-			err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-property", cmData)
+			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-property", cmData)
 			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--build-property", "configmap:my-cm-test-build-property").Execute()).To(Succeed())
@@ -277,7 +288,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from ConfigMap as property file", func(t *testing.T) {
 			var cmData = make(map[string]string)
 			cmData["my.properties"] = "quarkus.application.name=my-super-cool-application"
-			err = CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-properties", cmData)
+			err := CreatePlainTextConfigmap(t, ctx, ns, "my-cm-test-build-properties", cmData)
 			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--name", "build-property-file-route-cm", "--build-property", "configmap:my-cm-test-build-properties").Execute()).To(Succeed())
@@ -289,7 +300,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from Secret", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["quarkus.application.name"] = "my-great-application"
-			err = CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-property", secData)
+			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-property", secData)
 			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--build-property", "secret:my-sec-test-build-property").Execute()).To(Succeed())
@@ -301,7 +312,7 @@ func TestRunConfigExamples(t *testing.T) {
 		t.Run("Build time property from Secret as property file", func(t *testing.T) {
 			var secData = make(map[string]string)
 			secData["my.properties"] = "quarkus.application.name=my-awesome-application"
-			err = CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-properties", secData)
+			err := CreatePlainTextSecret(t, ctx, ns, "my-sec-test-build-properties", secData)
 			g.Expect(err).To(BeNil())
 
 			g.Expect(KamelRun(t, ctx, ns, "./files/build-property-file-route.yaml", "--name", "build-property-file-route-secret", "--build-property", "secret:my-sec-test-build-properties").Execute()).To(Succeed())

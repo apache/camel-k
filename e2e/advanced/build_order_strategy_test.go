@@ -49,7 +49,6 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 		}
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
-		g.Expect(CreateTimerKamelet(t, ctx, ns, "timer-source")()).To(Succeed())
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", integrationA).Execute()).To(Succeed())
 
@@ -122,8 +121,6 @@ func TestRunBuildOrderStrategyFIFO(t *testing.T) {
 			t.FailNow()
 		}
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
-		g.Expect(CreateTimerKamelet(t, ctx, ns, "timer-source")()).To(Succeed())
 
 		integrationA := RandomizedSuffixName("java-a")
 		g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
