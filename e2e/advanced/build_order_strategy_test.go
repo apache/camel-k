@@ -36,6 +36,7 @@ import (
 )
 
 func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
 
@@ -111,6 +112,7 @@ func TestRunBuildOrderStrategyMatchingDependencies(t *testing.T) {
 }
 
 func TestRunBuildOrderStrategyFIFO(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
 		// Update platform with parameters required by this test

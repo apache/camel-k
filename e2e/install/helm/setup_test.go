@@ -37,10 +37,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestHelmInstallRunUninstall(t *testing.T) {
-	// Ensure no CRDs are already installed
-	ctx := TestContext()
-	Cleanup(t, ctx)
+func TestHelmInstallation(t *testing.T) {
 	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {

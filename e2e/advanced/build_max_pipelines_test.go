@@ -105,6 +105,7 @@ func kitMaxBuildLimit(t *testing.T, maxRunningBuilds int32, condition func(runni
 }
 
 func TestKitMaxBuildLimitSequential(t *testing.T) {
+	t.Parallel()
 	// We must verify we have at least 1 build at a time
 	var condition = func(runningBuilds int) bool {
 		return runningBuilds <= 1
@@ -113,6 +114,7 @@ func TestKitMaxBuildLimitSequential(t *testing.T) {
 }
 
 func TestKitMaxBuildLimitFIFO(t *testing.T) {
+	t.Parallel()
 	// We may have up to 2 parallel builds
 	var condition = func(runningBuilds int) bool {
 		return runningBuilds <= 2
@@ -121,6 +123,7 @@ func TestKitMaxBuildLimitFIFO(t *testing.T) {
 }
 
 func TestKitMaxBuildLimitDependencies(t *testing.T) {
+	t.Parallel()
 	// We may have up to 2 parallel builds
 	var condition = func(runningBuilds int) bool {
 		return runningBuilds <= 2
@@ -129,6 +132,7 @@ func TestKitMaxBuildLimitDependencies(t *testing.T) {
 }
 
 func TestMaxBuildLimitWaitingBuilds(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
 

@@ -33,7 +33,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	testutil "github.com/apache/camel-k/v2/e2e/support/util"
@@ -55,15 +54,6 @@ func TestKustomizeUpgrade(t *testing.T) {
 		g.Expect(ok).To(BeTrue())
 		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
 		g.Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
-
-		if len(CRDs(t)()) > 0 {
-			// Clean up old installation - maybe leftover from another test
-			if err := UninstallAll(t, ctx); err != nil && !kerrors.IsNotFound(err) {
-				t.Error(err)
-				t.FailNow()
-			}
-		}
-		g.Eventually(CRDs(t)).Should(HaveLen(0))
 
 		// Should both install the CRDs and kamel in the given namespace
 		g.Expect(Kamel(t, ctx, "install", "-n", ns, "--global", "--olm=false", "--force").Execute()).To(Succeed())

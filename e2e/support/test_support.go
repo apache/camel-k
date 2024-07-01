@@ -2816,19 +2816,6 @@ func userCleanup(t *testing.T) {
 func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func(context.Context, *gomega.WithT, string)) {
 	defer func() {
 		DumpNamespace(t, ctx, ns)
-
-		osns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-
-		// Try to clean up namespace
-		if ns != osns && HasPlatform(t, ctx, ns)() {
-			t.Logf("Clean up test namespace: %s", ns)
-
-			if err := Kamel(t, ctx, "uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute(); err != nil {
-				t.Logf("Error while cleaning up namespace %s: %v\n", ns, err)
-			}
-
-			t.Logf("Successfully cleaned up test namespace: %s", ns)
-		}
 	}()
 
 	g := gomega.NewWithT(t)
