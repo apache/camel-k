@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"context"
@@ -34,6 +34,7 @@ import (
 )
 
 func TestKamelCLILog(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("check integration log", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", "log-yaml").Execute()).To(Succeed())

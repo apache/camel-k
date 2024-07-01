@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"io"
@@ -31,11 +31,13 @@ import (
 )
 
 func TestKamelVersionWorksOffline(t *testing.T) {
+	t.Parallel()
 	g := NewWithT(t)
 	g.Expect(Kamel(t, TestContext(), "version", "--kube-config", "non-existent-kubeconfig-file").Execute()).To(Succeed())
 }
 
 func TestKamelHelpOptionWorksOffline(t *testing.T) {
+	t.Parallel()
 	g := NewWithT(t)
 
 	traitCmd := Kamel(t, TestContext(), "run", "Xxx.java", "--help")
@@ -44,6 +46,7 @@ func TestKamelHelpOptionWorksOffline(t *testing.T) {
 }
 
 func TestKamelCompletionWorksOffline(t *testing.T) {
+	t.Parallel()
 	g := NewWithT(t)
 
 	bashCmd := Kamel(t, TestContext(), "completion", "bash", "--kube-config", "non-existent-kubeconfig-file")

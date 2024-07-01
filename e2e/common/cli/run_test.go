@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"context"
@@ -40,6 +40,7 @@ import (
 var sampleJar = "https://raw.githubusercontent.com/apache/camel-k/main/e2e/common/traits/files/jvm/sample-1.0.jar"
 
 func TestKamelCLIRun(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 
 		t.Run("Examples from GitHub", func(t *testing.T) {

@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"context"
@@ -40,6 +40,7 @@ import (
 )
 
 func TestKamelCLIConfig(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("check default namespace", func(t *testing.T) {
 			_, err := os.Stat(cmd.DefaultConfigLocation)

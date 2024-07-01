@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"context"
@@ -38,6 +38,7 @@ import (
 )
 
 func TestRunDevMode(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("run yaml dev mode", func(t *testing.T) {
 			ctx, cancel := context.WithCancel(ctx)

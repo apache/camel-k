@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"testing"
@@ -32,6 +32,7 @@ import (
 )
 
 func TestKamelCLIVersion(t *testing.T) {
+	t.Parallel()
 	g := NewWithT(t)
 
 	t.Run("check version correctness", func(t *testing.T) {

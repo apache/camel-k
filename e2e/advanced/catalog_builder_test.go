@@ -42,9 +42,7 @@ func TestCamelCatalogBuilder(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		InstallOperator(t, ctx, g, ns)
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
-		g.Eventually(PlatformConditionStatus(t, ctx, ns, v1.IntegrationPlatformConditionTypeCreated), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
 		g.Eventually(CamelCatalog(t, ctx, ns, catalogName)).ShouldNot(BeNil())
 		g.Eventually(CamelCatalogPhase(t, ctx, ns, catalogName), TestTimeoutMedium).Should(Equal(v1.CamelCatalogPhaseReady))

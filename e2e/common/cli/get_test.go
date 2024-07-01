@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"context"
@@ -35,6 +35,7 @@ import (
 )
 
 func TestKamelCLIGet(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 
 		t.Run("get integration", func(t *testing.T) {
