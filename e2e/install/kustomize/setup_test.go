@@ -102,28 +102,16 @@ func TestKustomizeNamespaced(t *testing.T) {
 		g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 		// Test operator only uninstall
-		ExpectExecSucceed(t, g, Kubectl(
-			"delete",
-			"deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform",
-			"-l",
-			"app=camel-k",
-			"-n",
-			ns,
-		))
+		UninstallOperator(t, ctx, g, ns, "../../../")
+
 		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
 		g.Eventually(Platform(t, ctx, ns)).Should(BeNil())
 		g.Eventually(Integration(t, ctx, ns, "yaml"), TestTimeoutShort).ShouldNot(BeNil())
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 		// Test CRD uninstall (will remove Integrations as well)
-		ExpectExecSucceed(t, g, Kubectl(
-			"delete",
-			"crd",
-			"-l",
-			"app=camel-k",
-			"-n",
-			ns,
-		))
+		UninstallCRDs(t, ctx, g, "../../../")
+
 		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
 		g.Eventually(Integration(t, ctx, ns, "yaml"), TestTimeoutShort).Should(BeNil())
 		g.Eventually(CRDs(t)).Should(BeNil())
@@ -212,28 +200,16 @@ func TestKustomizeDescoped(t *testing.T) {
 			g.Eventually(IntegrationLogs(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
 			// Test operator only uninstall
-			ExpectExecSucceed(t, g, Kubectl(
-				"delete",
-				"deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform",
-				"-l",
-				"app=camel-k",
-				"-n",
-				ns,
-			))
+			UninstallOperator(t, ctx, g, ns, "../../../")
+
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
 			g.Eventually(Platform(t, ctx, ns)).Should(BeNil())
 			g.Eventually(Integration(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).ShouldNot(BeNil())
 			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
 			// Test CRD uninstall (will remove Integrations as well)
-			ExpectExecSucceed(t, g, Kubectl(
-				"delete",
-				"crd",
-				"-l",
-				"app=camel-k",
-				"-n",
-				ns,
-			))
+			UninstallCRDs(t, ctx, g, "../../../")
+
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
 			g.Eventually(Integration(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).Should(BeNil())
 			g.Eventually(CRDs(t)).Should(BeNil())

@@ -21,6 +21,6 @@ metadata:
   labels:
     app: "camel-k"
     {{- include "camel-k.labels" . | nindent 4 }}
-  name: camel-k
+  name: {{ .Values.operator.operatorId }}
 spec:
   {{- toYaml .Values.platform | nindent 2}}
