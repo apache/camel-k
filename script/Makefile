@@ -832,9 +832,11 @@ install-openshift-ns: install-operator install-clean-kustomize
 
 uninstall:
 ifdef NAMESPACE
-	kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k -n $(NAMESPACE)
+	kubectl delete deploy -l app=camel-k -n $(NAMESPACE)
+	kubectl delete configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k -n $(NAMESPACE)
 else
-	kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k
+	kubectl delete deploy -l app=camel-k
+	kubectl delete configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k
 endif
 
 uninstall-crds:
