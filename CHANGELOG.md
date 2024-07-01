@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- `make uninstall` should consider lease [\#5671](https://github.com/apache/camel-k/issues/5671)
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
 - Add TimeoutSeconds to knative-service trait [\#5652](https://github.com/apache/camel-k/issues/5652)
 - Explain how to clean registry [\#5645](https://github.com/apache/camel-k/issues/5645)
@@ -41,6 +42,7 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): delete deployment before other resources [\#5679](https://github.com/apache/camel-k/pull/5679) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.46 to 0.6.47 [\#5676](https://github.com/apache/camel-k/pull/5676) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat: default resources for Operator and Integration Pods [\#5675](https://github.com/apache/camel-k/pull/5675) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.54.0 to 0.55.0 [\#5673](https://github.com/apache/camel-k/pull/5673) ([dependabot[bot]](https://github.com/apps/dependabot))
