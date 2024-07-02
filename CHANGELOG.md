@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- `make uninstall` should consider lease [\#5671](https://github.com/apache/camel-k/issues/5671)
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
 - Add TimeoutSeconds to knative-service trait [\#5652](https://github.com/apache/camel-k/issues/5652)
 - Explain how to clean registry [\#5645](https://github.com/apache/camel-k/issues/5645)
