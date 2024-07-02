@@ -256,6 +256,7 @@ func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, opera
 	}
 
 	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil || k8serrors.IsNotFound(err) {
+		log.Info("No IntegrationPlatform provided. Creating one with default values.")
 		defaultPlatform := v1.NewIntegrationPlatform(operatorNamespace, platformName)
 
 		if defaultPlatform.Labels == nil {

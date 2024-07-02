@@ -29,7 +29,7 @@ $ helm install camel-k \
   camel-k/camel-k
 ```
 
-You may install Camel K and specify a container registry later.
+You may install Camel K and specify a container registry later. You may need to provide the `--force` option if the installation complains about an existing `IntegrationPlatform`.
 
 ### Openshift
 
