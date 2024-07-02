@@ -39,7 +39,56 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-func TestEnvironmentTrait(t *testing.T) {
+func TestEnvironmentTraitVars(t *testing.T) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		operatorID := "camel-k-trait-environment"
+		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
+		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
+
+		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+
+		// Create configmap
+		var cmData = make(map[string]string)
+		cmData["my-cm-key"] = "hello configmap"
+		g.Expect(CreatePlainTextConfigmap(t, ctx, ns, "my-cm", cmData)).Should(Succeed())
+
+		// Create secret
+		var secData = make(map[string]string)
+		secData["my-sec-key"] = "very top secret"
+		g.Expect(CreatePlainTextSecret(t, ctx, ns, "my-sec", secData)).Should(Succeed())
+
+		t.Run("Run simple env-var", func(t *testing.T) {
+			name := RandomizedSuffixName("envvar")
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", name, "-t", "environment.vars=MY_ENV_VAR='hello world'", "files/envvar.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("hello world"))
+		})
+
+		t.Run("Run env-var from configmap", func(t *testing.T) {
+			name := RandomizedSuffixName("envvar-configmap")
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", name, "-t", "environment.vars=MY_ENV_VAR=configmap:my-cm/my-cm-key", "files/envvar.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("hello configmap"))
+		})
+
+		t.Run("Run env-var from secret", func(t *testing.T) {
+			name := RandomizedSuffixName("envvar-secret")
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", name, "-t", "environment.vars=MY_ENV_VAR=secret:my-sec/my-sec-key", "files/envvar.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("very top secret"))
+		})
+
+		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+	})
+}
+
+func TestEnvironmentTraitHttpProxy(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
@@ -67,7 +116,7 @@ func TestEnvironmentTrait(t *testing.T) {
 		}
 
 		// Install Camel K with the HTTP proxy environment variable
-		operatorID := "camel-k-trait-environment"
+		operatorID := "camel-k-trait-environment-http"
 		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
 		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
 		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--operator-env-vars", fmt.Sprintf("HTTP_PROXY=%s", httpProxy), "--operator-env-vars", "NO_PROXY="+strings.Join(noProxy, ","))).To(Succeed())

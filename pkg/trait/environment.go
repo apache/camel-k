@@ -19,9 +19,12 @@ package trait
 
 import (
 	"os"
+	"strings"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/pointer"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -46,7 +49,7 @@ const (
 	envVarCamelKRuntimeVersion = "CAMEL_K_RUNTIME_VERSION"
 	envVarMountPathConfigMaps  = "CAMEL_K_MOUNT_PATH_CONFIGMAPS"
 
-	// Disabling gosec linter as it may triggers:
+	// Disabling gosec linter as it may trigger:
 	//
 	//   pkg/trait/environment.go:41: G101: Potential hardcoded credentials (gosec)
 	//	   envVarMountPathSecrets     = "CAMEL_K_MOUNT_PATH_SECRETS"
@@ -99,12 +102,85 @@ func (t *environmentTrait) Apply(e *Environment) error {
 		}
 	}
 
-	if t.Vars != nil {
-		for _, env := range t.Vars {
-			k, v := property.SplitPropertyFileEntry(env)
+	for _, env := range t.Vars {
+		k, v := property.SplitPropertyFileEntry(env)
+		switch {
+		case strings.HasPrefix(v, "configmap:"):
+
+			err := setValFromConfigMapKeySelector(&e.EnvVars, k, v)
+			if err != nil {
+				return err
+			}
+		case strings.HasPrefix(v, "secret:"):
+			err := setValFromSecretKeySelector(&e.EnvVars, k, v)
+			if err != nil {
+				return err
+			}
+		default:
 			envvar.SetVal(&e.EnvVars, k, v)
 		}
 	}
+	return nil
+}
 
+func setValFromConfigMapKeySelector(vars *[]corev1.EnvVar, envName string, path string) error {
+	vs, err := v1.DecodeValueSource(path, "", "invalid configmap reference: "+path)
+	if err != nil {
+		return err
+	}
+	if envVar := envvar.Get(*vars, envName); envVar != nil {
+		envVar.Value = ""
+		envVar.ValueFrom = &corev1.EnvVarSource{
+			ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: vs.ConfigMapKeyRef.Name,
+				},
+				Key: vs.ConfigMapKeyRef.Key,
+			},
+		}
+	} else {
+		*vars = append(*vars, corev1.EnvVar{
+			Name: envName,
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: vs.ConfigMapKeyRef.Name,
+					},
+					Key: vs.ConfigMapKeyRef.Key,
+				},
+			},
+		})
+	}
+	return nil
+}
+
+func setValFromSecretKeySelector(vars *[]corev1.EnvVar, envName string, path string) error {
+	vs, err := v1.DecodeValueSource(path, "", "invalid secret reference: "+path)
+	if err != nil {
+		return err
+	}
+	if envVar := envvar.Get(*vars, envName); envVar != nil {
+		envVar.Value = ""
+		envVar.ValueFrom = &corev1.EnvVarSource{
+			SecretKeyRef: &corev1.SecretKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: vs.SecretKeyRef.Name,
+				},
+				Key: vs.SecretKeyRef.Key,
+			},
+		}
+	} else {
+		*vars = append(*vars, corev1.EnvVar{
+			Name: envName,
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: vs.SecretKeyRef.Name,
+					},
+					Key: vs.SecretKeyRef.Key,
+				},
+			},
+		})
+	}
 	return nil
 }

@@ -29,6 +29,7 @@ type EnvironmentTrait struct {
 	HTTPProxy *bool `property:"http-proxy" json:"httpProxy,omitempty"`
 	// A list of environment variables to be added to the integration container.
 	// The syntax is KEY=VALUE, e.g., `MY_VAR="my value"`.
+	// The value may also be a reference to a configmap or secret, e.g. `MY_VAR=configmap:my-cm/my-cm-key`
 	// These take precedence over the previously defined environment variables.
 	Vars []string `property:"vars" json:"vars,omitempty"`
 }

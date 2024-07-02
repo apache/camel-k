@@ -192,6 +192,76 @@ func TestCustomEnvVars(t *testing.T) {
 	assert.True(t, userK2)
 }
 
+func TestCustomEnvVarsFromConfigMap(t *testing.T) {
+	c, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	env := mockEnvironment(c)
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &traitv1.EnvironmentTrait{
+			Vars: []string{"key1=configmap:my-cm/cmk1", "key2=configmap:my-cm/cmk2"},
+		},
+	}
+	env.Platform.ResyncStatusFullConfig()
+
+	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+
+	var userK1, userK2 string
+
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if e.Name == "key1" {
+				assert.Equal(t, "my-cm", e.ValueFrom.ConfigMapKeyRef.Name)
+				userK1 = e.ValueFrom.ConfigMapKeyRef.Key
+			}
+			if e.Name == "key2" {
+				assert.Equal(t, "my-cm", e.ValueFrom.ConfigMapKeyRef.Name)
+				userK2 = e.ValueFrom.ConfigMapKeyRef.Key
+			}
+		}
+	})
+
+	assert.Equal(t, "cmk1", userK1)
+	assert.Equal(t, "cmk2", userK2)
+}
+
+func TestCustomEnvVarsFromSecret(t *testing.T) {
+	c, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	env := mockEnvironment(c)
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &traitv1.EnvironmentTrait{
+			Vars: []string{"key1=secret:my-sec/sec1", "key2=secret:my-sec/sec2"},
+		},
+	}
+	env.Platform.ResyncStatusFullConfig()
+
+	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+
+	var userK1, userK2 string
+
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if e.Name == "key1" {
+				assert.Equal(t, "my-sec", e.ValueFrom.SecretKeyRef.Name)
+				userK1 = e.ValueFrom.SecretKeyRef.Key
+			}
+			if e.Name == "key2" {
+				assert.Equal(t, "my-sec", e.ValueFrom.SecretKeyRef.Name)
+				userK2 = e.ValueFrom.SecretKeyRef.Key
+			}
+		}
+	})
+
+	assert.Equal(t, "sec1", userK1)
+	assert.Equal(t, "sec2", userK2)
+}
+
 func NewEnvironmentTestCatalog() *Catalog {
 	return NewCatalog(nil)
 }
