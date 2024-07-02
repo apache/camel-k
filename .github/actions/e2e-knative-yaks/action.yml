@@ -108,12 +108,6 @@ runs:
       image-name: "docker.io/citrusframework/yaks"
       version: 0.19.1
 
-  - id: report-problematic
-    name: List Tests Marked As Problematic
-    uses: ./.github/actions/kamel-report-problematic
-    with:
-      test-suite: yaks/common
-
   - id: run-it
     name: Run IT
     shell: bash

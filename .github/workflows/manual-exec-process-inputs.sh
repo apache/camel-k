@@ -32,9 +32,6 @@ while getopts ":i:p:q:t:" opt; do
     i)
       PRE_BUILT_IMAGE=${OPTARG}
       ;;
-    p)
-      SKIP_PROBLEMATIC=${OPTARG}
-      ;;
     q)
       LOG_LEVEL=${OPTARG}
       ;;
@@ -59,13 +56,6 @@ fi
 
 if [ -n "${PRE_BUILT_IMAGE}" ]; then
   echo "DEBUG_USE_EXISTING_IMAGE=${PRE_BUILT_IMAGE}" >> $GITHUB_ENV
-fi
-
-#
-# Avoid problematic tests only if parameter set to true
-#
-if [ "${SKIP_PROBLEMATIC}" == "true" ]; then
-  echo "CAMEL_K_TEST_SKIP_PROBLEMATIC=true" >> $GITHUB_ENV
 fi
 
 #
