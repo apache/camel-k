@@ -577,7 +577,7 @@ spec:
                         type: object
                       orderStrategy:
                         description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default `sequential`)
+                          `fifo` or `sequential` (default is the platform default)
                         enum:
                         - dependencies
                         - fifo
@@ -2613,7 +2613,7 @@ spec:
                         type: object
                       orderStrategy:
                         description: The build order strategy to use, either `dependencies`,
-                          `fifo` or `sequential` (default `sequential`)
+                          `fifo` or `sequential` (default is the platform default)
                         enum:
                         - dependencies
                         - fifo

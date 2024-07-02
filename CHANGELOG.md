@@ -17,6 +17,7 @@
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
 - Trait annotations saved on the IntegrationKit resource [\#5620](https://github.com/apache/camel-k/issues/5620)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
+-  Deprecate `kamel install` and change default installation to kustomize/helm/olm? [\#5615](https://github.com/apache/camel-k/issues/5615)
 - maven-settings-offline-template.xml does not contain license [\#5603](https://github.com/apache/camel-k/issues/5603)
 - Set default containers resources [\#5601](https://github.com/apache/camel-k/issues/5601)
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
@@ -42,17 +43,20 @@
 
 **Merged pull requests:**
 
+- chore\(install\): reduce default resource footprint [\#5681](https://github.com/apache/camel-k/pull/5681) ([squakez](https://github.com/squakez))
 - fix\(ci\): delete deployment before other resources [\#5679](https://github.com/apache/camel-k/pull/5679) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.46 to 0.6.47 [\#5676](https://github.com/apache/camel-k/pull/5676) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat: default resources for Operator and Integration Pods [\#5675](https://github.com/apache/camel-k/pull/5675) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/prometheus/common from 0.54.0 to 0.55.0 [\#5673](https://github.com/apache/camel-k/pull/5673) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.45 to 0.6.46 [\#5672](https://github.com/apache/camel-k/pull/5672) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Document how to clean container registry and script to prune. [\#5670](https://github.com/apache/camel-k/pull/5670) ([claudio4j](https://github.com/claudio4j))
+- feat: dependencies default order strategy [\#5669](https://github.com/apache/camel-k/pull/5669) ([squakez](https://github.com/squakez))
 - fix\(trait\): explicit jolokia agent dependency [\#5668](https://github.com/apache/camel-k/pull/5668) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump k8s.io/klog/v2 from 2.130.0 to 2.130.1 [\#5665](https://github.com/apache/camel-k/pull/5665) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(\#5121\): adding timeZone property to the Cron trait spec [\#5664](https://github.com/apache/camel-k/pull/5664) ([lsergio](https://github.com/lsergio))
 - \(\#5463\) Add make targets: setup-knative, setup-yaks [\#5661](https://github.com/apache/camel-k/pull/5661) ([tdiesler](https://github.com/tdiesler))
 - fix\(e2e\): Telemetry rest-consumer service name [\#5660](https://github.com/apache/camel-k/pull/5660) ([gansheer](https://github.com/gansheer))
+- chore\(ci\): simplify github actions execution [\#5657](https://github.com/apache/camel-k/pull/5657) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.42 to 0.6.45 [\#5655](https://github.com/apache/camel-k/pull/5655) ([dependabot[bot]](https://github.com/apps/dependabot))
 - \(\#5652\) Added TimeoutSeconds to knative-serving trait [\#5653](https://github.com/apache/camel-k/pull/5653) ([hernanDatgDev](https://github.com/hernanDatgDev))
 - \(\#5635\) Add TLS configuration in the ingress trait [\#5650](https://github.com/apache/camel-k/pull/5650) ([romain-pfund](https://github.com/romain-pfund))
