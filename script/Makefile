@@ -107,7 +107,7 @@ TEST_PREBUILD = build
 # Tests may run in parallel to each other. This count sets the amount of tests run in parallel.
 # (default value would be otherwise GOMAXPROCS)
 TEST_COMMON_PARALLEL_COUNT ?= 2
-TEST_ADVANCED_PARALLEL_COUNT ?= 2
+TEST_ADVANCED_PARALLEL_COUNT ?= 4
 
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
 #GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultOperatorName=camel-k-operator

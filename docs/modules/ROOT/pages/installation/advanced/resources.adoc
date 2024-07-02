@@ -30,11 +30,11 @@ The main Camel K Operator Pod contributor resources consumption is likely to be 
 ```
 resources:
   requests:
-    memory: "4Gi"
-    cpu: "1"
+    memory: "2Gi"
+    cpu: "500m"
   limits:
-    memory: "16Gi"
-    cpu: "4"
+    memory: "8Gi"
+    cpu: "2"
 ```
 
 Note that if you plan to perform **native builds**, then the memory requirements may be increased significantly. Also, the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
