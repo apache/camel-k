@@ -74,6 +74,7 @@ func newBuildPod(ctx context.Context, client client.Client, build *v1.Build) *co
 			RestartPolicy:      corev1.RestartPolicyNever,
 			SecurityContext:    podSecurityContext,
 			NodeSelector:       build.BuilderConfiguration().NodeSelector,
+			Tolerations:        build.BuilderConfiguration().Tolerations,
 		},
 	}
 
