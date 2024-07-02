@@ -62,6 +62,7 @@ func TestHelmInstallation(t *testing.T) {
 				fmt.Sprintf("operator.operatorId=%s", operatorID),
 				"-n",
 				ns,
+				"--force",
 			),
 		)
 

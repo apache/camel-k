@@ -15,8 +15,10 @@ Camel K is also available in Helm Hub:
 
 ```
 $ helm repo add camel-k https://apache.github.io/camel-k/charts/
-$ helm install camel-k [--set platform.build.registry.address=<my-registry>] camel-k/camel-k
+$ helm install camel-k [--set platform.build.registry.address=<my-registry>] camel-k/camel-k --force
 ```
+
+NOTE: the `--force` option may be required to override the platform configuration with the registry values provided.
 
 More instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page.
 
