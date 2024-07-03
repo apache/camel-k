@@ -734,7 +734,6 @@ $(GOIMPORT): $(LOCALBIN)
 #####
 
 KUSTOMIZE_DIR = "install/overlays/kubernetes/descoped"
-MINIKUBE_REGISTRY = "$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}' 2> /dev/null)"
 DEFAULT_NS = "camel-k"
 
 .PHONY: install install-k8s-global install-k8s-ns install-openshift-global install-openshift-ns
@@ -787,8 +786,8 @@ ifdef REGISTRY
 	@sed -i 's/address: .*/address: $(REGISTRY)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
 	kubectl apply -k $(KUST_TMP)/install/overlays/platform --server-side -n $(NAMESPACE) --force-conflicts
 else
-# verify if a minikube registry is existing by any chance, and set it automatically in such a case
-ifneq ($(MINIKUBE_REGISTRY), "")
+	$(eval MINIKUBE_REGISTRY=$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}' 2> /dev/null))
+ifneq ($(MINIKUBE_REGISTRY),"")
 	@echo "INFO: Looks like you're on Minikube. Setting IntegrationPlatform container registry to $(MINIKUBE_REGISTRY)"
 	@sed -i 's/address: .*/address: $(MINIKUBE_REGISTRY)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
 	kubectl apply -k $(KUST_TMP)/install/overlays/platform --server-side -n $(NAMESPACE) --force-conflicts
