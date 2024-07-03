@@ -17,6 +17,7 @@
 - Modeline container.port trait config set as String value [\#5621](https://github.com/apache/camel-k/issues/5621)
 - Trait annotations saved on the IntegrationKit resource [\#5620](https://github.com/apache/camel-k/issues/5620)
 - Documentation links to old Camel K examples location [\#5619](https://github.com/apache/camel-k/issues/5619)
+-  Deprecate `kamel install` and change default installation to kustomize/helm/olm? [\#5615](https://github.com/apache/camel-k/issues/5615)
 - maven-settings-offline-template.xml does not contain license [\#5603](https://github.com/apache/camel-k/issues/5603)
 - Set default containers resources [\#5601](https://github.com/apache/camel-k/issues/5601)
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
