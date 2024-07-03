@@ -43,6 +43,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.47 to 0.6.48 [\#5684](https://github.com/apache/camel-k/pull/5684) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(install\): reduce default resource footprint [\#5681](https://github.com/apache/camel-k/pull/5681) ([squakez](https://github.com/squakez))
 - fix\(ci\): delete deployment before other resources [\#5679](https://github.com/apache/camel-k/pull/5679) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.46 to 0.6.47 [\#5676](https://github.com/apache/camel-k/pull/5676) ([dependabot[bot]](https://github.com/apps/dependabot))
