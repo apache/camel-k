@@ -43,6 +43,7 @@
 
 **Merged pull requests:**
 
+- fix\(install\): avoid kubectl execution on Makefile evaluation [\#5686](https://github.com/apache/camel-k/pull/5686) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.47 to 0.6.48 [\#5684](https://github.com/apache/camel-k/pull/5684) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(install\): reduce default resource footprint [\#5681](https://github.com/apache/camel-k/pull/5681) ([squakez](https://github.com/squakez))
 - fix\(ci\): delete deployment before other resources [\#5679](https://github.com/apache/camel-k/pull/5679) ([squakez](https://github.com/squakez))
