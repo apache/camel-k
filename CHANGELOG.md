@@ -43,6 +43,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump fabric8-version from 6.13.0 to 6.13.1 in /java/crds [\#5688](https://github.com/apache/camel-k/pull/5688) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/term from 0.21.0 to 0.22.0 [\#5687](https://github.com/apache/camel-k/pull/5687) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(install\): avoid kubectl execution on Makefile evaluation [\#5686](https://github.com/apache/camel-k/pull/5686) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.47 to 0.6.48 [\#5684](https://github.com/apache/camel-k/pull/5684) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(install\): reduce default resource footprint [\#5681](https://github.com/apache/camel-k/pull/5681) ([squakez](https://github.com/squakez))
