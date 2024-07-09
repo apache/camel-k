@@ -8,6 +8,7 @@
 
 - `make uninstall` should consider lease [\#5671](https://github.com/apache/camel-k/issues/5671)
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
+- Cluster role global false still deploying cluster role [\#5656](https://github.com/apache/camel-k/issues/5656)
 - Add TimeoutSeconds to knative-service trait [\#5652](https://github.com/apache/camel-k/issues/5652)
 - Explain how to clean registry [\#5645](https://github.com/apache/camel-k/issues/5645)
 - Add TLS configuration in the ingress trait [\#5635](https://github.com/apache/camel-k/issues/5635)
@@ -43,6 +44,8 @@
 
 **Merged pull requests:**
 
+- fix\(helm\): Remove duplicate clusterrole camel-k edit [\#5690](https://github.com/apache/camel-k/pull/5690) ([gansheer](https://github.com/gansheer))
+- chore\(build\): Fix docker build warnings [\#5689](https://github.com/apache/camel-k/pull/5689) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump fabric8-version from 6.13.0 to 6.13.1 in /java/crds [\#5688](https://github.com/apache/camel-k/pull/5688) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/term from 0.21.0 to 0.22.0 [\#5687](https://github.com/apache/camel-k/pull/5687) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(install\): avoid kubectl execution on Makefile evaluation [\#5686](https://github.com/apache/camel-k/pull/5686) ([gansheer](https://github.com/gansheer))
