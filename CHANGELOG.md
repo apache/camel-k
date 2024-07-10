@@ -8,6 +8,7 @@
 
 - `make uninstall` should consider lease [\#5671](https://github.com/apache/camel-k/issues/5671)
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
+- Cluster role global false still deploying cluster role [\#5656](https://github.com/apache/camel-k/issues/5656)
 - Add TimeoutSeconds to knative-service trait [\#5652](https://github.com/apache/camel-k/issues/5652)
 - Explain how to clean registry [\#5645](https://github.com/apache/camel-k/issues/5645)
 - Add TLS configuration in the ingress trait [\#5635](https://github.com/apache/camel-k/issues/5635)
