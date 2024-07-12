@@ -194,6 +194,7 @@ echo "Constructing index image ..."
 # Removes catalog directory if already exists.
 # Stops opm from aborting due to existing directory.
 #
+echo "Removes catalog directory if already exists..."
 CATALOG_DIR=catalog
 if [ -d ${CATALOG_DIR} ]; then
   rm -rf ${CATALOG_DIR}
@@ -203,13 +204,17 @@ if [ -f ${CATALOG_DIR}.Dockerfile ]; then
   rm -f ${CATALOG_DIR}.Dockerfile
 fi
 
+echo "Create catalog directory if already exists..."
 mkdir ${CATALOG_DIR}
+echo "opm render quay.io/operatorhubio/catalog:latest"
 opm render quay.io/operatorhubio/catalog:latest -o yaml > ${CATALOG_DIR}/bundles.yaml
+echo "opm render --use-http"
 opm render --use-http -o yaml ${BUNDLE_IMAGE} > ${CATALOG_DIR}/camel-k.yaml
 
 #
 # Add the dedicated stable-dev branch (needed for upgrade tests)
 #
+echo "camel-k.yaml"
 cat << EOF >> ${CATALOG_DIR}/camel-k.yaml
 ---
 schema: olm.channel
@@ -223,6 +228,7 @@ EOF
 #
 # Update the existing stable channel (needed for preflight and tests on OCP)
 #
+echo "replaces"
 sedtemp=$(mktemp sed-template-XXX.sed)
 cat << EOF > ${sedtemp}
 /- name: ${IMAGE_LAST_NAME}.v${IMAGE_LAST_VERSION}/ {
@@ -242,6 +248,7 @@ cat << EOF > ${sedtemp}
 p;
 EOF
 
+echo "sed"
 sed -i -n -f ${sedtemp} ${CATALOG_DIR}/bundles.yaml
 
 rm -f ${sedtemp}
@@ -249,13 +256,18 @@ rm -f ${sedtemp}
 #
 # Validate the modified catalog
 #
+cat ${CATALOG_DIR}/bundles.yaml
+echo "validate"
 opm validate ${CATALOG_DIR}
+echo "generate"
 opm generate dockerfile ${CATALOG_DIR}
 if [ ! -f catalog.Dockerfile ]; then
   echo "Error: Failed to create catalog dockerfile"
   exit 1
 fi
+echo "docker build"
 docker build . -f catalog.Dockerfile -t ${LOCAL_IIB}
+echo "docker push"
 docker push ${LOCAL_IIB}
 BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX="${REGISTRY_PULL_HOST}/${IMAGE_NAMESPACE}/camel-k-iib:${IMAGE_VERSION}"
 echo "Setting build-bundle-image-bundle-index to ${BUILD_BUNDLE_LOCAL_IMAGE_BUNDLE_INDEX}"
