@@ -213,7 +213,7 @@ opm render --use-http -o yaml ${BUNDLE_IMAGE} > ${CATALOG_DIR}/camel-k.yaml
 cat << EOF >> ${CATALOG_DIR}/camel-k.yaml
 ---
 schema: olm.channel
-package: camel-k
+package: camel-k-operator
 name: stable-dev-$(make get-version | grep -Po "\d+\.\d+")
 entries:
   - name: $(make get-csv-name)

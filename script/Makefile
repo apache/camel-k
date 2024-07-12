@@ -678,6 +678,9 @@ bundle: set-version kustomize operator-sdk pre-bundle $(BUNDLE_CAMEL_APIS)
 # Rename the CSV name to conform with the existing released operator versions
 # This cannot happen in pre-bundle as the operator-sdk generation expects a CSV name the same as PACKAGE
 	@sed -i "s/^  name: $(CSV_NAME)/  name: $(CSV_PRODUCTION_NAME)/" $(CSV_PRODUCTION_PATH)
+# operator-sdk requires the name of the package to be the same as the operator name
+	@sed -i "s/^  operators.operatorframework.io.bundle.package.v1: $(PACKAGE)/  operators.operatorframework.io.bundle.package.v1: $(LAST_RELEASED_IMAGE_NAME)/" ./bundle/metadata/annotations.yaml
+	@sed -i "s/^LABEL operators.operatorframework.io.bundle.package.v1=$(PACKAGE)/LABEL operators.operatorframework.io.bundle.package.v1=$(LAST_RELEASED_IMAGE_NAME)/" ./bundle/Dockerfile
 	@echo "  com.redhat.openshift.versions: $(BUNDLE_METADATA_OPENSHIFT_VERSION)" >> ./bundle/metadata/annotations.yaml
 	$(OPERATOR_SDK) bundle validate ./bundle
 
