@@ -44,6 +44,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump org.apache.maven.plugins:maven-surefire-plugin from 3.3.0 to 3.3.1 in /java/crds [\#5695](https://github.com/apache/camel-k/pull/5695) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump org.apache:apache from 32 to 33 in /java/crds [\#5694](https://github.com/apache/camel-k/pull/5694) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(helm\): Remove duplicate clusterrole camel-k edit [\#5690](https://github.com/apache/camel-k/pull/5690) ([gansheer](https://github.com/gansheer))
 - chore\(build\): Fix docker build warnings [\#5689](https://github.com/apache/camel-k/pull/5689) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump fabric8-version from 6.13.0 to 6.13.1 in /java/crds [\#5688](https://github.com/apache/camel-k/pull/5688) ([dependabot[bot]](https://github.com/apps/dependabot))
