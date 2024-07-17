@@ -44,6 +44,7 @@
 
 **Merged pull requests:**
 
+- fix\(ci\): raise again default resource footprint [\#5697](https://github.com/apache/camel-k/pull/5697) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump org.apache.maven.plugins:maven-surefire-plugin from 3.3.0 to 3.3.1 in /java/crds [\#5695](https://github.com/apache/camel-k/pull/5695) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump org.apache:apache from 32 to 33 in /java/crds [\#5694](https://github.com/apache/camel-k/pull/5694) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(helm\): Remove duplicate clusterrole camel-k edit [\#5690](https://github.com/apache/camel-k/pull/5690) ([gansheer](https://github.com/gansheer))
