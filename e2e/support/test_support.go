@@ -2920,6 +2920,9 @@ func DumpNamespace(t *testing.T, ctx context.Context, ns string) {
 		if err := util.Dump(ctx, TestClient(t), ns, t); err != nil {
 			t.Logf("Error while dumping namespace %s: %v\n", ns, err)
 		}
+		if err := util.DumpClusterState(ctx, TestClient(t), ns, t); err != nil {
+			t.Logf("Error while dumping cluster state: %v\n", err)
+		}
 	}
 }
 
