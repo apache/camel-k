@@ -44,6 +44,7 @@
 
 **Merged pull requests:**
 
+- fix\(e2e\): Fix cron test [\#5700](https://github.com/apache/camel-k/pull/5700) ([gansheer](https://github.com/gansheer))
 - chore\(ci\): Dump some cluster infos [\#5699](https://github.com/apache/camel-k/pull/5699) ([gansheer](https://github.com/gansheer))
 - fix\(ci\): raise again default resource footprint [\#5697](https://github.com/apache/camel-k/pull/5697) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump org.apache.maven.plugins:maven-surefire-plugin from 3.3.0 to 3.3.1 in /java/crds [\#5695](https://github.com/apache/camel-k/pull/5695) ([dependabot[bot]](https://github.com/apps/dependabot))
