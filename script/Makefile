@@ -290,7 +290,7 @@ test-smoke:
 	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 30m -v \
 		./e2e/common/languages \
 		./e2e/common/traits \
-		--parallel $(TEST_COMMON_PARALLEL_COUNT) \
+		--parallel 1 \
 	  -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
