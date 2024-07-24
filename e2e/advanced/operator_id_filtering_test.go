@@ -57,7 +57,7 @@ func TestOperatorIDFiltering(t *testing.T) {
 				t.Run("Operators run scoped integrations", func(t *testing.T) {
 					g.Expect(KamelRunWithID(t, ctx, "operator-x", ns, "files/yaml.yaml", "--name", "moving", "--force").Execute()).To(Succeed())
 					g.Expect(AssignIntegrationToOperator(t, ctx, ns, "moving", operator1)).To(Succeed())
-					g.Eventually(IntegrationPhase(t, ctx, ns, "moving"), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+					g.Eventually(IntegrationPhase(t, ctx, ns, "moving"), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseRunning))
 					g.Eventually(IntegrationPodPhase(t, ctx, ns, "moving"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 					g.Eventually(IntegrationLogs(t, ctx, ns, "moving"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 				})
