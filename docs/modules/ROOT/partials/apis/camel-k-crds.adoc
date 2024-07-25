@@ -7899,6 +7899,13 @@ Syntax: [configmap{vbar}secret]:name[/key][@path], where name represents the res
 
 A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 
+|`emptyDirs` +
+[]string
+|
+
+
+A list of EmptyDir volumes to be mounted. Syntax: [name:/container/path]
+
 |`hotReload` +
 bool
 |

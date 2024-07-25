@@ -793,6 +793,11 @@ func (in *MountTrait) DeepCopyInto(out *MountTrait) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.EmptyDirs != nil {
+		in, out := &in.EmptyDirs, &out.EmptyDirs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.HotReload != nil {
 		in, out := &in.HotReload, &out.HotReload
 		*out = new(bool)

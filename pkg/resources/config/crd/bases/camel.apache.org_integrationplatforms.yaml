@@ -1591,6 +1591,12 @@ spec:
                           for backward compatibility.'
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
+                      emptyDirs:
+                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
+                          [name:/container/path]'
+                        items:
+                          type: string
+                        type: array
                       enabled:
                         description: 'Deprecated: no longer in use.'
                         type: boolean
@@ -3627,6 +3633,12 @@ spec:
                           for backward compatibility.'
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
+                      emptyDirs:
+                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
+                          [name:/container/path]'
+                        items:
+                          type: string
+                        type: array
                       enabled:
                         description: 'Deprecated: no longer in use.'
                         type: boolean

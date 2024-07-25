@@ -149,6 +149,13 @@ func (t *mountTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]co
 			return parseErr
 		}
 	}
+	for _, v := range t.EmptyDirs {
+		if vol, parseErr := utilResource.ParseEmptyDirVolume(v); parseErr == nil {
+			t.mountResource(vols, mnts, vol)
+		} else {
+			return parseErr
+		}
+	}
 
 	return nil
 }
@@ -167,7 +174,8 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile)
 	mntPath := getMountPoint(conf.Name(), dstDir, string(conf.StorageType()), string(conf.ContentType()))
 	readOnly := true
-	if conf.StorageType() == utilResource.StorageTypePVC {
+	if conf.StorageType() == utilResource.StorageTypePVC ||
+		conf.StorageType() == utilResource.StorageTypeEmptyDir {
 		readOnly = false
 	}
 	mnt := getMount(refName, mntPath, dstFile, readOnly)

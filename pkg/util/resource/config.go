@@ -80,6 +80,8 @@ const (
 	StorageTypeSecret StorageType = "secret"
 	// StorageTypePVC --.
 	StorageTypePVC StorageType = "pvc"
+	// StorageTypeEmptyDir --.
+	StorageTypeEmptyDir StorageType = "emptyDir"
 )
 
 // ContentType represent what kind of a content is, either data or purely text configuration.
@@ -132,6 +134,21 @@ func parseCMOrSecretValue(value string) (string, string, string) {
 // ParseResource will parse a resource and return a Config.
 func ParseResource(item string) (*Config, error) {
 	return parse(item, ContentTypeData)
+}
+
+// ParseEmptyDirVolume will parse an empty dir volume and return a Config.
+func ParseEmptyDirVolume(item string) (*Config, error) {
+	configParts := strings.Split(item, ":")
+
+	if len(configParts) != 2 {
+		return nil, fmt.Errorf("could not match emptyDir volume as %s", item)
+	}
+
+	return &Config{
+		storageType:     StorageTypeEmptyDir,
+		resourceName:    configParts[0],
+		destinationPath: configParts[1],
+	}, nil
 }
 
 // ParseVolume will parse a volume and return a Config.

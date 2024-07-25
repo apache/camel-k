@@ -57,6 +57,7 @@ const (
 	secretStorageType    = "secret"
 	configmapStorageType = "configmap"
 	pvcStorageType       = "pvc"
+	emptyDirStorageType  = "emptyDir"
 )
 
 var capabilityDynamicProperty = regexp.MustCompile(`(\$\{([^}]*)\})`)
@@ -635,6 +636,8 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 		volume.VolumeSource.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
 			ClaimName: storageName,
 		}
+	case emptyDirStorageType:
+		volume.VolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{}
 	}
 
 	return &volume
