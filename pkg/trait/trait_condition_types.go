@@ -76,15 +76,23 @@ func NewIntegrationConditionPlatformDisabledCatalogMissing() *TraitCondition {
 }
 
 func (tc *TraitCondition) integrationCondition() (v1.IntegrationConditionType, corev1.ConditionStatus, string, string) {
-	return v1.IntegrationConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationConditionType)),
+	return v1.IntegrationConditionType(tc.typeForCondition()),
 		tc.conditionStatus,
 		tc.reason,
 		tc.message
 }
 
 func (tc *TraitCondition) integrationKitCondition() (v1.IntegrationKitConditionType, corev1.ConditionStatus, string, string) {
-	return v1.IntegrationKitConditionType(fmt.Sprintf("%s%s", tc.traitID, tc.integrationConditionType)),
+	return v1.IntegrationKitConditionType(tc.typeForCondition()),
 		tc.conditionStatus,
 		tc.reason,
 		tc.message
+}
+
+func (tc *TraitCondition) typeForCondition() string {
+	conditionType := string(tc.integrationConditionType)
+	if conditionType == "TraitInfo" {
+		conditionType = fmt.Sprintf("%s%s", tc.traitID, tc.integrationConditionType)
+	}
+	return conditionType
 }
