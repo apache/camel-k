@@ -28,7 +28,9 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -38,15 +40,28 @@ import (
 func TestOperatorIDFiltering(t *testing.T) {
 	t.Parallel()
 
+	updateDeployment := func(d *appsv1.Deployment) {
+		d.Spec.Template.Spec.Containers[0].Resources.Limits = map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    resource.MustParse("0.75"),
+			corev1.ResourceMemory: resource.MustParse("3Gi"),
+		}
+		d.Spec.Template.Spec.Containers[0].Resources.Requests = map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    resource.MustParse("0.25"),
+			corev1.ResourceMemory: resource.MustParse("1Gi"),
+		}
+	}
+
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop1 string) {
 			operator1 := "operator-1"
 			InstallOperatorWithConf(t, ctx, g, nsop1, operator1, true, nil)
+			PatchOperatorDeployment(t, ctx, g, nsop1, updateDeployment)
 			g.Eventually(PlatformPhase(t, ctx, nsop1), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 			WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsop2 string) {
 				operator2 := "operator-2"
 				InstallOperatorWithConf(t, ctx, g, nsop2, operator2, true, nil)
+				PatchOperatorDeployment(t, ctx, g, nsop2, updateDeployment)
 				g.Eventually(PlatformPhase(t, ctx, nsop2), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 				t.Run("Operators ignore non-scoped integrations", func(t *testing.T) {

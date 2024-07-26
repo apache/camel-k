@@ -23,7 +23,9 @@ limitations under the License.
 package support
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -37,6 +39,9 @@ import (
 	"github.com/onsi/gomega/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	appsv1 "k8s.io/api/apps/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/strategicpatch"
 )
 
 var (
@@ -83,6 +88,7 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 		fmt.Printf("Setting operator ID property as %s\n", operatorID)
 		args = append(args, fmt.Sprintf("OPERATOR_ID=%s", operatorID))
 	}
+
 	if envs != nil {
 		envArgs := make([]string, len(envs))
 		for k, v := range envs {
@@ -104,8 +110,42 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 	ExpectExecSucceed(t, g,
 		Make(t, makeRule, args...),
 	)
+
 	// Let's make sure the operator has been deployed
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+}
+
+// PatchOperatorDeployment apply an update function to an existing operator deployment.
+func PatchOperatorDeployment(t *testing.T, ctx context.Context, g *WithT, ns string, updateFunc func(*appsv1.Deployment)) error {
+	od, err := TestClient(t).AppsV1().Deployments(ns).Get(ctx, "camel-k-operator", metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	updateFunc(od)
+	_, err = TestClient(t).AppsV1().Deployments(ns).Update(ctx, od, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Let's make sure the operator has been redeployed
+	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
+	return nil
+}
+
+func createPatch(o, n, datastruct interface{}) ([]byte, error) {
+	oldData, err := json.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	newData, err := json.Marshal(n)
+	if err != nil {
+		return nil, err
+	}
+	if bytes.Compare(oldData, newData) == 0 {
+		return nil, nil
+	}
+	return strategicpatch.CreateTwoWayMergePatch(oldData, newData, datastruct)
 }
 
 // InstallOperator will delete operator resources from namespace (keeps CRDs).
