@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Integration status reporing as Not Ready even when it is [\#5707](https://github.com/apache/camel-k/issues/5707)
+- Nightly github action workflows failure [\#5696](https://github.com/apache/camel-k/issues/5696)
 - `make uninstall` should consider lease [\#5671](https://github.com/apache/camel-k/issues/5671)
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
 - Cluster role global false still deploying cluster role [\#5656](https://github.com/apache/camel-k/issues/5656)
@@ -45,6 +46,7 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/onsi/gomega from 1.33.1 to 1.34.0 [\#5710](https://github.com/apache/camel-k/pull/5710) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ci\): Reduce parallelism for smoke tests [\#5702](https://github.com/apache/camel-k/pull/5702) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): Fix cron test [\#5700](https://github.com/apache/camel-k/pull/5700) ([gansheer](https://github.com/gansheer))
 - chore\(ci\): Dump some cluster infos [\#5699](https://github.com/apache/camel-k/pull/5699) ([gansheer](https://github.com/gansheer))
