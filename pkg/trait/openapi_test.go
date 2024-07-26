@@ -18,9 +18,17 @@ limitations under the License.
 package trait
 
 import (
+	"context"
+	"os"
 	"testing"
+	"time"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/test"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
@@ -64,4 +72,161 @@ func TestRestDslTraitApplicability(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
+}
+
+func TestRestDslTraitApplyError(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+	fakeClient, _ := test.NewFakeClient()
+
+	e := &Environment{
+		CamelCatalog: catalog,
+		Client:       fakeClient,
+	}
+
+	trait, _ := newOpenAPITrait().(*openAPITrait)
+	enabled, condition, err := trait.Configure(e)
+	require.NoError(t, err)
+	assert.False(t, enabled)
+	assert.Nil(t, condition)
+
+	e.Integration = &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "hello",
+			Namespace: "default",
+		},
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseInitialization,
+		},
+	}
+
+	trait.Configmaps = []string{"my-configmap"}
+
+	err = trait.Apply(e)
+	require.Error(t, err)
+	assert.Equal(t, "configmap my-configmap does not exist in namespace default", err.Error())
+}
+
+var openapi = `
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1.0",
+    "title" : "Greeting REST API"
+  },
+  "host" : "",
+  "basePath" : "/camel/",
+  "tags" : [ {
+    "name" : "greetings",
+    "description" : "Greeting to {name}"
+  } ],
+  "schemes" : [ "http" ],
+  "paths" : {
+    "/greetings/{name}" : {
+      "get" : {
+        "tags" : [ "greetings" ],
+        "operationId" : "greeting-api",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Output type",
+            "schema" : {
+              "$ref" : "#/definitions/Greetings"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "Greetings" : {
+      "type" : "object",
+      "properties" : {
+        "greetings" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}
+`
+
+func TestRestDslTraitApplyWorks(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+	fakeClient, _ := test.NewFakeClient(&corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-configmap",
+			Namespace: "default",
+		},
+		Data: map[string]string{
+			"greetings-api.json": openapi,
+		},
+	})
+
+	e := &Environment{
+		Ctx:          context.Background(),
+		CamelCatalog: catalog,
+		Client:       fakeClient,
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterKubernetes,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+					Cluster: v1.IntegrationPlatformClusterKubernetes,
+					Build: v1.IntegrationPlatformBuildSpec{
+						PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
+						Registry:        v1.RegistrySpec{Address: "registry"},
+						RuntimeVersion:  catalog.Runtime.Version,
+						Maven:           v1.MavenSpec{},
+						Timeout:         &metav1.Duration{Duration: time.Minute},
+					},
+				},
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		Resources: kubernetes.NewCollection(),
+	}
+
+	trait, _ := newOpenAPITrait().(*openAPITrait)
+	trait.Client = fakeClient
+	enabled, condition, err := trait.Configure(e)
+	require.NoError(t, err)
+	assert.False(t, enabled)
+	assert.Nil(t, condition)
+
+	e.Integration = &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "hello",
+			Namespace: "default",
+		},
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseInitialization,
+		},
+	}
+
+	trait.Configmaps = []string{"my-configmap"}
+
+	// use local Maven executable in tests
+	t.Setenv("MAVEN_WRAPPER", boolean.FalseString)
+	_, ok := os.LookupEnv("MAVEN_CMD")
+	if !ok {
+		t.Setenv("MAVEN_CMD", "mvn")
+	}
+
+	err = trait.Apply(e)
+	require.NoError(t, err)
+
+	assert.Equal(t, 1, e.Resources.Size())
+	sourceCm := e.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
+		return cm.Name == "hello-openapi-000"
+	})
+	assert.NotNil(t, sourceCm)
+	assert.Contains(t, sourceCm.Data["content"], "get id=\"greeting-api\" path=\"/greetings/{name}")
 }
