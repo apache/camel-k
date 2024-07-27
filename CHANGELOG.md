@@ -7,6 +7,7 @@
 **Closed issues:**
 
 - Integration status reporing as Not Ready even when it is [\#5707](https://github.com/apache/camel-k/issues/5707)
+- Nightly github action workflows failure [\#5696](https://github.com/apache/camel-k/issues/5696)
 - `make uninstall` should consider lease [\#5671](https://github.com/apache/camel-k/issues/5671)
 - Jolokia trait failure [\#5666](https://github.com/apache/camel-k/issues/5666)
 - Cluster role global false still deploying cluster role [\#5656](https://github.com/apache/camel-k/issues/5656)
