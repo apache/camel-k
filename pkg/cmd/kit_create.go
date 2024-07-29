@@ -117,7 +117,6 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies:  make([]string, 0, len(command.Dependencies)),
 		Configuration: make([]v1.ConfigurationSpec, 0),
-		Repositories:  command.Repositories,
 	}
 
 	if command.Image != "" {

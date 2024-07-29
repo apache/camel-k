@@ -22,13 +22,12 @@ package v1
 // PipeSpecApplyConfiguration represents an declarative configuration of the PipeSpec type for use
 // with apply.
 type PipeSpecApplyConfiguration struct {
-	Integration        *IntegrationSpecApplyConfiguration  `json:"integration,omitempty"`
-	Source             *EndpointApplyConfiguration         `json:"source,omitempty"`
-	Sink               *EndpointApplyConfiguration         `json:"sink,omitempty"`
-	ErrorHandler       *ErrorHandlerSpecApplyConfiguration `json:"errorHandler,omitempty"`
-	Steps              []EndpointApplyConfiguration        `json:"steps,omitempty"`
-	Replicas           *int32                              `json:"replicas,omitempty"`
-	ServiceAccountName *string                             `json:"serviceAccountName,omitempty"`
+	Integration  *IntegrationSpecApplyConfiguration  `json:"integration,omitempty"`
+	Source       *EndpointApplyConfiguration         `json:"source,omitempty"`
+	Sink         *EndpointApplyConfiguration         `json:"sink,omitempty"`
+	ErrorHandler *ErrorHandlerSpecApplyConfiguration `json:"errorHandler,omitempty"`
+	Steps        []EndpointApplyConfiguration        `json:"steps,omitempty"`
+	Replicas     *int32                              `json:"replicas,omitempty"`
 }
 
 // PipeSpecApplyConfiguration constructs an declarative configuration of the PipeSpec type for use with
@@ -87,13 +86,5 @@ func (b *PipeSpecApplyConfiguration) WithSteps(values ...*EndpointApplyConfigura
 // If called multiple times, the Replicas field is set to the value of the last call.
 func (b *PipeSpecApplyConfiguration) WithReplicas(value int32) *PipeSpecApplyConfiguration {
 	b.Replicas = &value
-	return b
-}
-
-// WithServiceAccountName sets the ServiceAccountName field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the ServiceAccountName field is set to the value of the last call.
-func (b *PipeSpecApplyConfiguration) WithServiceAccountName(value string) *PipeSpecApplyConfiguration {
-	b.ServiceAccountName = &value
 	return b
 }

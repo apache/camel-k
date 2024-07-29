@@ -27,4 +27,6 @@ package trait
 // +camel-k:trait=pod.
 type PodTrait struct {
 	Trait `property:",squash" json:",inline"`
+	// A custom Service Account
+	ServiceAccountName string `property:"service-account-name" json:"serviceAccountName,omitempty"`
 }

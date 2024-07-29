@@ -92,10 +92,6 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1alpha
 	}
 	it.Spec.Profile = profile
 
-	if binding.Spec.ServiceAccountName != "" {
-		it.Spec.ServiceAccountName = binding.Spec.ServiceAccountName
-	}
-
 	bindingContext := bindings.V1alpha1BindingContext{
 		Ctx:       ctx,
 		Client:    c,

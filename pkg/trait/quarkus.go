@@ -282,7 +282,6 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 	}
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies: e.Integration.Status.Dependencies,
-		Repositories: e.Integration.Spec.Repositories,
 		Traits:       propagateKitTraits(e),
 	}
 	if packageType == nativeSourcesPackageType {

@@ -342,7 +342,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 		MavenSpec: e.Platform.Status.Build.Maven,
 	}
 	// Add Maven repositories defined in the IntegrationKit
-	for _, repo := range e.IntegrationKit.Spec.Repositories {
+	for _, repo := range t.Repositories {
 		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
 	}
 

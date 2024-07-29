@@ -65,7 +65,6 @@ func newCmdBind(rootCmdOptions *RootCmdOptions) (*cobra.Command, *bindCmdOptions
 	cmd.Flags().StringP("operator-id", "x", "camel-k", "Operator id selected to manage this Pipe.")
 	cmd.Flags().StringArray("annotation", nil, "Add an annotation to the Pipe. E.g. \"--annotation my.company=hello\"")
 	cmd.Flags().Bool("force", false, "Force creation of Pipe regardless of potential misconfiguration.")
-	cmd.Flags().String("service-account", "", "The SA to use to run this binding")
 
 	return &cmd, &options
 }
@@ -79,18 +78,17 @@ const (
 
 type bindCmdOptions struct {
 	*RootCmdOptions
-	ErrorHandler   string   `mapstructure:"error-handler" yaml:",omitempty"`
-	Name           string   `mapstructure:"name" yaml:",omitempty"`
-	Connects       []string `mapstructure:"connects" yaml:",omitempty"`
-	OutputFormat   string   `mapstructure:"output" yaml:",omitempty"`
-	Properties     []string `mapstructure:"properties" yaml:",omitempty"`
-	SkipChecks     bool     `mapstructure:"skip-checks" yaml:",omitempty"`
-	Steps          []string `mapstructure:"steps" yaml:",omitempty"`
-	Traits         []string `mapstructure:"traits" yaml:",omitempty"`
-	OperatorID     string   `mapstructure:"operator-id" yaml:",omitempty"`
-	Annotations    []string `mapstructure:"annotations" yaml:",omitempty"`
-	Force          bool     `mapstructure:"force" yaml:",omitempty"`
-	ServiceAccount string   `mapstructure:"service-account" yaml:",omitempty"`
+	ErrorHandler string   `mapstructure:"error-handler" yaml:",omitempty"`
+	Name         string   `mapstructure:"name" yaml:",omitempty"`
+	Connects     []string `mapstructure:"connects" yaml:",omitempty"`
+	OutputFormat string   `mapstructure:"output" yaml:",omitempty"`
+	Properties   []string `mapstructure:"properties" yaml:",omitempty"`
+	SkipChecks   bool     `mapstructure:"skip-checks" yaml:",omitempty"`
+	Steps        []string `mapstructure:"steps" yaml:",omitempty"`
+	Traits       []string `mapstructure:"traits" yaml:",omitempty"`
+	OperatorID   string   `mapstructure:"operator-id" yaml:",omitempty"`
+	Annotations  []string `mapstructure:"annotations" yaml:",omitempty"`
+	Force        bool     `mapstructure:"force" yaml:",omitempty"`
 }
 
 func (o *bindCmdOptions) preRunE(cmd *cobra.Command, args []string) error {
@@ -244,10 +242,6 @@ func (o *bindCmdOptions) run(cmd *cobra.Command, args []string) error {
 			value := maybeBuildArrayNotation(binding.Annotations[v1.TraitAnnotationPrefix+kv[0]], kv[1])
 			binding.Annotations[v1.TraitAnnotationPrefix+kv[0]] = value
 		}
-	}
-
-	if o.ServiceAccount != "" {
-		binding.Spec.ServiceAccountName = o.ServiceAccount
 	}
 
 	// --operator-id={id} is a syntax sugar for '--annotation camel.apache.org/operator.id={id}'

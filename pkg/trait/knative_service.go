@@ -256,6 +256,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		serviceLabels[knativeServingVisibilityLabel] = t.Visibility
 	}
 
+	serviceAccountName := e.GetPodServiceAccountName()
 	svc := serving.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
@@ -278,7 +279,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 					},
 					Spec: serving.RevisionSpec{
 						PodSpec: corev1.PodSpec{
-							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
+							ServiceAccountName: serviceAccountName,
 						},
 					},
 				},

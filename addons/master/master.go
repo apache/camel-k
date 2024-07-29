@@ -156,7 +156,8 @@ func (t *masterTrait) Apply(e *trait.Environment) error {
 		}
 	} else if e.IntegrationInRunningPhases() {
 		// Master trait requires the ServiceAccount certain privileges
-		privileges, err := t.prepareRBAC(e.Client, e.Integration.Spec.ServiceAccountName, e.Integration.Name, e.Integration.Namespace)
+		serviceAccount := e.GetPodServiceAccountName()
+		privileges, err := t.prepareRBAC(e.Client, serviceAccount, e.Integration.Name, e.Integration.Namespace)
 		if err != nil {
 			return err
 		}

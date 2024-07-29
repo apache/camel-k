@@ -58,8 +58,6 @@ type PipeSpec struct {
 	Steps []Endpoint `json:"steps,omitempty"`
 	// Replicas is the number of desired replicas for the Pipe
 	Replicas *int32 `json:"replicas,omitempty"`
-	// Custom SA to use for the Pipe
-	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
 // Endpoint represents a source/sink external entity (could be any Kubernetes resource or Camel URI).

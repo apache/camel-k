@@ -31,7 +31,6 @@ type IntegrationKitSpecApplyConfiguration struct {
 	Profile       *v1.TraitProfile                        `json:"profile,omitempty"`
 	Traits        *IntegrationKitTraitsApplyConfiguration `json:"traits,omitempty"`
 	Configuration []ConfigurationSpecApplyConfiguration   `json:"configuration,omitempty"`
-	Repositories  []string                                `json:"repositories,omitempty"`
 	Sources       []SourceSpecApplyConfiguration          `json:"sources,omitempty"`
 	Capabilities  []string                                `json:"capabilities,omitempty"`
 }
@@ -85,16 +84,6 @@ func (b *IntegrationKitSpecApplyConfiguration) WithConfiguration(values ...*Conf
 			panic("nil value passed to WithConfiguration")
 		}
 		b.Configuration = append(b.Configuration, *values[i])
-	}
-	return b
-}
-
-// WithRepositories adds the given value to the Repositories field in the declarative configuration
-// and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Repositories field.
-func (b *IntegrationKitSpecApplyConfiguration) WithRepositories(values ...string) *IntegrationKitSpecApplyConfiguration {
-	for i := range values {
-		b.Repositories = append(b.Repositories, values[i])
 	}
 	return b
 }

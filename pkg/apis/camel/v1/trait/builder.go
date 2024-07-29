@@ -76,4 +76,6 @@ type BuilderTrait struct {
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 	// The list of manifest platforms to use to build a container image (default `linux/amd64`).
 	ImagePlatforms []string `property:"platforms" json:"platforms,omitempty"`
+	// A list of additional Maven repositories to be used
+	Repositories []string `property:"repositories" json:"repositories,omitempty"`
 }

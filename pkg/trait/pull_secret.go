@@ -141,7 +141,7 @@ func (t *pullSecretTrait) newImagePullerRoleBinding(e *Environment) *rbacv1.Role
 			},
 		}
 	}
-	serviceAccount := e.Integration.Spec.ServiceAccountName
+	serviceAccount := e.GetPodServiceAccountName()
 	if serviceAccount == "" {
 		serviceAccount = "default"
 	}

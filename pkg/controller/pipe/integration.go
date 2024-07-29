@@ -103,10 +103,6 @@ func CreateIntegrationFor(ctx context.Context, c client.Client, binding *v1.Pipe
 	}
 	it.Spec.Profile = profile
 
-	if binding.Spec.ServiceAccountName != "" {
-		it.Spec.ServiceAccountName = binding.Spec.ServiceAccountName
-	}
-
 	bindingContext := bindings.BindingContext{
 		Ctx:       ctx,
 		Client:    c,

@@ -242,6 +242,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 	if t.BackoffLimit != nil {
 		backoffLimit = *t.BackoffLimit
 	}
+	serviceAccountName := e.GetPodServiceAccountName()
 	cronjob := batchv1.CronJob{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "CronJob",
@@ -272,7 +273,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 							Annotations: annotations,
 						},
 						Spec: corev1.PodSpec{
-							ServiceAccountName: e.Integration.Spec.ServiceAccountName,
+							ServiceAccountName: serviceAccountName,
 							RestartPolicy:      corev1.RestartPolicyNever,
 						},
 					},

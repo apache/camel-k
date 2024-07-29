@@ -125,13 +125,6 @@ func (command *describeKitCommandOptions) describeIntegrationKit(cmd *cobra.Comm
 			}
 		}
 
-		if len(kit.Spec.Repositories) > 0 {
-			w.Writef(0, "Repositories:\n")
-			for _, repository := range kit.Spec.Repositories {
-				w.Writef(1, "%s\n", repository)
-			}
-		}
-
 		return describeTraits(w, kit.Spec.Traits)
 	})
 }

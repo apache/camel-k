@@ -27,17 +27,15 @@ import (
 // IntegrationSpecApplyConfiguration represents an declarative configuration of the IntegrationSpec type for use
 // with apply.
 type IntegrationSpecApplyConfiguration struct {
-	Replicas           *int32                                `json:"replicas,omitempty"`
-	Sources            []SourceSpecApplyConfiguration        `json:"sources,omitempty"`
-	Flows              []FlowApplyConfiguration              `json:"flows,omitempty"`
-	IntegrationKit     *corev1.ObjectReference               `json:"integrationKit,omitempty"`
-	Dependencies       []string                              `json:"dependencies,omitempty"`
-	Profile            *camelv1.TraitProfile                 `json:"profile,omitempty"`
-	Traits             *TraitsApplyConfiguration             `json:"traits,omitempty"`
-	PodTemplate        *PodSpecTemplateApplyConfiguration    `json:"template,omitempty"`
-	Configuration      []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
-	Repositories       []string                              `json:"repositories,omitempty"`
-	ServiceAccountName *string                               `json:"serviceAccountName,omitempty"`
+	Replicas       *int32                                `json:"replicas,omitempty"`
+	Sources        []SourceSpecApplyConfiguration        `json:"sources,omitempty"`
+	Flows          []FlowApplyConfiguration              `json:"flows,omitempty"`
+	IntegrationKit *corev1.ObjectReference               `json:"integrationKit,omitempty"`
+	Dependencies   []string                              `json:"dependencies,omitempty"`
+	Profile        *camelv1.TraitProfile                 `json:"profile,omitempty"`
+	Traits         *TraitsApplyConfiguration             `json:"traits,omitempty"`
+	PodTemplate    *PodSpecTemplateApplyConfiguration    `json:"template,omitempty"`
+	Configuration  []ConfigurationSpecApplyConfiguration `json:"configuration,omitempty"`
 }
 
 // IntegrationSpecApplyConfiguration constructs an declarative configuration of the IntegrationSpec type for use with
@@ -132,23 +130,5 @@ func (b *IntegrationSpecApplyConfiguration) WithConfiguration(values ...*Configu
 		}
 		b.Configuration = append(b.Configuration, *values[i])
 	}
-	return b
-}
-
-// WithRepositories adds the given value to the Repositories field in the declarative configuration
-// and returns the receiver, so that objects can be build by chaining "With" function invocations.
-// If called multiple times, values provided by each call will be appended to the Repositories field.
-func (b *IntegrationSpecApplyConfiguration) WithRepositories(values ...string) *IntegrationSpecApplyConfiguration {
-	for i := range values {
-		b.Repositories = append(b.Repositories, values[i])
-	}
-	return b
-}
-
-// WithServiceAccountName sets the ServiceAccountName field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the ServiceAccountName field is set to the value of the last call.
-func (b *IntegrationSpecApplyConfiguration) WithServiceAccountName(value string) *IntegrationSpecApplyConfiguration {
-	b.ServiceAccountName = &value
 	return b
 }

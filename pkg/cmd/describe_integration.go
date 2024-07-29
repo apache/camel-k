@@ -128,13 +128,6 @@ func (command *describeIntegrationCommandOptions) describeIntegration(cmd *cobra
 			}
 		}
 
-		if len(i.Spec.Repositories) > 0 {
-			w.Writef(0, "Repositories:\n")
-			for _, repository := range i.Spec.Repositories {
-				w.Writef(1, "%s\n", repository)
-			}
-		}
-
 		if len(i.AllSources()) > 0 {
 			w.Writef(0, "Sources:\n")
 			if command.showSourceContent {

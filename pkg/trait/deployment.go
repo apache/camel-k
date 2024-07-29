@@ -123,6 +123,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		deadline = *t.ProgressDeadlineSeconds
 	}
 
+	serviceAccountName := e.GetPodServiceAccountName()
 	deployment := appsv1.Deployment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Deployment",
@@ -152,7 +153,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 					Annotations: annotations,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: e.Integration.Spec.ServiceAccountName,
+					ServiceAccountName: serviceAccountName,
 				},
 			},
 		},

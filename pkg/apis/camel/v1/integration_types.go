@@ -76,10 +76,6 @@ type IntegrationSpec struct {
 	// Use mount trait (mount.resources) to manage resources
 	// Use mount trait (mount.volumes) to manage volumes
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
-	// additional Maven repositories to be used
-	Repositories []string `json:"repositories,omitempty"`
-	// custom SA to use for the Integration
-	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
 // IntegrationStatus defines the observed state of Integration.

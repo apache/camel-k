@@ -719,6 +719,16 @@ func (e *Environment) GetIntegrationContainerName() string {
 	return containerName
 }
 
+func (e *Environment) GetPodServiceAccountName() string {
+	serviceAccount := ""
+	if t := e.Catalog.GetTrait(podTraitId); t != nil {
+		if pod, ok := t.(*podTrait); ok {
+			serviceAccount = pod.ServiceAccountName
+		}
+	}
+	return serviceAccount
+}
+
 // Indicates whether the given source is embedded in the final binary.
 func (e *Environment) isEmbedded(source v1.SourceSpec) bool {
 	if dt := e.Catalog.GetTrait(quarkusTraitID); dt != nil {
