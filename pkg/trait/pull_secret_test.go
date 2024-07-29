@@ -126,6 +126,7 @@ func getEnvironmentAndDeployment(t *testing.T) (*Environment, *appsv1.Deployment
 	e.Resources = kubernetes.NewCollection(&deployment)
 
 	var err error
+	e.Catalog = NewCatalog(nil)
 	e.Ctx = context.TODO()
 	e.Client, err = test.NewFakeClient(e.Integration, &deployment)
 	require.NoError(t, err)

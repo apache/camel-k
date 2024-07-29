@@ -1003,16 +1003,6 @@ func IntegrationStatusCapabilities(t *testing.T, ctx context.Context, ns string,
 	}
 }
 
-func IntegrationSpecSA(t *testing.T, ctx context.Context, ns string, name string) func() string {
-	return func() string {
-		it := Integration(t, ctx, ns, name)()
-		if it == nil {
-			return ""
-		}
-		return it.Spec.ServiceAccountName
-	}
-}
-
 func IntegrationKit(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
 		it := Integration(t, ctx, ns, name)()

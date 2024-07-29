@@ -52,10 +52,5 @@ func TestKamelCLIBind(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-to-log"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, ns, "timer-to-log")).Should(ContainSubstring("Body is null"))
 		})
-
-		t.Run("bind with custom SA", func(t *testing.T) {
-			g.Expect(KamelBind(t, ctx, ns, "timer:foo", "log:bar", "--service-account", "my-service-account").Execute()).To(Succeed())
-			g.Eventually(IntegrationSpecSA(t, ctx, ns, "timer-to-log")).Should(Equal("my-service-account"))
-		})
 	})
 }

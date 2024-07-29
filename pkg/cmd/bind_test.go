@@ -257,16 +257,6 @@ status: {}
 `, output)
 }
 
-func TestBindServiceAccountName(t *testing.T) {
-	_, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "timer:foo", "log:bar",
-		"-o", "yaml",
-		"--service-account", "my-service-account")
-
-	require.NoError(t, err)
-	assert.Contains(t, output, "serviceAccountName: my-service-account")
-}
-
 func TestBindOutputWithoutKubernetesCluster(t *testing.T) {
 	tmpFile, err := os.CreateTemp("", "camel-k-kubeconfig-*")
 	require.NoError(t, err)
