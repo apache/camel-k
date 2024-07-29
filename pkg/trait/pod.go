@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	podTraitId    = "pod"
+	podTraitID    = "pod"
 	podTraitOrder = 1800
 )
 
@@ -45,7 +45,7 @@ type podTrait struct {
 
 func newPodTrait() Trait {
 	return &podTrait{
-		BaseTrait: NewBaseTrait(podTraitId, podTraitOrder),
+		BaseTrait: NewBaseTrait(podTraitID, podTraitOrder),
 	}
 }
 

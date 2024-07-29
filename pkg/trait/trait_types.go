@@ -721,7 +721,7 @@ func (e *Environment) GetIntegrationContainerName() string {
 
 func (e *Environment) GetPodServiceAccountName() string {
 	serviceAccount := ""
-	if t := e.Catalog.GetTrait(podTraitId); t != nil {
+	if t := e.Catalog.GetTrait(podTraitID); t != nil {
 		if pod, ok := t.(*podTrait); ok {
 			serviceAccount = pod.ServiceAccountName
 		}
