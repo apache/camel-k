@@ -595,6 +595,12 @@ spec:
                         items:
                           type: string
                         type: array
+                      repositories:
+                        description: A list of additional Maven repositories to be
+                          used
+                        items:
+                          type: string
+                        type: array
                       requestCPU:
                         description: 'When using `pod` strategy, the minimum amount
                           of CPU required by the pod builder. Deprecated: use TasksRequestCPU
@@ -1743,6 +1749,9 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      serviceAccountName:
+                        description: A custom Service Account
+                        type: string
                     type: object
                   prometheus:
                     description: The configuration of Prometheus trait
@@ -2637,6 +2646,12 @@ spec:
                         items:
                           type: string
                         type: array
+                      repositories:
+                        description: A list of additional Maven repositories to be
+                          used
+                        items:
+                          type: string
+                        type: array
                       requestCPU:
                         description: 'When using `pod` strategy, the minimum amount
                           of CPU required by the pod builder. Deprecated: use TasksRequestCPU
@@ -3785,6 +3800,9 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      serviceAccountName:
+                        description: A custom Service Account
+                        type: string
                     type: object
                   prometheus:
                     description: The configuration of Prometheus trait

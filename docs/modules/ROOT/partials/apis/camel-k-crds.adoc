@@ -2540,13 +2540,6 @@ Use mount trait (mount.resources) to manage resources
 Use mount trait (mount.volumes) to manage volumes
 configuration used by the kit
 
-|`repositories` +
-[]string
-|
-
-
-Maven repositories that can be used by the kit
-
 |`sources` +
 *xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
 |
@@ -3413,20 +3406,6 @@ Use camel trait (camel.properties) to manage properties
 Use mount trait (mount.configs) to manage configs
 Use mount trait (mount.resources) to manage resources
 Use mount trait (mount.volumes) to manage volumes
-
-|`repositories` +
-[]string
-|
-
-
-additional Maven repositories to be used
-
-|`serviceAccountName` +
-string
-|
-
-
-custom SA to use for the Integration
 
 
 |===
@@ -4660,13 +4639,6 @@ int32
 
 
 Replicas is the number of desired replicas for the Pipe
-
-|`serviceAccountName` +
-string
-|
-
-
-Custom SA to use for the Pipe
 
 
 |===
@@ -6365,6 +6337,13 @@ When using `pod` strategy, annotation to use for the builder pod.
 
 
 The list of manifest platforms to use to build a container image (default `linux/amd64`).
+
+|`repositories` +
+[]string
+|
+
+
+A list of additional Maven repositories to be used
 
 
 |===
@@ -8166,6 +8145,13 @@ by using the `integration` container name.
 
 
 
+
+|`serviceAccountName` +
+string
+|
+
+
+A custom Service Account
 
 
 |===

@@ -126,11 +126,6 @@ spec:
               profile:
                 description: the profile which is expected by this kit
                 type: string
-              repositories:
-                description: Maven repositories that can be used by the kit
-                items:
-                  type: string
-                type: array
               sources:
                 description: the sources to add at build time
                 items:
@@ -277,6 +272,12 @@ spec:
                       properties:
                         description: A list of properties to be provided to the build
                           task
+                        items:
+                          type: string
+                        type: array
+                      repositories:
+                        description: A list of additional Maven repositories to be
+                          used
                         items:
                           type: string
                         type: array

@@ -1273,11 +1273,6 @@ func (in *IntegrationKitSpec) DeepCopyInto(out *IntegrationKitSpec) {
 		*out = make([]ConfigurationSpec, len(*in))
 		copy(*out, *in)
 	}
-	if in.Repositories != nil {
-		in, out := &in.Repositories, &out.Repositories
-		*out = make([]string, len(*in))
-		copy(*out, *in)
-	}
 	if in.Sources != nil {
 		in, out := &in.Sources, &out.Sources
 		*out = make([]SourceSpec, len(*in))
@@ -1792,11 +1787,6 @@ func (in *IntegrationSpec) DeepCopyInto(out *IntegrationSpec) {
 	if in.Configuration != nil {
 		in, out := &in.Configuration, &out.Configuration
 		*out = make([]ConfigurationSpec, len(*in))
-		copy(*out, *in)
-	}
-	if in.Repositories != nil {
-		in, out := &in.Repositories, &out.Repositories
-		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
 }

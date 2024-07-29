@@ -160,14 +160,6 @@ spec:
                     description: the number of `Pods` needed for the running Integration
                     format: int32
                     type: integer
-                  repositories:
-                    description: additional Maven repositories to be used
-                    items:
-                      type: string
-                    type: array
-                  serviceAccountName:
-                    description: custom SA to use for the Integration
-                    type: string
                   sources:
                     description: the sources which contain the Camel routes to run
                     items:
@@ -6815,6 +6807,12 @@ spec:
                             items:
                               type: string
                             type: array
+                          repositories:
+                            description: A list of additional Maven repositories to
+                              be used
+                            items:
+                              type: string
+                            type: array
                           requestCPU:
                             description: 'When using `pod` strategy, the minimum amount
                               of CPU required by the pod builder. Deprecated: use
@@ -7980,6 +7978,9 @@ spec:
                             description: Can be used to enable or disable a trait.
                               All traits share this common property.
                             type: boolean
+                          serviceAccountName:
+                            description: A custom Service Account
+                            type: string
                         type: object
                       prometheus:
                         description: The configuration of Prometheus trait
@@ -8327,9 +8328,6 @@ spec:
                 description: Replicas is the number of desired replicas for the binding
                 format: int32
                 type: integer
-              serviceAccountName:
-                description: Custom SA to use for the binding
-                type: string
               sink:
                 description: Sink is the destination of the integration defined by
                   this binding
