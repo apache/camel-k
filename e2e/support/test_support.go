@@ -61,7 +61,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
@@ -420,7 +420,7 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 		}
 
 		options := corev1.PodLogOptions{
-			TailLines: pointer.Int64(100),
+			TailLines: ptr.To(int64(100)),
 		}
 
 		for _, container := range pod.Status.ContainerStatuses {
@@ -442,7 +442,7 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 func TailedLogs(t *testing.T, ctx context.Context, ns, name string, numLines int64) func() string {
 	return func() string {
 		options := corev1.PodLogOptions{
-			TailLines: pointer.Int64(numLines),
+			TailLines: ptr.To(numLines),
 		}
 
 		return Logs(t, ctx, ns, name, options)()
@@ -1578,8 +1578,8 @@ func CreatePlainTextConfigmapWithOwnerRefWithLabels(t *testing.T, ctx context.Co
 				Kind:               "Integration",
 				Name:               orname,
 				UID:                uid,
-				Controller:         pointer.Bool(true),
-				BlockOwnerDeletion: pointer.Bool(true),
+				Controller:         ptr.To(true),
+				BlockOwnerDeletion: ptr.To(true),
 			},
 			},
 			Labels: labels,

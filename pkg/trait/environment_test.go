@@ -26,7 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -86,7 +86,7 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
 		Environment: &traitv1.EnvironmentTrait{
-			ContainerMeta: pointer.Bool(true),
+			ContainerMeta: ptr.To(true),
 		},
 	}
 	env.Platform.ResyncStatusFullConfig()
@@ -125,7 +125,7 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 	env := mockEnvironment(c)
 	env.Integration.Spec.Traits = v1.Traits{
 		Environment: &traitv1.EnvironmentTrait{
-			ContainerMeta: pointer.Bool(false),
+			ContainerMeta: ptr.To(false),
 		},
 	}
 

@@ -32,7 +32,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
@@ -74,7 +74,7 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T)
 
 func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Enabled = pointer.Bool(false)
+	trait.Enabled = ptr.To(false)
 
 	expectedCondition := NewIntegrationCondition(
 		"JVM",
@@ -346,8 +346,8 @@ func TestApplyJvmTraitWithKnativeResource(t *testing.T) {
 
 func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Debug = pointer.Bool(true)
-	trait.DebugSuspend = pointer.Bool(true)
+	trait.Debug = ptr.To(true)
+	trait.DebugSuspend = ptr.To(true)
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -585,7 +585,7 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
 	client, _ := test.NewFakeClient()
 	trait, _ := newJvmTrait().(*jvmTrait)
-	trait.PrintCommand = pointer.Bool(false)
+	trait.PrintCommand = ptr.To(false)
 	trait.Client = client
 
 	environment := &Environment{

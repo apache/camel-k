@@ -27,7 +27,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -70,7 +70,7 @@ func (t *deployerTrait) Apply(e *Environment) error {
 			// check its list of accepted MIME types.
 			// As a simpler solution, we fall back to client-side apply at the first
 			// 415 error, and assume server-side apply is not available globally.
-			if hasServerSideApply && pointer.BoolDeref(t.UseSSA, true) {
+			if hasServerSideApply && ptr.Deref(t.UseSSA, true) {
 				err := t.serverSideApply(env, resource)
 				switch {
 				case err == nil:

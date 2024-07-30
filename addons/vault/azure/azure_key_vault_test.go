@@ -22,9 +22,9 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -39,7 +39,7 @@ func TestAzureKeyVaultTraitApply(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	azure := NewAzureKeyVaultTrait()
 	secrets, _ := azure.(*azureKeyVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.TenantID = "tenant-id"
 	secrets.ClientID = "client-id"
 	secrets.ClientSecret = "secret"
@@ -78,12 +78,12 @@ func TestAzureKeyVaultTraitApplyWithConfigmapAndRefresh(t *testing.T) {
 	})
 	azure := NewAzureKeyVaultTrait()
 	secrets, _ := azure.(*azureKeyVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.TenantID = "tenant-id"
 	secrets.ClientID = "client-id"
 	secrets.ClientSecret = "configmap:my-configmap1/azure-client-secret"
 	secrets.VaultName = "my-vault"
-	secrets.RefreshEnabled = pointer.Bool(true)
+	secrets.RefreshEnabled = ptr.To(true)
 	secrets.BlobAccessKey = "configmap:my-configmap2/azure-storage-blob-key"
 	secrets.BlobAccountName = "camel-k"
 	secrets.BlobContainerName = "camel-k-container"
@@ -125,12 +125,12 @@ func TestAzureKeyVaultTraitApplyWithSecretAndRefresh(t *testing.T) {
 	})
 	azure := NewAzureKeyVaultTrait()
 	secrets, _ := azure.(*azureKeyVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.TenantID = "tenant-id"
 	secrets.ClientID = "client-id"
 	secrets.ClientSecret = "secret:my-secret1/azure-client-secret"
 	secrets.VaultName = "my-vault"
-	secrets.RefreshEnabled = pointer.Bool(true)
+	secrets.RefreshEnabled = ptr.To(true)
 	secrets.BlobAccessKey = "secret:my-secret2/azure-storage-blob-key"
 	secrets.BlobAccountName = "camel-k"
 	secrets.BlobContainerName = "camel-k-container"
@@ -172,13 +172,13 @@ func TestAzureKeyVaultTraitAzureIdentityEnabledApplyWithSecretAndRefresh(t *test
 	})
 	azure := NewAzureKeyVaultTrait()
 	secrets, _ := azure.(*azureKeyVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.TenantID = "tenant-id"
 	secrets.ClientID = "client-id"
 	secrets.ClientSecret = "secret:my-secret1/azure-client-secret"
 	secrets.VaultName = "my-vault"
-	secrets.RefreshEnabled = pointer.Bool(true)
-	secrets.AzureIdentityEnabled = pointer.Bool(true)
+	secrets.RefreshEnabled = ptr.To(true)
+	secrets.AzureIdentityEnabled = ptr.To(true)
 	secrets.BlobAccessKey = "secret:my-secret2/azure-storage-blob-key"
 	secrets.BlobAccountName = "camel-k"
 	secrets.BlobContainerName = "camel-k-container"

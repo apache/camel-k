@@ -29,7 +29,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -95,7 +95,7 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
 	env.Integration.Spec.Traits.Service = &traitv1.ServiceTrait{
 		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(false),
+			Enabled: ptr.To(false),
 		},
 	}
 	res := processTestEnv(t, env)
@@ -144,20 +144,20 @@ func TestTraitHierarchyDecode(t *testing.T) {
 
 	env.Platform.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
 		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(false),
+			Enabled: ptr.To(false),
 		},
-		MinScale: pointer.Int(1),
-		MaxScale: pointer.Int(10),
-		Target:   pointer.Int(15),
+		MinScale: ptr.To(1),
+		MaxScale: ptr.To(10),
+		Target:   ptr.To(15),
 	}
 	env.Platform.ResyncStatusFullConfig()
 
 	env.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
 		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(true),
+			Enabled: ptr.To(true),
 		},
-		MinScale: pointer.Int(5),
-		MaxScale: pointer.Int(20),
+		MinScale: ptr.To(5),
+		MaxScale: ptr.To(20),
 	}
 
 	c := NewTraitTestCatalog()

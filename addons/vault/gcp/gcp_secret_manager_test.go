@@ -23,7 +23,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -37,8 +37,8 @@ func TestGcpSecretManagerTraitApply(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	gcp := NewGcpSecretManagerTrait()
 	secrets, _ := gcp.(*gcpSecretManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
-	secrets.UseDefaultInstance = pointer.Bool(false)
+	secrets.Enabled = ptr.To(true)
+	secrets.UseDefaultInstance = ptr.To(false)
 	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, condition, err := secrets.Configure(e)
@@ -58,8 +58,8 @@ func TestGcpSecretManagerTraitNoDefaultCreds(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	gcp := NewGcpSecretManagerTrait()
 	secrets, _ := gcp.(*gcpSecretManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
-	secrets.UseDefaultInstance = pointer.Bool(false)
+	secrets.Enabled = ptr.To(true)
+	secrets.UseDefaultInstance = ptr.To(false)
 	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, condition, err := secrets.Configure(e)

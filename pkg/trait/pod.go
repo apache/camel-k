@@ -25,7 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -50,7 +50,7 @@ func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Pod"), nil
 	}
 	if e.Integration.Spec.PodTemplate == nil {

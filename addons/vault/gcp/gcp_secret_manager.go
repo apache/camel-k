@@ -24,7 +24,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Google Secret Manager trait can be used to use secrets from Google Secret Manager
@@ -76,7 +76,7 @@ func NewGcpSecretManagerTrait() trait.Trait {
 }
 
 func (t *gcpSecretManagerTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if environment.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -85,15 +85,15 @@ func (t *gcpSecretManagerTrait) Configure(environment *trait.Environment) (bool,
 	}
 
 	if t.UseDefaultInstance == nil {
-		t.UseDefaultInstance = pointer.Bool(false)
+		t.UseDefaultInstance = ptr.To(false)
 	}
 
 	if t.ContextReloadEnabled == nil {
-		t.ContextReloadEnabled = pointer.Bool(false)
+		t.ContextReloadEnabled = ptr.To(false)
 	}
 
 	if t.RefreshEnabled == nil {
-		t.RefreshEnabled = pointer.Bool(false)
+		t.RefreshEnabled = ptr.To(false)
 	}
 
 	return true, nil, nil

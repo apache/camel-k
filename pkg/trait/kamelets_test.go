@@ -31,7 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestConfigurationNoKameletsUsed(t *testing.T) {
@@ -602,7 +602,7 @@ func TestKameletSyntheticKitConditionTrue(t *testing.T) {
 		})
 	environment.CamelCatalog = nil
 	environment.Integration.Spec.Sources = nil
-	trait.Auto = pointer.Bool(false)
+	trait.Auto = ptr.To(false)
 	trait.List = "timer-source"
 
 	enabled, condition, err := trait.Configure(environment)

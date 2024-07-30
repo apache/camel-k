@@ -18,11 +18,10 @@ limitations under the License.
 package trait
 
 import (
-	"k8s.io/utils/pointer"
-
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -55,7 +54,7 @@ func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(l.Enabled, true) {
+	if !ptr.Deref(l.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Logging"), nil
 	}
 
@@ -80,16 +79,16 @@ func (l loggingTrait) setEnvConfiguration(e *Environment) {
 		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
 	}
 
-	if pointer.BoolDeref(l.JSON, false) {
+	if ptr.Deref(l.JSON, false) {
 		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, boolean.TrueString)
-		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
+		if ptr.Deref(l.JSONPrettyPrint, false) {
 			envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSONPrettyPrint, boolean.TrueString)
 		}
 	} else {
 		// If the trait is false OR unset, we default to false.
 		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleJSON, boolean.FalseString)
 
-		if pointer.BoolDeref(l.Color, true) {
+		if ptr.Deref(l.Color, true) {
 			envvar.SetVal(&e.EnvVars, envVarQuarkusConsoleColor, boolean.TrueString)
 		}
 	}
@@ -103,15 +102,15 @@ func (l loggingTrait) setCatalogConfiguration(e *Environment) {
 	if l.Format != "" {
 		e.ApplicationProperties["camel.k.logging.format"] = l.Format
 	}
-	if pointer.BoolDeref(l.JSON, false) {
+	if ptr.Deref(l.JSON, false) {
 		e.ApplicationProperties["camel.k.logging.json"] = boolean.TrueString
-		if pointer.BoolDeref(l.JSONPrettyPrint, false) {
+		if ptr.Deref(l.JSONPrettyPrint, false) {
 			e.ApplicationProperties["camel.k.logging.jsonPrettyPrint"] = boolean.TrueString
 		}
 	} else {
 		// If the trait is false OR unset, we default to false.
 		e.ApplicationProperties["camel.k.logging.json"] = boolean.FalseString
-		if pointer.BoolDeref(l.Color, true) {
+		if ptr.Deref(l.Color, true) {
 			e.ApplicationProperties["camel.k.logging.color"] = boolean.TrueString
 		}
 	}

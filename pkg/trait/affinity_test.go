@@ -25,7 +25,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
@@ -43,8 +43,8 @@ func TestConfigureAffinityTraitDoesSucceed(t *testing.T) {
 func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
 	environment, _ := createNominalDeploymentTraitTest()
-	affinityTrait.PodAffinity = pointer.Bool(true)
-	affinityTrait.PodAntiAffinity = pointer.Bool(true)
+	affinityTrait.PodAffinity = ptr.To(true)
+	affinityTrait.PodAntiAffinity = ptr.To(true)
 	configured, condition, err := affinityTrait.Configure(environment)
 
 	assert.False(t, configured)
@@ -54,7 +54,7 @@ func TestConfigureAffinityTraitWithConflictingAffinitiesFails(t *testing.T) {
 
 func TestConfigureDisabledAffinityTraitFails(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
-	affinityTrait.Enabled = pointer.Bool(false)
+	affinityTrait.Enabled = ptr.To(false)
 	environment, _ := createNominalDeploymentTraitTest()
 	configured, condition, err := affinityTrait.Configure(environment)
 
@@ -125,7 +125,7 @@ func testApplyNodeAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, 
 
 func TestApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
-	affinityTrait.PodAntiAffinity = pointer.Bool(true)
+	affinityTrait.PodAntiAffinity = ptr.To(true)
 	affinityTrait.PodAntiAffinityLabels = []string{"criteria != value"}
 
 	environment, deployment := createNominalDeploymentTraitTest()
@@ -160,7 +160,7 @@ func testApplyPodAntiAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrai
 
 func TestApplyPodAffinityLabelsDoesSucceed(t *testing.T) {
 	affinityTrait := createNominalAffinityTest()
-	affinityTrait.PodAffinity = pointer.Bool(true)
+	affinityTrait.PodAffinity = ptr.To(true)
 	affinityTrait.PodAffinityLabels = []string{"!criteria"}
 
 	environment, deployment := createNominalDeploymentTraitTest()
@@ -194,7 +194,7 @@ func testApplyPodAffinityLabelsDoesSucceed(t *testing.T, trait *affinityTrait, e
 
 func createNominalAffinityTest() *affinityTrait {
 	trait, _ := newAffinityTrait().(*affinityTrait)
-	trait.Enabled = pointer.Bool(true)
+	trait.Enabled = ptr.To(true)
 
 	return trait
 }

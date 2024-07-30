@@ -26,7 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -78,7 +78,7 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 	if enabled {
 		env.Integration.Spec.Traits.Istio = &traitv1.IstioTrait{
 			Trait: traitv1.Trait{
-				Enabled: pointer.Bool(true),
+				Enabled: ptr.To(true),
 			},
 		}
 	}
@@ -123,8 +123,8 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 	}
 
 	env := NewIstioTestEnv(t, &d, &s, true)
-	env.Integration.Spec.Traits.Istio.Enabled = pointer.Bool(true)
-	env.Integration.Spec.Traits.Istio.Inject = pointer.Bool(true)
+	env.Integration.Spec.Traits.Istio.Enabled = ptr.To(true)
+	env.Integration.Spec.Traits.Istio.Inject = ptr.To(true)
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
@@ -148,8 +148,8 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 	}
 
 	env := NewIstioTestEnv(t, &d, &s, true)
-	env.Integration.Spec.Traits.Istio.Enabled = pointer.Bool(true)
-	env.Integration.Spec.Traits.Istio.Inject = pointer.Bool(false)
+	env.Integration.Spec.Traits.Istio.Enabled = ptr.To(true)
+	env.Integration.Spec.Traits.Istio.Inject = ptr.To(false)
 
 	conditions, err := env.Catalog.apply(&env)
 	require.NoError(t, err)

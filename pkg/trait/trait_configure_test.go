@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -38,15 +38,15 @@ func TestTraitConfiguration(t *testing.T) {
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Logging: &traitv1.LoggingTrait{
-						JSON:            pointer.Bool(true),
-						JSONPrettyPrint: pointer.Bool(false),
+						JSON:            ptr.To(true),
+						JSONPrettyPrint: ptr.To(false),
 						Level:           "DEBUG",
 					},
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto: pointer.Bool(true),
+						Auto: ptr.To(true),
 					},
 				},
 			},
@@ -78,7 +78,7 @@ func TestTraitConfigurationFromAnnotations(t *testing.T) {
 				Profile: v1.TraitProfileKubernetes,
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
-						Fallback:          pointer.Bool(true),
+						Fallback:          ptr.To(true),
 						ConcurrencyPolicy: "mypolicy",
 					},
 				},
@@ -141,7 +141,7 @@ func TestTraitConfigurationOverrideRulesFromAnnotations(t *testing.T) {
 			Spec: v1.IntegrationKitSpec{
 				Traits: v1.IntegrationKitTraits{
 					Builder: &traitv1.BuilderTrait{
-						Verbose: pointer.Bool(false),
+						Verbose: ptr.To(false),
 					},
 				},
 			},
@@ -219,7 +219,7 @@ func TestTraitDecode(t *testing.T) {
 		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 		Name:              "test-container",
 		Port:              7071,
-		Auto:              pointer.Bool(false),
+		Auto:              ptr.To(false),
 	})
 
 	target, ok := newContainerTrait().(*containerTrait)
@@ -229,5 +229,5 @@ func TestTraitDecode(t *testing.T) {
 
 	assert.Equal(t, "test-container", target.Name)
 	assert.Equal(t, 7071, target.Port)
-	assert.False(t, pointer.BoolDeref(target.Auto, true))
+	assert.False(t, ptr.Deref(target.Auto, true))
 }

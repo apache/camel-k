@@ -30,7 +30,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -53,7 +53,7 @@ func TestTolerationTrait(t *testing.T) {
 				Key:               "camel.apache.org/master",
 				Operator:          corev1.TolerationOpExists,
 				Effect:            corev1.TaintEffectNoExecute,
-				TolerationSeconds: pointer.Int64(300),
+				TolerationSeconds: ptr.To(int64(300)),
 			}))
 		})
 
@@ -71,7 +71,7 @@ func TestTolerationTrait(t *testing.T) {
 				Key:      "camel.apache.org/master",
 				Operator: corev1.TolerationOpEqual,
 				Value:    "test", Effect: corev1.TaintEffectNoExecute,
-				TolerationSeconds: pointer.Int64(300),
+				TolerationSeconds: ptr.To(int64(300)),
 			}))
 		})
 

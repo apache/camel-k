@@ -26,7 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -41,8 +41,8 @@ func TestAwsSecretsManagerTraitApply(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
-	secrets.UseDefaultCredentialsProvider = pointer.Bool(false)
+	secrets.Enabled = ptr.To(true)
+	secrets.UseDefaultCredentialsProvider = ptr.To(false)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
@@ -65,7 +65,7 @@ func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
@@ -105,7 +105,7 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "secret:my-secret2/aws-access-key"
 	secrets.SecretKey = "secret:my-secret1/aws-secret-key"
@@ -145,7 +145,7 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "configmap:my-configmap2/aws-access-key"
 	secrets.SecretKey = "configmap:my-configmap1/aws-secret-key"

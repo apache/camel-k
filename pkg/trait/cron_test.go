@@ -28,7 +28,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -410,7 +410,7 @@ func TestCronDepsFallback(t *testing.T) {
 				},
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
-						Fallback: pointer.Bool(true),
+						Fallback: ptr.To(true),
 					},
 				},
 			},
@@ -490,7 +490,7 @@ func TestCronWithActiveDeadline(t *testing.T) {
 				},
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
-						ActiveDeadlineSeconds: pointer.Int64(120),
+						ActiveDeadlineSeconds: ptr.To(int64(120)),
 					},
 				},
 			},
@@ -579,7 +579,7 @@ func TestCronWithBackoffLimit(t *testing.T) {
 				},
 				Traits: v1.Traits{
 					Cron: &traitv1.CronTrait{
-						BackoffLimit: pointer.Int32(5),
+						BackoffLimit: ptr.To(int32(5)),
 					},
 				},
 			},

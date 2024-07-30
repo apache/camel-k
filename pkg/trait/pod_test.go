@@ -24,11 +24,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/utils/ptr"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
@@ -115,7 +115,7 @@ func TestAutomountServiceAccountToken(t *testing.T) {
 // nolint: unparam
 func createPodTest(podSpecTemplate string) (*podTrait, *Environment, *appsv1.Deployment) {
 	trait, _ := newPodTrait().(*podTrait)
-	trait.Enabled = pointer.Bool(true)
+	trait.Enabled = ptr.To(true)
 
 	var podSpec v1.PodSpec
 	if podSpecTemplate != "" {

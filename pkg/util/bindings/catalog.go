@@ -25,7 +25,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 var bindingProviders []BindingProvider
@@ -76,7 +76,7 @@ func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1.Endp
 	if endpoint.Ref != nil {
 		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s/%s %s in namespace %s. Bindings available: %q",
 			endpoint.Ref.APIVersion, endpoint.Ref.Kind, endpoint.Ref.Name, endpoint.Ref.Namespace, availableBindings)
-	} else if pointer.StringDeref(endpoint.URI, "") != "" {
+	} else if ptr.Deref(endpoint.URI, "") != "" {
 		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s", *endpoint.URI)
 	}
 	return nil, fmt.Errorf(errorMessage)

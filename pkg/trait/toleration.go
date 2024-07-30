@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -44,7 +44,7 @@ func newTolerationTrait() Trait {
 }
 
 func (t *tolerationTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 

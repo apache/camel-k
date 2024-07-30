@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 const cmdDebug = "debug"
@@ -58,7 +58,7 @@ func TestToggle(t *testing.T) {
 	_, debugCmdOptions := initializeDebugCmdOptions(t, &defaultIntegration, &defaultKit)
 	// toggle on
 	it := debugCmdOptions.toggle(&defaultIntegration, true)
-	assert.Equal(t, pointer.Bool(true), it.Spec.Traits.JVM.Debug)
+	assert.Equal(t, ptr.To(true), it.Spec.Traits.JVM.Debug)
 	// toggle off
 	it = debugCmdOptions.toggle(&defaultIntegration, false)
 	assert.Nil(t, it.Spec.Traits.JVM.Debug)

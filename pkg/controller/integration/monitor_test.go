@@ -24,7 +24,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -51,7 +51,7 @@ func TestGetIntegrationSecretAndConfigmapResourceVersions(t *testing.T) {
 			Name:      "sec-test",
 			Namespace: "default",
 		},
-		Immutable: pointer.Bool(true),
+		Immutable: ptr.To(true),
 	}
 	sec.Data = map[string][]byte{
 		"test.txt": []byte("hello"),
@@ -81,7 +81,7 @@ func TestGetIntegrationSecretAndConfigmapResourceVersions(t *testing.T) {
 	assert.Len(t, configmaps, 0)
 	assert.Len(t, secrets, 0)
 	// Enabled hot reload (true)
-	it.Spec.Traits.Mount.HotReload = pointer.Bool(true)
+	it.Spec.Traits.Mount.HotReload = ptr.To(true)
 	configmaps, secrets = getIntegrationSecretAndConfigmapResourceVersions(context.TODO(), c, it)
 	assert.Len(t, configmaps, 1)
 	assert.Len(t, secrets, 1)

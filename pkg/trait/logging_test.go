@@ -26,7 +26,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -63,10 +63,10 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 				Profile: v1.TraitProfileOpenShift,
 				Traits: v1.Traits{
 					Logging: &traitv1.LoggingTrait{
-						Color:           pointer.Bool(color),
+						Color:           ptr.To(color),
 						Format:          logFormat,
-						JSON:            pointer.Bool(json),
-						JSONPrettyPrint: pointer.Bool(jsonPrettyPrint),
+						JSON:            ptr.To(json),
+						JSONPrettyPrint: ptr.To(jsonPrettyPrint),
 						Level:           logLevel,
 					},
 				},

@@ -28,7 +28,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	eventingduckv1 "knative.dev/eventing/pkg/apis/duck/v1"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
@@ -71,9 +71,9 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto:            pointer.Bool(false),
+						Auto:            ptr.To(false),
 						ChannelSources:  []string{"channel-source-1"},
 						ChannelSinks:    []string{"channel-sink-1"},
 						EndpointSources: []string{"endpoint-source-1"},
@@ -203,7 +203,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -315,7 +315,7 @@ func TestKnativeTriggerExplicitFilterConfig(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 						Filters: []string{"source=my-source"},
 					},
@@ -414,10 +414,10 @@ func TestKnativeTriggerExplicitFilterConfigNoEventTypeFilter(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 						Filters:         []string{"source=my-source"},
-						FilterEventType: pointer.Bool(false),
+						FilterEventType: ptr.To(false),
 					},
 				},
 			},
@@ -513,7 +513,7 @@ func TestKnativeTriggerDefaultEventTypeFilter(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -609,9 +609,9 @@ func TestKnativeTriggerDefaultEventTypeFilterDisabled(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						FilterEventType: pointer.Bool(false),
+						FilterEventType: ptr.To(false),
 					},
 				},
 			},
@@ -710,7 +710,7 @@ func TestKnativeMultipleTrigger(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -847,7 +847,7 @@ func TestKnativeMultipleTriggerAdditionalFilterConfig(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 						Filters: []string{"subject=Hello"},
 					},
@@ -983,7 +983,7 @@ func TestKnativeTriggerNoEventType(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -1080,7 +1080,7 @@ func TestKnativeTriggerNoServingAvailable(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -1393,7 +1393,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -1448,7 +1448,7 @@ func NewFakeEnvironmentForSyntheticKit(t *testing.T) Environment {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -1697,8 +1697,8 @@ func TestKnativeSyntheticKitDefault(t *testing.T) {
 func TestKnativeSyntheticKitEnabled(t *testing.T) {
 	e := NewFakeEnvironmentForSyntheticKit(t)
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
-	knTrait.Enabled = pointer.Bool(true)
-	knTrait.Auto = pointer.Bool(false)
+	knTrait.Enabled = ptr.To(true)
+	knTrait.Auto = ptr.To(false)
 	ok, condition, err := knTrait.Configure(&e)
 	require.NoError(t, err)
 	assert.True(t, ok)

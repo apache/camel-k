@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Hashicorp Vault trait can be used to use secrets from Hashicorp Vault
@@ -69,7 +69,7 @@ func NewHashicorpVaultTrait() trait.Trait {
 }
 
 func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if environment.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 

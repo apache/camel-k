@@ -26,7 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -65,7 +65,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
 			"Ingress",
 			v1.IntegrationConditionExposureAvailable,
@@ -75,7 +75,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		), nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		if e.Resources.GetUserServiceForIntegration(e.Integration) == nil {
 			return false, nil, nil
 		}

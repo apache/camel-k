@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestCreateIntegrationForPipe(t *testing.T) {
@@ -202,7 +202,7 @@ func TestExtractTraitAnnotations(t *testing.T) {
 	}
 	traits, err := extractAndDeleteTraits(client, annotations)
 	require.NoError(t, err)
-	assert.Equal(t, pointer.Bool(true), traits.Service.Enabled)
+	assert.Equal(t, ptr.To(true), traits.Service.Enabled)
 	assert.Equal(t, corev1.PullNever, traits.Container.ImagePullPolicy)
 	assert.Equal(t, "1.2.3", traits.Camel.RuntimeVersion)
 	assert.Equal(t, []string{"prop1=1", "prop2=2"}, traits.Camel.Properties)
@@ -256,5 +256,5 @@ func TestCreateIntegrationTraitsForPipeWithTraitAnnotations(t *testing.T) {
 	assert.Equal(t, map[string]string{
 		"my-annotation": "my-annotation-val",
 	}, it.Annotations)
-	assert.Equal(t, pointer.Bool(true), it.Spec.Traits.Service.Enabled)
+	assert.Equal(t, ptr.To(true), it.Spec.Traits.Service.Enabled)
 }

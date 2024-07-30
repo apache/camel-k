@@ -26,7 +26,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -83,7 +83,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Cron"), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
@@ -102,7 +102,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		), nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		err := t.autoConfigure(e)
 		if err != nil {
 			return false,
@@ -118,7 +118,7 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	// Fallback strategy can be implemented in any other controller
-	if pointer.BoolDeref(t.Fallback, false) {
+	if ptr.Deref(t.Fallback, false) {
 		var condition *TraitCondition
 		if e.IntegrationInPhase(v1.IntegrationPhaseDeploying) {
 			condition = NewIntegrationCondition(
@@ -180,7 +180,7 @@ func (t *cronTrait) autoConfigure(e *Environment) error {
 		}
 		for _, fromURI := range fromURIs {
 			if uri.GetComponent(fromURI) == genericCronComponent {
-				t.Fallback = pointer.Bool(true)
+				t.Fallback = ptr.To(true)
 				break
 			}
 		}
@@ -193,7 +193,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityCron)
 
-		if pointer.BoolDeref(t.Fallback, false) {
+		if ptr.Deref(t.Fallback, false) {
 			fallbackArtifact := e.CamelCatalog.GetArtifactByScheme(genericCronComponentFallbackScheme)
 			if fallbackArtifact == nil {
 				return fmt.Errorf("no fallback artifact for scheme %q has been found in camel catalog", genericCronComponentFallbackScheme)
@@ -203,7 +203,7 @@ func (t *cronTrait) Apply(e *Environment) error {
 		}
 	}
 
-	if !pointer.BoolDeref(t.Fallback, false) && e.IntegrationInRunningPhases() {
+	if !ptr.Deref(t.Fallback, false) && e.IntegrationInRunningPhases() {
 		if e.ApplicationProperties == nil {
 			e.ApplicationProperties = make(map[string]string)
 		}
@@ -287,13 +287,13 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 // SelectControllerStrategy can be used to check if a CronJob can be generated given the integration and trait settings.
 func (t *cronTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
 	cronStrategy := ControllerStrategyCronJob
-	if pointer.BoolDeref(t.Fallback, false) {
+	if ptr.Deref(t.Fallback, false) {
 		return nil, nil
 	}
 	if t.Schedule != "" {
 		return &cronStrategy, nil
 	}
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		globalCron, err := t.getGlobalCron(e)
 		if err == nil && globalCron != nil {
 			return &cronStrategy, nil

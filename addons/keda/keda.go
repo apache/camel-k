@@ -42,7 +42,7 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -117,7 +117,7 @@ func NewKedaTrait() trait.Trait {
 }
 
 func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 	if e.CamelCatalog == nil {
@@ -137,7 +137,7 @@ func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition
 
 func (t *kedaTrait) Apply(e *trait.Environment) error {
 	if e.IntegrationInPhase(camelv1.IntegrationPhaseInitialization) {
-		if !pointer.BoolDeref(t.HackControllerReplicas, false) {
+		if !ptr.Deref(t.HackControllerReplicas, false) {
 			return nil
 		}
 		if err := t.hackControllerReplicas(e); err != nil {

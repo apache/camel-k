@@ -26,7 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -59,10 +59,10 @@ func TestHealthTrait(t *testing.T) {
 				Traits: v1.Traits{
 					Health: &trait.HealthTrait{
 						Trait: trait.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						LivenessProbeEnabled:  pointer.Bool(true),
-						ReadinessProbeEnabled: pointer.Bool(true),
+						LivenessProbeEnabled:  ptr.To(true),
+						ReadinessProbeEnabled: ptr.To(true),
 					},
 				},
 			},
@@ -103,9 +103,9 @@ func TestHealthTrait(t *testing.T) {
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].StartupProbe)
 
 	// Change traits configuration
-	environment.Integration.Spec.Traits.Health.LivenessProbeEnabled = pointer.Bool(false)
-	environment.Integration.Spec.Traits.Health.ReadinessProbeEnabled = pointer.Bool(false)
-	environment.Integration.Spec.Traits.Health.StartupProbeEnabled = pointer.Bool(true)
+	environment.Integration.Spec.Traits.Health.LivenessProbeEnabled = ptr.To(false)
+	environment.Integration.Spec.Traits.Health.ReadinessProbeEnabled = ptr.To(false)
+	environment.Integration.Spec.Traits.Health.StartupProbeEnabled = ptr.To(true)
 
 	environment.Platform.ResyncStatusFullConfig()
 	_, err = traitCatalog.apply(&environment)

@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -53,21 +53,21 @@ func (t *pullSecretTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("PullSecret"), nil
 	}
 	if !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		err := t.autoConfigure(e)
 		if err != nil {
 			return false, nil, err
 		}
 	}
 
-	return t.SecretName != "" || pointer.BoolDeref(t.ImagePullerDelegation, false), nil, nil
+	return t.SecretName != "" || ptr.Deref(t.ImagePullerDelegation, false), nil, nil
 }
 func (t *pullSecretTrait) autoConfigure(e *Environment) error {
 	if t.SecretName == "" {
@@ -105,7 +105,7 @@ func (t *pullSecretTrait) Apply(e *Environment) error {
 			})
 		})
 	}
-	if pointer.BoolDeref(t.ImagePullerDelegation, false) {
+	if ptr.Deref(t.ImagePullerDelegation, false) {
 		if err := t.delegateImagePuller(e); err != nil {
 			return err
 		}
