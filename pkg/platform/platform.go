@@ -154,8 +154,8 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 	}
 
 	var fallback *v1.IntegrationPlatform
-	for _, platform := range lst.Items {
-		platform := platform // pin
+	for i := range lst.Items {
+		platform := lst.Items[i]
 		if IsActive(&platform) {
 			log.Debugf("Found active integration platform %s in namespace %s", platform.Name, namespace)
 			return &platform, nil

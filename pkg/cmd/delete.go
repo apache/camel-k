@@ -107,8 +107,8 @@ func (command *deleteCmdOptions) run(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		for _, integration := range integrationList.Items {
-			integration := integration // pin
+		for i := range integrationList.Items {
+			integration := integrationList.Items[i]
 			err := deleteIntegration(command.Context, cmd, c, &integration)
 			if err != nil {
 				return err

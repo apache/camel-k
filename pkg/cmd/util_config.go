@@ -98,7 +98,7 @@ func (cfg *Config) Update(cmd *cobra.Command, nodeID string, data interface{}, c
 	pl := p.NewClient()
 	val := reflect.ValueOf(data).Elem()
 
-	for i := 0; i < val.NumField(); i++ {
+	for i := range val.NumField() {
 		field := val.Type().Field(i)
 		if !field.Anonymous {
 			if ktag, ok := field.Tag.Lookup(KamelTagName); ok {

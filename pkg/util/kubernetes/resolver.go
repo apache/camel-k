@@ -30,7 +30,7 @@ import (
 
 // ResolveSources --.
 func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.SourceSpec, error) {
-	for i := 0; i < len(elements); i++ {
+	for i := range len(elements) {
 		r := &elements[i]
 
 		if err := Resolve(&r.DataSpec, mapLookup); err != nil {

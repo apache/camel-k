@@ -79,8 +79,6 @@ func collectConfigurationValues(configurationType string, configurable ...v1.Con
 	result := sets.NewSet()
 
 	for _, c := range configurable {
-		c := c
-
 		if c == nil || reflect.ValueOf(c).IsNil() {
 			continue
 		}
@@ -106,8 +104,6 @@ func collectConfigurations(configurationType string, configurable ...v1.Configur
 	var result []map[string]string
 
 	for _, c := range configurable {
-		c := c
-
 		if c == nil || reflect.ValueOf(c).IsNil() {
 			continue
 		}
@@ -133,8 +129,6 @@ func collectConfigurationPairs(configurationType string, configurable ...v1.Conf
 	result := make([]variable, 0)
 
 	for _, c := range configurable {
-		c := c
-
 		if c == nil || reflect.ValueOf(c).IsNil() {
 			continue
 		}

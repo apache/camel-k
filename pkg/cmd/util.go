@@ -219,7 +219,7 @@ func clone(dst interface{}, src interface{}) error {
 func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.StructField, bool) {
 	pl := p.NewClient()
 
-	for i := 0; i < target.Type().NumField(); i++ {
+	for i := range target.Type().NumField() {
 		f := target.Type().Field(i)
 
 		tag, ok := f.Tag.Lookup(MapstructureTagName)

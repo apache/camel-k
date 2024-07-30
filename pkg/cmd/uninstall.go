@@ -230,7 +230,7 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context,
 		if k8serrors.IsForbidden(err) {
 			// Let's print a warning message and continue
 			fmt.Fprintln(cmd.ErrOrStderr(), "Current user is not authorized to remove the operator ServiceAccount from the cluster role bindings")
-		} else if err != nil {
+		} else {
 			return err
 		}
 	}

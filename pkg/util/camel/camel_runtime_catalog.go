@@ -37,8 +37,6 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 
 	for id, artifact := range catalog.Artifacts {
 		for _, scheme := range artifact.Schemes {
-			scheme := scheme
-
 			// In case of duplicate only, choose the "org.apache.camel.quarkus" artifact (if present).
 			// Workaround for https://github.com/apache/camel-k/v2-runtime/issues/592
 			if _, duplicate := catalog.artifactByScheme[scheme.ID]; duplicate {
@@ -51,7 +49,6 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 			catalog.schemesByID[scheme.ID] = scheme
 		}
 		for _, dataFormat := range artifact.DataFormats {
-			dataFormat := dataFormat
 			catalog.artifactByDataFormat[dataFormat] = id
 		}
 		for _, language := range artifact.Languages {
