@@ -90,7 +90,6 @@ OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE := docker.io/camelk/camel-k
-STAGING_RUNTIME_REPO :=
 
 # Kamelets options
 INSTALL_DEFAULT_KAMELETS ?= true
@@ -170,7 +169,6 @@ bump-replace:
 	@mvn -f java/crds/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@mvn -f java/maven-logging/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
-	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
 
 bump: bump-replace codegen bundle
 
@@ -278,7 +276,7 @@ setup-knative:
 # the time to complete (they are used also as smoke test for nightly release)
 #
 test-common:
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 90m -v ./e2e/common/... --parallel 1 -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
@@ -286,7 +284,7 @@ test-common:
 # Smoke tests are a subset of common tests used to quickly verify the operator
 #
 test-smoke:
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 30m -v \
 		./e2e/common/languages \
 		./e2e/common/traits \
@@ -298,7 +296,7 @@ test-smoke:
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
 test-advanced:
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -p 1 -timeout 90m -v ./e2e/advanced --parallel $(TEST_ADVANCED_PARALLEL_COUNT) -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
@@ -306,7 +304,7 @@ test-advanced:
 # Installation procedure test using CLi and Kustomize methodologies
 #
 test-install:
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -timeout 20m -v ./e2e/install/kustomize -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 20m -v ./e2e/install/helm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 20m -v ./e2e/install/olm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
@@ -317,7 +315,7 @@ test-install:
 # Knative tests that require the presence of Knative configuration
 #
 test-knative:
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
+	FAILED=0; \
 	go test -timeout 60m -v ./e2e/knative -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
@@ -325,14 +323,12 @@ test-knative:
 # Telemetry tests that require the configuration of telemetry endpoints
 #
 test-telemetry:
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(GOTESTFMT)
 
 #
 # Quarkus native test (requires certain CPU and memory conditions)
 #
 test-quarkus-native:
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
 	go test -timeout 180m -v ./e2e/native -tags=integration $(GOTESTFMT)
 
 build-kamel:
@@ -351,7 +347,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 endif
 
 build-resources:
-	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION)
 
 bundle-kamelets:
 	@echo "Preparing Kamelets bundle resource..."
@@ -446,7 +442,7 @@ images: build maven-overlay bundle-kamelets image-build build-kamel-platform
 
 image-build:
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
-	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
+	./script/package_maven_artifacts.sh -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
@@ -546,9 +542,6 @@ release-kustomize:
 	RELEASE_VERSION=$(CUSTOM_VERSION) \
 	RELEASE_NAME=$(PACKAGE) \
 	./script/release_kustomize.sh
-
-get-staging-repo:
-	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
 .PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
