@@ -21,7 +21,7 @@ import corev1 "k8s.io/api/core/v1"
 
 // Get --.
 func Get(vars []corev1.EnvVar, name string) *corev1.EnvVar {
-	for i := 0; i < len(vars); i++ {
+	for i := range len(vars) {
 		if vars[i].Name == name {
 			return &vars[i]
 		}

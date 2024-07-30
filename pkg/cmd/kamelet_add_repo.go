@@ -125,8 +125,8 @@ func (o *kameletUpdateRepoCommandOptions) findIntegrationPlatform(cmd *cobra.Com
 	if err != nil {
 		return nil, err
 	}
-	for _, p := range platforms.Items {
-		p := p // pin
+	for i := range platforms.Items {
+		p := platforms.Items[i]
 		if platformutil.IsActive(&p) {
 			return &p, nil
 		}

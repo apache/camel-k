@@ -45,7 +45,6 @@ func BuildCamelServiceDefinition(name string, endpointKind CamelEndpointKind, se
 // SetSinkBinding marks one of the service as SinkBinding.
 func (env *CamelEnvironment) SetSinkBinding(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType, apiVersion, kind string) {
 	for i, svc := range env.Services {
-		svc := svc
 		if svc.Name == name &&
 			svc.Metadata[CamelMetaEndpointKind] == string(endpointKind) &&
 			svc.ServiceType == serviceType &&
@@ -107,7 +106,6 @@ func (env *CamelEnvironment) ContainsService(name string, endpointKind CamelEndp
 // FindService -- .
 func (env *CamelEnvironment) FindService(name string, endpointKind CamelEndpointKind, serviceType CamelServiceType, apiVersion, kind string) *CamelServiceDefinition {
 	for _, svc := range env.Services {
-		svc := svc
 		if svc.Name == name &&
 			svc.Metadata[CamelMetaEndpointKind] == string(endpointKind) &&
 			svc.ServiceType == serviceType &&
