@@ -78,10 +78,6 @@ runs:
         echo "Using IMAGE_NAME=$IMAGE_NAME"
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
-        MAVEN_REPOSITORY=$(make get-staging-repo)
-        echo "Using MAVEN_REPOSITORY=$MAVEN_REPOSITORY"
-        echo "MAVEN_REPOSITORY=$MAVEN_REPOSITORY" >> $GITHUB_ENV
-
     - name: Install newer docker CLI supporting multi platform build
       shell: bash
       run: |
@@ -129,7 +125,7 @@ runs:
 
           To test it, download the client for your OS and run:
           ```
-          kamel install --olm=false --maven-repository=${{ env.MAVEN_REPOSITORY }}
+          kamel install --olm=false
           ```
           NOTE: last updated on ${{ env.UPD_DATE }}
         token: ${{ inputs.secretGithubToken }}
