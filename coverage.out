@@ -1727,6 +1727,7 @@ github.com/apache/camel-k/v2/pkg/trait/trait_condition_types.go:63:					NewInteg
 github.com/apache/camel-k/v2/pkg/trait/trait_condition_types.go:68:					NewIntegrationConditionPlatformDisabledCatalogMissing	100.0%
 github.com/apache/camel-k/v2/pkg/trait/trait_condition_types.go:78:					integrationCondition					0.0%
 github.com/apache/camel-k/v2/pkg/trait/trait_condition_types.go:85:					integrationKitCondition					0.0%
+github.com/apache/camel-k/v2/pkg/trait/trait_condition_types.go:92:					typeForCondition					0.0%
 github.com/apache/camel-k/v2/pkg/trait/trait_configure.go:34:						Configure						63.2%
 github.com/apache/camel-k/v2/pkg/trait/trait_configure.go:68:						configureTraits						53.8%
 github.com/apache/camel-k/v2/pkg/trait/trait_configure.go:96:						configureTrait						75.0%
