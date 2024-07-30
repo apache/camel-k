@@ -6,10 +6,19 @@
 
 **Closed issues:**
 
+- Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
 - Flaky TestOperatorIDFiltering [\#5521](https://github.com/apache/camel-k/issues/5521)
+- OLM missing recommeded resource requests [\#5340](https://github.com/apache/camel-k/issues/5340)
+- Bump kubernetes dependencies to 1.29 [\#5307](https://github.com/apache/camel-k/issues/5307)
+- Upgrade controller-runtime to latest version [\#5211](https://github.com/apache/camel-k/issues/5211)
 
 **Merged pull requests:**
 
+- chore\(deps\): Upgrade controller runtime to 0.17.x [\#5725](https://github.com/apache/camel-k/pull/5725) ([gansheer](https://github.com/gansheer))
+- chore\(ci\): upgrade kubernetes API to 1.29 [\#5721](https://github.com/apache/camel-k/pull/5721) ([squakez](https://github.com/squakez))
+- chore\(ci\): removing staging variables [\#5719](https://github.com/apache/camel-k/pull/5719) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/onsi/gomega from 1.34.0 to 1.34.1 [\#5718](https://github.com/apache/camel-k/pull/5718) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.52 to 0.6.53 [\#5717](https://github.com/apache/camel-k/pull/5717) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ci\): tune resources [\#5715](https://github.com/apache/camel-k/pull/5715) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.48 to 0.6.52 [\#5714](https://github.com/apache/camel-k/pull/5714) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(\#5706\): removing trait prefix from condition type [\#5713](https://github.com/apache/camel-k/pull/5713) ([lsergio](https://github.com/lsergio))
