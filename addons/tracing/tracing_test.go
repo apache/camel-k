@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -35,7 +35,7 @@ func TestTracingTraitOnQuarkus(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	tracing := NewTracingTrait()
 	tt, _ := tracing.(*tracingTrait)
-	tt.Enabled = pointer.Bool(true)
+	tt.Enabled = ptr.To(true)
 	tt.Endpoint = "http://endpoint3"
 	ok, condition, err := tracing.Configure(e)
 	require.NoError(t, err)

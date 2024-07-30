@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestConfigureTolerationTraitMissingTaint(t *testing.T) {
@@ -133,7 +133,7 @@ func TestTolerationValidTaints(t *testing.T) {
 
 func createNominalTolerationTrait() *tolerationTrait {
 	tolerationTrait, _ := newTolerationTrait().(*tolerationTrait)
-	tolerationTrait.Enabled = pointer.Bool(true)
+	tolerationTrait.Enabled = ptr.To(true)
 	tolerationTrait.Taints = make([]string, 0)
 
 	return tolerationTrait

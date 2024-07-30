@@ -31,7 +31,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -310,7 +310,7 @@ func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.Integrat
 func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, client client.Client, integration *v1.Integration) ([]string, []string) {
 	configmaps := make([]string, 0)
 	secrets := make([]string, 0)
-	if integration.Spec.Traits.Mount != nil && pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, false) {
+	if integration.Spec.Traits.Mount != nil && ptr.Deref(integration.Spec.Traits.Mount.HotReload, false) {
 		mergedResources := make([]string, 0)
 		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Configs...)
 		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Resources...)

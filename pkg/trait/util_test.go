@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -36,8 +36,8 @@ func TestToTraitMap(t *testing.T) {
 		Container: &traitv1.ContainerTrait{
 			PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 			Name:              "test-container",
-			Auto:              pointer.Bool(false),
-			Expose:            pointer.Bool(true),
+			Auto:              ptr.To(false),
+			Expose:            ptr.To(true),
 			Port:              8081,
 			PortName:          "http-8081",
 			ServicePort:       81,
@@ -45,7 +45,7 @@ func TestToTraitMap(t *testing.T) {
 		},
 		Service: &traitv1.ServiceTrait{
 			Trait: traitv1.Trait{
-				Enabled: pointer.Bool(true),
+				Enabled: ptr.To(true),
 			},
 		},
 		Addons: map[string]v1.AddonTrait{
@@ -84,8 +84,8 @@ func TestToPropertyMap(t *testing.T) {
 	trait := traitv1.ContainerTrait{
 		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 		Name:              "test-container",
-		Auto:              pointer.Bool(false),
-		Expose:            pointer.Bool(true),
+		Auto:              ptr.To(false),
+		Expose:            ptr.To(true),
 		Port:              8081,
 		PortName:          "http-8081",
 		ServicePort:       81,
@@ -159,8 +159,8 @@ func TestToTrait(t *testing.T) {
 	expected := traitv1.ContainerTrait{
 		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 		Name:              "test-container",
-		Auto:              pointer.Bool(false),
-		Expose:            pointer.Bool(true),
+		Auto:              ptr.To(false),
+		Expose:            ptr.To(true),
 		Port:              8081,
 		PortName:          "http-8081",
 		ServicePort:       81,

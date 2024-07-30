@@ -23,7 +23,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -77,7 +77,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
 			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
@@ -148,7 +148,7 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		// explicitly disabled by the user
 		return nil, nil
 	}
@@ -194,7 +194,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 
 // This is true only when the user set the enabled flag on and the auto flag off.
 func (t *knativeServiceTrait) isForcefullyEnabled() bool {
-	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
+	return ptr.Deref(t.Enabled, false) && !ptr.Deref(t.Auto, true)
 }
 
 func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {

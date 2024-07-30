@@ -27,7 +27,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -79,7 +79,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Kamelets"), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
@@ -88,7 +88,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if t.MountPoint == "" {
 		t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
 	}
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		if e.CamelCatalog == nil {
 			// Cannot execute this trait for synthetic IntegrationKit. In order to use it, the
 			// user has to specify forcefully auto=false option and pass a list of kamelets explicitly

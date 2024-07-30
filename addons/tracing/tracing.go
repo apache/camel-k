@@ -18,13 +18,12 @@ limitations under the License.
 package tracing
 
 import (
-	"k8s.io/utils/pointer"
-
 	"github.com/apache/camel-k/v2/addons/tracing/discovery"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"k8s.io/utils/ptr"
 )
 
 // WARNING: The Tracing trait has been **deprecated** in favor of the xref:traits:telemetry.adoc[Telemetry] trait.
@@ -88,14 +87,14 @@ func NewTracingTrait() trait.Trait {
 }
 
 func (t *tracingTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 	if e.CamelCatalog == nil {
 		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 
-	if !pointer.BoolDeref(t.Auto, true) {
+	if !ptr.Deref(t.Auto, true) {
 		return true, nil, nil
 	}
 

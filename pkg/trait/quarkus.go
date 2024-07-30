@@ -24,7 +24,7 @@ import (
 	"github.com/rs/xid"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -429,7 +429,7 @@ func (t *quarkusTrait) isIncrementalImageBuild(e *Environment) bool {
 	// We need to get this information from the builder trait
 	if trait := e.Catalog.GetTrait(builderTraitID); trait != nil {
 		builder, ok := trait.(*builderTrait)
-		return ok && pointer.BoolDeref(builder.IncrementalImageBuild, true)
+		return ok && ptr.Deref(builder.IncrementalImageBuild, true)
 	}
 
 	// Default always to true for performance reasons

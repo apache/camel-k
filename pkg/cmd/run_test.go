@@ -31,11 +31,11 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
+	"k8s.io/utils/ptr"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/utils/pointer"
 )
 
 const (
@@ -455,9 +455,9 @@ func TestConfigureTraits(t *testing.T) {
 	traitMap, err := trait.ToTraitMap(traits)
 	require.NoError(t, err)
 	assert.Len(t, traitMap, 3)
-	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: pointer.Bool(false)})
-	assertTraitConfiguration(t, traits.Prometheus, &traitv1.PrometheusTrait{PodMonitor: pointer.Bool(false)})
+	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: ptr.To(false)})
+	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: ptr.To(false)})
+	assertTraitConfiguration(t, traits.Prometheus, &traitv1.PrometheusTrait{PodMonitor: ptr.To(false)})
 }
 
 func assertTraitConfiguration(t *testing.T, trait interface{}, expected interface{}) {

@@ -24,7 +24,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
@@ -79,10 +79,10 @@ func TestNewPipeWithComponentsCreating(t *testing.T) {
 		},
 		Spec: v1.PipeSpec{
 			Source: v1.Endpoint{
-				URI: pointer.String("timer:tick"),
+				URI: ptr.To("timer:tick"),
 			},
 			Sink: v1.Endpoint{
-				URI: pointer.String("log:info"),
+				URI: ptr.To("log:info"),
 			},
 		},
 	}
@@ -248,7 +248,7 @@ func TestNewPipeUnsupportedRef(t *testing.T) {
 		},
 		Spec: v1.PipeSpec{
 			Source: v1.Endpoint{
-				URI: pointer.String("timer:tick"),
+				URI: ptr.To("timer:tick"),
 			},
 			Sink: v1.Endpoint{
 				Ref: &corev1.ObjectReference{

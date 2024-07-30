@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -75,7 +75,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Knative"), nil
 	}
 	if e.CamelCatalog == nil {
@@ -90,7 +90,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Auto, true) {
+	if !ptr.Deref(t.Auto, true) {
 		return true, nil, nil
 	}
 
@@ -147,7 +147,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 	if t.FilterSourceChannels == nil {
 		// Filtering is no longer used by default
-		t.FilterSourceChannels = pointer.Bool(false)
+		t.FilterSourceChannels = ptr.To(false)
 	}
 	if t.SinkBinding == nil {
 		allowed := t.isSinkBindingAllowed(e)
@@ -159,7 +159,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 
 // This is true only when the user set the enabled flag on and the auto flag off.
 func (t *knativeTrait) isForcefullyEnabled() bool {
-	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
+	return ptr.Deref(t.Enabled, false) && !ptr.Deref(t.Auto, true)
 }
 
 func filterMetaItems(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, cst knativeapi.CamelServiceType, uriType string) ([]string, error) {
@@ -240,7 +240,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 				knativeapi.CamelMetaKnativeKind:       ref.Kind,
 				knativeapi.CamelMetaKnativeReply:      boolean.FalseString,
 			}
-			if pointer.BoolDeref(t.FilterSourceChannels, false) {
+			if ptr.Deref(t.FilterSourceChannels, false) {
 				meta[knativeapi.CamelMetaFilterPrefix+knativeHistoryHeader] = loc.Host
 			}
 			svc := knativeapi.CamelServiceDefinition{
@@ -417,7 +417,7 @@ func (t *knativeTrait) isSinkBindingAllowed(e *Environment) bool {
 }
 
 func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.CamelEnvironment) error {
-	if !pointer.BoolDeref(t.SinkBinding, false) {
+	if !ptr.Deref(t.SinkBinding, false) {
 		return nil
 	}
 	var serviceType knativeapi.CamelServiceType
@@ -477,7 +477,7 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 					APIVersion: ref.APIVersion,
 				}
 
-				if pointer.BoolDeref(t.NamespaceLabel, true) {
+				if ptr.Deref(t.NamespaceLabel, true) {
 					// set the namespace label to allow automatic sinkbinding injection
 					enabled, err := knativeutil.EnableKnativeBindInNamespace(e.Ctx, e.Client, e.Integration.Namespace)
 					if err != nil {
@@ -526,7 +526,7 @@ func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference
 		attributes[key] = value
 	}
 
-	if _, eventTypeSpecified := attributes["type"]; !eventTypeSpecified && pointer.BoolDeref(t.FilterEventType, true) && eventType != "" {
+	if _, eventTypeSpecified := attributes["type"]; !eventTypeSpecified && ptr.Deref(t.FilterEventType, true) && eventType != "" {
 		// Apply default trigger filter attribute for the event type
 		attributes["type"] = eventType
 	}

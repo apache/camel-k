@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -85,7 +85,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, trait.NewIntegrationConditionUserDisabled(masterComponent), nil
 	}
 	if e.CamelCatalog == nil {
@@ -95,8 +95,8 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 		return false, nil, nil
 	}
 
-	if !pointer.BoolDeref(t.Auto, true) {
-		return pointer.BoolDeref(t.Enabled, false), nil, nil
+	if !ptr.Deref(t.Auto, true) {
+		return ptr.Deref(t.Enabled, false), nil, nil
 	}
 
 	// Check if the master component has been used
@@ -118,7 +118,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 			}
 		}
 		// No master component, can skip the trait execution
-		if !pointer.BoolDeref(t.Enabled, false) {
+		if !ptr.Deref(t.Enabled, false) {
 			return false, nil, nil
 		}
 	}
@@ -132,7 +132,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	}
 
 	if t.ResourceType == nil {
-		t.ResourceType = pointer.String(leaseResourceType)
+		t.ResourceType = ptr.To(leaseResourceType)
 	}
 
 	if t.LabelKey == nil {
@@ -144,7 +144,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 		t.LabelValue = &e.Integration.Name
 	}
 
-	return pointer.BoolDeref(t.Enabled, false), nil, nil
+	return ptr.Deref(t.Enabled, false), nil, nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {

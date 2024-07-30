@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -199,9 +199,9 @@ func TestDetermineControllerStrategySyntheticKitForceKnative(t *testing.T) {
 	e.Integration.Spec.Traits = v1.Traits{
 		KnativeService: &trait.KnativeServiceTrait{
 			Trait: trait.Trait{
-				Enabled: pointer.Bool(true),
+				Enabled: ptr.To(true),
 			},
-			Auto: pointer.Bool(false),
+			Auto: ptr.To(false),
 		},
 	}
 	e.Platform.ResyncStatusFullConfig()

@@ -21,12 +21,11 @@ import (
 	"errors"
 	"sort"
 
-	"k8s.io/utils/pointer"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -48,7 +47,7 @@ func NewInitTrait() Trait {
 }
 
 func (t *initTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, nil, errors.New("trait init cannot be disabled")
 	}
 

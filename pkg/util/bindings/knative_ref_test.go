@@ -25,7 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -49,7 +49,7 @@ func TestKnativeRefAsSource(t *testing.T) {
 				},
 			},
 			uri:             "knative:event?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
-			filterEventType: pointer.Bool(false),
+			filterEventType: ptr.To(false),
 		},
 		{
 			name: "broker-name-property",
@@ -62,7 +62,7 @@ func TestKnativeRefAsSource(t *testing.T) {
 				Properties: asEndpointProperties(map[string]string{"name": "my-broker"}),
 			},
 			uri:             "knative:event?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=my-broker",
-			filterEventType: pointer.Bool(false),
+			filterEventType: ptr.To(false),
 		},
 		{
 			name: "event-type-filter",
@@ -102,7 +102,7 @@ func TestKnativeRefAsSource(t *testing.T) {
 			},
 			uri:             "knative:event?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
 			filters:         []string{"source=my-source", "subject=mySubject"},
-			filterEventType: pointer.Bool(false),
+			filterEventType: ptr.To(false),
 		},
 		{
 			name: "event-extension-filters",
@@ -116,7 +116,7 @@ func TestKnativeRefAsSource(t *testing.T) {
 			},
 			uri:             "knative:event?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
 			filters:         []string{"myextension=foo"},
-			filterEventType: pointer.Bool(false),
+			filterEventType: ptr.To(false),
 		},
 		{
 			name: "channel",
@@ -164,7 +164,7 @@ func TestKnativeRefAsSource(t *testing.T) {
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)
 
-			if tc.filters != nil || !pointer.BoolDeref(tc.filterEventType, true) {
+			if tc.filters != nil || !ptr.Deref(tc.filterEventType, true) {
 				assert.NotNil(t, binding.Traits.Knative)
 				assert.Len(t, binding.Traits.Knative.Filters, len(tc.filters))
 
@@ -172,7 +172,7 @@ func TestKnativeRefAsSource(t *testing.T) {
 					assert.Contains(t, binding.Traits.Knative.Filters, filterExpression)
 				}
 
-				assert.Equal(t, pointer.BoolDeref(binding.Traits.Knative.FilterEventType, true), pointer.BoolDeref(tc.filterEventType, true))
+				assert.Equal(t, ptr.Deref(binding.Traits.Knative.FilterEventType, true), ptr.Deref(tc.filterEventType, true))
 			}
 		})
 	}

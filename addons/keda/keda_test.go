@@ -36,13 +36,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestManualConfig(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = pointer.Bool(true)
-	keda.Auto = pointer.Bool(false)
+	keda.Enabled = ptr.To(true)
+	keda.Auto = ptr.To(false)
 	meta := map[string]string{
 		"prop":      "val",
 		"camelCase": "VAL",
@@ -70,8 +70,8 @@ func TestManualConfig(t *testing.T) {
 
 func TestConfigFromSecret(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = pointer.Bool(true)
-	keda.Auto = pointer.Bool(false)
+	keda.Enabled = ptr.To(true)
+	keda.Auto = ptr.To(false)
 	meta := map[string]string{
 		"prop":      "val",
 		"camelCase": "VAL",
@@ -118,7 +118,7 @@ func TestConfigFromSecret(t *testing.T) {
 
 func TestKameletAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = pointer.Bool(true)
+	keda.Enabled = ptr.To(true)
 	env := createBasicTestEnvironment(
 		&camelv1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -209,7 +209,7 @@ func TestKameletAutoDetection(t *testing.T) {
 
 func TestPipeAutoDetection(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = pointer.Bool(true)
+	keda.Enabled = ptr.To(true)
 	logEndpoint := "log:info"
 	klb := camelv1.Pipe{
 		ObjectMeta: metav1.ObjectMeta{
@@ -324,15 +324,15 @@ func TestPipeAutoDetection(t *testing.T) {
 
 func TestHackReplicas(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = pointer.Bool(true)
-	keda.Auto = pointer.Bool(false)
+	keda.Enabled = ptr.To(true)
+	keda.Auto = ptr.To(false)
 	keda.Triggers = append(keda.Triggers, kedaTrigger{
 		Type: "custom",
 		Metadata: map[string]string{
 			"a": "b",
 		},
 	})
-	keda.HackControllerReplicas = pointer.Bool(true)
+	keda.HackControllerReplicas = ptr.To(true)
 	env := createBasicTestEnvironment(
 		&camelv1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
@@ -359,15 +359,15 @@ func TestHackReplicas(t *testing.T) {
 
 func TestHackKLBReplicas(t *testing.T) {
 	keda, _ := NewKedaTrait().(*kedaTrait)
-	keda.Enabled = pointer.Bool(true)
-	keda.Auto = pointer.Bool(false)
+	keda.Enabled = ptr.To(true)
+	keda.Auto = ptr.To(false)
 	keda.Triggers = append(keda.Triggers, kedaTrigger{
 		Type: "custom",
 		Metadata: map[string]string{
 			"a": "b",
 		},
 	})
-	keda.HackControllerReplicas = pointer.Bool(true)
+	keda.HackControllerReplicas = ptr.To(true)
 	env := createBasicTestEnvironment(
 		&camelv1.Pipe{
 			ObjectMeta: metav1.ObjectMeta{

@@ -28,7 +28,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -88,7 +88,7 @@ func TestKnativeService(t *testing.T) {
 				Traits: v1.Traits{
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -212,9 +212,9 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 					},
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto: pointer.Bool(false),
+						Auto: ptr.To(false),
 					},
 					Container: &traitv1.ContainerTrait{
 						Name: "my-container-name",

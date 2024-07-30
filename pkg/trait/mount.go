@@ -25,7 +25,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -206,7 +206,7 @@ func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition 
 				"Unexpected error happened while casting to kamelets trait",
 			)
 		}
-		if !pointer.BoolDeref(t.ScanKameletsImplicitLabelSecrets, true) {
+		if !ptr.Deref(t.ScanKameletsImplicitLabelSecrets, true) {
 			return nil
 		}
 		implicitKameletSecrets, err := kamelets.listConfigurationSecrets(e)

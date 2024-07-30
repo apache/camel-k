@@ -29,7 +29,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/stretchr/testify/assert"
@@ -66,7 +66,7 @@ func TestPullSecretAuto(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = pointer.Bool(false)
+	trait.Auto = ptr.To(false)
 	enabled, condition, err := trait.Configure(e)
 	require.NoError(t, err)
 	assert.False(t, enabled)
@@ -77,8 +77,8 @@ func TestPullSecretImagePullerDelegation(t *testing.T) {
 	e, _ := getEnvironmentAndDeployment(t)
 
 	trait, _ := newPullSecretTrait().(*pullSecretTrait)
-	trait.Auto = pointer.Bool(false)
-	trait.ImagePullerDelegation = pointer.Bool(true)
+	trait.Auto = ptr.To(false)
+	trait.ImagePullerDelegation = ptr.To(true)
 	enabled, condition, err := trait.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, enabled)

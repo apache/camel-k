@@ -30,7 +30,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -49,7 +49,7 @@ func TestConfigureGCTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDisabledGCTraitDoesNotSucceed(t *testing.T) {
 	gcTrait, environment := createNominalGCTest()
-	gcTrait.Enabled = pointer.Bool(false)
+	gcTrait.Enabled = ptr.To(false)
 
 	expectedCondition := NewIntegrationCondition(
 		"GC",
@@ -308,7 +308,7 @@ func getIntegrationDeployment(integration *v1.Integration) *appsv1.Deployment {
 
 func createNominalGCTest() (*gcTrait, *Environment) {
 	trait, _ := newGCTrait().(*gcTrait)
-	trait.Enabled = pointer.Bool(true)
+	trait.Enabled = ptr.To(true)
 
 	environment := &Environment{
 		Catalog: NewCatalog(nil),

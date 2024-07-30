@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -128,7 +128,7 @@ func TestBindings(t *testing.T) {
 			traits: v1.Traits{
 				Knative: &traitv1.KnativeTrait{
 					Filters:         []string{"type=myeventtype"},
-					FilterEventType: pointer.Bool(true),
+					FilterEventType: ptr.To(true),
 				},
 			},
 		},
@@ -183,7 +183,7 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1.EndpointTypeSink,
 			endpoint: v1.Endpoint{
-				URI: pointer.String("https://myurl/hey"),
+				URI: ptr.To("https://myurl/hey"),
 				Properties: asEndpointProperties(map[string]string{
 					"ce.override.ce-type": "mytype",
 				}),
@@ -191,7 +191,7 @@ func TestBindings(t *testing.T) {
 			uri: "knative:endpoint/sink?ce.override.ce-type=mytype",
 			traits: v1.Traits{
 				Knative: &traitv1.KnativeTrait{
-					SinkBinding:   pointer.Bool(false),
+					SinkBinding:   ptr.To(false),
 					Configuration: asKnativeConfig("https://myurl/hey"),
 				},
 			},
@@ -199,7 +199,7 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1.EndpointTypeSink,
 			endpoint: v1.Endpoint{
-				URI: pointer.String("https://myurl/hey"),
+				URI: ptr.To("https://myurl/hey"),
 			},
 			profile: v1.TraitProfileKubernetes,
 			uri:     "https://myurl/hey",
@@ -207,7 +207,7 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1.EndpointTypeSink,
 			endpoint: v1.Endpoint{
-				URI: pointer.String("docker://xxx"),
+				URI: ptr.To("docker://xxx"),
 			},
 			uri: "docker://xxx",
 		},

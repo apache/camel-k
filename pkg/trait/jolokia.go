@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -52,7 +52,7 @@ func newJolokiaTrait() Trait {
 }
 
 func (t *jolokiaTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 

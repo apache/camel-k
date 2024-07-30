@@ -27,7 +27,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -47,7 +47,7 @@ func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Enabled = pointer.Bool(false)
+	ingressTrait.Enabled = ptr.To(false)
 
 	expectedCondition := NewIntegrationCondition(
 		"Ingress",
@@ -223,8 +223,8 @@ func TestConfigureTLSWithoutSecretNameIngressTraitWDoesSucceed(t *testing.T) {
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {
 	trait, _ := newIngressTrait().(*ingressTrait)
-	trait.Enabled = pointer.Bool(true)
-	trait.Auto = pointer.Bool(false)
+	trait.Enabled = ptr.To(true)
+	trait.Auto = ptr.To(false)
 	trait.Host = "hostname"
 
 	environment := &Environment{

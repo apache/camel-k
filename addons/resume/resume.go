@@ -25,7 +25,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Resume trait can be used to manage and configure resume strategies.
@@ -76,7 +76,7 @@ func NewResumeTrait() trait.Trait {
 }
 
 func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if !pointer.BoolDeref(r.Enabled, false) {
+	if !ptr.Deref(r.Enabled, false) {
 		return false, nil, nil
 	}
 	if environment.CamelCatalog == nil {
@@ -86,7 +86,7 @@ func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.Tr
 		return false, nil, nil
 	}
 
-	if pointer.BoolDeref(r.Auto, true) {
+	if ptr.Deref(r.Auto, true) {
 		// Check which components have been used
 		sources, err := kubernetes.ResolveIntegrationSources(environment.Ctx, r.Client, environment.Integration, environment.Resources)
 		if err != nil {

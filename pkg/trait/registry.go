@@ -34,7 +34,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/registry"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -61,7 +61,7 @@ func (t *registryTrait) InfluencesKit() bool {
 
 func (t *registryTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// disabled by default
-	if e.IntegrationKit == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.IntegrationKit == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 	enabled := e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted)

@@ -29,7 +29,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -230,7 +230,7 @@ func TestRoute_Disabled(t *testing.T) {
 	environment.Integration.Spec.Traits = v1.Traits{
 		Route: &traitv1.RouteTrait{
 			Trait: traitv1.Trait{
-				Enabled: pointer.Bool(false),
+				Enabled: ptr.To(false),
 			},
 		},
 	}

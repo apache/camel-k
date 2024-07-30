@@ -26,7 +26,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -74,9 +74,9 @@ func newContainerTrait() Trait {
 			ServicePort:              defaultServicePort,
 			ServicePortName:          defaultContainerPortName,
 			Name:                     defaultContainerName,
-			RunAsNonRoot:             pointer.Bool(defaultContainerRunAsNonRoot),
+			RunAsNonRoot:             ptr.To(defaultContainerRunAsNonRoot),
 			SeccompProfileType:       defaultContainerSeccompProfileType,
-			AllowPrivilegeEscalation: pointer.Bool(defaultContainerAllowPrivilegeEscalation),
+			AllowPrivilegeEscalation: ptr.To(defaultContainerAllowPrivilegeEscalation),
 			CapabilitiesDrop:         []corev1.Capability{defaultContainerCapabilitiesDrop},
 			RequestCPU:               defaultContainerResourceCPU,
 			RequestMemory:            defaultContainerResourceMemory,
@@ -116,7 +116,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 		}
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		if t.Expose == nil {
 			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
 			t.Expose = &e
@@ -268,7 +268,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		e.Resources.Add(props)
 	}
 	t.configureResources(&container)
-	if knative || pointer.BoolDeref(t.Expose, false) {
+	if knative || ptr.Deref(t.Expose, false) {
 		t.configureService(e, &container, knative)
 	}
 	t.configureCapabilities(e)

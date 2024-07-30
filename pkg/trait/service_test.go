@@ -26,7 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -78,9 +78,9 @@ func TestServiceWithDefaults(t *testing.T) {
 				Traits: v1.Traits{
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto: pointer.Bool(false),
+						Auto: ptr.To(false),
 					},
 				},
 			},
@@ -177,13 +177,13 @@ func TestService(t *testing.T) {
 				Traits: v1.Traits{
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 					Container: &traitv1.ContainerTrait{
 						PlatformBaseTrait: traitv1.PlatformBaseTrait{},
-						Auto:              pointer.Bool(false),
-						Expose:            pointer.Bool(true),
+						Auto:              ptr.To(false),
+						Expose:            ptr.To(true),
 						Port:              8081,
 						PortName:          "http-8081",
 						ServicePort:       81,
@@ -269,9 +269,9 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 				Traits: v1.Traits{
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto: pointer.Bool(false),
+						Auto: ptr.To(false),
 					},
 					Container: &traitv1.ContainerTrait{
 						Name: "my-container-name",
@@ -362,9 +362,9 @@ func TestServiceWithNodePort(t *testing.T) {
 				Traits: v1.Traits{
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto: pointer.Bool(false),
+						Auto: ptr.To(false),
 						Type: &serviceType,
 					},
 				},
@@ -457,13 +457,13 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 				Traits: v1.Traits{
 					Service: &traitv1.ServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto: pointer.Bool(false),
+						Auto: ptr.To(false),
 					},
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -639,7 +639,7 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 				Traits: v1.Traits{
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(false),
+							Enabled: ptr.To(false),
 						},
 					},
 				},
