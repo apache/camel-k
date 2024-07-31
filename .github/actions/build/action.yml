@@ -28,9 +28,19 @@ runs:
 
   steps:
 
-  - id: prepare-env
-    name: Prepare Test Environment
-    uses: ./.github/actions/kamel-prepare-env
+  - name: Set up JDK 17
+    uses: actions/setup-java@v4
+    if: ${{ env.ENV_PREPARED != 'true' }}
+    with:
+      java-version: '17'
+      distribution: 'temurin'
+
+  - name: Set up Go
+    uses: actions/setup-go@v5
+    if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+    with:
+      go-version-file: 'go.mod'
+      check-latest: true
 
   - name: Test new branch
     shell: bash

@@ -66,6 +66,9 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
     - name: Install Helm
       shell: bash
       run: |
@@ -75,8 +78,24 @@ jobs:
         sudo apt-get update
         sudo apt-get install helm
 
-    - name: Install and upgrade
-      uses: ./.github/actions/e2e-install
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+    - name: Build Helm chart
+      shell: bash
+      run: |
+        make release-helm
+
+    - name: Install OLM
+      shell: bash
+      run: |
+          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/crds.yaml
+          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/olm.yaml
+          kubectl wait --for=jsonpath='{.status.phase}'=Succeeded csv packageserver -n olm --timeout=2m
+
+    - name: Build OLM bundle
+      shell: bash
+      run: |
+        make bundle-build
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-install
