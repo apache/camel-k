@@ -23,9 +23,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -157,6 +159,15 @@ var openapi = `
 `
 
 func TestRestDslTraitApplyWorks(t *testing.T) {
+	settings, err := maven.NewSettings(
+		maven.Repositories(
+			"https://repository.apache.org/content/groups/snapshots-group@id=apache@snapshots@noreleases",
+		),
+	)
+	require.NoError(t, err)
+	content, err := util.EncodeXML(settings)
+	require.NoError(t, err)
+	cm := kubernetes.NewConfigMap("default", "maven-settings", "settings.xml", "settings.xml", string(content), nil)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 	fakeClient, _ := test.NewFakeClient(&corev1.ConfigMap{
@@ -167,13 +178,19 @@ func TestRestDslTraitApplyWorks(t *testing.T) {
 		Data: map[string]string{
 			"greetings-api.json": openapi,
 		},
-	})
+	},
+		cm,
+	)
 
 	e := &Environment{
 		Ctx:          context.Background(),
 		CamelCatalog: catalog,
 		Client:       fakeClient,
 		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "camel-k",
+				Namespace: "default",
+			},
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: v1.IntegrationPlatformClusterKubernetes,
 			},
@@ -184,8 +201,17 @@ func TestRestDslTraitApplyWorks(t *testing.T) {
 						PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyJib,
 						Registry:        v1.RegistrySpec{Address: "registry"},
 						RuntimeVersion:  catalog.Runtime.Version,
-						Maven:           v1.MavenSpec{},
-						Timeout:         &metav1.Duration{Duration: time.Minute},
+						Maven: v1.MavenSpec{
+							Settings: v1.ValueSource{
+								ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: cm.Name,
+									},
+									Key: "settings.xml",
+								},
+							},
+						},
+						Timeout: &metav1.Duration{Duration: time.Minute},
 					},
 				},
 				Phase: v1.IntegrationPlatformPhaseReady,
