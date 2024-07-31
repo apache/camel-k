@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Upgrade to Golang 1.22 [\#5720](https://github.com/apache/camel-k/issues/5720)
 - Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
 - Flaky TestOperatorIDFiltering [\#5521](https://github.com/apache/camel-k/issues/5521)
 - OLM missing recommeded resource requests [\#5340](https://github.com/apache/camel-k/issues/5340)
