@@ -41,14 +41,14 @@ require (
 	golang.org/x/text v0.16.0
 	golang.org/x/time v0.5.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.29.2
-	k8s.io/apiextensions-apiserver v0.29.2
-	k8s.io/apimachinery v0.29.2
-	k8s.io/cli-runtime v0.29.2
-	k8s.io/client-go v0.29.2
+	k8s.io/api v0.29.7
+	k8s.io/apiextensions-apiserver v0.29.7
+	k8s.io/apimachinery v0.29.7
+	k8s.io/cli-runtime v0.29.7
+	k8s.io/client-go v0.29.7
 	k8s.io/gengo v0.0.0-20240129211411-f967bbeff4b4
 	k8s.io/klog/v2 v2.130.1
-	k8s.io/kubectl v0.29.2
+	k8s.io/kubectl v0.29.7
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e
 	knative.dev/eventing v0.40.3
 	knative.dev/pkg v0.0.0-20240416145024-0f34a8815650
@@ -143,7 +143,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/component-base v0.29.2 // indirect
+	k8s.io/component-base v0.29.7 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
 	knative.dev/networking v0.0.0-20240418213116-979f63728302 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
