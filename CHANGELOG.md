@@ -6,7 +6,11 @@
 
 **Closed issues:**
 
+- Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
 - Flaky TestOperatorIDFiltering [\#5521](https://github.com/apache/camel-k/issues/5521)
+- OLM missing recommeded resource requests [\#5340](https://github.com/apache/camel-k/issues/5340)
+- Bump kubernetes dependencies to 1.29 [\#5307](https://github.com/apache/camel-k/issues/5307)
+- Upgrade controller-runtime to latest version [\#5211](https://github.com/apache/camel-k/issues/5211)
 
 ## [v2.4.0](https://github.com/apache/camel-k/tree/v2.4.0) (2024-07-29)
 
