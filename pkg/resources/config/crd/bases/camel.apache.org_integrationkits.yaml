@@ -127,7 +127,8 @@ spec:
                 description: the profile which is expected by this kit
                 type: string
               repositories:
-                description: Maven repositories that can be used by the kit
+                description: 'Maven repositories that can be used by the kit. Deprecated:
+                  use builder trait (builder.repositories) to manage repositories.'
                 items:
                   type: string
                 type: array
@@ -277,6 +278,12 @@ spec:
                       properties:
                         description: A list of properties to be provided to the build
                           task
+                        items:
+                          type: string
+                        type: array
+                      repositories:
+                        description: A list of additional Maven repositories to be
+                          used
                         items:
                           type: string
                         type: array

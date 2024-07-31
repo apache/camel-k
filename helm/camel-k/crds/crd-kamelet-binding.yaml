@@ -161,7 +161,8 @@ spec:
                     format: int32
                     type: integer
                   repositories:
-                    description: additional Maven repositories to be used
+                    description: 'Additional Maven repositories to be used. Deprecated:
+                      use builder trait (builder.repositories) to manage repositories.'
                     items:
                       type: string
                     type: array
@@ -6812,6 +6813,12 @@ spec:
                           properties:
                             description: A list of properties to be provided to the
                               build task
+                            items:
+                              type: string
+                            type: array
+                          repositories:
+                            description: A list of additional Maven repositories to
+                              be used
                             items:
                               type: string
                             type: array

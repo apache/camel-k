@@ -595,6 +595,12 @@ spec:
                         items:
                           type: string
                         type: array
+                      repositories:
+                        description: A list of additional Maven repositories to be
+                          used
+                        items:
+                          type: string
+                        type: array
                       requestCPU:
                         description: 'When using `pod` strategy, the minimum amount
                           of CPU required by the pod builder. Deprecated: use TasksRequestCPU
@@ -2634,6 +2640,12 @@ spec:
                       properties:
                         description: A list of properties to be provided to the build
                           task
+                        items:
+                          type: string
+                        type: array
+                      repositories:
+                        description: A list of additional Maven repositories to be
+                          used
                         items:
                           type: string
                         type: array

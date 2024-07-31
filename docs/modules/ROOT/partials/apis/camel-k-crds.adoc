@@ -2545,7 +2545,8 @@ configuration used by the kit
 |
 
 
-Maven repositories that can be used by the kit
+Maven repositories that can be used by the kit.
+Deprecated: use builder trait (builder.repositories) to manage repositories.
 
 |`sources` +
 *xref:#_camel_apache_org_v1_SourceSpec[[\]SourceSpec]*
@@ -3419,7 +3420,8 @@ Use mount trait (mount.volumes) to manage volumes
 |
 
 
-additional Maven repositories to be used
+Additional Maven repositories to be used.
+Deprecated: use builder trait (builder.repositories) to manage repositories.
 
 |`serviceAccountName` +
 string
@@ -6365,6 +6367,13 @@ When using `pod` strategy, annotation to use for the builder pod.
 
 
 The list of manifest platforms to use to build a container image (default `linux/amd64`).
+
+|`repositories` +
+[]string
+|
+
+
+A list of additional Maven repositories to be used
 
 
 |===
