@@ -108,7 +108,7 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 }
 
-// InstallOperator will delete operator resources from namespace (keeps CRDs).
+// UninstallOperator will delete operator resources from namespace (keeps CRDs).
 func UninstallOperator(t *testing.T, ctx context.Context, g *WithT, ns, makedir string) {
 	lock.Lock()
 	defer lock.Unlock()
