@@ -15,12 +15,40 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-name: kamel-install-knative
-description: 'Install Knative artifacts'
+name: infra-setting
+description: 'Setting CI infrastructure'
+
 runs:
   using: "composite"
+
   steps:
-    - name: Install Knative
-      shell: bash
-      run: |
-        ./e2e/knative/files/setup.sh
+  - id: setup-jdk
+    name: Set up JDK
+    uses: actions/setup-java@v4
+    with:
+      java-version: '17'
+      distribution: 'temurin'
+  - id: setup-go
+    name: Set up Go
+    uses: actions/setup-go@v5
+    with:
+      go-version-file: 'go.mod'
+      check-latest: true
+  - id: setup-kubectl
+    name: Set up Kubectl
+    uses: azure/setup-kubectl@v4
+  - id: minikube-start
+    name: Start minikube
+    uses: medyagh/setup-minikube@latest
+    with:
+      addons: registry
+      cpus: max
+      memory: max
+  - id: minikube-settings
+    name: Set docker-env
+    shell: bash
+    run: |
+      eval $(minikube -p minikube docker-env)
+      echo "KAMEL_INSTALL_REGISTRY=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')" >> $GITHUB_ENV
+      echo "Setting registry as $KAMEL_INSTALL_REGISTRY which is required by certain tests"
+      NOTEST=true make images

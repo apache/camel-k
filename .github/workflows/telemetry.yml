@@ -64,8 +64,23 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
-    - name: Execute Tests
-      uses: ./.github/actions/e2e-telemetry
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
+    - name: Install operator
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        make install-k8s-global
+        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
+
+    - name: Install OTLP Collector
+      uses: ./.github/actions/install-otlp-collector
       with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        otlp-collector-image-name: otel/opentelemetry-collector
+        otlp-collector-image-version: 0.102.0
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-telemetry

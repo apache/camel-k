@@ -47,7 +47,6 @@ func TestHelmInstallation(t *testing.T) {
 		operatorID := "helm-ck"
 		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
-		ExpectExecSucceed(t, g, Make(t, "release-helm"))
 		ExpectExecSucceed(t, g,
 			exec.Command(
 				"helm",
