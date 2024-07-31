@@ -70,9 +70,23 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
-    - name: Quarkus Native test
-      uses: ./.github/actions/e2e-native
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
+    - name: Install Knative
+      shell: bash
+      run: |
+        ./e2e/knative/files/setup.sh
+
+    - name: Install operator
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        make install-k8s-global
+        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-quarkus-native
 

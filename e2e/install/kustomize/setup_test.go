@@ -69,6 +69,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 			"apply",
 			"-k",
 			fmt.Sprintf("%s/overlays/platform", kustomizeDir),
+			"--server-side",
 			"-n",
 			ns,
 		))
@@ -97,7 +98,7 @@ func TestKustomizeNamespaced(t *testing.T) {
 
 		// Test a simple integration is running
 		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml")).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
@@ -148,6 +149,7 @@ func TestKustomizeDescoped(t *testing.T) {
 			"apply",
 			"-k",
 			fmt.Sprintf("%s/overlays/platform", kustomizeDir),
+			"--server-side",
 			"-n",
 			ns,
 		))
@@ -195,7 +197,7 @@ func TestKustomizeDescoped(t *testing.T) {
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
 			// Test a simple integration is running
 			g.Expect(KamelRun(t, ctx, nsIntegration, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, "yaml")).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 

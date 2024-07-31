@@ -60,35 +60,46 @@ concurrency:
 jobs:
   common-it:
     runs-on: ubuntu-latest
-
     steps:
-
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         persist-credentials: false
         submodules: recursive
 
-    - name: Common tests
-      uses: ./.github/actions/e2e-common
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
 
-  common-it-advanced:
+    - name: Install operator
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        make install-k8s-global
+        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
+
+  advanced-it:
     runs-on: ubuntu-latest
-
     steps:
-
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         persist-credentials: false
         submodules: recursive
 
-    - name: Common advanced tests
-      uses: ./.github/actions/e2e-common
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-        with-custom-install: 'true'
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
+    - name: Install CRDs
+      shell: bash
+      run: |
+        make install-crds
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-advanced
