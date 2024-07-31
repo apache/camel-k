@@ -341,9 +341,16 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	maven := v1.MavenBuildSpec{
 		MavenSpec: e.Platform.Status.Build.Maven,
 	}
-	// Add Maven repositories defined in the IntegrationKit
-	for _, repo := range e.IntegrationKit.Spec.Repositories {
-		maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
+	if len(t.Repositories) > 0 {
+		for _, repo := range t.Repositories {
+			maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
+		}
+	} else {
+		// Add Maven repositories defined in the IntegrationKit
+		// Deprecated - should use builder trait
+		for _, repo := range e.IntegrationKit.Spec.Repositories {
+			maven.Repositories = append(maven.Repositories, mvn.NewRepository(repo))
+		}
 	}
 
 	if t.Strategy != "" {
