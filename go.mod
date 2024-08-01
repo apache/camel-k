@@ -20,7 +20,7 @@ require (
 	// go get github.com/openshift/api@release-4.15
 	github.com/openshift/api v0.0.0-20240228005710-4511c790cc60
 	github.com/operator-framework/api v0.20.0
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.67.1
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.73.2
 	github.com/prometheus/client_golang v1.19.1
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.55.0
@@ -49,7 +49,7 @@ require (
 	k8s.io/gengo v0.0.0-20240129211411-f967bbeff4b4
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/kubectl v0.29.7
-	k8s.io/utils v0.0.0-20240102154912-e7106e64919e
+	k8s.io/utils v0.0.0-20240310230437-4693a0247e57
 	knative.dev/eventing v0.40.3
 	knative.dev/pkg v0.0.0-20240416145024-0f34a8815650
 	knative.dev/serving v0.40.1
