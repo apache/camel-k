@@ -37,6 +37,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
+const projectModePerm = 0600
+
 func init() {
 	registerSteps(Quarkus)
 
@@ -98,14 +100,22 @@ func prepareProjectWithSources(ctx *builderContext) error {
 			sourceList += ","
 		}
 		sourceList += "classpath:routes/" + source.Name
-		if err := os.WriteFile(filepath.Join(sourcesPath, source.Name), []byte(source.Content), os.ModePerm); err != nil {
+		if err := os.WriteFile(
+			filepath.Join(sourcesPath, source.Name),
+			[]byte(source.Content),
+			projectModePerm,
+		); err != nil {
 			return fmt.Errorf("failure while writing %s: %w", source.Name, err)
 		}
 	}
 
 	if sourceList != "" {
 		routesIncludedPattern := "camel.main.routes-include-pattern = " + sourceList
-		if err := os.WriteFile(filepath.Join(filepath.Dir(sourcesPath), "application.properties"), []byte(routesIncludedPattern), os.ModePerm); err != nil {
+		if err := os.WriteFile(
+			filepath.Join(filepath.Dir(sourcesPath), "application.properties"),
+			[]byte(routesIncludedPattern),
+			projectModePerm,
+		); err != nil {
 			return fmt.Errorf("failure while writing the configuration application.properties: %w", err)
 		}
 	}
