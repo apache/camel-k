@@ -15,14 +15,12 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.1
-  creationTimestamp: null
-  labels:
-    app: camel-k
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: builds.camel.apache.org
 spec:
   group: camel.apache.org
@@ -65,26 +63,31 @@ spec:
         description: Build is the Schema for the builds API.
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
           spec:
-            description: BuildSpec defines the list of tasks to be execute for a Build.
-              From Camel K version 2, it would be more appropriate to think it as
-              pipeline.
+            description: |-
+              BuildSpec defines the list of tasks to be execute for a Build. From Camel K version 2, it would be more appropriate
+              to think it as pipeline.
             properties:
               configuration:
-                description: 'The configuration that should be used to perform the
-                  Build. Deprecated: no longer in use in Camel K 2 - maintained for
-                  backward compatibility'
+                description: |-
+                  The configuration that should be used to perform the Build.
+                  Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
                 properties:
                   annotations:
                     additionalProperties:
@@ -142,16 +145,15 @@ spec:
                     type: string
                 type: object
               maxRunningBuilds:
-                description: 'the maximum amount of parallel running builds started
-                  by this operator instance Deprecated: no longer in use in Camel
-                  K 2 - maintained for backward compatibility'
+                description: |-
+                  the maximum amount of parallel running builds started by this operator instance
+                  Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
                 format: int32
                 type: integer
               operatorNamespace:
-                description: 'The namespace where to run the builder Pod (must be
-                  the same of the operator in charge of this Build reconciliation).
-                  Deprecated: no longer in use in Camel K 2 - maintained for backward
-                  compatibility'
+                description: |-
+                  The namespace where to run the builder Pod (must be the same of the operator in charge of this Build reconciliation).
+                  Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
                 type: string
               tasks:
                 description: The sequence of tasks (pipeline) to be performed.
@@ -160,8 +162,9 @@ spec:
                     task should be configured to represent the specific task chosen.
                   properties:
                     buildah:
-                      description: 'a BuildahTask, for Buildah strategy Deprecated:
-                        use jib, s2i or a custom publishing strategy instead'
+                      description: |-
+                        a BuildahTask, for Buildah strategy
+                        Deprecated: use jib, s2i or a custom publishing strategy instead
                       properties:
                         baseImage:
                           description: base image layer
@@ -347,15 +350,13 @@ spec:
                             application build phase
                           properties:
                             caSecrets:
-                              description: The Secrets name and key, containing the
-                                CA certificate(s) used to connect to remote Maven
-                                repositories. It can contain X.509 certificates, and
-                                PKCS#7 formatted certificate chains. A JKS formatted
-                                keystore is automatically created to store the CA
-                                certificate(s), and configured to be used as a trusted
-                                certificate(s) by the Maven commands. Note that the
-                                root CA certificates are also imported into the created
-                                keystore.
+                              description: |-
+                                The Secrets name and key, containing the CA certificate(s) used to connect
+                                to remote Maven repositories.
+                                It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+                                A JKS formatted keystore is automatically created to store the CA certificate(s),
+                                and configured to be used as a trusted certificate(s) by the Maven commands.
+                                Note that the root CA certificates are also imported into the created keystore.
                               items:
                                 description: SecretKeySelector selects a key of a
                                   Secret.
@@ -365,10 +366,10 @@ spec:
                                       be a valid secret key.
                                     type: string
                                   name:
-                                    description: 'Name of the referent. More info:
-                                      https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                      TODO: Add other useful fields. apiVersion, kind,
-                                      uid?'
+                                    description: |-
+                                      Name of the referent.
+                                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                      TODO: Add other useful fields. apiVersion, kind, uid?
                                     type: string
                                   optional:
                                     description: Specify whether the Secret or its
@@ -377,16 +378,20 @@ spec:
                                 required:
                                 - key
                                 type: object
+                                x-kubernetes-map-type: atomic
                               type: array
                             cliOptions:
-                              description: The CLI options that are appended to the
-                                list of arguments for Maven commands, e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
+                              description: |-
+                                The CLI options that are appended to the list of arguments for Maven commands,
+                                e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
                                 See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
                               items:
                                 type: string
                               type: array
                             extension:
-                              description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+                              description: |-
+                                The Maven build extensions.
+                                See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.
@@ -415,8 +420,9 @@ spec:
                               description: The path of the local Maven repository.
                               type: string
                             profiles:
-                              description: A reference to the ConfigMap or Secret
-                                key that contains the Maven profile.
+                              description: |-
+                                A reference to the ConfigMap or Secret key that contains
+                                the Maven profile.
                               items:
                                 description: ValueSource --.
                                 properties:
@@ -427,10 +433,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -439,6 +445,7 @@ spec:
                                     required:
                                     - key
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   secretKeyRef:
                                     description: Selects a key of a secret.
                                     properties:
@@ -447,10 +454,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -459,6 +466,7 @@ spec:
                                     required:
                                     - key
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                 type: object
                               type: array
                             properties:
@@ -481,23 +489,18 @@ spec:
                                     description: can use stable releases
                                     properties:
                                       checksumPolicy:
-                                        description: When Maven deploys files to the
-                                          repository, it also deploys corresponding
-                                          checksum files. Your options are to `ignore`,
-                                          `fail`, or `warn` on missing or incorrect
-                                          checksums.
+                                        description: |-
+                                          When Maven deploys files to the repository, it also deploys corresponding checksum files.
+                                          Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
                                         type: string
                                       enabled:
                                         description: is the policy activated or not
                                         type: boolean
                                       updatePolicy:
-                                        description: 'This element specifies how often
-                                          updates should attempt to occur. Maven will
-                                          compare the local POM''s timestamp (stored
-                                          in a repository''s maven-metadata file)
-                                          to the remote. The choices are: `always`,
-                                          `daily` (default), `interval:X` (where X
-                                          is an integer in minutes) or `never`'
+                                        description: |-
+                                          This element specifies how often updates should attempt to occur.
+                                          Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+                                          The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
                                         type: string
                                     required:
                                     - enabled
@@ -506,23 +509,18 @@ spec:
                                     description: can use snapshot
                                     properties:
                                       checksumPolicy:
-                                        description: When Maven deploys files to the
-                                          repository, it also deploys corresponding
-                                          checksum files. Your options are to `ignore`,
-                                          `fail`, or `warn` on missing or incorrect
-                                          checksums.
+                                        description: |-
+                                          When Maven deploys files to the repository, it also deploys corresponding checksum files.
+                                          Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
                                         type: string
                                       enabled:
                                         description: is the policy activated or not
                                         type: boolean
                                       updatePolicy:
-                                        description: 'This element specifies how often
-                                          updates should attempt to occur. Maven will
-                                          compare the local POM''s timestamp (stored
-                                          in a repository''s maven-metadata file)
-                                          to the remote. The choices are: `always`,
-                                          `daily` (default), `interval:X` (where X
-                                          is an integer in minutes) or `never`'
+                                        description: |-
+                                          This element specifies how often updates should attempt to occur.
+                                          Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+                                          The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
                                         type: string
                                     required:
                                     - enabled
@@ -555,8 +553,9 @@ spec:
                                 type: object
                               type: array
                             settings:
-                              description: A reference to the ConfigMap or Secret
-                                key that contains the Maven settings.
+                              description: |-
+                                A reference to the ConfigMap or Secret key that contains
+                                the Maven settings.
                               properties:
                                 configMapKeyRef:
                                   description: Selects a key of a ConfigMap.
@@ -565,10 +564,10 @@ spec:
                                       description: The key to select.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the ConfigMap or
@@ -577,6 +576,7 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 secretKeyRef:
                                   description: Selects a key of a secret.
                                   properties:
@@ -585,10 +585,10 @@ spec:
                                         from.  Must be a valid secret key.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the Secret or its
@@ -597,10 +597,12 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               type: object
                             settingsSecurity:
-                              description: A reference to the ConfigMap or Secret
-                                key that contains the security of the Maven settings.
+                              description: |-
+                                A reference to the ConfigMap or Secret key that contains
+                                the security of the Maven settings.
                               properties:
                                 configMapKeyRef:
                                   description: Selects a key of a ConfigMap.
@@ -609,10 +611,10 @@ spec:
                                       description: The key to select.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the ConfigMap or
@@ -621,6 +623,7 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 secretKeyRef:
                                   description: Selects a key of a secret.
                                   properties:
@@ -629,10 +632,10 @@ spec:
                                         from.  Must be a valid secret key.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the Secret or its
@@ -641,6 +644,7 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               type: object
                           type: object
                         name:
@@ -655,9 +659,9 @@ spec:
                               type: string
                             capabilities:
                               additionalProperties:
-                                description: Capability is a particular feature which
-                                  requires a well known set of dependencies and other
-                                  properties which are specified in the runtime catalog.
+                                description: |-
+                                  Capability is a particular feature which requires a well known set of dependencies and other properties
+                                  which are specified in the runtime catalog.
                                 properties:
                                   buildTimeProperties:
                                     description: Set of required Camel build time
@@ -798,9 +802,9 @@ spec:
                                   Kamelet
                                 type: boolean
                               interceptors:
-                                description: Interceptors are optional identifiers
-                                  the org.apache.camel.k.RoutesLoader uses to pre/post
-                                  process sources
+                                description: |-
+                                  Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+                                  uses to pre/post process sources
                                 items:
                                   type: string
                                 type: array
@@ -809,8 +813,9 @@ spec:
                                   DSL) used to interpret this source code
                                 type: string
                               loader:
-                                description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                                  that will interpret this source at runtime
+                                description: |-
+                                  Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
+                                  interpret this source at runtime
                                 type: string
                               name:
                                 description: the name of the specification
@@ -845,7 +850,9 @@ spec:
                         after the build and before the package task.
                       properties:
                         command:
-                          description: 'the command to execute Deprecated: use ContainerCommands'
+                          description: |-
+                            the command to execute
+                            Deprecated: use ContainerCommands
                           type: string
                         commands:
                           description: the command to execute
@@ -1026,8 +1033,9 @@ spec:
                           type: object
                       type: object
                     kaniko:
-                      description: 'a KanikoTask, for Kaniko strategy Deprecated:
-                        use jib, s2i or a custom publishing strategy instead'
+                      description: |-
+                        a KanikoTask, for Kaniko strategy
+                        Deprecated: use jib, s2i or a custom publishing strategy instead
                       properties:
                         baseImage:
                           description: base image layer
@@ -1141,8 +1149,9 @@ spec:
                           type: boolean
                       type: object
                     package:
-                      description: Application pre publishing a PackageTask, used
-                        to package the project
+                      description: |-
+                        Application pre publishing
+                        a PackageTask, used to package the project
                       properties:
                         baseImage:
                           description: the base image layer
@@ -1221,15 +1230,13 @@ spec:
                             application build phase
                           properties:
                             caSecrets:
-                              description: The Secrets name and key, containing the
-                                CA certificate(s) used to connect to remote Maven
-                                repositories. It can contain X.509 certificates, and
-                                PKCS#7 formatted certificate chains. A JKS formatted
-                                keystore is automatically created to store the CA
-                                certificate(s), and configured to be used as a trusted
-                                certificate(s) by the Maven commands. Note that the
-                                root CA certificates are also imported into the created
-                                keystore.
+                              description: |-
+                                The Secrets name and key, containing the CA certificate(s) used to connect
+                                to remote Maven repositories.
+                                It can contain X.509 certificates, and PKCS#7 formatted certificate chains.
+                                A JKS formatted keystore is automatically created to store the CA certificate(s),
+                                and configured to be used as a trusted certificate(s) by the Maven commands.
+                                Note that the root CA certificates are also imported into the created keystore.
                               items:
                                 description: SecretKeySelector selects a key of a
                                   Secret.
@@ -1239,10 +1246,10 @@ spec:
                                       be a valid secret key.
                                     type: string
                                   name:
-                                    description: 'Name of the referent. More info:
-                                      https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                      TODO: Add other useful fields. apiVersion, kind,
-                                      uid?'
+                                    description: |-
+                                      Name of the referent.
+                                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                      TODO: Add other useful fields. apiVersion, kind, uid?
                                     type: string
                                   optional:
                                     description: Specify whether the Secret or its
@@ -1251,16 +1258,20 @@ spec:
                                 required:
                                 - key
                                 type: object
+                                x-kubernetes-map-type: atomic
                               type: array
                             cliOptions:
-                              description: The CLI options that are appended to the
-                                list of arguments for Maven commands, e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
+                              description: |-
+                                The CLI options that are appended to the list of arguments for Maven commands,
+                                e.g., `-V,--no-transfer-progress,-Dstyle.color=never`.
                                 See https://maven.apache.org/ref/3.8.4/maven-embedder/cli.html.
                               items:
                                 type: string
                               type: array
                             extension:
-                              description: The Maven build extensions. See https://maven.apache.org/guides/mini/guide-using-extensions.html.
+                              description: |-
+                                The Maven build extensions.
+                                See https://maven.apache.org/guides/mini/guide-using-extensions.html.
                               items:
                                 description: MavenArtifact defines a GAV (Group:Artifact:Type:Version:Classifier)
                                   Maven artifact.
@@ -1289,8 +1300,9 @@ spec:
                               description: The path of the local Maven repository.
                               type: string
                             profiles:
-                              description: A reference to the ConfigMap or Secret
-                                key that contains the Maven profile.
+                              description: |-
+                                A reference to the ConfigMap or Secret key that contains
+                                the Maven profile.
                               items:
                                 description: ValueSource --.
                                 properties:
@@ -1301,10 +1313,10 @@ spec:
                                         description: The key to select.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the ConfigMap
@@ -1313,6 +1325,7 @@ spec:
                                     required:
                                     - key
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                   secretKeyRef:
                                     description: Selects a key of a secret.
                                     properties:
@@ -1321,10 +1334,10 @@ spec:
                                           from.  Must be a valid secret key.
                                         type: string
                                       name:
-                                        description: 'Name of the referent. More info:
-                                          https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                          TODO: Add other useful fields. apiVersion,
-                                          kind, uid?'
+                                        description: |-
+                                          Name of the referent.
+                                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                          TODO: Add other useful fields. apiVersion, kind, uid?
                                         type: string
                                       optional:
                                         description: Specify whether the Secret or
@@ -1333,6 +1346,7 @@ spec:
                                     required:
                                     - key
                                     type: object
+                                    x-kubernetes-map-type: atomic
                                 type: object
                               type: array
                             properties:
@@ -1355,23 +1369,18 @@ spec:
                                     description: can use stable releases
                                     properties:
                                       checksumPolicy:
-                                        description: When Maven deploys files to the
-                                          repository, it also deploys corresponding
-                                          checksum files. Your options are to `ignore`,
-                                          `fail`, or `warn` on missing or incorrect
-                                          checksums.
+                                        description: |-
+                                          When Maven deploys files to the repository, it also deploys corresponding checksum files.
+                                          Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
                                         type: string
                                       enabled:
                                         description: is the policy activated or not
                                         type: boolean
                                       updatePolicy:
-                                        description: 'This element specifies how often
-                                          updates should attempt to occur. Maven will
-                                          compare the local POM''s timestamp (stored
-                                          in a repository''s maven-metadata file)
-                                          to the remote. The choices are: `always`,
-                                          `daily` (default), `interval:X` (where X
-                                          is an integer in minutes) or `never`'
+                                        description: |-
+                                          This element specifies how often updates should attempt to occur.
+                                          Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+                                          The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
                                         type: string
                                     required:
                                     - enabled
@@ -1380,23 +1389,18 @@ spec:
                                     description: can use snapshot
                                     properties:
                                       checksumPolicy:
-                                        description: When Maven deploys files to the
-                                          repository, it also deploys corresponding
-                                          checksum files. Your options are to `ignore`,
-                                          `fail`, or `warn` on missing or incorrect
-                                          checksums.
+                                        description: |-
+                                          When Maven deploys files to the repository, it also deploys corresponding checksum files.
+                                          Your options are to `ignore`, `fail`, or `warn` on missing or incorrect checksums.
                                         type: string
                                       enabled:
                                         description: is the policy activated or not
                                         type: boolean
                                       updatePolicy:
-                                        description: 'This element specifies how often
-                                          updates should attempt to occur. Maven will
-                                          compare the local POM''s timestamp (stored
-                                          in a repository''s maven-metadata file)
-                                          to the remote. The choices are: `always`,
-                                          `daily` (default), `interval:X` (where X
-                                          is an integer in minutes) or `never`'
+                                        description: |-
+                                          This element specifies how often updates should attempt to occur.
+                                          Maven will compare the local POM's timestamp (stored in a repository's maven-metadata file) to the remote.
+                                          The choices are: `always`, `daily` (default), `interval:X` (where X is an integer in minutes) or `never`
                                         type: string
                                     required:
                                     - enabled
@@ -1429,8 +1433,9 @@ spec:
                                 type: object
                               type: array
                             settings:
-                              description: A reference to the ConfigMap or Secret
-                                key that contains the Maven settings.
+                              description: |-
+                                A reference to the ConfigMap or Secret key that contains
+                                the Maven settings.
                               properties:
                                 configMapKeyRef:
                                   description: Selects a key of a ConfigMap.
@@ -1439,10 +1444,10 @@ spec:
                                       description: The key to select.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the ConfigMap or
@@ -1451,6 +1456,7 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 secretKeyRef:
                                   description: Selects a key of a secret.
                                   properties:
@@ -1459,10 +1465,10 @@ spec:
                                         from.  Must be a valid secret key.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the Secret or its
@@ -1471,10 +1477,12 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               type: object
                             settingsSecurity:
-                              description: A reference to the ConfigMap or Secret
-                                key that contains the security of the Maven settings.
+                              description: |-
+                                A reference to the ConfigMap or Secret key that contains
+                                the security of the Maven settings.
                               properties:
                                 configMapKeyRef:
                                   description: Selects a key of a ConfigMap.
@@ -1483,10 +1491,10 @@ spec:
                                       description: The key to select.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the ConfigMap or
@@ -1495,6 +1503,7 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                                 secretKeyRef:
                                   description: Selects a key of a secret.
                                   properties:
@@ -1503,10 +1512,10 @@ spec:
                                         from.  Must be a valid secret key.
                                       type: string
                                     name:
-                                      description: 'Name of the referent. More info:
-                                        https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                        TODO: Add other useful fields. apiVersion,
-                                        kind, uid?'
+                                      description: |-
+                                        Name of the referent.
+                                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                        TODO: Add other useful fields. apiVersion, kind, uid?
                                       type: string
                                     optional:
                                       description: Specify whether the Secret or its
@@ -1515,6 +1524,7 @@ spec:
                                   required:
                                   - key
                                   type: object
+                                  x-kubernetes-map-type: atomic
                               type: object
                           type: object
                         name:
@@ -1529,9 +1539,9 @@ spec:
                               type: string
                             capabilities:
                               additionalProperties:
-                                description: Capability is a particular feature which
-                                  requires a well known set of dependencies and other
-                                  properties which are specified in the runtime catalog.
+                                description: |-
+                                  Capability is a particular feature which requires a well known set of dependencies and other properties
+                                  which are specified in the runtime catalog.
                                 properties:
                                   buildTimeProperties:
                                     description: Set of required Camel build time
@@ -1672,9 +1682,9 @@ spec:
                                   Kamelet
                                 type: boolean
                               interceptors:
-                                description: Interceptors are optional identifiers
-                                  the org.apache.camel.k.RoutesLoader uses to pre/post
-                                  process sources
+                                description: |-
+                                  Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+                                  uses to pre/post process sources
                                 items:
                                   type: string
                                 type: array
@@ -1683,8 +1693,9 @@ spec:
                                   DSL) used to interpret this source code
                                 type: string
                               loader:
-                                description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
-                                  that will interpret this source at runtime
+                                description: |-
+                                  Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
+                                  interpret this source at runtime
                                 type: string
                               name:
                                 description: the name of the specification
@@ -1816,8 +1827,9 @@ spec:
                           type: string
                       type: object
                     spectrum:
-                      description: 'a SpectrumTask, for Spectrum strategy Deprecated:
-                        use jib, s2i or a custom publishing strategy instead'
+                      description: |-
+                        a SpectrumTask, for Spectrum strategy
+                        Deprecated: use jib, s2i or a custom publishing strategy instead
                       properties:
                         baseImage:
                           description: base image layer
@@ -1917,15 +1929,17 @@ spec:
                   type: object
                 type: array
               timeout:
-                description: Timeout defines the Build maximum execution duration.
-                  The Build deadline is set to the Build start time plus the Timeout
-                  duration. If the Build deadline is exceeded, the Build context is
-                  canceled, and its phase set to BuildPhaseFailed.
+                description: |-
+                  Timeout defines the Build maximum execution duration.
+                  The Build deadline is set to the Build start time plus the Timeout duration.
+                  If the Build deadline is exceeded, the Build context is canceled,
+                  and its phase set to BuildPhaseFailed.
                 format: duration
                 type: string
               toolImage:
-                description: 'The container image to be used to run the build. Deprecated:
-                  no longer in use in Camel K 2 - maintained for backward compatibility'
+                description: |-
+                  The container image to be used to run the build.
+                  Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
                 type: string
             type: object
           status:
@@ -1994,8 +2008,10 @@ spec:
                 description: the digest from image
                 type: string
               duration:
-                description: how long it took for the build Change to Duration / ISO
-                  8601 when CRD uses OpenAPI spec v3 https://github.com/OAI/OpenAPI-Specification/issues/845
+                description: |-
+                  how long it took for the build
+                  Change to Duration / ISO 8601 when CRD uses OpenAPI spec v3
+                  https://github.com/OAI/OpenAPI-Specification/issues/845
                 type: string
               error:
                 description: the error description (if any)
