@@ -6,6 +6,8 @@
 
 **Closed issues:**
 
+- Drop support for Swagger \(Openapi v2.0\) in favour of Openapi 3.0 [\#5735](https://github.com/apache/camel-k/issues/5735)
+- Upgrade to Golang 1.22 [\#5720](https://github.com/apache/camel-k/issues/5720)
 - Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
 - Flaky TestOperatorIDFiltering [\#5521](https://github.com/apache/camel-k/issues/5521)
 - OLM missing recommeded resource requests [\#5340](https://github.com/apache/camel-k/issues/5340)
@@ -14,7 +16,16 @@
 
 **Merged pull requests:**
 
+- feat\(trait\): drop support for swagger [\#5736](https://github.com/apache/camel-k/pull/5736) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump knative.dev/serving from 0.40.1 to 0.42.1 [\#5734](https://github.com/apache/camel-k/pull/5734) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): update controllergen [\#5733](https://github.com/apache/camel-k/pull/5733) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump prometheus [\#5732](https://github.com/apache/camel-k/pull/5732) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump kubernetes to 1.29.7 [\#5731](https://github.com/apache/camel-k/pull/5731) ([squakez](https://github.com/squakez))
+- fix\(ci\): latest runtime openapi snapshot repo [\#5728](https://github.com/apache/camel-k/pull/5728) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.53 to 0.6.54 [\#5727](https://github.com/apache/camel-k/pull/5727) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(ci\): Upgrade golang to 1.22 [\#5726](https://github.com/apache/camel-k/pull/5726) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): Upgrade controller runtime to 0.17.x [\#5725](https://github.com/apache/camel-k/pull/5725) ([gansheer](https://github.com/gansheer))
+- chore\(deps\): bump knative [\#5724](https://github.com/apache/camel-k/pull/5724) ([squakez](https://github.com/squakez))
 - chore\(ci\): upgrade kubernetes API to 1.29 [\#5721](https://github.com/apache/camel-k/pull/5721) ([squakez](https://github.com/squakez))
 - chore\(ci\): removing staging variables [\#5719](https://github.com/apache/camel-k/pull/5719) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/onsi/gomega from 1.34.0 to 1.34.1 [\#5718](https://github.com/apache/camel-k/pull/5718) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -109,7 +120,6 @@
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
 - Nightly release note still define ARM64 specific instructions [\#5596](https://github.com/apache/camel-k/issues/5596)
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
-- Flaky TestRunCronExample [\#5533](https://github.com/apache/camel-k/issues/5533)
 - Test failures report mixed platform resolutions [\#5498](https://github.com/apache/camel-k/issues/5498)
 - Move deprecated v1alpha1.KameletBinding tests to v1.Pipe [\#5490](https://github.com/apache/camel-k/issues/5490)
 - Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)

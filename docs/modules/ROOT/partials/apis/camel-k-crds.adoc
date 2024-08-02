@@ -7955,7 +7955,7 @@ The OpenAPI DSL trait is internally used to allow creating integrations from a O
 |
 
 
-The configmaps holding the spec of the OpenAPI
+The configmaps holding the spec of the OpenAPI (compatible with > 3.0 spec only).
 
 
 |===

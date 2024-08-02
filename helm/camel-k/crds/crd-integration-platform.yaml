@@ -1677,6 +1677,7 @@ spec:
                     properties:
                       configmaps:
                         description: The configmaps holding the spec of the OpenAPI
+                          (compatible with > 3.0 spec only).
                         items:
                           type: string
                         type: array
@@ -3774,6 +3775,7 @@ spec:
                     properties:
                       configmaps:
                         description: The configmaps holding the spec of the OpenAPI
+                          (compatible with > 3.0 spec only).
                         items:
                           type: string
                         type: array
