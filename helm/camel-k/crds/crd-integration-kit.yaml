@@ -423,7 +423,7 @@ spec:
                     type: object
                   registry:
                     description: |-
-                      The Registry trait sets up Maven to use the Image registry as a Maven repository.
+                      The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
                       Deprecated: use jvm trait or read documentation.
                     properties:
                       configuration:
