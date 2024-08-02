@@ -27,3 +27,6 @@ resources:
 - bases/camel.apache.org_kamelets.yaml
 - bases/camel.apache.org_kameletbindings.yaml
 - bases/camel.apache.org_pipes.yaml
+
+commonLabels:
+  app: camel-k

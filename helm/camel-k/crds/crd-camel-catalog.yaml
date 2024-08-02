@@ -15,14 +15,12 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.6.1
-  creationTimestamp: null
-  labels:
-    app: camel-k
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: camelcatalogs.camel.apache.org
 spec:
   group: camel.apache.org
@@ -63,14 +61,19 @@ spec:
           statically generated.
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -371,9 +374,9 @@ spec:
                     type: string
                   capabilities:
                     additionalProperties:
-                      description: Capability is a particular feature which requires
-                        a well known set of dependencies and other properties which
-                        are specified in the runtime catalog.
+                      description: |-
+                        Capability is a particular feature which requires a well known set of dependencies and other properties
+                        which are specified in the runtime catalog.
                       properties:
                         buildTimeProperties:
                           description: Set of required Camel build time properties
