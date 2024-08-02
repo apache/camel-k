@@ -315,8 +315,6 @@ func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKi
 		Builder: traits.Builder.DeepCopy(),
 		Camel:   traits.Camel.DeepCopy(),
 		Quarkus: traits.Quarkus.DeepCopy(),
-
-		Registry: traits.Registry.DeepCopy(),
 	}
 
 	if err := kitTraits.Merge(ikt); err != nil {

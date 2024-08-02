@@ -2714,7 +2714,7 @@ NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the
 |
 
 
-The Registry trait sets up Maven to use the Image registry as a Maven repository.
+The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
 Deprecated: use jvm trait or read documentation.
 
 |`addons` +
@@ -5946,7 +5946,7 @@ The configuration of Quarkus trait
 |
 
 
-The configuration of Registry trait
+The configuration of Registry trait (support removed since version 2.5.0).
 Deprecated: use jvm trait or read documentation.
 
 |`route` +
@@ -8383,7 +8383,7 @@ Deprecated: for backward compatibility.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
-WARNING: The Registry trait is **deprecated** and will removed in future release versions.
+WARNING: The Registry trait was deprecated in version 2.2.0 and is no longer active since version 2.5.0.
 
 The Registry trait sets up Maven to use the Image registry
 as a Maven repository.

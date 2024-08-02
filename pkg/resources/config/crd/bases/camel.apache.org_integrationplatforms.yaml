@@ -1890,7 +1890,7 @@ spec:
                     type: object
                   registry:
                     description: |-
-                      The configuration of Registry trait
+                      The configuration of Registry trait (support removed since version 2.5.0).
                       Deprecated: use jvm trait or read documentation.
                     properties:
                       configuration:
@@ -3988,7 +3988,7 @@ spec:
                     type: object
                   registry:
                     description: |-
-                      The configuration of Registry trait
+                      The configuration of Registry trait (support removed since version 2.5.0).
                       Deprecated: use jvm trait or read documentation.
                     properties:
                       configuration:
