@@ -19,6 +19,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: builds.camel.apache.org
 spec:
   group: camel.apache.org
@@ -2077,6 +2079,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: camelcatalogs.camel.apache.org
 spec:
   group: camel.apache.org
@@ -2604,6 +2608,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: integrationkits.camel.apache.org
 spec:
   group: camel.apache.org
@@ -3159,6 +3165,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: integrationplatforms.camel.apache.org
 spec:
   group: camel.apache.org
@@ -7381,6 +7389,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: integrationprofiles.camel.apache.org
 spec:
   group: camel.apache.org
@@ -11357,6 +11367,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: integrations.camel.apache.org
 spec:
   group: camel.apache.org
@@ -19503,6 +19515,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: kameletbindings.camel.apache.org
 spec:
   group: camel.apache.org
@@ -28247,6 +28261,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: kamelets.camel.apache.org
 spec:
   group: camel.apache.org
@@ -29616,6 +29632,8 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.15.0
+  labels:
+    app: camel-k
   name: pipes.camel.apache.org
 spec:
   group: camel.apache.org
