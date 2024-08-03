@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Drop support for Swagger \(Openapi v2.0\) in favour of Openapi 3.0 [\#5735](https://github.com/apache/camel-k/issues/5735)
 - Upgrade to Golang 1.22 [\#5720](https://github.com/apache/camel-k/issues/5720)
 - Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
 - Flaky TestOperatorIDFiltering [\#5521](https://github.com/apache/camel-k/issues/5521)
@@ -47,7 +48,6 @@
 - Bring back Quarkus native test in PR [\#5598](https://github.com/apache/camel-k/issues/5598)
 - Nightly release note still define ARM64 specific instructions [\#5596](https://github.com/apache/camel-k/issues/5596)
 - Unable to specify any CloudEvent attributes or extensions, except for `type` [\#5537](https://github.com/apache/camel-k/issues/5537)
-- Flaky TestRunCronExample [\#5533](https://github.com/apache/camel-k/issues/5533)
 - Test failures report mixed platform resolutions [\#5498](https://github.com/apache/camel-k/issues/5498)
 - Move deprecated v1alpha1.KameletBinding tests to v1.Pipe [\#5490](https://github.com/apache/camel-k/issues/5490)
 - Move tests, examples and documentation from groovy to yaml [\#5489](https://github.com/apache/camel-k/issues/5489)
