@@ -35,36 +35,53 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	testutil "github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-// WARNING: this test is not OLM specific but needs certain setting we provide in OLM installation scenario
 func TestKustomizeUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// ********* START
-		// TODO: we need to replace this CLI based installation with Kustomize installation after 2.4 release
-		// this is a workaround as Kustomize was not working properly pre 2.4
-		version, ok := os.LookupEnv("KAMEL_K_TEST_RELEASE_VERSION")
+		// We start the test by installing previous version operator
+		lastVersion, ok := os.LookupEnv("LAST_RELEASED_VERSION")
 		g.Expect(ok).To(BeTrue())
-		image, ok := os.LookupEnv("KAMEL_K_TEST_OPERATOR_CURRENT_IMAGE")
-		g.Expect(ok).To(BeTrue())
-		kamel, ok := os.LookupEnv("RELEASED_KAMEL_BIN")
-		g.Expect(ok).To(BeTrue())
-		// Set KAMEL_BIN only for this test - don't override the ENV variable for all tests
-		g.Expect(os.Setenv("KAMEL_BIN", kamel)).To(Succeed())
+		lastVersionDir := fmt.Sprintf("/tmp/camel-k-v-%s", lastVersion)
+		// We clone and install the previous installed operator
+		// from source with tag
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"rm",
+				"-rf",
+				lastVersionDir,
+			))
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"git",
+				"clone",
+				"https://github.com/apache/camel-k.git",
+				lastVersionDir,
+			))
+		checkoutCmd := exec.Command(
+			"git",
+			"checkout",
+			fmt.Sprintf("v%s", lastVersion),
+		)
+		checkoutCmd.Dir = lastVersionDir
+		ExpectExecSucceed(t, g, checkoutCmd)
+		installPrevCmd := exec.Command(
+			"make",
+			"install-k8s-global",
+			fmt.Sprintf("NAMESPACE=%s", ns),
+		)
+		installPrevCmd.Dir = lastVersionDir
+		ExpectExecSucceed(t, g, installPrevCmd)
 
-		// Should both install the CRDs and kamel in the given namespace
-		g.Expect(Kamel(t, ctx, "install", "-n", ns, "--global", "--olm=false", "--force").Execute()).To(Succeed())
+		// Check the operator image is the previous one
+		g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(lastVersion))
 		// Check the operator pod is running
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		// Refresh the test client to account for the newly installed CRDs
-		RefreshClient(t)
 		// Check the IntegrationPlatform has been reconciled
-		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(version))
-		// TODO: replace the code above
-		// ************* END
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(lastVersion))
 
 		// We need a different namespace from the global operator
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
@@ -74,34 +91,19 @@ func TestKustomizeUpgrade(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name)).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionTrue))
 			// Check the Integration version
-			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name)).Should(Equal(version))
+			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name)).Should(Equal(lastVersion))
 
-			// Clear the KAMEL_BIN environment variable so that the current version is used from now on
-			g.Expect(os.Setenv("KAMEL_BIN", "")).To(Succeed())
-
-			// Upgrade the operator by installing the current version
-			registry := os.Getenv("KIND_REGISTRY")
-			g.Expect(registry).NotTo(Equal(""))
-			kustomizeDir := testutil.MakeTempCopyDir(t, "../../../install")
-			// We must change a few values in the Kustomize config
+			// Let's upgrade the operator with the newer installation
 			ExpectExecSucceed(t, g,
 				exec.Command(
-					"sed",
-					"-i",
-					fmt.Sprintf("s/namespace: .*/namespace: %s/", ns),
-					fmt.Sprintf("%s/overlays/kubernetes/descoped/kustomization.yaml", kustomizeDir),
-				))
-			ExpectExecSucceed(t, g, Kubectl(
-				"apply",
-				"-k",
-				fmt.Sprintf("%s/overlays/kubernetes/descoped", kustomizeDir),
-				"--server-side",
-				"--wait",
-				"--force-conflicts",
-			))
+					"make",
+					"install-k8s-global",
+					fmt.Sprintf("NAMESPACE=%s", ns),
+				),
+			)
 
 			// Check the operator image is the current built one
-			g.Eventually(OperatorImage(t, ctx, ns)).Should(Equal(image))
+			g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(defaults.Version))
 			// Check the operator pod is running
 			g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			// Check the IntegrationPlatform has been reconciled
@@ -109,7 +111,7 @@ func TestKustomizeUpgrade(t *testing.T) {
 			g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 			// Check the Integration hasn't been upgraded
-			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).Should(Equal(version))
+			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).Should(Equal(lastVersion))
 			// Make sure that any Pod rollout is completing successfully
 			// otherwise we are probably in front of a non breaking compatibility change
 			g.Consistently(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady),
@@ -124,7 +126,7 @@ func TestKustomizeUpgrade(t *testing.T) {
 			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 			// Check the previous kit is not garbage collected
-			g.Eventually(Kits(t, ctx, ns, KitWithVersion(version))).Should(HaveLen(1))
+			g.Eventually(Kits(t, ctx, ns, KitWithVersion(lastVersion))).Should(HaveLen(1))
 			// Check a new kit is created with the current version
 			g.Eventually(Kits(t, ctx, ns, KitWithVersion(defaults.Version))).Should(HaveLen(1))
 			// Check the new kit is ready
