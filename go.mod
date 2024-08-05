@@ -39,7 +39,7 @@ require (
 	golang.org/x/sync v0.7.0
 	golang.org/x/term v0.22.0
 	golang.org/x/text v0.16.0
-	golang.org/x/time v0.5.0
+	golang.org/x/time v0.6.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.29.7
 	k8s.io/apiextensions-apiserver v0.29.7
