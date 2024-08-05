@@ -51,4 +51,6 @@ runs:
       eval $(minikube -p minikube docker-env)
       echo "KAMEL_INSTALL_REGISTRY=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')" >> $GITHUB_ENV
       echo "Setting registry as $KAMEL_INSTALL_REGISTRY which is required by certain tests"
+      echo "LAST_RELEASED_VERSION=$(make get-last-released-version)" >> $GITHUB_ENV
+      echo "Setting last released version as as $LAST_RELEASED_VERSION which is required by certain tests"
       NOTEST=true make images
