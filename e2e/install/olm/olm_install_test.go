@@ -26,6 +26,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 	"testing"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -44,18 +46,28 @@ import (
 const installCatalogSourceName = "test-camel-k-source"
 
 func TestOLMInstallation(t *testing.T) {
-	// keep option names compatible with the upgrade test
-	newIIB := os.Getenv("CAMEL_K_NEW_IIB")
-
-	// optional options
-	newUpdateChannel := os.Getenv("CAMEL_K_NEW_UPGRADE_CHANNEL")
-
-	if newIIB == "" {
-		t.Skip("OLM fresh install test requires the CAMEL_K_NEW_IIB environment variable")
-	}
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		g.Expect(CreateOrUpdateCatalogSource(t, ctx, ns, installCatalogSourceName, newIIB)).To(Succeed())
+		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
+		// Set the configuration required for OLM to work with local catalog
+		// Build Camel K local bundle
+		ExpectExecSucceed(t, g,
+			Make(t, "bundle-build"),
+		)
+		// Build Operator local index
+		ExpectExecSucceed(t, g,
+			Make(t, "bundle-index"),
+		)
+
+		// This workaround is required because of
+		// https://github.com/operator-framework/operator-lifecycle-manager/issues/903#issuecomment-1779366630
+		cmd := exec.Command("docker", "inspect", "--format={{.Id}}", "apache/camel-k-bundle-index:2.4.0-SNAPSHOT")
+		out, err := cmd.Output()
+		require.NoError(t, err)
+		newBundleIndexSha := strings.ReplaceAll(string(out), "\n", "")
+		g.Expect(newBundleIndexSha).To(Not(Equal("")))
+
+		newBundleIndex := fmt.Sprintf("apache/camel-k-bundle-index@%s", newBundleIndexSha)
+		g.Expect(CreateOrUpdateCatalogSource(t, ctx, ns, installCatalogSourceName, newBundleIndex)).To(Succeed())
 
 		ocp, err := openshift.IsOpenShift(TestClient(t))
 		require.NoError(t, err)
@@ -70,13 +82,15 @@ func TestOLMInstallation(t *testing.T) {
 		g.Eventually(CatalogSourcePodRunning(t, ctx, ns, installCatalogSourceName), TestTimeoutMedium).Should(BeNil())
 		g.Eventually(CatalogSourcePhase(t, ctx, ns, installCatalogSourceName), TestTimeoutLong).Should(Equal("READY"))
 
-		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", installCatalogSourceName, "--olm-source-namespace", ns}
-
-		if newUpdateChannel != "" {
-			args = append(args, "--olm-channel", newUpdateChannel)
-		}
-
-		g.Expect(Kamel(t, ctx, args...).Execute()).To(Succeed())
+		// Install via OLM subscription (should use the latest default available channel)
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"kubectl",
+				"apply",
+				"-f",
+				"https://operatorhub.io/install/camel-k/camel-k.yaml",
+			),
+		)
 
 		// Find the only one Camel K CSV
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
