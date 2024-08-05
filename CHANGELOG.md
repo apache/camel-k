@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Drop support for Registry trait [\#5737](https://github.com/apache/camel-k/issues/5737)
 - Drop support for Swagger \(Openapi v2.0\) in favour of Openapi 3.0 [\#5735](https://github.com/apache/camel-k/issues/5735)
 - Upgrade to Golang 1.22 [\#5720](https://github.com/apache/camel-k/issues/5720)
 - Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
@@ -17,6 +18,10 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/oauth2 from 0.21.0 to 0.22.0 [\#5744](https://github.com/apache/camel-k/pull/5744) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/time from 0.5.0 to 0.6.0 [\#5743](https://github.com/apache/camel-k/pull/5743) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump linter [\#5741](https://github.com/apache/camel-k/pull/5741) ([squakez](https://github.com/squakez))
+- chore\(trait\): drop support for registry [\#5738](https://github.com/apache/camel-k/pull/5738) ([squakez](https://github.com/squakez))
 - feat\(trait\): drop support for swagger [\#5736](https://github.com/apache/camel-k/pull/5736) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/serving from 0.40.1 to 0.42.1 [\#5734](https://github.com/apache/camel-k/pull/5734) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): update controllergen [\#5733](https://github.com/apache/camel-k/pull/5733) ([squakez](https://github.com/squakez))
