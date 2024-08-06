@@ -39,7 +39,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 )
 
-func TestKustomizeUpgrade(t *testing.T) {
+func TestUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// We start the test by installing previous version operator
 		lastVersion, ok := os.LookupEnv("LAST_RELEASED_VERSION")

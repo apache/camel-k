@@ -38,14 +38,14 @@ import (
 )
 
 func TestHelmInstallation(t *testing.T) {
-	KAMEL_INSTALL_REGISTRY := os.Getenv("KAMEL_INSTALL_REGISTRY")
+	containerRegistry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY")
+	g.Expect(ok).To(BeTrue())
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Let's make sure no CRD is yet available in the cluster
 		// as we must make the Helm procedure to install them accordingly
 		g.Eventually(CRDs(t)).Should(BeNil())
 		operatorID := "helm-ck"
-		g.Expect(KAMEL_INSTALL_REGISTRY).NotTo(Equal(""))
 		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
 		ExpectExecSucceed(t, g,
 			exec.Command(
@@ -54,7 +54,7 @@ func TestHelmInstallation(t *testing.T) {
 				"camel-k",
 				fmt.Sprintf("../../../docs/charts/camel-k-%s.tgz", defaults.Version),
 				"--set",
-				fmt.Sprintf("platform.build.registry.address=%s", KAMEL_INSTALL_REGISTRY),
+				fmt.Sprintf("platform.build.registry.address=%s", containerRegistry),
 				"--set",
 				"platform.build.registry.insecure=true",
 				"--set",

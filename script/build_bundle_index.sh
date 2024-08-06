@@ -156,15 +156,15 @@ do
   fi
 done
 
-# echo -n "Validating index ... "
-# STATUS=$(${OPM} validate ${INDEX_DIR} 2>&1)
-# if [ $? != 0 ]; then
-#   echo "Failed"
-#   echo "Error: ${STATUS}"
-#   exit 1
-# else
-#   echo "OK"
-# fi
+echo -n "Validating index ... "
+STATUS=$(${OPM} validate ${INDEX_DIR} 2>&1)
+if [ $? != 0 ]; then
+  echo "Failed"
+  echo "Error: ${STATUS}"
+  exit 1
+else
+  echo "OK"
+fi
 
 echo -n "Generating catalog dockerfile ... "
 STATUS=$(${OPM} generate dockerfile ${INDEX_DIR} 2>&1)
