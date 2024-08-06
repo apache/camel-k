@@ -132,6 +132,10 @@ func UninstallCRDs(t *testing.T, ctx context.Context, g *WithT, makedir string) 
 }
 
 func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
+	ExpectExecSucceedWithTimeout(t, g, command, "")
+}
+
+func ExpectExecSucceedWithTimeout(t *testing.T, g *WithT, command *exec.Cmd, timeout string) {
 	t.Helper()
 
 	var cmdOut strings.Builder
@@ -146,7 +150,12 @@ func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
 
 	RegisterTestingT(t)
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
-	session.Wait()
+	if timeout != "" {
+		session.Wait(timeout)
+	} else {
+		session.Wait()
+	}
+
 	g.Eventually(session).Should(gexec.Exit(0))
 	require.NoError(t, err)
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")
