@@ -90,12 +90,15 @@ jobs:
           kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/olm.yaml
           kubectl wait --for=jsonpath='{.status.phase}'=Succeeded csv packageserver -n olm --timeout=2m
 
-    - name: Build OLM bundle
+    - name: Build and push OLM bundle
       shell: bash
       run: |
-        make bundle-build
+        echo "BUNDLE_IMAGE_NAME=docker.io/squakez/camel-k-bundle" >> $GITHUB_ENV
+        echo "Setting bundle image name as as $BUNDLE_IMAGE_NAME which is required by OLM tests"
+        # TODO publish in a staging environment accordingly
+        # BUNDLE_IMAGE_NAME=docker.io/squakez/camel-k-bundle make bundle-push
 
-    - name: Run test
+    - name: Run tests
       shell: bash
       run: |
         DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-install
