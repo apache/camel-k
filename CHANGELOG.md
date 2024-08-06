@@ -18,8 +18,10 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.54 to 0.6.55 [\#5747](https://github.com/apache/camel-k/pull/5747) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.21.0 to 0.22.0 [\#5744](https://github.com/apache/camel-k/pull/5744) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/time from 0.5.0 to 0.6.0 [\#5743](https://github.com/apache/camel-k/pull/5743) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/sync from 0.7.0 to 0.8.0 [\#5742](https://github.com/apache/camel-k/pull/5742) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump linter [\#5741](https://github.com/apache/camel-k/pull/5741) ([squakez](https://github.com/squakez))
 - chore\(trait\): drop support for registry [\#5738](https://github.com/apache/camel-k/pull/5738) ([squakez](https://github.com/squakez))
 - feat\(trait\): drop support for swagger [\#5736](https://github.com/apache/camel-k/pull/5736) ([squakez](https://github.com/squakez))
