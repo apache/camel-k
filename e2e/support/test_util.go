@@ -142,9 +142,11 @@ func ExpectExecSucceedWithTimeout(t *testing.T, g *WithT, command *exec.Cmd, tim
 	var cmdErr strings.Builder
 
 	defer func() {
+		t.Logf(`Executing "%s" ...
+`, command)
+		t.Logf("[OUT] %s\n", cmdOut.String())
 		if t.Failed() {
-			t.Logf("Output from exec command:\n%s\n", cmdOut.String())
-			t.Logf("Error from exec command:\n%s\n", cmdErr.String())
+			t.Logf("[ERR] %s\n", cmdErr.String())
 		}
 	}()
 
