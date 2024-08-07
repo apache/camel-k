@@ -2210,17 +2210,6 @@ func AssignPlatformToOperator(t *testing.T, ctx context.Context, ns, operator st
 	return TestClient(t).Update(ctx, pl)
 }
 
-func GetExpectedCRDs(releaseVersion string) int {
-	switch releaseVersion {
-	case "2.2.0":
-		return 8
-	case defaults.Version:
-		return ExpectedCRDs
-	}
-
-	return ExpectedCRDs
-}
-
 func CRDs(t *testing.T) func() []metav1.APIResource {
 	return func() []metav1.APIResource {
 
