@@ -9,6 +9,7 @@
 - Drop support for Registry trait [\#5737](https://github.com/apache/camel-k/issues/5737)
 - Drop support for Swagger \(Openapi v2.0\) in favour of Openapi 3.0 [\#5735](https://github.com/apache/camel-k/issues/5735)
 - Upgrade to Golang 1.22 [\#5720](https://github.com/apache/camel-k/issues/5720)
+- Release 2.4.0 [\#5678](https://github.com/apache/camel-k/issues/5678)
 - Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
 - Flaky TestOperatorIDFiltering [\#5521](https://github.com/apache/camel-k/issues/5521)
 - Expose Open API Spec for REST DSL [\#5394](https://github.com/apache/camel-k/issues/5394)
@@ -18,6 +19,8 @@
 
 **Merged pull requests:**
 
+- chore\(deps\): bump golang.org/x/term from 0.22.0 to 0.23.0 [\#5749](https://github.com/apache/camel-k/pull/5749) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/text from 0.16.0 to 0.17.0 [\#5748](https://github.com/apache/camel-k/pull/5748) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.54 to 0.6.55 [\#5747](https://github.com/apache/camel-k/pull/5747) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/oauth2 from 0.21.0 to 0.22.0 [\#5744](https://github.com/apache/camel-k/pull/5744) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump golang.org/x/time from 0.5.0 to 0.6.0 [\#5743](https://github.com/apache/camel-k/pull/5743) ([dependabot[bot]](https://github.com/apps/dependabot))
