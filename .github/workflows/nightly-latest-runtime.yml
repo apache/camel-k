@@ -20,7 +20,6 @@
 name: Nightly check against latest runtime
 
 env:
-  TEST_CLUSTER: kind
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CAMEL_K_TEST_TIMEOUT_SHORT: 3m
   CAMEL_K_TEST_TIMEOUT_MEDIUM: 7m
