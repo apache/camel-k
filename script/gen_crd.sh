@@ -32,6 +32,10 @@ rm -rf ./config
 # to root
 cd ../../../
 
+# Importing helm CRDs
+cat ./script/headers/yaml.txt > ./helm/camel-k/crds/camel-k-crds.yaml
+kustomize build ./pkg/resources/config/crd/. >> ./helm/camel-k/crds/camel-k-crds.yaml
+
 deploy_crd_file() {
   source=$1
 
@@ -55,8 +59,7 @@ deploy_crd() {
   name=$1
   plural=$2
 
-  deploy_crd_file ./pkg/resources/config/crd/bases/camel.apache.org_"$plural".yaml \
-    ./helm/camel-k/crds/crd-"$name".yaml
+  deploy_crd_file ./pkg/resources/config/crd/bases/camel.apache.org_"$plural".yaml
 }
 
 deploy_crd build builds
