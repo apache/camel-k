@@ -58,7 +58,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  common-it:
+  common:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -82,7 +82,7 @@ jobs:
       run: |
         DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
 
-  advanced-it:
+  advanced:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
