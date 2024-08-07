@@ -20,7 +20,6 @@
 name: Nightly release
 
 env:
-  TEST_CLUSTER: kind
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   NEXUS_DEPLOY_USERNAME: ${{ secrets.NEXUS_USER }}
   NEXUS_DEPLOY_PASSWORD: ${{ secrets.NEXUS_PW }}
