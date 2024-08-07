@@ -41,9 +41,12 @@ import (
 
 func TestUpgrade(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		// Let's make sure no CRD is yet available in the cluster
+		// as we must make the procedure to install them accordingly
+		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
 		// We start the test by installing previous version operator
 		lastVersion, ok := os.LookupEnv("LAST_RELEASED_VERSION")
-		g.Expect(ok).To(BeTrue())
+		g.Expect(ok).To(BeTrue(), "Missing last released version: you need to set it into LAST_RELEASED_VERSION env var")
 		lastVersionDir := fmt.Sprintf("/tmp/camel-k-v-%s", lastVersion)
 		// We clone and install the previous installed operator
 		// from source with tag
@@ -88,19 +91,20 @@ func TestUpgrade(t *testing.T) {
 			// Run the Integration
 			name := RandomizedSuffixName("yaml")
 			g.Expect(Kamel(t, ctx, "run", "-n", nsIntegration, "--name", name, "files/yaml.yaml").Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name)).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady)).
+				Should(Equal(corev1.ConditionTrue))
 			// Check the Integration version
 			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name)).Should(Equal(lastVersion))
 
 			// Let's upgrade the operator with the newer installation
-			ExpectExecSucceed(t, g,
-				exec.Command(
-					"make",
-					"install-k8s-global",
-					fmt.Sprintf("NAMESPACE=%s", ns),
-				),
+			installNextCmd := exec.Command(
+				"make",
+				"install-k8s-global",
+				fmt.Sprintf("NAMESPACE=%s", ns),
 			)
+			installNextCmd.Dir = "../../.."
+			ExpectExecSucceed(t, g, installNextCmd)
 
 			// Check the operator image is the current built one
 			g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(defaults.Version))
@@ -111,7 +115,8 @@ func TestUpgrade(t *testing.T) {
 			g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 			// Check the Integration hasn't been upgraded
-			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).Should(Equal(lastVersion))
+			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).
+				Should(Equal(lastVersion))
 			// Make sure that any Pod rollout is completing successfully
 			// otherwise we are probably in front of a non breaking compatibility change
 			g.Consistently(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady),
@@ -141,8 +146,10 @@ func TestUpgrade(t *testing.T) {
 			g.Eventually(IntegrationPodImage(t, ctx, nsIntegration, name)).Should(Equal(kit.Status.Image))
 
 			// Check the Integration runs correctly
-			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, nsIntegration, name), TestTimeoutMedium).
+				Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, nsIntegration, name, v1.IntegrationConditionReady)).
+				Should(Equal(corev1.ConditionTrue))
 		})
 		// TODO: we should verify new CRDs installed are the same as the one defined in the source core here
 	})
