@@ -9,6 +9,7 @@
 - Drop support for Registry trait [\#5737](https://github.com/apache/camel-k/issues/5737)
 - Drop support for Swagger \(Openapi v2.0\) in favour of Openapi 3.0 [\#5735](https://github.com/apache/camel-k/issues/5735)
 - Upgrade to Golang 1.22 [\#5720](https://github.com/apache/camel-k/issues/5720)
+- Release 2.4.0 [\#5678](https://github.com/apache/camel-k/issues/5678)
 - Remove `STAGING_RUNTIME_REPO` variable from Makefile [\#5616](https://github.com/apache/camel-k/issues/5616)
 - Flaky TestOperatorIDFiltering [\#5521](https://github.com/apache/camel-k/issues/5521)
 - Expose Open API Spec for REST DSL [\#5394](https://github.com/apache/camel-k/issues/5394)
