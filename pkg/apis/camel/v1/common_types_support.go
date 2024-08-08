@@ -30,6 +30,8 @@ import (
 	"github.com/imdario/mergo"
 )
 
+var PlainConfigSecretRegexp = regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
+
 func (in *Artifact) String() string {
 	return in.ID
 }
@@ -224,8 +226,7 @@ func (bc *BuildConfiguration) IsEmpty() bool {
 // DecodeValueSource returns a ValueSource object from an input that respects the format configmap|secret:resource-name[/path].
 func DecodeValueSource(input string, defaultKey string, errorMessage string) (ValueSource, error) {
 	sub := make([]string, 0)
-	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
-	hits := rex.FindAllStringSubmatch(input, -1)
+	hits := PlainConfigSecretRegexp.FindAllStringSubmatch(input, -1)
 
 	for _, hit := range hits {
 		if len(hit) > 1 {

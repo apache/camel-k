@@ -18,7 +18,6 @@ limitations under the License.
 package aws
 
 import (
-	"regexp"
 	"strconv"
 
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -105,7 +104,6 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 }
 
 func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
-	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAwsSecretsManager)
 	}
@@ -114,7 +112,7 @@ func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 		return nil
 	}
 
-	hits := rex.FindAllStringSubmatch(t.AccessKey, -1)
+	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.AccessKey, -1)
 	if len(hits) >= 1 {
 		var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key", "The access Key provided is not valid")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
@@ -125,7 +123,7 @@ func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 	} else {
 		environment.ApplicationProperties["camel.vault.aws.accessKey"] = t.AccessKey
 	}
-	hits = rex.FindAllStringSubmatch(t.SecretKey, -1)
+	hits = v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.SecretKey, -1)
 	if len(hits) >= 1 {
 		var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key", "The secret Key provided is not valid")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {

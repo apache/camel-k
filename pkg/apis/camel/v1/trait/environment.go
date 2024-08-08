@@ -28,7 +28,8 @@ type EnvironmentTrait struct {
 	// Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables (default `true`)
 	HTTPProxy *bool `property:"http-proxy" json:"httpProxy,omitempty"`
 	// A list of environment variables to be added to the integration container.
-	// The syntax is KEY=VALUE, e.g., `MY_VAR="my value"`.
-	// These take precedence over the previously defined environment variables.
+	// The syntax is either VAR=VALUE or VAR=[configmap|secret]:name/key, where name represents the resource name,
+	// and key represents the resource key to be mapped as and environment variable.
+	// These take precedence over any previously defined environment variables.
 	Vars []string `property:"vars" json:"vars,omitempty"`
 }
