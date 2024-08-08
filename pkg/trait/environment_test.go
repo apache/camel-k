@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -184,6 +185,45 @@ func TestCustomEnvVars(t *testing.T) {
 			}
 			if e.Name == "key2" {
 				userK2 = e.Value == "val2"
+			}
+		}
+	})
+
+	assert.True(t, userK1)
+	assert.True(t, userK2)
+}
+
+func TestValueSourceEnvVars(t *testing.T) {
+	c, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	env := mockEnvironment(c)
+	env.Integration.Spec.Traits = v1.Traits{
+		Environment: &traitv1.EnvironmentTrait{
+			Vars: []string{"MY_VAR_1=secret:my-sec/my-sec-value", "MY_VAR_2=configmap:my-cm/my-cm-value"},
+		},
+	}
+	env.Platform.ResyncStatusFullConfig()
+
+	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+
+	userK1 := false
+	userK2 := false
+
+	env.Resources.VisitDeployment(func(deployment *appsv1.Deployment) {
+		fmt.Println(deployment.Spec.Template.Spec.Containers[0].Env)
+		for _, e := range deployment.Spec.Template.Spec.Containers[0].Env {
+			if e.Name == "MY_VAR_1" {
+				userK1 = e.Value == "" &&
+					e.ValueFrom.SecretKeyRef.Name == "my-sec" &&
+					e.ValueFrom.SecretKeyRef.Key == "my-sec-value"
+			}
+			if e.Name == "MY_VAR_2" {
+				userK2 = e.Value == "" &&
+					e.ValueFrom.ConfigMapKeyRef.Name == "my-cm" &&
+					e.ValueFrom.ConfigMapKeyRef.Key == "my-cm-value"
 			}
 		}
 	})

@@ -22,6 +22,7 @@ import (
 
 	"k8s.io/utils/ptr"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -102,7 +103,16 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	if t.Vars != nil {
 		for _, env := range t.Vars {
 			k, v := property.SplitPropertyFileEntry(env)
-			envvar.SetVal(&e.EnvVars, k, v)
+			confs := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(v, -1)
+			if len(confs) > 0 {
+				var res, err = v1.DecodeValueSource(v, "", "Invalid configuration "+v)
+				if err != nil {
+					return err
+				}
+				envvar.SetValFromValueSource(&e.EnvVars, k, res)
+			} else {
+				envvar.SetVal(&e.EnvVars, k, v)
+			}
 		}
 	}
 
