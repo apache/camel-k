@@ -2,7 +2,19 @@
 
 ## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.4.0...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/2.4.1-nightly...HEAD)
+
+**Closed issues:**
+
+- How to config spec.template.spec.hostAliases with camel-k [\#5745](https://github.com/apache/camel-k/issues/5745)
+
+**Merged pull requests:**
+
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.55 to 0.6.56 [\#5753](https://github.com/apache/camel-k/pull/5753) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [2.4.1-nightly](https://github.com/apache/camel-k/tree/2.4.1-nightly) (2024-08-07)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.4.0...2.4.1-nightly)
 
 **Closed issues:**
 
@@ -389,7 +401,7 @@
 
 ## [camel-k-crds-2.3.1](https://github.com/apache/camel-k/tree/camel-k-crds-2.3.1) (2024-04-29)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/2.3.1-nightly...camel-k-crds-2.3.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/2.4.0-nightly...camel-k-crds-2.3.1)
 
 **Closed issues:**
 
@@ -435,13 +447,13 @@
 - Garbage-collect unused kits [\#254](https://github.com/apache/camel-k/issues/254)
 - Enable services to be associated with a version [\#182](https://github.com/apache/camel-k/issues/182)
 
-## [2.3.1-nightly](https://github.com/apache/camel-k/tree/2.3.1-nightly) (2024-04-08)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/2.4.0-nightly...2.3.1-nightly)
-
 ## [2.4.0-nightly](https://github.com/apache/camel-k/tree/2.4.0-nightly) (2024-04-08)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.3.0...2.4.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/2.3.1-nightly...2.4.0-nightly)
+
+## [2.3.1-nightly](https://github.com/apache/camel-k/tree/2.3.1-nightly) (2024-04-08)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.3.0...2.3.1-nightly)
 
 **Closed issues:**
 
@@ -1211,7 +1223,7 @@
 
 ## [2.0.1-nightly](https://github.com/apache/camel-k/tree/2.0.1-nightly) (2023-07-24)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v2.0.0...2.0.1-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v2.0.0...2.0.1-nightly)
 
 **Closed issues:**
 
@@ -1285,13 +1297,13 @@
 - fix\(build\): complete repo name for default baseImage [\#4480](https://github.com/apache/camel-k/pull/4480) ([gansheer](https://github.com/gansheer))
 - fix\(e2e\): remove workaround pre 1.12.1 [\#4479](https://github.com/apache/camel-k/pull/4479) ([squakez](https://github.com/squakez))
 
-## [pkg/kamelet/repository/v2.0.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v2.0.0) (2023-07-17)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v2.0.0...pkg/kamelet/repository/v2.0.0)
-
 ## [pkg/client/camel/v2.0.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v2.0.0) (2023-07-17)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.0.0...pkg/client/camel/v2.0.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v2.0.0...pkg/client/camel/v2.0.0)
+
+## [pkg/kamelet/repository/v2.0.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v2.0.0) (2023-07-17)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.0.0...pkg/kamelet/repository/v2.0.0)
 
 ## [v2.0.0](https://github.com/apache/camel-k/tree/v2.0.0) (2023-07-17)
 
@@ -1521,7 +1533,11 @@
 
 ## [v1.12.1](https://github.com/apache/camel-k/tree/v1.12.1) (2023-06-07)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.12.1...v1.12.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.1...v1.12.1)
+
+## [pkg/client/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.1) (2023-06-07)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/apis/camel/v1.12.1...pkg/client/camel/v1.12.1)
 
 ## [pkg/apis/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.12.1) (2023-06-07)
 
@@ -1529,11 +1545,7 @@
 
 ## [pkg/kamelet/repository/v1.12.1](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.12.1) (2023-06-07)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.1...pkg/kamelet/repository/v1.12.1)
-
-## [pkg/client/camel/v1.12.1](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.1) (2023-06-07)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.1...pkg/client/camel/v1.12.1)
+[Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.1...pkg/kamelet/repository/v1.12.1)
 
 **Closed issues:**
 
@@ -1717,11 +1729,7 @@
 
 ## [v1.12.0](https://github.com/apache/camel-k/tree/v1.12.0) (2023-02-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.0...v1.12.0)
-
-## [pkg/client/camel/v1.12.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.0) (2023-02-21)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.12.0...pkg/client/camel/v1.12.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/kamelet/repository/v1.12.0...v1.12.0)
 
 ## [pkg/kamelet/repository/v1.12.0](https://github.com/apache/camel-k/tree/pkg/kamelet/repository/v1.12.0) (2023-02-21)
 
@@ -1729,7 +1737,11 @@
 
 ## [pkg/apis/camel/v1.12.0](https://github.com/apache/camel-k/tree/pkg/apis/camel/v1.12.0) (2023-02-21)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.0...pkg/apis/camel/v1.12.0)
+[Full Changelog](https://github.com/apache/camel-k/compare/pkg/client/camel/v1.12.0...pkg/apis/camel/v1.12.0)
+
+## [pkg/client/camel/v1.12.0](https://github.com/apache/camel-k/tree/pkg/client/camel/v1.12.0) (2023-02-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-1.12.0...pkg/client/camel/v1.12.0)
 
 ## [camel-k-crds-1.12.0](https://github.com/apache/camel-k/tree/camel-k-crds-1.12.0) (2023-02-21)
 
