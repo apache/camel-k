@@ -108,7 +108,7 @@ func InstallOperatorWithConf(t *testing.T, ctx context.Context, g *WithT, ns, op
 	g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 }
 
-// InstallOperator will delete operator resources from namespace (keeps CRDs).
+// UninstallOperator will delete operator resources from namespace (keeps CRDs).
 func UninstallOperator(t *testing.T, ctx context.Context, g *WithT, ns, makedir string) {
 	lock.Lock()
 	defer lock.Unlock()
@@ -132,21 +132,32 @@ func UninstallCRDs(t *testing.T, ctx context.Context, g *WithT, makedir string) 
 }
 
 func ExpectExecSucceed(t *testing.T, g *WithT, command *exec.Cmd) {
+	ExpectExecSucceedWithTimeout(t, g, command, "")
+}
+
+func ExpectExecSucceedWithTimeout(t *testing.T, g *WithT, command *exec.Cmd, timeout string) {
 	t.Helper()
 
 	var cmdOut strings.Builder
 	var cmdErr strings.Builder
 
 	defer func() {
+		t.Logf(`Executing "%s" ...
+`, command)
+		t.Logf("[OUT] %s\n", cmdOut.String())
 		if t.Failed() {
-			t.Logf("Output from exec command:\n%s\n", cmdOut.String())
-			t.Logf("Error from exec command:\n%s\n", cmdErr.String())
+			t.Logf("[ERR] %s\n", cmdErr.String())
 		}
 	}()
 
 	RegisterTestingT(t)
 	session, err := gexec.Start(command, &cmdOut, &cmdErr)
-	session.Wait()
+	if timeout != "" {
+		session.Wait(timeout)
+	} else {
+		session.Wait()
+	}
+
 	g.Eventually(session).Should(gexec.Exit(0))
 	require.NoError(t, err)
 	assert.NotContains(t, strings.ToUpper(cmdErr.String()), "ERROR")

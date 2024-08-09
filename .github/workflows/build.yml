@@ -70,6 +70,6 @@ jobs:
         persist-credentials: false
         submodules: recursive
     - name: Execute Build (make)
-      uses: ./.github/actions/e2e-build
+      uses: ./.github/actions/build
       with:
         artifact-name: pr

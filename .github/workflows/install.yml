@@ -66,6 +66,9 @@ jobs:
         persist-credentials: false
         submodules: recursive
 
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
     - name: Install Helm
       shell: bash
       run: |
@@ -75,8 +78,32 @@ jobs:
         sudo apt-get update
         sudo apt-get install helm
 
-    - name: Install and upgrade
-      uses: ./.github/actions/e2e-install
+    - name: Build Helm chart
+      shell: bash
+      run: |
+        make release-helm
+
+    - name: Install OLM
+      shell: bash
+      run: |
+          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/crds.yaml
+          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/olm.yaml
+          kubectl wait --for=jsonpath='{.status.phase}'=Succeeded csv packageserver -n olm --timeout=2m
+
+    - name: Login to staging container registry
+      uses: docker/login-action@v3
       with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        username: ${{ secrets.TEST_DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.TEST_DOCKER_HUB_PASSWORD }}
+
+    - name: Build and push OLM bundle
+      shell: bash
+      run: |
+        echo "BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle" >> $GITHUB_ENV
+        echo "Setting bundle image name as as $BUNDLE_IMAGE_NAME which is required by OLM tests"
+        BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle make bundle-push
+
+    - name: Run tests
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-install

@@ -30,7 +30,7 @@ LAST_RELEASED_VERSION ?= 2.4.0
 DEFAULT_RUNTIME_VERSION := 3.8.1
 CONTROLLER_GEN_VERSION := v0.15.0
 CODEGEN_VERSION := v0.29.7
-OPERATOR_SDK_VERSION := v1.28.0
+OPERATOR_SDK_VERSION := v1.30.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
 LINTER_VERSION ?= v1.59.1
@@ -689,6 +689,13 @@ bundle-build: bundle
 
 bundle-push: bundle-build
 	docker push $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION)
+
+bundle-test: operator-sdk
+ifndef NAMESPACE
+	@echo "WARN: no namespace specified, using default namespace $(DEFAULT_NS)"
+	$(eval NAMESPACE=$(DEFAULT_NS))
+endif
+	$(OPERATOR_SDK) run bundle $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) -n $(NAMESPACE)
 
 #
 # Builds a test catalog index for installing the operator via an OLM
