@@ -18,6 +18,8 @@ limitations under the License.
 package v1
 
 import (
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -71,6 +73,14 @@ func (build *Build) BuilderDependencies() []string {
 	}
 
 	return []string{}
+}
+
+func (build *Build) RuntimeVersion() *string {
+	if builder, ok := FindBuilderTask(build.Spec.Tasks); ok {
+		return &builder.Runtime.Version
+	}
+
+	return nil
 }
 
 // FindBuilderTask returns the 1st builder task from the task list.
@@ -272,9 +282,15 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 	if len(required) == 0 {
 		return false, nil
 	}
+	runtimeVersion := build.RuntimeVersion()
 
 	for _, b := range bl.Items {
 		if b.Name == build.Name || b.Status.IsFinished() {
+			continue
+		}
+		bRuntimeVersion := b.RuntimeVersion()
+
+		if *runtimeVersion != *bRuntimeVersion {
 			continue
 		}
 
@@ -286,16 +302,17 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 
 		allMatching := true
 		missing := 0
+		commonDependencies := 0
 		for _, item := range required {
 			if _, ok := dependencyMap[item]; !ok {
 				allMatching = false
 				missing++
+			} else {
+				commonDependencies++
 			}
 		}
 
-		// Heuristic approach: if there are too many unrelated libraries then this image is
-		// not suitable to be used as base image
-		if !allMatching && missing > len(required)/2 {
+		if commonDependencies < len(required)/2 {
 			continue
 		}
 
@@ -311,10 +328,27 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 				// additionally check for the creation timestamp
 				if b.CreationTimestamp.Before(&build.CreationTimestamp) {
 					return true, &b
+				} else if b.CreationTimestamp.Equal(&build.CreationTimestamp) {
+					if strings.Compare(b.Name, build.Name) < 0 {
+						return true, &b
+					}
 				}
-			} else if missing > 0 {
-				// found another suitable scheduled build with fewer dependencies that should build first in order to reuse the produced image
-				return true, &b
+
+			} else if !allMatching && commonDependencies > 0 {
+				// there are common dependencies. let's compare the total number of dependencies
+				// in each build. whichever build has less dependencies should run first
+				if len(dependencies) < len(required) {
+					return true, &b
+				} else if len(dependencies) == len(required) {
+					// same number of total dependencies.
+					if b.CreationTimestamp.Before(&build.CreationTimestamp) {
+						return true, &b
+					} else if b.CreationTimestamp.Equal(&build.CreationTimestamp) &&
+						strings.Compare(b.Name, build.Name) < 0 {
+						return true, &b
+					}
+				}
+				continue
 			}
 		}
 	}
