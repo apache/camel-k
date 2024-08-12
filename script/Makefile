@@ -301,14 +301,21 @@ test-advanced:
 	exit $${FAILED}
 
 #
-# Installation procedure test using CLi and Kustomize methodologies
+# Installation and upgrade procedure test using
 #
 test-install:
 	FAILED=0; \
 	go test -timeout 20m -v ./e2e/install/kustomize -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 20m -v ./e2e/install/helm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
-	go test -timeout 20m -v ./e2e/install/olm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	go test -timeout 60m -v ./e2e/install/upgrade -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
+
+#
+# Installation procedure test via OLM
+#
+test-install-olm:
+	FAILED=0; \
+	go test -timeout 20m -v ./e2e/install/olm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #

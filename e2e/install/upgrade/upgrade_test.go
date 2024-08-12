@@ -78,13 +78,15 @@ func TestUpgrade(t *testing.T) {
 		installPrevCmd.Dir = lastVersionDir
 		ExpectExecSucceed(t, g, installPrevCmd)
 
+		// Refresh the test client to account for the newly installed CRDs
+		RefreshClient(t)
 		// Check the operator image is the previous one
 		g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(lastVersion))
 		// Check the operator pod is running
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		// Check the IntegrationPlatform has been reconciled
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(lastVersion))
+		g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformVersion(t, ctx, ns)).Should(Equal(lastVersion))
 
 		// We need a different namespace from the global operator
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
@@ -105,6 +107,8 @@ func TestUpgrade(t *testing.T) {
 			)
 			installNextCmd.Dir = "../../.."
 			ExpectExecSucceed(t, g, installNextCmd)
+			// Refresh the test client to account for the newly installed CRDs
+			RefreshClient(t)
 
 			// Check the operator image is the current built one
 			g.Eventually(OperatorImage(t, ctx, ns)).Should(ContainSubstring(defaults.Version))
