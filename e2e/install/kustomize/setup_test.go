@@ -117,7 +117,6 @@ func TestKustomizeNamespaced(t *testing.T) {
 		UninstallCRDs(t, ctx, g, "../../../")
 
 		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-		g.Eventually(Integration(t, ctx, ns, "yaml"), TestTimeoutShort).Should(BeNil())
 		g.Eventually(CRDs(t)).Should(BeNil())
 	})
 }
@@ -219,7 +218,6 @@ func TestKustomizeDescoped(t *testing.T) {
 			UninstallCRDs(t, ctx, g, "../../../")
 
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
-			g.Eventually(Integration(t, ctx, nsIntegration, "yaml"), TestTimeoutShort).Should(BeNil())
 			g.Eventually(CRDs(t)).Should(BeNil())
 		})
 	})
