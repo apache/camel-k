@@ -326,14 +326,9 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 			if allMatching && len(required) == len(dependencies) {
 				// seems like both builds require exactly the same list of dependencies
 				// additionally check for the creation timestamp
-				if b.CreationTimestamp.Before(&build.CreationTimestamp) {
+				if compareBuilds(&b, build) < 0 {
 					return true, &b
-				} else if b.CreationTimestamp.Equal(&build.CreationTimestamp) {
-					if strings.Compare(b.Name, build.Name) < 0 {
-						return true, &b
-					}
 				}
-
 			} else if !allMatching && commonDependencies > 0 {
 				// there are common dependencies. let's compare the total number of dependencies
 				// in each build. whichever build has less dependencies should run first
@@ -341,10 +336,7 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 					return true, &b
 				} else if len(dependencies) == len(required) {
 					// same number of total dependencies.
-					if b.CreationTimestamp.Before(&build.CreationTimestamp) {
-						return true, &b
-					} else if b.CreationTimestamp.Equal(&build.CreationTimestamp) &&
-						strings.Compare(b.Name, build.Name) < 0 {
+					if compareBuilds(&b, build) < 0 {
 						return true, &b
 					}
 				}
@@ -354,4 +346,14 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 	}
 
 	return false, nil
+}
+
+func compareBuilds(b1 *Build, b2 *Build) int {
+	if b1.CreationTimestamp.Before(&b2.CreationTimestamp) {
+		return -1
+	} else if b2.CreationTimestamp.Before(&b1.CreationTimestamp) {
+		return 1
+	} else {
+		return strings.Compare(b1.Name, b2.Name)
+	}
 }
