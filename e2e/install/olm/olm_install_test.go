@@ -63,6 +63,8 @@ func TestOLMInstallation(t *testing.T) {
 			),
 			"180s",
 		)
+		// Refresh the test client to account for the newly installed CRDs
+		RefreshClient(t)
 		// Find the only one Camel K CSV
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
 			return true
@@ -73,8 +75,6 @@ func TestOLMInstallation(t *testing.T) {
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		g.Eventually(OperatorImage(t, ctx, ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
 
-		// This is required in order to wait the availability of IntegrationPlatform CRDs
-		g.Eventually(CRDs(t)).Should(HaveLen(ExpectedCRDs))
 		// Check the IntegrationPlatform has been reconciled after setting the expected container registry
 		g.Expect(UpdatePlatform(t, ctx, ns, func(ip *v1.IntegrationPlatform) {
 			ip.Spec.Build.Registry.Address = containerRegistry
@@ -105,5 +105,9 @@ func TestOLMInstallation(t *testing.T) {
 		g.Consistently(
 			IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), 15*time.Second, 5*time.Second).
 			Should(Equal(corev1.ConditionTrue))
+
+		// Test CRD uninstall (will remove Integrations as well)
+		UninstallCRDs(t, ctx, g, "../../../")
+		g.Eventually(CRDs(t)).Should(BeNil())
 	})
 }

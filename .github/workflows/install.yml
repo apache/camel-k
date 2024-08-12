@@ -83,27 +83,6 @@ jobs:
       run: |
         make release-helm
 
-    - name: Install OLM
-      shell: bash
-      run: |
-          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/crds.yaml
-          kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/olm.yaml
-          kubectl wait --for=jsonpath='{.status.phase}'=Succeeded csv packageserver -n olm --timeout=2m
-
-    - name: Login to staging container registry
-      uses: docker/login-action@v3
-      with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build and push OLM bundle
-      shell: bash
-      run: |
-        echo "BUNDLE_IMAGE_NAME=ghcr.io/${{ github.actor }}/camel-k-bundle" >> $GITHUB_ENV
-        echo "Setting bundle image name as as $BUNDLE_IMAGE_NAME which is required by OLM tests"
-        BUNDLE_IMAGE_NAME=ghcr.io/${{ github.actor }}/camel-k-bundle make bundle-push
-
     - name: Run tests
       shell: bash
       run: |

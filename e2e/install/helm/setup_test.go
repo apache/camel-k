@@ -63,6 +63,8 @@ func TestHelmInstallation(t *testing.T) {
 				"--force",
 			),
 		)
+		// Refresh the test client to account for the newly installed CRDs
+		RefreshClient(t)
 
 		g.Eventually(OperatorPod(t, ctx, ns)).ShouldNot(BeNil())
 		// Check if restricted security context has been applied
@@ -74,10 +76,9 @@ func TestHelmInstallation(t *testing.T) {
 
 		// Test a simple route
 		t.Run("simple route", func(t *testing.T) {
-			name := RandomizedSuffixName("yaml")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 		})
 
 		ExpectExecSucceed(t, g,
@@ -91,5 +92,10 @@ func TestHelmInstallation(t *testing.T) {
 		)
 
 		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
+
+		// Test CRD uninstall (will remove Integrations as well)
+		UninstallCRDs(t, ctx, g, "../../../")
+
+		g.Eventually(CRDs(t)).Should(BeNil())
 	})
 }
