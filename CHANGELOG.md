@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Integrations built with build strategy Spectrum do not start [\#5759](https://github.com/apache/camel-k/issues/5759)
 - How to config spec.template.spec.hostAliases with camel-k [\#5745](https://github.com/apache/camel-k/issues/5745)
 - Add docker image creation date [\#5385](https://github.com/apache/camel-k/issues/5385)
 
