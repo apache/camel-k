@@ -54,29 +54,6 @@ func TestPipeConfig(t *testing.T) {
 				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myPipeLogger"))
 			})
 
-			t.Run("run test implicit default config using labeled secret", func(t *testing.T) {
-				name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
-				secretName := "my-pipe-default-implicit-secret"
-
-				var secData = make(map[string]string)
-				secData["camel.kamelet.my-pipe-timer-source.message"] = "My pipe secret message"
-				var labels = make(map[string]string)
-				labels["camel.apache.org/kamelet"] = "my-pipe-timer-source"
-				g.Expect(CreatePlainTextSecretWithLabels(t, ctx, ns, secretName, secData, labels)).To(Succeed())
-
-				g.Expect(KamelBind(t, ctx, ns,
-					"my-pipe-timer-source",
-					"my-pipe-log-sink",
-					"-p", "sink.loggerName=myDefaultLogger",
-					"--name", name,
-				).Execute()).To(Succeed())
-				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("My pipe secret message"))
-				g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("myDefaultLogger"))
-
-				g.Expect(DeleteSecret(t, ctx, ns, secretName)).To(Succeed())
-			})
-
 			t.Run("run test implicit default config using mounted secret", func(t *testing.T) {
 				name := RandomizedSuffixName("my-pipe-with-default-implicit-secret")
 				secretName := "my-pipe-default-implicit-secret"

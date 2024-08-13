@@ -569,48 +569,6 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			}
 		})
 	}
-
-	// Deprecated - should use mount trait
-	// User provided configmaps
-	for _, configmaps := range e.collectConfigurations("configmap") {
-		refName := kubernetes.SanitizeLabel(configmaps["value"])
-		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], configmapStorageType, configmaps["resourceType"])
-		vol := getVolume(refName, configmapStorageType, configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-
-	// Deprecated - should use mount trait
-	// User provided secrets
-	for _, secret := range e.collectConfigurations("secret") {
-		refName := kubernetes.SanitizeLabel(secret["value"])
-		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], secretStorageType, secret["resourceType"])
-		vol := getVolume(refName, secretStorageType, secret["value"], secret["resourceKey"], secret["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-	// Deprecated - should use mount trait
-	// User provided volumes
-	for _, volumeConfig := range e.collectConfigurationValues("volume") {
-		configParts := strings.Split(volumeConfig, ":")
-
-		if len(configParts) != 2 {
-			continue
-		}
-
-		pvcName := configParts[0]
-		mountPath := configParts[1]
-		volumeName := pvcName + "-data"
-
-		vol := getVolume(volumeName, pvcStorageType, pvcName, "", "")
-		mnt := getMount(volumeName, mountPath, "", false)
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
 }
 
 func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {
@@ -692,20 +650,12 @@ func getMountPoint(resourceName string, mountPoint string, storagetype, resource
 	return filepath.Join(defaultMountPoint, resourceName)
 }
 
-func (e *Environment) collectConfigurationValues(configurationType string) []string {
-	return collectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
-}
-
 type variable struct {
 	Name, Value string
 }
 
 func (e *Environment) collectConfigurationPairs(configurationType string) []variable {
 	return collectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
-}
-
-func (e *Environment) collectConfigurations(configurationType string) []map[string]string {
-	return collectConfigurations(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
 func (e *Environment) GetIntegrationContainerName() string {

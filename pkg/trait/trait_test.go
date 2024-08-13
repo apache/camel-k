@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -183,79 +182,6 @@ func TestTraitHierarchyDecode(t *testing.T) {
 
 	assert.NotNil(t, kns.Target)
 	assert.Equal(t, 15, *kns.Target)
-}
-
-func TestConfigureVolumesAndMountsTextResourcesAndProperties(t *testing.T) {
-	env := Environment{
-		Resources: kubernetes.NewCollection(),
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      TestDeploymentName,
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationSpec{
-				Configuration: []v1.ConfigurationSpec{
-					{
-						Type:  "property",
-						Value: "a=b",
-					},
-					{
-						Type:  "configmap",
-						Value: "test-configmap",
-					},
-					{
-						Type:  "secret",
-						Value: "test-secret",
-					},
-					{
-						Type:  "volume",
-						Value: "testvolume:/foo/bar",
-					},
-					{
-						Type:  "volume",
-						Value: "an-invalid-volume-spec",
-					},
-				},
-			},
-		},
-	}
-
-	vols := make([]corev1.Volume, 0)
-	mnts := make([]corev1.VolumeMount, 0)
-
-	env.configureVolumesAndMounts(&vols, &mnts)
-
-	assert.Len(t, vols, 3)
-	assert.Len(t, mnts, 3)
-
-	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "test-configmap" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.NotNil(t, v.VolumeSource.ConfigMap.LocalObjectReference)
-	assert.Equal(t, "test-configmap", v.VolumeSource.ConfigMap.LocalObjectReference.Name)
-
-	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-configmap" })
-	assert.NotNil(t, m)
-	assert.Equal(t, filepath.Join(camel.ConfigConfigmapsMountPath, "test-configmap"), m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "test-secret" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.Secret)
-	assert.Equal(t, "test-secret", v.Secret.SecretName)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-secret" })
-	assert.NotNil(t, m)
-	assert.Equal(t, filepath.Join(camel.ConfigSecretsMountPath, "test-secret"), m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "testvolume-data" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource)
-	assert.NotNil(t, v.VolumeSource.PersistentVolumeClaim)
-	assert.Equal(t, "testvolume", v.VolumeSource.PersistentVolumeClaim.ClaimName)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "testvolume-data" })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/foo/bar", m.MountPath)
 }
 
 func TestConfigureVolumesAndMountsSources(t *testing.T) {
