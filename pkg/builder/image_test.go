@@ -93,3 +93,365 @@ func TestListPublishedImages(t *testing.T) {
 	assert.Len(t, i, 1)
 	assert.Equal(t, "image-2", i[0].Image)
 }
+
+func TestFindBestImageExactMatch(t *testing.T) {
+	requiredArtifacts := []v1.Artifact{
+		{
+			Checksum: "1",
+			ID:       "artifact-1",
+		},
+		{
+			Checksum: "2",
+			ID:       "artifact-2",
+		},
+		{
+			Checksum: "3",
+			ID:       "artifact-3",
+		},
+	}
+	iks := []v1.IntegrationKitStatus{
+		{
+			// missing dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "3",
+					ID:       "artifact-3",
+				},
+			},
+		},
+		{
+			// exact match
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "3",
+					ID:       "artifact-3",
+				},
+			},
+		},
+		{
+			// extra dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "3",
+					ID:       "artifact-3",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+			},
+		},
+		{
+			// missing and extra dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+			},
+		}}
+
+	bestImage, commonLibs := findBestImage(iks, requiredArtifacts)
+	assert.NotNil(t, bestImage)
+	assert.Equal(t, iks[1], bestImage) // exact match
+
+	assert.NotNil(t, commonLibs)
+	assert.Equal(t, 3, len(commonLibs))
+	assert.True(t, commonLibs["artifact-1"])
+	assert.True(t, commonLibs["artifact-2"])
+	assert.True(t, commonLibs["artifact-3"])
+
+}
+
+func TestFindBestImageNoExactMatch(t *testing.T) {
+	requiredArtifacts := []v1.Artifact{
+		{
+			Checksum: "1",
+			ID:       "artifact-1",
+		},
+		{
+			Checksum: "2",
+			ID:       "artifact-2",
+		},
+		{
+			Checksum: "3",
+			ID:       "artifact-3",
+		},
+	}
+	iks := []v1.IntegrationKitStatus{
+		{
+			// missing 2 dependencies
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+			},
+		},
+		{
+			// missing dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "3",
+					ID:       "artifact-3",
+				},
+			},
+		},
+		{
+			// extra dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "3",
+					ID:       "artifact-3",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+			},
+		},
+		{
+			// missing and extra dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+			},
+		}}
+
+	bestImage, commonLibs := findBestImage(iks, requiredArtifacts)
+	assert.NotNil(t, bestImage)
+	assert.Equal(t, iks[1], bestImage) // missing only 1 dependency and no surplus
+
+	assert.NotNil(t, commonLibs)
+	assert.Equal(t, 2, len(commonLibs))
+	assert.True(t, commonLibs["artifact-1"])
+	assert.True(t, commonLibs["artifact-3"])
+
+}
+
+func TestFindBestImageNoExactMatchBadChecksum(t *testing.T) {
+	requiredArtifacts := []v1.Artifact{
+		{
+			Checksum: "1",
+			ID:       "artifact-1",
+		},
+		{
+			Checksum: "2",
+			ID:       "artifact-2",
+		},
+		{
+			Checksum: "3",
+			ID:       "artifact-3",
+		},
+	}
+	iks := []v1.IntegrationKitStatus{
+		{
+			// missing 2 dependencies
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+			},
+		},
+		{
+			// missing dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "bad-checksum",
+					ID:       "artifact-3",
+				},
+			},
+		},
+		{
+			// extra dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "3",
+					ID:       "artifact-3",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+			},
+		},
+		{
+			// missing and extra dependency
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+			},
+		}}
+
+	bestImage, commonLibs := findBestImage(iks, requiredArtifacts)
+	assert.NotNil(t, bestImage)
+	assert.Equal(t, iks[0], bestImage) // 2 missing dependencies and no surplus
+
+	assert.NotNil(t, commonLibs)
+	assert.Equal(t, 1, len(commonLibs))
+	assert.True(t, commonLibs["artifact-1"])
+
+}
+
+func TestFindBestImageAllImagesWithSurplus(t *testing.T) {
+	requiredArtifacts := []v1.Artifact{
+		{
+			Checksum: "1",
+			ID:       "artifact-1",
+		},
+		{
+			Checksum: "2",
+			ID:       "artifact-2",
+		},
+		{
+			Checksum: "3",
+			ID:       "artifact-3",
+		},
+	}
+	iks := []v1.IntegrationKitStatus{
+		{
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "5",
+					ID:       "artifact-5",
+				},
+			},
+		},
+		{
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+			},
+		},
+		{
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "3",
+					ID:       "artifact-3",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+				{
+					Checksum: "5",
+					ID:       "artifact-5",
+				},
+			},
+		},
+		{
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "1",
+					ID:       "artifact-1",
+				},
+				{
+					Checksum: "2",
+					ID:       "artifact-2",
+				},
+				{
+					Checksum: "4",
+					ID:       "artifact-4",
+				},
+				{
+					Checksum: "6",
+					ID:       "artifact-6",
+				},
+			},
+		}}
+
+	bestImage, commonLibs := findBestImage(iks, requiredArtifacts)
+	assert.Equal(t, "", bestImage.Image)
+	assert.Empty(t, commonLibs)
+}

@@ -555,14 +555,14 @@ func TestMonitorDependencyMatchingBuilds(t *testing.T) {
 				"Waiting for build (my-build-pending) to finish in order to use incremental image builds - the build (my-build) gets enqueued"),
 		},
 		{
-			name: "queueBuildWhenSuitableBuildWithSupersetDependenciesIsAlreadyRunning",
+			name: "queueBuildWhenSuitableBuildWithSubsetDependenciesIsAlreadyRunning",
 			running: []*v1.Build{
 				newBuild("some-ns", "my-build-1", deps...),
 				newBuild("other-ns", "my-build-2", deps...),
 			},
 			builds: []*v1.Build{
 				newBuildInPhase("ns", "my-build-x", v1.BuildPhaseSucceeded, deps...),
-				newBuildInPhase("ns", "my-build-running", v1.BuildPhaseRunning, append(deps, "camel:test")...),
+				newBuildInPhase("ns", "my-build-running", v1.BuildPhaseRunning, deps[0:len(deps)-1]...),
 			},
 			build:   newBuild("ns", "my-build", deps...),
 			allowed: false,
