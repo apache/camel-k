@@ -178,8 +178,75 @@ func TestMatchingBuildsSchedulingSharedDependencies(t *testing.T) {
 				{
 					Builder: &BuilderTask{
 						Dependencies: []string{
+							"camel:core",
+							"camel:rest",
+						},
+						Runtime: RuntimeSpec{
+							Version: "3.8.1",
+						}},
+				},
+			},
+		},
+		Status: BuildStatus{
+			Phase: BuildPhaseScheduling,
+		},
+	}
+
+	buildList := BuildList{
+		Items: []Build{buildA, buildB},
+	}
+
+	// buildB contains a subset of buildA dependencies
+	// buildA should wait for it
+
+	matches, buildMatch := buildList.HasMatchingBuild(&buildA)
+	assert.True(t, matches)
+	assert.True(t, buildMatch.Name == buildB.Name)
+	matches, buildMatch = buildList.HasMatchingBuild(&buildB)
+	assert.False(t, matches)
+	assert.Nil(t, buildMatch)
+}
+
+func TestMatchingBuildsSchedulingSharedDependenciesWithSurplus(t *testing.T) {
+	timestamp, _ := time.Parse("2006-01-02T15:04:05-0700", "2024-08-09T10:00:00Z")
+	creationTimestamp := v1.Time{Time: timestamp}
+	buildA := Build{
+		ObjectMeta: v1.ObjectMeta{
+			Name: "buildA",
+		},
+		Spec: BuildSpec{
+			Tasks: []Task{
+				{
+					Builder: &BuilderTask{
+						Dependencies: []string{
+							"camel:core",
+							"camel:rest",
+							"mvn:org.apache.camel.k:camel-k-runtime",
+							"mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl",
+						},
+						Runtime: RuntimeSpec{
+							Version: "3.8.1",
+						},
+					},
+				},
+			},
+		},
+		Status: BuildStatus{
+			Phase: BuildPhaseScheduling,
+		},
+	}
+	buildB := Build{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "buildB",
+			CreationTimestamp: creationTimestamp,
+		},
+		Spec: BuildSpec{
+			Tasks: []Task{
+				{
+					Builder: &BuilderTask{
+						Dependencies: []string{
+							"camel:core",
 							"camel:quartz",
-							"mvn:org.apache.camel.k:camel-k-cron",
 							"mvn:org.apache.camel.k:camel-k-runtime",
 							"mvn:org.apache.camel.quarkus:camel-quarkus-yaml-dsl",
 						},
@@ -198,15 +265,14 @@ func TestMatchingBuildsSchedulingSharedDependencies(t *testing.T) {
 		Items: []Build{buildA, buildB},
 	}
 
-	// both builds share dependencies and have the same creationTimestamp
-	// buildA should be prioritized so there should be not matching build for it
+	// no build is a subset of the other
 
 	matches, buildMatch := buildList.HasMatchingBuild(&buildA)
 	assert.False(t, matches)
 	assert.Nil(t, buildMatch)
 	matches, buildMatch = buildList.HasMatchingBuild(&buildB)
-	assert.True(t, matches)
-	assert.True(t, buildMatch.Name == buildA.Name)
+	assert.False(t, matches)
+	assert.Nil(t, buildMatch)
 }
 
 func TestMatchingBuildsSchedulingSameDependenciesDIfferentRuntimes(t *testing.T) {
@@ -360,15 +426,6 @@ func TestMatchingBuildsSchedulingFewCommonDependencies(t *testing.T) {
 					Builder: &BuilderTask{
 						Dependencies: []string{
 							"camel:quartz",
-							"camel:componenta1",
-							"camel:componentb1",
-							"camel:componentc1",
-							"camel:componentd1",
-							"camel:componente1",
-							"camel:componentf1",
-							"camel:componentg1",
-							"camel:componenth1",
-							"camel:componenti1",
 						},
 						Runtime: RuntimeSpec{
 							Version: "3.8.1",
@@ -418,7 +475,7 @@ func TestMatchingBuildsSchedulingFewCommonDependencies(t *testing.T) {
 		Items: []Build{buildA, buildB},
 	}
 
-	// builds have only 1 out of 10 shared dependencies. they should not match
+	// builds have only 1 out of 10 required dependencies. they should not match
 
 	matches, buildMatch := buildList.HasMatchingBuild(&buildA)
 	assert.False(t, matches)
