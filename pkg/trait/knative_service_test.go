@@ -80,15 +80,20 @@ func TestKnativeService(t *testing.T) {
 						Language: v1.LanguageJavaScript,
 					},
 				},
-				Configuration: []v1.ConfigurationSpec{
-					{Type: "configmap", Value: "my-cm"},
-					{Type: "secret", Value: "my-secret"},
-					{Type: "property", Value: "my-property=my-property-value"},
-				},
 				Traits: v1.Traits{
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
 							Enabled: ptr.To(true),
+						},
+					},
+					Camel: &traitv1.CamelTrait{
+						Properties: []string{
+							"my-property=my-property-value",
+						},
+					},
+					Mount: &traitv1.MountTrait{
+						Configs: []string{
+							"configmap:my-cm", "secret:my-secret",
 						},
 					},
 				},

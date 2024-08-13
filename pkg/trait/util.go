@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
-	"sort"
 	"strings"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -73,56 +72,6 @@ func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	kit := v1.NewIntegrationKit(integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name)
 	err := c.Get(ctx, ctrl.ObjectKeyFromObject(kit), kit)
 	return kit, err
-}
-
-func collectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
-	result := sets.NewSet()
-
-	for _, c := range configurable {
-		if c == nil || reflect.ValueOf(c).IsNil() {
-			continue
-		}
-
-		entries := c.Configurations()
-		if entries == nil {
-			continue
-		}
-
-		for _, entry := range entries {
-			if entry.Type == configurationType {
-				result.Add(entry.Value)
-			}
-		}
-	}
-
-	s := result.List()
-	sort.Strings(s)
-	return s
-}
-
-func collectConfigurations(configurationType string, configurable ...v1.Configurable) []map[string]string {
-	var result []map[string]string
-
-	for _, c := range configurable {
-		if c == nil || reflect.ValueOf(c).IsNil() {
-			continue
-		}
-
-		entries := c.Configurations()
-		if entries == nil {
-			continue
-		}
-
-		for _, entry := range entries {
-			if entry.Type == configurationType {
-				item := make(map[string]string)
-				item["value"] = entry.Value
-				result = append(result, item)
-			}
-		}
-	}
-
-	return result
 }
 
 func collectConfigurationPairs(configurationType string, configurable ...v1.Configurable) []variable {
@@ -524,7 +473,7 @@ func NewSpecTraitsOptionsForIntegrationAndPlatform(c client.Client, i *v1.Integr
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
-	// IMPORTANT: when we remove this we'll need to remove the cli from the func,
+	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
 	return newTraitsOptions(c, options, i.ObjectMeta.Annotations)
@@ -537,7 +486,7 @@ func NewSpecTraitsOptionsForIntegration(c client.Client, i *v1.Integration) (Opt
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
-	// IMPORTANT: when we remove this we'll need to remove the cli from the func,
+	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
 	return newTraitsOptions(c, m1, i.ObjectMeta.Annotations)
@@ -550,7 +499,7 @@ func newTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit, tr
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
-	// IMPORTANT: when we remove this we'll need to remove the cli from the func,
+	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
 	return newTraitsOptions(c, m1, i.ObjectMeta.Annotations)
