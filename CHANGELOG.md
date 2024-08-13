@@ -8,11 +8,13 @@
 
 - Integrations built with build strategy Spectrum do not start [\#5759](https://github.com/apache/camel-k/issues/5759)
 - How to config spec.template.spec.hostAliases with camel-k [\#5745](https://github.com/apache/camel-k/issues/5745)
+- Move github actions to use Minikube [\#5723](https://github.com/apache/camel-k/issues/5723)
 - Add docker image creation date [\#5385](https://github.com/apache/camel-k/issues/5385)
 
 **Merged pull requests:**
 
 - chore\(deps\): bump fabric8-version from 6.13.1 to 6.13.2 in /java/crds [\#5761](https://github.com/apache/camel-k/pull/5761) ([dependabot[bot]](https://github.com/apps/dependabot))
+- feat\(ci\): minikube usage [\#5756](https://github.com/apache/camel-k/pull/5756) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.55 to 0.6.56 [\#5753](https://github.com/apache/camel-k/pull/5753) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [2.4.1-nightly](https://github.com/apache/camel-k/tree/2.4.1-nightly) (2024-08-07)
