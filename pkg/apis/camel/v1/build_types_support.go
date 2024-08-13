@@ -316,13 +316,12 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 			continue
 		}
 
-		// handle suitable build that has started already
-		if b.Status.Phase == BuildPhasePending || b.Status.Phase == BuildPhaseRunning {
+		switch b.Status.Phase {
+		case BuildPhasePending, BuildPhaseRunning:
+			// handle suitable build that has started already
 			return true, &b
-		}
-
-		// handle suitable scheduled build
-		if b.Status.Phase == BuildPhaseInitialization || b.Status.Phase == BuildPhaseScheduling {
+		case BuildPhaseInitialization, BuildPhaseScheduling:
+			// handle suitable scheduled build
 			if allMatching && len(required) == len(dependencies) {
 				// seems like both builds require exactly the same list of dependencies
 				// additionally check for the creation timestamp
@@ -332,13 +331,9 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 			} else if !allMatching && commonDependencies > 0 {
 				// there are common dependencies. let's compare the total number of dependencies
 				// in each build. whichever build has less dependencies should run first
-				if len(dependencies) < len(required) {
+				if len(dependencies) < len(required) ||
+					len(dependencies) == len(required) && compareBuilds(&b, build) < 0 {
 					return true, &b
-				} else if len(dependencies) == len(required) {
-					// same number of total dependencies.
-					if compareBuilds(&b, build) < 0 {
-						return true, &b
-					}
 				}
 				continue
 			}
@@ -351,9 +346,9 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 func compareBuilds(b1 *Build, b2 *Build) int {
 	if b1.CreationTimestamp.Before(&b2.CreationTimestamp) {
 		return -1
-	} else if b2.CreationTimestamp.Before(&b1.CreationTimestamp) {
-		return 1
-	} else {
-		return strings.Compare(b1.Name, b2.Name)
 	}
+	if b2.CreationTimestamp.Before(&b1.CreationTimestamp) {
+		return 1
+	}
+	return strings.Compare(b1.Name, b2.Name)
 }
