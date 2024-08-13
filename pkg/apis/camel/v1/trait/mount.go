@@ -40,9 +40,6 @@ type MountTrait struct {
 	// marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
 	// changes in metadata.
 	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
-	// Deprecated: include your properties in an explicit property file backed by a secret.
-	// Let the operator to scan for secret labeled with `camel.apache.org/kamelet` and `camel.apache.org/kamelet.configuration`.
-	// These secrets are mounted to the application and treated as plain properties file with their key/value list
-	// (ie .spec.data["camel.my-property"] = my-value) (default `true`).
+	// Deprecated: no longer available since version 2.5.
 	ScanKameletsImplicitLabelSecrets *bool `property:"scan-kamelets-implicit-label-secrets" json:"scanKameletsImplicitLabelSecrets,omitempty"`
 }
