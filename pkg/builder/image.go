@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -134,6 +135,7 @@ func incrementalImageContext(ctx *builderContext) error {
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
 
+			log.Infof("Selected %s as base image for %s", bestImage.Image, ctx.Build.Name)
 			ctx.BaseImage = bestImage.Image
 			ctx.SelectedArtifacts = make([]v1.Artifact, 0)
 
@@ -234,7 +236,6 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 	}
 
 	bestImageCommonLibs := make(map[string]bool)
-	bestImageSurplusLibs := 0
 
 	for _, image := range images {
 		common := make(map[string]bool)
@@ -253,16 +254,14 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 		numCommonLibs := len(common)
 		surplus := len(image.Artifacts) - numCommonLibs
 
-		if numCommonLibs != len(image.Artifacts) && surplus >= numCommonLibs/3 {
-			// Heuristic approach: if there are too many unrelated libraries then this image is
-			// not suitable to be used as base image
+		if surplus > 0 {
+			// the base image cannot have extra libs that we don't need
 			continue
 		}
 
-		if numCommonLibs > len(bestImageCommonLibs) || (numCommonLibs == len(bestImageCommonLibs) && surplus < bestImageSurplusLibs) {
+		if numCommonLibs >= len(bestImageCommonLibs) {
 			bestImage = image
 			bestImageCommonLibs = common
-			bestImageSurplusLibs = surplus
 		}
 	}
 
