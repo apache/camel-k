@@ -7,15 +7,26 @@
 **Closed issues:**
 
 - Integrations built with build strategy Spectrum do not start [\#5759](https://github.com/apache/camel-k/issues/5759)
+- Possible deadlock between integration builds [\#5755](https://github.com/apache/camel-k/issues/5755)
 - How to config spec.template.spec.hostAliases with camel-k [\#5745](https://github.com/apache/camel-k/issues/5745)
+- Drop support for Tracing trait [\#5739](https://github.com/apache/camel-k/issues/5739)
 - Move github actions to use Minikube [\#5723](https://github.com/apache/camel-k/issues/5723)
+- Enhance environment trait to include values from secrets/configmaps [\#5522](https://github.com/apache/camel-k/issues/5522)
 - Add docker image creation date [\#5385](https://github.com/apache/camel-k/issues/5385)
 
 **Merged pull requests:**
 
+- chore: remove code deprecated before 2.3 [\#5770](https://github.com/apache/camel-k/pull/5770) ([squakez](https://github.com/squakez))
+- chore\(ci\): exclude mock, util and generated code from coverage [\#5769](https://github.com/apache/camel-k/pull/5769) ([squakez](https://github.com/squakez))
+- fix\(ci\): use new infra configuration [\#5767](https://github.com/apache/camel-k/pull/5767) ([squakez](https://github.com/squakez))
+- chore\(traits\): remove tracing [\#5764](https://github.com/apache/camel-k/pull/5764) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump fabric8-version from 6.13.1 to 6.13.2 in /java/crds [\#5761](https://github.com/apache/camel-k/pull/5761) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.56 to 0.6.57 [\#5760](https://github.com/apache/camel-k/pull/5760) ([dependabot[bot]](https://github.com/apps/dependabot))
+- bugfix\(\#5755\): avoiding deadlock between builds with dependencies build order strategy [\#5757](https://github.com/apache/camel-k/pull/5757) ([lsergio](https://github.com/lsergio))
 - feat\(ci\): minikube usage [\#5756](https://github.com/apache/camel-k/pull/5756) ([squakez](https://github.com/squakez))
+- feat\(trait\): set env as configmaps/secrets [\#5754](https://github.com/apache/camel-k/pull/5754) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.55 to 0.6.56 [\#5753](https://github.com/apache/camel-k/pull/5753) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump knative.dev/serving from 0.42.1 to 0.42.2 [\#5750](https://github.com/apache/camel-k/pull/5750) ([dependabot[bot]](https://github.com/apps/dependabot))
 
 ## [2.4.1-nightly](https://github.com/apache/camel-k/tree/2.4.1-nightly) (2024-08-07)
 
