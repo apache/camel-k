@@ -8,6 +8,7 @@
 
 - Integrations built with build strategy Spectrum do not start [\#5759](https://github.com/apache/camel-k/issues/5759)
 - How to config spec.template.spec.hostAliases with camel-k [\#5745](https://github.com/apache/camel-k/issues/5745)
+- Move github actions to use Minikube [\#5723](https://github.com/apache/camel-k/issues/5723)
 - Add docker image creation date [\#5385](https://github.com/apache/camel-k/issues/5385)
 
 ## [2.4.1-nightly](https://github.com/apache/camel-k/tree/2.4.1-nightly) (2024-08-07)
