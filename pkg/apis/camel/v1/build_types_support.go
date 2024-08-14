@@ -288,8 +288,11 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 	}
 	runtimeVersion := build.RuntimeVersion()
 
+	var bestBuild Build
+	bestBuildCommonDependencies := 0
 buildLoop:
-	for _, b := range bl.Items {
+	for i := range bl.Items {
+		b := bl.Items[i]
 		if b.Name == build.Name || b.Status.IsFinished() {
 			continue
 		}
@@ -323,8 +326,8 @@ buildLoop:
 			}
 		}
 
-		if commonDependencies < len(required)/2 {
-			// few common dependencies
+		if commonDependencies == 0 {
+			// no common dependencies
 			continue
 		}
 
@@ -335,23 +338,23 @@ buildLoop:
 		case BuildPhaseInitialization, BuildPhaseScheduling:
 			// handle suitable scheduled build
 
-			// the build has at least half the dependencies, maybe all of them
-			if compareBuilds(&b, build) < 0 {
-				return true, &b
-			}
 			if missing == 0 {
 				// seems like both builds require exactly the same list of dependencies
 				// additionally check for the creation timestamp
 				if compareBuilds(&b, build) < 0 {
 					return true, &b
 				}
-			} else {
-				// some deps are missing, but this build has at least half the deps we need and no extra dependency.
-				return true, &b
+			} else if commonDependencies > bestBuildCommonDependencies {
+				bestBuildCommonDependencies = commonDependencies
+				bestBuild = b
+				continue
 			}
 		}
 	}
 
+	if bestBuildCommonDependencies > 0 {
+		return true, &bestBuild
+	}
 	return false, nil
 }
 
