@@ -284,7 +284,8 @@ func (bl BuildList) HasMatchingBuild(build *Build) (bool, *Build) {
 	}
 	runtimeVersion := build.RuntimeVersion()
 
-	for _, b := range bl.Items {
+	for i := range bl.Items {
+		b := bl.Items[i]
 		if b.Name == build.Name || b.Status.IsFinished() {
 			continue
 		}
