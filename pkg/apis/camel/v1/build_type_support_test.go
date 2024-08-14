@@ -403,14 +403,108 @@ func TestMatchingBuildsSchedulingSameDependenciesSameRuntime(t *testing.T) {
 		Items: []Build{buildA, buildB},
 	}
 
-	// ebuilds have the same dependencies, runtime and creation timestamp
+	// builds have the same dependencies, runtime and creation timestamp
+	// buildB should wait for buildA
 
 	matches, buildMatch := buildList.HasMatchingBuild(&buildA)
 	assert.False(t, matches)
 	assert.Nil(t, buildMatch)
 	matches, buildMatch = buildList.HasMatchingBuild(&buildB)
 	assert.True(t, matches)
-	assert.True(t, buildMatch.Name == buildA.Name)
+	assert.Equal(t, buildA.Name, buildMatch.Name)
+}
+
+func TestMatchingBuildsSchedulingMutipleSubsets(t *testing.T) {
+	timestamp, _ := time.Parse("2006-01-02T15:04:05-0700", "2024-08-09T10:00:00Z")
+	creationTimestamp := v1.Time{Time: timestamp}
+	buildA := Build{
+		ObjectMeta: v1.ObjectMeta{
+			Name: "buildA",
+		},
+		Spec: BuildSpec{
+			Tasks: []Task{
+				{
+					Builder: &BuilderTask{
+						Dependencies: []string{
+							"camel:component-a",
+						},
+						Runtime: RuntimeSpec{
+							Version: "3.8.1",
+						},
+					},
+				},
+			},
+		},
+		Status: BuildStatus{
+			Phase: BuildPhaseScheduling,
+		},
+	}
+	buildB := Build{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "buildB",
+			CreationTimestamp: creationTimestamp,
+		},
+		Spec: BuildSpec{
+			Tasks: []Task{
+				{
+					Builder: &BuilderTask{
+						Dependencies: []string{
+							"camel:component-a",
+							"camel:component-b",
+						},
+						Runtime: RuntimeSpec{
+							Version: "3.8.1",
+						},
+					},
+				},
+			},
+		},
+		Status: BuildStatus{
+			Phase: BuildPhaseScheduling,
+		},
+	}
+	buildC := Build{
+		ObjectMeta: v1.ObjectMeta{
+			Name:              "buildC",
+			CreationTimestamp: creationTimestamp,
+		},
+		Spec: BuildSpec{
+			Tasks: []Task{
+				{
+					Builder: &BuilderTask{
+						Dependencies: []string{
+							"camel:component-a",
+							"camel:component-b",
+							"camel:component-c",
+						},
+						Runtime: RuntimeSpec{
+							Version: "3.8.1",
+						},
+					},
+				},
+			},
+		},
+		Status: BuildStatus{
+			Phase: BuildPhaseScheduling,
+		},
+	}
+
+	buildList := BuildList{
+		Items: []Build{buildA, buildB, buildC},
+	}
+
+	// buildA is a subset of buildB, which is a subset of buildC
+	// buildC should wait for B, which should wait for A
+
+	matches, buildMatch := buildList.HasMatchingBuild(&buildA)
+	assert.False(t, matches)
+	assert.Nil(t, buildMatch)
+	matches, buildMatch = buildList.HasMatchingBuild(&buildB)
+	assert.True(t, matches)
+	assert.Equal(t, buildA.Name, buildMatch.Name)
+	matches, buildMatch = buildList.HasMatchingBuild(&buildC)
+	assert.True(t, matches)
+	assert.Equal(t, buildB.Name, buildMatch.Name)
 }
 
 func TestMatchingBuildsSchedulingFewCommonDependencies(t *testing.T) {
@@ -475,12 +569,12 @@ func TestMatchingBuildsSchedulingFewCommonDependencies(t *testing.T) {
 		Items: []Build{buildA, buildB},
 	}
 
-	// builds have only 1 out of 10 required dependencies. they should not match
+	// buildA is a subset of buildB. should wait for it
 
 	matches, buildMatch := buildList.HasMatchingBuild(&buildA)
 	assert.False(t, matches)
 	assert.Nil(t, buildMatch)
 	matches, buildMatch = buildList.HasMatchingBuild(&buildB)
-	assert.False(t, matches)
-	assert.Nil(t, buildMatch)
+	assert.True(t, matches)
+	assert.Equal(t, buildA.Name, buildMatch.Name)
 }
