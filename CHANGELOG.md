@@ -7,8 +7,11 @@
 **Closed issues:**
 
 - Integrations built with build strategy Spectrum do not start [\#5759](https://github.com/apache/camel-k/issues/5759)
+- Possible deadlock between integration builds [\#5755](https://github.com/apache/camel-k/issues/5755)
 - How to config spec.template.spec.hostAliases with camel-k [\#5745](https://github.com/apache/camel-k/issues/5745)
+- Drop support for Tracing trait [\#5739](https://github.com/apache/camel-k/issues/5739)
 - Move github actions to use Minikube [\#5723](https://github.com/apache/camel-k/issues/5723)
+- Enhance environment trait to include values from secrets/configmaps [\#5522](https://github.com/apache/camel-k/issues/5522)
 - Add docker image creation date [\#5385](https://github.com/apache/camel-k/issues/5385)
 
 ## [2.4.1-nightly](https://github.com/apache/camel-k/tree/2.4.1-nightly) (2024-08-07)
