@@ -4050,7 +4050,7 @@ github.com/apache/camel-k/v2/pkg/util/util.go:162:										StringSliceUniqueAdd
 github.com/apache/camel-k/v2/pkg/util/util.go:179:										StringSliceUniqueConcat					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:190:										SubstringFrom						100.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:199:										SubstringBefore						100.0%
-github.com/apache/camel-k/v2/pkg/util/util.go:219:										RandomString						90.9%
+github.com/apache/camel-k/v2/pkg/util/util.go:219:										RandomString						100.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:237:										RandomInt63						0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:241:										EncodeXMLWithoutHeader					0.0%
 github.com/apache/camel-k/v2/pkg/util/util.go:245:										EncodeXML						0.0%
