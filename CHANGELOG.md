@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+
+**Merged pull requests:**
+
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.19.1 to 1.20.0 [\#5775](https://github.com/apache/camel-k/pull/5775) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.57 to 0.6.58 [\#5774](https://github.com/apache/camel-k/pull/5774) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [2.5.0-nightly](https://github.com/apache/camel-k/tree/2.5.0-nightly) (2024-08-14)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.4.1-nightly...2.5.0-nightly)
