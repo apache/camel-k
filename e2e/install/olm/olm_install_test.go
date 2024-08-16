@@ -76,6 +76,7 @@ func TestOLMInstallation(t *testing.T) {
 		g.Eventually(OperatorImage(t, ctx, ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
 
 		// Check the IntegrationPlatform has been reconciled after setting the expected container registry
+		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
 		g.Expect(UpdatePlatform(t, ctx, ns, func(ip *v1.IntegrationPlatform) {
 			ip.Spec.Build.Registry.Address = containerRegistry
 			ip.Spec.Build.Registry.Insecure = true
