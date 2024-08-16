@@ -24,8 +24,7 @@ cd "$apidir"
 $(go env GOPATH)/bin/controller-gen crd \
   paths=./... \
   output:crd:artifacts:config=../../../pkg/resources/config/crd/bases \
-  output:crd:dir=../../../pkg/resources/config/crd/bases \
-  crd:crdVersions=v1
+  output:crd:dir=../../../pkg/resources/config/crd/bases
 
 # cleanup working directory in $apidir
 rm -rf ./config
@@ -46,9 +45,7 @@ deploy_crd_file() {
   # Post-process source
   cat ./script/headers/yaml.txt > "$source"
   echo "" >> "$source"
-  sed -n '/^---/,/^status/p;/^status/q' "${source}.orig" \
-    | sed '1d;$d' \
-    | sed '/creationTimestamp:/a\  labels:\n    app: camel-k' >> "$source"
+  cat ${source}.orig >> "$source"
 
   for dest in "${@:2}"; do
     cp "$source" "$dest"
