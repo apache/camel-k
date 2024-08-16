@@ -99,14 +99,17 @@ func TestFindBestImageExactMatch(t *testing.T) {
 		{
 			Checksum: "1",
 			ID:       "artifact-1",
+			Target:   "dependencies/lib/main/artifact-1.jar",
 		},
 		{
 			Checksum: "2",
 			ID:       "artifact-2",
+			Target:   "dependencies/lib/main/artifact-2.jar",
 		},
 		{
 			Checksum: "3",
 			ID:       "artifact-3",
+			Target:   "dependencies/lib/main/artifact-3.jar",
 		},
 	}
 	iks := []v1.IntegrationKitStatus{
@@ -116,10 +119,12 @@ func TestFindBestImageExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "3",
 					ID:       "artifact-3",
+					Target:   "dependencies/lib/main/artifact-3.jar",
 				},
 			},
 		},
@@ -129,14 +134,17 @@ func TestFindBestImageExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "2",
 					ID:       "artifact-2",
+					Target:   "dependencies/lib/main/artifact-2.jar",
 				},
 				{
 					Checksum: "3",
 					ID:       "artifact-3",
+					Target:   "dependencies/lib/main/artifact-3.jar",
 				},
 			},
 		},
@@ -146,18 +154,22 @@ func TestFindBestImageExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "2",
 					ID:       "artifact-2",
+					Target:   "dependencies/lib/main/artifact-2.jar",
 				},
 				{
 					Checksum: "3",
 					ID:       "artifact-3",
+					Target:   "dependencies/lib/main/artifact-3.jar",
 				},
 				{
 					Checksum: "4",
 					ID:       "artifact-4",
+					Target:   "dependencies/lib/main/artifact-4.jar",
 				},
 			},
 		},
@@ -167,14 +179,17 @@ func TestFindBestImageExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "2",
 					ID:       "artifact-2",
+					Target:   "dependencies/lib/main/artifact-2.jar",
 				},
 				{
 					Checksum: "4",
 					ID:       "artifact-4",
+					Target:   "dependencies/lib/main/artifact-4.jar",
 				},
 			},
 		}}
@@ -196,14 +211,17 @@ func TestFindBestImageNoExactMatch(t *testing.T) {
 		{
 			Checksum: "1",
 			ID:       "artifact-1",
+			Target:   "dependencies/lib/main/artifact-1.jar",
 		},
 		{
 			Checksum: "2",
 			ID:       "artifact-2",
+			Target:   "dependencies/lib/main/artifact-2.jar",
 		},
 		{
 			Checksum: "3",
 			ID:       "artifact-3",
+			Target:   "dependencies/lib/main/artifact-3.jar",
 		},
 	}
 	iks := []v1.IntegrationKitStatus{
@@ -213,6 +231,7 @@ func TestFindBestImageNoExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 			},
 		},
@@ -222,10 +241,12 @@ func TestFindBestImageNoExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "3",
 					ID:       "artifact-3",
+					Target:   "dependencies/lib/main/artifact-3.jar",
 				},
 			},
 		},
@@ -235,18 +256,22 @@ func TestFindBestImageNoExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "2",
 					ID:       "artifact-2",
+					Target:   "dependencies/lib/main/artifact-2.jar",
 				},
 				{
 					Checksum: "3",
 					ID:       "artifact-3",
+					Target:   "dependencies/lib/main/artifact-3.jar",
 				},
 				{
 					Checksum: "4",
 					ID:       "artifact-4",
+					Target:   "dependencies/lib/main/artifact-4.jar",
 				},
 			},
 		},
@@ -256,14 +281,17 @@ func TestFindBestImageNoExactMatch(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "2",
 					ID:       "artifact-2",
+					Target:   "dependencies/lib/main/artifact-2.jar",
 				},
 				{
 					Checksum: "4",
 					ID:       "artifact-4",
+					Target:   "dependencies/lib/main/artifact-4.jar",
 				},
 			},
 		}}
@@ -284,14 +312,17 @@ func TestFindBestImageNoExactMatchBadChecksum(t *testing.T) {
 		{
 			Checksum: "1",
 			ID:       "artifact-1",
+			Target:   "dependencies/lib/main/artifact-1.jar",
 		},
 		{
 			Checksum: "2",
 			ID:       "artifact-2",
+			Target:   "dependencies/lib/main/artifact-2.jar",
 		},
 		{
 			Checksum: "3",
 			ID:       "artifact-3",
+			Target:   "dependencies/lib/main/artifact-3.jar",
 		},
 	}
 	iks := []v1.IntegrationKitStatus{
@@ -301,6 +332,7 @@ func TestFindBestImageNoExactMatchBadChecksum(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 			},
 		},
@@ -310,10 +342,12 @@ func TestFindBestImageNoExactMatchBadChecksum(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "bad-checksum",
 					ID:       "artifact-3",
+					Target:   "dependencies/lib/main/artifact-3.jar",
 				},
 			},
 		},
@@ -323,18 +357,22 @@ func TestFindBestImageNoExactMatchBadChecksum(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "2",
 					ID:       "artifact-2",
+					Target:   "dependencies/lib/main/artifact-2.jar",
 				},
 				{
 					Checksum: "3",
 					ID:       "artifact-3",
+					Target:   "dependencies/lib/main/artifact-3.jar",
 				},
 				{
 					Checksum: "4",
 					ID:       "artifact-4",
+					Target:   "dependencies/lib/main/artifact-4.jar",
 				},
 			},
 		},
@@ -344,14 +382,17 @@ func TestFindBestImageNoExactMatchBadChecksum(t *testing.T) {
 				{
 					Checksum: "1",
 					ID:       "artifact-1",
+					Target:   "dependencies/lib/main/artifact-1.jar",
 				},
 				{
 					Checksum: "2",
 					ID:       "artifact-2",
+					Target:   "dependencies/lib/main/artifact-2.jar",
 				},
 				{
 					Checksum: "4",
 					ID:       "artifact-4",
+					Target:   "dependencies/lib/main/artifact-4.jar",
 				},
 			},
 		}}
@@ -454,4 +495,50 @@ func TestFindBestImageAllImagesWithSurplus(t *testing.T) {
 	bestImage, commonLibs := findBestImage(iks, requiredArtifacts)
 	assert.Equal(t, "", bestImage.Image)
 	assert.Empty(t, commonLibs)
+}
+
+func TestFindBestImageShouldIgnoreIntegrationArfifact(t *testing.T) {
+	requiredArtifacts := []v1.Artifact{
+		{
+			Checksum: "sha1:eMo2eeyP9wfBixeIXvWJRneAxIY=",
+			ID:       "io.github.crac.org-crac-0.1.3.jar",
+			Target:   "dependencies/lib/boot/io.github.crac.org-crac-0.1.3.jar",
+		},
+		{
+			Checksum: "sha1:bOYm5KjEIJKipCZTSMpiGReLm80=",
+			ID:       "io.quarkus.quarkus-development-mode-spi-3.8.3.jar",
+			Target:   "dependencies/lib/boot/io.quarkus.quarkus-development-mode-spi-3.8.3.jar",
+		},
+	}
+	iks := []v1.IntegrationKitStatus{
+		{
+			// the integration jar file should not be taken into account, so this should be a good match
+			Artifacts: []v1.Artifact{
+				{
+					Checksum: "sha1:Nca4e5f6WohYvjBCigLINWbigAo=",
+					ID:       "camel-k-integration-2.5.0-SNAPSHOT.jar",
+					Target:   "dependencies/app/camel-k-integration-2.5.0-SNAPSHOT.jar",
+				},
+				{
+					Checksum: "sha1:eMo2eeyP9wfBixeIXvWJRneAxIY=",
+					ID:       "io.github.crac.org-crac-0.1.3.jar",
+					Target:   "dependencies/lib/boot/io.github.crac.org-crac-0.1.3.jar",
+				},
+				{
+					Checksum: "sha1:bOYm5KjEIJKipCZTSMpiGReLm80=",
+					ID:       "io.quarkus.quarkus-development-mode-spi-3.8.3.jar",
+					Target:   "dependencies/lib/boot/io.quarkus.quarkus-development-mode-spi-3.8.3.jar",
+				},
+			},
+		},
+	}
+
+	bestImage, commonLibs := findBestImage(iks, requiredArtifacts)
+
+	assert.NotNil(t, bestImage)
+	assert.Equal(t, iks[0], bestImage)
+	assert.NotNil(t, commonLibs)
+	assert.Equal(t, 2, len(commonLibs))
+	assert.True(t, commonLibs["io.github.crac.org-crac-0.1.3.jar"])
+	assert.True(t, commonLibs["io.quarkus.quarkus-development-mode-spi-3.8.3.jar"])
 }

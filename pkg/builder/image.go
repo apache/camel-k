@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -238,8 +239,17 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 	bestImageCommonLibs := make(map[string]bool)
 
 	for _, image := range images {
+		nonLibArtifacts := 0
 		common := make(map[string]bool)
+
 		for _, artifact := range image.Artifacts {
+			// the application artifacts should not be considered as dependencies for image reuse
+			// otherwise, checksums would never match and we would always use the root image
+			if !strings.HasPrefix(artifact.Target, "dependencies/lib") {
+				nonLibArtifacts++
+				continue
+			}
+
 			// If the Artifact's checksum is not defined we can't reliably determine if for some
 			// reason the artifact has been changed but not the ID (as example for snapshots or
 			// other generated jar) thus we do not take this artifact into account.
@@ -252,7 +262,7 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 		}
 
 		numCommonLibs := len(common)
-		surplus := len(image.Artifacts) - numCommonLibs
+		surplus := len(image.Artifacts) - numCommonLibs - nonLibArtifacts
 
 		if surplus > 0 {
 			// the base image cannot have extra libs that we don't need
