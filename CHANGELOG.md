@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+
 ## [2.5.0-nightly](https://github.com/apache/camel-k/tree/2.5.0-nightly) (2024-08-14)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.4.1-nightly...2.5.0-nightly)
