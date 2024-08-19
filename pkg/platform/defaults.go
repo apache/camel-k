@@ -230,10 +230,7 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	if target.Status.Build.PublishStrategy == "" {
 		target.Status.Build.PublishStrategy = source.Status.Build.PublishStrategy
 	}
-	if target.Status.Build.PublishStrategyOptions == nil {
-		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", target.Name, target.Namespace)
-		target.Status.Build.PublishStrategyOptions = source.Status.Build.PublishStrategyOptions
-	}
+
 	if target.Status.Build.BuildConfiguration.Strategy == "" {
 		target.Status.Build.BuildConfiguration.Strategy = source.Status.Build.BuildConfiguration.Strategy
 	}
@@ -311,10 +308,6 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 }
 
 func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
-	if p.Status.Build.PublishStrategyOptions == nil {
-		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", p.Name, p.Namespace)
-		p.Status.Build.PublishStrategyOptions = map[string]string{}
-	}
 	if p.Status.Build.RuntimeVersion == "" {
 		log.Debugf("Integration Platform %s [%s]: setting runtime version", p.Name, p.Namespace)
 		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion

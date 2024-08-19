@@ -3238,7 +3238,7 @@ spec:
                   PublishStrategyOptions:
                     additionalProperties:
                       type: string
-                    description: Generic options that can used by any publish strategy
+                    description: 'Deprecated: no longer in use'
                     type: object
                   baseImage:
                     description: |-
@@ -5286,7 +5286,7 @@ spec:
                   PublishStrategyOptions:
                     additionalProperties:
                       type: string
-                    description: Generic options that can used by any publish strategy
+                    description: 'Deprecated: no longer in use'
                     type: object
                   baseImage:
                     description: |-
