@@ -131,7 +131,7 @@ type IntegrationPlatformBuildSpec struct {
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 	// Maven configuration used to build the Camel/Camel-Quarkus applications
 	Maven MavenSpec `json:"maven,omitempty"`
-	// Generic options that can used by any publish strategy
+	// Deprecated: no longer in use
 	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
 	// the maximum amount of parallel running pipelines started by this operator instance
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`

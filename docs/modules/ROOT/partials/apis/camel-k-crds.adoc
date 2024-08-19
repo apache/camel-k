@@ -2833,7 +2833,7 @@ map[string]string
 |
 
 
-Generic options that can used by any publish strategy
+Deprecated: no longer in use
 
 |`maxRunningBuilds` +
 int32
