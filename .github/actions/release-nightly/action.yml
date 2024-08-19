@@ -60,8 +60,8 @@ runs:
     - name: Set up QEMU (required by multi platform build)
       uses: docker/setup-qemu-action@v3
 
-    # - name: Infra setting
-    #   uses: ./.github/actions/infra-setting
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
 
     # - name: Install operator
     #   shell: bash
