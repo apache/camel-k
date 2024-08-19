@@ -10,23 +10,14 @@ For the reason above it's important that you provide a container registry which 
 
 For any other platform that do not provide a default container registry, then, a registry must be provided accordingly.
 
-[[configuring-registry-install-time]]
-== Configure the registry at installation time
+[[how-to-configure]]
+== How to configure Camel K container registry
 
-Registry configuration can be set upon installation using command:
+When running a production grade installation, you'll be probably using a private container registry which is accessible via authenticated method. The secret is something that will be https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret[included at deployment time] as `imagePullSecret` configuration.
 
-[source,bash]
-----
-$ kamel install --registry registry-host.io [--organization your-user-id-or-org] [--registry-secret my-secret-registry-conf]
-----
+As each registry may have a slightly different way of securing the access you can use the generic guidelines provided in xref:installation/registry/dockerhub.adoc[Docker Hub] registry configuration and adjust accordingly. We expect that at the end of the process you have a public address (1) an _organization_ (2) and a _secret_ (3) values that will be used to configure the registry.
 
-Although optionals, the `organization` and `registry-secret` parameters are strongly suggested in order to secure the pull/push operations on a registry that is private, although accessible through the Internet. The secret is something that will https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret[included at deployment time] as `imagePullSecret` configuration.
-
-As each registry may have a slightly different way of securing the access you can use the guidelines provided in xref:installation/registry/dockerhub.adoc[Docker Hub] registry configuration and adjust accordingly.
-
-[[configuring-registry-after-install]]
-== Configure the registry after installation
-The settings you've provided in the chapter above are applied to the `IntegrationPlatform` custom resource. In particular you can find them in the `.spec.pipeline.registry`.
+You will need to create or edit any existing `IntegrationPlatform` custom resource with the values as expected in the `.spec.build.registry`.
 
 [source,yaml]
 ----
@@ -39,12 +30,12 @@ metadata:
 spec:
   build:
     registry:
-      address: registry-host.io
-      organization: your-user-id-or-org
-      secret: my-secret-registry-conf
+      address: <my-registry-address> (1)
+      organization: <my-organization> (2)
+      secret: <my-secret-credentials> (3)
 ----
 
-You can therefore update the values in the `IntegrationPlatform` in order to perform any change to the registry configuration after the Camel K operator is installed. The changes will be immediately reconciled and ready to use.
+The changes will be immediately reconciled and the operator will be able to push and pull resources in a secure manner.
 
 [[configuring-registry]]
 == Container registry requirements

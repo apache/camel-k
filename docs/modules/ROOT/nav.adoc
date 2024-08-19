@@ -1,4 +1,5 @@
 * xref:installation/installation.adoc[Installation]
+** xref:installation/integrationplatform.adoc[Configure IntegrationPlatform]
 ** xref:installation/registry/registry.adoc[Configure Registry]
 ** xref:installation/advanced/maven.adoc[Configure Maven]
 ** xref:installation/knative.adoc[Configure Knative]
