@@ -23,9 +23,10 @@ import (
 
 func newCmdKamelet(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
-		Use:   "kamelet",
-		Short: "Configure a Kamelet",
-		Long:  `Configure a Kamelet.`,
+		Use:        "kamelet",
+		Short:      "Configure a Kamelet",
+		Long:       `Configure a Kamelet.`,
+		Deprecated: "consider using kubectl (or oc) command instead.",
 	}
 
 	cmd.AddCommand(cmdOnly(newKameletGetCmd(rootCmdOptions)))

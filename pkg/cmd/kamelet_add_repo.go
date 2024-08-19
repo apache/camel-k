@@ -40,10 +40,11 @@ func newKameletAddRepoCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kame
 	}
 
 	cmd := cobra.Command{
-		Use:     "add-repo github:owner/repo[/path_to_kamelets_folder][@version] ...",
-		Short:   "Add a Kamelet repository",
-		Long:    `Add a Kamelet repository.`,
-		PreRunE: decode(&options, options.Flags),
+		Use:        "add-repo github:owner/repo[/path_to_kamelets_folder][@version] ...",
+		Short:      "Add a Kamelet repository",
+		Long:       `Add a Kamelet repository.`,
+		Deprecated: "consider using kubectl (or oc) command instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err

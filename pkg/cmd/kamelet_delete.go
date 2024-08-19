@@ -35,9 +35,10 @@ func newKameletDeleteCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kamel
 	}
 
 	cmd := cobra.Command{
-		Use:     "delete [Kamelet1] [Kamelet2] ...",
-		Short:   "Delete Kamelets deployed on Kubernetes",
-		PreRunE: decode(&options, options.Flags),
+		Use:        "delete [Kamelet1] [Kamelet2] ...",
+		Short:      "Delete Kamelets deployed on Kubernetes",
+		Deprecated: "consider using kubectl (or oc) command instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err

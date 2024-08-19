@@ -43,10 +43,6 @@ Some of the most used commands are:
 |Get integrations deployed on Kubernetes
 |kamel get
 
-|describe
-|Get detailed information on a resource
-|kamel describe integration routes
-
 |log
 |Print the logs of a running integration
 |kamel log routes
