@@ -37,11 +37,12 @@ func newDescribeIntegrationCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, 
 	}
 
 	cmd := cobra.Command{
-		Use:     "integration",
-		Aliases: []string{"it"},
-		Short:   "Describe an Integration",
-		Long:    `Describe an Integration.`,
-		PreRunE: decode(&options, options.Flags),
+		Use:        "integration",
+		Aliases:    []string{"it"},
+		Short:      "Describe an Integration",
+		Long:       `Describe an Integration.`,
+		Deprecated: "consider using kubectl (or oc) custom resource describe command instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err
