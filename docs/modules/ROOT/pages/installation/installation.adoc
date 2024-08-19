@@ -98,7 +98,7 @@ integrationplatform.camel.apache.org/camel-k condition met
 
 Your operator is now ready to run some Camel `Integration`.
 
-NOTE: a xref:installation/registry/registry.adoc#configuring-registry-install-time[container registry] configuration may require other parameters and secret management.
+NOTE: a production ready xref:installation/registry/registry.adoc[container registry configuration] may require other parameters and secret management.
 
 [[test]]
 == Run some integration
