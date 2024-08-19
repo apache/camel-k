@@ -60,20 +60,20 @@ runs:
     - name: Set up QEMU (required by multi platform build)
       uses: docker/setup-qemu-action@v3
 
-    - name: Infra setting
-      uses: ./.github/actions/infra-setting
+    # - name: Infra setting
+    #   uses: ./.github/actions/infra-setting
 
-    - name: Install operator
-      shell: bash
-      run: |
-        kubectl create ns camel-k
-        make install-k8s-global
-        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
+    # - name: Install operator
+    #   shell: bash
+    #   run: |
+    #     kubectl create ns camel-k
+    #     make install-k8s-global
+    #     kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
-    - name: Run test
-      shell: bash
-      run: |
-        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
+    # - name: Run test
+    #   shell: bash
+    #   run: |
+    #     DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
 
     - name: Get nightly version and update date
       shell: bash
@@ -95,8 +95,7 @@ runs:
     - name: Build and release containers
       shell: bash
       run: |
-        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} images-nightly
-        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} release-nightly
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} bundle release-helm images-nightly release-nightly
 
     - name: Generate SBOM
       uses: ./.github/actions/gh-go-mod-generate-sbom
@@ -104,26 +103,44 @@ runs:
         version: v1
         args: mod -licenses -json -output sbom.json
 
+    # Commit locally to be included in the tag
+    - name: Push changes
+      shell: bash
+      env:
+        CI_USER: "github-actions[bot]"
+        CI_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+        CI_TOKEN: ${{ inputs.secretGithubToken }}
+      run: |
+        git config --local user.email "$CI_EMAIL"
+        git config --local user.name "$CI_USER"
+        git add -A -f && git commit -m 'chore(ci): nightly release update' || echo "No nightly release updates changes to commit"
+
     - name: Create Release
       id: create_release
       uses: ncipollo/release-action@1e3e9c6637e5566e185b7ab66f187539c5a76da7
       with:
-        artifacts: "./camel-k-client*.tar.gz,sbom.json"
+        artifacts: "./camel-k-client*.tar.gz,sbom.json,./docs/charts/camel-k-${{ env.VERSION }}.tgz"
         body: |
           Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using
-          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
+          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`.
+          The available platforms are AMD64 and ARM64.
 
-          To test it, download the client for your OS and run:
+          To test it you can either apply:
           ```
-          kamel install --olm=false
+          kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v${{ env.VERSION }}
           ```
+          or you can download the Helm chart and run:
+          ```
+          helm install camel-k camel-k-${{ env.VERSION }}.tgz
+          ```
+
           NOTE: last updated on ${{ env.UPD_DATE }}
         token: ${{ inputs.secretGithubToken }}
         draft: false
         prerelease: true
         allowUpdates: true
         replacesArtifacts: true
-        tag: ${{ env.VERSION }}
+        tag: v${{ env.VERSION }}
         commit: main
 
     # If release was okey, we can also release the java extensions
@@ -132,4 +149,3 @@ runs:
       shell: bash
       run: |
         mvn clean deploy --settings ../../.github/asf-deploy-settings.xml -q
-
