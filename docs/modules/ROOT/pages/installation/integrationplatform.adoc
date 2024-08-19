@@ -1,0 +1,40 @@
+= Configure an IntegrationPlatform
+
+The IntegrationPlatform custom resource is used to configure your operator and the components required to build, publish and run your Camel applications. This custom resource may be provided at installation time (above all when using Helm or Kustomize methodology) or after the Camel K operator is running. The same operator will be in charge to reconcile the configuration provided and run any following Integration with the new values provided.
+
+The operator is using default values for most of the configuration. The only mandatory configuration you need to provide is the container registry (1) where you want to push and pull the container images.
+
+```
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+   build:
+     registry: (1)
+...
+status:
+  build:
+    baseImage: eclipse-temurin:17
+    buildConfiguration:
+      orderStrategy: dependencies
+      strategy: routine
+    maven:
+      cliOptions:
+      - -V
+      - --no-transfer-progress
+      - -Dstyle.color=never
+      localRepository: /etc/maven/m2
+    maxRunningBuilds: 3
+    publishStrategy: Jib
+    registry: (1)
+    runtimeVersion: 3.8.1
+    timeout: 5m0s
+  cluster: Kubernetes
+```
+
+NOTE: the above are the default values coming from version 2.5.0, they may slightly change in future versions.
+
+There are many more configuration available in the IntegrationPlatform specification. Have a look at the xref:apis/camel-k.adoc#_camel_apache_org_v1_IntegrationPlatformSpec[IntegrationPlatform API specification] to learn more about each of its usage.
+
+Have also a look at the specific sections to learn more about xref:registry/registry.adoc[how to configure a container registry], xref:advanced/build-config.adoc[how to choose the right build and publishing strategy] or xref:advanced/maven.adoc[how to configure Maven].

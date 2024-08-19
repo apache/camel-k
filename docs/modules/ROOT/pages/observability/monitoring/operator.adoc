@@ -6,26 +6,17 @@ NOTE: The Camel K monitoring architecture relies on https://prometheus.io[Promet
 [[installation]]
 == Installation
 
-The `kamel install` command provides the `--monitoring` option flag, that can be used to automatically create the default resources required to monitor the Camel K operator, e.g.:
+You need to create the resources required to let Prometheus to interact with the metrics exposed by the operator. There is a Kustomization based configuration you can find under `/install/base/config/prometheus`.
 
-[source,console]
-----
-$ kamel install --monitoring=true
-----
+We have prepared a base configuration you can quickly apply executing:
 
-This creates:
+```
+kubectl apply -k github.com/apache/camel-k/install/base/config/prometheus?ref=v2.4.0
+```
 
-* a `PodMonitor` resource targeting the operator _metrics_ endpoint, so that the Prometheus server can scrape the <<metrics>> exposed by the operator;
-* a `PrometheusRule` resource with default alerting rules based on the exposed metrics. The <<alerting>> provides more details about these default rules.
+NOTE: change the ref value with the installation version tag you want to install.
 
-The `kamel install` command also provides the `--monitoring-port` option, that can be used to change the port of the operator monitoring endpoint, e.g.:
-
-[source,console]
-----
-$ kamel install --monitoring=true --monitoring-port=8888
-----
-
-You can refer to the <<discovery>> and <<alerting>> sections in case you don't want to rely on the default monitoring configuration.
+However, most of the time you want to probably configure and add different thresholds and KPIs in order to monitor in a properly manner your installation.
 
 [[metrics]]
 == Metrics
@@ -73,7 +64,7 @@ The Camel K operator monitoring endpoint exposes the following metrics:
 
 A `PodMonitor` resource must be created for the Prometheus Operator to reconcile, so that the managed Prometheus instance can scrape the Camel K operator _metrics_ endpoint.
 
-As an example, hereafter is the `PodMonitor` resource that is created when executing the `kamel install --monitoring=true` command:
+As an example, hereafter is the `PodMonitor` resource that is created when executing the default Prometheus configuration provided above:
 
 .operator-pod-monitor.yaml
 [source,yaml]
@@ -106,7 +97,7 @@ NOTE: The Prometheus Operator declares the `AlertManager` resource that can be u
 
 A `PrometheusRule` resource can be created for the Prometheus Operator to reconcile, so that the managed AlertManager instance can trigger alerts, based on the metrics exposed by the Camel K operator.
 
-As an example, hereafter is the alerting rules that are defined in `PrometheusRule` resource that is created when executing the `kamel install --monitoring=true` command:
+As an example, hereafter is the alerting rules that are defined in `PrometheusRule` resource that is created when executing the default Prometheus configuration provided above:
 
 .Camel K operator alerts
 |===
