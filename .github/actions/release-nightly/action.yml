@@ -63,17 +63,17 @@ runs:
     - name: Infra setting
       uses: ./.github/actions/infra-setting
 
-    # - name: Install operator
-    #   shell: bash
-    #   run: |
-    #     kubectl create ns camel-k
-    #     make install-k8s-global
-    #     kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
+    - name: Install operator
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        make install-k8s-global
+        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
 
-    # - name: Run test
-    #   shell: bash
-    #   run: |
-    #     DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-common
 
     - name: Get nightly version and update date
       shell: bash
@@ -119,6 +119,7 @@ runs:
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
         git commit -am 'chore(ci): v${{ env.VERSION }} nightly release updates' || echo "No nightly release updates changes to commit"
+        echo "GIT_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
     - name: Create Release
       id: create_release
@@ -126,9 +127,10 @@ runs:
       with:
         artifacts: "./camel-k-client*.tar.gz,sbom.json,./docs/charts/camel-k-${{ env.VERSION }}.tgz"
         body: |
-          Apache Camel K ${{ env.VERSION }} build for testing (unstable). This nightly release is using
-          an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`.
-          The available platforms are AMD64 and ARM64.
+          ```
+          NOTE: last updated on ${{ env.UPD_DATE }}
+          ```
+          Apache Camel K ${{ env.VERSION }} build for testing purposese only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
 
           ## Kustomize
           ```
@@ -142,17 +144,15 @@ runs:
           ## OLM
           Use the `operator-sdk` tool and run the bundle via:
           ```
-          operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:{{ env.VERSION }}
+          operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:${{ env.VERSION }}
           ```
-
-          NOTE: last updated on ${{ env.UPD_DATE }}
         token: ${{ inputs.secretGithubToken }}
         draft: false
         prerelease: true
         allowUpdates: true
         replacesArtifacts: true
         tag: v${{ env.VERSION }}
-        commit: main
+        commit: ${{ env.GIT_COMMIT }}
 
     # If release was okey, we can also release the java extensions
     - name: Deploy Camel-K-CRDs to ASF Snapshots Repository
