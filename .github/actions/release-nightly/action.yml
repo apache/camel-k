@@ -97,6 +97,11 @@ runs:
       run: |
         make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} bundle release-helm images-nightly release-nightly
 
+    - name: Build and push OLM bundle
+      shell: bash
+      run: |
+        make VERSION=${{ env.VERSION }} IMAGE_NAME=${{ env.IMAGE_NAME }} BUNDLE_IMAGE_NAME=docker.io/testcamelk/camel-k-bundle bundle-push
+
     - name: Generate SBOM
       uses: ./.github/actions/gh-go-mod-generate-sbom
       with:
@@ -104,7 +109,7 @@ runs:
         args: mod -licenses -json -output sbom.json
 
     # Commit locally to be included in the tag
-    - name: Push changes
+    - name: Commit local changes
       shell: bash
       env:
         CI_USER: "github-actions[bot]"
@@ -113,7 +118,7 @@ runs:
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
-        git add -A -f && git commit -m 'chore(ci): nightly release update' || echo "No nightly release updates changes to commit"
+        git commit -am 'chore(ci): v${{ env.VERSION }} nightly release updates' || echo "No nightly release updates changes to commit"
 
     - name: Create Release
       id: create_release
@@ -125,13 +130,19 @@ runs:
           an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`.
           The available platforms are AMD64 and ARM64.
 
-          To test it you can either apply:
+          ## Kustomize
           ```
           kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v${{ env.VERSION }}
           ```
-          or you can download the Helm chart and run:
+          ## Helm
+          Download the Helm chart and run:
           ```
           helm install camel-k camel-k-${{ env.VERSION }}.tgz
+          ```
+          ## OLM
+          Use the `operator-sdk` tool and run the bundle via:
+          ```
+          operator-sdk run bundle docker.io/testcamelk/camel-k-bundle:{{ env.VERSION }}
           ```
 
           NOTE: last updated on ${{ env.UPD_DATE }}
