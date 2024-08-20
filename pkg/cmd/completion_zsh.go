@@ -45,9 +45,10 @@ fi
 
 func newCmdCompletionZsh(root *cobra.Command) *cobra.Command {
 	return &cobra.Command{
-		Use:   "zsh",
-		Short: "Generates zsh completion scripts",
-		Long:  zshCompletionCmdLongDescription,
+		Use:        "zsh",
+		Short:      "Generates zsh completion scripts",
+		Long:       zshCompletionCmdLongDescription,
+		Deprecated: "no longer supported.",
 		Run: func(_ *cobra.Command, _ []string) {
 			err := root.GenZshCompletion(root.OutOrStdout())
 			if err != nil {

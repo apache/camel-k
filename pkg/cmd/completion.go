@@ -23,8 +23,9 @@ import (
 
 func newCmdCompletion(root *cobra.Command) *cobra.Command {
 	completion := cobra.Command{
-		Use:   "completion",
-		Short: "Generate completion scripts",
+		Use:        "completion",
+		Short:      "Generate completion scripts",
+		Deprecated: "no longer supported.",
 	}
 
 	completion.AddCommand(newCmdCompletionBash(root))

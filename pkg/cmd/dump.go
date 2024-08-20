@@ -47,6 +47,9 @@ func newCmdDump(rootCmdOptions *RootCmdOptions) (*cobra.Command, *dumpCmdOptions
 		Long:    `Dump the state of currently used namespace. If no filename will be specified, the output will be on stdout`,
 		PreRunE: decode(&options, options.Flags),
 		RunE:    options.dump,
+		// Once we moved from the deprecation this should be hidden and only used internally for E2E test execution.
+		Deprecated: "no longer supported.",
+		// Hidden: true,
 	}
 
 	cmd.Flags().Int("logLines", 100, "Number of log lines to dump")
