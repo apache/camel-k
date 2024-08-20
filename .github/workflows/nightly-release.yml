@@ -28,6 +28,9 @@ env:
   CAMEL_K_TEST_TIMEOUT_LONG: 12m
   CAMEL_K_TEST_TIMEOUT_VERY_LONG: 30m
 
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: "15 0 * * *"
