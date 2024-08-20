@@ -54,7 +54,7 @@ func TestKameletTrait(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Started capabilities-webhook-source-1 (platform-http:///webhook)"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Started route1 (kamelet://capabilities-webhook-source)"))
 			// Verify Integration capabilities
 			g.Eventually(IntegrationStatusCapabilities(t, ctx, ns, name), TestTimeoutShort).Should(ContainElements("platform-http"))
 			// Verify expected resources from Kamelet (Service in this case)
