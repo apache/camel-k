@@ -75,12 +75,12 @@ func TestOLMInstallation(t *testing.T) {
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		g.Eventually(OperatorImage(t, ctx, ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
 
-		// Check the IntegrationPlatform has been reconciled after setting the expected container registry
-		g.Eventually(Platform(t, ctx, ns)).ShouldNot(BeNil())
-		g.Expect(UpdatePlatform(t, ctx, ns, func(ip *v1.IntegrationPlatform) {
-			ip.Spec.Build.Registry.Address = containerRegistry
-			ip.Spec.Build.Registry.Insecure = true
-		})).To(Succeed())
+		integrationPlatform := v1.NewIntegrationPlatform(ns, "camel-k")
+		integrationPlatform.Spec.Build.Registry = v1.RegistrySpec{
+			Address:  containerRegistry,
+			Insecure: true,
+		}
+		g.Expect(CreateIntegrationPlatform(t, ctx, &integrationPlatform)).To(Succeed())
 		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
