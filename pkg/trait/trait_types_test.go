@@ -282,9 +282,12 @@ func createSyntethicKitTestEnvironment(t *testing.T, profile v1.TraitProfile) *E
 	t.Helper()
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
 	environment := &Environment{
-		Catalog: traitCatalog,
-		Client:  client,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -325,7 +328,7 @@ func createSyntethicKitTestEnvironment(t *testing.T, profile v1.TraitProfile) *E
 
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err := traitCatalog.apply(environment)
+	_, err = traitCatalog.apply(environment)
 	require.NoError(t, err)
 
 	return environment

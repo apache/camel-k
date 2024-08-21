@@ -123,6 +123,12 @@ type ConfigurationSpec struct {
 	Value string `json:"value"`
 }
 
+// Catalog represents the Camel Catalog runtime specification.
+type Catalog struct {
+	Version  string          `json:"version,omitempty" yaml:"version,omitempty"`
+	Provider RuntimeProvider `json:"provider,omitempty" yaml:"provider,omitempty"`
+}
+
 // Artifact represents a materialized artifact (a jar dependency or in general a file used by the build).
 type Artifact struct {
 	// the identification (GAV for maven dependencies or file name for other file types)

@@ -3045,6 +3045,15 @@ spec:
               baseImage:
                 description: base image used by the kit (could be another IntegrationKit)
                 type: string
+              catalog:
+                description: the catalog used to build/operate the IntegrationKit.
+                properties:
+                  provider:
+                    description: RuntimeProvider is the provider chosen for the runtime.
+                    type: string
+                  version:
+                    type: string
+                type: object
               conditions:
                 description: a list of conditions which happened for the events related
                   the kit
@@ -11194,6 +11203,10 @@ spec:
     - description: The runtime provider
       jsonPath: .status.runtimeVersion
       name: Runtime Version
+      type: string
+    - description: The catalog version
+      jsonPath: .status.catalog.version
+      name: Catalog Version
       type: string
     - description: The integration kit
       jsonPath: .status.integrationKit.name
@@ -19345,6 +19358,15 @@ spec:
                 items:
                   type: string
                 type: array
+              catalog:
+                description: the catalog used to build/operate the Integration.
+                properties:
+                  provider:
+                    description: RuntimeProvider is the provider chosen for the runtime.
+                    type: string
+                  version:
+                    type: string
+                type: object
               conditions:
                 description: a list of events happened for the Integration
                 items:

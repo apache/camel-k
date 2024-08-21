@@ -156,10 +156,10 @@ func TestJsonLoggingTrait(t *testing.T) {
 
 func TestDefaultQuarkusLogging(t *testing.T) {
 	env := createDefaultLoggingTestEnv(t)
-	// Simulate a synthetic Integration Kit for which the catalog is not available
-	env.CamelCatalog = nil
-	env.IntegrationKit.Labels = map[string]string{
-		v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeSynthetic,
+	// Simulate an older catalog configuration which is missing the logging
+	// capability
+	env.CamelCatalog.Runtime.Capabilities["logging"] = v1.Capability{
+		RuntimeProperties: nil,
 	}
 	env.EnvVars = []corev1.EnvVar{}
 	conditions, err := NewLoggingTestCatalog().apply(env)

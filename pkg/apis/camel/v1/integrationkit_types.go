@@ -117,6 +117,8 @@ type IntegrationKitStatus struct {
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime provider for which this kit was configured
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the catalog used to build/operate the IntegrationKit.
+	Catalog *Catalog `json:"catalog,omitempty"`
 	// the platform for which this kit was configured
 	Platform string `json:"platform,omitempty"`
 	// the Camel K operator version for which this kit was configured
