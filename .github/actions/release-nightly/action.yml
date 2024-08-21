@@ -85,6 +85,7 @@ runs:
         IMAGE_NAME=docker.io/${TEST_DOCKER_HUB_USERNAME:-testcamelk}/camel-k
         echo "Using IMAGE_NAME=$IMAGE_NAME"
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+        echo "BRANCH_NIGHTLY_NAME=release-$V" >> $GITHUB_ENV 
 
     - name: Login to staging container registry
       uses: docker/login-action@v3
@@ -108,8 +109,7 @@ runs:
         version: v1
         args: mod -licenses -json -output sbom.json
 
-    # Commit locally to be included in the tag
-    - name: Commit local changes
+    - name: Commit and push nightly branch
       shell: bash
       env:
         CI_USER: "github-actions[bot]"
@@ -118,8 +118,8 @@ runs:
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
-        git commit -am 'chore(ci): v${{ env.VERSION }} nightly release updates' || echo "No nightly release updates changes to commit"
-        echo "GIT_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+        git commit -am 'chore(ci): v${{ env.VERSION }} release updates' || echo "No nightly release updates changes to commit"
+        git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ env.BRANCH_NIGHTLY_NAME }} -f || echo "No nightly release updates changes to push"
 
     - name: Create Release
       id: create_release
@@ -152,7 +152,7 @@ runs:
         allowUpdates: true
         replacesArtifacts: true
         tag: v${{ env.VERSION }}
-        commit: ${{ env.GIT_COMMIT }}
+        commit: ${{ env.BRANCH_NIGHTLY_NAME }}
 
     # If release was okey, we can also release the java extensions
     - name: Deploy Camel-K-CRDs to ASF Snapshots Repository
