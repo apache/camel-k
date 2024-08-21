@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kubernetes
+package trait
 
 import (
 	"context"
@@ -23,17 +23,18 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/gzip"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 
 	corev1 "k8s.io/api/core/v1"
 	controller "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// ResolveSources --.
-func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.SourceSpec, error) {
+// resolveSources --.
+func resolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.SourceSpec, error) {
 	for i := range len(elements) {
 		r := &elements[i]
 
-		if err := Resolve(&r.DataSpec, mapLookup); err != nil {
+		if err := resolve(&r.DataSpec, mapLookup); err != nil {
 			return nil, err
 		}
 	}
@@ -41,8 +42,8 @@ func ResolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.Co
 	return elements, nil
 }
 
-// Resolve --.
-func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error)) error {
+// resolve --.
+func resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error)) error {
 	// if it is a reference, get the content from the
 	// referenced ConfigMap
 	if data.ContentRef != "" {
@@ -81,18 +82,18 @@ func Resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error
 	return nil
 }
 
-// ResolveIntegrationSources --.
-func ResolveIntegrationSources(
+// resolveIntegrationSources --.
+func resolveIntegrationSources(
 	context context.Context,
 	client controller.Reader,
 	integration *v1.Integration,
-	resources *Collection) ([]v1.SourceSpec, error) {
+	resources *kubernetes.Collection) ([]v1.SourceSpec, error) {
 
 	if integration == nil {
 		return nil, nil
 	}
 
-	return ResolveSources(integration.AllSources(), func(name string) (*corev1.ConfigMap, error) {
+	return resolveSources(integration.AllSources(), func(name string) (*corev1.ConfigMap, error) {
 		// the config map could be part of the resources created
 		// by traits
 		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
@@ -103,6 +104,6 @@ func ResolveIntegrationSources(
 			return cm, nil
 		}
 
-		return GetConfigMap(context, client, name, integration.Namespace)
+		return kubernetes.GetConfigMap(context, client, name, integration.Namespace)
 	})
 }

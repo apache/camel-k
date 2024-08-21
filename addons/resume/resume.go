@@ -23,7 +23,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"k8s.io/utils/ptr"
 )
@@ -87,19 +86,15 @@ func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.Tr
 	}
 
 	if ptr.Deref(r.Auto, true) {
-		// Check which components have been used
-		sources, err := kubernetes.ResolveIntegrationSources(environment.Ctx, r.Client, environment.Integration, environment.Resources)
+		_, err := environment.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+			for _, endpoint := range meta.FromURIs {
+				log.Infof("Processing component %s", endpoint)
+			}
+
+			return true
+		})
 		if err != nil {
 			return false, nil, err
-		}
-
-		meta, err := metadata.ExtractAll(environment.CamelCatalog, sources)
-		if err != nil {
-			return false, nil, err
-		}
-
-		for _, endpoint := range meta.FromURIs {
-			log.Infof("Processing component %s", endpoint)
 		}
 
 		if r.ResumeStrategy == "" {

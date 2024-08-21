@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -37,7 +36,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
-	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
@@ -93,27 +91,6 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
-	}
-
-	knativeInstalled, _ := knative.IsEventingInstalled(e.Client)
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !knativeInstalled {
-		hasKnativeEndpoint, err := containsEndpoint("knative", e, t.Client)
-		if err != nil {
-			return false, nil, err
-		}
-
-		if hasKnativeEndpoint {
-			// fail fast the integration as there is no knative installed in the cluster
-			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains knative endpoint that cannot run, as knative is not installed in the cluster.", e.Integration.Namespace, e.Integration.Name)
-			err := errors.New("integration cannot run, as knative is not installed in the cluster")
-			return false, NewIntegrationCondition(
-				"Container",
-				v1.IntegrationConditionKnativeAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionKnativeNotInstalledReason,
-				err.Error(),
-			), err
-		}
 	}
 
 	if ptr.Deref(t.Auto, true) {
