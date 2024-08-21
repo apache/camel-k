@@ -31,13 +31,10 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
-	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
 func ptrFrom[T any](value T) *T {
@@ -141,17 +138,9 @@ func filterTransferableAnnotations(annotations map[string]string) map[string]str
 	return res
 }
 
-// ExtractSourceDependencies extracts dependencies from source.
-func ExtractSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) (*sets.Set, error) {
+// ExtractSourceLoaderDependencies extracts dependencies from source.
+func ExtractSourceLoaderDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) *sets.Set {
 	dependencies := sets.NewSet()
-
-	// Add auto-detected dependencies
-	meta, err := metadata.Extract(catalog, source)
-	if err != nil {
-		return nil, err
-	}
-	dependencies.Merge(meta.Dependencies)
-
 	// Add loader dependencies
 	lang := source.InferLanguage()
 	for loader, v := range catalog.Loaders {
@@ -174,7 +163,7 @@ func ExtractSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatal
 		}
 	}
 
-	return dependencies, nil
+	return dependencies
 }
 
 // AssertTraitsType asserts that traits is either v1.Traits or v1.IntegrationKitTraits.
@@ -542,31 +531,6 @@ func NewTraitsOptionsForKameletBinding(c client.Client, kb *v1alpha1.KameletBind
 	}
 
 	return newTraitsOptions(c, options, kb.ObjectMeta.Annotations)
-}
-
-// verify if the integration in the Environment contains an endpoint.
-func containsEndpoint(name string, e *Environment, c client.Client) (bool, error) {
-	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, c, e.Integration, e.Resources)
-	if err != nil {
-		return false, err
-	}
-
-	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-	if err != nil {
-		return false, err
-	}
-
-	hasKnativeEndpoint := false
-	endpoints := make([]string, 0)
-	endpoints = append(endpoints, meta.FromURIs...)
-	endpoints = append(endpoints, meta.ToURIs...)
-	for _, endpoint := range endpoints {
-		if uri.GetComponent(endpoint) == name {
-			hasKnativeEndpoint = true
-			break
-		}
-	}
-	return hasKnativeEndpoint, nil
 }
 
 // HasMatchingTraits verifies if two traits options match.

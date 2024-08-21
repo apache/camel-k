@@ -32,7 +32,6 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -356,17 +355,16 @@ func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
 }
 
 func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
-	var sources []v1.SourceSpec
-	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources); err != nil {
-		return nil, err
-	}
-	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	var fromUris []string
+	_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		fromUris = meta.FromURIs
+		return true
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return meta.FromURIs, nil
+	return fromUris, nil
 }
 
 func getCronForURIs(camelURIs []string) *cronInfo {

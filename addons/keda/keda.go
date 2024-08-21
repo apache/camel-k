@@ -34,7 +34,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/source"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
@@ -315,12 +314,8 @@ func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectRe
 }
 
 func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
-	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
-	if err != nil {
-		return err
-	}
 	kameletURIs := make(map[string][]string)
-	if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+	_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
 		for _, kameletURI := range meta.FromURIs {
 			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelv1.ValidKameletName(kameletStr) {
 				kamelet := kameletStr
@@ -333,8 +328,10 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 				kameletURIs[kamelet] = uriList
 			}
 		}
+
 		return true
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 

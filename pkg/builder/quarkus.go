@@ -32,9 +32,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/maven"
-	corev1 "k8s.io/api/core/v1"
 )
 
 const projectModePerm = 0600
@@ -67,35 +65,14 @@ var Quarkus = quarkusSteps{
 	ComputeQuarkusDependencies: NewStep(ProjectBuildPhase+1, computeQuarkusDependencies),
 }
 
-func resolveBuildSources(ctx *builderContext) ([]v1.SourceSpec, error) {
-	resources := kubernetes.NewCollection()
-	return kubernetes.ResolveSources(ctx.Build.Sources, func(name string) (*corev1.ConfigMap, error) {
-		// the config map could be part of the resources created
-		// by traits
-		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
-			return m.Name == name
-		})
-
-		if cm != nil {
-			return cm, nil
-		}
-
-		return kubernetes.GetConfigMap(ctx.C, ctx.Client, name, ctx.Namespace)
-	})
-}
-
 func prepareProjectWithSources(ctx *builderContext) error {
-	sources, err := resolveBuildSources(ctx)
-	if err != nil {
-		return err
-	}
 	sourcesPath := filepath.Join(ctx.Path, "maven", "src", "main", "resources", "routes")
 	if err := os.MkdirAll(sourcesPath, os.ModePerm); err != nil {
 		return fmt.Errorf("failure while creating resource folder: %w", err)
 	}
 
 	sourceList := ""
-	for _, source := range sources {
+	for _, source := range ctx.Build.Sources {
 		if sourceList != "" {
 			sourceList += ","
 		}

@@ -32,7 +32,7 @@ func ExtractAll(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec) (Integra
 	meta.ExposesHTTPServices = false
 
 	for _, source := range sources {
-		m, err := Extract(catalog, source)
+		m, err := extract(catalog, source)
 		if err != nil {
 			return IntegrationMetadata{}, err
 		}
@@ -53,6 +53,10 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 	t = append(t, m1.ToURIs...)
 	t = append(t, m2.ToURIs...)
 
+	k := make([]string, 0, len(m1.Kamelets)+len(m2.Kamelets))
+	k = append(k, m1.Kamelets...)
+	k = append(k, m2.Kamelets...)
+
 	return src.Metadata{
 		FromURIs:             f,
 		ToURIs:               t,
@@ -60,11 +64,12 @@ func merge(m1 src.Metadata, m2 src.Metadata) src.Metadata {
 		RequiredCapabilities: sets.Union(m1.RequiredCapabilities, m2.RequiredCapabilities),
 		ExposesHTTPServices:  m1.ExposesHTTPServices || m2.ExposesHTTPServices,
 		PassiveEndpoints:     m1.PassiveEndpoints && m2.PassiveEndpoints,
+		Kamelets:             k,
 	}
 }
 
-// Extract returns metadata information from the source code.
-func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) (IntegrationMetadata, error) {
+// extract returns metadata information from the source code.
+func extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) (IntegrationMetadata, error) {
 	if source.ContentRef != "" {
 		panic("source must be dereferenced before calling this method")
 	}
@@ -85,20 +90,4 @@ func Extract(catalog *camel.RuntimeCatalog, source v1.SourceSpec) (IntegrationMe
 	return IntegrationMetadata{
 		Metadata: meta,
 	}, nil
-}
-
-// Each traverses the sources with the provided consumer function.
-func Each(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, consumer func(int, IntegrationMetadata) bool) error {
-	for i, s := range sources {
-		meta, err := Extract(catalog, s)
-		if err != nil {
-			return err
-		}
-
-		if !consumer(i, meta) {
-			break
-		}
-	}
-
-	return nil
 }

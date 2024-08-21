@@ -32,13 +32,14 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
+	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
-	"github.com/apache/camel-k/v2/pkg/util/kamelets"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 const (
@@ -82,11 +83,19 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 			// user has to specify forcefully auto=false option and pass a list of kamelets explicitly
 			return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 		}
-		kamelets, err := kamelets.ExtractKameletFromSources(e.Ctx, e.Client, e.CamelCatalog, e.Resources, e.Integration)
+		var kamelets []string
+		_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+			util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
+			return true
+		})
 		if err != nil {
 			return false, nil, err
 		}
-
+		// Check if a Kamelet is configured as default error handler URI
+		defaultErrorHandlerURI := e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerAppPropertiesPrefix + ".deadLetterUri")
+		if defaultErrorHandlerURI != "" && strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
+			kamelets = append(kamelets, source.ExtractKamelet(defaultErrorHandlerURI))
+		}
 		if len(kamelets) > 0 {
 			sort.Strings(kamelets)
 			t.List = strings.Join(kamelets, ",")

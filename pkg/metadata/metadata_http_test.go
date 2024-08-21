@@ -42,7 +42,7 @@ func TestHttpJavaSource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
@@ -67,7 +67,7 @@ func TestHttpOnlyJavaSource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
@@ -89,7 +89,7 @@ func TestHttpOnlyJavaSourceRest(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
@@ -111,7 +111,7 @@ func TestHttpOnlyJavaSourceRest2(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
@@ -134,7 +134,7 @@ func TestNoHttpGroovySource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.False(t, meta.ExposesHTTPServices)
@@ -157,7 +157,7 @@ func TestHttpOnlyGroovySource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
@@ -180,7 +180,7 @@ func TestHttpXMLSource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)
@@ -204,7 +204,7 @@ func TestHttpOnlyXMLSource(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	meta, err := Extract(catalog, code)
+	meta, err := extract(catalog, code)
 	require.NoError(t, err)
 
 	assert.True(t, meta.ExposesHTTPServices)

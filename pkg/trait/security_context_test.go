@@ -90,6 +90,11 @@ func TestDefaultPodOpenshiftSecurityContext(t *testing.T) {
 
 func TestDefaultPodKnativeSecurityContext(t *testing.T) {
 	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKnative)
+	environment.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
+		Trait: traitv1.Trait{
+			Enabled: ptr.To(true),
+		},
+	}
 	traitCatalog := NewCatalog(nil)
 
 	conditions, err := traitCatalog.apply(environment)

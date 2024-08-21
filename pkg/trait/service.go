@@ -27,7 +27,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -76,7 +75,9 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 
 	if ptr.Deref(t.Auto, true) {
-		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
+		exposeHTTPServices, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+			return meta.ExposesHTTPServices
+		})
 		var condition *TraitCondition
 		if err != nil {
 			condition = NewIntegrationCondition(
@@ -88,16 +89,10 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			)
 			return false, condition, err
 		}
-
-		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-		if err != nil {
-			return false, nil, err
-		}
-		if !meta.ExposesHTTPServices {
-			return false, nil, nil
-		}
+		return exposeHTTPServices, nil, nil
 	}
-	return true, nil, nil
+
+	return ptr.Deref(t.Enabled, false), nil, nil
 }
 
 func (t *serviceTrait) Apply(e *Environment) error {

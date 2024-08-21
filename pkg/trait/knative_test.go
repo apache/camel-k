@@ -44,11 +44,14 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	k8sutils "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -57,6 +60,7 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -160,6 +164,8 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 }
 
 func TestKnativeEnvConfigurationFromSource(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -168,6 +174,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -1229,6 +1236,8 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 }
 
 func TestKnativeEnabled(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -1237,6 +1246,7 @@ func TestKnativeEnabled(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -1299,6 +1309,8 @@ func TestKnativeEnabled(t *testing.T) {
 }
 
 func TestKnativeNotEnabled(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -1307,6 +1319,7 @@ func TestKnativeNotEnabled(t *testing.T) {
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -1703,4 +1716,96 @@ func TestKnativeSyntheticKitEnabled(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
+}
+
+func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
+	environment := createEnvironmentMissingEventingCRDs()
+	trait, _ := newKnativeTrait().(*knativeTrait)
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name: "test.java",
+				Content: `
+				from("knative:channel/test").to("log:${body};
+			`,
+			},
+			Language: v1.LanguageJavaSource,
+		},
+	}
+	expectedCondition := NewIntegrationCondition(
+		"Knative",
+		v1.IntegrationConditionKnativeAvailable,
+		corev1.ConditionFalse,
+		v1.IntegrationConditionKnativeNotInstalledReason,
+		"integration cannot run. Knative is not installed in the cluster",
+	)
+	configured, condition, err := trait.Configure(environment)
+	require.Error(t, err)
+	assert.Equal(t, expectedCondition, condition)
+	assert.False(t, configured)
+}
+
+func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
+	environment := createEnvironmentMissingEventingCRDs()
+	trait, _ := newKnativeTrait().(*knativeTrait)
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name: "test.java",
+				Content: `
+				from("platform-http://my-site").to("log:${body}");
+			`,
+			},
+			Language: v1.LanguageJavaSource,
+		},
+	}
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.False(t, configured)
+	conditions := environment.Integration.Status.Conditions
+	assert.Empty(t, conditions)
+}
+
+func createEnvironmentMissingEventingCRDs() *Environment {
+	client, _ := test.NewFakeClient()
+	// disable the knative eventing api
+	fakeClient := client.(*test.FakeClient) //nolint
+	fakeClient.DisableAPIGroupDiscovery("eventing.knative.dev/v1")
+
+	replicas := int32(3)
+	catalog, _ := camel.QuarkusCatalog()
+
+	environment := &Environment{
+		CamelCatalog: catalog,
+		Catalog:      NewCatalog(nil),
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "integration-name",
+			},
+			Spec: v1.IntegrationSpec{
+				Replicas: &replicas,
+				Traits:   v1.Traits{},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "namespace",
+			},
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterKubernetes,
+				Profile: v1.TraitProfileKubernetes,
+			},
+		},
+		Resources:             kubernetes.NewCollection(),
+		ApplicationProperties: make(map[string]string),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	return environment
 }

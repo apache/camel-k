@@ -35,6 +35,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -747,4 +748,38 @@ func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) stri
 		return strings.ReplaceAll(camelPropertyKey, match[1], vars[match[2]])
 	}
 	return camelPropertyKey
+}
+
+// ConsumeMeta is used to consume metadata information coming from Integration sources. If no sources available,
+// would return false.
+func (e *Environment) ConsumeMeta(consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
+	return e.consumeSourcesMeta(nil, consumeMeta)
+}
+
+// consumeSourcesMeta is used to consume both sources and metadata information coming from Integration sources.
+// If no sources available would return false.
+func (e *Environment) consumeSourcesMeta(
+	consumeSources func(sources []v1.SourceSpec) bool,
+	consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
+	var sources []v1.SourceSpec
+	var err error
+	if sources, err = resolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources); err != nil {
+		return false, err
+	}
+	if len(sources) < 1 {
+		// No sources available
+		return false, nil
+	}
+	if consumeSources != nil {
+		consumeSources(sources)
+	}
+	if e.CamelCatalog == nil {
+		return false, fmt.Errorf("cannot extract metadata from sources. Camel Catalog is null")
+	}
+	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	if err != nil {
+		return false, err
+	}
+
+	return consumeMeta(meta), nil
 }
