@@ -2110,6 +2110,10 @@ func UpdatePlatform(t *testing.T, ctx context.Context, ns string, upd func(ip *v
 	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
 }
 
+func CreateIntegrationPlatform(t *testing.T, ctx context.Context, ip *v1.IntegrationPlatform) error {
+	return TestClient(t).Create(ctx, ip)
+}
+
 func PlatformVersion(t *testing.T, ctx context.Context, ns string) func() string {
 	return func() string {
 		p := Platform(t, ctx, ns)()
