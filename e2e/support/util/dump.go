@@ -320,6 +320,21 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		}
 	}
 
+	// Cronjobs
+	cronjobs, err := c.BatchV1().CronJobs(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("\nFound %d cronjobs:\n", len(cronjobs.Items))
+	for _, cronjobs := range cronjobs.Items {
+		ref := cronjobs
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
+	}
+
 	// OLM CSV
 	csvs := olm.ClusterServiceVersionList{}
 	err = c.List(ctx, &csvs, ctrl.InNamespace(ns))
