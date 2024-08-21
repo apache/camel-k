@@ -4,26 +4,13 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
 
-**Closed issues:**
-
-- Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
-
 **Merged pull requests:**
 
+- fix\(e2e\): olm needs to create an Integration Platform [\#5791](https://github.com/apache/camel-k/pull/5791) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/prometheus/client\_golang from 1.20.0 to 1.20.1 [\#5789](https://github.com/apache/camel-k/pull/5789) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(e2e\): Kamelet in route logs [\#5788](https://github.com/apache/camel-k/pull/5788) ([gansheer](https://github.com/gansheer))
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-20)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
-
-**Closed issues:**
-
-- Error: io.quarkus.vertx.http.runtime.TrustedProxyCheckPartConverter not a subtype [\#5758](https://github.com/apache/camel-k/issues/5758)
-- Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
-
-**Merged pull requests:**
-
 - chore\(api\): deprecate PublishStrategyOptions [\#5785](https://github.com/apache/camel-k/pull/5785) ([squakez](https://github.com/squakez))
+- chore\(cmd\): deprecate CLIs subcommands [\#5784](https://github.com/apache/camel-k/pull/5784) ([squakez](https://github.com/squakez))
 - chore\(dep\): Upgrade operator-framework/api to v0.23.0 [\#5782](https://github.com/apache/camel-k/pull/5782) ([gansheer](https://github.com/gansheer))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.58 to 0.6.59 [\#5780](https://github.com/apache/camel-k/pull/5780) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump fabric8-version from 6.13.2 to 6.13.3 in /java/crds [\#5779](https://github.com/apache/camel-k/pull/5779) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -31,6 +18,17 @@
 - chore\(deps\): bump github.com/prometheus/client\_golang from 1.19.1 to 1.20.0 [\#5775](https://github.com/apache/camel-k/pull/5775) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.57 to 0.6.58 [\#5774](https://github.com/apache/camel-k/pull/5774) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bugfix/5758 incremental image build fix [\#5772](https://github.com/apache/camel-k/pull/5772) ([lsergio](https://github.com/lsergio))
+
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-21)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
+
+**Closed issues:**
+
+- Error: io.quarkus.vertx.http.runtime.TrustedProxyCheckPartConverter not a subtype [\#5758](https://github.com/apache/camel-k/issues/5758)
+- Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
+- Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+- Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 
 ## [2.5.0-nightly](https://github.com/apache/camel-k/tree/2.5.0-nightly) (2024-08-14)
 
