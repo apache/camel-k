@@ -39,6 +39,7 @@ type IntegrationStatusApplyConfiguration struct {
 	GeneratedSources        []SourceSpecApplyConfiguration           `json:"generatedSources,omitempty"`
 	RuntimeVersion          *string                                  `json:"runtimeVersion,omitempty"`
 	RuntimeProvider         *v1.RuntimeProvider                      `json:"runtimeProvider,omitempty"`
+	Catalog                 *CatalogApplyConfiguration               `json:"catalog,omitempty"`
 	Configuration           []ConfigurationSpecApplyConfiguration    `json:"configuration,omitempty"`
 	Conditions              []IntegrationConditionApplyConfiguration `json:"conditions,omitempty"`
 	Version                 *string                                  `json:"version,omitempty"`
@@ -146,6 +147,14 @@ func (b *IntegrationStatusApplyConfiguration) WithRuntimeVersion(value string) *
 // If called multiple times, the RuntimeProvider field is set to the value of the last call.
 func (b *IntegrationStatusApplyConfiguration) WithRuntimeProvider(value v1.RuntimeProvider) *IntegrationStatusApplyConfiguration {
 	b.RuntimeProvider = &value
+	return b
+}
+
+// WithCatalog sets the Catalog field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Catalog field is set to the value of the last call.
+func (b *IntegrationStatusApplyConfiguration) WithCatalog(value *CatalogApplyConfiguration) *IntegrationStatusApplyConfiguration {
+	b.Catalog = value
 	return b
 }
 

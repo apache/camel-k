@@ -76,6 +76,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.CamelSchemeScopeApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Capability"):
 		return &camelv1.CapabilityApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("Catalog"):
+		return &camelv1.CatalogApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("ConfigurationSpec"):
 		return &camelv1.ConfigurationSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("DataSpec"):

@@ -1478,6 +1478,38 @@ Set of generic metadata
 
 |===
 
+[#_camel_apache_org_v1_Catalog]
+=== Catalog
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+Catalog represents the Camel Catalog runtime specification.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`version` +
+string
+|
+
+
+
+
+|`provider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_Configurable]
 === Configurable
 
@@ -2648,6 +2680,13 @@ the runtime version for which this kit was configured
 
 the runtime provider for which this kit was configured
 
+|`catalog` +
+*xref:#_camel_apache_org_v1_Catalog[Catalog]*
+|
+
+
+the catalog used to build/operate the IntegrationKit.
+
 |`platform` +
 string
 |
@@ -3521,6 +3560,13 @@ the runtime version targeted for this Integration
 
 
 the runtime provider targeted for this Integration
+
+|`catalog` +
+*xref:#_camel_apache_org_v1_Catalog[Catalog]*
+|
+
+
+the catalog used to build/operate the Integration.
 
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
@@ -5259,6 +5305,7 @@ ResourceCondition is a common type for all conditions.
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1_Catalog, Catalog>>
 * <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
 * <<#_camel_apache_org_v1_IntegrationProfileBuildSpec, IntegrationProfileBuildSpec>>

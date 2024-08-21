@@ -206,9 +206,8 @@ type ControllerStrategySelector interface {
 //
 //nolint:containedctx
 type Environment struct {
-	CamelCatalog   *camel.RuntimeCatalog
-	RuntimeVersion string
-	Catalog        *Catalog
+	CamelCatalog *camel.RuntimeCatalog
+	Catalog      *Catalog
 	// The Go standard context for the traits execution
 	Ctx context.Context
 	// The client to the API server

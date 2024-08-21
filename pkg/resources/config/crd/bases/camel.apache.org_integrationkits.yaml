@@ -468,6 +468,15 @@ spec:
               baseImage:
                 description: base image used by the kit (could be another IntegrationKit)
                 type: string
+              catalog:
+                description: the catalog used to build/operate the IntegrationKit.
+                properties:
+                  provider:
+                    description: RuntimeProvider is the provider chosen for the runtime.
+                    type: string
+                  version:
+                    type: string
+                type: object
               conditions:
                 description: a list of conditions which happened for the events related
                   the kit

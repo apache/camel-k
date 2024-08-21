@@ -83,7 +83,7 @@ func (action *initializeAction) image(ctx context.Context, env *trait.Environmen
 	catalog, err := kubernetes.GetCamelCatalog(
 		ctx,
 		action.client,
-		fmt.Sprintf("camel-catalog-%s", strings.ToLower(env.RuntimeVersion)),
+		fmt.Sprintf("camel-catalog-%s", strings.ToLower(env.CamelCatalog.GetRuntimeVersion())),
 		kit.Namespace,
 	)
 

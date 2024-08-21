@@ -36,6 +36,7 @@ type IntegrationKitStatusApplyConfiguration struct {
 	Failure            *FailureApplyConfiguration                  `json:"failure,omitempty"`
 	RuntimeVersion     *string                                     `json:"runtimeVersion,omitempty"`
 	RuntimeProvider    *v1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
+	Catalog            *CatalogApplyConfiguration                  `json:"catalog,omitempty"`
 	Platform           *string                                     `json:"platform,omitempty"`
 	Version            *string                                     `json:"version,omitempty"`
 	Conditions         []IntegrationKitConditionApplyConfiguration `json:"conditions,omitempty"`
@@ -129,6 +130,14 @@ func (b *IntegrationKitStatusApplyConfiguration) WithRuntimeVersion(value string
 // If called multiple times, the RuntimeProvider field is set to the value of the last call.
 func (b *IntegrationKitStatusApplyConfiguration) WithRuntimeProvider(value v1.RuntimeProvider) *IntegrationKitStatusApplyConfiguration {
 	b.RuntimeProvider = &value
+	return b
+}
+
+// WithCatalog sets the Catalog field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Catalog field is set to the value of the last call.
+func (b *IntegrationKitStatusApplyConfiguration) WithCatalog(value *CatalogApplyConfiguration) *IntegrationKitStatusApplyConfiguration {
+	b.Catalog = value
 	return b
 }
 
