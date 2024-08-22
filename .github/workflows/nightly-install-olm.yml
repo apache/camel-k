@@ -31,7 +31,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
+  install:
     strategy:
       fail-fast: false
       matrix:
