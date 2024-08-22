@@ -117,6 +117,7 @@ runs:
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
+        git add docs/charts/
         git commit -am 'chore(ci): v${{ env.VERSION }} release updates' || echo "No nightly release updates changes to commit"
         echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_ENV
         git tag v${{ env.VERSION }} $(git rev-parse HEAD)
@@ -126,21 +127,20 @@ runs:
       id: create_release
       uses: ncipollo/release-action@1e3e9c6637e5566e185b7ab66f187539c5a76da7
       with:
-        artifacts: "./camel-k-client*.tar.gz,sbom.json,./docs/charts/camel-k-${{ env.VERSION }}.tgz"
+        artifacts: "./camel-k-client*.tar.gz,sbom.json"
         body: |
           ```
           NOTE: last updated on ${{ env.UPD_DATE }}
           ```
           Apache Camel K ${{ env.VERSION }} build for testing purposese only (unstable). This nightly release is using an **unsupported** operator image published as `${{ env.IMAGE_NAME }}:${{ env.VERSION }}`. The available platforms are AMD64 and ARM64.
 
-          ## Kustomize
+          ## Kubectl
           ```
           kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v${{ env.VERSION }}
           ```
           ## Helm
-          Download the Helm chart and run:
           ```
-          helm install camel-k camel-k-${{ env.VERSION }}.tgz
+          helm install camel-k https://github.com/apache/camel-k/raw/v${{ env.VERSION }}/docs/charts/camel-k-${{ env.VERSION }}.tgz
           ```
           ## OLM
           Use the `operator-sdk` tool and run the bundle via:
