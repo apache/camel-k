@@ -63,7 +63,7 @@ runs:
         make generate codegen update-docs
 
     # Coverage badge
-    - name: Run Test
+    - name: Run Test and get coverage badge
       shell: bash
       run: |
         go test -v ./... -covermode=count -coverprofile=coverage.out
@@ -76,11 +76,9 @@ runs:
         go tool cover -func=coverage.mod.out -o=coverage.mod.out
         grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.mod.out | xargs > coverage
         touch badge.out
-    - name: Go coverage badge
-      uses: ./.github/actions/coverage-badge
-      with:
-        filename: coverage.out
-        target: badge.out
+        wget https://gobinaries.com/github.com/AlexBeauchemin/gobadge@v0.2.0 -O gobadge
+        gobadge -filename=coverage -target=badge.out
+
     - name: Convert badge to adoc
       shell: bash
       run: |
