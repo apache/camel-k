@@ -76,12 +76,6 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Knative"), nil
 	}
-	if e.CamelCatalog == nil {
-		if ptr.Deref(t.Enabled, false) {
-			return true, nil, nil
-		}
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
@@ -130,8 +124,8 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 
 	hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 || len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSources) > 0 || len(t.EventSinks) > 0
-	t.Enabled = &hasKnativeEndpoint
-	if !hasKnativeEndpoint {
+
+	if !hasKnativeEndpoint && !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 	if !knativeInstalled {

@@ -49,10 +49,6 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, *TraitCondition, er
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
-
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}

@@ -62,7 +62,7 @@ func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 }
 
 func (l loggingTrait) Apply(e *Environment) error {
-	if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties != nil {
+	if e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties != nil {
 		l.setCatalogConfiguration(e)
 	} else {
 		l.setEnvConfiguration(e)

@@ -90,16 +90,9 @@ func NewTelemetryTrait() trait.Trait {
 	}
 }
 
-func (t *telemetryTrait) isForcefullyEnabled() bool {
-	return ptr.Deref(t.Enabled, false) && !ptr.Deref(t.Auto, true)
-}
-
 func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
 	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
-	}
-	if e.CamelCatalog == nil && !t.isForcefullyEnabled() {
-		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 
 	if !ptr.Deref(t.Auto, true) {
@@ -143,7 +136,7 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 func (t *telemetryTrait) Apply(e *trait.Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTelemetry)
 
-	if t.isForcefullyEnabled() || e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
+	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
 		t.setCatalogConfiguration(e)
 	} else {
 		t.setRuntimeProviderProperties(e)
@@ -175,7 +168,7 @@ func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
 		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = boolean.FalseString
 	}
 
-	if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
+	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
 		for _, cp := range e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties {
 			e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 		}

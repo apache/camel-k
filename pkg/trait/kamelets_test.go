@@ -618,17 +618,16 @@ func TestKameletSyntheticKitAutoConditionFalse(t *testing.T) {
 				}),
 			},
 		})
-	environment.CamelCatalog = nil
 	environment.Integration.Spec.Sources = nil
 	trait.List = "timer-source"
 
-	// Auto=true by default, so, we will need to skip as
-	// we cannot parse sources
+	// Auto=true by default. The source parsing will be empty as
+	// there are no available sources.
 
 	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
-	assert.False(t, enabled)
-	assert.NotNil(t, condition)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
 
 	kameletsBundle := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels[kubernetes.ConfigMapTypeLabel] == KameletBundleType

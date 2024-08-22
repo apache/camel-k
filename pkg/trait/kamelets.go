@@ -78,11 +78,6 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
 	}
 	if ptr.Deref(t.Auto, true) {
-		if e.CamelCatalog == nil {
-			// Cannot execute this trait for synthetic IntegrationKit. In order to use it, the
-			// user has to specify forcefully auto=false option and pass a list of kamelets explicitly
-			return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-		}
 		var kamelets []string
 		_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
 			util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)

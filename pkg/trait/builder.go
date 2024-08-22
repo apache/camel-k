@@ -93,9 +93,6 @@ func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.IntegrationKit == nil {
 		return false, nil, nil
 	}
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	condition := t.adaptDeprecatedFields()
 	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
 		condition = newOrAppend(condition, "Spectrum publishing strategy is deprecated and may be removed in future releases. Make sure to use any supported publishing strategy instead.")

@@ -76,7 +76,7 @@ func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 
 func (t *healthTrait) setProbesValues(e *Environment) {
 	if t.LivenessProbe == "" {
-		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
 			t.LivenessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultLivenessProbePath"]
 		} else {
 			// Deprecated: to be removed
@@ -84,7 +84,7 @@ func (t *healthTrait) setProbesValues(e *Environment) {
 		}
 	}
 	if t.ReadinessProbe == "" {
-		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
 			t.ReadinessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultReadinessProbePath"]
 		} else {
 			// Deprecated: to be removed
@@ -92,7 +92,7 @@ func (t *healthTrait) setProbesValues(e *Environment) {
 		}
 	}
 	if t.StartupProbe == "" {
-		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
 			t.StartupProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultStartupProbePath"]
 		} else {
 			// Deprecated: to be removed
