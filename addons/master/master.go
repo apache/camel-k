@@ -88,13 +88,9 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	if !ptr.Deref(t.Enabled, true) {
 		return false, trait.NewIntegrationConditionUserDisabled(masterComponent), nil
 	}
-	if e.CamelCatalog == nil {
-		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseBuildingKit) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
 	if !ptr.Deref(t.Auto, true) {
 		return ptr.Deref(t.Enabled, false), nil, nil
 	}

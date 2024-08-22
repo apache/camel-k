@@ -119,9 +119,6 @@ func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition
 	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
-	if e.CamelCatalog == nil {
-		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	if !e.IntegrationInPhase(camelv1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}

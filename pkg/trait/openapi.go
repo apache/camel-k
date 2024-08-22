@@ -202,13 +202,7 @@ func (t *openAPITrait) createNewOpenAPIConfigMap(e *Environment, resource v1.Dat
 		return err
 	}
 
-	// If the catalog is missing, we use the default version used by the IntegrationPlatform
-	runtimeVersion := e.Platform.Status.Build.RuntimeVersion
-	if e.CamelCatalog != nil {
-		runtimeVersion = e.CamelCatalog.Runtime.Version
-	}
-
-	project := t.generateMavenProject(runtimeVersion)
+	project := t.generateMavenProject(e.CamelCatalog.Runtime.Version)
 	mc := maven.NewContext(tmpDir)
 	mc.LocalRepository = e.Platform.Status.Build.Maven.LocalRepository
 	mc.AdditionalArguments = e.Platform.Status.Build.Maven.CLIOptions

@@ -140,9 +140,6 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	condition := t.adaptDeprecatedFields()
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||

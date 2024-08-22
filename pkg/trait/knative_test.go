@@ -1303,8 +1303,6 @@ func TestKnativeEnabled(t *testing.T) {
 
 	// apply the knative trait
 	require.NoError(t, knTrait.Apply(&environment))
-
-	assert.True(t, *knTrait.Enabled)
 	assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityKnative)
 }
 
@@ -1704,14 +1702,13 @@ func TestKnativeSyntheticKitDefault(t *testing.T) {
 	ok, condition, err := knTrait.Configure(&e)
 	require.NoError(t, err)
 	assert.False(t, ok)
-	assert.NotNil(t, condition)
+	assert.Nil(t, condition)
 }
 
 func TestKnativeSyntheticKitEnabled(t *testing.T) {
 	e := NewFakeEnvironmentForSyntheticKit(t)
 	knTrait, _ := newKnativeTrait().(*knativeTrait)
 	knTrait.Enabled = ptr.To(true)
-	knTrait.Auto = ptr.To(false)
 	ok, condition, err := knTrait.Configure(&e)
 	require.NoError(t, err)
 	assert.True(t, ok)

@@ -93,8 +93,6 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 
 func TestTelemetryForSourceless(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
-	// CamelCatalog not necessarily available during a sourceless deployment
-	e.CamelCatalog = nil
 	telemetry := NewTelemetryTrait()
 	tt, _ := telemetry.(*telemetryTrait)
 	tt.Enabled = ptr.To(true)
@@ -104,7 +102,6 @@ func TestTelemetryForSourceless(t *testing.T) {
 	tt.Sampler = "ratio"
 	tt.SamplerRatio = "0.001"
 	tt.SamplerParentBased = ptr.To(false)
-	assert.True(t, tt.isForcefullyEnabled())
 
 	ok, condition, err := telemetry.Configure(e)
 	require.NoError(t, err)
