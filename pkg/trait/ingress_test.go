@@ -120,6 +120,37 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
 			assert.Nil(t, ingress.Spec.TLS)
 			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Nil(t, ingress.Spec.IngressClassName)
+		}
+	})
+
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func TestApplyIngressTraitWithIngressClassNameDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTestWithIngressClassName("someIngressClass")
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	assert.Len(t, environment.Resources.Items(), 2)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "service-name", ingress.Name)
+			assert.Equal(t, "namespace", ingress.Namespace)
+			assert.Len(t, ingress.Spec.Rules, 1)
+			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Nil(t, ingress.Spec.TLS)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, "someIngressClass", *ingress.Spec.IngressClassName)
 		}
 	})
 
@@ -219,6 +250,12 @@ func TestConfigureTLSWithoutSecretNameIngressTraitWDoesSucceed(t *testing.T) {
 	conditions := environment.Integration.Status.Conditions
 	assert.Len(t, conditions, 1)
 	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func createNominalIngressTestWithIngressClassName(ingressClassName string) (*ingressTrait, *Environment) {
+	trait, environment := createNominalIngressTest()
+	trait.IngressClassName = ingressClassName
+	return trait, environment
 }
 
 func createNominalIngressTest() (*ingressTrait, *Environment) {

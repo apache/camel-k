@@ -7198,6 +7198,14 @@ It's enabled by default whenever a Service is added to the integration (through 
 
 
 
+|`ingressClassName` +
+string
+|
+
+
+The Ingress class name as defined by the Ingress spec
+See https://kubernetes.io/docs/concepts/services-networking/ingress/
+
 |`annotations` +
 map[string]string
 |
