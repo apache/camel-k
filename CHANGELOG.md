@@ -1,19 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Windscribe VPN Premium 3.78.1465 Crack + License Key \[2024\] [\#5794](https://github.com/apache/camel-k/issues/5794)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-24)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-25)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
 **Closed issues:**
 
+- Windscribe VPN Premium 3.78.1465 Crack + License Key \[2024\] [\#5794](https://github.com/apache/camel-k/issues/5794)
 - Error: io.quarkus.vertx.http.runtime.TrustedProxyCheckPartConverter not a subtype [\#5758](https://github.com/apache/camel-k/issues/5758)
 - Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
