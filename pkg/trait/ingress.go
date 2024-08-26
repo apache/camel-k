@@ -43,12 +43,13 @@ func newIngressTrait() Trait {
 	return &ingressTrait{
 		BaseTrait: NewBaseTrait(ingressTraitID, ingressTraitOrder),
 		IngressTrait: traitv1.IngressTrait{
-			Annotations:   map[string]string{},
-			Host:          "",
-			Path:          "/",
-			PathType:      ptrFrom(networkingv1.PathTypePrefix),
-			TLSHosts:      []string{},
-			TLSSecretName: "",
+			IngressClassName: "",
+			Annotations:      map[string]string{},
+			Host:             "",
+			Path:             "/",
+			PathType:         ptrFrom(networkingv1.PathTypePrefix),
+			TLSHosts:         []string{},
+			TLSSecretName:    "",
 		},
 	}
 }
@@ -125,6 +126,9 @@ func (t *ingressTrait) Apply(e *Environment) error {
 				},
 			},
 		},
+	}
+	if t.IngressClassName != "" {
+		ingress.Spec.IngressClassName = &t.IngressClassName
 	}
 
 	if len(t.TLSHosts) > 0 && t.TLSSecretName != "" {
