@@ -73,22 +73,26 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return action.checkDigestAndRebuild(ctx, integration, nil)
 	}
 
-	// At this stage the Integration must have a Kit
-	if integration.Status.IntegrationKit == nil {
-		return nil, fmt.Errorf("no kit set on integration %s", integration.Name)
+	var kit *v1.IntegrationKit
+	var err error
+	if integration.Status.IntegrationKit == nil && integration.Status.Image == "" {
+		return nil, fmt.Errorf("no kit nor container image set on integration %s", integration.Name)
 	}
 
-	kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
-		integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
-	if err != nil {
-		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
-			integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
-	}
+	if integration.Status.IntegrationKit != nil {
+		// Managed Integration
+		kit, err = kubernetes.GetIntegrationKit(ctx, action.client,
+			integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+		if err != nil {
+			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
+				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+		}
 
-	// If integration is in error and its kit is also in error then integration does not change
-	if isInIntegrationKitFailed(integration.Status) &&
-		kit.Status.Phase == v1.IntegrationKitPhaseError {
-		return nil, nil
+		// If integration is in error and its kit is also in error then integration does not change
+		if isInIntegrationKitFailed(integration.Status) &&
+			kit.Status.Phase == v1.IntegrationKitPhaseError {
+			return nil, nil
+		}
 	}
 
 	// Check if the Integration requires a rebuild
@@ -98,31 +102,32 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return changed, nil
 	}
 
-	// Check if an IntegrationKit with higher priority is ready
-	priority, ok := kit.Labels[v1.IntegrationKitPriorityLabel]
-	if !ok {
-		priority = "0"
-	}
-	withHigherPriority, err := labels.NewRequirement(v1.IntegrationKitPriorityLabel,
-		selection.GreaterThan, []string{priority})
-	if err != nil {
-		return nil, err
-	}
+	if kit != nil {
+		// Check if an IntegrationKit with higher priority is ready
+		priority, ok := kit.Labels[v1.IntegrationKitPriorityLabel]
+		if !ok {
+			priority = "0"
+		}
+		withHigherPriority, err := labels.NewRequirement(v1.IntegrationKitPriorityLabel,
+			selection.GreaterThan, []string{priority})
+		if err != nil {
+			return nil, err
+		}
 
-	kits, err := lookupKitsForIntegration(ctx, action.client, integration, ctrl.MatchingLabelsSelector{
-		Selector: labels.NewSelector().Add(*withHigherPriority),
-	})
-	if err != nil {
-		return nil, err
+		kits, err := lookupKitsForIntegration(ctx, action.client, integration, ctrl.MatchingLabelsSelector{
+			Selector: labels.NewSelector().Add(*withHigherPriority),
+		})
+		if err != nil {
+			return nil, err
+		}
+		priorityReadyKit, err := findHighestPriorityReadyKit(kits)
+		if err != nil {
+			return nil, err
+		}
+		if priorityReadyKit != nil {
+			integration.SetIntegrationKit(priorityReadyKit)
+		}
 	}
-	priorityReadyKit, err := findHighestPriorityReadyKit(kits)
-	if err != nil {
-		return nil, err
-	}
-	if priorityReadyKit != nil {
-		integration.SetIntegrationKit(priorityReadyKit)
-	}
-
 	// Run traits that are enabled for the phase
 	environment, err := trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {

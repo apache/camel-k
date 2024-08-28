@@ -40,6 +40,9 @@ const (
 	CamelClonedLabelName      = CamelClonedLabelPrefix + ".name"
 	CamelClonedLabelNamespace = CamelClonedLabelPrefix + ".namespace"
 	CamelClonedLabelVersion   = CamelClonedLabelPrefix + ".version"
+
+	CamelLabelRuntimeVersion  = "camel.apache.org/runtime.version"
+	CamelLabelRuntimeProvider = "camel.apache.org/runtime.provider"
 )
 
 // FilterCamelCreatorLabels is used to inherit the creator information among resources.

@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
-
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -81,7 +80,8 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	if e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic() && t.Jar == "" {
+	if ((e.Integration != nil && !e.Integration.IsManagedBuild()) || (e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic())) &&
+		t.Jar == "" {
 		// We skip this trait since we cannot make any assumption on the container Java tooling running
 		// for the synthetic IntegrationKit
 		return false, NewIntegrationConditionPlatformDisabledWithMessage(
@@ -94,25 +94,6 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 }
 
 func (t *jvmTrait) Apply(e *Environment) error {
-	kit := e.IntegrationKit
-
-	if kit == nil && e.Integration.Status.IntegrationKit != nil {
-		name := e.Integration.Status.IntegrationKit.Name
-		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
-		k := v1.NewIntegrationKit(ns, name)
-		if err := t.Client.Get(e.Ctx, ctrl.ObjectKeyFromObject(k), k); err != nil {
-			return fmt.Errorf("unable to find integration kit %s/%s: %w", ns, name, err)
-		}
-		kit = k
-	}
-
-	if kit == nil {
-		if e.Integration.Status.IntegrationKit != nil {
-			return fmt.Errorf("unable to find integration kit %s/%s", e.Integration.GetIntegrationKitNamespace(e.Platform), e.Integration.Status.IntegrationKit.Name)
-		}
-		return fmt.Errorf("unable to find integration kit for integration %s", e.Integration.Name)
-	}
-
 	container := e.GetIntegrationContainer()
 	if container == nil {
 		return fmt.Errorf("unable to find a container for %s Integration", e.Integration.Name)
@@ -169,8 +150,9 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		args = append(args, "-cp", strings.Join(classpathItems, ":"))
 		args = append(args, "-jar", t.Jar)
 	} else {
-		if e.CamelCatalog == nil {
-			return fmt.Errorf("cannot execute trait: missing Camel catalog")
+		kit, err := t.getIntegrationKit(e)
+		if err != nil {
+			return err
 		}
 		kitDepsDirs := kit.Status.GetDependenciesPaths()
 		if len(kitDepsDirs) == 0 {
@@ -184,6 +166,33 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	container.Args = args
 
 	return nil
+}
+
+func (t *jvmTrait) getIntegrationKit(e *Environment) (*v1.IntegrationKit, error) {
+	kit := e.IntegrationKit
+
+	if kit == nil && e.Integration.Status.IntegrationKit != nil {
+		name := e.Integration.Status.IntegrationKit.Name
+		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
+		k := v1.NewIntegrationKit(ns, name)
+		if err := t.Client.Get(e.Ctx, ctrl.ObjectKeyFromObject(k), k); err != nil {
+			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", ns, name, err)
+		}
+		kit = k
+	}
+
+	if kit == nil {
+		if e.Integration.Status.IntegrationKit != nil {
+			return nil, fmt.Errorf(
+				"unable to find integration kit %s/%s",
+				e.Integration.GetIntegrationKitNamespace(e.Platform),
+				e.Integration.Status.IntegrationKit.Name,
+			)
+		}
+		return nil, fmt.Errorf("unable to find integration kit for integration %s", e.Integration.Name)
+	}
+
+	return kit, nil
 }
 
 func (t *jvmTrait) enableDebug(e *Environment) string {

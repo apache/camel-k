@@ -88,6 +88,11 @@ func (in *Integration) UserDefinedSources() []SourceSpec {
 	return sources
 }
 
+// IsManagedBuild returns true when the Integration requires to be built by the operator.
+func (in *Integration) IsManagedBuild() bool {
+	return in.Spec.Traits.Container == nil || in.Spec.Traits.Container.Image == ""
+}
+
 func (in *IntegrationSpec) AddSource(name string, content string, language Language) {
 	in.Sources = append(in.Sources, NewSourceSpec(name, content, language))
 }
