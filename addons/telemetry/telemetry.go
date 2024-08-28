@@ -177,10 +177,6 @@ func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
 
 // Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
 func (t *telemetryTrait) setRuntimeProviderProperties(e *trait.Environment) {
-	if e.CamelCatalog == nil {
-		return
-	}
-
 	provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
 	properties := telemetryProperties[provider]
 	if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {

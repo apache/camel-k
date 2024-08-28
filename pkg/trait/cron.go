@@ -321,9 +321,6 @@ func (c *cronInfo) withSchedule(schedule string) *cronInfo {
 }
 
 func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
-	if e.CamelCatalog == nil {
-		return nil, nil
-	}
 	fromURIs, err := t.getSourcesFromURIs(e)
 	if err != nil {
 		return nil, err

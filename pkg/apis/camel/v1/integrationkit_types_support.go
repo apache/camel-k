@@ -110,6 +110,7 @@ func (in *IntegrationKit) IsExternal() bool {
 	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeExternal
 }
 
+// Deprecated: synthetic Integration Kits are replaced by syntentic Integrations.
 // IsSynthetic returns true for synthetic IntegrationKits.
 func (in *IntegrationKit) IsSynthetic() bool {
 	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeSynthetic

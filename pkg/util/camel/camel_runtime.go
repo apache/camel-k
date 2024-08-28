@@ -47,8 +47,8 @@ func CreateCatalog(ctx context.Context, client client.Client, namespace string, 
 	cx := v1.NewCamelCatalogWithSpecs(namespace, catalogName, catalog.CamelCatalogSpec)
 	cx.Labels = make(map[string]string)
 	cx.Labels["app"] = "camel-k"
-	cx.Labels["camel.apache.org/runtime.version"] = runtime.Version
-	cx.Labels["camel.apache.org/runtime.provider"] = string(runtime.Provider)
+	cx.Labels[kubernetes.CamelLabelRuntimeVersion] = runtime.Version
+	cx.Labels[kubernetes.CamelLabelRuntimeProvider] = string(runtime.Provider)
 	cx.Labels["camel.apache.org/catalog.generated"] = "true"
 
 	if err := client.Create(ctx, &cx); err != nil {

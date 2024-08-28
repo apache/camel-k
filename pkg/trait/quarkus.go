@@ -248,8 +248,8 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 
 	kit.Labels = map[string]string{
 		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
-		"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
-		"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
+		kubernetes.CamelLabelRuntimeVersion:   integration.Status.RuntimeVersion,
+		kubernetes.CamelLabelRuntimeProvider:  string(integration.Status.RuntimeProvider),
 		v1.IntegrationKitLayoutLabel:          string(packageType),
 		v1.IntegrationKitPriorityLabel:        kitPriority[packageType],
 		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
@@ -447,7 +447,8 @@ func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
 
 func (t *quarkusTrait) isNativeIntegration(e *Environment) bool {
 	// The current IntegrationKit determines the Integration runtime type
-	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNativeSources
+	return e.IntegrationKit != nil &&
+		e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNativeSources
 }
 
 // Indicates whether the given source code is embedded into the final binary.

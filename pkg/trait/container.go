@@ -33,7 +33,6 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -129,43 +128,7 @@ func (t *containerTrait) configureImageIntegrationKit(e *Environment) error {
 			e.Integration.Spec.IntegrationKit)
 	}
 
-	kitName := fmt.Sprintf("kit-%s", e.Integration.Name)
-	kit := v1.NewIntegrationKit(e.Integration.Namespace, kitName)
-	kit.Spec.Image = t.Image
-
-	// Add some information for post-processing, this may need to be refactored
-	// to a proper data structure
-	kit.Labels = map[string]string{
-		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypeSynthetic,
-		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
-		kubernetes.CamelCreatorLabelName:      e.Integration.Name,
-		kubernetes.CamelCreatorLabelNamespace: e.Integration.Namespace,
-		kubernetes.CamelCreatorLabelVersion:   e.Integration.ResourceVersion,
-	}
-
-	if v, ok := e.Integration.Annotations[v1.PlatformSelectorAnnotation]; ok {
-		v1.SetAnnotation(&kit.ObjectMeta, v1.PlatformSelectorAnnotation, v)
-	}
-
-	if v, ok := e.Integration.Annotations[v1.IntegrationProfileAnnotation]; ok {
-		v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileAnnotation, v)
-
-		if v, ok := e.Integration.Annotations[v1.IntegrationProfileNamespaceAnnotation]; ok {
-			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, v)
-		} else {
-			// set integration profile namespace to the integration namespace.
-			// this is because the kit may live in another namespace and needs to resolve the integration profile from the integration namespace.
-			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
-		}
-	}
-
-	operatorID := defaults.OperatorID()
-	if operatorID != "" {
-		kit.SetOperatorID(operatorID)
-	}
-
-	e.Resources.Add(kit)
-	e.Integration.SetIntegrationKit(kit)
+	e.Integration.Status.Image = t.Image
 
 	return nil
 }

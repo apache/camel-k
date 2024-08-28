@@ -20,10 +20,10 @@ package trait
 import (
 	"fmt"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -92,7 +92,9 @@ func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
 
 func TestConfigureJvmTraitExecutableSourcelessContainer(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeSynthetic
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Image: "my-image",
+	}
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -105,7 +107,9 @@ func TestConfigureJvmTraitExecutableSourcelessContainer(t *testing.T) {
 
 func TestConfigureJvmTraitExecutableSourcelessContainerWithJar(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeSynthetic
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Image: "my-image",
+	}
 	trait.Jar = "my-path/to/my-app.jar"
 
 	d := appsv1.Deployment{
@@ -140,7 +144,9 @@ func TestConfigureJvmTraitExecutableSourcelessContainerWithJar(t *testing.T) {
 
 func TestConfigureJvmTraitExecutableSourcelessContainerWithJarAndOptions(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeSynthetic
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Image: "my-image",
+	}
 	trait.Jar = "my-path/to/my-app.jar"
 	// Add some additional JVM configurations
 	trait.Classpath = "deps/a.jar:deps/b.jar"
@@ -254,8 +260,10 @@ func TestConfigureJvmTraitWithJarAndConfigs(t *testing.T) {
 }
 
 func TestConfigureJvmTraitInWrongIntegrationKitPhaseExternal(t *testing.T) {
-	trait, environment := createNominalJvmTest(v1.IntegrationKitTypeSynthetic)
-
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Image: "my-image",
+	}
 	expectedCondition := NewIntegrationCondition(
 		"JVM",
 		v1.IntegrationConditionTraitInfo,
@@ -494,12 +502,13 @@ func TestApplyJvmTraitWithClasspathAndExistingContainerCPArg(t *testing.T) {
 
 func TestApplyJvmTraitKitMissing(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	environment.IntegrationKit = nil
-
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Image: "my-image",
+	}
 	err := trait.Apply(environment)
 
 	require.Error(t, err)
-	assert.True(t, strings.HasPrefix(err.Error(), "unable to find integration kit"))
+	assert.Equal(t, "unable to find a container for my-it Integration", err.Error())
 }
 
 func TestApplyJvmTraitContainerResourceArgs(t *testing.T) {
@@ -592,6 +601,10 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 		Catalog:      NewCatalog(nil),
 		CamelCatalog: catalog,
 		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "kit-namespace",
+				Name:      "my-it",
+			},
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,
 			},
