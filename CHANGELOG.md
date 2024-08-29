@@ -4,14 +4,12 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
 
-**Closed issues:**
-
-- Add ingressClassName field to Ingress trait [\#5793](https://github.com/apache/camel-k/issues/5793)
-- Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
-- Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
-
 **Merged pull requests:**
 
+- chore\(api\): print Kamelets info [\#5804](https://github.com/apache/camel-k/pull/5804) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump github.com/onsi/gomega from 1.34.1 to 1.34.2 [\#5802](https://github.com/apache/camel-k/pull/5802) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/container-tools/spectrum from 0.6.59 to 0.6.60 [\#5801](https://github.com/apache/camel-k/pull/5801) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump github.com/prometheus/common from 0.56.0 to 0.57.0 [\#5800](https://github.com/apache/camel-k/pull/5800) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/common from 0.55.0 to 0.56.0 [\#5799](https://github.com/apache/camel-k/pull/5799) ([dependabot[bot]](https://github.com/apps/dependabot))
 - feat\(trait\): operate via default catalog  [\#5798](https://github.com/apache/camel-k/pull/5798) ([squakez](https://github.com/squakez))
 - feat: adding ingressClassName field to the Ingress trait [\#5797](https://github.com/apache/camel-k/pull/5797) ([lsergio](https://github.com/lsergio))
@@ -32,16 +30,18 @@
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.57 to 0.6.58 [\#5774](https://github.com/apache/camel-k/pull/5774) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bugfix/5758 incremental image build fix [\#5772](https://github.com/apache/camel-k/pull/5772) ([lsergio](https://github.com/lsergio))
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-28)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-29)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
 **Closed issues:**
 
-- Windscribe VPN Premium 3.78.1465 Crack + License Key \[2024\] [\#5794](https://github.com/apache/camel-k/issues/5794)
+- Add ingressClassName field to Ingress trait [\#5793](https://github.com/apache/camel-k/issues/5793)
 - Error: io.quarkus.vertx.http.runtime.TrustedProxyCheckPartConverter not a subtype [\#5758](https://github.com/apache/camel-k/issues/5758)
 - Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
+- Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+- Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 
 ## [2.5.0-nightly](https://github.com/apache/camel-k/tree/2.5.0-nightly) (2024-08-14)
