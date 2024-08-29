@@ -45,9 +45,10 @@ func NewIstioTestEnv(t *testing.T, d *appsv1.Deployment, s *serving.Service, ena
 	require.NoError(t, err)
 
 	env := Environment{
-		Catalog:      NewEnvironmentTestCatalog(),
-		CamelCatalog: catalog,
-		Client:       client,
+		Catalog:        NewEnvironmentTestCatalog(),
+		CamelCatalog:   catalog,
+		Client:         client,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Status: v1.IntegrationStatus{
 				Phase: v1.IntegrationPhaseDeploying,

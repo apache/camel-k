@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,9 +40,11 @@ func TestGetKitDependenciesDirectories(t *testing.T) {
 		},
 	}
 	paths := kit.Status.GetDependenciesPaths()
-	assert.Len(t, paths, 4)
-	assert.Equal(t, "my-dir/*", paths[0])
-	assert.Equal(t, "my-dir1/lib/*", paths[1])
-	assert.Equal(t, "my-dir1/lib2/*", paths[2])
-	assert.Equal(t, "my-dir2/lib/*", paths[3])
+	pathsArray := paths.List()
+	sort.Strings(pathsArray)
+	assert.Len(t, pathsArray, 4)
+	assert.Equal(t, "my-dir/*", pathsArray[0])
+	assert.Equal(t, "my-dir1/lib/*", pathsArray[1])
+	assert.Equal(t, "my-dir1/lib2/*", pathsArray[2])
+	assert.Equal(t, "my-dir2/lib/*", pathsArray[3])
 }

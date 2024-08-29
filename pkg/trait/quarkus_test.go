@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
@@ -53,6 +54,21 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	packageTask := getPackageTask(environment.Pipeline)
 	assert.NotNil(t, t, packageTask)
 	assert.Len(t, packageTask.Steps, 4)
+}
+
+func TestConfigureQuarkusTraitNativeNotSupported(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	// Set a source not supporting Quarkus native
+	environment.Integration.Spec.Sources[0].Language = v1.LanguageJavaScript
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+	quarkusTrait.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
+
+	configured, condition, err := quarkusTrait.Configure(environment)
+
+	assert.False(t, configured)
+	require.Error(t, err)
+	assert.Equal(t, "invalid native support: Integration default/my-it contains a js source that cannot be compiled to native executable", err.Error())
+	assert.Nil(t, condition)
 }
 
 func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
@@ -96,6 +112,10 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 		Catalog:      NewCatalog(client),
 		CamelCatalog: &camel.RuntimeCatalog{},
 		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "default",
+				Name:      "my-it",
+			},
 			Spec: v1.IntegrationSpec{
 				Sources: []v1.SourceSpec{
 					{

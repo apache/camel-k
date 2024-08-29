@@ -493,7 +493,7 @@ func TestApplyJvmTraitWithClasspathAndExistingContainerCPArg(t *testing.T) {
 		"-cp",
 		"my-precious-lib.jar",
 		"-cp",
-		fmt.Sprintf("my-precious-lib.jar:./resources:%s:%s:%s:%s:%s:dependencies/*",
+		fmt.Sprintf("./resources:%s:%s:%s:%s:%s:dependencies/*:my-precious-lib.jar",
 			rdMountPath, cmrMountPath, scrMountPath,
 			"/path/to/another/dep.jar", "/path/to/my-dep.jar"),
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",

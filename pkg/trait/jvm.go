@@ -69,17 +69,12 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		notice := userDisabledMessage + "; this configuration is deprecated and may be removed within next releases"
 		return false, NewIntegrationCondition("JVM", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, notice), nil
 	}
-	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) || !e.IntegrationInRunningPhases() {
+
+	if (e.IntegrationKit != nil && !e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady)) || !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
 
-	// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
-	if qt := e.Catalog.GetTrait(quarkusTraitID); qt != nil {
-		if quarkus, ok := qt.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
-			return false, NewIntegrationConditionPlatformDisabledWithMessage("JVM", "quarkus native build"), nil
-		}
-	}
-
+	//nolint: staticcheck
 	if ((e.Integration != nil && !e.Integration.IsManagedBuild()) || (e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic())) &&
 		t.Jar == "" {
 		// We skip this trait since we cannot make any assumption on the container Java tooling running
@@ -88,6 +83,13 @@ func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 			"JVM",
 			"integration kit was not created via Camel K operator and the user did not provide the jar to execute",
 		), nil
+	}
+
+	// The JVM trait must be disabled in case the current IntegrationKit corresponds to a native build
+	if qt := e.Catalog.GetTrait(quarkusTraitID); qt != nil {
+		if quarkus, ok := qt.(*quarkusTrait); ok && quarkus.isNativeIntegration(e) {
+			return false, NewIntegrationConditionPlatformDisabledWithMessage("JVM", "quarkus native build"), nil
+		}
 	}
 
 	return true, nil, nil
@@ -139,6 +141,11 @@ func (t *jvmTrait) Apply(e *Environment) error {
 		args = append(args, httpProxyArgs...)
 	}
 
+	return t.feedContainer(container, args, e)
+}
+
+//nolint:nestif
+func (t *jvmTrait) feedContainer(container *corev1.Container, args []string, e *Environment) error {
 	// If user provided the jar, we will execute on the container something like
 	// java -Dxyx ... -cp ... -jar my-app.jar
 	// For this reason it's important that the container is a java based container able to run a Camel (hence Java) application
@@ -147,25 +154,53 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	classpathItems := t.prepareClasspathItems(container)
 	if t.Jar != "" {
 		// User is providing the Jar to execute explicitly
-		args = append(args, "-cp", strings.Join(classpathItems, ":"))
+		args = append(args, "-cp", classpathItems)
 		args = append(args, "-jar", t.Jar)
 	} else {
 		kit, err := t.getIntegrationKit(e)
 		if err != nil {
 			return err
 		}
-		kitDepsDirs := kit.Status.GetDependenciesPaths()
-		if len(kitDepsDirs) == 0 {
-			// Use legacy Camel Quarkus expected structure
-			kitDepsDirs = getLegacyCamelQuarkusDependenciesPaths()
+		if kit != nil {
+			// managed Integrations
+			kitDepsDirs := kit.Status.GetDependenciesPaths()
+			if kitDepsDirs.IsEmpty() {
+				// Use legacy Camel Quarkus expected structure
+				kitDepsDirs = getLegacyCamelQuarkusDependenciesPaths()
+			}
+			classpathItems = getClasspath(kitDepsDirs, classpathItems)
 		}
-		classpathItems = append(classpathItems, kitDepsDirs...)
-		args = append(args, "-cp", strings.Join(classpathItems, ":"))
+		args = append(args, "-cp", classpathItems)
 		args = append(args, e.CamelCatalog.Runtime.ApplicationClass)
 	}
 	container.Args = args
 
 	return nil
+}
+
+// getClasspath merges the classpath required by the kit with any value provided in the trait.
+func getClasspath(depsDirs *sets.Set, jvmTraitClasspath string) string {
+	if !depsDirs.IsEmpty() {
+		if jvmTraitClasspath != "" {
+			jvmTraitClasspathSet := getClasspathSet(jvmTraitClasspath)
+			depsDirs = sets.Union(depsDirs, jvmTraitClasspathSet)
+		}
+		classPaths := depsDirs.List()
+		sort.Strings(classPaths)
+
+		return strings.Join(classPaths, ":")
+	}
+
+	return jvmTraitClasspath
+}
+
+func getClasspathSet(cps string) *sets.Set {
+	s := sets.NewSet()
+	for _, cp := range strings.Split(cps, ":") {
+		s.Add(cp)
+	}
+
+	return s
 }
 
 func (t *jvmTrait) getIntegrationKit(e *Environment) (*v1.IntegrationKit, error) {
@@ -174,22 +209,10 @@ func (t *jvmTrait) getIntegrationKit(e *Environment) (*v1.IntegrationKit, error)
 	if kit == nil && e.Integration.Status.IntegrationKit != nil {
 		name := e.Integration.Status.IntegrationKit.Name
 		ns := e.Integration.GetIntegrationKitNamespace(e.Platform)
-		k := v1.NewIntegrationKit(ns, name)
-		if err := t.Client.Get(e.Ctx, ctrl.ObjectKeyFromObject(k), k); err != nil {
+		kit = v1.NewIntegrationKit(ns, name)
+		if err := t.Client.Get(e.Ctx, ctrl.ObjectKeyFromObject(kit), kit); err != nil {
 			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w", ns, name, err)
 		}
-		kit = k
-	}
-
-	if kit == nil {
-		if e.Integration.Status.IntegrationKit != nil {
-			return nil, fmt.Errorf(
-				"unable to find integration kit %s/%s",
-				e.Integration.GetIntegrationKitNamespace(e.Platform),
-				e.Integration.Status.IntegrationKit.Name,
-			)
-		}
-		return nil, fmt.Errorf("unable to find integration kit for integration %s", e.Integration.Name)
 	}
 
 	return kit, nil
@@ -212,7 +235,7 @@ func (t *jvmTrait) enableDebug(e *Environment) string {
 		suspend, t.DebugAddress)
 }
 
-func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
+func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) string {
 	existingClasspaths := extractExistingClasspathItems(container)
 	classpath := sets.NewSet()
 	// Deprecated: replaced by /etc/camel/resources.d/[_configmaps/_secrets] (camel.ResourcesConfigmapsMountPath/camel.ResourcesSecretsMountPath).
@@ -235,10 +258,10 @@ func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
 
 	if existingClasspaths != nil {
 		existingClasspaths = append(existingClasspaths, items...)
-		return existingClasspaths
+		return strings.Join(existingClasspaths, ":")
 	}
 
-	return items
+	return strings.Join(items, ":")
 }
 
 // extractExistingClasspathItems returns any container classpath option (if exists).
@@ -317,11 +340,12 @@ func (t *jvmTrait) prepareHTTPProxy(container *corev1.Container) ([]string, erro
 }
 
 // Deprecated: to be removed as soon as version 2.3.x is no longer supported.
-func getLegacyCamelQuarkusDependenciesPaths() []string {
-	return []string{
-		"dependencies/*",
-		"dependencies/lib/boot/*",
-		"dependencies/lib/main/*",
-		"dependencies/quarkus/*",
-	}
+func getLegacyCamelQuarkusDependenciesPaths() *sets.Set {
+	s := sets.NewSet()
+	s.Add("dependencies/*")
+	s.Add("dependencies/lib/boot/*")
+	s.Add("dependencies/lib/main/*")
+	s.Add("dependencies/quarkus/*")
+
+	return s
 }

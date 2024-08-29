@@ -45,7 +45,6 @@ func (action *buildKitAction) CanHandle(integration *v1.Integration) bool {
 
 func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// TODO: we may need to add a timeout strategy, i.e give up after some time in case of an unrecoverable error.
-
 	secrets, configmaps := getIntegrationSecretAndConfigmapResourceVersions(ctx, action.client, integration)
 	hash, err := digest.ComputeForIntegration(integration, configmaps, secrets)
 	if err != nil {
@@ -73,9 +72,10 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 	action.L.Debug("No kit specified in integration status so looking up", "integration", integration.Name, "namespace", integration.Namespace)
 	existingKits, err := lookupKitsForIntegration(ctx, action.client, integration)
 	if err != nil {
-		return nil, fmt.Errorf("failed to lookup kits for integration %s/%s: %w",
-			integration.Namespace, integration.Name, err)
-
+		err = fmt.Errorf("failed to lookup kits for integration %s/%s: %w", integration.Namespace, integration.Name, err)
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyConditionError(err.Error())
+		return integration, err
 	}
 
 	action.L.Debug("Applying traits to integration",
@@ -83,9 +83,10 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		"namespace", integration.Namespace)
 	env, err := trait.Apply(ctx, action.client, integration, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to apply traits to integration %s/%s: %w",
-			integration.Namespace, integration.Name, err)
-
+		err = fmt.Errorf("failed to apply traits to integration %s/%s: %w", integration.Namespace, integration.Name, err)
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyConditionError(err.Error())
+		return integration, err
 	}
 
 	action.L.Debug("Searching integration kits to assign to integration", "integration",
@@ -100,9 +101,10 @@ kits:
 			action.L.Debug("Comparing existing kit with environment", "env kit", kit.Name, "existing kit", k.Name)
 			match, err := kitMatches(action.client, &kit, k)
 			if err != nil {
-				return nil, fmt.Errorf("error occurred matches integration kits with environment for integration %s/%s: %w",
-					integration.Namespace, integration.Name, err)
-
+				err = fmt.Errorf("error occurred matches integration kits with environment for integration %s/%s: %w", integration.Namespace, integration.Name, err)
+				integration.Status.Phase = v1.IntegrationPhaseError
+				integration.SetReadyConditionError(err.Error())
+				return integration, err
 			}
 			if match {
 				if integrationKit == nil ||
@@ -123,9 +125,10 @@ kits:
 			"namespace", integration.Namespace,
 			"integration kit", kit.Name)
 		if err := action.client.Create(ctx, &kit); err != nil {
-			return nil, fmt.Errorf("failed to create new integration kit for integration %s/%s: %w",
-				integration.Namespace, integration.Name, err)
-
+			err = fmt.Errorf("failed to create new integration kit for integration %s/%s: %w", integration.Namespace, integration.Name, err)
+			integration.Status.Phase = v1.IntegrationPhaseError
+			integration.SetReadyConditionError(err.Error())
+			return integration, err
 		}
 		if integrationKit == nil {
 			integrationKit = &kit
@@ -133,7 +136,6 @@ kits:
 	}
 
 	if integrationKit != nil {
-
 		action.L.Debug("Setting integration kit for integration", "integration", integration.Name, "namespace", integration.Namespace, "integration kit", integrationKit.Name)
 		// Set the kit name so the next handle loop, will fall through the
 		// same path as integration with a user defined kit

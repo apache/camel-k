@@ -1291,18 +1291,10 @@ func KitWithPhase(phase v1.IntegrationKitPhase) KitFilter {
 	}
 }
 
-func KitWithVersion(version string) KitFilter {
+func KitWithRuntimeVersion(version string) KitFilter {
 	return &kitFilter{
 		filter: func(kit *v1.IntegrationKit) bool {
-			return kit.Status.Version == version
-		},
-	}
-}
-
-func KitWithVersionPrefix(versionPrefix string) KitFilter {
-	return &kitFilter{
-		filter: func(kit *v1.IntegrationKit) bool {
-			return strings.HasPrefix(kit.Status.Version, versionPrefix)
+			return kit.Status.RuntimeVersion == version
 		},
 	}
 }
@@ -2121,6 +2113,16 @@ func PlatformVersion(t *testing.T, ctx context.Context, ns string) func() string
 			return ""
 		}
 		return p.Status.Version
+	}
+}
+
+func PlatformRuntimeVersion(t *testing.T, ctx context.Context, ns string) func() string {
+	return func() string {
+		p := Platform(t, ctx, ns)()
+		if p == nil {
+			return ""
+		}
+		return p.Status.Build.RuntimeVersion
 	}
 }
 

@@ -87,6 +87,7 @@ func TestUpgrade(t *testing.T) {
 		// Check the IntegrationPlatform has been reconciled
 		g.Eventually(PlatformPhase(t, ctx, ns)).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		g.Eventually(PlatformVersion(t, ctx, ns)).Should(Equal(lastVersion))
+		lastRuntimeVersion := PlatformRuntimeVersion(t, ctx, ns)()
 
 		// We need a different namespace from the global operator
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsIntegration string) {
@@ -117,6 +118,7 @@ func TestUpgrade(t *testing.T) {
 			// Check the IntegrationPlatform has been reconciled
 			g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 			g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
+			g.Eventually(PlatformRuntimeVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.DefaultRuntimeVersion))
 
 			// Check the Integration hasn't been upgraded
 			g.Consistently(IntegrationVersion(t, ctx, nsIntegration, name), 15*time.Second, 3*time.Second).
@@ -135,14 +137,14 @@ func TestUpgrade(t *testing.T) {
 			g.Eventually(IntegrationVersion(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 			// Check the previous kit is not garbage collected
-			g.Eventually(Kits(t, ctx, ns, KitWithVersion(lastVersion))).Should(HaveLen(1))
+			g.Eventually(Kits(t, ctx, ns, KitWithRuntimeVersion(lastRuntimeVersion))).Should(HaveLen(1))
 			// Check a new kit is created with the current version
-			g.Eventually(Kits(t, ctx, ns, KitWithVersion(defaults.Version))).Should(HaveLen(1))
+			g.Eventually(Kits(t, ctx, ns, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion))).Should(HaveLen(1))
 			// Check the new kit is ready
-			g.Eventually(Kits(t, ctx, ns, KitWithVersion(defaults.Version), KitWithPhase(v1.IntegrationKitPhaseReady)),
+			g.Eventually(Kits(t, ctx, ns, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion), KitWithPhase(v1.IntegrationKitPhaseReady)),
 				TestTimeoutMedium).Should(HaveLen(1))
 
-			kit := Kits(t, ctx, ns, KitWithVersion(defaults.Version))()[0]
+			kit := Kits(t, ctx, ns, KitWithRuntimeVersion(defaults.DefaultRuntimeVersion))()[0]
 
 			// Check the Integration uses the new image
 			g.Eventually(IntegrationKit(t, ctx, nsIntegration, name), TestTimeoutMedium).Should(Equal(kit.Name))

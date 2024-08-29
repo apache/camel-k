@@ -1,6 +1,8 @@
 = Camel Runtimes (aka "sourceless" Integrations)
 
-Camel K can run any runtime available in Apache Camel. However, this is possible only when the Camel application was previously built and packaged into a container image. Also, if you run through this option, some of the features offered by the operator may not be available. For example, you won't be able to discover Camel capabilities because the source is not available to the operator but embedded in the container image.
+Camel K operator is traditionally in charge to perform a build from a Camel DSL source. The resulting Integration depends directly on an IntegrationKit, which is a reusable custom resource backing the final container image that your application will run. In the last versions, the only runtime the operator can build is Camel Quarkus (via Camel K Runtime project).
+
+However Camel K can run any runtime available in Apache Camel. This is possible only when the Camel application was previously built and packaged into a container image externally. Mind that if you run through this option, some of the features offered by the operator may not be available. For example, you won't be able to discover Camel capabilities because the source is not available to the operator but embedded in the container image.
 
 This option is quite interesting if in general you're building your applications externally, ie, via a CICD technology, and you want to delegate the operator only the "operational" part, taking care on your own of the building and publishing part.
 
@@ -15,7 +17,7 @@ You can have your own Camel application or just create a basic one for the purpo
 
 The step above is a very quick way to create a basic Camel application in any of the available runtime. Let's imagine we've done this for Camel Main or we have already a Camel application as a Maven project. As the build part is something we want to take care on our own, we create a pipeline to build, containerize and push the container to a registry (see as a reference https://github.com/tektoncd/catalog/blob/main/task/kamel-run/0.1/samples/run-external-build.yaml[Camel K Tekton example]).
 
-At this stage we do have a container image with our Camel application. We can use the `kamel` CLI to run our Camel application via `kamel run --image docker.io/my-org/my-app:1.0.0` tuning, if it's the case, with any of the trait or configuration required. Mind that, when you run an Integration with this option, the operator will create a **synthetic** IntegrationKit.
+At this stage we do have a container image with our Camel application. We can use the `kamel` CLI to run our Camel application via `kamel run --image docker.io/my-org/my-app:1.0.0` tuning, if it's the case, with any of the trait or configuration required. As there is no creation of an IntegrationKit, this is also known as 'kit-less' Integration.
 
 If all is good, in a few seconds (there is no build involved) you should have your application up and running and you can monitor and operate with Camel K as usual.
 
