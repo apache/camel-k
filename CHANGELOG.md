@@ -1,6 +1,16 @@
 # Changelog
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-27)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Add ingressClassName field to Ingress trait [\#5793](https://github.com/apache/camel-k/issues/5793)
+- Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
+- Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
+
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-28)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
