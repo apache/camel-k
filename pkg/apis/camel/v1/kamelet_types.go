@@ -56,7 +56,10 @@ var (
 // +kubebuilder:storageversion
 // +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
+// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kamelet\.type`,description="The Kamelet type"
+// +kubebuilder:printcolumn:name="Provider",type=string,JSONPath=`.metadata.annotations.camel\.apache\.org\/provider`,description="The Kamelet provider"
+// +kubebuilder:printcolumn:name="Bundled",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kamelet\.bundled`,description="The Kamelet bundled"
+// +kubebuilder:printcolumn:name="Camel Version",type=string,JSONPath=`.metadata.annotations.camel\.apache\.org\/catalog\.version`,description="The Camel compatible version"
 
 // Kamelet is the Schema for the kamelets API.
 type Kamelet struct {
