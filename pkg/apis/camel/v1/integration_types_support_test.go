@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -100,4 +101,27 @@ func TestGetConfigurationProperty(t *testing.T) {
 	assert.Equal(t, "", v5)
 	v6 := integration.GetConfigurationProperty("key6")
 	assert.Equal(t, "", v6)
+}
+
+func TestManagedBuild(t *testing.T) {
+	integration := Integration{
+		Spec: IntegrationSpec{},
+	}
+	assert.True(t, integration.IsManagedBuild())
+	integration.Spec.Traits = Traits{
+		Container: &trait.ContainerTrait{},
+	}
+	assert.True(t, integration.IsManagedBuild())
+	integration.Spec.Traits = Traits{
+		Container: &trait.ContainerTrait{
+			Image: "registry.io/my-org/my-image",
+		},
+	}
+	assert.False(t, integration.IsManagedBuild())
+	integration.Spec.Traits = Traits{
+		Container: &trait.ContainerTrait{
+			Image: "10.100.107.57/camel-k/camel-k-kit-cr82ehho23os73cgua70@sha256:13e5a67d37665710c0bdd89701c7ae10aee393b00f5e4e09dc8ecc234763e7c2",
+		},
+	}
+	assert.True(t, integration.IsManagedBuild())
 }

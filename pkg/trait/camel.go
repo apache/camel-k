@@ -78,6 +78,7 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	}
 
 	var cond *TraitCondition
+	//nolint: staticcheck
 	if (e.Integration != nil && !e.Integration.IsManagedBuild()) || (e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic()) {
 		// We set a condition to warn the user the catalog used to run the Integration
 		// may differ from the runtime version which we don't control
@@ -118,6 +119,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 		}
 	}
 	if e.IntegrationKit != nil {
+		//nolint: staticcheck
 		if !e.IntegrationKit.IsSynthetic() {
 			e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
 			e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider

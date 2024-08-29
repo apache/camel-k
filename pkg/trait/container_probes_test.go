@@ -57,6 +57,7 @@ func newTestProbesEnv(t *testing.T, integration *v1.Integration) Environment {
 				},
 			},
 		},
+		IntegrationKit:        &v1.IntegrationKit{},
 		Integration:           integration,
 		Resources:             kubernetes.NewCollection(),
 		ApplicationProperties: make(map[string]string),

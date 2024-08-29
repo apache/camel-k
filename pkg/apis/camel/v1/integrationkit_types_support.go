@@ -20,7 +20,6 @@ package v1
 import (
 	"fmt"
 	"path/filepath"
-	"sort"
 	"strconv"
 
 	"github.com/apache/camel-k/v2/pkg/util/sets"
@@ -211,16 +210,14 @@ func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 }
 
 // GetDependenciesPaths returns the set of dependency paths.
-func (in *IntegrationKitStatus) GetDependenciesPaths() []string {
+func (in *IntegrationKitStatus) GetDependenciesPaths() *sets.Set {
 	s := sets.NewSet()
 	for _, dep := range in.Artifacts {
 		path := filepath.Dir(dep.Target)
 		s.Add(fmt.Sprintf("%s/*", path))
 	}
-	values := s.List()
-	sort.Strings(values)
 
-	return values
+	return s
 }
 
 func (c IntegrationKitCondition) GetType() string {

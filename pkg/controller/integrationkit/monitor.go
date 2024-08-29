@@ -44,6 +44,7 @@ func (action *monitorAction) CanHandle(kit *v1.IntegrationKit) bool {
 }
 
 func (action *monitorAction) Handle(ctx context.Context, kit *v1.IntegrationKit) (*v1.IntegrationKit, error) {
+	//nolint: staticcheck
 	if kit.IsExternal() || kit.IsSynthetic() {
 		// do nothing, it's not a managed kit
 		// if it's a syntetic Kit add a condition to warn this is a

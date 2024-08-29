@@ -384,10 +384,11 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		Ctx:          context.TODO(),
-		Client:       client,
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
+		Ctx:            context.TODO(),
+		Client:         client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
@@ -431,10 +432,11 @@ func TestDeploymentContainerPorts(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		Ctx:          context.TODO(),
-		Client:       client,
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
+		Ctx:            context.TODO(),
+		Client:         client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
@@ -496,10 +498,11 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		Ctx:          context.TODO(),
-		Client:       client,
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
+		Ctx:            context.TODO(),
+		Client:         client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKnative,

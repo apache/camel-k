@@ -73,11 +73,6 @@ func TestTektonLikeBehavior(t *testing.T) {
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Echo"))
-			tektonIntegrationKitName := IntegrationKit(t, ctx, ns, name)()
-			g.Expect(tektonIntegrationKitName).ToNot(BeEmpty())
-			tektonIntegrationKitImage := KitImage(t, ctx, ns, tektonIntegrationKitName)()
-			g.Expect(tektonIntegrationKitImage).ToNot(BeEmpty())
-			g.Eventually(Kit(t, ctx, ns, tektonIntegrationKitName)().Status.Image, TestTimeoutShort).Should(Equal(externalImage))
 		})
 	})
 }

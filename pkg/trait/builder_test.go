@@ -45,11 +45,12 @@ func TestBuilderTraitNotAppliedBecauseOfNilKit(t *testing.T) {
 		e.IntegrationKit = nil
 
 		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
-			conditions, err := NewBuilderTestCatalog().apply(e)
+			trait, _ := newBuilderTrait().(*builderTrait)
 
+			configure, conditions, err := trait.Configure(e)
+			assert.False(t, configure)
+			assert.Empty(t, conditions)
 			require.NoError(t, err)
-			assert.NotEmpty(t, conditions)
-			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Pipeline)
 		})

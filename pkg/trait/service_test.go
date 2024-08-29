@@ -431,9 +431,10 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 	require.NoError(t, err)
 
 	environment := Environment{
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
-		Client:       client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		Client:         client,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -523,9 +524,10 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 	require.NoError(t, err)
 
 	environment := Environment{
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
-		Client:       client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		Client:         client,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,
@@ -603,9 +605,10 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 	require.NoError(t, err)
 
 	environment := Environment{
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
-		Client:       client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		Client:         client,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      ServiceTestName,

@@ -27,7 +27,6 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -41,8 +40,6 @@ func TestNativeIntegrations(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/JavaScript.js", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
-			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionKitAvailable)).
-				Should(Equal(corev1.ConditionFalse))
 		})
 
 		t.Run("xml native support", func(t *testing.T) {

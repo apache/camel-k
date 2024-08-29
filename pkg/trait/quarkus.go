@@ -142,6 +142,15 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	condition := t.adaptDeprecatedFields()
 
+	if t.containsMode(traitv1.NativeQuarkusMode) && e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
+		// Native compilation is only supported for a subset of languages,
+		// so let's check for compatibility, and fail-fast the Integration,
+		// to save compute resources and user time.
+		if err := t.validateNativeSupport(e); err != nil {
+			return false, nil, err
+		}
+	}
+
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases(),
@@ -167,10 +176,20 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 	return nil
 }
 
+func (t *quarkusTrait) validateNativeSupport(e *Environment) error {
+	for _, source := range e.Integration.AllSources() {
+		if language := source.InferLanguage(); !getLanguageSettings(e, language).native {
+			return fmt.Errorf("invalid native support: Integration %s/%s contains a %s source that cannot be compiled to native executable",
+				e.Integration.Namespace, e.Integration.Name, language)
+		}
+	}
+
+	return nil
+}
+
 func (t *quarkusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		t.applyWhileBuildingKit(e)
-
 		return nil
 	}
 
@@ -190,16 +209,6 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 }
 
 func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
-	if t.containsMode(traitv1.NativeQuarkusMode) {
-		// Native compilation is only supported for a subset of languages,
-		// so let's check for compatibility, and fail-fast the Integration,
-		// to save compute resources and user time.
-		if !t.validateNativeSupport(e) {
-			// Let the calling controller handle the Integration update
-			return
-		}
-	}
-
 	switch len(t.Modes) {
 	case 0:
 		// Default behavior
@@ -222,24 +231,6 @@ func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
 			e.IntegrationKits = append(e.IntegrationKits, *kit)
 		}
 	}
-}
-
-func (t *quarkusTrait) validateNativeSupport(e *Environment) bool {
-	for _, source := range e.Integration.AllSources() {
-		if language := source.InferLanguage(); !getLanguageSettings(e, language).native {
-			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace, e.Integration.Name, language)
-			e.Integration.Status.Phase = v1.IntegrationPhaseError
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionKitAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionUnsupportedLanguageReason,
-				fmt.Sprintf("native compilation for language %q is not supported", language))
-
-			return false
-		}
-	}
-
-	return true
 }
 
 func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPackageType) *v1.IntegrationKit {
