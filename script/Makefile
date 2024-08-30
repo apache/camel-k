@@ -95,7 +95,7 @@ STAGING_IMAGE := docker.io/camelk/camel-k
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v4.0.1
+KAMELET_CATALOG_REPO_TAG := v4.4.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
