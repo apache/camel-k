@@ -2673,10 +2673,12 @@ func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, n
 				Labels:    labels,
 			},
 			Spec: v1.KameletSpec{
-				Definition: &v1.JSONSchemaProps{
-					Properties: properties,
+				KameletSpecBase: v1.KameletSpecBase{
+					Definition: &v1.JSONSchemaProps{
+						Properties: properties,
+					},
+					Template: asTemplate(t, template),
 				},
-				Template: asTemplate(t, template),
 			},
 		}
 

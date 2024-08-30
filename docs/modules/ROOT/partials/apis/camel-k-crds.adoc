@@ -1756,7 +1756,7 @@ the expected schema for the data type
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 DataTypesSpec represents the specification for a set of data types.
 
@@ -2005,7 +2005,7 @@ ErrorHandlerType a type of error handler (ie, sink).
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 EventTypeSpec represents a specification for an event type.
 Deprecated: In favor of using DataTypeSpec.
@@ -3864,7 +3864,7 @@ XDescriptors is a list of extended properties that trigger a custom behavior in 
 
 * <<#_camel_apache_org_v1_DataTypeSpec, DataTypeSpec>>
 * <<#_camel_apache_org_v1_EventTypeSpec, EventTypeSpec>>
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 
@@ -4123,6 +4123,37 @@ the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
 * <<#_camel_apache_org_v1_Kamelet, Kamelet>>
 
 KameletSpec specifies the configuration required to execute a Kamelet.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`KameletSpecBase` +
+*xref:#_camel_apache_org_v1_KameletSpecBase[KameletSpecBase]*
+|(Members of `KameletSpecBase` are embedded into this type.)
+
+
+
+
+|`versions` +
+*xref:#_camel_apache_org_v1_KameletSpecBase[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.KameletSpecBase]*
+|
+
+
+the optional versions available for this Kamelet.
+
+
+|===
+
+[#_camel_apache_org_v1_KameletSpecBase]
+=== KameletSpecBase
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+
+KameletSpecBase specifies the base configuration of a Kamelet.
 
 [cols="2,2a",options="header"]
 |===
@@ -5474,7 +5505,7 @@ string
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language.
 
@@ -5687,7 +5718,7 @@ a JibTask, for Jib strategy
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 Template is an unstructured object representing a Kamelet template in YAML/JSON DSL.
 
