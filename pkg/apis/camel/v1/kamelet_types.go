@@ -76,6 +76,13 @@ type Kamelet struct {
 
 // KameletSpec specifies the configuration required to execute a Kamelet.
 type KameletSpec struct {
+	KameletSpecBase `json:",inline"`
+	// the optional versions available for this Kamelet.
+	Versions map[string]KameletSpecBase `json:"versions,omitempty"`
+}
+
+// KameletSpecBase specifies the base configuration of a Kamelet.
+type KameletSpecBase struct {
 	// defines the formal configuration of the Kamelet
 	Definition *JSONSchemaProps `json:"definition,omitempty"`
 	// sources in any Camel DSL supported

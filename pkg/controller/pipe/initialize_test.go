@@ -120,18 +120,20 @@ func TestNewPipeWithKameletsCreating(t *testing.T) {
 		v1.AnnotationIcon: "my-source-icon-base64",
 	}
 	source.Spec = v1.KameletSpec{
-		Template: templateOrFail(map[string]interface{}{
-			"from": map[string]interface{}{
-				"uri": "timer:tick",
-				"steps": []interface{}{
-					map[string]interface{}{
-						"to": "kamelet:sink",
+		KameletSpecBase: v1.KameletSpecBase{
+			Template: templateOrFail(map[string]interface{}{
+				"from": map[string]interface{}{
+					"uri": "timer:tick",
+					"steps": []interface{}{
+						map[string]interface{}{
+							"to": "kamelet:sink",
+						},
 					},
 				},
+			}),
+			Dependencies: []string{
+				"camel:timer",
 			},
-		}),
-		Dependencies: []string{
-			"camel:timer",
 		},
 	}
 	sink := v1.NewKamelet("ns", "my-sink")
@@ -139,20 +141,22 @@ func TestNewPipeWithKameletsCreating(t *testing.T) {
 		v1.AnnotationIcon: "my-sink-icon-base64",
 	}
 	sink.Spec = v1.KameletSpec{
-		Template: templateOrFail(map[string]interface{}{
-			"from": map[string]interface{}{
-				"uri": "kamelet:source",
-				"steps": []interface{}{
-					map[string]interface{}{
-						"to": map[string]interface{}{
-							"uri": "log:info",
+		KameletSpecBase: v1.KameletSpecBase{
+			Template: templateOrFail(map[string]interface{}{
+				"from": map[string]interface{}{
+					"uri": "kamelet:source",
+					"steps": []interface{}{
+						map[string]interface{}{
+							"to": map[string]interface{}{
+								"uri": "log:info",
+							},
 						},
 					},
 				},
+			}),
+			Dependencies: []string{
+				"camel:log",
 			},
-		}),
-		Dependencies: []string{
-			"camel:log",
 		},
 	}
 	pipe := &v1.Pipe{

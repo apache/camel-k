@@ -81,14 +81,16 @@ func TestKameletLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1.KameletSpec{
-			Template: templateOrFail(map[string]interface{}{
-				"from": map[string]interface{}{
-					"uri": "timer:tick",
+			KameletSpecBase: v1.KameletSpecBase{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+				Dependencies: []string{
+					"camel:timer",
+					"camel:log",
 				},
-			}),
-			Dependencies: []string{
-				"camel:timer",
-				"camel:log",
 			},
 		},
 	})
@@ -125,18 +127,20 @@ func TestKameletSecondarySourcesLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1.KameletSpec{
-			Template: templateOrFail(map[string]interface{}{
-				"from": map[string]interface{}{
-					"uri": "timer:tick",
-				},
-			}),
-			Sources: []v1.SourceSpec{
-				{
-					DataSpec: v1.DataSpec{
-						Name:    "support.groovy",
-						Content: "from('xxx:xxx').('to:log:info')",
+			KameletSpecBase: v1.KameletSpecBase{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
 					},
-					Language: v1.LanguageGroovy,
+				}),
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "support.groovy",
+							Content: "from('xxx:xxx').('to:log:info')",
+						},
+						Language: v1.LanguageGroovy,
+					},
 				},
 			},
 		},
@@ -181,13 +185,15 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1.KameletSpec{
-			Sources: []v1.SourceSpec{
-				{
-					DataSpec: v1.DataSpec{
-						Name:    "mykamelet.groovy",
-						Content: `from("timer").to("log:info")`,
+			KameletSpecBase: v1.KameletSpecBase{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "mykamelet.groovy",
+							Content: `from("timer").to("log:info")`,
+						},
+						Type: v1.SourceTypeTemplate,
 					},
-					Type: v1.SourceTypeTemplate,
 				},
 			},
 		},
@@ -224,23 +230,25 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1.KameletSpec{
-			Template: templateOrFail(map[string]interface{}{
-				"from": map[string]interface{}{
-					"uri": "timer:tick",
-				},
-			}),
-			Sources: []v1.SourceSpec{
-				{
-					DataSpec: v1.DataSpec{
-						Name:    "support.groovy",
-						Content: "from('xxx:xxx').('to:log:info')",
+			KameletSpecBase: v1.KameletSpecBase{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
 					},
-					Language: v1.LanguageGroovy,
+				}),
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "support.groovy",
+							Content: "from('xxx:xxx').('to:log:info')",
+						},
+						Language: v1.LanguageGroovy,
+					},
 				},
-			},
-			Dependencies: []string{
-				"camel:timer",
-				"camel:xxx",
+				Dependencies: []string{
+					"camel:timer",
+					"camel:xxx",
+				},
 			},
 		},
 	}, &v1.Kamelet{
@@ -249,21 +257,23 @@ func TestMultipleKamelets(t *testing.T) {
 			Name:      "logger",
 		},
 		Spec: v1.KameletSpec{
-			Template: templateOrFail(map[string]interface{}{
-				"from": map[string]interface{}{
-					"uri": "tbd:endpoint",
-					"steps": []interface{}{
-						map[string]interface{}{
-							"to": map[string]interface{}{
-								"uri": "log:info",
+			KameletSpecBase: v1.KameletSpecBase{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "tbd:endpoint",
+						"steps": []interface{}{
+							map[string]interface{}{
+								"to": map[string]interface{}{
+									"uri": "log:info",
+								},
 							},
 						},
 					},
+				}),
+				Dependencies: []string{
+					"camel:log",
+					"camel:tbd",
 				},
-			}),
-			Dependencies: []string{
-				"camel:log",
-				"camel:tbd",
 			},
 		},
 	})
@@ -318,14 +328,16 @@ func TestKameletConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1.KameletSpec{
-			Template: templateOrFail(map[string]interface{}{
-				"from": map[string]interface{}{
-					"uri": "timer:tick",
+			KameletSpecBase: v1.KameletSpecBase{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+				Dependencies: []string{
+					"camel:timer",
+					"camel:log",
 				},
-			}),
-			Dependencies: []string{
-				"camel:timer",
-				"camel:log",
 			},
 		},
 	}, &corev1.Secret{
@@ -373,14 +385,16 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 			Name:      "timer",
 		},
 		Spec: v1.KameletSpec{
-			Template: templateOrFail(map[string]interface{}{
-				"from": map[string]interface{}{
-					"uri": "timer:tick",
+			KameletSpecBase: v1.KameletSpecBase{
+				Template: templateOrFail(map[string]interface{}{
+					"from": map[string]interface{}{
+						"uri": "timer:tick",
+					},
+				}),
+				Dependencies: []string{
+					"camel:timer",
+					"camel:log",
 				},
-			}),
-			Dependencies: []string{
-				"camel:timer",
-				"camel:log",
 			},
 		},
 	}, &corev1.Secret{
@@ -432,11 +446,13 @@ func TestKameletConditionFalse(t *testing.T) {
 				Name:      "timer",
 			},
 			Spec: v1.KameletSpec{
-				Template: templateOrFail(map[string]interface{}{
-					"from": map[string]interface{}{
-						"uri": "timer:tick",
-					},
-				}),
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
 			},
 		})
 
@@ -471,11 +487,13 @@ func TestKameletConditionTrue(t *testing.T) {
 				Name:      "timer",
 			},
 			Spec: v1.KameletSpec{
-				Template: templateOrFail(map[string]interface{}{
-					"from": map[string]interface{}{
-						"uri": "timer:tick",
-					},
-				}),
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
 			},
 		},
 		&v1.Kamelet{
@@ -484,11 +502,13 @@ func TestKameletConditionTrue(t *testing.T) {
 				Name:      "none",
 			},
 			Spec: v1.KameletSpec{
-				Template: templateOrFail(map[string]interface{}{
-					"from": map[string]interface{}{
-						"uri": "timer:tick",
-					},
-				}),
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
 			},
 		})
 
@@ -568,11 +588,13 @@ func TestKameletSyntheticKitConditionTrue(t *testing.T) {
 				Name:      "timer-source",
 			},
 			Spec: v1.KameletSpec{
-				Template: templateOrFail(map[string]interface{}{
-					"from": map[string]interface{}{
-						"uri": "timer:tick",
-					},
-				}),
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
 			},
 		})
 	environment.CamelCatalog = nil
@@ -611,11 +633,13 @@ func TestKameletSyntheticKitAutoConditionFalse(t *testing.T) {
 				Name:      "timer-source",
 			},
 			Spec: v1.KameletSpec{
-				Template: templateOrFail(map[string]interface{}{
-					"from": map[string]interface{}{
-						"uri": "timer:tick",
-					},
-				}),
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
 			},
 		})
 	environment.Integration.Spec.Sources = nil

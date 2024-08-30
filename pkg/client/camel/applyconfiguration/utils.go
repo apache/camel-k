@@ -168,6 +168,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.KameletRepositorySpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletSpec"):
 		return &camelv1.KameletSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("KameletSpecBase"):
+		return &camelv1.KameletSpecBaseApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletStatus"):
 		return &camelv1.KameletStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KanikoTask"):
