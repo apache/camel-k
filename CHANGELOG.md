@@ -30,7 +30,7 @@
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.57 to 0.6.58 [\#5774](https://github.com/apache/camel-k/pull/5774) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bugfix/5758 incremental image build fix [\#5772](https://github.com/apache/camel-k/pull/5772) ([lsergio](https://github.com/lsergio))
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-30)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-08-31)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
