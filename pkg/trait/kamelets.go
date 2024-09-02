@@ -97,7 +97,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		}
 	}
 
-	return len(t.getKameletKeys()) > 0, nil, nil
+	return len(t.getKameletKeys(false)) > 0, nil, nil
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
@@ -109,6 +109,7 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 	return nil
 }
 
+// collectKamelets load a Kamelet specification setting the specific version specification.
 func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet, error) {
 	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
@@ -119,18 +120,27 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	missingKamelets := make([]string, 0)
 	availableKamelets := make([]string, 0)
 
-	for _, key := range t.getKameletKeys() {
-		kamelet, err := repo.Get(e.Ctx, key)
+	for _, kml := range strings.Split(t.List, ",") {
+		name := getKameletKey(kml, false)
+		if !v1.ValidKameletName(name) {
+			// Skip kamelet sink and source id
+			continue
+		}
+		kamelet, err := repo.Get(e.Ctx, name)
 		if err != nil {
 			return nil, err
 		}
-
 		if kamelet == nil {
-			missingKamelets = append(missingKamelets, key)
+			missingKamelets = append(missingKamelets, name)
+			continue
 		} else {
-			availableKamelets = append(availableKamelets, key)
-			kamelets[key] = kamelet
+			availableKamelets = append(availableKamelets, name)
 		}
+		clonedKamelet, err := kamelet.CloneWithVersion(getKameletVersion(kml))
+		if err != nil {
+			return nil, err
+		}
+		kamelets[clonedKamelet.Name] = clonedKamelet
 	}
 
 	sort.Strings(availableKamelets)
@@ -163,18 +173,16 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 }
 
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	if len(t.getKameletKeys()) == 0 {
+	if len(t.getKameletKeys(false)) == 0 {
 		return nil
 	}
-
 	kamelets, err := t.collectKamelets(e)
 	if err != nil {
 		return err
 	}
 	kb := newKameletBundle()
-	for _, key := range t.getKameletKeys() {
-		kamelet := kamelets[key]
-		if err := t.addKameletAsSource(e, kamelet); err != nil {
+	for version, kamelet := range kamelets {
+		if err := t.addKameletAsSource(e, kamelet, version); err != nil {
 			return err
 		}
 		// Adding dependencies from Kamelets
@@ -210,23 +218,20 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 // This func will add a Kamelet as a generated Integration source. The source included here is going to be used in order to parse the Kamelet
 // for any component or capability (ie, rest) which is included in the Kamelet spec itself. However, the generated source is marked as coming `FromKamelet`.
 // When mounting the sources, these generated sources won't be mounted as sources but as Kamelet instead.
-func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) error {
+func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet, version string) error {
 	sources := make([]v1.SourceSpec, 0)
 
 	if kamelet.Spec.Template != nil {
-		template := kamelet.Spec.Template
-		flowData, err := dsl.TemplateToYamlDSL(*template, kamelet.Name)
+		flowData, err := dsl.TemplateToYamlDSL(*kamelet.Spec.Template, kamelet.Name)
 		if err != nil {
 			return err
 		}
-
 		flowSource := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
 				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
 				Content: string(flowData),
 			},
-			Language:    v1.LanguageYaml,
-			FromKamelet: true,
+			Language: v1.LanguageYaml,
 		}
 		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-template", e.Integration.Name, kamelet.Name))
 		if err != nil {
@@ -259,13 +264,10 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 	return nil
 }
 
-func (t *kameletsTrait) getKameletKeys() []string {
+func (t *kameletsTrait) getKameletKeys(withVersion bool) []string {
 	answer := make([]string, 0)
 	for _, item := range strings.Split(t.List, ",") {
-		i := strings.Trim(item, " \t\"")
-		if strings.Contains(i, "/") {
-			i = strings.SplitN(i, "/", 2)[0]
-		}
+		i := getKameletKey(item, withVersion)
 		if i != "" && v1.ValidKameletName(i) {
 			util.StringSliceUniqueAdd(&answer, i)
 		}
@@ -274,12 +276,38 @@ func (t *kameletsTrait) getKameletKeys() []string {
 	return answer
 }
 
+func getKameletKey(item string, withVersion bool) string {
+	i := strings.Trim(item, " \t\"")
+	if strings.Contains(i, "/") {
+		i = strings.SplitN(i, "/", 2)[0]
+	}
+	if strings.Contains(i, "?version=") {
+		versionedKamelet := strings.SplitN(i, "?version=", 2)
+		if withVersion {
+			i = fmt.Sprintf("%s-%s", versionedKamelet[0], versionedKamelet[1])
+		} else {
+			i = versionedKamelet[0]
+		}
+	}
+	return i
+}
+
+func getKameletVersion(item string) string {
+	if strings.Contains(item, "?version=") {
+		versionedKamelet := strings.SplitN(item, "?version=", 2)
+		return versionedKamelet[1]
+	}
+	return ""
+}
+
 func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
 	if source.Type == v1.SourceTypeTemplate {
 		// Kamelets must be named "<kamelet-name>.extension"
 		language := source.InferLanguage()
 		source.Name = fmt.Sprintf("%s.%s", kamelet.Name, string(language))
 	}
+
+	source.FromKamelet = true
 
 	if source.DataSpec.ContentRef != "" {
 		return source, nil

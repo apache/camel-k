@@ -1,0 +1,4 @@
+- from:
+    uri: "kamelet:my-timer-source?version=v1"
+    steps:
+      - log: "${body}"
