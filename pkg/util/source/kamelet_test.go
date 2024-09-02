@@ -29,6 +29,6 @@ func TestExtractKamelets(t *testing.T) {
 	assert.Equal(t, "my-test", ExtractKamelet("kamelet:my-test?"))
 	assert.Equal(t, "my-test", ExtractKamelet("kamelet:my-test?option=1"))
 	assert.Equal(t, "my-test", ExtractKamelet("kamelet:my-test?option=1&opt2=2"))
-	assert.Equal(t, "my-test?version=v1", ExtractKamelet("kamelet:my-test?option=1&opt2=2&version=v1"))
-	assert.Equal(t, "my-test?version=v1", ExtractKamelet("kamelet:my-test?version=v1"))
+	assert.Equal(t, "my-test?kameletVersion=v1", ExtractKamelet("kamelet:my-test?option=1&opt2=2&kameletVersion=v1"))
+	assert.Equal(t, "my-test?kameletVersion=v1", ExtractKamelet("kamelet:my-test?kameletVersion=v1"))
 }

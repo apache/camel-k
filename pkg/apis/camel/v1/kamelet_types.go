@@ -49,6 +49,8 @@ var (
 	reservedKameletNames = map[string]bool{"source": true, "sink": true}
 	// KameletIDProperty used to identify.
 	KameletIDProperty = "id"
+	// KameletVersionProperty used to specify the version to use.
+	KameletVersionProperty = "kameletVersion"
 )
 
 // +genclient
@@ -77,7 +79,9 @@ type Kamelet struct {
 // KameletSpec specifies the configuration required to execute a Kamelet.
 type KameletSpec struct {
 	KameletSpecBase `json:",inline"`
-	// the optional versions available for this Kamelet.
+	// the optional versions available for this Kamelet. This field may not be taken in account by Camel core and is meant to support
+	// any user defined versioning model on cluster only. If the user wants to use any given version, she must materialize a file with the given version spec
+	// as the `main` Kamelet spec on the runtime.
 	Versions map[string]KameletSpecBase `json:"versions,omitempty"`
 }
 
