@@ -226,7 +226,7 @@ Kamelets provided in a catalog are generally meant to work with a given runtime 
 .kamlet-namedconfig-route.yaml
 ----
 - from:
-    uri: "timer:tick?version=v2"
+    uri: "timer:tick?kameletVersion=v2"
     steps:
       - to: "log:info"
 ----

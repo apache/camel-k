@@ -164,6 +164,24 @@ func TestBindings(t *testing.T) {
 			},
 		},
 		{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "Kamelet",
+					APIVersion: "camel.apache.org/v1any1",
+					Name:       "mykamelet",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"mymessage":      "myval",
+					"kameletVersion": "v1",
+				}),
+			},
+			uri: "kamelet:mykamelet/sink?kameletVersion=v1",
+			props: map[string]string{
+				"camel.kamelet.mykamelet.sink.mymessage": "myval",
+			},
+		},
+		{
 			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",

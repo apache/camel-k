@@ -54,7 +54,7 @@ func TestConfigurationWithKamelets(t *testing.T) {
     uri: kamelet:c1
     steps:
     - to: kamelet:c2
-    - to: kamelet:c3?version=v1
+    - to: kamelet:c3?kameletVersion=v1
     - to: telegram:bots
     - to: kamelet://c0?prop=x
     - to: kamelet://complex-.-.-1a?prop=x&prop2
@@ -222,7 +222,7 @@ func TestNonYAMLKameletLookup(t *testing.T) {
 func TestMultipleKamelets(t *testing.T) {
 	trait, environment := createKameletsTestEnvironment(`
 - from:
-    uri: kamelet:timer?version=v1
+    uri: kamelet:timer?kameletVersion=v1
     steps:
     - to: kamelet:logger
 `, &v1.Kamelet{
@@ -310,7 +310,7 @@ func TestMultipleKamelets(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
-	assert.Equal(t, "logger,timer?version=v1", trait.List)
+	assert.Equal(t, "logger,timer?kameletVersion=v1", trait.List)
 	assert.Equal(t, []string{"logger", "timer"}, trait.getKameletKeys(false))
 	assert.Equal(t, []string{"logger", "timer-v1"}, trait.getKameletKeys(true))
 

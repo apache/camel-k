@@ -373,7 +373,9 @@ spec:
 
 NOTE: make sure the overall content fits into 1 MiB, which is the storage limit for a Custom Resource.
 
-This is a way to handle multiple version on Kubernetes and may not be supported out of the box by Camel core. If the Integration will require specifically to use `kamelet:my-timer-source?version=v2`, then, the operator will mount properly the specification on the running application.
+This is a way to handle multiple version on Kubernetes and may not be supported out of the box by Camel core. If the Integration will require specifically to use `kamelet:my-timer-source?kameletVersion=v2`, then, the operator will mount properly the specification on the running application.
+
+The `.spec.versions` field may not be necessarily supported by the core as it's meant to provide a way to handle versioning on the cluster only. The runtime must be provided with a materialized Kamelet file with the chosen spec (the operator is in charge of that).
 
 == Kamelet data types
 

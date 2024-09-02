@@ -53,6 +53,8 @@ const (
 	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
 
+var kameletVersionProperty = fmt.Sprintf("?%s=", v1.KameletVersionProperty)
+
 type kameletsTrait struct {
 	BaseTrait
 	traitv1.KameletsTrait `property:",squash"`
@@ -181,8 +183,8 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		return err
 	}
 	kb := newKameletBundle()
-	for version, kamelet := range kamelets {
-		if err := t.addKameletAsSource(e, kamelet, version); err != nil {
+	for _, kamelet := range kamelets {
+		if err := t.addKameletAsSource(e, kamelet); err != nil {
 			return err
 		}
 		// Adding dependencies from Kamelets
@@ -218,7 +220,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 // This func will add a Kamelet as a generated Integration source. The source included here is going to be used in order to parse the Kamelet
 // for any component or capability (ie, rest) which is included in the Kamelet spec itself. However, the generated source is marked as coming `FromKamelet`.
 // When mounting the sources, these generated sources won't be mounted as sources but as Kamelet instead.
-func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet, version string) error {
+func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) error {
 	sources := make([]v1.SourceSpec, 0)
 
 	if kamelet.Spec.Template != nil {
@@ -281,8 +283,8 @@ func getKameletKey(item string, withVersion bool) string {
 	if strings.Contains(i, "/") {
 		i = strings.SplitN(i, "/", 2)[0]
 	}
-	if strings.Contains(i, "?version=") {
-		versionedKamelet := strings.SplitN(i, "?version=", 2)
+	if strings.Contains(i, kameletVersionProperty) {
+		versionedKamelet := strings.SplitN(i, kameletVersionProperty, 2)
 		if withVersion {
 			i = fmt.Sprintf("%s-%s", versionedKamelet[0], versionedKamelet[1])
 		} else {
@@ -293,8 +295,8 @@ func getKameletKey(item string, withVersion bool) string {
 }
 
 func getKameletVersion(item string) string {
-	if strings.Contains(item, "?version=") {
-		versionedKamelet := strings.SplitN(item, "?version=", 2)
+	if strings.Contains(item, fmt.Sprintf("?%s=", v1.KameletVersionProperty)) {
+		versionedKamelet := strings.SplitN(item, kameletVersionProperty, 2)
 		return versionedKamelet[1]
 	}
 	return ""
