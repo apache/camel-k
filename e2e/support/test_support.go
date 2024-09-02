@@ -36,6 +36,7 @@ import (
 	"reflect"
 	"regexp"
 	"runtime/debug"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -546,6 +547,10 @@ func IntegrationPod(t *testing.T, ctx context.Context, ns string, name string) f
 		if len(pods) == 0 {
 			return nil
 		}
+
+		sort.SliceStable(pods, func(i, j int) bool {
+			return pods[i].GetCreationTimestamp().Time.After(pods[j].GetCreationTimestamp().Time)
+		})
 		return &pods[0]
 	}
 }
