@@ -18,10 +18,12 @@ limitations under the License.
 package source
 
 import (
+	"fmt"
 	"regexp"
 )
 
 var kameletNameRegexp = regexp.MustCompile("kamelet:(?://)?([a-z0-9-.]+(/[a-z0-9-.]+)?)(?:$|[^a-z0-9-.].*)")
+var kameletVersionRegexp = regexp.MustCompile("version=([a-z0-9-.]+)")
 
 func ExtractKamelets(uris []string) []string {
 	var kamelets []string
@@ -37,6 +39,10 @@ func ExtractKamelets(uris []string) []string {
 func ExtractKamelet(uri string) string {
 	matches := kameletNameRegexp.FindStringSubmatch(uri)
 	if len(matches) > 1 {
+		version := kameletVersionRegexp.FindString(uri)
+		if version != "" {
+			return fmt.Sprintf("%s?%s", matches[1], version)
+		}
 		return matches[1]
 	}
 	return ""
