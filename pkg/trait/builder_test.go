@@ -145,11 +145,10 @@ func createBuilderTestEnv(cluster v1.IntegrationPlatformCluster, strategy v1.Int
 			Spec: v1.IntegrationPlatformSpec{
 				Cluster: cluster,
 				Build: v1.IntegrationPlatformBuildSpec{
-					PublishStrategy:        strategy,
-					Registry:               v1.RegistrySpec{Address: "registry"},
-					RuntimeVersion:         defaults.DefaultRuntimeVersion,
-					RuntimeProvider:        v1.RuntimeProviderQuarkus,
-					PublishStrategyOptions: map[string]string{},
+					PublishStrategy: strategy,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  defaults.DefaultRuntimeVersion,
+					RuntimeProvider: v1.RuntimeProviderQuarkus,
 					BuildConfiguration: v1.BuildConfiguration{
 						Strategy: buildStrategy,
 					},
@@ -683,4 +682,14 @@ func TestBuilderTraitPlatforms(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, []string{"linux/amd64", "linux/arm64"}, env.Pipeline[2].Jib.Configuration.ImagePlatforms)
+}
+
+func TestBuilderTraitOrderStrategy(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.OrderStrategy = "fifo"
+	err := builderTrait.Apply(env)
+	require.NoError(t, err)
+
+	assert.Equal(t, v1.BuildOrderStrategyFIFO, env.Pipeline[0].Builder.Configuration.OrderStrategy)
 }

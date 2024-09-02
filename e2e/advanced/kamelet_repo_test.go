@@ -24,7 +24,6 @@ package advanced
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -38,26 +37,21 @@ func TestKameletFromCustomRepository(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		InstallOperator(t, ctx, g, ns)
 
 		kameletName := "timer-custom-source"
 		removeKamelet(t, ctx, kameletName, ns)
-
 		g.Eventually(Kamelet(t, ctx, kameletName, ns)).Should(BeNil())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 		// Add the custom repository
-		g.Expect(Kamel(t, ctx, "kamelet", "add-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
-
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-custom-kamelet-integration"), TestTimeoutLong).
+		g.Expect(Kamel(t, ctx, "kamelet", "add-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns).Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/TimerCustomKameletIntegration.java").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-custom-kamelet-integration"), TestTimeoutMedium).
 			Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "timer-custom-kamelet-integration")).Should(ContainSubstring("hello world"))
 
 		// Remove the custom repository
-		g.Expect(Kamel(t, ctx, "kamelet", "remove-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns, "-x", operatorID).Execute()).To(Succeed())
+		g.Expect(Kamel(t, ctx, "kamelet", "remove-repo", "github:squakez/ck-kamelet-test-repo/kamelets", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

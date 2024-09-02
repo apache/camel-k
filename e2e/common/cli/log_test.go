@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"context"
@@ -34,9 +34,10 @@ import (
 )
 
 func TestKamelCLILog(t *testing.T) {
+	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("check integration log", func(t *testing.T) {
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/yaml.yaml", "--name", "log-yaml").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", "log-yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "log-yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			// first line of the integration logs
 			firstLine := strings.Split(IntegrationLogs(t, ctx, ns, "log-yaml")(), "\n")[0]
@@ -53,7 +54,5 @@ func TestKamelCLILog(t *testing.T) {
 			g.Eventually(logsCLI).Should(ContainSubstring("Monitoring pod " + podName))
 			g.Eventually(logsCLI).Should(ContainSubstring(lastLine))
 		})
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

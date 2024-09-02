@@ -45,6 +45,33 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
+// DumpClusterState prints informations about the cluster state
+func DumpClusterState(ctx context.Context, c client.Client, ns string, t *testing.T) error {
+	t.Logf("-------------------- start dumping cluster state --------------------\n")
+
+	nodes, err := c.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, node := range nodes.Items {
+		nodeReady := false
+		nodeConditions := node.Status.Conditions
+		for _, condition := range nodeConditions {
+			if condition.Type == corev1.NodeReady && condition.Status == corev1.ConditionTrue {
+				nodeReady = true
+			}
+		}
+		t.Logf("node: Name='%s', Ready='%t'", node.ObjectMeta.Name, nodeReady)
+		if node.Spec.Taints != nil {
+			t.Logf("node taints: Taints='%s'", node.Spec.Taints)
+		}
+	}
+
+	t.Logf("-------------------- dumping cluster state --------------------\n")
+	return nil
+}
+
 // Dump prints all information about the given namespace to debug errors
 func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 	t.Logf("-------------------- start dumping namespace %s --------------------\n", ns)
@@ -291,6 +318,21 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 			}
 			t.Logf("---\n%s\n---\n", string(data))
 		}
+	}
+
+	// Cronjobs
+	cronjobs, err := c.BatchV1().CronJobs(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("\nFound %d cronjobs:\n", len(cronjobs.Items))
+	for _, cronjobs := range cronjobs.Items {
+		ref := cronjobs
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
 	}
 
 	// OLM CSV

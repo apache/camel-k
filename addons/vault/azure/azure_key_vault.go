@@ -18,7 +18,6 @@ limitations under the License.
 package azure
 
 import (
-	"regexp"
 	"strconv"
 
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -27,7 +26,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Azure Key Vault trait can be used to use secrets from Azure Key Vault service
@@ -81,10 +80,6 @@ type Trait struct {
 	BlobContainerName string `property:"blob-container-name" json:"blobContainerName,omitempty"`
 }
 
-var (
-	azureKeyValueRex = regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
-)
-
 type azureKeyVaultTrait struct {
 	trait.BaseTrait
 	Trait `property:",squash"`
@@ -97,7 +92,7 @@ func NewAzureKeyVaultTrait() trait.Trait {
 }
 
 func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if environment.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -106,15 +101,15 @@ func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, *t
 	}
 
 	if t.ContextReloadEnabled == nil {
-		t.ContextReloadEnabled = pointer.Bool(false)
+		t.ContextReloadEnabled = ptr.To(false)
 	}
 
 	if t.RefreshEnabled == nil {
-		t.RefreshEnabled = pointer.Bool(false)
+		t.RefreshEnabled = ptr.To(false)
 	}
 
 	if t.AzureIdentityEnabled == nil {
-		t.AzureIdentityEnabled = pointer.Bool(false)
+		t.AzureIdentityEnabled = ptr.To(false)
 	}
 
 	return true, nil, nil
@@ -130,7 +125,7 @@ func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
 		return nil
 	}
 
-	hits := azureKeyValueRex.FindAllStringSubmatch(t.ClientSecret, -1)
+	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.ClientSecret, -1)
 	if len(hits) >= 1 {
 		var res, _ = v1.DecodeValueSource(t.ClientSecret, "azure-key-vault-client-secret", "The Azure Key Vault Client Secret provided is not valid")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
@@ -141,7 +136,7 @@ func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
 	} else {
 		environment.ApplicationProperties["camel.vault.azure.clientSecret"] = t.ClientSecret
 	}
-	hits = azureKeyValueRex.FindAllStringSubmatch(t.BlobAccessKey, -1)
+	hits = v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.BlobAccessKey, -1)
 	if len(hits) >= 1 {
 		var res, _ = v1.DecodeValueSource(t.BlobAccessKey, "azure-storage-blob-access-key", "The Azure Storage Blob Access Key provided is not valid")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {

@@ -123,6 +123,12 @@ type ConfigurationSpec struct {
 	Value string `json:"value"`
 }
 
+// Catalog represents the Camel Catalog runtime specification.
+type Catalog struct {
+	Version  string          `json:"version,omitempty" yaml:"version,omitempty"`
+	Provider RuntimeProvider `json:"provider,omitempty" yaml:"provider,omitempty"`
+}
+
 // Artifact represents a materialized artifact (a jar dependency or in general a file used by the build).
 type Artifact struct {
 	// the identification (GAV for maven dependencies or file name for other file types)
@@ -233,7 +239,7 @@ type Traits struct {
 	PullSecret *trait.PullSecretTrait `property:"pull-secret" json:"pull-secret,omitempty"`
 	// The configuration of Quarkus trait
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
-	// The configuration of Registry trait
+	// The configuration of Registry trait (support removed since version 2.5.0).
 	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The configuration of Route trait

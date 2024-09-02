@@ -20,8 +20,9 @@ package trait
 import (
 	"os"
 
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -59,7 +60,7 @@ func newEnvironmentTrait() Trait {
 	return &environmentTrait{
 		BasePlatformTrait: NewBasePlatformTrait(environmentTraitID, environmentTraitOrder),
 		EnvironmentTrait: traitv1.EnvironmentTrait{
-			ContainerMeta: pointer.Bool(true),
+			ContainerMeta: ptr.To(true),
 		},
 	}
 }
@@ -82,12 +83,12 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	envvar.SetVal(&e.EnvVars, envVarMountPathConfigMaps, camel.ConfigConfigmapsMountPath)
 	envvar.SetVal(&e.EnvVars, envVarMountPathSecrets, camel.ConfigSecretsMountPath)
 
-	if pointer.BoolDeref(t.ContainerMeta, true) {
+	if ptr.Deref(t.ContainerMeta, true) {
 		envvar.SetValFrom(&e.EnvVars, envVarNamespace, "metadata.namespace")
 		envvar.SetValFrom(&e.EnvVars, envVarPodName, "metadata.name")
 	}
 
-	if pointer.BoolDeref(t.HTTPProxy, true) {
+	if ptr.Deref(t.HTTPProxy, true) {
 		if HTTPProxy, ok := os.LookupEnv("HTTP_PROXY"); ok {
 			envvar.SetVal(&e.EnvVars, "HTTP_PROXY", HTTPProxy)
 		}
@@ -102,7 +103,16 @@ func (t *environmentTrait) Apply(e *Environment) error {
 	if t.Vars != nil {
 		for _, env := range t.Vars {
 			k, v := property.SplitPropertyFileEntry(env)
-			envvar.SetVal(&e.EnvVars, k, v)
+			confs := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(v, -1)
+			if len(confs) > 0 {
+				var res, err = v1.DecodeValueSource(v, "", "Invalid configuration "+v)
+				if err != nil {
+					return err
+				}
+				envvar.SetValFromValueSource(&e.EnvVars, k, res)
+			} else {
+				envvar.SetVal(&e.EnvVars, k, v)
+			}
 		}
 	}
 

@@ -22,7 +22,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
@@ -45,13 +45,13 @@ func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait: NewBaseTrait(prometheusTraitID, prometheusTraitOrder),
 		PrometheusTrait: traitv1.PrometheusTrait{
-			PodMonitor: pointer.Bool(true),
+			PodMonitor: ptr.To(true),
 		},
 	}
 }
 
 func (t *prometheusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -89,7 +89,7 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 	condition.Message = fmt.Sprintf("%s(%d)", container.Name, containerPort.ContainerPort)
 
 	// Add the PodMonitor resource
-	if pointer.BoolDeref(t.PodMonitor, false) {
+	if ptr.Deref(t.PodMonitor, false) {
 		portName := containerPort.Name
 		podMonitor, err := t.getPodMonitorFor(e, portName)
 		if err != nil {

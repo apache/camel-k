@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -85,66 +85,60 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, trait.NewIntegrationConditionUserDisabled(masterComponent), nil
-	}
-	if e.CamelCatalog == nil {
-		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseBuildingKit) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
-	if !pointer.BoolDeref(t.Auto, true) {
-		return pointer.BoolDeref(t.Enabled, false), nil, nil
+	if !ptr.Deref(t.Auto, true) {
+		return ptr.Deref(t.Enabled, false), nil, nil
 	}
 
-	// Check if the master component has been used
-	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
-	if err != nil {
-		return false, nil, err
-	}
-
-	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-	if err != nil {
-		return false, nil, err
-	}
-
-	if t.Enabled == nil {
+	enabled, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		found := false
+	loop:
 		for _, endpoint := range meta.FromURIs {
 			if uri.GetComponent(endpoint) == masterComponent {
-				enabled := true
-				t.Enabled = &enabled
+				found = true
+				break loop
 			}
 		}
-		// No master component, can skip the trait execution
-		if !pointer.BoolDeref(t.Enabled, false) {
-			return false, nil, nil
+		if found {
+			if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
+				t.delegateDependencies = findAdditionalDependencies(e, meta)
+			}
 		}
+
+		return found
+	})
+
+	if err != nil {
+		return false, nil, err
 	}
-	if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
-		t.delegateDependencies = findAdditionalDependencies(e, meta)
+	if enabled {
+		if t.ResourceName == nil {
+			val := e.Integration.Name + "-lock"
+			t.ResourceName = &val
+		}
+
+		if t.ResourceType == nil {
+			t.ResourceType = ptr.To(leaseResourceType)
+		}
+
+		if t.LabelKey == nil {
+			val := v1.IntegrationLabel
+			t.LabelKey = &val
+		}
+
+		if t.LabelValue == nil {
+			t.LabelValue = &e.Integration.Name
+		}
+
+		return true, nil, nil
 	}
 
-	if t.ResourceName == nil {
-		val := e.Integration.Name + "-lock"
-		t.ResourceName = &val
-	}
-
-	if t.ResourceType == nil {
-		t.ResourceType = pointer.String(leaseResourceType)
-	}
-
-	if t.LabelKey == nil {
-		val := v1.IntegrationLabel
-		t.LabelKey = &val
-	}
-
-	if t.LabelValue == nil {
-		t.LabelValue = &e.Integration.Name
-	}
-
-	return pointer.BoolDeref(t.Enabled, false), nil, nil
+	return false, nil, nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {

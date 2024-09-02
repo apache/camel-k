@@ -23,7 +23,12 @@ resources:
 
 namespace: default
 
-# You can provide any required adjustments here. Take the following as references:
+patches:
+- path: patch-operator-id.yaml
+  target:
+    kind: Deployment
+
+    # You can provide any required adjustments here. Take the following as references:
 # patchesStrategicMerge:
 # - patch-toleration.yaml
 # - patch-node-selector.yaml

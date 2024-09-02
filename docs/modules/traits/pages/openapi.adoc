@@ -31,7 +31,7 @@ The following configuration options are available:
 
 | openapi.configmaps
 | []string
-| The configmaps holding the spec of the OpenAPI
+| The configmaps holding the spec of the OpenAPI (compatible with > 3.0 spec only).
 
 |===
 

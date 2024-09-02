@@ -18,7 +18,6 @@ limitations under the License.
 package trait
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -26,7 +25,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -37,7 +36,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/envvar"
-	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
@@ -54,6 +52,11 @@ const (
 	defaultContainerSeccompProfileType       = corev1.SeccompProfileTypeRuntimeDefault
 	defaultContainerAllowPrivilegeEscalation = false
 	defaultContainerCapabilitiesDrop         = "ALL"
+
+	defaultContainerResourceCPU    = "125m"
+	defaultContainerResourceMemory = "128Mi"
+	defaultContainerLimitCPU       = "500m"
+	defaultContainerLimitMemory    = "512Mi"
 )
 
 type containerTrait struct {
@@ -69,10 +72,14 @@ func newContainerTrait() Trait {
 			ServicePort:              defaultServicePort,
 			ServicePortName:          defaultContainerPortName,
 			Name:                     defaultContainerName,
-			RunAsNonRoot:             pointer.Bool(defaultContainerRunAsNonRoot),
+			RunAsNonRoot:             ptr.To(defaultContainerRunAsNonRoot),
 			SeccompProfileType:       defaultContainerSeccompProfileType,
-			AllowPrivilegeEscalation: pointer.Bool(defaultContainerAllowPrivilegeEscalation),
+			AllowPrivilegeEscalation: ptr.To(defaultContainerAllowPrivilegeEscalation),
 			CapabilitiesDrop:         []corev1.Capability{defaultContainerCapabilitiesDrop},
+			RequestCPU:               defaultContainerResourceCPU,
+			RequestMemory:            defaultContainerResourceMemory,
+			LimitCPU:                 defaultContainerLimitCPU,
+			LimitMemory:              defaultContainerLimitMemory,
 		},
 	}
 }
@@ -86,28 +93,7 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 		return false, nil, nil
 	}
 
-	knativeInstalled, _ := knative.IsEventingInstalled(e.Client)
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !knativeInstalled {
-		hasKnativeEndpoint, err := containsEndpoint("knative", e, t.Client)
-		if err != nil {
-			return false, nil, err
-		}
-
-		if hasKnativeEndpoint {
-			// fail fast the integration as there is no knative installed in the cluster
-			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains knative endpoint that cannot run, as knative is not installed in the cluster.", e.Integration.Namespace, e.Integration.Name)
-			err := errors.New("integration cannot run, as knative is not installed in the cluster")
-			return false, NewIntegrationCondition(
-				"Container",
-				v1.IntegrationConditionKnativeAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionKnativeNotInstalledReason,
-				err.Error(),
-			), err
-		}
-	}
-
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		if t.Expose == nil {
 			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
 			t.Expose = &e
@@ -259,7 +245,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		e.Resources.Add(props)
 	}
 	t.configureResources(&container)
-	if knative || pointer.BoolDeref(t.Expose, false) {
+	if knative || ptr.Deref(t.Expose, false) {
 		t.configureService(e, &container, knative)
 	}
 	t.configureCapabilities(e)

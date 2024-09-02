@@ -19,6 +19,7 @@ package trait
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -55,9 +56,12 @@ func TestApplyCamelTraitSucceeds(t *testing.T) {
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)
-	assert.Equal(t, "0.0.1", environment.RuntimeVersion)
+	assert.Equal(t, "0.0.1", environment.CamelCatalog.GetRuntimeVersion())
 	assert.Equal(t, "0.0.1", environment.Integration.Status.RuntimeVersion)
 	assert.Equal(t, "0.0.1", environment.IntegrationKit.Status.RuntimeVersion)
+	expectedCatalog := &v1.Catalog{Version: "0.0.1", Provider: v1.RuntimeProviderQuarkus}
+	assert.Equal(t, expectedCatalog, environment.Integration.Status.Catalog)
+	assert.Equal(t, expectedCatalog, environment.IntegrationKit.Status.Catalog)
 
 	// Test regex as well
 	assert.True(t, exactVersionRegexp.MatchString("1.2.3"))
@@ -71,7 +75,17 @@ func TestApplyCamelTraitExternalKit(t *testing.T) {
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
-	assert.Nil(t, condition)
+	expectedCondition := NewIntegrationCondition(
+		"Camel",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		traitConfigurationReason,
+		fmt.Sprintf(
+			"Operated with CamelCatalog version %s which may be different from the runtime used in the container",
+			"0.0.1",
+		),
+	)
+	assert.Equal(t, expectedCondition, condition)
 	assert.True(t, configured)
 	err = trait.Apply(environment)
 	require.NoError(t, err)
@@ -79,6 +93,9 @@ func TestApplyCamelTraitExternalKit(t *testing.T) {
 	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
 	assert.Equal(t, "", environment.IntegrationKit.Status.RuntimeVersion)
 	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
+	expectedCatalog := &v1.Catalog{Version: "0.0.1", Provider: v1.RuntimeProviderQuarkus}
+	assert.Equal(t, expectedCatalog, environment.Integration.Status.Catalog)
+	assert.Equal(t, expectedCatalog, environment.IntegrationKit.Status.Catalog)
 }
 
 func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *testing.T) {
@@ -214,7 +231,17 @@ func TestApplyCamelTraitSyntheticKitWithProperties(t *testing.T) {
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
-	assert.Nil(t, condition)
+	expectedCondition := NewIntegrationCondition(
+		"Camel",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		traitConfigurationReason,
+		fmt.Sprintf(
+			"Operated with CamelCatalog version %s which may be different from the runtime used in the container",
+			"0.0.1",
+		),
+	)
+	assert.Equal(t, expectedCondition, condition)
 	assert.True(t, configured)
 
 	err = trait.Apply(environment)
@@ -274,8 +301,8 @@ func TestCamelMatches(t *testing.T) {
 func TestCamelCatalogSemver(t *testing.T) {
 	trait, environment := createNominalCamelTest(true)
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+	environment.CamelCatalog.Runtime.Version = "2.16.1"
 	trait.RuntimeVersion = "2.x"
-	environment.CamelCatalog.CamelCatalogSpec.Runtime.Version = "2.16.0"
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -284,8 +311,8 @@ func TestCamelCatalogSemver(t *testing.T) {
 
 	err = trait.Apply(environment)
 	require.NoError(t, err)
-	// 2.x will translate with 2.16.0 as it is already existing
-	assert.Equal(t, environment.CamelCatalog.CamelCatalogSpec.Runtime.Version, environment.RuntimeVersion)
+	// 2.x will translate with 2.16.1 as it is already existing
+	assert.Equal(t, "2.16.1", environment.CamelCatalog.GetRuntimeVersion())
 }
 
 func TestCamelTraitSyntheticIntegration(t *testing.T) {

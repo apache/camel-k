@@ -21,7 +21,7 @@ import (
 	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -88,14 +88,14 @@ func NewThreeScaleTrait() trait.Trait {
 }
 
 func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 	if !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
+	if ptr.Deref(t.Auto, true) {
 		if t.Scheme == "" {
 			t.Scheme = ThreeScaleSchemeDefaultValue
 		}

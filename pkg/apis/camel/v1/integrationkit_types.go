@@ -88,7 +88,7 @@ type IntegrationKitTraits struct {
 	// It's enabled by default.
 	// NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the Pod running the native build must have enough memory available.
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
-	// The Registry trait sets up Maven to use the Image registry as a Maven repository.
+	// The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
 	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The collection of addon trait configurations
@@ -117,6 +117,8 @@ type IntegrationKitStatus struct {
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime provider for which this kit was configured
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the catalog used to build/operate the IntegrationKit.
+	Catalog *Catalog `json:"catalog,omitempty"`
 	// the platform for which this kit was configured
 	Platform string `json:"platform,omitempty"`
 	// the Camel K operator version for which this kit was configured

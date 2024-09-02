@@ -42,7 +42,7 @@ func TestKamelCLIPromote(t *testing.T) {
 	// Dev environment namespace
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsDev string) {
 		operatorDevID := "camel-k-cli-promote-dev"
-		g.Expect(KamelInstallWithID(t, ctx, operatorDevID, nsDev)).To(Succeed())
+		InstallOperatorWithConf(t, ctx, g, nsDev, operatorDevID, false, nil)
 		g.Eventually(SelectedPlatformPhase(t, ctx, nsDev, operatorDevID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
 
 		// Dev content configmap
@@ -72,14 +72,14 @@ func TestKamelCLIPromote(t *testing.T) {
 		})
 
 		t.Run("kamelet integration dev", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, ctx, operatorDevID, nsDev, "my-own-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKameletWithID(t, ctx, operatorDevID, nsDev, "my-own-timer-source")()).To(Succeed())
 			g.Expect(KamelRunWithID(t, ctx, operatorDevID, nsDev, "./files/timer-kamelet-usage.yaml").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, nsDev, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, nsDev, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
 		})
 
 		t.Run("binding dev", func(t *testing.T) {
-			g.Expect(CreateTimerKamelet(t, ctx, operatorDevID, nsDev, "kb-timer-source")()).To(Succeed())
+			g.Expect(CreateTimerKameletWithID(t, ctx, operatorDevID, nsDev, "kb-timer-source")()).To(Succeed())
 			g.Expect(KamelBindWithID(t, ctx, operatorDevID, nsDev, "kb-timer-source", "log:info", "-p", "source.message=my-kamelet-binding-rocks").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, nsDev, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationLogs(t, ctx, nsDev, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))
@@ -88,21 +88,13 @@ func TestKamelCLIPromote(t *testing.T) {
 		// Prod environment namespace
 		WithNewTestNamespace(t, func(ctx context.Context, g *WithT, nsProd string) {
 			operatorProdID := "camel-k-cli-promote-prod"
-			g.Expect(KamelInstallWithID(t, ctx, operatorProdID, nsProd)).To(Succeed())
+			InstallOperatorWithConf(t, ctx, g, nsProd, operatorProdID, false, nil)
 			g.Eventually(PlatformPhase(t, ctx, nsProd), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
-			t.Run("no configmap in destination", func(t *testing.T) {
-				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).NotTo(Succeed())
-			})
 
 			// Prod content configmap
 			var cmData = make(map[string]string)
 			cmData["my-configmap-key"] = "I am production"
 			CreatePlainTextConfigmap(t, ctx, nsProd, "my-cm-promote", cmData)
-
-			t.Run("no secret in destination", func(t *testing.T) {
-				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "promote-route", "--to", nsProd).Execute()).NotTo(Succeed())
-			})
 
 			// Prod secret
 			var secData = make(map[string]string)
@@ -143,12 +135,8 @@ func TestKamelCLIPromote(t *testing.T) {
 				g.Expect(IntegrationPodImage(t, ctx, nsProd, "promote-route")()).Should(Equal(IntegrationPodImage(t, ctx, nsDev, "promote-route")()))
 			})
 
-			t.Run("no kamelet in destination", func(t *testing.T) {
-				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "timer-kamelet-usage", "--to", nsProd).Execute()).NotTo(Succeed())
-			})
-
 			t.Run("kamelet integration promotion", func(t *testing.T) {
-				g.Expect(CreateTimerKamelet(t, ctx, operatorProdID, nsProd, "my-own-timer-source")()).To(Succeed())
+				g.Expect(CreateTimerKameletWithID(t, ctx, operatorProdID, nsProd, "my-own-timer-source")()).To(Succeed())
 				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "timer-kamelet-usage", "--to", nsProd).Execute()).To(Succeed())
 				g.Eventually(IntegrationPodPhase(t, ctx, nsProd, "timer-kamelet-usage"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationLogs(t, ctx, nsProd, "timer-kamelet-usage"), TestTimeoutShort).Should(ContainSubstring("Hello world"))
@@ -156,12 +144,8 @@ func TestKamelCLIPromote(t *testing.T) {
 				g.Expect(IntegrationPodImage(t, ctx, nsProd, "timer-kamelet-usage")()).Should(Equal(IntegrationPodImage(t, ctx, nsDev, "timer-kamelet-usage")()))
 			})
 
-			t.Run("no kamelet for binding in destination", func(t *testing.T) {
-				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "kb-timer-source-to-log", "--to", nsProd).Execute()).NotTo(Succeed())
-			})
-
 			t.Run("binding promotion", func(t *testing.T) {
-				g.Expect(CreateTimerKamelet(t, ctx, operatorProdID, nsProd, "kb-timer-source")()).To(Succeed())
+				g.Expect(CreateTimerKameletWithID(t, ctx, operatorProdID, nsProd, "kb-timer-source")()).To(Succeed())
 				g.Expect(Kamel(t, ctx, "promote", "-n", nsDev, "kb-timer-source-to-log", "--to", nsProd).Execute()).To(Succeed())
 				g.Eventually(IntegrationPodPhase(t, ctx, nsProd, "kb-timer-source-to-log"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 				g.Eventually(IntegrationLogs(t, ctx, nsProd, "kb-timer-source-to-log"), TestTimeoutShort).Should(ContainSubstring("my-kamelet-binding-rocks"))

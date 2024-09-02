@@ -117,7 +117,7 @@ func StringSliceJoin(slices ...[]string) []string {
 }
 
 func StringSliceContains(slice []string, items []string) bool {
-	for i := 0; i < len(items); i++ {
+	for i := range len(items) {
 		if !StringSliceExists(slice, items[i]) {
 			return false
 		}
@@ -127,7 +127,7 @@ func StringSliceContains(slice []string, items []string) bool {
 }
 
 func StringSliceExists(slice []string, item string) bool {
-	for i := 0; i < len(slice); i++ {
+	for i := range len(slice) {
 		if slice[i] == item {
 			return true
 		}
@@ -137,7 +137,7 @@ func StringSliceExists(slice []string, item string) bool {
 }
 
 func StringContainsPrefix(slice []string, prefix string) bool {
-	for i := 0; i < len(slice); i++ {
+	for i := range len(slice) {
 		if strings.HasPrefix(slice[i], prefix) {
 			return true
 		}
@@ -147,8 +147,8 @@ func StringContainsPrefix(slice []string, prefix string) bool {
 }
 
 func StringSliceContainsAnyOf(slice []string, items ...string) bool {
-	for i := 0; i < len(slice); i++ {
-		for j := 0; j < len(items); j++ {
+	for i := range len(slice) {
+		for j := range len(items) {
 			if strings.Contains(slice[i], items[j]) {
 				return true
 			}

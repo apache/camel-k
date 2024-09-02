@@ -12,14 +12,14 @@ Since both unit test and integration test names end with `_test.go`, both would 
 
 Look into the https://github.com/apache/camel-k/tree/main/e2e[/e2e] directory for examples of integration tests.
 
-Before running an integration test, you need to be connected to a Kubernetes/OpenShift namespace. After you log into your cluster, you can run the following command to execute the suite of smoke tests:
+Before running an integration test, you need to be connected to a Kubernetes/OpenShift namespace and have the Camel K operator installed globally into a namespaced named `camel-k`. After you log into your cluster, you can run the following command to execute the suite of smoke tests:
 
 [source]
 ----
 make test-smoke
 ----
 
-The test script will install the operators needed in a random namespace, execute all expected tests and clean themselves. Cleaning may not be performed if the execution of tests fails or the test process is interrupted. In that case you can look for any namespace similar to `test-29ed8147-c9fc-4c04-9c29-744eaf4750c6` and remove it manually.
+The test script will run the Integrations in random namespaces, execute all expected tests and clean themselves. Cleaning may not be performed if the execution of tests fails or the test process is interrupted. In that case you can look for any namespace similar to `test-29ed8147-c9fc-4c04-9c29-744eaf4750c6` and remove it manually.
 
 [[testing-e2e-structure]]
 == End-To-End tests structure
@@ -30,10 +30,9 @@ There may be a `files/setup.sh` script in some groups (e.g. knative) that can he
 
 This is the list of the groups we are using (please, notice that they can slightly change in the future):
 
-    * builder (`make test-builder`)
     * common (`make test-common`)
     * advanced (`make test-advanced`)
-    * install (`make test-install`, `make test-install-olm` and `make test-install-upgrade`)
+    * install (`make test-install`)
     * knative (`make test-knative`)
     * native (`make test-quarkus-native`)
     * telemetry (`make test-telemetry`)
@@ -42,17 +41,10 @@ Each group tests a specific feature of Camel K. Typically any new test should be
 
 It's important to know that a subset of `common` named `test-smoke` is used as smoke test in the nightly release process. We want to keep this group of test as fast as possible.
 
-=== Configure End To End tests runs with env vars
-Some e2e test runs parameters can be configured usually with env vars.
-Most of them are located at https://github.com/apache/camel-k/tree/main/e2e/support/test_support.go[e2e/support/test_support.go] in `init` and `kamelInstallWithContext` functions.
-A list of the most commonly used:
-
-* `CAMEL_K_TEST_SKIP_PROBLEMATIC`: set it to `true` to skip tests that might fail.
-
 [[testing-operator]]
 == Testing Operator under development
 
-You probably want to test your changes on camel-k `operator` locally after some development. You will need to make the operator docker image available to your cluster registry before launching the tests. We have a script which will take care of that.
+You probably want to test your changes on Camel-K Operator locally after some development. You will need to make the operator docker image available to your cluster registry before launching the tests. We have a script which will take care of that.
 
 First, you must connect and point to the `docker daemon`. If you're on a local environment such as `minikube`, it will be as simple as executing
 
@@ -75,40 +67,4 @@ You can also execute the following script, if by any chance you have some change
 [source]
 ----
 make images [CAMEL_K_RUNTIME_DIR=/path/to/camel-k-runtime-project]
-----
-
-[[using-remote-cluster]]
-== Using remote cluster
-
-If you don't have enough machine resources to run the test locally (a local Kubernetes cluster may require up to 32 GB of memory and several CPUs), then, you can push your operator image to some remote registry that is also reachable from your Kubernetes cluster.
-
-----
-make images CUSTOM_IMAGE=docker.io/my-org/my-ck-operator-test
-----
-
-Then, you need to use a couple of environment variables in order to let the test know the container image to use.
-
-----
-export CAMEL_K_TEST_OPERATOR_IMAGE=docker.io/my-org/my-ck-operator-test:2.0.0-SNAPSHOT
-export CAMEL_K_TEST_OPERATOR_IMAGE_PULL_POLICY=Always // this may not be required, use only if you want to change the policy
-----
-
-Make sure your local Kubernetes config settings is pointing to the right cluster (ie, `kubectl config current-context`) and run the suite of test you want to run (ie, `make test-common`).
-
-[[using-nexus]]
-== Using Nexus repository mirror with E2E testing
-
-To speed up integration testing locally, you may use a https://github.com/sonatype/docker-nexus3[Nexus Repository Manager] for Maven repository mirror.
-
-You can set the environment variable `TEST_ENABLE_NEXUS=true` to enable the usage of Nexus mirror in e2e testing. If `TEST_ENABLE_NEXUS` is set, e2e tests will try to discover a Nexus instance as `nexus` service in `nexus` namespace and if it is found they will use it as the Maven repository mirror for the `camel-k` platform under test.
-
-[source]
-----
-TEST_ENABLE_NEXUS=true make test-integration
-----
-
-To set up a Nexus instance in your cluster, run the following command:
-[source]
-----
-kubectl apply -f e2e/support/files/nexus.yaml
 ----

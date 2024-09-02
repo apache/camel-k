@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestPlatformTraitChangeStatus(t *testing.T) {
@@ -61,7 +61,7 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = pointer.Bool(false)
+			trait.CreateDefault = ptr.To(false)
 
 			var err error
 			trait.Client, err = test.NewFakeClient()
@@ -96,7 +96,7 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	}
 
 	trait, _ := newPlatformTrait().(*platformTrait)
-	trait.CreateDefault = pointer.Bool(true)
+	trait.CreateDefault = ptr.To(true)
 
 	var err error
 	trait.Client, err = test.NewFakeClient()
@@ -152,7 +152,7 @@ func TestPlatformTraitExisting(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = pointer.Bool(true)
+			trait.CreateDefault = ptr.To(true)
 
 			var err error
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")

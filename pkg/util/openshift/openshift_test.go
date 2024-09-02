@@ -26,7 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakeclientset "k8s.io/client-go/kubernetes/fake"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 var noSccAnnotationNamespace *corev1.Namespace = &corev1.Namespace{
@@ -68,7 +68,7 @@ func TestGetUserIdNamespaceConstrained(t *testing.T) {
 	uid, errUID := GetOpenshiftUser(context.Background(), kclient, "myuser")
 
 	require.NoError(t, errUID)
-	assert.Equal(t, pointer.Int64(1000860000), uid)
+	assert.Equal(t, ptr.To(int64(1000860000)), uid)
 }
 
 func TestGetPodSecurityContextNamespaceWithoutLabels(t *testing.T) {

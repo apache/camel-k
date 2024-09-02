@@ -23,7 +23,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -55,7 +55,7 @@ func newIstioTrait() Trait {
 }
 
 func (t *istioTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 

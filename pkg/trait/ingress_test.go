@@ -27,7 +27,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -47,7 +47,7 @@ func TestConfigureIngressTraitDoesSucceed(t *testing.T) {
 
 func TestConfigureDisabledIngressTraitDoesNotSucceed(t *testing.T) {
 	ingressTrait, environment := createNominalIngressTest()
-	ingressTrait.Enabled = pointer.Bool(false)
+	ingressTrait.Enabled = ptr.To(false)
 
 	expectedCondition := NewIntegrationCondition(
 		"Ingress",
@@ -120,6 +120,37 @@ func TestApplyIngressTraitDoesSucceed(t *testing.T) {
 			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
 			assert.Nil(t, ingress.Spec.TLS)
 			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Nil(t, ingress.Spec.IngressClassName)
+		}
+	})
+
+	conditions := environment.Integration.Status.Conditions
+	assert.Len(t, conditions, 1)
+	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
+}
+
+func TestApplyIngressTraitWithIngressClassNameDoesSucceed(t *testing.T) {
+	ingressTrait, environment := createNominalIngressTestWithIngressClassName("someIngressClass")
+
+	err := ingressTrait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Len(t, environment.Integration.Status.Conditions, 1)
+
+	assert.Len(t, environment.Resources.Items(), 2)
+	environment.Resources.Visit(func(resource runtime.Object) {
+		if ingress, ok := resource.(*networkingv1.Ingress); ok {
+			assert.Equal(t, "service-name", ingress.Name)
+			assert.Equal(t, "namespace", ingress.Namespace)
+			assert.Len(t, ingress.Spec.Rules, 1)
+			assert.Equal(t, "hostname", ingress.Spec.Rules[0].Host)
+			assert.Len(t, ingress.Spec.Rules[0].HTTP.Paths, 1)
+			assert.Equal(t, "service-name", ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Name)
+			assert.Equal(t, "/", ingress.Spec.Rules[0].HTTP.Paths[0].Path)
+			assert.NotNil(t, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Nil(t, ingress.Spec.TLS)
+			assert.Equal(t, networkingv1.PathTypePrefix, *ingress.Spec.Rules[0].HTTP.Paths[0].PathType)
+			assert.Equal(t, "someIngressClass", *ingress.Spec.IngressClassName)
 		}
 	})
 
@@ -221,10 +252,16 @@ func TestConfigureTLSWithoutSecretNameIngressTraitWDoesSucceed(t *testing.T) {
 	assert.Equal(t, "service-name(hostname) -> service-name(http)", conditions[0].Message)
 }
 
+func createNominalIngressTestWithIngressClassName(ingressClassName string) (*ingressTrait, *Environment) {
+	trait, environment := createNominalIngressTest()
+	trait.IngressClassName = ingressClassName
+	return trait, environment
+}
+
 func createNominalIngressTest() (*ingressTrait, *Environment) {
 	trait, _ := newIngressTrait().(*ingressTrait)
-	trait.Enabled = pointer.Bool(true)
-	trait.Auto = pointer.Bool(false)
+	trait.Enabled = ptr.To(true)
+	trait.Auto = ptr.To(false)
 	trait.Host = "hostname"
 
 	environment := &Environment{

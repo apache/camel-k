@@ -22,9 +22,8 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
-	"k8s.io/utils/pointer"
-
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	"github.com/apache/camel-k/v2/addons/telemetry/discovery"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -92,14 +91,11 @@ func NewTelemetryTrait() trait.Trait {
 }
 
 func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
-	if e.CamelCatalog == nil {
-		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 
-	if !pointer.BoolDeref(t.Auto, true) {
+	if !ptr.Deref(t.Auto, true) {
 		return true, nil, nil
 	}
 
@@ -143,7 +139,7 @@ func (t *telemetryTrait) Apply(e *trait.Environment) error {
 	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
 		t.setCatalogConfiguration(e)
 	} else {
-		t.setProperties(e)
+		t.setRuntimeProviderProperties(e)
 	}
 
 	return nil
@@ -166,19 +162,21 @@ func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
 	if t.SamplerRatio != "" {
 		e.ApplicationProperties["camel.k.telemetry.samplerRatio"] = t.SamplerRatio
 	}
-	if pointer.BoolDeref(t.SamplerParentBased, true) {
+	if ptr.Deref(t.SamplerParentBased, true) {
 		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = boolean.TrueString
 	} else {
 		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = boolean.FalseString
 	}
 
-	for _, cp := range e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties {
-		e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
+		for _, cp := range e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties {
+			e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+		}
 	}
 }
 
 // Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
-func (t *telemetryTrait) setProperties(e *trait.Environment) {
+func (t *telemetryTrait) setRuntimeProviderProperties(e *trait.Environment) {
 	if e.CamelCatalog == nil {
 		return
 	}
@@ -201,7 +199,7 @@ func (t *telemetryTrait) setProperties(e *trait.Environment) {
 		e.ApplicationProperties[appPropSamplerRatio] = t.SamplerRatio
 	}
 	if appPropSamplerParentBased := properties[propSamplerParentBased]; appPropSamplerParentBased != "" {
-		if pointer.BoolDeref(t.SamplerParentBased, true) {
+		if ptr.Deref(t.SamplerParentBased, true) {
 			e.ApplicationProperties[appPropSamplerParentBased] = "true"
 		} else {
 			e.ApplicationProperties[appPropSamplerParentBased] = boolean.FalseString

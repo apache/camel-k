@@ -30,6 +30,11 @@ The following configuration options are available:
 | bool
 | Can be used to enable or disable a trait. All traits share this common property.
 
+| ingress.ingress-class-name
+| string
+| The Ingress class name as defined by the Ingress spec
+See https://kubernetes.io/docs/concepts/services-networking/ingress/
+
 | ingress.annotations
 | map[string]string
 | The annotations added to the ingress.

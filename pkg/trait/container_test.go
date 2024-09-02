@@ -27,9 +27,10 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -181,8 +182,8 @@ func TestContainerWithOpenshift(t *testing.T) {
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
 	assert.Equal(t, defaultContainerName, d.Spec.Template.Spec.Containers[0].Name)
-	assert.Equal(t, pointer.Bool(defaultContainerRunAsNonRoot), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
-	assert.Equal(t, pointer.Int64(1000860000), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
+	assert.Equal(t, ptr.To(defaultContainerRunAsNonRoot), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, ptr.To(int64(1000860000)), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 }
 
 func TestContainerWithCustomName(t *testing.T) {
@@ -436,98 +437,6 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 	assert.Equal(t, corev1.PullAlways, container.ImagePullPolicy)
 }
 
-func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
-	environment := createEnvironment()
-	trait, _ := newContainerTrait().(*containerTrait)
-	environment.Integration.Spec.Sources = []v1.SourceSpec{
-		{
-			DataSpec: v1.DataSpec{
-				Name: "test.java",
-				Content: `
-				from("knative:channel/test").to("log:${body};
-			`,
-			},
-			Language: v1.LanguageJavaSource,
-		},
-	}
-	expectedCondition := NewIntegrationCondition(
-		"Container",
-		v1.IntegrationConditionKnativeAvailable,
-		corev1.ConditionFalse,
-		v1.IntegrationConditionKnativeNotInstalledReason,
-		"integration cannot run, as knative is not installed in the cluster",
-	)
-	configured, condition, err := trait.Configure(environment)
-	require.Error(t, err)
-	assert.Equal(t, expectedCondition, condition)
-	assert.False(t, configured)
-}
-
-func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
-	environment := createEnvironment()
-	trait, _ := newContainerTrait().(*containerTrait)
-	environment.Integration.Spec.Sources = []v1.SourceSpec{
-		{
-			DataSpec: v1.DataSpec{
-				Name: "test.java",
-				Content: `
-				from("platform-http://my-site").to("log:${body}");
-			`,
-			},
-			Language: v1.LanguageJavaSource,
-		},
-	}
-
-	configured, condition, err := trait.Configure(environment)
-	require.NoError(t, err)
-	assert.Nil(t, condition)
-	assert.True(t, configured)
-	conditions := environment.Integration.Status.Conditions
-	assert.Empty(t, conditions)
-}
-
-func createEnvironment() *Environment {
-	client, _ := test.NewFakeClient()
-	// disable the knative eventing api
-	fakeClient := client.(*test.FakeClient) //nolint
-	fakeClient.DisableAPIGroupDiscovery("eventing.knative.dev/v1")
-
-	replicas := int32(3)
-	catalog, _ := camel.QuarkusCatalog()
-
-	environment := &Environment{
-		CamelCatalog: catalog,
-		Catalog:      NewCatalog(nil),
-		Client:       client,
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "integration-name",
-			},
-			Spec: v1.IntegrationSpec{
-				Replicas: &replicas,
-				Traits:   v1.Traits{},
-			},
-			Status: v1.IntegrationStatus{
-				Phase: v1.IntegrationPhaseInitialization,
-			},
-		},
-		Platform: &v1.IntegrationPlatform{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "namespace",
-			},
-			Spec: v1.IntegrationPlatformSpec{
-				Cluster: v1.IntegrationPlatformClusterKubernetes,
-				Profile: v1.TraitProfileKubernetes,
-			},
-		},
-		Resources:             kubernetes.NewCollection(),
-		ApplicationProperties: make(map[string]string),
-	}
-	environment.Platform.ResyncStatusFullConfig()
-
-	return environment
-}
-
 func TestDeploymentContainerPorts(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
@@ -672,16 +581,21 @@ func TestDefaultKubernetesSecurityContext(t *testing.T) {
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
 	assert.Equal(t, defaultContainerName, d.Spec.Template.Spec.Containers[0].Name)
-	assert.Equal(t, pointer.Bool(defaultContainerRunAsNonRoot), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, ptr.To(defaultContainerRunAsNonRoot), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, d.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
-	assert.Equal(t, pointer.Bool(defaultContainerAllowPrivilegeEscalation), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, ptr.To(defaultContainerAllowPrivilegeEscalation), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
 	assert.Equal(t, []corev1.Capability{defaultContainerCapabilitiesDrop}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Nil(t, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
 }
 
 func TestDefaultKnativeSecurityContext(t *testing.T) {
 	environment := createSettingContextEnvironment(t, v1.TraitProfileKnative)
+	environment.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
+		Trait: traitv1.Trait{
+			Enabled: ptr.To(true),
+		},
+	}
 	traitCatalog := NewCatalog(nil)
 
 	conditions, err := traitCatalog.apply(environment)
@@ -700,10 +614,10 @@ func TestDefaultKnativeSecurityContext(t *testing.T) {
 	assert.NotNil(t, s)
 	assert.Len(t, s.Spec.Template.Spec.Containers, 1)
 	assert.Equal(t, defaultContainerName, s.Spec.Template.Spec.Containers[0].Name)
-	assert.Equal(t, pointer.Bool(defaultContainerRunAsNonRoot), s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, ptr.To(defaultContainerRunAsNonRoot), s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
 	assert.Nil(t, s.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, s.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
-	assert.Equal(t, pointer.Bool(defaultContainerAllowPrivilegeEscalation), s.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, ptr.To(defaultContainerAllowPrivilegeEscalation), s.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
 	assert.Equal(t, []corev1.Capability{defaultContainerCapabilitiesDrop}, s.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Nil(t, s.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
 }
@@ -712,10 +626,10 @@ func TestUserSecurityContext(t *testing.T) {
 	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
 	environment.Integration.Spec.Traits = v1.Traits{
 		Container: &traitv1.ContainerTrait{
-			RunAsNonRoot:             pointer.Bool(false),
-			RunAsUser:                pointer.Int64(1000),
+			RunAsNonRoot:             ptr.To(false),
+			RunAsUser:                ptr.To(int64(1000)),
 			SeccompProfileType:       "Unconfined",
-			AllowPrivilegeEscalation: pointer.Bool(true),
+			AllowPrivilegeEscalation: ptr.To(true),
 			CapabilitiesDrop:         []corev1.Capability{"DROP"},
 			CapabilitiesAdd:          []corev1.Capability{"ADD"},
 		},
@@ -734,12 +648,33 @@ func TestUserSecurityContext(t *testing.T) {
 
 	assert.NotNil(t, d)
 	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
-	assert.Equal(t, pointer.Bool(false), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
-	assert.Equal(t, pointer.Int64(1000), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
+	assert.Equal(t, ptr.To(false), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsNonRoot)
+	assert.Equal(t, ptr.To(int64(1000)), d.Spec.Template.Spec.Containers[0].SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeUnconfined, d.Spec.Template.Spec.Containers[0].SecurityContext.SeccompProfile.Type)
-	assert.Equal(t, pointer.Bool(true), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
+	assert.Equal(t, ptr.To(true), d.Spec.Template.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation)
 	assert.Equal(t, []corev1.Capability{"DROP"}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Drop)
 	assert.Equal(t, []corev1.Capability{"ADD"}, d.Spec.Template.Spec.Containers[0].SecurityContext.Capabilities.Add)
+}
+
+func TestUserDefaultResources(t *testing.T) {
+	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
+	traitCatalog := NewCatalog(nil)
+	conditions, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("deployment"))
+	assert.NotNil(t, environment.GetTrait("container"))
+
+	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
+
+	assert.NotNil(t, d)
+	assert.Len(t, d.Spec.Template.Spec.Containers, 1)
+	assert.Equal(t, resource.MustParse("500m"), *d.Spec.Template.Spec.Containers[0].Resources.Limits.Cpu())
+	assert.Equal(t, resource.MustParse("125m"), *d.Spec.Template.Spec.Containers[0].Resources.Requests.Cpu())
+	assert.Equal(t, resource.MustParse("512Mi"), *d.Spec.Template.Spec.Containers[0].Resources.Limits.Memory())
+	assert.Equal(t, resource.MustParse("128Mi"), *d.Spec.Template.Spec.Containers[0].Resources.Requests.Memory())
 }
 
 func createSettingContextEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {

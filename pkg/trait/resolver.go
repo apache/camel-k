@@ -1,0 +1,109 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to You under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package trait
+
+import (
+	"context"
+	"fmt"
+
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/gzip"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+
+	corev1 "k8s.io/api/core/v1"
+	controller "sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+// resolveSources --.
+func resolveSources(elements []v1.SourceSpec, mapLookup func(string) (*corev1.ConfigMap, error)) ([]v1.SourceSpec, error) {
+	for i := range len(elements) {
+		r := &elements[i]
+
+		if err := resolve(&r.DataSpec, mapLookup); err != nil {
+			return nil, err
+		}
+	}
+
+	return elements, nil
+}
+
+// resolve --.
+func resolve(data *v1.DataSpec, mapLookup func(string) (*corev1.ConfigMap, error)) error {
+	// if it is a reference, get the content from the
+	// referenced ConfigMap
+	if data.ContentRef != "" {
+		// look up the ConfigMap from the kubernetes cluster
+		cm, err := mapLookup(data.ContentRef)
+		if err != nil {
+			return err
+		}
+
+		if cm == nil {
+			return fmt.Errorf("unable to find a ConfigMap with name: %s ", data.ContentRef)
+		}
+
+		//
+		// Replace ref source content with real content
+		//
+		key := data.ContentKey
+		if key == "" {
+			key = "content"
+		}
+		data.Content = cm.Data[key]
+		data.ContentRef = ""
+	}
+
+	if data.Compression {
+		cnt := []byte(data.Content)
+		var uncompressed []byte
+		var err error
+		if uncompressed, err = gzip.UncompressBase64(cnt); err != nil {
+			return fmt.Errorf("error while uncompressing data: %w", err)
+		}
+		data.Compression = false
+		data.Content = string(uncompressed)
+	}
+
+	return nil
+}
+
+// resolveIntegrationSources --.
+func resolveIntegrationSources(
+	context context.Context,
+	client controller.Reader,
+	integration *v1.Integration,
+	resources *kubernetes.Collection) ([]v1.SourceSpec, error) {
+
+	if integration == nil {
+		return nil, nil
+	}
+
+	return resolveSources(integration.AllSources(), func(name string) (*corev1.ConfigMap, error) {
+		// the config map could be part of the resources created
+		// by traits
+		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {
+			return m.Name == name
+		})
+
+		if cm != nil {
+			return cm, nil
+		}
+
+		return kubernetes.GetConfigMap(context, client, name, integration.Namespace)
+	})
+}

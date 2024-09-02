@@ -56,26 +56,20 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 	messaging "knative.dev/eventing/pkg/apis/messaging/v1"
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
-
-	configv1 "github.com/openshift/api/config/v1"
-	projectv1 "github.com/openshift/api/project/v1"
-	routev1 "github.com/openshift/api/route/v1"
 
 	"github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -85,14 +79,16 @@ import (
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	pkgutil "github.com/apache/camel-k/v2/pkg/util"
 	v2util "github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	"github.com/apache/camel-k/v2/pkg/util/patch"
+	configv1 "github.com/openshift/api/config/v1"
+	projectv1 "github.com/openshift/api/project/v1"
+	routev1 "github.com/openshift/api/route/v1"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	// let's enable addons in all tests
 	_ "github.com/apache/camel-k/v2/addons"
@@ -141,9 +137,12 @@ var NoOlmOperatorImage string
 
 var testContext = context.TODO()
 var testClient client.Client
+var cmdMutex = sync.Mutex{}
 
-var testSetupMutex = sync.Mutex{}
-var kamelInstallMutex = sync.Mutex{}
+func init() {
+	// This line prevents controller-runtime from complaining about log.SetLogger never being called
+	logf.SetLogger(zap.New(zap.UseDevMode(true)))
+}
 
 // Only panic the test if absolutely necessary and there is
 // no test locus. In most cases, the test should fail gracefully
@@ -272,98 +271,6 @@ func Kamel(t *testing.T, ctx context.Context, args ...string) *cobra.Command {
 	return KamelWithContext(t, ctx, args...)
 }
 
-func KamelInstall(t *testing.T, ctx context.Context, namespace string, args ...string) error {
-	return KamelInstallWithID(t, ctx, platform.DefaultPlatformName, namespace, args...)
-}
-
-func KamelInstallWithID(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) error {
-	return kamelInstallWithContext(t, ctx, operatorID, namespace, true, args...)
-}
-
-func KamelInstallWithIDAndKameletCatalog(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) error {
-	return kamelInstallWithContext(t, ctx, operatorID, namespace, false, args...)
-}
-
-func kamelInstallWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, skipKameletCatalog bool, args ...string) error {
-	// This line prevents controller-runtime from complaining about log.SetLogger never being called
-	logf.SetLogger(zap.New(zap.UseDevMode(true)))
-
-	kamelInstallMutex.Lock()
-	defer kamelInstallMutex.Unlock()
-
-	var installArgs []string
-
-	installArgs = []string{"install", "-n", namespace, "--operator-id", operatorID, "--skip-cluster-setup"}
-
-	if !pkgutil.StringSliceExists(args, "--build-timeout") {
-		// if --build-timeout is not explicitly passed as an argument, try to configure it
-		buildTimeout := os.Getenv("CAMEL_K_TEST_BUILD_TIMEOUT")
-		if buildTimeout == "" {
-			// default Build Timeout for tests
-			buildTimeout = "10m"
-		}
-		fmt.Printf("Setting build timeout to %s\n", buildTimeout)
-		installArgs = append(installArgs, "--build-timeout", buildTimeout)
-	}
-
-	if skipKameletCatalog {
-		installArgs = append(installArgs, "--skip-default-kamelets-setup")
-	}
-
-	logLevel := os.Getenv("CAMEL_K_TEST_LOG_LEVEL")
-	if len(logLevel) > 0 {
-		fmt.Printf("Setting log-level to %s\n", logLevel)
-		installArgs = append(installArgs, "--log-level", logLevel)
-	}
-
-	mvnCLIOptions := os.Getenv("CAMEL_K_TEST_MAVEN_CLI_OPTIONS")
-	if len(mvnCLIOptions) > 0 {
-		// Split the string by spaces
-		mvnCLIArr := strings.Split(mvnCLIOptions, " ")
-		for _, mc := range mvnCLIArr {
-			mc = strings.Trim(mc, " ")
-			if len(mc) == 0 {
-				continue
-			}
-
-			fmt.Printf("Adding maven cli option %s\n", mc)
-			installArgs = append(installArgs, "--maven-cli-option", mc)
-		}
-	}
-
-	runtimeVersion := os.Getenv("CAMEL_K_TEST_RUNTIME_VERSION")
-	if runtimeVersion != "" {
-		fmt.Printf("Setting runtime version to %s\n", runtimeVersion)
-		installArgs = append(installArgs, "--runtime-version", runtimeVersion)
-	}
-	baseImage := os.Getenv("CAMEL_K_TEST_BASE_IMAGE")
-	if baseImage != "" {
-		fmt.Printf("Setting base image to %s\n", baseImage)
-		installArgs = append(installArgs, "--base-image", baseImage)
-	}
-	opImage := os.Getenv("CAMEL_K_TEST_OPERATOR_IMAGE")
-	if opImage != "" {
-		fmt.Printf("Setting operator image to %s\n", opImage)
-		installArgs = append(installArgs, "--operator-image", opImage)
-	}
-	opImagePullPolicy := os.Getenv("CAMEL_K_TEST_OPERATOR_IMAGE_PULL_POLICY")
-	if opImagePullPolicy != "" {
-		fmt.Printf("Setting operator image pull policy to %s\n", opImagePullPolicy)
-		installArgs = append(installArgs, "--operator-image-pull-policy", opImagePullPolicy)
-	}
-	if len(os.Getenv("CAMEL_K_TEST_MAVEN_CA_PEM_PATH")) > 0 {
-		certName := "myCert"
-		secretName := "maven-ca-certs"
-		CreateSecretDecoded(t, ctx, namespace, os.Getenv("CAMEL_K_TEST_MAVEN_CA_PEM_PATH"), secretName, certName)
-		installArgs = append(installArgs, "--maven-repository", os.Getenv("KAMEL_INSTALL_MAVEN_REPOSITORIES"),
-			"--maven-ca-secret", secretName+"/"+certName)
-	}
-
-	installArgs = append(installArgs, args...)
-	installCommand := KamelWithContext(t, ctx, installArgs...)
-	return installCommand.Execute()
-}
-
 func KamelRun(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
 	return KamelRunWithID(t, ctx, platform.DefaultPlatformName, namespace, args...)
 }
@@ -373,7 +280,7 @@ func KamelRunWithID(t *testing.T, ctx context.Context, operatorID string, namesp
 }
 
 func KamelRunWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
-	return KamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
+	return kamelCommandWithContext(t, ctx, "run", operatorID, namespace, args...)
 }
 
 func KamelBind(t *testing.T, ctx context.Context, namespace string, args ...string) *cobra.Command {
@@ -385,16 +292,15 @@ func KamelBindWithID(t *testing.T, ctx context.Context, operatorID string, names
 }
 
 func KamelBindWithContext(t *testing.T, ctx context.Context, operatorID string, namespace string, args ...string) *cobra.Command {
-	return KamelCommandWithContext(t, ctx, "bind", operatorID, namespace, args...)
+	return kamelCommandWithContext(t, ctx, "bind", operatorID, namespace, args...)
 }
 
-func KamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
-	// This line prevents controller-runtime from complaining about log.SetLogger never being called
-	logf.SetLogger(zap.New(zap.UseDevMode(true)))
-	var cmdArgs []string
+func kamelCommandWithContext(t *testing.T, ctx context.Context, command string, operatorID string, namespace string, args ...string) *cobra.Command {
+	// Avoid concurrent access to the CLI
+	cmdMutex.Lock()
+	defer cmdMutex.Unlock()
 
-	cmdArgs = []string{command, "-n", namespace, "--operator-id", operatorID}
-
+	cmdArgs := []string{command, "-n", namespace, "--operator-id", operatorID}
 	cmdArgs = append(cmdArgs, args...)
 	return KamelWithContext(t, ctx, cmdArgs...)
 }
@@ -490,7 +396,7 @@ func MakeWithContext(t *testing.T, rule string, args ...string) *exec.Cmd {
 	}
 
 	args = append([]string{"-C", makeDir, rule}, args...)
-
+	fmt.Println("Running make with arguments:", args)
 	return exec.Command("make", args...)
 }
 
@@ -514,7 +420,7 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 		}
 
 		options := corev1.PodLogOptions{
-			TailLines: pointer.Int64(100),
+			TailLines: ptr.To(int64(100)),
 		}
 
 		for _, container := range pod.Status.ContainerStatuses {
@@ -536,7 +442,7 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 func TailedLogs(t *testing.T, ctx context.Context, ns, name string, numLines int64) func() string {
 	return func() string {
 		options := corev1.PodLogOptions{
-			TailLines: pointer.Int64(numLines),
+			TailLines: ptr.To(numLines),
 		}
 
 		return Logs(t, ctx, ns, name, options)()
@@ -1047,28 +953,6 @@ func Integration(t *testing.T, ctx context.Context, ns string, name string) func
 	}
 }
 
-func UnstructuredIntegration(t *testing.T, ctx context.Context, ns string, name string) func() *unstructured.Unstructured {
-	return func() *unstructured.Unstructured {
-		gvk := schema.GroupVersionKind{Group: v1.SchemeGroupVersion.Group, Version: v1.SchemeGroupVersion.Version, Kind: v1.IntegrationKind}
-		return UnstructuredObject(t, ctx, ns, name, gvk)()
-	}
-}
-
-func UnstructuredObject(t *testing.T, ctx context.Context, ns string, name string, gvk schema.GroupVersionKind) func() *unstructured.Unstructured {
-	return func() *unstructured.Unstructured {
-		object := &unstructured.Unstructured{}
-		object.SetNamespace(ns)
-		object.SetName(name)
-		object.SetGroupVersionKind(gvk)
-		if err := TestClient(t).Get(ctx, ctrl.ObjectKeyFromObject(object), object); err != nil && !k8serrors.IsNotFound(err) {
-			failTest(t, err)
-		} else if err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		}
-		return object
-	}
-}
-
 func IntegrationVersion(t *testing.T, ctx context.Context, ns string, name string) func() string {
 	return func() string {
 		it := Integration(t, ctx, ns, name)()
@@ -1152,6 +1036,34 @@ func IntegrationKitNamespace(t *testing.T, ctx context.Context, integrationNames
 			return ""
 		}
 		return it.Status.IntegrationKit.Namespace
+	}
+}
+
+func IntegrationKitLayout(t *testing.T, ctx context.Context, ns string, name string) func() string {
+	return func() string {
+		it := Integration(t, ctx, ns, name)()
+		if it == nil {
+			return ""
+		}
+		if it.Status.IntegrationKit == nil {
+			return ""
+		}
+		kit := Kit(t, ctx, it.Status.IntegrationKit.Namespace, it.Status.IntegrationKit.Name)()
+		return kit.Labels[v1.IntegrationKitLayoutLabel]
+	}
+}
+
+func IntegrationKitStatusPhase(t *testing.T, ctx context.Context, ns string, name string) func() v1.IntegrationKitPhase {
+	return func() v1.IntegrationKitPhase {
+		it := Integration(t, ctx, ns, name)()
+		if it == nil {
+			return v1.IntegrationKitPhaseNone
+		}
+		if it.Status.IntegrationKit == nil {
+			return v1.IntegrationKitPhaseNone
+		}
+		kit := Kit(t, ctx, it.Status.IntegrationKit.Namespace, it.Status.IntegrationKit.Name)()
+		return kit.Status.Phase
 	}
 }
 
@@ -1666,8 +1578,8 @@ func CreatePlainTextConfigmapWithOwnerRefWithLabels(t *testing.T, ctx context.Co
 				Kind:               "Integration",
 				Name:               orname,
 				UID:                uid,
-				Controller:         pointer.Bool(true),
-				BlockOwnerDeletion: pointer.Bool(true),
+				Controller:         ptr.To(true),
+				BlockOwnerDeletion: ptr.To(true),
 			},
 			},
 			Labels: labels,
@@ -2004,7 +1916,7 @@ func Platform(t *testing.T, ctx context.Context, ns string) func() *v1.Integrati
 	return func() *v1.IntegrationPlatform {
 		lst := v1.NewIntegrationPlatformList()
 		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns)); err != nil {
-			failTest(t, err)
+			return nil
 		}
 		if len(lst.Items) == 0 {
 			return nil
@@ -2029,67 +1941,6 @@ func PlatformByName(t *testing.T, ctx context.Context, ns string, name string) f
 		}
 		return nil
 	}
-}
-
-func CopyIntegrationKits(t *testing.T, ctx context.Context, ns, operatorID string) error {
-	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_INTEGRATION_KITS"); ok && value == boolean.FalseString {
-		fmt.Println("Copy integration kits optimization is disabled")
-		return nil
-	}
-
-	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
-
-	lst := v1.NewIntegrationKitList()
-	if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(opns)); err != nil {
-		failTest(t, err)
-	}
-	for _, kit := range lst.Items {
-		if kit.Status.Image != "" && kit.Status.Phase == v1.IntegrationKitPhaseReady {
-			copyKit := v1.IntegrationKit{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: ns,
-					Name:      kit.Name,
-					Labels:    kit.Labels,
-				},
-				Spec:   *kit.Spec.DeepCopy(),
-				Status: *kit.Status.DeepCopy(),
-			}
-
-			v1.SetAnnotation(&copyKit.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
-			fmt.Printf("Copy integration kit %s from namespace %s\n", kit.Name, opns)
-			if err := CreateIntegrationKit(t, ctx, &copyKit)(); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func CopyCamelCatalog(t *testing.T, ctx context.Context, ns, operatorID string) error {
-	if value, ok := os.LookupEnv("CAMEL_K_TEST_COPY_CATALOG"); ok && value == boolean.FalseString {
-		fmt.Println("Copy catalog optimization is disabled")
-		return nil
-	}
-
-	catalogName := fmt.Sprintf("camel-catalog-%s", strings.ToLower(defaults.DefaultRuntimeVersion))
-	opns := GetEnvOrDefault("CAMEL_K_GLOBAL_OPERATOR_NS", TestDefaultNamespace)
-
-	defaultCatalog := CamelCatalog(t, ctx, opns, catalogName)()
-	if defaultCatalog != nil {
-		fmt.Printf("Copy catalog %s from namespace %s\n", catalogName, opns)
-		catalog := v1.CamelCatalog{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: ns,
-				Name:      catalogName,
-			},
-			Spec: *defaultCatalog.Spec.DeepCopy(),
-		}
-		v1.SetAnnotation(&catalog.ObjectMeta, v1.OperatorIDAnnotation, operatorID)
-		return CreateCamelCatalog(t, ctx, &catalog)()
-	}
-
-	return nil
 }
 
 func IntegrationProfileByName(t *testing.T, ctx context.Context, ns string, name string) func() *v1.IntegrationProfile {
@@ -2158,22 +2009,6 @@ func UpdateIntegrationProfile(t *testing.T, ctx context.Context, ns string, upd 
 		return nil
 	}
 	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
-}
-
-func CreateCamelCatalog(t *testing.T, ctx context.Context, catalog *v1.CamelCatalog) func() error {
-	return func() error {
-		testSetupMutex.Lock()
-		defer testSetupMutex.Unlock()
-		return TestClient(t).Create(ctx, catalog)
-	}
-}
-
-func CreateIntegrationKit(t *testing.T, ctx context.Context, kit *v1.IntegrationKit) func() error {
-	return func() error {
-		testSetupMutex.Lock()
-		defer testSetupMutex.Unlock()
-		return TestClient(t).Create(ctx, kit)
-	}
 }
 
 func DeleteCamelCatalog(t *testing.T, ctx context.Context, ns, name string) func() bool {
@@ -2258,10 +2093,10 @@ func DeletePlatform(t *testing.T, ctx context.Context, ns string) func() bool {
 	}
 }
 
-func UpdatePlatform(t *testing.T, ctx context.Context, ns string, name string, upd func(ip *v1.IntegrationPlatform)) error {
-	ip := PlatformByName(t, ctx, ns, name)()
+func UpdatePlatform(t *testing.T, ctx context.Context, ns string, upd func(ip *v1.IntegrationPlatform)) error {
+	ip := PlatformByName(t, ctx, ns, platform.DefaultPlatformName)()
 	if ip == nil {
-		return fmt.Errorf("unable to locate Integration Platform %s in %s", name, ns)
+		return fmt.Errorf("unable to locate Integration Platform %s in %s", platform.DefaultPlatformName, ns)
 	}
 	target := ip.DeepCopy()
 	upd(target)
@@ -2273,6 +2108,10 @@ func UpdatePlatform(t *testing.T, ctx context.Context, ns string, name string, u
 		return nil
 	}
 	return TestClient(t).Patch(ctx, target, ctrl.RawPatch(types.MergePatchType, p))
+}
+
+func CreateIntegrationPlatform(t *testing.T, ctx context.Context, ip *v1.IntegrationPlatform) error {
+	return TestClient(t).Create(ctx, ip)
 }
 
 func PlatformVersion(t *testing.T, ctx context.Context, ns string) func() string {
@@ -2375,17 +2214,6 @@ func AssignPlatformToOperator(t *testing.T, ctx context.Context, ns, operator st
 	return TestClient(t).Update(ctx, pl)
 }
 
-func GetExpectedCRDs(releaseVersion string) int {
-	switch releaseVersion {
-	case "2.2.0":
-		return 8
-	case defaults.Version:
-		return ExpectedCRDs
-	}
-
-	return ExpectedCRDs
-}
-
 func CRDs(t *testing.T) func() []metav1.APIResource {
 	return func() []metav1.APIResource {
 
@@ -2440,25 +2268,54 @@ func ConsoleCLIDownload(t *testing.T, ctx context.Context, name string) func() *
 	}
 }
 
+func operatorPods(t *testing.T, ctx context.Context, ns string) []corev1.Pod {
+	lst := corev1.PodList{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: v1.SchemeGroupVersion.String(),
+		},
+	}
+	opts := []ctrl.ListOption{
+		ctrl.MatchingLabels{
+			"camel.apache.org/component": "operator",
+		},
+	}
+	if ns != "" {
+		opts = append(opts, ctrl.InNamespace(ns))
+	}
+	if err := TestClient(t).List(ctx, &lst, opts...); err != nil {
+		failTest(t, err)
+	}
+	if len(lst.Items) == 0 {
+		return nil
+	}
+	return lst.Items
+}
+
 func OperatorPod(t *testing.T, ctx context.Context, ns string) func() *corev1.Pod {
 	return func() *corev1.Pod {
-		lst := corev1.PodList{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Pod",
-				APIVersion: v1.SchemeGroupVersion.String(),
-			},
+		pods := operatorPods(t, ctx, ns)
+		if len(pods) > 0 {
+			return &pods[0]
 		}
-		if err := TestClient(t).List(ctx, &lst,
-			ctrl.InNamespace(ns),
-			ctrl.MatchingLabels{
-				"camel.apache.org/component": "operator",
-			}); err != nil {
-			failTest(t, err)
+		return nil
+	}
+}
+
+// Return the first global operator Pod found in the cluster (if any).
+func OperatorPodGlobal(t *testing.T, ctx context.Context) func() *corev1.Pod {
+	return func() *corev1.Pod {
+		pods := operatorPods(t, ctx, "")
+		for _, pod := range pods {
+			for _, envVar := range pod.Spec.Containers[0].Env {
+				if envVar.Name == "WATCH_NAMESPACE" {
+					if envVar.Value == "" {
+						return &pod
+					}
+				}
+			}
 		}
-		if len(lst.Items) == 0 {
-			return nil
-		}
-		return &lst.Items[0]
+		return nil
 	}
 }
 
@@ -2796,7 +2653,11 @@ func CreateKnativeBroker(t *testing.T, ctx context.Context, ns string, name stri
 	Kamelets
 */
 
-func CreateKamelet(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+func CreateKamelet(t *testing.T, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
+	return CreateKameletWithID(t, platform.DefaultPlatformName, ctx, ns, name, template, properties, labels)
+}
+
+func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, ns string, name string, template map[string]interface{}, properties map[string]v1.JSONSchemaProp, labels map[string]string) func() error {
 	return func() error {
 		kamelet := v1.Kamelet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -2817,7 +2678,11 @@ func CreateKamelet(t *testing.T, operatorID string, ctx context.Context, ns stri
 	}
 }
 
-func CreateTimerKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
+func CreateTimerKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
+	return CreateTimerKameletWithID(t, ctx, platform.DefaultPlatformName, ns, name)
+}
+
+func CreateTimerKameletWithID(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
 	props := map[string]v1.JSONSchemaProp{
 		"message": {
 			Type: "string",
@@ -2840,7 +2705,7 @@ func CreateTimerKamelet(t *testing.T, ctx context.Context, operatorID string, ns
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
+	return CreateKameletWithID(t, operatorID, ctx, ns, name, flow, props, nil)
 }
 
 func DeleteKamelet(t *testing.T, ctx context.Context, ns string, name string) error {
@@ -2944,19 +2809,6 @@ func userCleanup(t *testing.T) {
 func invokeUserTestCode(t *testing.T, ctx context.Context, ns string, doRun func(context.Context, *gomega.WithT, string)) {
 	defer func() {
 		DumpNamespace(t, ctx, ns)
-
-		osns := os.Getenv("CAMEL_K_GLOBAL_OPERATOR_NS")
-
-		// Try to clean up namespace
-		if ns != osns && HasPlatform(t, ctx, ns)() {
-			t.Logf("Clean up test namespace: %s", ns)
-
-			if err := Kamel(t, ctx, "uninstall", "-n", ns, "--skip-crd", "--skip-cluster-roles").Execute(); err != nil {
-				t.Logf("Error while cleaning up namespace %s: %v\n", ns, err)
-			}
-
-			t.Logf("Successfully cleaned up test namespace: %s", ns)
-		}
 	}()
 
 	g := gomega.NewWithT(t)
@@ -3060,6 +2912,9 @@ func DumpNamespace(t *testing.T, ctx context.Context, ns string) {
 	if t.Failed() {
 		if err := util.Dump(ctx, TestClient(t), ns, t); err != nil {
 			t.Logf("Error while dumping namespace %s: %v\n", ns, err)
+		}
+		if err := util.DumpClusterState(ctx, TestClient(t), ns, t); err != nil {
+			t.Logf("Error while dumping cluster state: %v\n", err)
 		}
 	}
 }
@@ -3193,7 +3048,7 @@ func GetOutputStringAsync(cmd *cobra.Command) func() string {
 	}
 }
 
-func CreateLogKamelet(t *testing.T, ctx context.Context, operatorID string, ns string, name string) func() error {
+func CreateLogKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -3211,7 +3066,7 @@ func CreateLogKamelet(t *testing.T, ctx context.Context, operatorID string, ns s
 		},
 	}
 
-	return CreateKamelet(t, operatorID, ctx, ns, name, flow, props, nil)
+	return CreateKamelet(t, ctx, ns, name, flow, props, nil)
 }
 
 func GetCIProcessID() string {

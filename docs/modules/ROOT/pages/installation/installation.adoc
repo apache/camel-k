@@ -1,46 +1,27 @@
 [[installation]]
 = Installation
 
-Camel K allows us to run Camel integrations directly on a Kubernetes or OpenShift cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes (ie, Minikube or Kind).
+Camel K allows us to run Camel integrations directly on a Kubernetes cluster. To use it, you need to be connected to a cloud environment or to a local cluster created for development purposes (ie, Minikube or Kind).
 
-[[registry]]
-== Registry requirements
+[[operator]]
+== Camel K operator installation
 
-Camel K may require a container registry which is used to store the images built for your applications. Certain clusters may use their internal container registry (ie, Openshift, Minikube or https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry[KEP-1755 compatible] clusters). If it's not the case for your cluster make sure to have a xref:installation/registry/registry.adoc#configuring-registry-install-time[container registry] available and set it according the specific installation methodology chosen.
-
-[[cli]]
-== Installation via Kamel CLI
-
-To start using Camel K you need the **"kamel"** CLI tool, that can be used to both configure the cluster and run integrations. Look into the https://github.com/apache/camel-k/releases[release page] for the latest version of the *camel-k-client* tool for your specific platform.
-
-Download and deflate the archive. It contains a small binary file named `kamel` that you should put into your system path. For example, if you're using Linux, you can put `kamel` in `/usr/bin`.
-
-Once you have put the `kamel` CLI in the path, log into your cluster using the standard `oc` (OpenShift) or `kubectl` (Kubernetes) client tool and execute the following command to install Camel K:
-
-[source]
-----
-$ kamel install --olm=false
-----
-
-This will configure the cluster with the Camel K custom resource definitions and install the operator on the current namespace with the default settings.
-
-IMPORTANT: Custom Resource Definitions (CRD) are cluster-wide objects and you need admin rights to install them. Fortunately, this operation can be done *once per cluster*. So, if the `kamel install` operation fails, you'll be asked to repeat it when logged as admin.
-For CRC, this means executing `oc login -u system:admin` then `kamel install --cluster-setup` only for the first-time installation.
+The first step is to install and run the Camel K operator. You can do it via any of the following methodologies:
 
 [[helm]]
-== Installation via Helm Hub
+=== Installation via Helm Hub
 
-Camel K is also available in Helm Hub:
+Camel K is available in Helm Hub:
 
 ```
 $ helm repo add camel-k https://apache.github.io/camel-k/charts/
-$ helm install camel-k [--set platform.build.registry.address=<my-registry>] camel-k/camel-k
+$ helm install camel-k camel-k/camel-k
 ```
 
 More instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page.
 
 [[olm]]
-== Installation via Operator Hub
+=== Installation via Operator Hub
 
 Camel K is also available in Operator Hub. You will need the OLM framework to be properly installed in your cluster. More instructions on the https://operatorhub.io/operator/camel-k[Camel K Operator Hub] page.
 
@@ -53,52 +34,74 @@ You can edit the `Subscription` custom resource, setting the channel you want to
 NOTE: Some Kubernetes clusters such as Openshift may let you to perform the same operation from a GUI as well. Refer to the cluster instruction to learn how to perform such action from user interface.
 
 [[kustomize]]
-== Installation via Kustomize
+=== Installation via Kustomize
 
 https://kustomize.io[Kustomize] provides a declarative approach to the configuration customization of a Camel-K installation. Kustomize works either with a standalone executable or as a built-in to `kubectl`. The https://github.com/apache/camel-k/tree/main/install[/install] directory provides a series of base and overlays configuration that you can use. You can create your own overlays or customize the one available in the repository to accommodate your need.
 
-=== One liner operator installation procedure
-
-If you don't need to provide any configuration nor the registry (ie, in Openshift), you can apply this simple one liner:
-
 ```
-$ kubectl apply -k github.com/apache/camel-k/install/overlays/openshift/descoped?ref=v2.4.0 --server-side
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side
 ```
 
 You can specify as `ref` parameter the version you're willing to install (ie, `v2.4.0`). The command above will install a descoped (global) operator in the camel-k namespace.
 
-NOTE: if you're not installing in Openshift you will need to manually change the IntegrationPlatform registry configuration as the operator won't be able to find any valid registry address (see section below).
+[[verify]]
+=== Verify that the operator is up and running
 
-=== Custom configuration procedure
-
-Most often you want to specify different parameters to configure the registry and other platform behaviors. In such case you can clone the project repository and use any of the overlays available, customizing to your needs.
-
-```
-# Clone the project repository
-$ https://github.com/apache/camel-k.git
-$ cd camel-k
-# You can use any release tag (recommended as it is immutable) or branch
-$ git checkout v2.4.0
-$ cd install/overlays
-```
-
-In this directory you may find a series of default configuration for Kubernetes, Openshift and any other sensible profile. For Kubernetes, you can see we have prepared a `descoped` configuration and a `namespaced` which are installing the operator globally or in a specific namespace.
+In order to verify that the operator is up and running, you should be able to see a Camel K operator `Pod` running in the namespace used, for example:
 
 ```
-# Default, use this namespace (edit `kustomize.yaml` to change it)
-$ kubectl create ns camel-k
-$ kubectl apply -k kubernetes/descoped --server-side
-# Change the registry address (edit the file for more configuration if required)
-$ sed -i 's/address: .*/address: my-registry-host.io/' kubernetes/descoped/integration-platform.yaml
-$ kubectl apply -k platform
+kubectl get pods -n camel-k
+NAME                                READY   STATUS    RESTARTS   AGE
+camel-k-operator-5b686db99f-c2k2s   1/1     Running   0          3m46s
 ```
 
-NOTE: you don't need to set the platform if running on Openshift.
+[[integration-platform]]
+== IntegrationPlatform and container registry
 
-The above command will install a global Camel K operator in the `camel-k` namespace using the container registry you've provided. The `server-side` option is required in order to prevent some error while installing CRDs. We need to apply a separate platform configuration as Kustomize may not be yet aware of the CRDs if done in the same step.
+The operator is now up and running. However, there is a second step you need to perform in order to be able to properly use it.
+
+The majority of configuration required to tune the operator are stored in an `IntegrationPlatform` custom resource. This is mainly required to provide configuration for the container registry, build time configuration or common profile you want to apply to all your `Integrations`.
+
+Camel K requires a container registry which is used to store the images built for your applications. Certain clusters may use their internal container registry (ie, Openshift, Minikube or https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry[KEP-1755 compatible] clusters).
+
+You need to create an `IntegrationPlatform` with the following configuration in the namespace where the operator is running:
+
+```yaml
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+labels:
+    app: camel-k
+name: camel-k
+namespace: camel-k
+spec:
+build:
+    registry:
+    address: registry.io
+    insecure: true
+```
+
+The minimum configuration required is the container registry. Just change the example value with the configuration available for your installation and write as a file as `itp.yaml`.
+
+NOTE: a local minikube registry can be enabled via `minikube addons enable registry` and the IP to use running `kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'`.
+
+```
+kubectl apply -f itp.yaml -n camel-k
+```
+
+Wait now for the`IntegrationPlatform` to turn into ready state:
+
+```
+$ kubectl wait --for jsonpath='{.status.phase}'=Ready IntegrationPlatform camel-k -n camel-k --timeout 30s
+integrationplatform.camel.apache.org/camel-k condition met
+```
+
+Your operator is now ready to run some Camel `Integration`.
+
+NOTE: a production ready xref:installation/registry/registry.adoc[container registry configuration] may require other parameters and secret management.
 
 [[test]]
-== Test your installation
+== Run some integration
 
 Once you've completed any of the above installation procedure, you'll be ready to xref:running/running.adoc[run some integrations].
 

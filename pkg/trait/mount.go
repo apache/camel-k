@@ -25,11 +25,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -60,9 +58,6 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// Look for secrets which may have been created by service binding trait
 	t.addServiceBindingSecret(e)
 
-	// Look for implicit secrets which may be required by kamelets
-	condition := t.addImplicitKameletsSecrets(e)
-
 	// Validate resources and pvcs
 	for _, c := range t.Configs {
 		if !strings.HasPrefix(c, "configmap:") && !strings.HasPrefix(c, "secret:") {
@@ -75,7 +70,7 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	return true, condition, nil
+	return true, nil, nil
 }
 
 func (t *mountTrait) Apply(e *Environment) error {
@@ -149,6 +144,13 @@ func (t *mountTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]co
 			return parseErr
 		}
 	}
+	for _, v := range t.EmptyDirs {
+		if vol, parseErr := utilResource.ParseEmptyDirVolume(v); parseErr == nil {
+			t.mountResource(vols, mnts, vol)
+		} else {
+			return parseErr
+		}
+	}
 
 	return nil
 }
@@ -167,7 +169,8 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile)
 	mntPath := getMountPoint(conf.Name(), dstDir, string(conf.StorageType()), string(conf.ContentType()))
 	readOnly := true
-	if conf.StorageType() == utilResource.StorageTypePVC {
+	if conf.StorageType() == utilResource.StorageTypePVC ||
+		conf.StorageType() == utilResource.StorageTypeEmptyDir {
 		readOnly = false
 	}
 	mnt := getMount(refName, mntPath, dstFile, readOnly)
@@ -182,49 +185,4 @@ func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 			t.Configs = append(t.Configs, "secret:"+secret.Name)
 		}
 	})
-}
-
-// Deprecated: to be removed in future releases.
-func (t *mountTrait) addImplicitKameletsSecrets(e *Environment) *TraitCondition {
-	featureUsed := false
-	if trait := e.Catalog.GetTrait(kameletsTraitID); trait != nil {
-		kamelets, ok := trait.(*kameletsTrait)
-		if !ok {
-			return NewIntegrationCondition(
-				"Mount",
-				v1.IntegrationConditionTraitInfo,
-				corev1.ConditionTrue,
-				traitConfigurationReason,
-				"Unexpected error happened while casting to kamelets trait",
-			)
-		}
-		if !pointer.BoolDeref(t.ScanKameletsImplicitLabelSecrets, true) {
-			return nil
-		}
-		implicitKameletSecrets, err := kamelets.listConfigurationSecrets(e)
-		if err != nil {
-			return NewIntegrationCondition(
-				"Mount",
-				v1.IntegrationConditionTraitInfo,
-				corev1.ConditionTrue,
-				traitConfigurationReason,
-				err.Error(),
-			)
-		}
-		for _, secret := range implicitKameletSecrets {
-			featureUsed = true
-			t.Configs = append(t.Configs, "secret:"+secret)
-		}
-	}
-
-	if featureUsed {
-		return NewIntegrationCondition(
-			"Mount",
-			v1.IntegrationConditionTraitInfo,
-			corev1.ConditionTrue,
-			traitConfigurationReason,
-			"Implicit Kamelet labelling secrets are deprecated and may be removed in future releases. Make sure to use explicit mount.config secrets instead.",
-		)
-	}
-	return nil
 }

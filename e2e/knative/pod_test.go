@@ -36,14 +36,12 @@ import (
 
 func TestPodTraitWithKnative(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/podtest-knative2.yaml", "--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/podtest-knative2.yaml", "--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "podtest-knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "podtest-knative2", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/podtest-knative1.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "files/podtest-knative1.yaml").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "podtest-knative1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "podtest-knative1", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "podtest-knative1"), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

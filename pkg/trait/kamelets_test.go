@@ -31,7 +31,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestConfigurationNoKameletsUsed(t *testing.T) {
@@ -67,16 +67,6 @@ func TestConfigurationWithKamelets(t *testing.T) {
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 	assert.Equal(t, []string{"c0", "c1", "c2", "complex-.-.-1a", "complex-.-.-1b", "complex-.-.-1c"}, trait.getKameletKeys())
-	assert.Equal(t, []configurationKey{
-		newConfigurationKey("c0", ""),
-		newConfigurationKey("c1", ""),
-		newConfigurationKey("c2", ""),
-		newConfigurationKey("complex-.-.-1a", ""),
-		newConfigurationKey("complex-.-.-1b", ""),
-		newConfigurationKey("complex-.-.-1b", "a"),
-		newConfigurationKey("complex-.-.-1c", ""),
-		newConfigurationKey("complex-.-.-1c", "b"),
-	}, trait.getConfigurationKeys())
 }
 
 func TestKameletLookup(t *testing.T) {
@@ -369,12 +359,6 @@ func TestKameletConfigLookup(t *testing.T) {
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
-	assert.Equal(t, []configurationKey{newConfigurationKey("timer", "")}, trait.getConfigurationKeys())
-
-	list, err := trait.listConfigurationSecrets(environment)
-	require.NoError(t, err)
-	assert.Contains(t, list, "my-secret", "my-secret3")
-	assert.NotContains(t, list, "my-secret2")
 }
 
 func TestKameletNamedConfigLookup(t *testing.T) {
@@ -431,15 +415,6 @@ func TestKameletNamedConfigLookup(t *testing.T) {
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 	assert.Equal(t, []string{"timer"}, trait.getKameletKeys())
-	assert.Equal(t, []configurationKey{
-		newConfigurationKey("timer", ""),
-		newConfigurationKey("timer", "id2"),
-	}, trait.getConfigurationKeys())
-
-	list, err := trait.listConfigurationSecrets(environment)
-	require.NoError(t, err)
-	assert.Contains(t, list, "my-secret", "my-secret2")
-	assert.NotContains(t, list, "my-secret3")
 }
 
 func TestKameletConditionFalse(t *testing.T) {
@@ -602,7 +577,7 @@ func TestKameletSyntheticKitConditionTrue(t *testing.T) {
 		})
 	environment.CamelCatalog = nil
 	environment.Integration.Spec.Sources = nil
-	trait.Auto = pointer.Bool(false)
+	trait.Auto = ptr.To(false)
 	trait.List = "timer-source"
 
 	enabled, condition, err := trait.Configure(environment)
@@ -643,17 +618,16 @@ func TestKameletSyntheticKitAutoConditionFalse(t *testing.T) {
 				}),
 			},
 		})
-	environment.CamelCatalog = nil
 	environment.Integration.Spec.Sources = nil
 	trait.List = "timer-source"
 
-	// Auto=true by default, so, we will need to skip as
-	// we cannot parse sources
+	// Auto=true by default. The source parsing will be empty as
+	// there are no available sources.
 
 	enabled, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
-	assert.False(t, enabled)
-	assert.NotNil(t, condition)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
 
 	kameletsBundle := environment.Resources.GetConfigMap(func(cm *corev1.ConfigMap) bool {
 		return cm.Labels[kubernetes.ConfigMapTypeLabel] == KameletBundleType

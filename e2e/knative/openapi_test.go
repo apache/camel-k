@@ -45,18 +45,15 @@ func TestOpenAPIService(t *testing.T) {
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi-knative", cmDataProps)
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "--name", "petstore", "--open-api", "configmap:my-openapi-knative", "files/petstore.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "--name", "petstore", "--open-api", "configmap:my-openapi-knative", "files/petstore.yaml").Execute()).To(Succeed())
 
 		g.Eventually(KnativeService(t, ctx, ns, "petstore"), TestTimeoutLong).
 			Should(Not(BeNil()))
-
 		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
 		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
 			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
-
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

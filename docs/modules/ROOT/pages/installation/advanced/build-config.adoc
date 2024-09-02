@@ -1,6 +1,6 @@
 = Build configuration
 
-The default installation provides some default configuration in order to perform a build and the publishing of the application in the container registry. In order to provide a more customized user experience, we provide two build configuration which you can use: **Build Strategy** and **Publish Strategy**.
+The Camel K operator installation provides some default configuration in order to perform a build and the publishing of the application in a container registry. The configuration can be defined at a global scope in the IntegrationPlatform custom resource, or during each Integration execution via the options available in the builder trait.
 
 [[build-strategy]]
 == Build strategy
@@ -20,12 +20,10 @@ The most relevant are the `resource` and `limit` parameters which can be used to
 
 The publish strategy is used to control the behavior of the creation of the container after a build. Basically it create a container image from the application built in the previous step and store as a container in the xref:installation/registry/registry.adoc[registry] configured.
 
-The operator has 3 different strategy which you can adopt: Spectrum (default in plain Kubernetes profile), S2I (default in Openshift profile) and Jib.
-
-Each configuration provides a set of technologies which are supporting the creation of a container image and the storage into a container registry. https://github.com/container-tools/spectrum[Spectrum] is a lightweight technology based on https://github.com/google/go-containerregistry[go-containerregistry]. It creates a raw image on top of a base image and push very quickly to a registry.
-
-https://access.redhat.com/documentation/es-es/openshift_container_platform/4.2/html/builds/understanding-image-builds#build-strategy-s2i_understanding-image-builds[S2I] is an efficient technology integrated in Openshift, reason why it is enabled by default in such a profile.
+The operator has 2 different strategy which you can adopt: Jib (default in plain Kubernetes profile) and S2I (default in Openshift profile).
 
 https://cloud.google.com/java/getting-started/jib[Jib] is a technology that transform a Java project into a container image and is configurable directly in Maven.
+
+https://access.redhat.com/documentation/es-es/openshift_container_platform/4.2/html/builds/understanding-image-builds#build-strategy-s2i_understanding-image-builds[S2I] is an efficient technology integrated in Openshift, reason why it is enabled by default in such a profile.
 
 NOTE: you may define your own publishing technology by using xref:pipeline/pipeline.adoc[pipelines].

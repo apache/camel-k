@@ -32,7 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -202,7 +202,7 @@ func enqueueRequestsFromConfigFunc(ctx context.Context, c client.Client, res ctr
 
 	for _, integration := range list.Items {
 		found := false
-		if integration.Spec.Traits.Mount == nil || !pointer.BoolDeref(integration.Spec.Traits.Mount.HotReload, false) {
+		if integration.Spec.Traits.Mount == nil || !ptr.Deref(integration.Spec.Traits.Mount.HotReload, false) {
 			continue
 		}
 		for _, c := range integration.Spec.Traits.Mount.Configs {

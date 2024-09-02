@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -69,7 +69,7 @@ func TestProbesDependencies(t *testing.T) {
 			Traits: v1.Traits{
 				Health: &traitv1.HealthTrait{
 					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
+						Enabled: ptr.To(true),
 					},
 				},
 			},
@@ -91,10 +91,10 @@ func TestProbesOnDeployment(t *testing.T) {
 			Traits: v1.Traits{
 				Health: &traitv1.HealthTrait{
 					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
+						Enabled: ptr.To(true),
 					},
-					LivenessProbeEnabled:  pointer.Bool(true),
-					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessProbeEnabled:  ptr.To(true),
+					ReadinessProbeEnabled: ptr.To(true),
 					LivenessTimeout:       1234,
 				},
 			},
@@ -127,10 +127,10 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 			Traits: v1.Traits{
 				Health: &traitv1.HealthTrait{
 					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
+						Enabled: ptr.To(true),
 					},
-					LivenessProbeEnabled:  pointer.Bool(true),
-					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessProbeEnabled:  ptr.To(true),
+					ReadinessProbeEnabled: ptr.To(true),
 					LivenessScheme:        "HTTPS",
 					ReadinessScheme:       "HTTPS",
 					LivenessTimeout:       1234,
@@ -166,15 +166,15 @@ func TestProbesOnKnativeService(t *testing.T) {
 			Traits: v1.Traits{
 				KnativeService: &traitv1.KnativeServiceTrait{
 					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
+						Enabled: ptr.To(true),
 					},
 				},
 				Health: &traitv1.HealthTrait{
 					Trait: traitv1.Trait{
-						Enabled: pointer.Bool(true),
+						Enabled: ptr.To(true),
 					},
-					LivenessProbeEnabled:  pointer.Bool(true),
-					ReadinessProbeEnabled: pointer.Bool(true),
+					LivenessProbeEnabled:  ptr.To(true),
+					ReadinessProbeEnabled: ptr.To(true),
 					LivenessTimeout:       1234,
 				},
 			},

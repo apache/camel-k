@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
-	"sort"
 	"strings"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
@@ -32,13 +31,10 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
-	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
 func ptrFrom[T any](value T) *T {
@@ -75,66 +71,10 @@ func getIntegrationKit(ctx context.Context, c client.Client, integration *v1.Int
 	return kit, err
 }
 
-func collectConfigurationValues(configurationType string, configurable ...v1.Configurable) []string {
-	result := sets.NewSet()
-
-	for _, c := range configurable {
-		c := c
-
-		if c == nil || reflect.ValueOf(c).IsNil() {
-			continue
-		}
-
-		entries := c.Configurations()
-		if entries == nil {
-			continue
-		}
-
-		for _, entry := range entries {
-			if entry.Type == configurationType {
-				result.Add(entry.Value)
-			}
-		}
-	}
-
-	s := result.List()
-	sort.Strings(s)
-	return s
-}
-
-func collectConfigurations(configurationType string, configurable ...v1.Configurable) []map[string]string {
-	var result []map[string]string
-
-	for _, c := range configurable {
-		c := c
-
-		if c == nil || reflect.ValueOf(c).IsNil() {
-			continue
-		}
-
-		entries := c.Configurations()
-		if entries == nil {
-			continue
-		}
-
-		for _, entry := range entries {
-			if entry.Type == configurationType {
-				item := make(map[string]string)
-				item["value"] = entry.Value
-				result = append(result, item)
-			}
-		}
-	}
-
-	return result
-}
-
 func collectConfigurationPairs(configurationType string, configurable ...v1.Configurable) []variable {
 	result := make([]variable, 0)
 
 	for _, c := range configurable {
-		c := c
-
 		if c == nil || reflect.ValueOf(c).IsNil() {
 			continue
 		}
@@ -198,17 +138,9 @@ func filterTransferableAnnotations(annotations map[string]string) map[string]str
 	return res
 }
 
-// ExtractSourceDependencies extracts dependencies from source.
-func ExtractSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) (*sets.Set, error) {
+// ExtractSourceLoaderDependencies extracts dependencies from source.
+func ExtractSourceLoaderDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatalog) *sets.Set {
 	dependencies := sets.NewSet()
-
-	// Add auto-detected dependencies
-	meta, err := metadata.Extract(catalog, source)
-	if err != nil {
-		return nil, err
-	}
-	dependencies.Merge(meta.Dependencies)
-
 	// Add loader dependencies
 	lang := source.InferLanguage()
 	for loader, v := range catalog.Loaders {
@@ -231,7 +163,7 @@ func ExtractSourceDependencies(source v1.SourceSpec, catalog *camel.RuntimeCatal
 		}
 	}
 
-	return dependencies, nil
+	return dependencies
 }
 
 // AssertTraitsType asserts that traits is either v1.Traits or v1.IntegrationKitTraits.
@@ -530,7 +462,7 @@ func NewSpecTraitsOptionsForIntegrationAndPlatform(c client.Client, i *v1.Integr
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
-	// IMPORTANT: when we remove this we'll need to remove the cli from the func,
+	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
 	return newTraitsOptions(c, options, i.ObjectMeta.Annotations)
@@ -543,7 +475,7 @@ func NewSpecTraitsOptionsForIntegration(c client.Client, i *v1.Integration) (Opt
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
-	// IMPORTANT: when we remove this we'll need to remove the cli from the func,
+	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
 	return newTraitsOptions(c, m1, i.ObjectMeta.Annotations)
@@ -556,7 +488,7 @@ func newTraitsOptionsForIntegrationKit(c client.Client, i *v1.IntegrationKit, tr
 	}
 
 	// Deprecated: to remove when we remove support for traits annotations.
-	// IMPORTANT: when we remove this we'll need to remove the cli from the func,
+	// IMPORTANT: when we remove this we'll need to remove the client.Client from the func,
 	// which will bring to more cascade removal. It had to be introduced to support the deprecated feature
 	// in a properly manner (ie, comparing the spec.traits with annotations in a proper way).
 	return newTraitsOptions(c, m1, i.ObjectMeta.Annotations)
@@ -599,31 +531,6 @@ func NewTraitsOptionsForKameletBinding(c client.Client, kb *v1alpha1.KameletBind
 	}
 
 	return newTraitsOptions(c, options, kb.ObjectMeta.Annotations)
-}
-
-// verify if the integration in the Environment contains an endpoint.
-func containsEndpoint(name string, e *Environment, c client.Client) (bool, error) {
-	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, c, e.Integration, e.Resources)
-	if err != nil {
-		return false, err
-	}
-
-	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-	if err != nil {
-		return false, err
-	}
-
-	hasKnativeEndpoint := false
-	endpoints := make([]string, 0)
-	endpoints = append(endpoints, meta.FromURIs...)
-	endpoints = append(endpoints, meta.ToURIs...)
-	for _, endpoint := range endpoints {
-		if uri.GetComponent(endpoint) == name {
-			hasKnativeEndpoint = true
-			break
-		}
-	}
-	return hasKnativeEndpoint, nil
 }
 
 // HasMatchingTraits verifies if two traits options match.

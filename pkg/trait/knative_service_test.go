@@ -28,7 +28,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -80,15 +80,20 @@ func TestKnativeService(t *testing.T) {
 						Language: v1.LanguageJavaScript,
 					},
 				},
-				Configuration: []v1.ConfigurationSpec{
-					{Type: "configmap", Value: "my-cm"},
-					{Type: "secret", Value: "my-secret"},
-					{Type: "property", Value: "my-property=my-property-value"},
-				},
 				Traits: v1.Traits{
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
+						},
+					},
+					Camel: &traitv1.CamelTrait{
+						Properties: []string{
+							"my-property=my-property-value",
+						},
+					},
+					Mount: &traitv1.MountTrait{
+						Configs: []string{
+							"configmap:my-cm", "secret:my-secret",
 						},
 					},
 				},
@@ -212,9 +217,9 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 					},
 					KnativeService: &traitv1.KnativeServiceTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto: pointer.Bool(false),
+						Auto: ptr.To(false),
 					},
 					Container: &traitv1.ContainerTrait{
 						Name: "my-container-name",

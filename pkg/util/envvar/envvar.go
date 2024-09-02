@@ -17,11 +17,14 @@ limitations under the License.
 
 package envvar
 
-import corev1 "k8s.io/api/core/v1"
+import (
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
+)
 
 // Get --.
 func Get(vars []corev1.EnvVar, name string) *corev1.EnvVar {
-	for i := 0; i < len(vars); i++ {
+	for i := range len(vars) {
 		if vars[i].Name == name {
 			return &vars[i]
 		}
@@ -89,6 +92,30 @@ func SetValFrom(vars *[]corev1.EnvVar, name string, path string) {
 					FieldPath: path,
 				},
 			},
+		})
+	}
+}
+
+// SetValFromValueSource --.
+func SetValFromValueSource(vars *[]corev1.EnvVar, name string, vs v1.ValueSource) {
+	var envVarSource *corev1.EnvVarSource
+	if vs.SecretKeyRef != nil {
+		envVarSource = &corev1.EnvVarSource{
+			SecretKeyRef: vs.SecretKeyRef,
+		}
+	} else if vs.ConfigMapKeyRef != nil {
+		envVarSource = &corev1.EnvVarSource{
+			ConfigMapKeyRef: vs.ConfigMapKeyRef,
+		}
+	}
+
+	if envVar := Get(*vars, name); envVar != nil {
+		envVar.Value = ""
+		envVar.ValueFrom = envVarSource
+	} else {
+		*vars = append(*vars, corev1.EnvVar{
+			Name:      name,
+			ValueFrom: envVarSource,
 		})
 	}
 }

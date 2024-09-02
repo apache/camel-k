@@ -92,9 +92,8 @@ func (action *buildKitAction) Handle(ctx context.Context, integration *v1.Integr
 		integration.Name, "namespace", integration.Namespace)
 	var integrationKit *v1.IntegrationKit
 kits:
-	for _, kit := range env.IntegrationKits {
-		kit := kit
-
+	for j := range env.IntegrationKits {
+		kit := env.IntegrationKits[j]
 		for i := range existingKits {
 			k := &existingKits[i]
 

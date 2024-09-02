@@ -5,14 +5,7 @@ Production or corporate environments can deny direct access to the Internet, and
 
 The Camel K operator can be configured to route egress traffic to this proxy, by setting the usual `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` on the operator Deployment.
 
-This can be achieved with the Kamel CLI, at installation time, e.g.:
-
-[source,console]
-----
-$ kamel install --operator-env-vars=HTTP_PROXY=http://proxy
-----
-
-Alternatively, the operator Deployment can be amended with the `kubectl` CLI, e.g.:
+This can be achieved with the proper customization at installation time (see details for each specific installation method). Alternatively, the operator Deployment can be amended with the `kubectl` CLI, e.g.:
 
 [source,console]
 ----

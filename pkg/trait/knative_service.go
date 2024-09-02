@@ -23,7 +23,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -32,7 +32,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/knative"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -77,7 +76,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
 			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
@@ -148,53 +147,38 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		// explicitly disabled by the user
 		return nil, nil
 	}
-
 	// Knative serving is required
 	if ok, _ := knative.IsServingInstalled(e.Client); !ok {
-		if t.isForcefullyEnabled() {
-			// User has forcefully request to use this feature.
+		if ptr.Deref(t.Enabled, false) {
 			// Warn the user that he requested a feature but it cannot be fulfilled due to missing
 			// API installation
 			return nil, fmt.Errorf("missing Knative Service API, cannot enable Knative service trait")
 		}
+		// Fallback to other strategies otherwise
 		return nil, nil
 	}
 
-	if e.CamelCatalog == nil {
-		if t.isForcefullyEnabled() {
-			// Likely a sourceless Integration. Here we must verify the user has forcefully enabled the feature in order to turn it on
-			// as we don't have the possibility to scan the Integration source to verify if there is any endpoint suitable with
-			// Knative
-			knativeServiceStrategy := ControllerStrategyKnativeService
-			return &knativeServiceStrategy, nil
-		}
-		return nil, nil
+	controllerStrategy := ControllerStrategyKnativeService
+	if ptr.Deref(t.Enabled, false) {
+		return &controllerStrategy, nil
 	}
 
-	var sources []v1.SourceSpec
-	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources); err != nil {
-		return nil, err
-	}
-
-	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	enabled, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		return meta.ExposesHTTPServices || meta.PassiveEndpoints
+	})
 	if err != nil {
 		return nil, err
 	}
-	if meta.ExposesHTTPServices || meta.PassiveEndpoints {
-		knativeServiceStrategy := ControllerStrategyKnativeService
-		return &knativeServiceStrategy, nil
+	if enabled {
+		controllerStrategy := ControllerStrategyKnativeService
+		return &controllerStrategy, nil
 	}
-	return nil, nil
-}
 
-// This is true only when the user set the enabled flag on and the auto flag off.
-func (t *knativeServiceTrait) isForcefullyEnabled() bool {
-	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
+	return nil, nil
 }
 
 func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {

@@ -1,125 +1,33 @@
 [[fine-tuning]]
 = Camel K Operator fine tuning
 
-Camel K Operators offers several possibility of customization. The default installation could be good in the most of the cases, but, we have a series of configuration that can be applied when you want to fine tune your Camel K operator and get the very best of it. The following settings will work for an installation via `kamel` CLI, but the same configuration could be done with the other xref:installation/installation.adoc[installation procedures] by applying the required changes on the related configuration files.
+Camel K Operators offers several possibility of customization. The default installation could be good in the most of the cases, but, we have a series of configuration that can be applied when you want to fine tune your Camel K operator and get the very best of it.
 
-NOTE: changing some of the following configuration may affect the behavior of your Camel K Operator. Make sure to understand how to properly tune each configuration.
+Some of the configuration can be defined after the operator is installed using the proper xref:installation/integrationplatform.adoc[IntegrationPlatform specifications]. Other fine tunings require to change the operator Deployment, so they either need to be provided before the installation procedure start, or after, with the subsequent operator restart.
 
-[[operator-customization]]
-== Operator configuration
-The operator installation can be customized by using the following parameters:
-```
---operator-env-vars stringArray               Add an environment variable to set in the operator Pod(s), as <name=value>
--x, --operator-id string                      Set the operator id that is used to select the resources this operator should manage (default "camel-k")
---operator-image string                       Set the operator Image used for the operator deployment
---operator-image-pull-policy string           Set the operator ImagePullPolicy used for the operator deployment
---skip-cluster-setup                          Skip the cluster-setup phase
---skip-default-kamelets-setup                 Skip installation of the default Kamelets from catalog
---skip-operator-setup                         Do not install the operator in the namespace (in case there's a global one)
---skip-registry-setup                         Skip the registry-setup phase (may negatively impact building of integrations)
-```
+NOTE: changing some of the default configuration may affect the behavior of your Camel K Operator. Make sure to understand how to properly tune each configuration.
 
-The above parameters are helpful to change the default Camel K operator configuration or to partially skip certain advanced configuration resources.
+Most of these settings will require changing either an environment variable or other configuration of the operator Deployment. You need to verify how to apply those changes according the installation methodology chosen.
+
+== Installation name
+
+You can install one or more Camel K operators (which must share CRDs). In such case you need to specify a unique operator name which will be used by each resource to know who is in charge to reconcile it. This behavior is controlled by the OPERATOR_ID environment variable (default value, _camel-k_).
 
 [[resources]]
 == Resource management
 
-We provide certain configuration to better "operationalize" the Camel K Operator:
-```
---node-selector stringArray                   Add a NodeSelector to the operator Pod
---operator-resources stringArray              Define the resources requests and limits assigned to the operator Pod as <requestType.requestResource=value> (i.e., limits.memory=256Mi)
---toleration stringArray                      Add a Toleration to the operator Pod
-```
-
-More detailed information on the xref:installation/advanced/resources.adoc[resource management] page.
-
-[[build-configuration]]
-== Build configuration
-
-We have several configuration used to influence the building of an integration:
-
-```
---base-image string                           Set the base Image used to run integrations
---build-publish-strategy string               Set the build publish strategy
---build-publish-strategy-option stringArray   Add a build publish strategy option, as <name=value>
---build-strategy string                       Set the build strategy
---build-order-strategy string                 Set the build order strategy
---build-timeout string                        Set how long the build process can last
---max-running-pipelines int                   Maximum number of parallel running pipelines
-```
-A very important set of configuration you can provide is related to Maven:
-```
---maven-ca-secret string                      Configure the secret key containing the Maven CA certificates (secret/key)
---maven-cli-option stringArray                Add a default Maven CLI option to the list of arguments for Maven commands
---maven-extension stringArray                 Add a Maven build extension
---maven-local-repository string               Path of the local Maven repository
---maven-property stringArray                  Add a Maven property
---maven-repository stringArray                Add a Maven repository
---maven-settings string                       Configure the source of the Maven settings (configmap|secret:name[/key])
-```
-You can learn more in details in the xref:installation/advanced/maven.adoc[Maven configuration] page.
-
-[[publish-configuration]]
-== Publish configuration
-
-Camel K requires a container registry where to store the applications built. These are the main configurations:
-
-```
---organization string                         A organization on the Docker Hub that can be used to publish images
---registry string                             A container registry that can be used to publish images
---registry-auth-file string                   A container registry configuration file containing authorization tokens for pushing and pulling images
---registry-auth-password string               The container registry authentication password
---registry-auth-server string                 The container registry authentication server
---registry-auth-username string               The container registry authentication username
---registry-insecure                           Configure registry access in insecure mode or not (`http` vs `https`)
---registry-secret string                      A secret used to push/pull images to the container registry
-```
-We have a dedicated section to explain more in details xref:installation/registry/registry.adoc[how to configure a registry].
+We provide certain configuration to better "operationalize" the Camel K Operator. More detailed information on the xref:installation/advanced/resources.adoc[resource management] page.
 
 == Monitoring
 
-Camel K Operator provides certain monitoring capabilities. You can change the default settings:
+Camel K Operator provides certain parameters that would let you enable monitoring capabilities.
 
-```
---health-port int                             The port of the health endpoint (default 8081)
---monitoring                                  To enable or disable the operator monitoring
---monitoring-port int                         The port of the metrics endpoint (default 8080)
---log-level string                            The level of operator logging (default - info): info or 0, debug or 1 (default "info")
-```
-You can learn more about xref:observability/monitoring/operator.adoc[how to monitor Camel K Operator].
+There is a default liveness service that is available at the operator Pod _/healtz_ endpoint on port _8081_. You can change the port parameter if you need to expose under a different port making sure to start the operator with the _--health-port_ to the same value. You also need to change the Deployment template spec to reflect the change on the operator container liveness check.
 
-== Debugging
+There is a default metrics service as well available at the operator Pod _/metrics_ endpoint on port _8080_. The port can be also changed. In this case you only need to change the Deployment container operator, changing the _--monitoring-port_ value to the port you want the operator to expose.
 
-Camel K offers the possibility to execute debugging on the same operator program. Here is the list of settings available:
+The service exposed on the _/metrics_ endpoint is compatible with Prometheus. You can learn more about xref:observability/monitoring/operator.adoc[how to monitor Camel K Operator].
 
-```
---debugging                                   To enable or disable the operator debugging
---debugging-path string                       The path to the kamel executable file (default "/usr/local/bin/kamel")
---debugging-port int                          The port of the debugger (default 4040)
-```
+== Logging
 
-== Installation topology
-
-We have also certain configuration that let you control how to deploy your Camel K Operator(s):
-```
---global                                      Configure the operator to watch all namespaces. No integration platform is created. You can run integrations in a namespace by installing an integration platform: 'kamel install --skip-operator-setup -n my-namespace'
---operator-id string                          Set the operator id that is used to select the resources this operator should manage (default "camel-k")
-```
-Learn more about xref:installation/advanced/multi.adoc[Camel K multi-tenancy].
-
-== OLM Specific parameters
-
-OLM is one of the methodology and we have a few handy parameters to customize it:
-
-```
---olm                                         Try to install everything via OLM (Operator Lifecycle Manager) if available (default true)
---olm-channel string                          Name of the Camel K channel in the OLM source or marketplace
---olm-global-namespace string                 A namespace containing an OperatorGroup that defines global scope for the operator (used in combination with the --global flag)
---olm-operator-name string                    Name of the Camel K operator in the OLM source or marketplace
---olm-package string                          Name of the Camel K package in the OLM source or marketplace
---olm-source string                           Name of the OLM source providing the Camel K package (defaults to the standard Operator Hub source)
---olm-source-namespace string                 Namespace where the OLM source is available
---olm-starting-csv string                     Allow to install a specific version from the operator source instead of latest available from the channel
-```
-
-Have a look at xref:installation/installation.adoc#olm[OLM installation procedure].
+By default, the operator Pod logging level is set to INFO. You may require to change this value to log also DEBUG. In this case you need to provide an environment variable to the operator Deployment, _LOG_LEVEL_ which can be set to `debug`. You can also lower the number of logging tracing by setting this value to `error` (advisable for production environments).

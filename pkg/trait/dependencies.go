@@ -23,7 +23,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
@@ -47,9 +46,6 @@ func (t *dependenciesTrait) Configure(e *Environment) (bool, *TraitCondition, er
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if e.CamelCatalog == nil {
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-	}
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
 }
 
@@ -72,26 +68,25 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 		dependencies.Add(d.GetDependencyID())
 	}
 
-	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
-	if err != nil {
-		return err
-	}
-	for _, s := range sources {
-		// Add source-related dependencies
-		srcDeps, err := ExtractSourceDependencies(s, e.CamelCatalog)
-		if err != nil {
-			return err
-		}
-		dependencies.Merge(srcDeps)
-
-		meta, err := metadata.Extract(e.CamelCatalog, s)
-		if err != nil {
-			return err
-		}
-		meta.RequiredCapabilities.Each(func(item string) bool {
-			util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
+	_, err := e.consumeSourcesMeta(
+		func(sources []v1.SourceSpec) bool {
+			for _, s := range sources {
+				// Add source-related language dependencies
+				srcDeps := ExtractSourceLoaderDependencies(s, e.CamelCatalog)
+				dependencies.Merge(srcDeps)
+			}
+			return true
+		},
+		func(meta metadata.IntegrationMetadata) bool {
+			dependencies.Merge(meta.Dependencies)
+			meta.RequiredCapabilities.Each(func(item string) bool {
+				util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, item)
+				return true
+			})
 			return true
 		})
+	if err != nil {
+		return err
 	}
 
 	// Add dependencies back to integration

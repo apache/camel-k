@@ -34,13 +34,12 @@ type MountTrait struct {
 	Resources []string `property:"resources" json:"resources,omitempty"`
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
+	// A list of EmptyDir volumes to be mounted. Syntax: [name:/container/path]
+	EmptyDirs []string `property:"empty-dirs" json:"emptyDirs,omitempty"`
 	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
 	// marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
 	// changes in metadata.
 	HotReload *bool `property:"hot-reload" json:"hotReload,omitempty"`
-	// Deprecated: include your properties in an explicit property file backed by a secret.
-	// Let the operator to scan for secret labeled with `camel.apache.org/kamelet` and `camel.apache.org/kamelet.configuration`.
-	// These secrets are mounted to the application and treated as plain properties file with their key/value list
-	// (ie .spec.data["camel.my-property"] = my-value) (default `true`).
+	// Deprecated: no longer available since version 2.5.
 	ScanKameletsImplicitLabelSecrets *bool `property:"scan-kamelets-implicit-label-secrets" json:"scanKameletsImplicitLabelSecrets,omitempty"`
 }

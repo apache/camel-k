@@ -214,6 +214,7 @@ func (action *monitorPodAction) sigterm(ctx context.Context, pod *corev1.Pod) er
 			Resource("pods").
 			Namespace(pod.Namespace).
 			Name(pod.Name).
+			Timeout(1*time.Minute).
 			SubResource("exec").
 			Param("container", container.Name)
 

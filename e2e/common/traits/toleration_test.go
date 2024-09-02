@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
 	"context"
@@ -30,7 +30,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -38,18 +38,10 @@ import (
 
 func TestTolerationTrait(t *testing.T) {
 	t.Parallel()
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		operatorID := "camel-k-traits-toleration"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
 		t.Run("Run Java with node toleration operation exists", func(t *testing.T) {
 			name := RandomizedSuffixName("java1")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "toleration.enabled=true", "-t", "toleration.taints=camel.apache.org/master:NoExecute:300").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "toleration.enabled=true", "-t", "toleration.taints=camel.apache.org/master:NoExecute:300").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -61,13 +53,13 @@ func TestTolerationTrait(t *testing.T) {
 				Key:               "camel.apache.org/master",
 				Operator:          corev1.TolerationOpExists,
 				Effect:            corev1.TaintEffectNoExecute,
-				TolerationSeconds: pointer.Int64(300),
+				TolerationSeconds: ptr.To(int64(300)),
 			}))
 		})
 
 		t.Run("Run Java with node toleration operation equals", func(t *testing.T) {
 			name := RandomizedSuffixName("java2")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "toleration.enabled=true", "-t", "toleration.taints=camel.apache.org/master=test:NoExecute:300").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "toleration.enabled=true", "-t", "toleration.taints=camel.apache.org/master=test:NoExecute:300").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
@@ -79,7 +71,7 @@ func TestTolerationTrait(t *testing.T) {
 				Key:      "camel.apache.org/master",
 				Operator: corev1.TolerationOpEqual,
 				Value:    "test", Effect: corev1.TaintEffectNoExecute,
-				TolerationSeconds: pointer.Int64(300),
+				TolerationSeconds: ptr.To(int64(300)),
 			}))
 		})
 
@@ -89,7 +81,7 @@ func TestTolerationTrait(t *testing.T) {
 			}
 
 			name := RandomizedSuffixName("java3")
-			g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "affinity.enabled=true", "-t", "affinity.node-affinity-labels=node-role.kubernetes.io/master", "-t", "toleration.enabled=true", "-t", "toleration.taints=node-role.kubernetes.io/master:NoSchedule").Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "affinity.enabled=true", "-t", "affinity.node-affinity-labels=node-role.kubernetes.io/master", "-t", "toleration.enabled=true", "-t", "toleration.taints=node-role.kubernetes.io/master:NoSchedule").Execute()).To(Succeed())
 
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
@@ -116,8 +108,5 @@ func TestTolerationTrait(t *testing.T) {
 				}),
 			})))
 		})
-
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }

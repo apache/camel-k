@@ -18,14 +18,12 @@ limitations under the License.
 package hashicorp
 
 import (
-	"regexp"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Hashicorp Vault trait can be used to use secrets from Hashicorp Vault
@@ -69,7 +67,7 @@ func NewHashicorpVaultTrait() trait.Trait {
 }
 
 func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if environment.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -81,7 +79,6 @@ func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, *
 }
 
 func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
-	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityHashicorpVault)
 	}
@@ -90,7 +87,7 @@ func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
 		return nil
 	}
 
-	hits := rex.FindAllStringSubmatch(t.Token, -1)
+	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.Token, -1)
 	if len(hits) >= 1 {
 		var res, _ = v1.DecodeValueSource(t.Token, "hashicorp-vault-token", "The Hashicorp Vault Token provided is not valid")
 

@@ -33,7 +33,7 @@ import (
 	"github.com/spf13/cobra"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func newCmdDebug(rootCmdOptions *RootCmdOptions) (*cobra.Command, *debugCmdOptions) {
@@ -145,8 +145,8 @@ func (o *debugCmdOptions) toggle(it *v1.Integration, active bool) *v1.Integratio
 	jvmTrait := it.Spec.Traits.JVM
 
 	if active {
-		jvmTrait.Debug = pointer.Bool(true)
-		jvmTrait.DebugSuspend = pointer.Bool(o.Suspend)
+		jvmTrait.Debug = ptr.To(true)
+		jvmTrait.DebugSuspend = ptr.To(o.Suspend)
 	} else {
 		jvmTrait.Debug = nil
 		jvmTrait.DebugSuspend = nil

@@ -10,23 +10,14 @@ For the reason above it's important that you provide a container registry which 
 
 For any other platform that do not provide a default container registry, then, a registry must be provided accordingly.
 
-[[configuring-registry-install-time]]
-== Configure the registry at installation time
+[[how-to-configure]]
+== How to configure Camel K container registry
 
-Registry configuration can be set upon installation using command:
+When running a production grade installation, you'll be probably using a private container registry which is accessible via authenticated method. The secret is something that will be https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret[included at deployment time] as `imagePullSecret` configuration.
 
-[source,bash]
-----
-$ kamel install --registry registry-host.io [--organization your-user-id-or-org] [--registry-secret my-secret-registry-conf]
-----
+As each registry may have a slightly different way of securing the access you can use the generic guidelines provided in xref:installation/registry/dockerhub.adoc[Docker Hub] registry configuration and adjust accordingly. We expect that at the end of the process you have a public address (1) an _organization_ (2) and a _secret_ (3) values that will be used to configure the registry.
 
-Although optionals, the `organization` and `registry-secret` parameters are strongly suggested in order to secure the pull/push operations on a registry that is private, although accessible through the Internet. The secret is something that will https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-pod-that-uses-your-secret[included at deployment time] as `imagePullSecret` configuration.
-
-As each registry may have a slightly different way of securing the access you can use the guidelines provided in xref:installation/registry/dockerhub.adoc[Docker Hub] registry configuration and adjust accordingly.
-
-[[configuring-registry-after-install]]
-== Configure the registry after installation
-The settings you've provided in the chapter above are applied to the `IntegrationPlatform` custom resource. In particular you can find them in the `.spec.pipeline.registry`.
+You will need to create or edit any existing `IntegrationPlatform` custom resource with the values as expected in the `.spec.build.registry`.
 
 [source,yaml]
 ----
@@ -39,12 +30,12 @@ metadata:
 spec:
   build:
     registry:
-      address: registry-host.io
-      organization: your-user-id-or-org
-      secret: my-secret-registry-conf
+      address: <my-registry-address> (1)
+      organization: <my-organization> (2)
+      secret: <my-secret-credentials> (3)
 ----
 
-You can therefore update the values in the `IntegrationPlatform` in order to perform any change to the registry configuration after the Camel K operator is installed. The changes will be immediately reconciled and ready to use.
+The changes will be immediately reconciled and the operator will be able to push and pull resources in a secure manner.
 
 [[configuring-registry]]
 == Container registry requirements
@@ -70,3 +61,64 @@ We have some hints that can help you configuring on the most common platforms:
 [[configuring-registry-run-it-yours]]
 == Run your own container registry
 You can also xref:installation/registry/own.adoc[run your own registry], but this option is recommended only for advanced use cases as it may requires certain changes in the cluster configuration, so, make sure to understand how each change may affect your cluster. As you've seen in the diagram above, the cluster has to be aware of the presence of the registry in order to pull the images pushed by the operator.
+
+[[pruning-registry]]
+== Pruning unused images from container registry
+
+Over time, while building integrations the produced images are stored in the container registry and it may become outdated and may require pruning old unused images.
+
+NOTE: Each container registry vendor can provide unique details about the pruning policy, check your vendor documentation.
+
+NOTE: This is an unsupported functionality, use at your own risk.
+
+It's recommended only to delete container images from container registry if the corresponding `Integration` or `IntegrationKit` doesn't exist anymore or has no expectation to be used. Then if you delete the container image, you should also delete corresponding `Integrationkit` custom resource object.
+
+Camel K materializes the Camel integration in one of the two kubernetes objects: `Deployment` or `CronJob`.
+
+You have to check if the `Integration` is running or scaled down to zero pods, which is the case for CronJobs or Knative deployments.
+
+Then, we can provide some general guide about how to inspect the Camel K objects to prune unused images.
+
+For this guide, we assume you are connected to the container registry with `docker login`.
+
+Step 1: List all Camel K container images, prefixed with `camel-k`
+
+```
+$ docker images |grep k-kit
+10.98.248.245/camel-k/camel-k-kit-cpth0mtf799b89lheon0  <none>  bd52ae6e32af   54 years ago    481MB
+10.98.248.245/camel-k/camel-k-kit-cptguntf799b89lheok0  <none>  b7f347193b3c   54 years ago    471MB
+10.98.248.245/camel-k/camel-k-kit-cptgv0tf799b89lheokg  <none>  8d2d963396ca   54 years ago    477MB
+10.98.248.245/camel-k/camel-k-kit-cpth0mtf799b89lheomg  <none>  dc11800ef203   54 years ago    481MB
+10.98.248.245/camel-k/camel-k-kit-cptgvd5f799b89lheol0  <none>  0bbdf20f2f49   54 years ago    479MB
+```
+
+Step 2: List the container images of the Camel K Integrations (don't print the sha256 digest)
+```
+$ kubectl get -A it -oyaml|grep 'image:'|sed 's/^\s*image: //g;s/@sha256.*//g'|sort|uniq
+10.98.248.245/camel-k/camel-k-kit-cptguntf799b89lheok0
+10.98.248.245/camel-k/camel-k-kit-cptgv0tf799b89lheokg
+10.98.248.245/camel-k/camel-k-kit-cptgvd5f799b89lheol0
+10.98.248.245/camel-k/camel-k-kit-cpth0mtf799b89lheon0
+```
+
+Step 3: Compare them and remove the container images and `IntegrationKit` from list 1 not found in list 2
+```
+docker rmi dc11800ef203
+kubectl delete ik/kit-cpth0mtf799b89lheomg
+```
+
+There is a https://github.com/apache/camel-k/blob/main/script/prune-camel-k-kit-images.sh[prune-camel-k-kit-images.sh] script to help you in this task. This script requires the following cli tools: `kubectl, comm, docker`.
+The script lists the dangling images from the container registry, it accepts two parameters with no arguments: `-v` (verbose) and `-p`  (prune images).
+
+An example of an execution:
+```
+$ prune-camel-k-kit-images.sh -p
+> Images from container registry, eligible for pruning.
+10.98.248.245/camel-k/camel-k-kit-cpth0mtf799b89lheom0
+
+> Delete Container Images
+integrationkit.camel.apache.org "kit-cpth0mtf799b89lheom0" deleted
+Untagged: 10.98.248.245/camel-k/camel-k-kit-cpth0mtf799b89lheom0@sha256:3857f8e331e50ded6529641e668de8781eb3cb7b881ea14b89cfc4f6b6e9d455
+Deleted: sha256:1015a6b18f164e9b086337e69a98e5850149c158cb778bac6059984756dc0528
+Deleted: sha256:2f0d224916e77654c4401f6fc4b1147a9a6e3ccf713213c38e877d7b939bab81
+```

@@ -27,18 +27,19 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
+	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
-	"github.com/apache/camel-k/v2/pkg/util/kamelets"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 const (
@@ -51,18 +52,6 @@ const (
 	kameletConfigurationLabel   = "camel.apache.org/kamelet.configuration"
 	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
-
-type configurationKey struct {
-	kamelet         string
-	configurationID string
-}
-
-func newConfigurationKey(kamelet, configurationID string) configurationKey {
-	return configurationKey{
-		kamelet:         kamelet,
-		configurationID: configurationID,
-	}
-}
 
 type kameletsTrait struct {
 	BaseTrait
@@ -79,7 +68,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Kamelets"), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
@@ -88,17 +77,20 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if t.MountPoint == "" {
 		t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
 	}
-	if pointer.BoolDeref(t.Auto, true) {
-		if e.CamelCatalog == nil {
-			// Cannot execute this trait for synthetic IntegrationKit. In order to use it, the
-			// user has to specify forcefully auto=false option and pass a list of kamelets explicitly
-			return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
-		}
-		kamelets, err := kamelets.ExtractKameletFromSources(e.Ctx, e.Client, e.CamelCatalog, e.Resources, e.Integration)
+	if ptr.Deref(t.Auto, true) {
+		var kamelets []string
+		_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+			util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
+			return true
+		})
 		if err != nil {
 			return false, nil, err
 		}
-
+		// Check if a Kamelet is configured as default error handler URI
+		defaultErrorHandlerURI := e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerAppPropertiesPrefix + ".deadLetterUri")
+		if defaultErrorHandlerURI != "" && strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
+			kamelets = append(kamelets, source.ExtractKamelet(defaultErrorHandlerURI))
+		}
 		if len(kamelets) > 0 {
 			sort.Strings(kamelets)
 			t.List = strings.Join(kamelets, ",")
@@ -267,30 +259,6 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 	return nil
 }
 
-// Deprecated: use explicit secret configuration instead.
-func (t *kameletsTrait) listConfigurationSecrets(e *Environment) ([]string, error) {
-	listConfigurationSecrets := make([]string, 0)
-	for _, k := range t.getConfigurationKeys() {
-		options := metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", kameletLabel, k.kamelet),
-		}
-		if k.configurationID != "" {
-			options.LabelSelector = fmt.Sprintf("%s=%s,%s=%s", kameletLabel, k.kamelet, kameletConfigurationLabel, k.configurationID)
-		}
-		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(e.Ctx, options)
-		if err != nil {
-			return nil, err
-		}
-		for _, item := range secrets.Items {
-			if item.Labels != nil && item.Labels[kameletConfigurationLabel] != k.configurationID {
-				continue
-			}
-			listConfigurationSecrets = append(listConfigurationSecrets, item.Name)
-		}
-	}
-	return listConfigurationSecrets, nil
-}
-
 func (t *kameletsTrait) getKameletKeys() []string {
 	answer := make([]string, 0)
 	for _, item := range strings.Split(t.List, ",") {
@@ -303,36 +271,6 @@ func (t *kameletsTrait) getKameletKeys() []string {
 		}
 	}
 	sort.Strings(answer)
-	return answer
-}
-
-func (t *kameletsTrait) getConfigurationKeys() []configurationKey {
-	answer := make([]configurationKey, 0)
-	for _, item := range t.getKameletKeys() {
-		answer = append(answer, newConfigurationKey(item, ""))
-	}
-	for _, item := range strings.Split(t.List, ",") {
-		i := strings.Trim(item, " \t\"")
-		if strings.Contains(i, "/") {
-			parts := strings.SplitN(i, "/", 2)
-			newKey := newConfigurationKey(parts[0], parts[1])
-			alreadyPresent := false
-			for _, existing := range answer {
-				if existing == newKey {
-					alreadyPresent = true
-					break
-				}
-			}
-			if !alreadyPresent {
-				answer = append(answer, newKey)
-			}
-		}
-	}
-	sort.Slice(answer, func(i, j int) bool {
-		o1 := answer[i]
-		o2 := answer[j]
-		return o1.kamelet < o2.kamelet || (o1.kamelet == o2.kamelet && o1.configurationID < o2.configurationID)
-	})
 	return answer
 }
 

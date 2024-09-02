@@ -26,7 +26,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -63,7 +63,7 @@ func TestDefaultPodKubernetesSecurityContext(t *testing.T) {
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
 
 	assert.NotNil(t, d)
-	assert.Equal(t, pointer.Bool(defaultPodRunAsNonRoot), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
+	assert.Equal(t, ptr.To(defaultPodRunAsNonRoot), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
 	assert.Nil(t, d.Spec.Template.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, d.Spec.Template.Spec.SecurityContext.SeccompProfile.Type)
 }
@@ -83,13 +83,18 @@ func TestDefaultPodOpenshiftSecurityContext(t *testing.T) {
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
 
 	assert.NotNil(t, d)
-	assert.Equal(t, pointer.Bool(defaultPodRunAsNonRoot), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
+	assert.Equal(t, ptr.To(defaultPodRunAsNonRoot), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
 	assert.NotNil(t, d.Spec.Template.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeRuntimeDefault, d.Spec.Template.Spec.SecurityContext.SeccompProfile.Type)
 }
 
 func TestDefaultPodKnativeSecurityContext(t *testing.T) {
 	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKnative)
+	environment.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
+		Trait: traitv1.Trait{
+			Enabled: ptr.To(true),
+		},
+	}
 	traitCatalog := NewCatalog(nil)
 
 	conditions, err := traitCatalog.apply(environment)
@@ -113,8 +118,8 @@ func TestUserPodSecurityContext(t *testing.T) {
 	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKubernetes)
 	environment.Integration.Spec.Traits = v1.Traits{
 		SecurityContext: &traitv1.SecurityContextTrait{
-			RunAsNonRoot:       pointer.Bool(false),
-			RunAsUser:          pointer.Int64(1000),
+			RunAsNonRoot:       ptr.To(false),
+			RunAsUser:          ptr.To(int64(1000)),
 			SeccompProfileType: "Unconfined",
 		},
 	}
@@ -131,8 +136,8 @@ func TestUserPodSecurityContext(t *testing.T) {
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
 
 	assert.NotNil(t, d)
-	assert.Equal(t, pointer.Bool(false), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
-	assert.Equal(t, pointer.Int64(1000), d.Spec.Template.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, ptr.To(false), d.Spec.Template.Spec.SecurityContext.RunAsNonRoot)
+	assert.Equal(t, ptr.To(int64(1000)), d.Spec.Template.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, corev1.SeccompProfileTypeUnconfined, d.Spec.Template.Spec.SecurityContext.SeccompProfile.Type)
 }
 

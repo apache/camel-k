@@ -22,9 +22,9 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -39,7 +39,7 @@ func TestHashicorpVaultTraitApply(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	hashicorp := NewHashicorpVaultTrait()
 	secrets, _ := hashicorp.(*hashicorpVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Engine = "test"
 	secrets.Token = "wwww.testx1234590"
 	secrets.Host = "localhost"
@@ -73,7 +73,7 @@ func TestHashicorpVaultTraitWithSecretApply(t *testing.T) {
 	})
 	hashicorp := NewHashicorpVaultTrait()
 	secrets, _ := hashicorp.(*hashicorpVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Engine = "test"
 	secrets.Token = "secret:my-secret1/hashicorp-vault-token"
 	secrets.Host = "localhost"
@@ -107,7 +107,7 @@ func TestHashicorpVaultTraitWithConfigMapApply(t *testing.T) {
 	})
 	hashicorp := NewHashicorpVaultTrait()
 	secrets, _ := hashicorp.(*hashicorpVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Engine = "test"
 	secrets.Token = "configmap:my-configmap1/hashicorp-vault-token"
 	secrets.Host = "localhost"

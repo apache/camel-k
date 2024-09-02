@@ -35,6 +35,7 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -57,6 +58,7 @@ const (
 	secretStorageType    = "secret"
 	configmapStorageType = "configmap"
 	pvcStorageType       = "pvc"
+	emptyDirStorageType  = "emptyDir"
 )
 
 var capabilityDynamicProperty = regexp.MustCompile(`(\$\{([^}]*)\})`)
@@ -204,9 +206,8 @@ type ControllerStrategySelector interface {
 //
 //nolint:containedctx
 type Environment struct {
-	CamelCatalog   *camel.RuntimeCatalog
-	RuntimeVersion string
-	Catalog        *Catalog
+	CamelCatalog *camel.RuntimeCatalog
+	Catalog      *Catalog
 	// The Go standard context for the traits execution
 	Ctx context.Context
 	// The client to the API server
@@ -568,48 +569,6 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			}
 		})
 	}
-
-	// Deprecated - should use mount trait
-	// User provided configmaps
-	for _, configmaps := range e.collectConfigurations("configmap") {
-		refName := kubernetes.SanitizeLabel(configmaps["value"])
-		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], configmapStorageType, configmaps["resourceType"])
-		vol := getVolume(refName, configmapStorageType, configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-
-	// Deprecated - should use mount trait
-	// User provided secrets
-	for _, secret := range e.collectConfigurations("secret") {
-		refName := kubernetes.SanitizeLabel(secret["value"])
-		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], secretStorageType, secret["resourceType"])
-		vol := getVolume(refName, secretStorageType, secret["value"], secret["resourceKey"], secret["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-	// Deprecated - should use mount trait
-	// User provided volumes
-	for _, volumeConfig := range e.collectConfigurationValues("volume") {
-		configParts := strings.Split(volumeConfig, ":")
-
-		if len(configParts) != 2 {
-			continue
-		}
-
-		pvcName := configParts[0]
-		mountPath := configParts[1]
-		volumeName := pvcName + "-data"
-
-		vol := getVolume(volumeName, pvcStorageType, pvcName, "", "")
-		mnt := getMount(volumeName, mountPath, "", false)
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
 }
 
 func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {
@@ -635,6 +594,8 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 		volume.VolumeSource.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
 			ClaimName: storageName,
 		}
+	case emptyDirStorageType:
+		volume.VolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{}
 	}
 
 	return &volume
@@ -689,20 +650,12 @@ func getMountPoint(resourceName string, mountPoint string, storagetype, resource
 	return filepath.Join(defaultMountPoint, resourceName)
 }
 
-func (e *Environment) collectConfigurationValues(configurationType string) []string {
-	return collectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
-}
-
 type variable struct {
 	Name, Value string
 }
 
 func (e *Environment) collectConfigurationPairs(configurationType string) []variable {
 	return collectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
-}
-
-func (e *Environment) collectConfigurations(configurationType string) []map[string]string {
-	return collectConfigurations(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
 func (e *Environment) GetIntegrationContainerName() string {
@@ -794,4 +747,38 @@ func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) stri
 		return strings.ReplaceAll(camelPropertyKey, match[1], vars[match[2]])
 	}
 	return camelPropertyKey
+}
+
+// ConsumeMeta is used to consume metadata information coming from Integration sources. If no sources available,
+// would return false.
+func (e *Environment) ConsumeMeta(consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
+	return e.consumeSourcesMeta(nil, consumeMeta)
+}
+
+// consumeSourcesMeta is used to consume both sources and metadata information coming from Integration sources.
+// If no sources available would return false.
+func (e *Environment) consumeSourcesMeta(
+	consumeSources func(sources []v1.SourceSpec) bool,
+	consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
+	var sources []v1.SourceSpec
+	var err error
+	if sources, err = resolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources); err != nil {
+		return false, err
+	}
+	if len(sources) < 1 {
+		// No sources available
+		return false, nil
+	}
+	if consumeSources != nil {
+		consumeSources(sources)
+	}
+	if e.CamelCatalog == nil {
+		return false, fmt.Errorf("cannot extract metadata from sources. Camel Catalog is null")
+	}
+	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	if err != nil {
+		return false, err
+	}
+
+	return consumeMeta(meta), nil
 }

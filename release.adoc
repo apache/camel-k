@@ -115,7 +115,7 @@ Commit and push the changes done so far.
 
 ```
 git add *
-git commit -m "preparing for next release"
+git commit -m "chore(release): preparing for next release"
 # assuming you're on release branch and have write permissions
 git push
 ```
@@ -142,7 +142,8 @@ Camel K Client 2.0.0
 If the version retrieved is the one expected you can run an installation procedure
 
 ```
-$ ./kamel install --operator-image=camelk/camel-k:$CAMEL_K_VERSION
+CUSTOM_IMAGE=camelk/camel-k CUSTOM_VERSION=$CAMEL_K_VERSION make bundle
+make install-k8s-global
 ```
 
 Make some test and if all is in order, you can upload the sources and CLIs to the dist/dev repository in ASF the staged artifacts, in order to link them in the release vote communication.
@@ -194,7 +195,7 @@ Wait for maven mirrors to sync the new artifacts. This can take more than 1 hour
 You can start a release from the tag created in the previous steps (ie, `v2.1.0`). You can use the automatic release note generator, making sure to select the previous stable release to generate the differences. You need to manually add the CLI files, the CRDs dependency and the sbom.json created in the previous steps. Select it as latest stable release and finalize the process.
 
 Before announcing the release, perform a simple test to verify that everything is in place (running a "Hello World" integration
-after an installation done with a simple `kamel install`). Do a simple final test.
+after an installation done with, as an example `kubectl apply -k github.com/apache/camel-k/install/overlays/openshift/descoped?ref=v2.1.0 --server-side`). Do a simple final test.
 
 The release can be now announced to dev@camel.apache.org and users@camel.apache.org ideally accompanied by a blog post to explain what's new. A PMC member with access to the @ApacheCamel former Twitter account should announce the release on former Twitter as well.
 

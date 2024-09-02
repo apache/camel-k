@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -77,11 +77,6 @@ func TestCollectConfigurationValues(t *testing.T) {
 		},
 	}
 	e.Platform.ResyncStatusFullConfig()
-
-	assert.Contains(t, e.collectConfigurationValues("configmap"), "my-cm-integration")
-	assert.Contains(t, e.collectConfigurationValues("secret"), "my-secret-platform")
-	assert.Contains(t, e.collectConfigurationValues("property"), "my-p-kit")
-	assert.Contains(t, e.collectConfigurationValues("env"), "my-env-integration")
 }
 
 func TestCollectConfigurationPairs(t *testing.T) {
@@ -199,9 +194,9 @@ func TestDetermineControllerStrategySyntheticKitForceKnative(t *testing.T) {
 	e.Integration.Spec.Traits = v1.Traits{
 		KnativeService: &trait.KnativeServiceTrait{
 			Trait: trait.Trait{
-				Enabled: pointer.Bool(true),
+				Enabled: ptr.To(true),
 			},
-			Auto: pointer.Bool(false),
+			Auto: ptr.To(false),
 		},
 	}
 	e.Platform.ResyncStatusFullConfig()
@@ -287,9 +282,12 @@ func createSyntethicKitTestEnvironment(t *testing.T, profile v1.TraitProfile) *E
 	t.Helper()
 	client, _ := test.NewFakeClient()
 	traitCatalog := NewCatalog(nil)
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
 	environment := &Environment{
-		Catalog: traitCatalog,
-		Client:  client,
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -330,7 +328,7 @@ func createSyntethicKitTestEnvironment(t *testing.T, profile v1.TraitProfile) *E
 
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err := traitCatalog.apply(environment)
+	_, err = traitCatalog.apply(environment)
 	require.NoError(t, err)
 
 	return environment

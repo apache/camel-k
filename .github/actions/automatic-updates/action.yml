@@ -63,18 +63,23 @@ runs:
         make generate codegen update-docs
 
     # Coverage badge
-    - name: Run Test
+    - name: Run Test and get coverage badge
       shell: bash
       run: |
         go test -v ./... -covermode=count -coverprofile=coverage.out
-        go tool cover -func=coverage.out -o=coverage.out
-        grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.out | xargs > coverage
+        # Remove mock and generated code from account
+        grep -v "github.com/apache/camel-k/v2/pkg/client" coverage.out \
+          | grep -v "zz_generated" \
+          | grep -v "github.com/apache/camel-k/v2/addons/strimzi/duck/" \
+          | grep -v "github.com/apache/camel-k/v2/addons/keda/duck/" \
+          | grep -v "github.com/apache/camel-k/v2/cmd/util"  > coverage.mod.out
+        go tool cover -func=coverage.mod.out -o=coverage.mod.out
+        grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.mod.out | xargs > coverage
         touch badge.out
-    - name: Go coverage badge
-      uses: ./.github/actions/coverage-badge
-      with:
-        filename: coverage.out
-        target: badge.out
+        curl -sf https://gobinaries.com/github.com/AlexBeauchemin/gobadge@v0.2.0 | PREFIX=. sh
+        chmod +x gobadge
+        ./gobadge -filename=coverage -target=badge.out
+
     - name: Convert badge to adoc
       shell: bash
       run: |
@@ -92,7 +97,7 @@ runs:
       run: |
         git config --local user.email "$CI_EMAIL"
         git config --local user.name "$CI_USER"
-        git add -A -f && git commit -m 'chore: nightly automatic updates' || echo "No nightly automatic updates changes to commit"
+        git add README.adoc CHANGELOG.md && git commit -m 'chore: nightly automatic updates' || echo "No nightly automatic updates changes to commit"
         git push "https://$CI_USER:$CI_TOKEN@github.com/$GITHUB_REPOSITORY.git" HEAD:${{ inputs.branch-ref }} || echo "No nightly automatic updates changes to push"
 
     # Give it a rest to avoid hitting Github API rate limit

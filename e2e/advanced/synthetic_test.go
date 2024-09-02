@@ -41,11 +41,7 @@ func TestSyntheticIntegrationOff(t *testing.T) {
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		// Install Camel K without synthetic Integration feature variable (default)
-		operatorID := "camel-k-synthetic-env-off"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns)).To(Succeed())
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		InstallOperator(t, ctx, g, ns)
 
 		// Run the external deployment
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/deploy.yaml", "-n", ns))
@@ -64,13 +60,12 @@ func TestSyntheticIntegrationFromDeployment(t *testing.T) {
 	t.Parallel()
 
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		// Install Camel K with the synthetic Integration feature variable
-		operatorID := "camel-k-synthetic-env"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(CopyIntegrationKits(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns,
-			"--operator-env-vars", "CAMEL_K_SYNTHETIC_INTEGRATIONS=true",
-		)).To(Succeed())
+		// Install Camel K with the proper configuration support
+		InstallOperatorWithConf(t, ctx, g, ns, "", false,
+			map[string]string{
+				"CAMEL_K_SYNTHETIC_INTEGRATIONS": "true",
+			},
+		)
 		g.Eventually(OperatorPodHas(t, ctx, ns, func(op *corev1.Pod) bool {
 			if envVar := envvar.Get(op.Spec.Containers[0].Env, "CAMEL_K_SYNTHETIC_INTEGRATIONS"); envVar != nil {
 				return envVar.Value == "true"

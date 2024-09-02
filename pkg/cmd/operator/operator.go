@@ -38,7 +38,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
@@ -222,7 +221,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
-	exitOnError(findOrCreateIntegrationPlatform(installCtx, bootstrapClient, operatorNamespace), "failed to create integration platform")
 
 	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
 	if synth && synthEnvVal == "true" {
@@ -243,44 +241,6 @@ func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[
 		namespacesSelector[watchNamespace] = cache.Config{}
 	}
 	return namespacesSelector
-}
-
-// findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists.
-func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, operatorNamespace string) error {
-	operatorID := defaults.OperatorID()
-	var platformName string
-	if operatorID != "" {
-		platformName = operatorID
-	} else {
-		platformName = platform.DefaultPlatformName
-	}
-
-	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil || k8serrors.IsNotFound(err) {
-		defaultPlatform := v1.NewIntegrationPlatform(operatorNamespace, platformName)
-
-		if defaultPlatform.Labels == nil {
-			defaultPlatform.Labels = make(map[string]string)
-		}
-		defaultPlatform.Labels["app"] = "camel-k"
-		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
-
-		if operatorID != "" {
-			defaultPlatform.SetOperatorID(operatorID)
-		}
-
-		if _, err := c.CamelV1().IntegrationPlatforms(operatorNamespace).Create(ctx, &defaultPlatform, metav1.CreateOptions{}); err != nil {
-			return err
-		}
-
-		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
-		if err := install.IntegrationPlatformViewerRole(ctx, c, operatorNamespace); err != nil && !k8serrors.IsAlreadyExists(err) {
-			return fmt.Errorf("error while installing global IntegrationPlatform viewer role: %w", err)
-		}
-	} else {
-		return err
-	}
-
-	return nil
 }
 
 // getWatchNamespace returns the Namespace the operator should be watching for changes.

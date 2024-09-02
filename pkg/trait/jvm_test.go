@@ -32,7 +32,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 )
 
@@ -74,7 +74,7 @@ func TestConfigureJvmTraitInWrongIntegrationKitPhaseDoesNotSucceed(t *testing.T)
 
 func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Enabled = pointer.Bool(false)
+	trait.Enabled = ptr.To(false)
 
 	expectedCondition := NewIntegrationCondition(
 		"JVM",
@@ -346,8 +346,8 @@ func TestApplyJvmTraitWithKnativeResource(t *testing.T) {
 
 func TestApplyJvmTraitWithDebugEnabled(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
-	trait.Debug = pointer.Bool(true)
-	trait.DebugSuspend = pointer.Bool(true)
+	trait.Debug = ptr.To(true)
+	trait.DebugSuspend = ptr.To(true)
 
 	d := appsv1.Deployment{
 		Spec: appsv1.DeploymentSpec{
@@ -449,6 +449,49 @@ func TestApplyJvmTraitWithClasspath(t *testing.T) {
 		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
+
+func TestApplyJvmTraitWithClasspathAndExistingContainerCPArg(t *testing.T) {
+	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
+	trait.Classpath = "/path/to/my-dep.jar:/path/to/another/dep.jar"
+	d := appsv1.Deployment{
+		Spec: appsv1.DeploymentSpec{
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name: defaultContainerName,
+							Args: []string{
+								"-cp",
+								"my-precious-lib.jar",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	environment.Resources.Add(&d)
+	configure, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, configure)
+	assert.Nil(t, condition)
+	err = trait.Apply(environment)
+
+	require.NoError(t, err)
+	assert.Equal(t, []string{
+		// WARN: we don't care if there are multiple classpath arguments
+		// as the application will use the second one
+		"-cp",
+		"my-precious-lib.jar",
+		"-cp",
+		fmt.Sprintf("my-precious-lib.jar:./resources:%s:%s:%s:%s:%s:dependencies/*",
+			rdMountPath, cmrMountPath, scrMountPath,
+			"/path/to/another/dep.jar", "/path/to/my-dep.jar"),
+		"io.quarkus.bootstrap.runner.QuarkusEntryPoint",
+	}, d.Spec.Template.Spec.Containers[0].Args)
+}
+
 func TestApplyJvmTraitKitMissing(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	environment.IntegrationKit = nil
@@ -542,7 +585,7 @@ func createNominalJvmTest(kitType string) (*jvmTrait, *Environment) {
 	catalog, _ := camel.DefaultCatalog()
 	client, _ := test.NewFakeClient()
 	trait, _ := newJvmTrait().(*jvmTrait)
-	trait.PrintCommand = pointer.Bool(false)
+	trait.PrintCommand = ptr.To(false)
 	trait.Client = client
 
 	environment := &Environment{

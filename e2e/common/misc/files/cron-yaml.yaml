@@ -18,7 +18,7 @@
 - from:
     uri: "cron:tab"
     parameters:
-      schedule: "* * * * ?"
+      schedule: "*/2 * * * ?"
     steps:
       - setHeader:
           name: "m"

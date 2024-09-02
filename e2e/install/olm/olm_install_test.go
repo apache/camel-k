@@ -27,76 +27,62 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
 
 const installCatalogSourceName = "test-camel-k-source"
 
 func TestOLMInstallation(t *testing.T) {
-	// keep option names compatible with the upgrade test
-	newIIB := os.Getenv("CAMEL_K_NEW_IIB")
-
-	// optional options
-	newUpdateChannel := os.Getenv("CAMEL_K_NEW_UPGRADE_CHANNEL")
-
-	if newIIB == "" {
-		t.Skip("OLM fresh install test requires the CAMEL_K_NEW_IIB environment variable")
-	}
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		g.Expect(CreateOrUpdateCatalogSource(t, ctx, ns, installCatalogSourceName, newIIB)).To(Succeed())
-
-		ocp, err := openshift.IsOpenShift(TestClient(t))
-		require.NoError(t, err)
-
-		if ocp {
-			// Wait for pull secret to be created in namespace
-			// eg. test-camel-k-source-dockercfg-zlltn
-			secretPrefix := fmt.Sprintf("%s-dockercfg-", installCatalogSourceName)
-			g.Eventually(SecretByName(t, ctx, ns, secretPrefix), TestTimeoutLong).Should(Not(BeNil()))
-		}
-
-		g.Eventually(CatalogSourcePodRunning(t, ctx, ns, installCatalogSourceName), TestTimeoutMedium).Should(BeNil())
-		g.Eventually(CatalogSourcePhase(t, ctx, ns, installCatalogSourceName), TestTimeoutLong).Should(Equal("READY"))
-
-		args := []string{"install", "-n", ns, "--olm=true", "--olm-source", installCatalogSourceName, "--olm-source-namespace", ns}
-
-		if newUpdateChannel != "" {
-			args = append(args, "--olm-channel", newUpdateChannel)
-		}
-
-		g.Expect(Kamel(t, ctx, args...).Execute()).To(Succeed())
-
+		// Let's make sure no CRD is yet available in the cluster
+		// as we must make the procedure to install them accordingly
+		g.Eventually(CRDs(t)).Should(BeNil(), "No Camel K CRDs should be previously installed for this test")
+		bundleImageName, ok := os.LookupEnv("BUNDLE_IMAGE_NAME")
+		g.Expect(ok).To(BeTrue(), "Missing bundle image: you need to build and push to a container registry and set BUNDLE_IMAGE_NAME env var")
+		containerRegistry, ok := os.LookupEnv("KAMEL_INSTALL_REGISTRY")
+		g.Expect(ok).To(BeTrue(), "Missing local container registry: you need to set it into KAMEL_INSTALL_REGISTRY env var")
+		os.Setenv("CAMEL_K_TEST_MAKE_DIR", "../../../")
+		// Install staged bundle (it must be available by building it before running the test)
+		// You can build it locally via `make bundle-push` action
+		ExpectExecSucceedWithTimeout(t, g,
+			Make(t,
+				"bundle-test",
+				fmt.Sprintf("BUNDLE_IMAGE_NAME=%s", bundleImageName),
+				fmt.Sprintf("NAMESPACE=%s", ns),
+			),
+			"180s",
+		)
+		// Refresh the test client to account for the newly installed CRDs
+		RefreshClient(t)
 		// Find the only one Camel K CSV
 		noAdditionalConditions := func(csv olm.ClusterServiceVersion) bool {
 			return true
 		}
-		g.Eventually(ClusterServiceVersionPhase(t, ctx, noAdditionalConditions, ns), TestTimeoutMedium).Should(Equal(olm.CSVPhaseSucceeded))
-
-		// Refresh the test client to account for the newly installed CRDs
-		RefreshClient(t)
-
-		csvVersion := ClusterServiceVersion(t, ctx, noAdditionalConditions, ns)().Spec.Version
-		ipVersionPrefix := fmt.Sprintf("%d.%d", csvVersion.Version.Major, csvVersion.Version.Minor)
-		t.Logf("CSV Version installed: %s", csvVersion.Version.String())
-
+		g.Eventually(ClusterServiceVersionPhase(t, ctx, noAdditionalConditions, ns), TestTimeoutMedium).
+			Should(Equal(olm.CSVPhaseSucceeded))
 		// Check the operator pod is running
 		g.Eventually(OperatorPodPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 		g.Eventually(OperatorImage(t, ctx, ns), TestTimeoutShort).Should(Equal(defaults.OperatorImage()))
 
-		// Check the IntegrationPlatform has been reconciled
-		g.Eventually(PlatformVersion(t, ctx, ns)).Should(ContainSubstring(ipVersionPrefix))
+		integrationPlatform := v1.NewIntegrationPlatform(ns, "camel-k")
+		integrationPlatform.Spec.Build.Registry = v1.RegistrySpec{
+			Address:  containerRegistry,
+			Insecure: true,
+		}
+		g.Expect(CreateIntegrationPlatform(t, ctx, &integrationPlatform)).To(Succeed())
+		g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		g.Eventually(PlatformVersion(t, ctx, ns), TestTimeoutMedium).Should(Equal(defaults.Version))
 
 		// Check if restricted security context has been applyed
 		operatorPod := OperatorPod(t, ctx, ns)()
@@ -105,10 +91,24 @@ func TestOLMInstallation(t *testing.T) {
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.SeccompProfile).To(Equal(kubernetes.DefaultOperatorSecurityContext().SeccompProfile))
 		g.Expect(operatorPod.Spec.Containers[0].SecurityContext.AllowPrivilegeEscalation).To(Equal(kubernetes.DefaultOperatorSecurityContext().AllowPrivilegeEscalation))
 
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
-		g.Expect(Kamel(t, ctx, "uninstall", "-n", ns).Execute()).To(Succeed())
-		// Clean up cluster-wide resources that are not removed by OLM
-		g.Expect(Kamel(t, ctx, "uninstall", "--all", "-n", ns, "--olm=false").Execute()).To(Succeed())
+		// Test a simple integration is running
+		g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+		// Remove OLM CSV and test Integration is still existing
+		csv := ClusterServiceVersion(t, ctx, noAdditionalConditions, ns)()
+		g.Expect(TestClient(t).Delete(ctx, csv)).To(Succeed())
+		g.Eventually(OperatorPod(t, ctx, ns)).Should(BeNil())
+
+		g.Consistently(Integration(t, ctx, ns, "yaml"), 15*time.Second, 5*time.Second).ShouldNot(BeNil())
+		g.Consistently(
+			IntegrationConditionStatus(t, ctx, ns, "yaml", v1.IntegrationConditionReady), 15*time.Second, 5*time.Second).
+			Should(Equal(corev1.ConditionTrue))
+
+		// Test CRD uninstall (will remove Integrations as well)
+		UninstallCRDs(t, ctx, g, "../../../")
+		g.Eventually(CRDs(t)).Should(BeNil())
 	})
 }

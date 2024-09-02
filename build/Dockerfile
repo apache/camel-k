@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:17-jdk as base
+FROM eclipse-temurin:17-jdk AS base
 
 ARG IMAGE_ARCH
 
@@ -22,6 +22,7 @@ ARG MAVEN_HOME="/usr/share/maven"
 ARG MAVEN_DIST_URL="https://archive.apache.org/dist/maven/maven-3/${MAVEN_DEFAULT_VERSION}/binaries/apache-maven-${MAVEN_DEFAULT_VERSION}-bin.zip"
 ARG MVNW_DIR="/usr/share/maven/mvnw/"
 ARG MVN_REPO="/etc/maven/m2"
+ARG MAVEN_OPTS=""
 
 USER 0
 
@@ -43,6 +44,7 @@ RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> 
     && cp -r /usr/share/maven/lib/. $(cat ${MVNW_DIR}default)/lib \
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider* \
     && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.* 
+
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
 ADD build/_maven_output ${MVN_REPO}
@@ -63,10 +65,10 @@ USER 1001:0
 
 ADD build/_output/bin/kamel-${IMAGE_ARCH} /usr/local/bin/kamel
 
-FROM golang:1.21 as go
+FROM golang:1.22 AS go
 
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
-FROM base as debug
+FROM base AS debug
 
 COPY --from=go /go/bin/dlv /usr/local/bin/dlv

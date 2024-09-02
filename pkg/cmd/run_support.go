@@ -20,14 +20,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
-	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
@@ -121,39 +116,6 @@ func fromMapToProperties(data interface{}, toString func(reflect.Value) string, 
 		}
 	}
 	return result, nil
-}
-
-// downloadDependency downloads the file located at the given URL into a temporary folder and returns the local path to the generated temporary file.
-func downloadDependency(ctx context.Context, url url.URL) (string, error) {
-	tctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(tctx, http.MethodGet, url.String(), nil)
-	if err != nil {
-		return "", err
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-	base := filepath.Base(url.Path)
-	if base == "." || base == "/" || filepath.Ext(base) == "" {
-		base = filepath.Base(url.String())
-		if base == "." || base == "/" {
-			base = "tmp"
-		}
-	}
-	out, err := os.CreateTemp("", fmt.Sprintf("*.%s", base))
-	if err != nil {
-		return "", err
-	}
-	defer out.Close()
-	_, err = io.Copy(out, res.Body)
-	if err != nil {
-		return "", err
-	}
-	return out.Name(), nil
 }
 
 func validatePropertyFiles(propertyFiles []string) error {

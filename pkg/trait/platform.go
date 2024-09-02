@@ -20,7 +20,7 @@ package trait
 import (
 	"github.com/apache/camel-k/v2/pkg/install"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -57,16 +57,16 @@ func (t *platformTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		return false, nil, nil
 	}
 
-	if t.CreateDefault == nil && pointer.BoolDeref(t.Auto, false) && e.Platform == nil {
+	if t.CreateDefault == nil && ptr.Deref(t.Auto, false) && e.Platform == nil {
 		// Calculate if the platform should be automatically created when missing.
 		if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
 			return false, nil, err
 		} else if ocp {
-			t.CreateDefault = pointer.Bool(true)
+			t.CreateDefault = ptr.To(true)
 		} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
 			return false, nil, err
 		} else if addr != nil {
-			t.CreateDefault = pointer.Bool(true)
+			t.CreateDefault = ptr.To(true)
 		}
 	}
 
@@ -117,7 +117,7 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 	if err != nil && !apierrors.IsNotFound(err) {
 		return nil, err
 	}
-	if apierrors.IsNotFound(err) && pointer.BoolDeref(t.CreateDefault, false) {
+	if apierrors.IsNotFound(err) && ptr.Deref(t.CreateDefault, false) {
 		pl = t.createDefaultPlatform(e)
 		e.Resources.Add(pl)
 
@@ -146,7 +146,7 @@ func (t *platformTrait) createDefaultPlatform(e *Environment) *v1.IntegrationPla
 		platformName = platform.DefaultPlatformName
 	}
 	namespace := e.Integration.Namespace
-	if pointer.BoolDeref(t.Global, false) {
+	if ptr.Deref(t.Global, false) {
 		operatorNamespace := platform.GetOperatorNamespace()
 		if operatorNamespace != "" {
 			namespace = operatorNamespace

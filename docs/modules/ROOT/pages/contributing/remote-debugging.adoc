@@ -60,7 +60,8 @@ namespace/test created
 Then, install the operator with the image that we built before
 [source,shell]
 ----
-./kamel install --olm=false --operator-image apache/camel-k-debug:2.0.0-SNAPSHOT --debugging -n test
+CUSTOM_IMAGE=docker.io/myrepo/camel-k CUSTOM_VERSION=2.4.0-SNAPSHOT make bundle
+make install-k8s-global
 ----
 It will install the operator using `apache/camel-k-debug:2.0.0-SNAPSHOT` as docker image and launch it in debug mode.
 

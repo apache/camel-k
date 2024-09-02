@@ -24,16 +24,16 @@ PROJECT_PATH := $(patsubst %/,%,$(dir $(MKFILE_PATH)))
 LOCALBIN := $(PROJECT_PATH)/bin
 
 VERSIONFILE := pkg/util/defaults/defaults.go
-VERSION ?= 2.4.0-SNAPSHOT
+VERSION ?= 2.5.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
-LAST_RELEASED_VERSION ?= 2.3.3
+LAST_RELEASED_VERSION ?= 2.4.0
 DEFAULT_RUNTIME_VERSION := 3.8.1
-CONTROLLER_GEN_VERSION := v0.6.1
-CODEGEN_VERSION := v0.27.4
-OPERATOR_SDK_VERSION := v1.28.0
+CONTROLLER_GEN_VERSION := v0.15.0
+CODEGEN_VERSION := v0.29.7
+OPERATOR_SDK_VERSION := v1.30.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-LINTER_VERSION ?= v1.58.1
+LINTER_VERSION ?= v1.59.1
 GOVULNCHECK_VERSION ?= latest
 
 LINTER ?= $(LOCALBIN)/golangci-lint
@@ -90,13 +90,12 @@ OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE := docker.io/camelk/camel-k
-STAGING_RUNTIME_REPO :=
 
 # Kamelets options
 INSTALL_DEFAULT_KAMELETS ?= true
 KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
 # Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v4.0.1
+KAMELET_CATALOG_REPO_TAG := v4.4.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
@@ -104,9 +103,10 @@ KAMELET_CATALOG_REPO_TAG := v4.0.1
 # and those rules with a dependency on the build rule will no longer call it (see do-build)
 DO_TEST_PREBUILD ?= true
 TEST_PREBUILD = build
-# Tests may run in parallel to each other. This count sets the amount of tests run in parallel. (default value usually is GOMAXPROCS)
-TEST_COMMON_PARALLEL_COUNT ?= 4
-TEST_ADVANCED_PARALLEL_COUNT ?= 4
+# Tests may run in parallel to each other. This count sets the amount of tests run in parallel.
+# (default value would be otherwise GOMAXPROCS)
+TEST_COMMON_PARALLEL_COUNT ?= 2
+TEST_ADVANCED_PARALLEL_COUNT ?= 2
 
 # OLM (Operator Lifecycle Manager and Operator Hub): uncomment to override operator settings at build time
 #GOLDFLAGS += -X github.com/apache/camel-k/v2/pkg/util/olm.DefaultOperatorName=camel-k-operator
@@ -169,7 +169,6 @@ bump-replace:
 	@mvn -f java/crds/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@mvn -f java/maven-logging/pom.xml versions:set -DgenerateBackupPoms=false -DnewVersion=$(VERSION)
 	@sed -i 's/^LAST_RELEASED_VERSION ?= .*$//LAST_RELEASED_VERSION ?= $(LAST_RELEASED_VERSION)/' ./script/Makefile
-	@sed -i 's/^STAGING_RUNTIME_REPO :=.*$//STAGING_RUNTIME_REPO :=/' ./script/Makefile
 
 bump: bump-replace codegen bundle
 
@@ -267,106 +266,77 @@ else
 endif
 
 #
+# Setup the Knative test environment
+#
+setup-knative:
+	./e2e/knative/files/setup.sh
+
+#
 # Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
 # the time to complete (they are used also as smoke test for nightly release)
 #
-test-common: do-build
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/common/... -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
+test-common:
+	FAILED=0; \
+	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 90m -v ./e2e/common/... --parallel 1 -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
 # Smoke tests are a subset of common tests used to quickly verify the operator
 #
-test-smoke: do-build
-	TEST_SKIP_AFTER_FAILURE_COUNT="$(TEST_SKIP_AFTER_FAILURE_COUNT)"; \
-	if [[ $$TEST_SKIP_AFTER_FAILURE_COUNT = "" ]]; then \
-		TEST_SKIP_AFTER_FAILURE_COUNT=0; \
-	fi; \
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	echo "TEST_COMMON_PARALLEL_COUNT=$$TEST_COMMON_PARALLEL_COUNT"; \
-	echo "TEST_SKIP_AFTER_FAILURE_COUNT=$$TEST_SKIP_AFTER_FAILURE_COUNT"; \
-	go test -timeout 10m -count=1 -v ./e2e/common/main_test.go -tags=integration $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
-	if [ $$FAILED -le $$TEST_SKIP_AFTER_FAILURE_COUNT ]; then \
-		go test -timeout 30m -count=1 -v ./e2e/common/languages -tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
-	fi; \
-	if [ $$FAILED -le $$TEST_SKIP_AFTER_FAILURE_COUNT ]; then \
-		go test -timeout 30m -count=1 -v \
-			./e2e/common/misc/cron_test.go \
-			./e2e/common/misc/kamelet_test.go \
-			./e2e/common/misc/pipe_test.go \
-			-tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
-	fi; \
-	if [ $$FAILED -le $$TEST_SKIP_AFTER_FAILURE_COUNT ]; then \
-		go test -timeout 30m -count=1 -v \
-			./e2e/common/traits/camel_test.go \
-			./e2e/common/traits/container_test.go \
-			./e2e/common/traits/openapi_test.go \
-			./e2e/common/traits/service_test.go \
-			-tags=integration -parallel=$(TEST_COMMON_PARALLEL_COUNT) $(TEST_INTEGRATION_COMMON_LANG_RUN) $(GOTESTFMT) || ((FAILED++)); \
-	fi; \
-	exit $$FAILED
+test-smoke:
+	FAILED=0; \
+	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 30m -v \
+		./e2e/common/languages \
+		./e2e/common/traits \
+		--parallel 1 \
+	  -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
 
 #
 # Common tests that require some particular operator setting or need to be installed in multiple namespaces
 #
-test-advanced: do-build
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 90m -v ./e2e/advanced -tags=integration -parallel=$(TEST_ADVANCED_PARALLEL_COUNT) $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
+test-advanced:
+	FAILED=0; \
+	go test -p 1 -timeout 90m -v ./e2e/advanced --parallel $(TEST_ADVANCED_PARALLEL_COUNT) -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
-# Installation procedure test using CLi and Kustomize methodologies
+# Installation and upgrade procedure test using
 #
-test-install: do-build
-	FAILED=0; STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 40m -v ./e2e/install/cli -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
-	go test -timeout 40m -v ./e2e/install/kustomize -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
-	go test -timeout 60m -v ./e2e/install/helm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT) || ((FAILED++)); \
+test-install:
+	FAILED=0; \
+	go test -timeout 20m -v ./e2e/install/kustomize -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 20m -v ./e2e/install/helm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	go test -timeout 60m -v ./e2e/install/upgrade -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #
-# Installation procedure test using OLM (requires cluster to be setup accordingly)
+# Installation procedure test via OLM
 #
-test-install-olm: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 30m -v ./e2e/install/olm -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
-
-#
-# Upgrade procedure test (requires cluster to be setup accordingly, ie OLM)
-#
-test-install-upgrade: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 30m -v ./e2e/install/upgrade -tags=integration $(TEST_INSTALL_RUN) $(GOTESTFMT)
+test-install-olm:
+	FAILED=0; \
+	go test -timeout 20m -v ./e2e/install/olm -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
 
 #
 # Knative tests that require the presence of Knative configuration
 #
-test-knative: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 60m -v ./e2e/knative -tags=integration $(TEST_KNATIVE_RUN) $(GOTESTFMT) || ((FAILED++)); \
+test-knative:
+	FAILED=0; \
+	go test -timeout 60m -v ./e2e/knative -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
-
-#
-# Builder tests that require a custom build strategy
-#
-test-builder: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)"; \
-	go test -timeout 30m -v ./e2e/builder -tags=integration $(TEST_BUILDER_RUN) $(GOTESTFMT)
 
 #
 # Telemetry tests that require the configuration of telemetry endpoints
 #
-test-telemetry: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(TEST_TELEMETRY_RUN) $(GOTESTFMT)
+test-telemetry:
+	go test -timeout 30m -v ./e2e/telemetry -tags=integration $(GOTESTFMT)
 
 #
 # Quarkus native test (requires certain CPU and memory conditions)
 #
-test-quarkus-native: do-build
-	STAGING_RUNTIME_REPO="$(STAGING_RUNTIME_REPO)" \
-	go test -timeout 180m -v ./e2e/native -tags=integration $(TEST_QUARKUS_RUN) $(GOTESTFMT)
+test-quarkus-native:
+	go test -timeout 180m -v ./e2e/native -tags=integration $(GOTESTFMT)
 
 build-kamel:
 	@echo "####### Building kamel CLI for linux/$(IMAGE_ARCH) architecture..."
@@ -384,7 +354,7 @@ ifneq ($(shell uname -s 2>/dev/null || echo Unknown),Linux)
 endif
 
 build-resources:
-	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION) $(STAGING_RUNTIME_REPO)
+	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION)
 
 bundle-kamelets:
 	@echo "Preparing Kamelets bundle resource..."
@@ -479,7 +449,7 @@ images: build maven-overlay bundle-kamelets image-build build-kamel-platform
 
 image-build:
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
-	./script/package_maven_artifacts.sh -s "$(STAGING_RUNTIME_REPO)" -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
+	./script/package_maven_artifacts.sh -d "$(CAMEL_K_RUNTIME_DIR)" $(DEFAULT_RUNTIME_VERSION)
 endif
 	@echo "####### Building Camel K operator arch $(IMAGE_ARCH) container image..."
 	mkdir -p build/_maven_output
@@ -579,9 +549,6 @@ release-kustomize:
 	RELEASE_VERSION=$(CUSTOM_VERSION) \
 	RELEASE_NAME=$(PACKAGE) \
 	./script/release_kustomize.sh
-
-get-staging-repo:
-	@echo $(or ${STAGING_RUNTIME_REPO},https://repository.apache.org/content/repositories/snapshots@id=apache-snapshots@snapshots)
 
 .PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
@@ -730,6 +697,13 @@ bundle-build: bundle
 bundle-push: bundle-build
 	docker push $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION)
 
+bundle-test: operator-sdk
+ifndef NAMESPACE
+	@echo "WARN: no namespace specified, using default namespace $(DEFAULT_NS)"
+	$(eval NAMESPACE=$(DEFAULT_NS))
+endif
+	$(OPERATOR_SDK) run bundle $(BUNDLE_IMAGE_NAME):$(CUSTOM_VERSION) -n $(NAMESPACE)
+
 #
 # Builds a test catalog index for installing the operator via an OLM
 #
@@ -767,63 +741,93 @@ $(GOIMPORT): $(LOCALBIN)
 #####
 
 KUSTOMIZE_DIR = "install/overlays/kubernetes/descoped"
-MINIKUBE_REGISTRY = "$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}' 2> /dev/null)"
 DEFAULT_NS = "camel-k"
 
 .PHONY: install install-k8s-global install-k8s-ns install-openshift-global install-openshift-ns
 
+clone-kustomize-dir:
+	$(eval KUST_TMP=$(shell mktemp -d))
+	@echo "... cloning installation files to $(KUST_TMP)"
+	cp -Lr install $(KUST_TMP)/.
+
+# the set-operator targets are mostly thought as an utility for the e2e which require certain operator settings
+set-operator-id:
+ifdef OPERATOR_ID
+	@echo "INFO: setting operator ID to $(OPERATOR_ID)"
+	@sed -i 's/name: .*/name: $(OPERATOR_ID)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
+	cd $(KUST_TMP)/install/overlays/platform/ && kustomize edit add annotation camel.apache.org/operator.id:$(OPERATOR_ID)
+	@sed -i 's/value: .*/value: $(OPERATOR_ID)/' $(KUST_TMP)/$(KUSTOMIZE_DIR)/patch-operator-id.yaml
+	@echo "INFO: adding a suffix for ClusterRoleBindings $(OPERATOR_ID)"
+	cd $(KUST_TMP)/install/base/config/rbac/descoped && kustomize edit set namesuffix -- -$(OPERATOR_ID)
+	cd $(KUST_TMP)/install/base/config/rbac/openshift/descoped && kustomize edit set namesuffix -- -$(OPERATOR_ID)
+else
+	@echo "INFO: no operator ID variable \"OPERATOR_ID\" provided. Keeping default."
+endif
+
+# ENV is expected to be in the formal ENV="myvar1=v1 myvar2=v2 ..."
+set-operator-env:
+ifdef ENV
+	@for n in $(ENV); do \
+		k=$${n%=*}; \
+		v=$${n#*=}; \
+		echo "INFO: setting operator env var $${k}=$${v}"; \
+		cd $(KUST_TMP)/$(KUSTOMIZE_DIR) && kustomize edit add patch --kind Deployment --patch \
+		 	"[{\"op\": \"add\", \"path\": \"/spec/template/spec/containers/0/env/-\", \"value\": {\"name\": \"$${k}\", \"value\": \"$${v}\"}}]"; \
+    done
+endif
+
 install-operator:
+	@echo "####### Installing operator..."
 ifndef NAMESPACE
 	@echo "WARN: no namespace specified, using default namespace $(DEFAULT_NS)"
 	$(eval NAMESPACE=$(DEFAULT_NS))
 endif
-	cd $(KUSTOMIZE_DIR) && kustomize edit set namespace $(NAMESPACE)
-	cd install/overlays/platform && kustomize edit set namespace $(NAMESPACE)
-	kubectl apply -k $(KUSTOMIZE_DIR) --server-side
+	cd $(KUST_TMP)/$(KUSTOMIZE_DIR) && kustomize edit set namespace $(NAMESPACE)
+	cd $(KUST_TMP)/install/overlays/platform && kustomize edit set namespace $(NAMESPACE)
+	kubectl apply -k $(KUST_TMP)/$(KUSTOMIZE_DIR) --server-side --force-conflicts
 
 install-registry:
+	@echo "####### Installing container registry..."
 ifdef REGISTRY
 	@echo "INFO: Setting IntegrationPlatform container registry to $(REGISTRY)"
-	@sed -i 's/address: .*/address: $(REGISTRY)/' install/overlays/platform/integration-platform.yaml
-	kubectl apply -k install/overlays/platform --server-side -n $(NAMESPACE)
+	@sed -i 's/address: .*/address: $(REGISTRY)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
+	kubectl apply -k $(KUST_TMP)/install/overlays/platform --server-side -n $(NAMESPACE) --force-conflicts
 else
-# verify if a minikube registry is existing by any chance, and set it automatically in such a case
-ifneq ($(MINIKUBE_REGISTRY), "")
+	$(eval MINIKUBE_REGISTRY=$(shell kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}' 2> /dev/null))
+ifneq ($(MINIKUBE_REGISTRY),"")
 	@echo "INFO: Looks like you're on Minikube. Setting IntegrationPlatform container registry to $(MINIKUBE_REGISTRY)"
-	@sed -i 's/address: .*/address: $(MINIKUBE_REGISTRY)/' install/overlays/platform/integration-platform.yaml
-	kubectl apply -k install/overlays/platform --server-side -n $(NAMESPACE)
+	@sed -i 's/address: .*/address: $(MINIKUBE_REGISTRY)/' $(KUST_TMP)/install/overlays/platform/integration-platform.yaml
+	kubectl apply -k $(KUST_TMP)/install/overlays/platform --server-side -n $(NAMESPACE) --force-conflicts
 endif
 endif
-
-install-clean-kustomize:
-# we must revert any change done by Kustomize in order to avoid they are committed by mistake in source code repository
-	@echo "INFO: reverting changes done by Kustomization"
-	git checkout -- install/overlays/platform/kustomization.yaml
-	git checkout -- install/overlays/platform/integration-platform.yaml
-	git checkout -- $(KUSTOMIZE_DIR)/kustomization.yaml
 
 install-k8s-global: DEFAULT_NS="camel-k"
 install-k8s-global: KUSTOMIZE_DIR="install/overlays/kubernetes/descoped"
-install-k8s-global: install-operator install-registry install-clean-kustomize
+install-k8s-global: clone-kustomize-dir set-operator-id set-operator-env install-operator install-registry
 
 install-k8s-ns: DEFAULT_NS="default"
 install-k8s-ns: KUSTOMIZE_DIR="install/overlays/kubernetes/namespaced"
-install-k8s-ns: install-operator install-registry install-clean-kustomize
+install-k8s-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator install-registry
 
 install-openshift-global: DEFAULT_NS="camel-k"
 install-openshift-global: KUSTOMIZE_DIR="install/overlays/openshift/descoped"
-install-openshift-global: install-operator install-clean-kustomize
+install-openshift-global: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 install-openshift-ns: DEFAULT_NS="default"
 install-openshift-ns: KUSTOMIZE_DIR="install/overlays/openshift/namespaced"
-install-openshift-ns: install-operator install-clean-kustomize
+install-openshift-ns: clone-kustomize-dir set-operator-id set-operator-env install-operator
 
 uninstall:
 ifdef NAMESPACE
-	kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k -n $(NAMESPACE)
+	kubectl delete deploy -l app=camel-k -n $(NAMESPACE)
+	kubectl delete configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k -n $(NAMESPACE)
 else
-	kubectl delete deploy,configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k
+	kubectl delete deploy -l app=camel-k
+	kubectl delete configmap,secret,sa,rolebindings,clusterrolebindings,roles,clusterroles,integrationplatform -l app=camel-k
 endif
+
+install-crds:
+	kubectl apply -k install/base/config/crd --server-side --force-conflicts
 
 uninstall-crds:
 	kubectl delete crd -l app=camel-k

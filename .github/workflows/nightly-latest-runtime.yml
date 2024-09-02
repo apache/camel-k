@@ -20,7 +20,6 @@
 name: Nightly check against latest runtime
 
 env:
-  TEST_CLUSTER: kind
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CAMEL_K_TEST_TIMEOUT_SHORT: 3m
   CAMEL_K_TEST_TIMEOUT_MEDIUM: 7m
@@ -57,9 +56,17 @@ jobs:
       run: |
         make update-default-camel
 
-    - name: Run smoke tests
-      uses: ./.github/actions/e2e-common
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-        smoke-test-only: 'true'
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
+    - name: Install operator
+      shell: bash
+      run: |
+        kubectl create ns camel-k
+        make install-k8s-global
+        kubectl wait --for=jsonpath='{.status.phase}'=Ready itp camel-k -n camel-k --timeout=60s
+
+    - name: Run test
+      shell: bash
+      run: |
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-smoke

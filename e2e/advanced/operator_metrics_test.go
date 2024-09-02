@@ -27,7 +27,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"os"
 	"testing"
 	"time"
 
@@ -43,30 +42,22 @@ import (
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
-/*
-* TODO
-* The duration_seconds tests keep randomly failing on OCP4 with slightly different duration values
-* May need to lessen the strict checking parameters
-*
-* Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
- */
 func TestMetrics(t *testing.T) {
 	t.Parallel()
 
-	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-		t.Skip("WARNING: Test marked as problematic ... skipping")
-	}
-
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		name := RandomizedSuffixName("java")
-		operatorID := "camel-k-metrics"
-		g.Expect(CopyCamelCatalog(t, ctx, ns, operatorID)).To(Succeed())
-		g.Expect(KamelInstallWithID(t, ctx, operatorID, ns, "--log-level", "debug")).To(Succeed())
-		g.Eventually(SelectedPlatformPhase(t, ctx, ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+		// Install Camel K with the log debug enabled
+		InstallOperatorWithConf(t, ctx, g, ns, "", false,
+			map[string]string{
+				"LOG_LEVEL": "debug",
+			},
+		)
 
-		g.Expect(KamelRunWithID(t, ctx, operatorID, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
+		name := RandomizedSuffixName("java")
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "prometheus.enabled=true", "-t", "prometheus.pod-monitor=false").Execute()).To(Succeed())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 			Should(Equal(corev1.ConditionTrue))
@@ -74,7 +65,6 @@ func TestMetrics(t *testing.T) {
 
 		pod := OperatorPod(t, ctx, ns)()
 		g.Expect(pod).NotTo(BeNil())
-
 		// pod.Namespace could be different from ns if using global operator
 		fmt.Printf("Fetching logs for operator pod %s in namespace %s", pod.Name, pod.Namespace)
 		logOptions := &corev1.PodLogOptions{
@@ -85,7 +75,9 @@ func TestMetrics(t *testing.T) {
 		g.Expect(logs).NotTo(BeEmpty())
 
 		response, err := TestClient(t).CoreV1().RESTClient().Get().
-			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, pod.Name)).DoRaw(ctx)
+			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/metrics", pod.Namespace, pod.Name)).
+			Timeout(30 * time.Second).
+			DoRaw(ctx)
 		g.Expect(err).To(BeNil())
 		metrics, err := parsePrometheusData(response)
 		g.Expect(err).To(BeNil())
@@ -210,7 +202,7 @@ func TestMetrics(t *testing.T) {
 				"LoggerName":       Equal("camel-k.controller.integrationplatform"),
 				"Message":          Equal("Reconciling IntegrationPlatform"),
 				"RequestNamespace": Equal(ns),
-				"RequestName":      Equal(operatorID),
+				"RequestName":      Equal(platform.DefaultPlatformName),
 			}))
 			g.Expect(err).To(BeNil())
 
@@ -548,9 +540,6 @@ func TestMetrics(t *testing.T) {
 				},
 			))
 		})
-
-		// Clean up
-		g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

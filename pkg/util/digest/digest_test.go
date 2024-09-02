@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
@@ -71,7 +71,7 @@ func TestDigestUsesConfigmap(t *testing.T) {
 			Traits: v1.Traits{
 				Mount: &trait.MountTrait{
 					Configs:   []string{"configmap:cm"},
-					HotReload: pointer.Bool(true),
+					HotReload: ptr.To(true),
 				},
 			},
 		},
@@ -101,7 +101,7 @@ func TestDigestUsesSecret(t *testing.T) {
 			Traits: v1.Traits{
 				Mount: &trait.MountTrait{
 					Configs:   []string{"secret:mysec"},
-					HotReload: pointer.Bool(true),
+					HotReload: ptr.To(true),
 				},
 			},
 		},

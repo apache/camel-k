@@ -131,7 +131,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured resources requests!")
 					}
-					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
+					for i := range len(d.Spec.Template.Spec.Containers) {
 						d.Spec.Template.Spec.Containers[i].Resources = resourceReq
 					}
 				}
@@ -145,7 +145,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse environment variables!")
 					}
-					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
+					for i := range len(d.Spec.Template.Spec.Containers) {
 						for _, envVar := range envVars {
 							envvar.SetVar(&d.Spec.Template.Spec.Containers[i].Env, envVar)
 						}

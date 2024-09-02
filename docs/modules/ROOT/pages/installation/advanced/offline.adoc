@@ -107,11 +107,7 @@ If you have already installed Camel K, then you can patch the `IntegrationPlatfo
 kubectl patch itp/camel-k --type=merge -p '{"spec": {"build": {"maven": {"settings": {"configMapKeyRef": {"key": "settings.xml", "name": "local-maven-settings-offline"}}}}}}'
 ```
 
-If you want to install Camel K with this custom maven settings.xml, use the parameter `--maven-settings`:
-
-```
-kamel install --maven-settings configmap:local-maven-settings-offline
-```
+If you want to install Camel K with this custom maven settings.xml.
 
 [[itp-build-native]]
 === Quarkus Native Build
@@ -181,7 +177,8 @@ Also in this case, you need to edit the IntegrationPlatform and add the `--offli
 Last option we may suggest is to build your own image of the operator from source and include in it the entire set of dependencies extracted. You need to extract everything under _/build/_maven_output_ directory. Then, run `make images` and it will create an image containing the whole repo. You can publish such image (which should have an average of 5 GB) calling it for instance `my-camel-k:2.0.0-offline` and later use to install the operator normally:
 
 ```bash
-kamel install --operator-image my-camel-k:2.0.0-offline
+CUSTOM_IMAGE=my-camel-k CUSTOM_VERSION=2.0.0-offline make bundle
+make install-k8s-global
 ```
 
 Also here, you need to edit the IntegrationPlatform and add the `--offline` (or `-o`) option as shown above.

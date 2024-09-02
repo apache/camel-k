@@ -49,6 +49,10 @@ The following configuration options are available:
 | The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 mechanism to work correctly.
 
+| cron.timeZone
+| string
+| The timezone that the CronJob will run on
+
 | cron.components
 | string
 | A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.

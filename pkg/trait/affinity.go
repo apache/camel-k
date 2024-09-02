@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -45,18 +45,18 @@ func newAffinityTrait() Trait {
 	return &affinityTrait{
 		BaseTrait: NewBaseTrait(affinityTraitID, affinityTraitOrder),
 		AffinityTrait: traitv1.AffinityTrait{
-			PodAffinity:     pointer.Bool(false),
-			PodAntiAffinity: pointer.Bool(false),
+			PodAffinity:     ptr.To(false),
+			PodAntiAffinity: ptr.To(false),
 		},
 	}
 }
 
 func (t *affinityTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
-	if pointer.BoolDeref(t.PodAffinity, false) && pointer.BoolDeref(t.PodAntiAffinity, false) {
+	if ptr.Deref(t.PodAffinity, false) && ptr.Deref(t.PodAntiAffinity, false) {
 		return false, nil, fmt.Errorf("both pod affinity and pod anti-affinity can't be set simultaneously")
 	}
 
@@ -124,7 +124,7 @@ func (t *affinityTrait) addNodeAffinity(_ *Environment, podSpec *corev1.PodSpec)
 
 //nolint:dupl
 func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) error {
-	if !pointer.BoolDeref(t.PodAffinity, false) && len(t.PodAffinityLabels) == 0 {
+	if !ptr.Deref(t.PodAffinity, false) && len(t.PodAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -149,7 +149,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) 
 		}
 	}
 
-	if pointer.BoolDeref(t.PodAffinity, false) {
+	if ptr.Deref(t.PodAffinity, false) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,
@@ -176,7 +176,7 @@ func (t *affinityTrait) addPodAffinity(e *Environment, podSpec *corev1.PodSpec) 
 
 //nolint:dupl
 func (t *affinityTrait) addPodAntiAffinity(e *Environment, podSpec *corev1.PodSpec) error {
-	if !pointer.BoolDeref(t.PodAntiAffinity, false) && len(t.PodAntiAffinityLabels) == 0 {
+	if !ptr.Deref(t.PodAntiAffinity, false) && len(t.PodAntiAffinityLabels) == 0 {
 		return nil
 	}
 
@@ -201,7 +201,7 @@ func (t *affinityTrait) addPodAntiAffinity(e *Environment, podSpec *corev1.PodSp
 		}
 	}
 
-	if pointer.BoolDeref(t.PodAntiAffinity, false) {
+	if ptr.Deref(t.PodAntiAffinity, false) {
 		labelSelectorRequirements = append(labelSelectorRequirements, metav1.LabelSelectorRequirement{
 			Key:      v1.IntegrationLabel,
 			Operator: metav1.LabelSelectorOpIn,

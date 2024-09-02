@@ -27,7 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -66,7 +66,7 @@ func newJvmTrait() Trait {
 
 func (t *jvmTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	// Deprecated: the JVM has to be a platform trait and the user should not be able to disable it
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		notice := userDisabledMessage + "; this configuration is deprecated and may be removed within next releases"
 		return false, NewIntegrationCondition("JVM", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, notice), nil
 	}
@@ -122,7 +122,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 	// Other traits may have already contributed some arguments
 	args := container.Args
 
-	if pointer.BoolDeref(t.Debug, false) {
+	if ptr.Deref(t.Debug, false) {
 		debugArgs := t.enableDebug(e)
 		args = append(args, debugArgs)
 	}
@@ -188,7 +188,7 @@ func (t *jvmTrait) Apply(e *Environment) error {
 
 func (t *jvmTrait) enableDebug(e *Environment) string {
 	suspend := "n"
-	if pointer.BoolDeref(t.DebugSuspend, false) {
+	if ptr.Deref(t.DebugSuspend, false) {
 		suspend = "y"
 	}
 	// Add label to mark the pods with debug enabled
@@ -204,6 +204,7 @@ func (t *jvmTrait) enableDebug(e *Environment) string {
 }
 
 func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
+	existingClasspaths := extractExistingClasspathItems(container)
 	classpath := sets.NewSet()
 	// Deprecated: replaced by /etc/camel/resources.d/[_configmaps/_secrets] (camel.ResourcesConfigmapsMountPath/camel.ResourcesSecretsMountPath).
 	classpath.Add("./resources")
@@ -223,7 +224,26 @@ func (t *jvmTrait) prepareClasspathItems(container *corev1.Container) []string {
 	// Keep class path sorted so that it's consistent over reconciliation cycles
 	sort.Strings(items)
 
+	if existingClasspaths != nil {
+		existingClasspaths = append(existingClasspaths, items...)
+		return existingClasspaths
+	}
+
 	return items
+}
+
+// extractExistingClasspathItems returns any container classpath option (if exists).
+func extractExistingClasspathItems(container *corev1.Container) []string {
+	for i, arg := range container.Args {
+		if arg == "-cp" || arg == "-classpath" {
+			if i < len(container.Args) {
+				// return the next argument
+				return strings.Split(container.Args[i+1], ":")
+			}
+		}
+	}
+
+	return nil
 }
 
 // Translate HTTP proxy environment variables, that are set by the environment trait,

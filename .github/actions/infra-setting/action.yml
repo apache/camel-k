@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: infra-setting
+description: 'Setting CI infrastructure'
+
+runs:
+  using: "composite"
+
+  steps:
+  - id: setup-jdk
+    name: Set up JDK
+    uses: actions/setup-java@v4
+    with:
+      java-version: '17'
+      distribution: 'temurin'
+  - id: setup-go
+    name: Set up Go
+    uses: actions/setup-go@v5
+    with:
+      go-version-file: 'go.mod'
+      check-latest: true
+  - id: setup-kubectl
+    name: Set up Kubectl
+    uses: azure/setup-kubectl@v4
+  - id: minikube-start
+    name: Start minikube
+    uses: medyagh/setup-minikube@v0.0.18
+    with:
+      addons: registry
+      cpus: max
+      memory: max
+  - id: minikube-settings
+    name: Set docker-env
+    shell: bash
+    run: |
+      eval $(minikube -p minikube docker-env)
+      echo "KAMEL_INSTALL_REGISTRY=$(kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}')" >> $GITHUB_ENV
+      echo "Setting registry as $KAMEL_INSTALL_REGISTRY which is required by certain tests"
+      echo "LAST_RELEASED_VERSION=$(make get-last-released-version)" >> $GITHUB_ENV
+      echo "Setting last released version as as $LAST_RELEASED_VERSION which is required by certain tests"
+      NOTEST=true make images

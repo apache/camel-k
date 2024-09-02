@@ -34,7 +34,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	"github.com/apache/camel-k/v2/pkg/util/source"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
@@ -42,7 +41,7 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -117,11 +116,8 @@ func NewKedaTrait() trait.Trait {
 }
 
 func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
-	}
-	if e.CamelCatalog == nil {
-		return false, trait.NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 	if !e.IntegrationInPhase(camelv1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
@@ -137,7 +133,7 @@ func (t *kedaTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition
 
 func (t *kedaTrait) Apply(e *trait.Environment) error {
 	if e.IntegrationInPhase(camelv1.IntegrationPhaseInitialization) {
-		if !pointer.BoolDeref(t.HackControllerReplicas, false) {
+		if !ptr.Deref(t.HackControllerReplicas, false) {
 			return nil
 		}
 		if err := t.hackControllerReplicas(e); err != nil {
@@ -315,12 +311,8 @@ func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectRe
 }
 
 func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
-	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
-	if err != nil {
-		return err
-	}
 	kameletURIs := make(map[string][]string)
-	if err := metadata.Each(e.CamelCatalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
+	_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
 		for _, kameletURI := range meta.FromURIs {
 			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelv1.ValidKameletName(kameletStr) {
 				kamelet := kameletStr
@@ -333,8 +325,10 @@ func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 				kameletURIs[kamelet] = uriList
 			}
 		}
+
 		return true
-	}); err != nil {
+	})
+	if err != nil {
 		return err
 	}
 

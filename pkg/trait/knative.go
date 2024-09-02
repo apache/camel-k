@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -42,9 +42,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/camel"
 	knativeutil "github.com/apache/camel-k/v2/pkg/util/knative"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 )
 
 const (
@@ -75,79 +73,73 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationConditionUserDisabled("Knative"), nil
-	}
-	if e.CamelCatalog == nil {
-		if t.isForcefullyEnabled() {
-			// Likely a sourceless Integration. Here we must verify the user has forcefully enabled the feature in order to turn it on
-			// as we don't have the possibility to scan the Integration source to verify if there is any endpoint suitable with
-			// Knative
-			return true, nil, nil
-		}
-		return false, NewIntegrationConditionPlatformDisabledCatalogMissing(), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Auto, true) {
-		return true, nil, nil
-	}
 
-	sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources)
+	knativeInstalled, err := knativeutil.IsEventingInstalled(e.Client)
 	if err != nil {
 		return false, nil, err
 	}
-	if len(t.ChannelSources) == 0 {
-		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeChannel, "from")
-		if err != nil {
-			return false, nil, err
+
+	if !ptr.Deref(t.Auto, true) {
+		if !knativeInstalled {
+			return false, NewIntegrationCondition(
+				"Knative",
+				v1.IntegrationConditionKnativeAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionKnativeNotInstalledReason,
+				"integration cannot run. Knative is not installed in the cluster",
+			), fmt.Errorf("integration cannot run. Knative is not installed in the cluster")
 		}
-		t.ChannelSources = items
+		return true, nil, nil
 	}
-	if len(t.ChannelSinks) == 0 {
-		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeChannel, "to")
-		if err != nil {
-			return false, nil, err
+
+	_, err = e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		if len(t.ChannelSources) == 0 {
+			t.ChannelSources = filterMetaItems(meta, knativeapi.CamelServiceTypeChannel, "from")
 		}
-		t.ChannelSinks = items
-	}
-	if len(t.EndpointSources) == 0 {
-		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEndpoint, "from")
-		if err != nil {
-			return false, nil, err
+		if len(t.ChannelSinks) == 0 {
+			t.ChannelSinks = filterMetaItems(meta, knativeapi.CamelServiceTypeChannel, "to")
 		}
-		t.EndpointSources = items
-	}
-	if len(t.EndpointSinks) == 0 {
-		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEndpoint, "to")
-		if err != nil {
-			return false, nil, err
+		if len(t.EndpointSources) == 0 {
+			t.EndpointSources = filterMetaItems(meta, knativeapi.CamelServiceTypeEndpoint, "from")
 		}
-		t.EndpointSinks = items
-	}
-	if len(t.EventSources) == 0 {
-		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEvent, "from")
-		if err != nil {
-			return false, nil, err
+		if len(t.EndpointSinks) == 0 {
+			t.EndpointSinks = filterMetaItems(meta, knativeapi.CamelServiceTypeEndpoint, "to")
 		}
-		t.EventSources = items
-	}
-	if len(t.EventSinks) == 0 {
-		items, err := filterMetaItems(e.CamelCatalog, sources, knativeapi.CamelServiceTypeEvent, "to")
-		if err != nil {
-			return false, nil, err
+		if len(t.EventSources) == 0 {
+			t.EventSources = filterMetaItems(meta, knativeapi.CamelServiceTypeEvent, "from")
 		}
-		t.EventSinks = items
+		if len(t.EventSinks) == 0 {
+			t.EventSinks = filterMetaItems(meta, knativeapi.CamelServiceTypeEvent, "to")
+		}
+		return true
+	})
+	if err != nil {
+		return false, nil, err
 	}
+
 	hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 || len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSources) > 0 || len(t.EventSinks) > 0
-	t.Enabled = &hasKnativeEndpoint
-	if !hasKnativeEndpoint {
+
+	if !hasKnativeEndpoint && !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
+	}
+	if !knativeInstalled {
+		return false, NewIntegrationCondition(
+			"Knative",
+			v1.IntegrationConditionKnativeAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationConditionKnativeNotInstalledReason,
+			"integration cannot run. Knative is not installed in the cluster",
+		), fmt.Errorf("integration cannot run. Knative is not installed in the cluster")
 	}
 	if t.FilterSourceChannels == nil {
 		// Filtering is no longer used by default
-		t.FilterSourceChannels = pointer.Bool(false)
+		t.FilterSourceChannels = ptr.To(false)
 	}
 	if t.SinkBinding == nil {
 		allowed := t.isSinkBindingAllowed(e)
@@ -157,42 +149,29 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	return true, nil, nil
 }
 
-// This is true only when the user set the enabled flag on and the auto flag off.
-func (t *knativeTrait) isForcefullyEnabled() bool {
-	return pointer.BoolDeref(t.Enabled, false) && !pointer.BoolDeref(t.Auto, true)
-}
-
-func filterMetaItems(catalog *camel.RuntimeCatalog, sources []v1.SourceSpec, cst knativeapi.CamelServiceType, uriType string) ([]string, error) {
+func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServiceType, uriType string) []string {
 	items := make([]string, 0)
-	if err := metadata.Each(catalog, sources, func(_ int, meta metadata.IntegrationMetadata) bool {
-		var uris []string
-		if uriType == "from" {
-			uris = meta.FromURIs
-		} else if uriType == "to" {
-			uris = meta.ToURIs
-		}
-		items = append(items, knativeutil.FilterURIs(uris, cst)...)
-		return true
-	}); err != nil {
-		return nil, err
+	var uris []string
+	if uriType == "from" {
+		uris = meta.FromURIs
+	} else if uriType == "to" {
+		uris = meta.ToURIs
 	}
-
+	items = append(items, knativeutil.FilterURIs(uris, cst)...)
 	sort.Strings(items)
-	return items, nil
+	return items
 }
 
 func (t *knativeTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityKnative)
 	}
-
 	if len(t.ChannelSources) > 0 || len(t.EndpointSources) > 0 || len(t.EventSources) > 0 {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 	}
 	if len(t.ChannelSinks) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSinks) > 0 {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 	}
-
 	if !e.IntegrationInRunningPhases() {
 		return nil
 	}
@@ -240,7 +219,7 @@ func (t *knativeTrait) configureChannels(e *Environment, env *knativeapi.CamelEn
 				knativeapi.CamelMetaKnativeKind:       ref.Kind,
 				knativeapi.CamelMetaKnativeReply:      boolean.FalseString,
 			}
-			if pointer.BoolDeref(t.FilterSourceChannels, false) {
+			if ptr.Deref(t.FilterSourceChannels, false) {
 				meta[knativeapi.CamelMetaFilterPrefix+knativeHistoryHeader] = loc.Host
 			}
 			svc := knativeapi.CamelServiceDefinition{
@@ -417,7 +396,7 @@ func (t *knativeTrait) isSinkBindingAllowed(e *Environment) bool {
 }
 
 func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.CamelEnvironment) error {
-	if !pointer.BoolDeref(t.SinkBinding, false) {
+	if !ptr.Deref(t.SinkBinding, false) {
 		return nil
 	}
 	var serviceType knativeapi.CamelServiceType
@@ -477,7 +456,7 @@ func (t *knativeTrait) configureSinkBinding(e *Environment, env *knativeapi.Came
 					APIVersion: ref.APIVersion,
 				}
 
-				if pointer.BoolDeref(t.NamespaceLabel, true) {
+				if ptr.Deref(t.NamespaceLabel, true) {
 					// set the namespace label to allow automatic sinkbinding injection
 					enabled, err := knativeutil.EnableKnativeBindInNamespace(e.Ctx, e.Client, e.Integration.Namespace)
 					if err != nil {
@@ -526,7 +505,7 @@ func (t *knativeTrait) createTrigger(e *Environment, ref *corev1.ObjectReference
 		attributes[key] = value
 	}
 
-	if _, eventTypeSpecified := attributes["type"]; !eventTypeSpecified && pointer.BoolDeref(t.FilterEventType, true) && eventType != "" {
+	if _, eventTypeSpecified := attributes["type"]; !eventTypeSpecified && ptr.Deref(t.FilterEventType, true) && eventType != "" {
 		// Apply default trigger filter attribute for the event type
 		attributes["type"] = eventType
 	}

@@ -23,7 +23,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -37,7 +37,7 @@ func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	telemetry := NewTelemetryTrait()
 	tt, _ := telemetry.(*telemetryTrait)
-	tt.Enabled = pointer.Bool(true)
+	tt.Enabled = ptr.To(true)
 	tt.Endpoint = "http://endpoint3"
 	ok, condition, err := telemetry.Configure(e)
 	require.NoError(t, err)
@@ -64,12 +64,12 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	telemetry := NewTelemetryTrait()
 	tt, _ := telemetry.(*telemetryTrait)
-	tt.Enabled = pointer.Bool(true)
+	tt.Enabled = ptr.To(true)
 	tt.Endpoint = "http://endpoint3"
 	tt.ServiceName = "Test"
 	tt.Sampler = "ratio"
 	tt.SamplerRatio = "0.001"
-	tt.SamplerParentBased = pointer.Bool(false)
+	tt.SamplerParentBased = ptr.To(false)
 	ok, condition, err := telemetry.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
@@ -89,6 +89,34 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	assert.Equal(t, "${camel.k.telemetry.sampler}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler"])
 	assert.Equal(t, "${camel.k.telemetry.samplerRatio}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.ratio"])
 	assert.Equal(t, "${camel.k.telemetry.samplerParentBased}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.parent-based"])
+}
+
+func TestTelemetryForSourceless(t *testing.T) {
+	e := createEnvironment(t, camel.QuarkusCatalog)
+	telemetry := NewTelemetryTrait()
+	tt, _ := telemetry.(*telemetryTrait)
+	tt.Enabled = ptr.To(true)
+	tt.Auto = ptr.To(false)
+	tt.Endpoint = "http://endpoint3"
+	tt.ServiceName = "Test"
+	tt.Sampler = "ratio"
+	tt.SamplerRatio = "0.001"
+	tt.SamplerParentBased = ptr.To(false)
+
+	ok, condition, err := telemetry.Configure(e)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+
+	err = telemetry.Apply(e)
+	require.NoError(t, err)
+
+	assert.Empty(t, e.ApplicationProperties["quarkus.opentelemetry.enabled"])
+	assert.Equal(t, "http://endpoint3", e.ApplicationProperties["camel.k.telemetry.endpoint"])
+	assert.Equal(t, "service.name=Test", e.ApplicationProperties["camel.k.telemetry.serviceName"])
+	assert.Equal(t, "ratio", e.ApplicationProperties["camel.k.telemetry.sampler"])
+	assert.Equal(t, "0.001", e.ApplicationProperties["camel.k.telemetry.samplerRatio"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.k.telemetry.samplerParentBased"])
 }
 
 func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *trait.Environment {

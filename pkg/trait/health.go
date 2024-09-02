@@ -23,7 +23,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -58,13 +58,13 @@ func newHealthTrait() Trait {
 func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil ||
 		(!e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases()) ||
-		!pointer.BoolDeref(t.Enabled, false) {
+		!ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
 	// The trait must be disabled if a debug operation is ongoing
 	if jt := e.Catalog.GetTrait(jvmTraitID); jt != nil {
-		if jvm, ok := jt.(*jvmTrait); ok && pointer.BoolDeref(jvm.Debug, false) {
+		if jvm, ok := jt.(*jvmTrait); ok && ptr.Deref(jvm.Debug, false) {
 			return false, NewIntegrationConditionPlatformDisabledWithMessage("Health", "debug operation ongoing: incompatible with health checks"), nil
 		}
 	}
@@ -76,7 +76,7 @@ func (t *healthTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 
 func (t *healthTrait) setProbesValues(e *Environment) {
 	if t.LivenessProbe == "" {
-		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
 			t.LivenessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultLivenessProbePath"]
 		} else {
 			// Deprecated: to be removed
@@ -84,7 +84,7 @@ func (t *healthTrait) setProbesValues(e *Environment) {
 		}
 	}
 	if t.ReadinessProbe == "" {
-		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
 			t.ReadinessProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultReadinessProbePath"]
 		} else {
 			// Deprecated: to be removed
@@ -92,7 +92,7 @@ func (t *healthTrait) setProbesValues(e *Environment) {
 		}
 	}
 	if t.StartupProbe == "" {
-		if e.CamelCatalog != nil && e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
+		if e.CamelCatalog.Runtime.Capabilities["health"].Metadata != nil {
 			t.StartupProbe = e.CamelCatalog.Runtime.Capabilities["health"].Metadata["defaultStartupProbePath"]
 		} else {
 			// Deprecated: to be removed
@@ -113,7 +113,7 @@ func (t *healthTrait) Apply(e *Environment) error {
 		return nil
 	}
 
-	if !pointer.BoolDeref(t.LivenessProbeEnabled, false) && !pointer.BoolDeref(t.ReadinessProbeEnabled, true) && !pointer.BoolDeref(t.StartupProbeEnabled, false) {
+	if !ptr.Deref(t.LivenessProbeEnabled, false) && !ptr.Deref(t.ReadinessProbeEnabled, true) && !ptr.Deref(t.StartupProbeEnabled, false) {
 		return nil
 	}
 
@@ -134,19 +134,19 @@ func (t *healthTrait) Apply(e *Environment) error {
 }
 
 func (t *healthTrait) setProbes(container *corev1.Container, port *intstr.IntOrString) error {
-	if pointer.BoolDeref(t.LivenessProbeEnabled, false) {
+	if ptr.Deref(t.LivenessProbeEnabled, false) {
 		if t.LivenessProbe == "" {
 			return fmt.Errorf("you need to configure a liveness probe explicitly or in your catalog")
 		}
 		container.LivenessProbe = t.newLivenessProbe(port, t.LivenessProbe)
 	}
-	if pointer.BoolDeref(t.ReadinessProbeEnabled, true) {
+	if ptr.Deref(t.ReadinessProbeEnabled, true) {
 		if t.ReadinessProbe == "" {
 			return fmt.Errorf("you need to configure a readiness probe explicitly or in your catalog")
 		}
 		container.ReadinessProbe = t.newReadinessProbe(port, t.ReadinessProbe)
 	}
-	if pointer.BoolDeref(t.StartupProbeEnabled, false) {
+	if ptr.Deref(t.StartupProbeEnabled, false) {
 		if t.StartupProbe == "" {
 			return fmt.Errorf("you need to configure a startup probe explicitly or in your catalog")
 		}

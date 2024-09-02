@@ -27,3 +27,6 @@ patches:
 - path: patch-watch-namespace-global.yaml
   target:
     kind: Deployment
+- path: patch-operator-id.yaml
+  target:
+    kind: Deployment

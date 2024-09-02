@@ -171,16 +171,6 @@ func (in *IntegrationPlatformStatus) RemoveCondition(condType IntegrationPlatfor
 	in.Conditions = newConditions
 }
 
-// AddOption add a publish strategy option.
-func (b *IntegrationPlatformBuildSpec) AddOption(option string, value string) {
-	options := b.PublishStrategyOptions
-	if options == nil {
-		options = make(map[string]string)
-		b.PublishStrategyOptions = options
-	}
-	options[option] = value
-}
-
 // GetTimeout returns the specified duration or a default one.
 func (b IntegrationPlatformBuildSpec) GetTimeout() metav1.Duration {
 	if b.Timeout == nil {

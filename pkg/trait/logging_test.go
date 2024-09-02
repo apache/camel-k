@@ -26,7 +26,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -63,10 +63,10 @@ func createLoggingTestEnv(t *testing.T, color bool, json bool, jsonPrettyPrint b
 				Profile: v1.TraitProfileOpenShift,
 				Traits: v1.Traits{
 					Logging: &traitv1.LoggingTrait{
-						Color:           pointer.Bool(color),
+						Color:           ptr.To(color),
 						Format:          logFormat,
-						JSON:            pointer.Bool(json),
-						JSONPrettyPrint: pointer.Bool(jsonPrettyPrint),
+						JSON:            ptr.To(json),
+						JSONPrettyPrint: ptr.To(jsonPrettyPrint),
 						Level:           logLevel,
 					},
 				},
@@ -156,10 +156,10 @@ func TestJsonLoggingTrait(t *testing.T) {
 
 func TestDefaultQuarkusLogging(t *testing.T) {
 	env := createDefaultLoggingTestEnv(t)
-	// Simulate a synthetic Integration Kit for which the catalog is not available
-	env.CamelCatalog = nil
-	env.IntegrationKit.Labels = map[string]string{
-		v1.IntegrationKitTypeLabel: v1.IntegrationKitTypeSynthetic,
+	// Simulate an older catalog configuration which is missing the logging
+	// capability
+	env.CamelCatalog.Runtime.Capabilities["logging"] = v1.Capability{
+		RuntimeProperties: nil,
 	}
 	env.EnvVars = []corev1.EnvVar{}
 	conditions, err := NewLoggingTestCatalog().apply(env)
