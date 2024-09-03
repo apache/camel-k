@@ -1,13 +1,10 @@
-[[operating]]
-= Operating
+= Standard Operating Procedures
 
 NOTE: The following guide uses the terminology from the https://sre.google/sre-book/service-level-objectives/[Site Reliability Engineer] book.
 
-The Camel K operator exposes a monitoring endpoint, that publishes xref:observability/monitoring/operator.adoc#metrics[metrics] indicating the _level of service_ provided to its users.
-These metrics materialize the Service Level Indicators (SLIs) for the Camel K operator.
+The Camel K operator exposes a monitoring endpoint, that publishes xref:observability/monitoring/operator.adoc#metrics[metrics] indicating the _level of service_ provided to its users. These metrics materialize the Service Level Indicators (SLIs) for the Camel K operator.
 
-Service Level Objectives (SLOs) can be defined based on these SLIs.
-The xref:observability/monitoring/operator.adoc#alerting[default alerts] created for the Camel K operator query the SLIs corresponding metrics, and match the SLOs for the Camel K operator, so that they fire up as soon as the _level of service_ is not met, and preemptive measures can be taken before beaching the Service Level Agreement (SLA) for the Camel K operator.
+Service Level Objectives (SLOs) can be defined based on these SLIs. The xref:observability/monitoring/operator.adoc#alerting[default alerts] created for the Camel K operator query the SLIs corresponding metrics, and match the SLOs for the Camel K operator, so that they fire up as soon as the _level of service_ is not met, and preemptive measures can be taken before beaching the Service Level Agreement (SLA) for the Camel K operator.
 
 [[operator-sops]]
 == Operator SOPs

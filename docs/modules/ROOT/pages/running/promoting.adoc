@@ -1,5 +1,5 @@
 [[promoting-integration]]
-= Promoting across environments
+= Promoting Integrations across environments
 
 As soon as you have an Integration running in your cluster, you will be challenged to move that Integration to an higher environment. Ie, you can test your Integration in a **development** environment, and, as soon as you're happy with the result, you will need to move it into a **production** environment.
 

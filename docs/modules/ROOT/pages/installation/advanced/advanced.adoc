@@ -13,7 +13,10 @@ Most of these settings will require changing either an environment variable or o
 
 You can install one or more Camel K operators (which must share CRDs). In such case you need to specify a unique operator name which will be used by each resource to know who is in charge to reconcile it. This behavior is controlled by the OPERATOR_ID environment variable (default value, _camel-k_).
 
-[[resources]]
+== Watch namespaces
+
+Camel K operator can work in **global** (descoped) mode by watching all namespaces or **namespaced** (scoped). This behavior is controlled by the WATCH_NAMESPACE environment variable. If set to an empty value, then the operator will watch for resources in all namespaces. If it set to a given namespace, then it will only watch for resources in such a namespace.
+
 == Resource management
 
 We provide certain configuration to better "operationalize" the Camel K Operator. More detailed information on the xref:installation/advanced/resources.adoc[resource management] page.

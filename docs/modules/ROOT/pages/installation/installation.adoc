@@ -8,6 +8,17 @@ Camel K allows us to run Camel integrations directly on a Kubernetes cluster. To
 
 The first step is to install and run the Camel K operator. You can do it via any of the following methodologies:
 
+[[kustomize]]
+=== Installation via Kustomize
+
+https://kustomize.io[Kustomize] provides a declarative approach to the configuration customization of a Camel-K installation. Kustomize works either with a standalone executable or as a built-in to `kubectl`. The https://github.com/apache/camel-k/tree/main/install[/install] directory provides a series of base and overlays configuration that you can use. You can create your own overlays or customize the one available in the repository to accommodate your need.
+
+```
+$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side
+```
+
+You can specify as `ref` parameter the version you're willing to install (ie, `v2.4.0`). The command above will install a descoped (global) operator in the camel-k namespace.
+
 [[helm]]
 === Installation via Helm Hub
 
@@ -32,17 +43,6 @@ $ kubectl create -f https://operatorhub.io/install/camel-k.yaml
 You can edit the `Subscription` custom resource, setting the channel you want to use. From Camel K version 2 onward, we're going to provide an installation channel for each major version we're releasing (ie, `stable-v2`). This will simplify the upgrade process if you choose to perform an automatic upgrade.
 
 NOTE: Some Kubernetes clusters such as Openshift may let you to perform the same operation from a GUI as well. Refer to the cluster instruction to learn how to perform such action from user interface.
-
-[[kustomize]]
-=== Installation via Kustomize
-
-https://kustomize.io[Kustomize] provides a declarative approach to the configuration customization of a Camel-K installation. Kustomize works either with a standalone executable or as a built-in to `kubectl`. The https://github.com/apache/camel-k/tree/main/install[/install] directory provides a series of base and overlays configuration that you can use. You can create your own overlays or customize the one available in the repository to accommodate your need.
-
-```
-$ kubectl apply -k github.com/apache/camel-k/install/overlays/kubernetes/descoped?ref=v2.4.0 --server-side
-```
-
-You can specify as `ref` parameter the version you're willing to install (ie, `v2.4.0`). The command above will install a descoped (global) operator in the camel-k namespace.
 
 [[verify]]
 === Verify that the operator is up and running
@@ -110,15 +110,8 @@ Once you've completed any of the above installation procedure, you'll be ready t
 
 Camel K installation is usually straightforward, but for certain cluster types you need to apply specific configuration settings before installing it. You need customized instructions for the following cluster types:
 
-- xref:installation/platform/digitalocean.adoc[DigitalOcean]
-- xref:installation/platform/docker-desktop.adoc[Docker Desktop]
 - xref:installation/platform/gke.adoc[Google Kubernetes Engine (GKE)]
 - xref:installation/platform/iks.adoc[IBM Kubernetes Services (IKS)]
-- xref:installation/platform/k3s.adoc[K3s]
-- xref:installation/platform/kind.adoc[Kind]
-- xref:installation/platform/minikube.adoc[Minikube]
-- xref:installation/platform/openshift.adoc[OpenShift]
-- xref:installation/platform/crc.adoc[Red Hat CodeReady Containers (CRC)]
 
 [[fine-tuning]]
 == Fine Tuning

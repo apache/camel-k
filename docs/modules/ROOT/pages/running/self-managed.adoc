@@ -1,6 +1,6 @@
-= Camel Runtimes (aka "sourceless" Integrations)
+= Self Managed Build Integrations
 
-Camel K operator is traditionally in charge to perform a build from a Camel DSL source. The resulting Integration depends directly on an IntegrationKit, which is a reusable custom resource backing the final container image that your application will run. In the last versions, the only runtime the operator can build is Camel Quarkus (via Camel K Runtime project).
+Camel K operator is traditionally in charge to perform a build from a Camel DSL source. The resulting Integration depends directly on an xref:architecture/cr/integration-kit.adoc[IntegrationKit], which is a reusable custom resource backing the final container image that your application will run. The only runtime the operator can build is Camel Quarkus (via Camel K Runtime project).
 
 However Camel K can run any runtime available in Apache Camel. This is possible only when the Camel application was previously built and packaged into a container image externally. Mind that if you run through this option, some of the features offered by the operator may not be available. For example, you won't be able to discover Camel capabilities because the source is not available to the operator but embedded in the container image.
 
@@ -24,9 +24,9 @@ If all is good, in a few seconds (there is no build involved) you should have yo
 [[camel-runtime-discovery]]
 == Camel Runtime version discovery
 
-Every Camel application requires a `CamelCatalog` object to know how to perform certain runtime configuration. When you run a **sourceless Integrations** there is no easy way to automatically discover for which runtime your application was built. In this case, we suggest you to specify the `camel.runtime-version` trait in order to improve the compatibility between the operator configuration and the specific runtime you're running. If no runtime version is specified, then, as default, the operator will use the one specified in the IntegrationPlatform.
+Every Camel application requires a `CamelCatalog` object to know how to perform certain runtime configuration. When you run a **self managed build Integrations** there is no easy way to automatically discover for which runtime your application was built. In this case, we suggest you to specify the `camel.runtime-version` trait in order to improve the compatibility between the operator configuration and the specific runtime you're running. If no runtime version is specified, then, as default, the operator will use the one specified in the IntegrationPlatform.
 
 [[traits]]
 == Trait configuration
 
-Certain Camel K operational aspect may be driven by traits. When you're building the application outside the operator, some of those traits may not be executed as they are executed during the building phase that we are skipping when running **sourceless Integrations**. There is also no possible way to auto-tune certain traits that require the presence of the source. In this case, you should instead provide a trait configuration with the values that are required by your Integration (for example, Knative, Service and other deployment traits).
+Certain Camel K operational aspect may be driven by traits. When you're building the application outside the operator, some of those traits may not be executed as they are executed during the building phase that we are skipping when running **self managed build Integrations**. There is also no possible way to auto-tune certain traits that require the presence of the source. In this case, you should instead provide a trait configuration with the values that are required by your Integration (for example, Knative, Service and other deployment traits).

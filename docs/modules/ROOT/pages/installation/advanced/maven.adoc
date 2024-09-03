@@ -297,3 +297,29 @@ Maven dependencies hosted in your S3 bucket can now be used just like any other 
 ----
 $ kamel run S3.java --dependency=mvn:artfiactId:groupId:version
 ----
+
+[[maven-profiles]]
+== Maven Profiles
+
+You can customize the build of an Integration with a https://maven.apache.org/guides/introduction/introduction-to-profiles.html#profiles-in-poms[Maven profile]:
+
+```
+<profile>
+  <id>my-profile</id>
+  ...
+</profile>
+```
+
+Once you have the file ready you can create a Configmap or a Secret in order to use it in your integration:
+
+```
+kubectl create cm my-maven-profile --from-file my-profile.xml
+```
+
+Once the Configmap/Secret is ready, then, you can use it to run your integration:
+
+```
+kamel run hello.yaml -t builder.maven-profile=configmap:my-maven-profile/my-profile.xml
+```
+
+The profile will be added to your Integration's project generated POM file. What will be changed in the `mvn package` execution will depend on your profile definition.

@@ -54,9 +54,18 @@ Then create a secret with the Docker config file `$HOME/.docker/config.json` (or
 $ kubectl create secret generic my-icr-secret --from-file=.dockerconfigjson=$HOME/.docker/config.json --type=kubernetes.io/dockerconfigjson
 ----
 
-Now you can proceed to install Camel K with the following command:
+Now you can provide the secret to the IntegrationPlatform:
 
-[source,console]
+[source,yaml]
 ----
-$ kamel install --registry <region>.icr.io --organization <my_namespace> --registry-secret my-icr-secret
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    registry:
+      address: <region>.icr.io
+      organization: <my_namespace>
+      secret: my-icr-secret
 ----

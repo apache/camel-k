@@ -1,0 +1,80 @@
+= Bind Pipes with kamel CLI
+
+You may be already familiar of the xref:running/running-cli.adoc[`kamel run`] CLI command. The CLI has a similar command thought to easily interact with Pipe custom resource: `kamel bind`.
+
+The command will allow to easily create and submit a Pipe with a few line of code:
+
+```bash
+kamel bind timer:foo log:bar --step https://gist.githubusercontent.com/squakez/48b4ebf24c2579caf6bcb3e8a59fa509/raw/c7d9db6ee5e8851f5dc6a564172d85f00d87219c/gistfile1.txt
+...
+binding "timer-to-log" created
+```
+
+The Pipe will be immediately created and you will be able to log the content of the Integration created after the Pipe:
+
+```bash
+kamel logs timer-to-log
+Integration 'timer-to-log' is now running. Showing log ...
+[1] Monitoring pod timer-to-log-6d949466c8-97d7x
+[1] 2024-09-03 14:32:31,789 INFO  [org.apa.cam.k.Runtime] (main) Apache Camel K Runtime 3.8.1
+...
+[1] 2024-09-03 14:32:41,170 INFO  [bar] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: byte[], Body: Hello Camel K]
+[1] 2024-09-03 14:32:41,270 INFO  [bar] (Camel (camel-1) thread #1 - timer://foo) Exchange[ExchangePattern: InOnly, BodyType: byte[], Body: Hello Camel K]
+```
+
+The similar developer experience when you want to run any supported custom resource, for example, Kamelets:
+
+```bash
+kamel bind timer-source log-sink -p source.message="Hello Camel K"
+...
+binding "timer-source-to-log-sink" created
+```
+
+In this case you need to provide one of the parameter required by the Kamelet used. Then you can watch at the Integration log as usual:
+
+```bash
+kamel logs timer-source-to-log-sink
+The building kit for integration 'timer-source-to-log-sink' is at: Build Running
+Integration 'timer-source-to-log-sink' is now running. Showing log ...
+[1] Monitoring pod timer-source-to-log-sink-9bf7bf67f-wh2v2
+[1] 2024-09-03 14:37:58,091 INFO  [org.apa.cam.k.Runtime] (main) Apache Camel K Runtime 3.8.1
+...
+[1] 2024-09-03 14:38:01,693 INFO  [log-sink] (Camel (camel-1) thread #1 - timer://tick) Exchange[ExchangePattern: InOnly, BodyType: String, Body: Hello Camel K]
+```
+
+[[dry-run]]
+== Dry Run
+
+The `bind` command has also a **dry-run** option as you may have already familiar with the `run`. If you have familiarity with Kubernetes, you will see we use the same approach used by `kubectl`, exposing a `-o` parameter which accepts either `yaml` or `json`. The presence of this feature will let you simplify any deployment strategy (including GitOps) as you can just get the result of the Integration which will be eventually executed by the Camel K Operator.
+
+NOTE: we make use of `stderr` for many CLI warning and this is automatically redirected to `stdout` to show immediately the result of any error to the user. If you're running any automation, make sure to redirect the `stderr` to any channel to avoid altering the result of the dry run, Ie `kamel run /tmp/Test.java -o yaml 2>/dev/null`.
+
+As an example, take the option available on the `kamel bind timer-source log-sink -p source.message="Hello Camel K v3.6.0" -t camel.runtime-version=3.6.0 -n camel-k -o yaml` command:
+
+```yaml
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+    trait.camel.apache.org/camel.runtime-version: 3.6.0
+  creationTimestamp: null
+  name: timer-source-to-log-sink
+  namespace: camel-k
+spec:
+  sink:
+    ref:
+      apiVersion: camel.apache.org/v1
+      kind: Kamelet
+      name: log-sink
+      namespace: camel-k
+  source:
+    properties:
+      message: Hello Camel K v3.6.0
+    ref:
+      apiVersion: camel.apache.org/v1
+      kind: Kamelet
+      name: timer-source
+      namespace: camel-k
+status: {}
+```
