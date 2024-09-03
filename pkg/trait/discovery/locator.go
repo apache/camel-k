@@ -15,7 +15,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package telemetry
+package discovery
 
-// Expose telemetryTrait type for testing.
-type TestTelemetryTrait = telemetryTrait
+import (
+	"context"
+
+	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/log"
+)
+
+// TelemetryLocators contains available telemetry OTLP locators.
+var TelemetryLocators []TelemetryLocator
+
+// TelemetryLocator is able to find the address of an available telemetry OTLP endpoint.
+type TelemetryLocator interface {
+	FindEndpoint(ctx context.Context, c client.Client, logger log.Logger, namespace string) (string, error)
+}

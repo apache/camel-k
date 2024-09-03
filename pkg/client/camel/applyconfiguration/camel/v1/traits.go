@@ -60,6 +60,7 @@ type TraitsApplyConfiguration struct {
 	SecurityContext *trait.SecurityContextTrait             `json:"security-context,omitempty"`
 	Service         *trait.ServiceTrait                     `json:"service,omitempty"`
 	ServiceBinding  *trait.ServiceBindingTrait              `json:"service-binding,omitempty"`
+	Telemetry       *trait.TelemetryTrait                   `json:"telemetry,omitempty"`
 	Toleration      *trait.TolerationTrait                  `json:"toleration,omitempty"`
 	Addons          map[string]AddonTraitApplyConfiguration `json:"addons,omitempty"`
 	Keda            *TraitSpecApplyConfiguration            `json:"keda,omitempty"`
@@ -344,6 +345,14 @@ func (b *TraitsApplyConfiguration) WithService(value trait.ServiceTrait) *Traits
 // If called multiple times, the ServiceBinding field is set to the value of the last call.
 func (b *TraitsApplyConfiguration) WithServiceBinding(value trait.ServiceBindingTrait) *TraitsApplyConfiguration {
 	b.ServiceBinding = &value
+	return b
+}
+
+// WithTelemetry sets the Telemetry field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Telemetry field is set to the value of the last call.
+func (b *TraitsApplyConfiguration) WithTelemetry(value trait.TelemetryTrait) *TraitsApplyConfiguration {
+	b.Telemetry = &value
 	return b
 }
 

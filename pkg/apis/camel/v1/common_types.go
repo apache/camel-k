@@ -250,6 +250,8 @@ type Traits struct {
 	Service *trait.ServiceTrait `property:"service" json:"service,omitempty"`
 	// The configuration of Service Binding trait
 	ServiceBinding *trait.ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
+	// The configuration of Telemetry trait
+	Telemetry *trait.TelemetryTrait `property:"telemetry" json:"telemetry,omitempty"`
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `property:"toleration" json:"toleration,omitempty"`
 

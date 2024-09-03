@@ -5260,6 +5260,43 @@ spec:
                     required:
                     - configuration
                     type: object
+                  telemetry:
+                    description: The configuration of Telemetry trait
+                    properties:
+                      auto:
+                        description: Enables automatic configuration of the trait,
+                          including automatic discovery of the telemetry endpoint.
+                        type: boolean
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      endpoint:
+                        description: The target endpoint of the Telemetry service
+                          (automatically discovered by default)
+                        type: string
+                      sampler:
+                        description: The sampler of the telemetry used for tracing
+                          (default "on")
+                        type: string
+                      sampler-parent-based:
+                        description: The sampler of the telemetry used for tracing
+                          is parent based (default "true")
+                        type: boolean
+                      sampler-ratio:
+                        description: The sampler ratio of the telemetry used for tracing
+                        type: string
+                      serviceName:
+                        description: The name of the service that publishes telemetry
+                          data (defaults to the integration name)
+                        type: string
+                    type: object
                   toleration:
                     description: The configuration of Toleration trait
                     properties:
@@ -7361,6 +7398,43 @@ spec:
                     required:
                     - configuration
                     type: object
+                  telemetry:
+                    description: The configuration of Telemetry trait
+                    properties:
+                      auto:
+                        description: Enables automatic configuration of the trait,
+                          including automatic discovery of the telemetry endpoint.
+                        type: boolean
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      endpoint:
+                        description: The target endpoint of the Telemetry service
+                          (automatically discovered by default)
+                        type: string
+                      sampler:
+                        description: The sampler of the telemetry used for tracing
+                          (default "on")
+                        type: string
+                      sampler-parent-based:
+                        description: The sampler of the telemetry used for tracing
+                          is parent based (default "true")
+                        type: boolean
+                      sampler-ratio:
+                        description: The sampler ratio of the telemetry used for tracing
+                        type: string
+                      serviceName:
+                        description: The name of the service that publishes telemetry
+                          data (defaults to the integration name)
+                        type: string
+                    type: object
                   toleration:
                     description: The configuration of Toleration trait
                     properties:
@@ -9367,6 +9441,43 @@ spec:
                     required:
                     - configuration
                     type: object
+                  telemetry:
+                    description: The configuration of Telemetry trait
+                    properties:
+                      auto:
+                        description: Enables automatic configuration of the trait,
+                          including automatic discovery of the telemetry endpoint.
+                        type: boolean
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      endpoint:
+                        description: The target endpoint of the Telemetry service
+                          (automatically discovered by default)
+                        type: string
+                      sampler:
+                        description: The sampler of the telemetry used for tracing
+                          (default "on")
+                        type: string
+                      sampler-parent-based:
+                        description: The sampler of the telemetry used for tracing
+                          is parent based (default "true")
+                        type: boolean
+                      sampler-ratio:
+                        description: The sampler ratio of the telemetry used for tracing
+                        type: string
+                      serviceName:
+                        description: The name of the service that publishes telemetry
+                          data (defaults to the integration name)
+                        type: string
+                    type: object
                   toleration:
                     description: The configuration of Toleration trait
                     properties:
@@ -11349,6 +11460,43 @@ spec:
                         x-kubernetes-preserve-unknown-fields: true
                     required:
                     - configuration
+                    type: object
+                  telemetry:
+                    description: The configuration of Telemetry trait
+                    properties:
+                      auto:
+                        description: Enables automatic configuration of the trait,
+                          including automatic discovery of the telemetry endpoint.
+                        type: boolean
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      endpoint:
+                        description: The target endpoint of the Telemetry service
+                          (automatically discovered by default)
+                        type: string
+                      sampler:
+                        description: The sampler of the telemetry used for tracing
+                          (default "on")
+                        type: string
+                      sampler-parent-based:
+                        description: The sampler of the telemetry used for tracing
+                          is parent based (default "true")
+                        type: boolean
+                      sampler-ratio:
+                        description: The sampler ratio of the telemetry used for tracing
+                        type: string
+                      serviceName:
+                        description: The name of the service that publishes telemetry
+                          data (defaults to the integration name)
+                        type: string
                     type: object
                   toleration:
                     description: The configuration of Toleration trait
@@ -19372,6 +19520,43 @@ spec:
                         x-kubernetes-preserve-unknown-fields: true
                     required:
                     - configuration
+                    type: object
+                  telemetry:
+                    description: The configuration of Telemetry trait
+                    properties:
+                      auto:
+                        description: Enables automatic configuration of the trait,
+                          including automatic discovery of the telemetry endpoint.
+                        type: boolean
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      endpoint:
+                        description: The target endpoint of the Telemetry service
+                          (automatically discovered by default)
+                        type: string
+                      sampler:
+                        description: The sampler of the telemetry used for tracing
+                          (default "on")
+                        type: string
+                      sampler-parent-based:
+                        description: The sampler of the telemetry used for tracing
+                          is parent based (default "true")
+                        type: boolean
+                      sampler-ratio:
+                        description: The sampler ratio of the telemetry used for tracing
+                        type: string
+                      serviceName:
+                        description: The name of the service that publishes telemetry
+                          data (defaults to the integration name)
+                        type: string
                     type: object
                   toleration:
                     description: The configuration of Toleration trait
@@ -27760,6 +27945,44 @@ spec:
                             x-kubernetes-preserve-unknown-fields: true
                         required:
                         - configuration
+                        type: object
+                      telemetry:
+                        description: The configuration of Telemetry trait
+                        properties:
+                          auto:
+                            description: Enables automatic configuration of the trait,
+                              including automatic discovery of the telemetry endpoint.
+                            type: boolean
+                          configuration:
+                            description: |-
+                              Legacy trait configuration parameters.
+                              Deprecated: for backward compatibility.
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                          enabled:
+                            description: Can be used to enable or disable a trait.
+                              All traits share this common property.
+                            type: boolean
+                          endpoint:
+                            description: The target endpoint of the Telemetry service
+                              (automatically discovered by default)
+                            type: string
+                          sampler:
+                            description: The sampler of the telemetry used for tracing
+                              (default "on")
+                            type: string
+                          sampler-parent-based:
+                            description: The sampler of the telemetry used for tracing
+                              is parent based (default "true")
+                            type: boolean
+                          sampler-ratio:
+                            description: The sampler ratio of the telemetry used for
+                              tracing
+                            type: string
+                          serviceName:
+                            description: The name of the service that publishes telemetry
+                              data (defaults to the integration name)
+                            type: string
                         type: object
                       toleration:
                         description: The configuration of Toleration trait
@@ -38645,6 +38868,44 @@ spec:
                             x-kubernetes-preserve-unknown-fields: true
                         required:
                         - configuration
+                        type: object
+                      telemetry:
+                        description: The configuration of Telemetry trait
+                        properties:
+                          auto:
+                            description: Enables automatic configuration of the trait,
+                              including automatic discovery of the telemetry endpoint.
+                            type: boolean
+                          configuration:
+                            description: |-
+                              Legacy trait configuration parameters.
+                              Deprecated: for backward compatibility.
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                          enabled:
+                            description: Can be used to enable or disable a trait.
+                              All traits share this common property.
+                            type: boolean
+                          endpoint:
+                            description: The target endpoint of the Telemetry service
+                              (automatically discovered by default)
+                            type: string
+                          sampler:
+                            description: The sampler of the telemetry used for tracing
+                              (default "on")
+                            type: string
+                          sampler-parent-based:
+                            description: The sampler of the telemetry used for tracing
+                              is parent based (default "true")
+                            type: boolean
+                          sampler-ratio:
+                            description: The sampler ratio of the telemetry used for
+                              tracing
+                            type: string
+                          serviceName:
+                            description: The name of the service that publishes telemetry
+                              data (defaults to the integration name)
+                            type: string
                         type: object
                       toleration:
                         description: The configuration of Toleration trait
