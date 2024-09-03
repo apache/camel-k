@@ -15,13 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package threescale
+package trait
 
 import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +34,7 @@ func TestThreeScaleDisabled(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	e := &trait.Environment{
+	e := &Environment{
 		CamelCatalog: catalog,
 	}
 
@@ -47,7 +46,7 @@ func TestThreeScaleDisabled(t *testing.T) {
 }
 
 func TestThreeScaleInjection(t *testing.T) {
-	svc, e := createEnvironment(t)
+	svc, e := createThreeScaleEnvironment(t)
 	threeScale := NewThreeScaleTrait()
 	tst, _ := threeScale.(*threeScaleTrait)
 	tst.Enabled = ptr.To(true)
@@ -67,7 +66,7 @@ func TestThreeScaleInjection(t *testing.T) {
 }
 
 func TestThreeScaleInjectionNoAPIPath(t *testing.T) {
-	svc, e := createEnvironment(t)
+	svc, e := createThreeScaleEnvironment(t)
 	threeScale := NewThreeScaleTrait()
 	tst, _ := threeScale.(*threeScaleTrait)
 	tst.Enabled = ptr.To(true)
@@ -88,13 +87,13 @@ func TestThreeScaleInjectionNoAPIPath(t *testing.T) {
 	assert.False(t, p)
 }
 
-func createEnvironment(t *testing.T) (*corev1.Service, *trait.Environment) {
+func createThreeScaleEnvironment(t *testing.T) (*corev1.Service, *Environment) {
 	t.Helper()
 
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
-	e := trait.Environment{
+	e := Environment{
 		CamelCatalog: catalog,
 	}
 

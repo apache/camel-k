@@ -8943,6 +8943,65 @@ The sampler of the telemetry used for tracing is parent based (default "true")
 
 |===
 
+[#_camel_apache_org_v1_trait_ThreeScaleTrait]
+=== ThreeScaleTrait
+
+The 3scale trait can be used to automatically create annotations that allow
+3scale to discover the generated service and make it available for API management.
+
+The 3scale trait is disabled by default.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+Enables automatic configuration of the trait.
+
+|`scheme` +
+string
+|
+
+
+The scheme to use to contact the service (default `http`)
+
+|`path` +
+string
+|
+
+
+The path where the API is published (default `/`)
+
+|`port` +
+int
+|
+
+
+The port where the service is exposed (default `80`)
+
+|`descriptionPath` +
+string
+|
+
+
+The path where the Open-API specification is published (default `/openapi.json`)
+
+
+|===
+
 [#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait
 
@@ -9014,6 +9073,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_ServiceBindingTrait, ServiceBindingTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
 * <<#_camel_apache_org_v1_trait_TelemetryTrait, TelemetryTrait>>
+* <<#_camel_apache_org_v1_trait_ThreeScaleTrait, ThreeScaleTrait>>
 * <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
 
 Trait is the base type for all traits. It could be disabled by the user.

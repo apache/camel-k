@@ -15,42 +15,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package threescale
+package trait
 
 import (
 	"strconv"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/trait"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
-// The 3scale trait can be used to automatically create annotations that allow
-// 3scale to discover the generated service and make it available for API management.
-//
-// The 3scale trait is disabled by default.
-//
-// +camel-k:trait=3scale.
-type Trait struct {
-	traitv1.Trait `property:",squash" json:",inline"`
-	// Enables automatic configuration of the trait.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// The scheme to use to contact the service (default `http`)
-	Scheme string `property:"scheme" json:"scheme,omitempty"`
-	// The path where the API is published (default `/`)
-	Path string `property:"path" json:"path,omitempty"`
-	// The port where the service is exposed (default `80`)
-	Port int `property:"port" json:"port,omitempty"`
-	// The path where the Open-API specification is published (default `/openapi.json`)
-	DescriptionPath *string `property:"description-path" json:"descriptionPath,omitempty"`
-}
-
 type threeScaleTrait struct {
-	trait.BaseTrait
-	Trait `property:",squash"`
+	BaseTrait
+	traitv1.ThreeScaleTrait `property:",squash"`
 }
 
 const (
@@ -81,13 +59,13 @@ const (
 )
 
 // NewThreeScaleTrait --.
-func NewThreeScaleTrait() trait.Trait {
+func NewThreeScaleTrait() Trait {
 	return &threeScaleTrait{
-		BaseTrait: trait.NewBaseTrait("3scale", trait.TraitOrderPostProcessResources),
+		BaseTrait: NewBaseTrait("3scale", TraitOrderPostProcessResources),
 	}
 }
 
-func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
+func (t *threeScaleTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
@@ -114,7 +92,7 @@ func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, *trait.TraitCon
 	return true, nil, nil
 }
 
-func (t *threeScaleTrait) Apply(e *trait.Environment) error {
+func (t *threeScaleTrait) Apply(e *Environment) error {
 	if svc := e.Resources.GetServiceForIntegration(e.Integration); svc != nil {
 		t.addLabelsAndAnnotations(&svc.ObjectMeta)
 	}
