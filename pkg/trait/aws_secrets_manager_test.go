@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package aws
+package trait
 
 import (
 	"testing"
@@ -29,7 +29,6 @@ import (
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
@@ -38,8 +37,8 @@ import (
 )
 
 func TestAwsSecretsManagerTraitApply(t *testing.T) {
-	e := createEnvironment(t, camel.QuarkusCatalog)
-	aws := NewAwsSecretsManagerTrait()
+	e := createAwsSecretsManagerEnvironment(t, camel.QuarkusCatalog)
+	aws := newAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
 	secrets.Enabled = ptr.To(true)
 	secrets.UseDefaultCredentialsProvider = ptr.To(false)
@@ -62,8 +61,8 @@ func TestAwsSecretsManagerTraitApply(t *testing.T) {
 }
 
 func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
-	e := createEnvironment(t, camel.QuarkusCatalog)
-	aws := NewAwsSecretsManagerTrait()
+	e := createAwsSecretsManagerEnvironment(t, camel.QuarkusCatalog)
+	aws := newAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
 	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
@@ -85,7 +84,7 @@ func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
 }
 
 func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
-	e := createEnvironment(t, camel.QuarkusCatalog, &corev1.Secret{
+	e := createAwsSecretsManagerEnvironment(t, camel.QuarkusCatalog, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "my-secret1",
@@ -103,7 +102,7 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 		},
 	})
 
-	aws := NewAwsSecretsManagerTrait()
+	aws := newAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
 	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
@@ -125,7 +124,7 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 }
 
 func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
-	e := createEnvironment(t, camel.QuarkusCatalog, &corev1.ConfigMap{
+	e := createAwsSecretsManagerEnvironment(t, camel.QuarkusCatalog, &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test",
 			Name:      "my-configmap1",
@@ -143,7 +142,7 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 		},
 	})
 
-	aws := NewAwsSecretsManagerTrait()
+	aws := newAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
 	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
@@ -164,14 +163,14 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
-func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error), objects ...runtime.Object) *trait.Environment {
+func createAwsSecretsManagerEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error), objects ...runtime.Object) *Environment {
 	t.Helper()
 
 	catalog, err := catalogGen()
 	client, _ := test.NewFakeClient(objects...)
 	require.NoError(t, err)
 
-	e := trait.Environment{
+	e := Environment{
 		CamelCatalog:          catalog,
 		ApplicationProperties: make(map[string]string),
 		Client:                client,

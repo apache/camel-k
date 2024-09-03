@@ -21,6 +21,7 @@ func init() {
 	// List of default trait factories.
 	// Declaration order is not important, but let's keep them sorted for debugging.
 	AddToTraits(newAffinityTrait)
+	AddToTraits(newAwsSecretsManagerTrait)
 	AddToTraits(newBuilderTrait)
 	AddToTraits(newCamelTrait)
 	AddToTraits(newContainerTrait)
