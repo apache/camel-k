@@ -15,26 +15,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package telemetry
+package trait
 
 import (
 	"testing"
 
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
-	e := createEnvironment(t, camel.QuarkusCatalog)
+	e := createTelemetryEnvironment(t, camel.QuarkusCatalog)
 	telemetry := NewTelemetryTrait()
 	tt, _ := telemetry.(*telemetryTrait)
 	tt.Enabled = ptr.To(true)
@@ -61,7 +57,7 @@ func TestTelemetryTraitOnDefaultQuarkus(t *testing.T) {
 }
 
 func TestTelemetryTraitWithValues(t *testing.T) {
-	e := createEnvironment(t, camel.QuarkusCatalog)
+	e := createTelemetryEnvironment(t, camel.QuarkusCatalog)
 	telemetry := NewTelemetryTrait()
 	tt, _ := telemetry.(*telemetryTrait)
 	tt.Enabled = ptr.To(true)
@@ -92,7 +88,7 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 }
 
 func TestTelemetryForSourceless(t *testing.T) {
-	e := createEnvironment(t, camel.QuarkusCatalog)
+	e := createTelemetryEnvironment(t, camel.QuarkusCatalog)
 	telemetry := NewTelemetryTrait()
 	tt, _ := telemetry.(*telemetryTrait)
 	tt.Enabled = ptr.To(true)
@@ -119,13 +115,13 @@ func TestTelemetryForSourceless(t *testing.T) {
 	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.k.telemetry.samplerParentBased"])
 }
 
-func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *trait.Environment {
+func createTelemetryEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *Environment {
 	t.Helper()
 
 	catalog, err := catalogGen()
 	require.NoError(t, err)
 
-	e := trait.Environment{
+	e := Environment{
 		CamelCatalog:          catalog,
 		ApplicationProperties: make(map[string]string),
 	}

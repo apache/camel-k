@@ -15,51 +15,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package telemetry
+package trait
 
 import (
 	"fmt"
 
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
-
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/ptr"
-
-	"github.com/apache/camel-k/v2/addons/telemetry/discovery"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/trait"
+	"github.com/apache/camel-k/v2/pkg/trait/discovery"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 )
 
-// The Telemetry trait can be used to automatically publish tracing information to an OTLP compatible collector.
-//
-// The trait is able to automatically discover the telemetry OTLP endpoint available in the namespace (supports **Jaerger** in version 1.35+).
-//
-// The Telemetry trait is disabled by default.
-//
-// WARNING: The Telemetry trait can't be enabled at the same time as the Tracing trait.
-//
-// +camel-k:trait=telemetry.
-type Trait struct {
-	traitv1.Trait `property:",squash" json:",inline"`
-	// Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
-	Auto *bool `property:"auto" json:"auto,omitempty"`
-	// The name of the service that publishes telemetry data (defaults to the integration name)
-	ServiceName string `property:"service-name" json:"serviceName,omitempty"`
-	// The target endpoint of the Telemetry service (automatically discovered by default)
-	Endpoint string `property:"endpoint" json:"endpoint,omitempty"`
-	// The sampler of the telemetry used for tracing (default "on")
-	Sampler string `property:"sampler" json:"sampler,omitempty"`
-	// The sampler ratio of the telemetry used for tracing
-	SamplerRatio string `property:"sampler-ratio" json:"sampler-ratio,omitempty"`
-	// The sampler of the telemetry used for tracing is parent based (default "true")
-	SamplerParentBased *bool `property:"sampler-parent-based" json:"sampler-parent-based,omitempty"`
-}
-
 type telemetryTrait struct {
-	trait.BaseTrait
-	Trait `property:",squash"`
+	BaseTrait
+	traitv1.TelemetryTrait `property:",squash"`
 }
 
 const (
@@ -84,13 +56,13 @@ var (
 )
 
 // NewTelemetryTrait instance the telemetry trait as a BaseTrait capable to inject quarkus properties.
-func NewTelemetryTrait() trait.Trait {
+func NewTelemetryTrait() Trait {
 	return &telemetryTrait{
-		BaseTrait: trait.NewBaseTrait("telemetry", trait.TraitOrderBeforeControllerCreation),
+		BaseTrait: NewBaseTrait("telemetry", TraitOrderBeforeControllerCreation),
 	}
 }
 
-func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
+func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
@@ -99,17 +71,17 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 		return true, nil, nil
 	}
 
-	var condition *trait.TraitCondition
+	var condition *TraitCondition
 
 	if t.Endpoint == "" {
 		for _, locator := range discovery.TelemetryLocators {
-			endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e)
+			endpoint, err := locator.FindEndpoint(e.Ctx, t.Client, t.L, e.Integration.Namespace)
 			if err != nil {
 				return false, nil, err
 			}
 			if endpoint != "" {
 				t.L.Infof("Using tracing endpoint: %s", endpoint)
-				condition = trait.NewIntegrationCondition(
+				condition = NewIntegrationCondition(
 					"Telemetry",
 					v1.IntegrationConditionTraitInfo,
 					corev1.ConditionTrue,
@@ -133,7 +105,7 @@ func (t *telemetryTrait) Configure(e *trait.Environment) (bool, *trait.TraitCond
 	return true, condition, nil
 }
 
-func (t *telemetryTrait) Apply(e *trait.Environment) error {
+func (t *telemetryTrait) Apply(e *Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTelemetry)
 
 	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
@@ -145,7 +117,7 @@ func (t *telemetryTrait) Apply(e *trait.Environment) error {
 	return nil
 }
 
-func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
+func (t *telemetryTrait) setCatalogConfiguration(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
@@ -170,17 +142,17 @@ func (t *telemetryTrait) setCatalogConfiguration(e *trait.Environment) {
 
 	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
 		for _, cp := range e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties {
-			e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+			e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 		}
 	}
 }
 
 // Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
-func (t *telemetryTrait) setRuntimeProviderProperties(e *trait.Environment) {
+func (t *telemetryTrait) setRuntimeProviderProperties(e *Environment) {
 	provider := e.CamelCatalog.CamelCatalogSpec.Runtime.Provider
 	properties := telemetryProperties[provider]
 	if appPropEnabled := properties[propEnabled]; appPropEnabled != "" {
-		e.ApplicationProperties[appPropEnabled] = "true"
+		e.ApplicationProperties[appPropEnabled] = boolean.TrueString
 	}
 	if appPropEndpoint := properties[propEndpoint]; appPropEndpoint != "" && t.Endpoint != "" {
 		e.ApplicationProperties[appPropEndpoint] = t.Endpoint
@@ -196,7 +168,7 @@ func (t *telemetryTrait) setRuntimeProviderProperties(e *trait.Environment) {
 	}
 	if appPropSamplerParentBased := properties[propSamplerParentBased]; appPropSamplerParentBased != "" {
 		if ptr.Deref(t.SamplerParentBased, true) {
-			e.ApplicationProperties[appPropSamplerParentBased] = "true"
+			e.ApplicationProperties[appPropSamplerParentBased] = boolean.TrueString
 		} else {
 			e.ApplicationProperties[appPropSamplerParentBased] = boolean.FalseString
 		}

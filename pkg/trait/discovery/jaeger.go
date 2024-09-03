@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/client"
-	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -37,11 +36,11 @@ const (
 	jaegerPortName = "grpc-otlp"
 )
 
-func (loc *JaegerTelemetryLocator) FindEndpoint(ctx context.Context, c client.Client, l log.Logger, e *trait.Environment) (string, error) {
+func (loc *JaegerTelemetryLocator) FindEndpoint(ctx context.Context, c client.Client, l log.Logger, namespace string) (string, error) {
 	opts := metav1.ListOptions{
 		LabelSelector: "app.kubernetes.io/part-of=jaeger,app.kubernetes.io/component=service-collector",
 	}
-	lst, err := c.CoreV1().Services(e.Integration.Namespace).List(ctx, opts)
+	lst, err := c.CoreV1().Services(namespace).List(ctx, opts)
 	if err != nil {
 		return "", err
 	}

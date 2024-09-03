@@ -8874,6 +8874,75 @@ The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'
 
 
 
+[#_camel_apache_org_v1_trait_TelemetryTrait]
+=== TelemetryTrait
+
+The Telemetry trait can be used to automatically publish tracing information to an OTLP compatible collector.
+
+The trait is able to automatically discover the telemetry OTLP endpoint available in the namespace (supports **Jaerger** in version 1.35+).
+
+The Telemetry trait is disabled by default.
+
+WARNING: The Telemetry trait can't be enabled at the same time as the Tracing trait.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
+
+|`serviceName` +
+string
+|
+
+
+The name of the service that publishes telemetry data (defaults to the integration name)
+
+|`endpoint` +
+string
+|
+
+
+The target endpoint of the Telemetry service (automatically discovered by default)
+
+|`sampler` +
+string
+|
+
+
+The sampler of the telemetry used for tracing (default "on")
+
+|`sampler-ratio` +
+string
+|
+
+
+The sampler ratio of the telemetry used for tracing
+
+|`sampler-parent-based` +
+bool
+|
+
+
+The sampler of the telemetry used for tracing is parent based (default "true")
+
+
+|===
+
 [#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait
 
@@ -8944,6 +9013,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_RouteTrait, RouteTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceBindingTrait, ServiceBindingTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
+* <<#_camel_apache_org_v1_trait_TelemetryTrait, TelemetryTrait>>
 * <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
 
 Trait is the base type for all traits. It could be disabled by the user.
