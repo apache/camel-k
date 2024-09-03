@@ -91,7 +91,7 @@ func TestTelemetryTraitWithValues(t *testing.T) {
 	assert.Equal(t, "${camel.k.telemetry.samplerParentBased}", e.ApplicationProperties["quarkus.opentelemetry.tracer.sampler.parent-based"])
 }
 
-func TestTelemetryForSourceless(t *testing.T) {
+func TestTelemetryForSelfManagedBuild(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	telemetry := NewTelemetryTrait()
 	tt, _ := telemetry.(*telemetryTrait)

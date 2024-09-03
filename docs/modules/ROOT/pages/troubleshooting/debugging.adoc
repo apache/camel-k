@@ -1,8 +1,7 @@
 [[debugging]]
 = Debugging Camel K Integrations
 
-Sometimes an Integration can fail or behave unexpectedly for unknown reasons, and a developer needs to investigate the cause of such behavior.
-Attaching a Java debugger to an integration is a common way to start the investigation.
+Sometimes an Integration can fail or behave unexpectedly for unknown reasons, and a developer needs to investigate the cause of such behavior. Attaching a Java debugger to an integration is a common way to start the investigation.
 
 Even if the Integration Pods run on a Kubernetes cluster, it's very easy to attach a Java debugger to the remote Integration container using the CLI.
 
@@ -19,8 +18,7 @@ Suppose you've started an Integration using the following command:
 $ kamel run examples/Sample.java
 ----
 
-An Integration named `sample` should be running in the cluster.
-You can use the `kamel debug` command to put it in _debug_ mode:
+An Integration named `sample` should be running in the cluster. You can use the `kamel debug` command to put it in _debug_ mode:
 
 [source,console]
 ----

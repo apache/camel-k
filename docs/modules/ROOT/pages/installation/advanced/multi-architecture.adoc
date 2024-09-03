@@ -1,8 +1,6 @@
 [[multi-architecture-props]]
 = Multi Architecture
 
-NOTE: this part is evolving quickly during development of version 2 so it may be slightly inaccurate.
-
 Since version 2, Camel K is publishing an ARM64 architecture beside the default AMD64 architecture. You can build your particular architecture from source as well, following the guidelines in xref:contributing/local-development.adoc[Local development].
 
 [[multi-architecture-install]]

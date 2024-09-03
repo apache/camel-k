@@ -34,7 +34,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestSourceLessIntegrations(t *testing.T) {
+func TestSelfManagedBuildIntegrations(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		var cmData = make(map[string]string)

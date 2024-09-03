@@ -63,9 +63,22 @@ If you apply this configuration, a registry Pod will be started and you can use 
 ```
 NAME       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
 registry   ClusterIP   10.96.112.40   <none>        80/TCP    23h
-
-$ kamel install --registry 10.96.112.40
 ```
+
+Now you can use such value into your IntegrationPlatform:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    registry:
+      address: 10.96.112.40
+      insecure: true
+----
 
 The above installation should be able to push and pull Integration images correctly.
 

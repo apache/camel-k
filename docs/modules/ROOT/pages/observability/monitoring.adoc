@@ -13,8 +13,7 @@ To take full advantage of the Camel K monitoring capabilities, it is recommended
 [[kubernetes]]
 === Kubernetes
 
-The easiest way of starting with the Prometheus Operator is by deploying it as part of https://github.com/prometheus-operator/kube-prometheus[kube-prometheus], which provisions an entire monitoring stack.
-You can follow the https://prometheus-operator.dev/docs/prologue/quick-start/[quickstart] from the Prometheus Operator https://prometheus-operator.dev/[documentation].
+The easiest way of starting with the Prometheus Operator is by deploying it as part of https://github.com/prometheus-operator/kube-prometheus[kube-prometheus], which provisions an entire monitoring stack. You can follow the https://prometheus-operator.dev/docs/prologue/quick-start/[quickstart] from the Prometheus Operator https://prometheus-operator.dev/[documentation].
 
 Alternatively, you can quickly deploy the Prometheus operator by running:
 
@@ -42,9 +41,7 @@ spec:
 EOF
 ----
 
-By default, the Prometheus instance discovers applications to be monitored in the same namespace.
-You can use the `podMonitorNamespaceSelector` field from the `Prometheus` resource to enable cross-namespace monitoring.
-You may also need to specify a ServiceAccount with the `serviceAccountName` field, that's bound to a Role with the necessary permissions.
+By default, the Prometheus instance discovers applications to be monitored in the same namespace. You can use the `podMonitorNamespaceSelector` field from the `Prometheus` resource to enable cross-namespace monitoring. You may also need to specify a ServiceAccount with the `serviceAccountName` field, that's bound to a Role with the necessary permissions.
 
 [[openshift]]
 === OpenShift

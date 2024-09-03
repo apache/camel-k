@@ -90,7 +90,7 @@ func TestConfigureJvmTraitInWrongJvmDisabled(t *testing.T) {
 	assert.Equal(t, expectedCondition, condition)
 }
 
-func TestConfigureJvmTraitExecutableSourcelessContainer(t *testing.T) {
+func TestConfigureJvmTraitExecutableSelfManagedBuildContainer(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
 		Image: "my-image",
@@ -105,7 +105,7 @@ func TestConfigureJvmTraitExecutableSourcelessContainer(t *testing.T) {
 	)
 }
 
-func TestConfigureJvmTraitExecutableSourcelessContainerWithJar(t *testing.T) {
+func TestConfigureJvmTraitExecutableSelfManagedBuildContainerWithJar(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
 		Image: "my-image",
@@ -142,7 +142,7 @@ func TestConfigureJvmTraitExecutableSourcelessContainerWithJar(t *testing.T) {
 	}, d.Spec.Template.Spec.Containers[0].Args)
 }
 
-func TestConfigureJvmTraitExecutableSourcelessContainerWithJarAndOptions(t *testing.T) {
+func TestConfigureJvmTraitExecutableSelfManagedBuildContainerWithJarAndOptions(t *testing.T) {
 	trait, environment := createNominalJvmTest(v1.IntegrationKitTypePlatform)
 	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
 		Image: "my-image",

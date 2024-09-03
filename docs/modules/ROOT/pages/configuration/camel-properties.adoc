@@ -6,7 +6,7 @@ During the execution of an `Integration` you can provide a single property or a 
 [[runtime-single-prop]]
 == Single property
 
-Imagine you have a generic `Route` and you set a placeholder for certain information (ie, _my.message_ variable):
+Imagine you have a generic route and you set a placeholder for certain information (ie, _my.message_ variable):
 
 [source,yaml]
 .property-route.yaml
@@ -117,7 +117,7 @@ The key-value pairs of the `ConfigMap` are loaded and used as runtime properties
 [[runtime-configmap-as-file]]
 == Property from ConfigMap/Secret as file
 
-When you have a lot of key-value pairs to store into a given `ConfigMap`/`Secret`, you may consider storing some runtime properties as a file into a specific key-value pair for the sake of simplicity. 
+When you have a lot of key-value pairs to store into a given `ConfigMap`/`Secret`, you may consider storing some runtime properties as a file into a specific key-value pair for the sake of simplicity.
 
 The only constraint is to use `.properties` as a suffix of the key to indicate that the value is actually a property file, not a simple value.
 

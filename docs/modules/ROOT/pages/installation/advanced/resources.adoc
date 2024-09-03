@@ -7,12 +7,15 @@ The usage of these advanced configuration assumes you're familiar with the https
 
 Depending on the installation methodology (ie, Helm) provided you may have certain configuration parameters out of the box. Otherwise you should be able to fine tune those parameters altering directly the Camel K operator Deployment.
 
-[[scheduling-infra-pod-scheduling]]
-== Scheduling
+== Scheduling Node Selectors, Affinity and Tolerations
 
-=== Node Selectors and tolerations
+=== Operator Pod
 
 We suggest to edit the Deployment to configure the https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/[`NodeSelector` Kubernetes feature] and the https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/[`Taint` and `Toleration` Kubernetes feature].
+
+=== Builder Pods and Integrations
+
+Builder Pods and Integration Pods can be also scheduled and assigned in the cluster. For this reason you need to use xref:traits:builder.adoc[builder trait] configuration (for builder Pod when using `pod` building strategy) and xref:traits:affinity.adoc[affinity], xref:traits:pod.adoc[pod], xref:traits:toleration.adoc[toleration] traits for Integration Pods.
 
 [[scheduling-infra-pod-resources]]
 == Resources
@@ -39,7 +42,7 @@ Note that if you plan to perform **native builds**, then the memory requirements
 
 === Default Integration Pod configuration
 
-The resource set on the container here is highly dependant on what your application is doing. You can control this behavior by setting opportunely the resources on the Integration via container trait.
+The resource set on the container here is highly dependant on what your application is doing. You can control this behavior by setting opportunely the resources on the Integration via xref:traits:container.adoc[container] trait.
 
 Be aware that the default are actually the following:
 
@@ -52,3 +55,7 @@ resources:
     memory: "1Gi"
     cpu: "500m"
 ```
+
+=== Builder Pod configuration
+
+You can set the resources requests and limits for the builder Pod using xref:traits:builder.adoc[container] trait.

@@ -1,0 +1,20 @@
+[[configuring-registry-github]]
+= Configuring a Github Packages Registry
+
+You can use a Github Packages registry to host your container images.
+
+Login to Github, then navigate to `Settings -> Developer settings -> Personal access tokens`. Create a new token with the following permissions:
+
+* `repo` (all)
+* `write:packages`
+* `read:packages`
+* `delete:packages`
+
+Take note of the personal access token, you'll use it during installation. You also need to **choose a github repository** for hosting your images.
+
+Finally you can xref:installation/registry/registry-secret.adoc[configure the secret] with the following parameters:
+
+* registry: docker.pkg.github.com
+* organization: github-user/repository
+* registry-auth-username: github-user-id
+* registry-auth-password: github-token

@@ -1,41 +1,6 @@
-[[installation-on-kind]]
-= Installing Camel K on Kind
+= Configuring a local registry on Kind
 
-[[with-public-registry]]
-== With a public registry
-
-Installing Camel K on Kind, with a public registry doesn't require any special configuration.
-
-Assuming you have Kind installed, then start by creating a cluster:
-
-[source,shell]
-----
-kind create cluster
-----
-
-Create a secret with your registry username and password:
-
-[source,shell]
-----
-kubectl -n default create secret docker-registry external-registry-secret --docker-username my-user --docker-password "password"
-----
-
-Install Camel K operator on the cluster in the default namespace:
-
-[source,shell]
-----
-kamel install --olm=false -n default --registry docker.io --organization my-org-or-username --registry-secret external-registry-secret --wait
-----
-
-Make sure to replace the `my-org-or-username` with your actual username or organization used to host the images.
-
-[[with-local-registry]]
-== With a local registry
-
-Installing Camel K on Kind, with a local insecure registry doesn't require any special configuration.
-
-Assuming you have Kind installed, then start by creating a cluster with a pre-configured local registry by executing the
-following script:
+Installing Camel K on Kind, with a local insecure registry doesn't require any special configuration. Assuming you have Kind installed, then start by creating a cluster with a pre-configured local registry by executing the following script:
 
 [source,shell]
 ----
@@ -105,14 +70,16 @@ The local registry is then listening on port `5001`, so we can push the docker i
 Assuming that you want to use a snapshot version (created with `make images`), simply create a tag with the proper host
 then push it to the local registry with the following commands:
 
-[source,shell]
+Finally, configure the IntegrationPlatform as:
+[source,yaml]
 ----
-docker tag apache/camel-k:2.0.0-SNAPSHOT localhost:5001/apache/camel-k:2.0.0-SNAPSHOT
-docker push localhost:5001/apache/camel-k:2.0.0-SNAPSHOT
-----
-
-Finally, install Camel K operator on the cluster in the default namespace:
-[source,shell]
-----
-kamel install --olm=false --operator-image kind-registry:5000/apache/camel-k:2.0.0-SNAPSHOT --registry kind-registry:5000 --registry-insecure
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    registry:
+      address: kind-registry:5000
+      insecure: true
 ----

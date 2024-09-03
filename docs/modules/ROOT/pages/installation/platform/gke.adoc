@@ -26,9 +26,4 @@ kubectl create clusterrolebinding user-cluster-admin-binding --clusterrole=clust
 
 The command above is needed to make sure your user is able to delegate some permissions to Camel K service accounts.
 
-You can now get the *kamel* CLI tool the from https://github.com/apache/camel-k/releases[release page]
-and put it on your system path.
-
-The last thing to do is to xref:installation/registry/gcr.adoc[configure gcr.io as registry] to host your integration image.
-
-After doing that, you'll be ready to play with Camel K. Enjoy!
+The last thing to do is to xref:installation/registry/special/gcr.adoc[configure gcr.io as registry] to host your integration image.

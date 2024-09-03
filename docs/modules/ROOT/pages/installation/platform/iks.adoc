@@ -14,13 +14,8 @@ kubectl get pods --all-namespaces
 ====
 IKS provide an internal container registry feature. Camel K is able to leverage that registry.
 
-You could create a customized namespace on xref:installation/registry/icr.adoc[IBM container registry] in order to host your integration images.
+You could create a customized namespace on xref:installation/registry/special/icr.adoc[IBM container registry] in order to host your integration images.
 Please take note of the namespace and region created to configure them on the installation step.
 ====
 
-You can now download *kamel* CLI tool the from https://github.com/apache/camel-k/releases[release page]
-and put it on your system path.
-
-After configure *kamel* CLI, you could start with the xref:installation/installation.adoc[standard installation] or xref:installation/installation.adoc#helm[installation via Helm].
-
-Finally you are ready to work with Camel K.
+You can now install via xref:installation/installation.adoc[standard installation].

@@ -934,7 +934,7 @@ func TestRunOutputWithoutKubernetesCluster(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestSourceLessIntegration(t *testing.T) {
+func TestSelfManagedBuildIntegration(t *testing.T) {
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, "--image", "docker.io/my-org/my-app:1.0.0", "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)

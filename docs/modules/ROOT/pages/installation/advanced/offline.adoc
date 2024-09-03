@@ -2,7 +2,7 @@
 
 Camel K is naturally developed to fit in an "open world" cluster model. It basically means that the default installation assumes it can pull and push resources from the Internet. However, there could be certain domains or use cases where this is a limitation. For this reason this guide will show you how to setup properly Camel K in an offline (or disconnected, or air gapped) cluster environment.
 
-In order to understand the content of this guide. It is good to have familiarity with the default xref:installation/advanced/network.adoc[network architecture]. Let's see again the diagram here:
+In order to understand the content of this guide. It is good to have familiarity with the default xref:installation/advanced/network.adoc[components topology]. Let's see again the diagram here:
 
 image::architecture/camel-k-network.svg[Network architecture, width=800]
 
