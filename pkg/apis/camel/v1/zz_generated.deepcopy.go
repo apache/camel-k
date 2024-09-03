@@ -3303,6 +3303,11 @@ func (in *Traits) DeepCopyInto(out *Traits) {
 		*out = new(trait.ServiceBindingTrait)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Telemetry != nil {
+		in, out := &in.Telemetry, &out.Telemetry
+		*out = new(trait.TelemetryTrait)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Toleration != nil {
 		in, out := &in.Toleration, &out.Toleration
 		*out = new(trait.TolerationTrait)
