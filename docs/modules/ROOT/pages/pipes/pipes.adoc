@@ -125,4 +125,4 @@ spec:
 
 == Using Kamel CLI
 
-Camel K works very well with any Kubernetes compatible user interface (such as CLI as `kubectl`, `oc` or any other visual tooling). However we do provide a simple CLI that helps you performing most of the Pipe works in an easier fashion: it's xref:running/bind-cli.adoc[`kamel` CLI].
+Camel K works very well with any Kubernetes compatible user interface (such as CLI as `kubectl`, `oc` or any other visual tooling). However we do provide a simple CLI that helps you performing most of the Pipe works in an easier fashion: it's xref:pipes/bind-cli.adoc[`kamel` CLI].
