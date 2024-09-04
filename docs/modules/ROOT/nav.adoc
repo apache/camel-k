@@ -21,7 +21,7 @@
 ** xref:running/synthetic.adoc[Synthetic Integrations]
 ** xref:running/promoting.adoc[Promote an Integration]
 * xref:pipes/pipes.adoc[Run an Pipe]
-** xref:pipes/pipes-cli.adoc[kamel bind CLI]
+** xref:pipes/bind-cli.adoc[kamel bind CLI]
 ** xref:pipes/promoting.adoc[Promote a Pipe]
 * xref:languages/languages.adoc[Languages]
 ** xref:languages/java.adoc[Java]
