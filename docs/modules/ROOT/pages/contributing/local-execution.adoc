@@ -108,7 +108,7 @@ spec:
 
 The <my-version> variable must be replaced with the version you are building. For example, `1.3.1-SNAPSHOT`. With these instructions, the operator will pick up and use the snapshot version you have released locally. In order to use the local maven repository, you will also need to edit your IntegrationPlatform as follow:
 ----
-$ k edit ip -n operator-test
+$ kubectl edit ip -n operator-test
 
 ...
   spec:
