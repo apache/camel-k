@@ -67,11 +67,22 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 		return false, nil, nil
 	}
 
-	if !ptr.Deref(t.Auto, true) {
-		return true, nil, nil
+	var condition *TraitCondition
+
+	// Deprecated
+	if _, isAddon := e.Integration.Spec.Traits.Addons["telemetry"]; isAddon {
+		condition = NewIntegrationCondition(
+			"Telemetry",
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			traitConfigurationReason,
+			"Telemetry addon configuration is deprecated and may be removed in future releases. Make sure to use Telemetry trait configuration instead.",
+		)
 	}
 
-	var condition *TraitCondition
+	if !ptr.Deref(t.Auto, true) {
+		return true, condition, nil
+	}
 
 	if t.Endpoint == "" {
 		for _, locator := range discovery.TelemetryLocators {
@@ -81,11 +92,15 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 			}
 			if endpoint != "" {
 				t.L.Infof("Using tracing endpoint: %s", endpoint)
+				conditionMessage := "TracingEndpoint"
+				if condition != nil {
+					conditionMessage = conditionMessage + ";" + condition.message
+				}
 				condition = NewIntegrationCondition(
 					"Telemetry",
 					v1.IntegrationConditionTraitInfo,
 					corev1.ConditionTrue,
-					"TracingEndpoint",
+					conditionMessage,
 					endpoint,
 				)
 				t.Endpoint = endpoint
