@@ -75,6 +75,8 @@ func TestTelemetryAddon(t *testing.T) {
 		// Create integration and activate traces by telemetry trait
 		ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/int-rest-consumer-addon.yaml", "-n", ns))
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, "rest-consumer-addon"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationCondition(t, ctx, ns, "rest-consumer-addon", "TelemetryTraitInfo"), TestTimeoutShort).Should(
+			WithTransform(IntegrationConditionMessage, ContainSubstring("Telemetry addon configuration is deprecated")))
 
 		name := "Alice"
 		serviceName := fmt.Sprintf("rest-consumer-addon.%s", ns)
