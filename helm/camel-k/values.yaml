@@ -45,9 +45,3 @@ operator:
 
   # Default operator name
   operatorId: camel-k
-
-
-platform:
-  build:
-    registry: {}
-  cluster: ""
