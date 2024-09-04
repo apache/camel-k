@@ -16,7 +16,7 @@ Camel K does the best it can to discover automatically dependencies required by 
 
 Build time properties are the configuration injected during the building of the project. They are mainly used by Camel Quarkus and you may not need at all depending on the kind of applications you're building. See more in the xref:configuration/build-time-properties.adoc[build time properties] section.
 
-If you want to optimize your application to run natively on the cloud, then you may see how to xref:configuration/quarkus-native.adoc[run your application with Quarkus Native].
+If you want to optimize your application to run natively on the cloud, then you may see how to xref:configuration/quarkus-native.adoc[run your application with Quarkus Native compilation].
 
 While building the container image, the operator will use a default JDK based image. See how you can xref:configuration/base-image.adoc[change the default base image].
 
