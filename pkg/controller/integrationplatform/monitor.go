@@ -121,6 +121,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 				corev1.ConditionTrue,
 				v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
 				fmt.Sprintf("camel catalog %s available", runtimeSpec.Version))
+			platform.Status.Build.RuntimeCoreVersion = catalog.Runtime.Metadata["camel.version"]
 		}
 	}
 
