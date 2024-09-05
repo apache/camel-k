@@ -6,7 +6,9 @@ Camel K is a https://kubernetes.io/docs/concepts/extend-kubernetes/operator/[Kub
 
 A Camel workload is generally represented by a route expressed in any Camel DSL. This is wrapped into one or more custom resource which will manage the lifecycle of the application on the cloud.
 
-image::concepts/integrations.png[Camel workload lifecycle, width=1024]
+
+image::concepts/integrations.png[Camel workload lifecycle, width=640]
+
 
 The user is responsible to create a single IntegrationPlatform which contains the configuration required to drive the build and publishing process. Then the user creates any Integration custom resource, which is mainly a container for the Camel route and other optional Kubernetes fine tunings.
 
@@ -24,7 +26,9 @@ The user is responsible to create a single IntegrationPlatform which contains th
 
 The user can use an alternative approach using the Pipe (Connector) abstraction. With Pipe, he can provide a declarative connector-style approach, connecting an **Event Source** to an **Event Sink**. The source and sink can be any Kubernetes object reference that the operator can transform. The operator will be in charge to transform such a Pipe into an Integration and start the build and deployment process as described above.
 
-image::concepts/pipes.png[Camel connector lifecycle, width=1024]
+
+image::concepts/pipes.png[Camel connector lifecycle, width=640]
+
 
 **Pipe**: it is used to create the connector binding an event source to an event sink.
 
