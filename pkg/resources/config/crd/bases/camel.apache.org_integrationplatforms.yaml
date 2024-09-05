@@ -57,6 +57,10 @@ spec:
       jsonPath: .status.build.runtimeVersion
       name: Default runtime
       type: string
+    - description: The default Camel core version
+      jsonPath: .status.build.runtimeCoreVersion
+      name: Camel version
+      type: string
     name: v1
     schema:
       openAPIV3Schema:
@@ -416,6 +420,9 @@ spec:
                         description: the secret where credentials are stored
                         type: string
                     type: object
+                  runtimeCoreVersion:
+                    description: the Camel core version used by this IntegrationPlatform
+                    type: string
                   runtimeProvider:
                     description: the runtime used. Likely Camel Quarkus (we used to
                       have main runtime which has been discontinued since version
@@ -2506,6 +2513,9 @@ spec:
                         description: the secret where credentials are stored
                         type: string
                     type: object
+                  runtimeCoreVersion:
+                    description: the Camel core version used by this IntegrationPlatform
+                    type: string
                   runtimeProvider:
                     description: the runtime used. Likely Camel Quarkus (we used to
                       have main runtime which has been discontinued since version

@@ -121,6 +121,8 @@ func TestCreateCatalog(t *testing.T) {
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase, "Error", answer.Status.Conditions[0].Message)
 	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	// We don't know exactly which is the core version, it is enough to check is not empty in the test
+	assert.NotEqual(t, "", answer.Status.Build.RuntimeCoreVersion)
 
 	list := v1.NewCamelCatalogList()
 	err = c.List(context.TODO(), &list, k8sclient.InNamespace(ip.Namespace))
@@ -160,6 +162,9 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 	catalog := v1.NewCamelCatalog("ns", fmt.Sprintf("camel-catalog-%s", defaults.DefaultRuntimeVersion))
 	catalog.Spec.Runtime.Version = defaults.DefaultRuntimeVersion
 	catalog.Spec.Runtime.Provider = v1.RuntimeProviderQuarkus
+	catalog.Spec.Runtime.Metadata = map[string]string{
+		"camel.version": "4.4.0",
+	}
 
 	c, err := test.NewFakeClient(&ip, &catalog)
 	require.NoError(t, err)
@@ -176,6 +181,7 @@ func TestCatalogAlreadyPresent(t *testing.T) {
 	assert.NotNil(t, answer)
 
 	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
+	assert.Equal(t, "4.4.0", answer.Status.Build.RuntimeCoreVersion)
 	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
 }
 

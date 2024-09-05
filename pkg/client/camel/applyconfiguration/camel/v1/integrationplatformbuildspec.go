@@ -31,6 +31,7 @@ type IntegrationPlatformBuildSpecApplyConfiguration struct {
 	PublishStrategy         *camelv1.IntegrationPlatformBuildPublishStrategy `json:"publishStrategy,omitempty"`
 	RuntimeVersion          *string                                          `json:"runtimeVersion,omitempty"`
 	RuntimeProvider         *camelv1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
+	RuntimeCoreVersion      *string                                          `json:"runtimeCoreVersion,omitempty"`
 	BaseImage               *string                                          `json:"baseImage,omitempty"`
 	Registry                *RegistrySpecApplyConfiguration                  `json:"registry,omitempty"`
 	BuildCatalogToolTimeout *metav1.Duration                                 `json:"buildCatalogToolTimeout,omitempty"`
@@ -75,6 +76,14 @@ func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithRuntimeVersion(valu
 // If called multiple times, the RuntimeProvider field is set to the value of the last call.
 func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithRuntimeProvider(value camelv1.RuntimeProvider) *IntegrationPlatformBuildSpecApplyConfiguration {
 	b.RuntimeProvider = &value
+	return b
+}
+
+// WithRuntimeCoreVersion sets the RuntimeCoreVersion field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the RuntimeCoreVersion field is set to the value of the last call.
+func (b *IntegrationPlatformBuildSpecApplyConfiguration) WithRuntimeCoreVersion(value string) *IntegrationPlatformBuildSpecApplyConfiguration {
+	b.RuntimeCoreVersion = &value
 	return b
 }
 

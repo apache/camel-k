@@ -2830,6 +2830,13 @@ the Camel K Runtime dependency version
 
 the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
 
+|`runtimeCoreVersion` +
+string
+|
+
+
+the Camel core version used by this IntegrationPlatform
+
 |`baseImage` +
 string
 |
