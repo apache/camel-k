@@ -29,6 +29,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
@@ -595,7 +596,13 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 			ClaimName: storageName,
 		}
 	case emptyDirStorageType:
-		volume.VolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{}
+		size, err := resource.ParseQuantity("1Gi")
+		if err != nil {
+			log.WithValues("Function", "trait.getVolume").Errorf(err, "could not parse empty dir quantity, skipping")
+		}
+		volume.VolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{
+			SizeLimit: &size,
+		}
 	}
 
 	return &volume
