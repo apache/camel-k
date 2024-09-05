@@ -4,13 +4,15 @@
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
 
-**Closed issues:**
-
-- Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
-
 **Merged pull requests:**
 
+- feat\(api\): expose Camel core version [\#5825](https://github.com/apache/camel-k/pull/5825) ([squakez](https://github.com/squakez))
+- chore\(doc\): minor adjustments [\#5824](https://github.com/apache/camel-k/pull/5824) ([squakez](https://github.com/squakez))
+- chore\(deps\): bump golang.org/x/oauth2 from 0.22.0 to 0.23.0 [\#5823](https://github.com/apache/camel-k/pull/5823) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/text from 0.17.0 to 0.18.0 [\#5822](https://github.com/apache/camel-k/pull/5822) ([dependabot[bot]](https://github.com/apps/dependabot))
+- chore\(deps\): bump golang.org/x/term from 0.23.0 to 0.24.0 [\#5821](https://github.com/apache/camel-k/pull/5821) ([dependabot[bot]](https://github.com/apps/dependabot))
 - fix\(ci\): website build [\#5820](https://github.com/apache/camel-k/pull/5820) ([squakez](https://github.com/squakez))
+- chore\(helm\): deprecate installation with platform [\#5819](https://github.com/apache/camel-k/pull/5819) ([squakez](https://github.com/squakez))
 - doc: polish documentation [\#5818](https://github.com/apache/camel-k/pull/5818) ([squakez](https://github.com/squakez))
 - chore\(deps\): bump knative.dev/eventing from 0.40.3 to 0.42.1 [\#5817](https://github.com/apache/camel-k/pull/5817) ([dependabot[bot]](https://github.com/apps/dependabot))
 - chore\(deps\): bump github.com/prometheus/common from 0.57.0 to 0.58.0 [\#5815](https://github.com/apache/camel-k/pull/5815) ([dependabot[bot]](https://github.com/apps/dependabot))
@@ -43,7 +45,7 @@
 - chore\(deps\): bump github.com/container-tools/spectrum from 0.6.57 to 0.6.58 [\#5774](https://github.com/apache/camel-k/pull/5774) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bugfix/5758 incremental image build fix [\#5772](https://github.com/apache/camel-k/pull/5772) ([lsergio](https://github.com/lsergio))
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-04)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-05)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -54,6 +56,7 @@
 - Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
 - Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+- Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
 - Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 - Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
