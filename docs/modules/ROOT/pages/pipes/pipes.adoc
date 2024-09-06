@@ -104,8 +104,8 @@ spec:
 Another typical use case is consume/produce events directly from a KafkaTopic custom resource (managed by Strimzi operator) or Knative resources:
 
 ```yaml
-apiVersion: camel.apache.org/v1alpha1
-kind: KameletBinding
+apiVersion: camel.apache.org/v1
+kind: Pipe
 metadata:
   name: beer-event-source
 spec:
