@@ -1,14 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-04)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-05)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -19,6 +11,7 @@
 - Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
 - Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+- Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
 - Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 - Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
