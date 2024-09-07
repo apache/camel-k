@@ -19,24 +19,15 @@ package install
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io/fs"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
-	"sync/atomic"
 
 	"golang.org/x/sync/errgroup"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 
@@ -44,19 +35,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/patch"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 const (
 	kameletDirEnv     = "KAMELET_CATALOG_DIR"
 	defaultKameletDir = "/kamelets/"
-)
-
-var (
-	log = logf.Log
-
-	hasServerSideApply atomic.Value
-	tryServerSideApply sync.Once
 )
 
 // KameletCatalog installs the bundled Kamelets into the specified namespace.
@@ -76,6 +60,7 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 	}
 
 	g, gCtx := errgroup.WithContext(ctx)
+	applier := c.ServerOrClientSideApplier()
 
 	err = filepath.WalkDir(kameletDir, func(p string, f fs.DirEntry, err error) error {
 		if err != nil {
@@ -93,38 +78,10 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 			if err != nil {
 				return err
 			}
-			once := false
-			tryServerSideApply.Do(func() {
-				once = true
-				if err = serverSideApply(gCtx, c, kamelet); err != nil {
-					if isIncompatibleServerError(err) {
-						log.Info("Fallback to client-side apply for installing bundled Kamelets")
-						hasServerSideApply.Store(false)
-						err = nil
-					} else {
-						// Unexpected error occurred
-						err = fmt.Errorf("unexpected error occurred whilst validating kamelet: %w", err)
-						log.Error(err, "Error occurred whilst loading kamelets")
-					}
-				} else {
-					hasServerSideApply.Store(true)
-				}
-			})
-			if err != nil {
-				return err
-			}
-			v := hasServerSideApply.Load()
-			var bundleKamError error
-			if vb, ok := v.(bool); ok && vb {
-				if !once {
-					bundleKamError = serverSideApply(gCtx, c, kamelet)
-				}
-			} else {
-				bundleKamError = clientSideApply(gCtx, c, kamelet)
-			}
+			err = applier.Apply(gCtx, kamelet)
 			// We only log the error. If we returned the error, the creation of the ITP would have stopped
-			if bundleKamError != nil {
-				log.Error(bundleKamError, "Error occurred whilst applying bundled kamelet")
+			if err != nil {
+				log.Error(err, "Error occurred whilst applying bundled kamelet")
 			}
 			return nil
 		})
@@ -135,43 +92,6 @@ func KameletCatalog(ctx context.Context, c client.Client, namespace string) erro
 	}
 
 	return g.Wait()
-}
-
-func serverSideApply(ctx context.Context, c client.Client, resource runtime.Object) error {
-	target, err := patch.ApplyPatch(resource)
-	if err != nil {
-		return err
-	}
-	return c.Patch(ctx, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator"))
-}
-
-func clientSideApply(ctx context.Context, c client.Client, resource ctrl.Object) error {
-	if err := c.Create(ctx, resource); err == nil {
-		return nil
-	} else if !k8serrors.IsAlreadyExists(err) {
-		return fmt.Errorf("error during create resource: %s/%s: %w", resource.GetNamespace(), resource.GetName(), err)
-	}
-	// Directly use the serialized resource as JSON merge patch since it's prescriptive
-	p, err := json.Marshal(resource)
-	if err != nil {
-		return err
-	}
-	return c.Patch(ctx, resource, ctrl.RawPatch(types.MergePatchType, p))
-}
-
-func isIncompatibleServerError(err error) bool {
-	// First simpler check for older servers (i.e. OpenShift 3.11)
-	if strings.Contains(err.Error(), "415: Unsupported Media Type") {
-		return true
-	}
-	// 415: Unsupported media type means we're talking to a server which doesn't
-	// support server-side apply.
-	var serr *k8serrors.StatusError
-	if errors.As(err, &serr) {
-		return serr.Status().Code == http.StatusUnsupportedMediaType
-	}
-	// Non-StatusError means the error isn't because the server is incompatible.
-	return false
 }
 
 func loadKamelet(path string, namespace string) (ctrl.Object, error) {
@@ -212,8 +132,5 @@ func loadKamelet(path string, namespace string) (ctrl.Object, error) {
 
 // KameletViewerRole installs the role that allows any user ro access kamelets in the global namespace.
 func KameletViewerRole(ctx context.Context, c client.Client, namespace string) error {
-	if err := Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/resources/viewer/user-global-kamelet-viewer-role.yaml"); err != nil {
-		return err
-	}
 	return Resource(ctx, c, namespace, true, IdentityResourceCustomizer, "/resources/viewer/user-global-kamelet-viewer-role-binding.yaml")
 }
