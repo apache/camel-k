@@ -924,6 +924,7 @@ spec:
                         type: string
                       useSSA:
                         description: |-
+                          Deprecated: won't be able to enforce client side update in the future.
                           Use server-side apply to update the owned resources (default `true`).
                           Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
                         type: boolean
@@ -3065,6 +3066,7 @@ spec:
                         type: string
                       useSSA:
                         description: |-
+                          Deprecated: won't be able to enforce client side update in the future.
                           Use server-side apply to update the owned resources (default `true`).
                           Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
                         type: boolean
