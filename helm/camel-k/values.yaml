@@ -23,7 +23,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 operator:
-  image: docker.io/apache/camel-k:2.3.0-SNAPSHOT
+  image: docker.io/apache/camel-k:2.5.0-SNAPSHOT
   global: "false"
   resources: {}
   securityContext: {}
@@ -45,9 +45,3 @@ operator:
 
   # Default operator name
   operatorId: camel-k
-
-
-platform:
-  build:
-    registry: {}
-  cluster: ""

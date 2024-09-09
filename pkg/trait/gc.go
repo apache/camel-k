@@ -20,6 +20,7 @@ package trait
 import (
 	"context"
 	"fmt"
+	"maps"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,7 +28,12 @@ import (
 
 	"golang.org/x/time/rate"
 
+	appsv1 "k8s.io/api/apps/v1"
 	authorization "k8s.io/api/authorization/v1"
+	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,19 +41,57 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/discovery"
-	"k8s.io/utils/pointer"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 var (
-	lock            sync.Mutex
-	rateLimiter     = rate.NewLimiter(rate.Every(time.Minute), 1)
-	collectableGVKs = make(map[schema.GroupVersionKind]struct{})
+	lock                  sync.Mutex
+	rateLimiter           = rate.NewLimiter(rate.Every(time.Minute), 1)
+	collectableGVKs       = make(map[schema.GroupVersionKind]struct{})
+	defaultDeletableTypes = map[schema.GroupVersionKind]struct{}{
+		{
+			Kind:    "ConfigMap",
+			Group:   corev1.SchemeGroupVersion.Group,
+			Version: corev1.SchemeGroupVersion.Version,
+		}: {},
+		{
+			Kind:    "Deployment",
+			Group:   appsv1.SchemeGroupVersion.Group,
+			Version: appsv1.SchemeGroupVersion.Version,
+		}: {},
+		{
+			Kind:    "Secret",
+			Group:   corev1.SchemeGroupVersion.Group,
+			Version: corev1.SchemeGroupVersion.Version,
+		}: {},
+		{
+			Kind:    "Service",
+			Group:   corev1.SchemeGroupVersion.Group,
+			Version: corev1.SchemeGroupVersion.Version,
+		}: {},
+		{
+			Kind:    "CronJob",
+			Group:   batchv1.SchemeGroupVersion.Group,
+			Version: batchv1.SchemeGroupVersion.Version,
+		}: {},
+		{
+			Kind:    "Job",
+			Group:   batchv1.SchemeGroupVersion.Group,
+			Version: batchv1.SchemeGroupVersion.Version,
+		}: {},
+	}
+)
+
+const (
+	gcTraitID    = "gc"
+	gcTraitOrder = 1200
 )
 
 type gcTrait struct {
@@ -57,7 +101,7 @@ type gcTrait struct {
 
 func newGCTrait() Trait {
 	return &gcTrait{
-		BaseTrait: NewBaseTrait("gc", 1200),
+		BaseTrait: NewBaseTrait(gcTraitID, gcTraitOrder),
 	}
 }
 
@@ -65,15 +109,15 @@ func (t *gcTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+	if !ptr.Deref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled("GC"), nil
 	}
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *gcTrait) Apply(e *Environment) error {
-	if e.IntegrationInRunningPhases() && e.Integration.GetGeneration() > 1 {
+	if e.Integration.GetGeneration() > 1 {
 		// Register a post action that deletes the existing resources that are labelled
 		// with the previous integration generation(s).
 		// We make the assumption generation is a monotonically increasing strictly positive integer,
@@ -88,12 +132,12 @@ func (t *gcTrait) Apply(e *Environment) error {
 	e.PostProcessors = append(e.PostProcessors, func(env *Environment) error {
 		generation := strconv.FormatInt(env.Integration.GetGeneration(), 10)
 		env.Resources.VisitMetaObject(func(resource metav1.Object) {
-			labels := resource.GetLabels()
+			resourceLabels := resource.GetLabels()
 			// Label the resource with the current integration generation
-			labels["camel.apache.org/generation"] = generation
+			resourceLabels[v1.IntegrationGenerationLabel] = generation
 			// Make sure the integration label is set
-			labels[v1.IntegrationLabel] = env.Integration.Name
-			resource.SetLabels(labels)
+			resourceLabels[v1.IntegrationLabel] = env.Integration.Name
+			resource.SetLabels(resourceLabels)
 		})
 		return nil
 	})
@@ -107,8 +151,36 @@ func (t *gcTrait) garbageCollectResources(e *Environment) error {
 		return fmt.Errorf("cannot discover GVK types: %w", err)
 	}
 
+	profile := e.DetermineProfile()
+	deletableTypesByProfile := map[schema.GroupVersionKind]struct{}{}
+
+	if profile == v1.TraitProfileKnative {
+		if ok, _ := knative.IsServingInstalled(e.Client); ok {
+			deletableTypesByProfile[schema.GroupVersionKind{
+				Kind:    "Service",
+				Group:   "serving.knative.dev",
+				Version: "v1",
+			}] = struct{}{}
+		}
+
+		if ok, _ := knative.IsEventingInstalled(e.Client); ok {
+			deletableTypesByProfile[schema.GroupVersionKind{
+				Kind:    "Trigger",
+				Group:   "eventing.knative.dev",
+				Version: "v1",
+			}] = struct{}{}
+		}
+	}
+
+	// copy profile related deletable types if not already present
+	for key, value := range deletableTypesByProfile {
+		if _, found := deletableGVKs[key]; !found {
+			deletableGVKs[key] = value
+		}
+	}
+
 	integration, _ := labels.NewRequirement(v1.IntegrationLabel, selection.Equals, []string{e.Integration.Name})
-	generation, err := labels.NewRequirement("camel.apache.org/generation", selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
+	generation, err := labels.NewRequirement(v1.IntegrationGenerationLabel, selection.LessThan, []string{strconv.FormatInt(e.Integration.GetGeneration(), 10)})
 	if err != nil {
 		return fmt.Errorf("cannot determine generation requirement: %w", err)
 	}
@@ -172,10 +244,14 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 	lock.Lock()
 	defer lock.Unlock()
 
+	// Return a fresh map even when returning cached collectables
+	GVKs := make(map[schema.GroupVersionKind]struct{})
+
 	// Rate limit to avoid Discovery and SelfSubjectRulesReview requests at every reconciliation.
 	if !rateLimiter.Allow() {
 		// Return the cached set of garbage collectable GVKs.
-		return collectableGVKs, nil
+		maps.Copy(GVKs, collectableGVKs)
+		return GVKs, nil
 	}
 
 	// We rely on the discovery API to retrieve all the resources GVK,
@@ -204,7 +280,6 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 		return nil, err
 	}
 
-	GVKs := make(map[schema.GroupVersionKind]struct{})
 	for _, APIResourceList := range APIResourceLists {
 		for _, resource := range APIResourceList.APIResources {
 			resourceGroup := resource.Group
@@ -233,7 +308,21 @@ func (t *gcTrait) getDeletableTypes(e *Environment) (map[schema.GroupVersionKind
 			}
 		}
 	}
-	collectableGVKs = GVKs
 
-	return collectableGVKs, nil
+	if len(GVKs) == 0 {
+		// Auto discovery of deletable types has no results (probably an error)
+		// Make sure to at least use a minimal set of deletable types for garbage collection
+		t.L.ForIntegration(e.Integration).Debugf("Auto discovery of deletable types returned no results. " +
+			"Using default minimal set of deletable types for garbage collection")
+		maps.Copy(GVKs, defaultDeletableTypes)
+	}
+
+	collectableGVKs = make(map[schema.GroupVersionKind]struct{})
+	maps.Copy(collectableGVKs, GVKs)
+
+	for gvk := range GVKs {
+		log.Debugf("Found deletable type: %s", gvk.String())
+	}
+
+	return GVKs, nil
 }

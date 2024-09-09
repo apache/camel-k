@@ -19,6 +19,7 @@ package trait
 
 import (
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // The Deployment trait is responsible for generating the Kubernetes deployment that will make sure
@@ -38,12 +39,12 @@ type DeploymentTrait struct {
 	// Absolute number is calculated from percentage by rounding down.
 	// This can not be 0 if MaxSurge is 0.
 	// Defaults to `25%`.
-	RollingUpdateMaxUnavailable *int `property:"rolling-update-max-unavailable" json:"rollingUpdateMaxUnavailable,omitempty"`
+	RollingUpdateMaxUnavailable *intstr.IntOrString `property:"rolling-update-max-unavailable" json:"rollingUpdateMaxUnavailable,omitempty"`
 	// The maximum number of pods that can be scheduled above the desired number of
 	// pods.
 	// Value can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
 	// This can not be 0 if MaxUnavailable is 0.
 	// Absolute number is calculated from percentage by rounding up.
 	// Defaults to `25%`.
-	RollingUpdateMaxSurge *int `property:"rolling-update-max-surge" json:"rollingUpdateMaxSurge,omitempty"`
+	RollingUpdateMaxSurge *intstr.IntOrString `property:"rolling-update-max-surge" json:"rollingUpdateMaxSurge,omitempty"`
 }

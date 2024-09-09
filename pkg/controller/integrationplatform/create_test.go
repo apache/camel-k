@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/rs/xid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -40,27 +41,27 @@ func TestCreate(t *testing.T) {
 	ip.Spec.Profile = v1.TraitProfileOpenShift
 
 	c, err := test.NewFakeClient(&ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	err = platform.ConfigureDefaults(context.TODO(), c, &ip, false)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	h := NewCreateAction()
 	h.InjectLogger(log.Log)
 	h.InjectClient(c)
 
 	answer, err := h.Handle(context.TODO(), &ip)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
 	list := v1.NewCamelCatalogList()
 	err = c.List(context.TODO(), &list, k8sclient.InNamespace(ip.Namespace))
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, list.Items)
 
 	items, err := resources.WithPrefix("/resources/camel-catalog-")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	foundOverall := 0
 	for _, k := range items {

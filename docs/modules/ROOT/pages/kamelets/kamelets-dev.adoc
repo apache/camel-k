@@ -331,6 +331,52 @@ If everything goes right, you should get some tweets in the logs after the integ
 
 Refer to the xref:kamelets/kamelets-user.adoc[Kamelets User Guide] for more information on how to use it in different contexts (like Knative, Kafka, etc.).
 
+== Kamelet versions
+
+The catalog containing a set of Kamelets is generally developed in order to be used with a given Camel version (see the Apache Camel Kamelets catalog). However, when publishing the Kamelet to the cluster you may want to maintain more than one version for any reason (ie, to use a different dependency and be able to support multiple runtimes). You can therefore use the `.spec.versions` parameter to optionally maintain a set of alternative versions beside the main (and default) one.
+
+.my-timer-source.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: my-timer-source
+spec:
+  definition:
+    title: "Timer Example"
+  types:
+    out:
+      mediaType: text/plain
+  template:
+    from:
+      uri: timer:tick
+      steps:
+        - setBody:
+            constant: "Kamelet Main"
+        - to: "kamelet:sink"
+  versions:
+    v2:
+      definition:
+        title: "Timer Example 2"
+      types:
+        out:
+          mediaType: text/plain
+      template:
+        from:
+          uri: timer:tick
+          steps:
+            - setBody:
+                constant: "Kamelet V2"
+            - to: "kamelet:sink"
+----
+
+NOTE: make sure the overall content fits into 1 MiB, which is the storage limit for a Custom Resource.
+
+This is a way to handle multiple version on Kubernetes and may not be supported out of the box by Camel core. If the Integration will require specifically to use `kamelet:my-timer-source?kameletVersion=v2`, then, the operator will mount properly the specification on the running application.
+
+The `.spec.versions` field may not be necessarily supported by the core as it's meant to provide a way to handle versioning on the cluster only. The runtime must be provided with a materialized Kamelet file with the chosen spec (the operator is in charge of that).
+
 == Kamelet data types
 
 A Kamelet usually encapsulates a specific functionality and serves a very opinionated use case with well-defined input parameters and outcome.

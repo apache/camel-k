@@ -17,7 +17,8 @@
 # limitations under the License.
 #
 
-CW=./../../camel-website
+SCRIPT_DIR=$(dirname $0)
+CW=${SCRIPT_DIR}/../../camel-website
 LOCAL=./../camel-k
 
 cd $CW || (echo 'camel-website not in expected location $CW' && exit)

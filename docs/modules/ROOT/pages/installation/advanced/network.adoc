@@ -1,8 +1,6 @@
-= Network architecture
+= Components topology
 
 Camel K operator requires certain side technologies in order to perform the build and the deployment of a Camel application into the cloud. The operator itself can take care to build an application or delegate to a builder Pod. However, nothing change for the sake of this document. The operator is very fast in performing its tasks and when you experience some slower operation is typically due to the needs to access to external components/resources. In this document we want to highlight which are those components in order to help you tune them properly.
-
-== Components topology
 
 One of Camel K capabilities is to build a Camel application. As a Camel application (regardless its runtime) is a Java application, then, we require the presence of Maven as a technology to compile and package a Java application.
 
@@ -14,6 +12,17 @@ Most of these operations typically require the connection to the Internet as the
 
 image::architecture/camel-k-network.svg[Network architecture, width=800]
 
+[[registry]]
+== Container registry
+
+During installation procedure, you may have already familiarized with the concept of a container registry. This one may be a registry operated by the user in the same cluster, an external registry or the embedded registry which may be offered by certain Kubernetes distributions (ie, Openshift). Whichever is your configuration, it's important to know that when Camel K operator creates the container image, it may requires to access certain base images in public container registries such as `docker.io` or `quay.io`.
+
+In particular the access will be required when the operator build the builder container image (driven by the runtime catalog you'll be using) and when it builds the IntegrationKit container image from the base image.
+
+Also in this case, the longer the operator runs, the lower the need to access to the base images, since they will be already cached and the higher the possibility to use incremental image from other IntegrationKits created.
+
+NOTE: at the moment of writing, the default builder image we use is _quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-jdk-17_ and the default integration image is _eclipse-temurin:17_
+
 [[build]]
 == Build application with Maven
 
@@ -24,14 +33,3 @@ As you can see in the diagram, either you're using a Maven proxy or you're runni
 If the dependencies are stored in the local disk of the operator (or an IntegrationKit is already available to be used), then, no access to the Internet will be required. As a natural consequence, the longer the operator runs, the less it will need to access the Internet. A particular case is when you use the builder Pod strategy, in which case, it will require to download all dependencies from scratch. Similar situation when the operator Pod is restarted.
 
 We suggest you to check the xref:installation/advanced/maven.adoc[Maven configuration] page which contains all the details required to fine tune the build phase.
-
-[[registry]]
-== Container registry
-
-The other required component for Camel K to run properly is the availability of a container registry. This one may be a registry operated by the user in the same cluster, an external registry or the embedded registry which may be offered by certain Kubernetes distributions (ie, Openshift). Whichever is your configuration, it's important to know that when Camel K operator creates the container image, it may requires to access certain base images in public container registries such as docker.io or quay.io.
-
-In particular the access will be required when the operator build the builder container image (driven by the runtime catalog you'll be using) and when it builds the IntegrationKit container image from the base image.
-
-Also in this case, the longer the operator runs, the lower the need to access to the base images, since they will be already cached and the higher the possibility to use incremental image from other IntegrationKits created.
-
-NOTE: at the moment of writing, the default builder image we use is _quay.io/quarkus/ubi-quarkus-mandrel-builder-image:23.0-jdk-17_ and the default integration image is _eclipse-temurin:17_

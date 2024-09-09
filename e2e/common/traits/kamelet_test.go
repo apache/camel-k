@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -33,35 +34,51 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestKameletTrait(t *testing.T) {
-	RegisterTestingT(t)
-
-	t.Run("discover kamelet capabilities", func(t *testing.T) {
-		template := map[string]interface{}{
-			"from": map[string]interface{}{
-				"uri": "platform-http:///webhook",
-				"steps": []map[string]interface{}{
-					{
-						"to": "kamelet:sink",
+func TestKameletDiscoverCapabilities(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("discover kamelet capabilities", func(t *testing.T) {
+			template := map[string]interface{}{
+				"from": map[string]interface{}{
+					"uri": "platform-http:///webhook",
+					"steps": []map[string]interface{}{
+						{
+							"to": "kamelet:sink",
+						},
 					},
 				},
-			},
-		}
-		Expect(CreateKamelet(ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
+			}
+			g.Expect(CreateKamelet(t, ctx, ns, "capabilities-webhook-source", template, nil, nil)()).To(Succeed())
 
-		name := RandomizedSuffixName("webhook")
-		Expect(KamelRunWithID(operatorID, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Started capabilities-webhook-source-1 (platform-http:///webhook)"))
-		// Verify Integration capabilities
-		Eventually(IntegrationStatusCapabilities(ns, name), TestTimeoutShort).Should(ContainElements("platform-http"))
-		// Verify expected resources from Kamelet (Service in this case)
-		service := Service(ns, name)
-		Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
+			name := RandomizedSuffixName("webhook")
+			g.Expect(KamelRun(t, ctx, ns, "files/webhook.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Started route1 (kamelet://capabilities-webhook-source)"))
+			// Verify Integration capabilities
+			g.Eventually(IntegrationStatusCapabilities(t, ctx, ns, name), TestTimeoutShort).Should(ContainElements("platform-http"))
+			// Verify expected resources from Kamelet (Service in this case)
+			service := Service(t, ctx, ns, name)
+			g.Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
+		})
 	})
+}
 
-	// Clean-up
-	Expect(DeleteKamelet(ns, "capabilities-webhook-source")).To(Succeed())
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+func TestKameletMultiVersions(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("multiple kamelet versions", func(t *testing.T) {
+			ExpectExecSucceed(t, g, Kubectl("apply", "-f", "files/my-timer-source.kamelet.yaml", "-n", ns))
+			name := RandomizedSuffixName("multiversions")
+			g.Expect(KamelRun(t, ctx, ns, "files/kamelet-it-main.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Kamelet Main"))
+			// Switch to Kamelet V1
+			g.Expect(KamelRun(t, ctx, ns, "files/kamelet-it-v1.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Kamelet V1"))
+		})
+	})
 }

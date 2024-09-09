@@ -15,10 +15,7 @@ The assigned operator will be responsible for the reconciliation of the annotate
 In detail, the Camel K operator supports the environment variable `OPERATOR_ID`. The value is an identifier that can be equal to any string (e.g. `OPERATOR_ID=operator-1`).
 Once the operator is assigned with an identifier, it will *only reconcile* Camel K custom resources that are assigned to that ID (unannotated resources will be ignored as well).
 
-By default, the Camel K operator is using the id `camel-k`. When installing many operators the instances must use a different operator id.
-(e.g. `kamel install --global --olm=false -n camel-ns-1 --operator-id=operator-2`).
-
-To assign a resource to a specific operator, the user can annotate it with `camel.apache.org/operator.id`. For example:
+By default, the Camel K operator is using the id `camel-k`. When installing many operators the instances must use a different operator id. To assign a resource to a specific operator, the user can annotate it with `camel.apache.org/operator.id`. For example:
 
 [source,yaml]
 ----
@@ -48,6 +45,15 @@ operator id:
 ----
 kubectl annotate integration timer-to-log camel.apache.org/operator.id=operator-2 --overwrite
 ----
+
+[[advanced-installation-caveat]]
+== Installation caveat
+
+In order to install more than one operator globally, you may need to change the ClusterRoleBindings to let more than one operator to have the RBAC set consistently. If you use a Kustomize installation approach, for example, you need to execute the following procedure to rename the roles and not conflicting between each other:
+
+```
+cd /install/base/config/rbac/descoped && kustomize edit set namesuffix -- -$OPERATOR_ID
+```
 
 [[advanced-installation-integration-profile]]
 == Apply custom IntegrationProfile settings

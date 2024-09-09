@@ -23,18 +23,21 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
 )
 
 const (
-	knativeServiceTraitID = "knative-service"
+	knativeServiceTraitID               = "knative-service"
+	knativeServiceTraitOrder            = 1400
+	knativeServiceStrategySelectorOrder = 100
 
 	// Auto-scaling annotations.
 	knativeServingClassAnnotation    = "autoscaling.knative.dev/class"
@@ -57,7 +60,7 @@ var _ ControllerStrategySelector = &knativeServiceTrait{}
 
 func newKnativeServiceTrait() Trait {
 	return &knativeServiceTrait{
-		BaseTrait: NewBaseTrait(knativeServiceTraitID, 1400),
+		BaseTrait: NewBaseTrait(knativeServiceTraitID, knativeServiceTraitOrder),
 		KnativeServiceTrait: traitv1.KnativeServiceTrait{
 			Annotations: map[string]string{},
 		},
@@ -73,8 +76,9 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
@@ -89,6 +93,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	if e.Resources.GetDeploymentForIntegration(e.Integration) != nil {
 		// A controller is already present for the integration
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
@@ -99,6 +104,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
@@ -107,6 +113,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	}
 	if strategy != ControllerStrategyKnativeService {
 		return false, NewIntegrationCondition(
+			"KnativeService",
 			v1.IntegrationConditionKnativeServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionKnativeServiceNotAvailableReason,
@@ -140,30 +147,42 @@ func (t *knativeServiceTrait) Apply(e *Environment) error {
 }
 
 func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*ControllerStrategy, error) {
-	if !pointer.BoolDeref(t.Enabled, true) {
-		// explicitly disabled
+	if !ptr.Deref(t.Enabled, true) {
+		// explicitly disabled by the user
+		return nil, nil
+	}
+	// Knative serving is required
+	if ok, _ := knative.IsServingInstalled(e.Client); !ok {
+		if ptr.Deref(t.Enabled, false) {
+			// Warn the user that he requested a feature but it cannot be fulfilled due to missing
+			// API installation
+			return nil, fmt.Errorf("missing Knative Service API, cannot enable Knative service trait")
+		}
+		// Fallback to other strategies otherwise
 		return nil, nil
 	}
 
-	var sources []v1.SourceSpec
-	var err error
-	if sources, err = kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources); err != nil {
-		return nil, err
+	controllerStrategy := ControllerStrategyKnativeService
+	if ptr.Deref(t.Enabled, false) {
+		return &controllerStrategy, nil
 	}
 
-	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	enabled, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		return meta.ExposesHTTPServices || meta.PassiveEndpoints
+	})
 	if err != nil {
 		return nil, err
 	}
-	if meta.ExposesHTTPServices || meta.PassiveEndpoints {
-		knativeServiceStrategy := ControllerStrategyKnativeService
-		return &knativeServiceStrategy, nil
+	if enabled {
+		controllerStrategy := ControllerStrategyKnativeService
+		return &controllerStrategy, nil
 	}
+
 	return nil, nil
 }
 
 func (t *knativeServiceTrait) ControllerStrategySelectorOrder() int {
-	return 100
+	return knativeServiceStrategySelectorOrder
 }
 
 func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, error) {
@@ -215,7 +234,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		// See:
 		// - https://knative.dev/v1.3-docs/eventing/custom-event-source/sinkbinding/create-a-sinkbinding/#optional-choose-sinkbinding-namespace-selection-behavior
 		// - https://github.com/knative/operator/blob/release-1.2/docs/configuration.md#specsinkbindingselectionmode
-		"bindings.knative.dev/include": "true",
+		"bindings.knative.dev/include": boolean.TrueString,
 	}
 	if t.Visibility != "" {
 		serviceLabels[knativeServingVisibilityLabel] = t.Visibility
@@ -251,6 +270,9 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		},
 	}
 
+	if t.TimeoutSeconds != nil {
+		svc.Spec.ConfigurationSpec.Template.Spec.TimeoutSeconds = t.TimeoutSeconds
+	}
 	replicas := e.Integration.Spec.Replicas
 
 	isUpdateRequired := false
@@ -280,6 +302,7 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 		isUpdateRequired = true
 	}
 
+	//nolint:nestif
 	if isUpdateRequired {
 		if replicas == nil {
 			if t.MinScale != nil && *t.MinScale > 0 {

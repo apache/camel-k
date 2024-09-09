@@ -20,6 +20,7 @@ package integrationplatform
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
@@ -46,6 +47,7 @@ func (action *monitorAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady || platform.Status.Phase == v1.IntegrationPlatformPhaseError
 }
 
+//nolint:nestif
 func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
 	// Just track the version of the operator in the platform resource
 	if platform.Status.Version != defaults.Version {
@@ -53,6 +55,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 		action.L.Info("IntegrationPlatform version updated", "version", platform.Status.Version)
 	}
 
+	// TODO: refactor the phase transition as it is hard to reason
 	platformPhase := v1.IntegrationPlatformPhaseReady
 
 	// Refresh applied configuration
@@ -118,10 +121,33 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 				corev1.ConditionTrue,
 				v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
 				fmt.Sprintf("camel catalog %s available", runtimeSpec.Version))
+			platform.Status.Build.RuntimeCoreVersion = catalog.Runtime.Metadata["camel.version"]
 		}
 	}
 
 	platform.Status.Phase = platformPhase
+	action.checkTraitAnnotationsDeprecatedNotice(platform)
 
 	return platform, nil
+}
+
+// Deprecated: to be removed in future versions, when we won't support any longer trait annotations into IntegrationPlatforms.
+func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(platform *v1.IntegrationPlatform) {
+	if platform.Annotations != nil {
+		for k := range platform.Annotations {
+			if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+				platform.Status.SetCondition(
+					v1.IntegrationPlatformConditionType("AnnotationTraitsDeprecated"),
+					corev1.ConditionTrue,
+					"DeprecationNotice",
+					"Annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration instead.",
+				)
+				action.L.Infof(
+					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s platform instead.",
+					platform.Name,
+				)
+				return
+			}
+		}
+	}
 }

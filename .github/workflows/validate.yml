@@ -22,18 +22,24 @@ on:
     branches:
       - main
       - "release-*"
-    paths:
-      - 'pkg/**'
-      - 'cmd/**'
-      - 'addons/**'
+    paths-ignore:
+      - 'proposals/**'
+      - '**.adoc'
+      - '**.md'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
   push:
     branches:
       - main
       - "release-*"
-    paths:
-      - 'pkg/**'
-      - 'cmd/**'
-      - 'addons/**'
+    paths-ignore:
+      - 'proposals/**'
+      - '**.md'
+      - '**.adoc'
+      - 'KEYS'
+      - 'LICENSE'
+      - 'NOTICE'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -50,10 +56,11 @@ jobs:
         with:
           go-version-file: 'go.mod'
           check-latest: true
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        env:
-          GOGC: 20
-        with:
-          version: v1.53.3
-          args: --verbose --deadline 15m --config .golangci.yml
+      - name: lint
+        shell: bash
+        run: |
+          make lint
+      - name: licenses
+        shell: bash
+        run: |
+          make check-licenses

@@ -38,7 +38,7 @@ func newCmdReset(rootCmdOptions *RootCmdOptions) (*cobra.Command, *resetCmdOptio
 		Use:     "reset",
 		Short:   "Reset the Camel K installation",
 		Long:    `Reset the Camel K installation by deleting everything except current integration profile.`,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		Run:     options.reset,
 	}
 
@@ -171,7 +171,7 @@ func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
 	if len(list.Items) > 1 {
 		return fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
 	} else if len(list.Items) == 0 {
-		return errors.New("no integration platforms found in the namespace: run \"kamel install\" to install the platform")
+		return errors.New("no integration platforms found in the namespace")
 	}
 	platform := list.Items[0]
 	// Let's reset the status

@@ -23,10 +23,15 @@ import (
 	policyv1 "k8s.io/api/policy/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+)
+
+const (
+	pdbTraitID    = "pdb"
+	pdbTraitOrder = 900
 )
 
 type pdbTrait struct {
@@ -36,12 +41,12 @@ type pdbTrait struct {
 
 func newPdbTrait() Trait {
 	return &pdbTrait{
-		BaseTrait: NewBaseTrait("pdb", 900),
+		BaseTrait: NewBaseTrait(pdbTraitID, pdbTraitOrder),
 	}
 }
 
 func (t *pdbTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 

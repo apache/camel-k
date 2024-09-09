@@ -64,7 +64,7 @@ type Task interface {
 type Step interface {
 	ID() string
 	Phase() int32
-	execute(*builderContext) error
+	execute(context *builderContext) error
 }
 
 type resource struct {
@@ -72,7 +72,7 @@ type resource struct {
 	Content []byte
 }
 
-// nolint: containedctx
+//nolint:containedctx
 type builderContext struct {
 	client.Client
 	C                 context.Context

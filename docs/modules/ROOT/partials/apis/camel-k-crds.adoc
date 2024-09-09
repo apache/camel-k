@@ -23,7 +23,7 @@ string
 string
 |`Build`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -65,7 +65,7 @@ string
 string
 |`CamelCatalog`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -107,7 +107,7 @@ string
 string
 |`Integration`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -152,7 +152,7 @@ string
 string
 |`IntegrationKit`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -197,7 +197,7 @@ string
 string
 |`IntegrationPlatform`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -240,7 +240,7 @@ string
 string
 |`IntegrationProfile`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -282,7 +282,7 @@ string
 string
 |`Kamelet`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -325,7 +325,7 @@ string
 string
 |`Pipe`
 |`metadata` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta[Kubernetes meta/v1.ObjectMeta]*
 |
 
 
@@ -525,21 +525,21 @@ BuildCondition describes the state of a resource at a certain point.
 Type of integration condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -658,6 +658,13 @@ map[string]string
 
 Annotation to use for the builder pod. Only used for `pod` strategy
 
+|`platforms` +
+[]string
+|
+
+
+The list of platforms used in order to build a container image.
+
 
 |===
 
@@ -728,7 +735,7 @@ The namespace where to run the builder Pod (must be the same of the operator in 
 Deprecated: no longer in use in Camel K 2 - maintained for backward compatibility
 
 |`timeout` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
 
 
@@ -826,7 +833,7 @@ the error description (if any)
 the reason of the failure (if any)
 
 |`startedAt` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -871,6 +878,7 @@ will take care of producing the expected Camel/Camel-Quarkus runtime.
 * <<#_camel_apache_org_v1_Task, Task>>
 
 BuildahTask is used to configure Buildah.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===
@@ -1132,21 +1140,21 @@ CamelCatalogCondition describes the state of a resource at a certain point.
 Type of CamelCatalog condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -1317,6 +1325,37 @@ the metadata of the loader
 
 |===
 
+[#_camel_apache_org_v1_CamelProperty]
+=== CamelProperty
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Capability, Capability>>
+
+CamelProperty represents a Camel property that may end up in an application.properties file.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`key` +
+string
+|
+
+
+
+
+|`value` +
+string
+|
+
+
+
+
+
+|===
+
 [#_camel_apache_org_v1_CamelScheme]
 === CamelScheme
 
@@ -1400,7 +1439,7 @@ list of dependencies needed for this scope
 
 * <<#_camel_apache_org_v1_RuntimeSpec, RuntimeSpec>>
 
-Capability is a particular feature which requires a well known set of dependencies
+Capability is a particular feature which requires a well known set of dependencies and other properties
 which are specified in the runtime catalog.
 
 [cols="2,2a",options="header"]
@@ -1410,6 +1449,59 @@ which are specified in the runtime catalog.
 
 |`dependencies` +
 *xref:#_camel_apache_org_v1_MavenArtifact[[\]MavenArtifact]*
+|
+
+
+List of required Maven dependencies
+
+|`runtimeProperties` +
+*xref:#_camel_apache_org_v1_CamelProperty[[\]CamelProperty]*
+|
+
+
+Set of required Camel runtime properties
+
+|`buildTimeProperties` +
+*xref:#_camel_apache_org_v1_CamelProperty[[\]CamelProperty]*
+|
+
+
+Set of required Camel build time properties
+
+|`metadata` +
+map[string]string
+|
+
+
+Set of generic metadata
+
+
+|===
+
+[#_camel_apache_org_v1_Catalog]
+=== Catalog
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
+
+Catalog represents the Camel Catalog runtime specification.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`version` +
+string
+|
+
+
+
+
+|`provider` +
+*xref:#_camel_apache_org_v1_RuntimeProvider[RuntimeProvider]*
 |
 
 
@@ -1664,7 +1756,7 @@ the expected schema for the data type
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 DataTypesSpec represents the specification for a set of data types.
 
@@ -1713,7 +1805,7 @@ Endpoint represents a source/sink external entity (could be any Kubernetes resou
 |Description
 
 |`ref` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
 
 
@@ -1913,7 +2005,7 @@ ErrorHandlerType a type of error handler (ie, sink).
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 EventTypeSpec represents a specification for an event type.
 Deprecated: In favor of using DataTypeSpec.
@@ -2025,7 +2117,7 @@ string
 a short text specifying the reason
 
 |`time` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -2070,7 +2162,7 @@ int
 maximum number of attempts
 
 |`attemptTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 *(Optional)*
 
@@ -2286,28 +2378,28 @@ IntegrationCondition describes the state of a resource at a certain point.
 Type of integration condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 Last time the condition transitioned from one status to another.
 
 |`firstTruthyTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -2369,21 +2461,21 @@ IntegrationKitCondition describes the state of a resource at a certain point.
 Type of integration condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -2494,6 +2586,13 @@ Maven repositories that can be used by the kit
 
 the sources to add at build time
 
+|`capabilities` +
+[]string
+|
+
+
+features offered by the IntegrationKit
+
 
 |===
 
@@ -2581,6 +2680,13 @@ the runtime version for which this kit was configured
 
 the runtime provider for which this kit was configured
 
+|`catalog` +
+*xref:#_camel_apache_org_v1_Catalog[Catalog]*
+|
+
+
+the catalog used to build/operate the IntegrationKit.
+
 |`platform` +
 string
 |
@@ -2602,13 +2708,6 @@ the Camel K operator version for which this kit was configured
 
 a list of conditions which happened for the events related the kit
 
-|`traits` +
-*xref:#_camel_apache_org_v1_IntegrationKitTraits[IntegrationKitTraits]*
-|
-
-
-generated traits executed by the kit
-
 
 |===
 
@@ -2618,7 +2717,6 @@ generated traits executed by the kit
 *Appears on:*
 
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
-* <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 
 IntegrationKitTraits defines traits assigned to an `IntegrationKit`.
 
@@ -2655,7 +2753,8 @@ NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the
 |
 
 
-The Registry trait sets up Maven to use the Image registry as a Maven repository.
+The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
+Deprecated: use jvm trait or read documentation.
 
 |`addons` +
 *xref:#_camel_apache_org_v1_AddonTrait[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.AddonTrait]*
@@ -2731,6 +2830,13 @@ the Camel K Runtime dependency version
 
 the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
 
+|`runtimeCoreVersion` +
+string
+|
+
+
+the Camel core version used by this IntegrationPlatform
+
 |`baseImage` +
 string
 |
@@ -2747,7 +2853,7 @@ It can be useful if you want to provide some custom base image with further util
 the image registry used to push/pull Integration images
 
 |`buildCatalogToolTimeout` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
 
 
@@ -2755,7 +2861,7 @@ the timeout (in seconds) to use when creating the build tools container image
 Deprecated: no longer in use
 
 |`timeout` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
 
 
@@ -2773,7 +2879,7 @@ map[string]string
 |
 
 
-Generic options that can used by any publish strategy
+Deprecated: no longer in use
 
 |`maxRunningBuilds` +
 int32
@@ -2817,21 +2923,21 @@ IntegrationPlatformCondition describes the state of a resource at a certain poin
 Type of integration condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -3068,7 +3174,7 @@ It can be useful if you want to provide some custom base image with further util
 the image registry used to push/pull Integration images
 
 |`timeout` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#duration-v1-meta[Kubernetes meta/v1.Duration]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta[Kubernetes meta/v1.Duration]*
 |
 
 
@@ -3106,21 +3212,21 @@ IntegrationProfileCondition describes the state of a resource at a certain point
 Type of integration condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -3309,7 +3415,7 @@ the sources which contain the Camel routes to run
 a source in YAML DSL language which contain the routes to run
 
 |`integrationKit` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
 
 
@@ -3428,7 +3534,7 @@ a list of dependencies needed by the application
 the profile needed to run this Integration
 
 |`integrationKit` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
 
 
@@ -3461,6 +3567,13 @@ the runtime version targeted for this Integration
 
 
 the runtime provider targeted for this Integration
+
+|`catalog` +
+*xref:#_camel_apache_org_v1_Catalog[Catalog]*
+|
+
+
+the catalog used to build/operate the Integration.
 
 |`configuration` +
 *xref:#_camel_apache_org_v1_ConfigurationSpec[[\]ConfigurationSpec]*
@@ -3505,15 +3618,8 @@ label selector
 
 features offered by the Integration
 
-|`traits` +
-*xref:#_camel_apache_org_v1_Traits[Traits]*
-|
-
-
-the traits generated and executed for this Integration
-
 |`lastInitTimestamp` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -3765,7 +3871,7 @@ XDescriptors is a list of extended properties that trigger a custom behavior in 
 
 * <<#_camel_apache_org_v1_DataTypeSpec, DataTypeSpec>>
 * <<#_camel_apache_org_v1_EventTypeSpec, EventTypeSpec>>
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 
@@ -3903,21 +4009,21 @@ KameletCondition describes the state of a resource at a certain point.
 Type of kamelet condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -4030,6 +4136,39 @@ KameletSpec specifies the configuration required to execute a Kamelet.
 |Field
 |Description
 
+|`KameletSpecBase` +
+*xref:#_camel_apache_org_v1_KameletSpecBase[KameletSpecBase]*
+|(Members of `KameletSpecBase` are embedded into this type.)
+
+
+
+
+|`versions` +
+*xref:#_camel_apache_org_v1_KameletSpecBase[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.KameletSpecBase]*
+|
+
+
+the optional versions available for this Kamelet. This field may not be taken in account by Camel core and is meant to support
+any user defined versioning model on cluster only. If the user wants to use any given version, she must materialize a file with the given version spec
+as the `main` Kamelet spec on the runtime.
+
+
+|===
+
+[#_camel_apache_org_v1_KameletSpecBase]
+=== KameletSpecBase
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+
+KameletSpecBase specifies the base configuration of a Kamelet.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
 |`definition` +
 *xref:#_camel_apache_org_v1_JSONSchemaProps[JSONSchemaProps]*
 |
@@ -4129,6 +4268,7 @@ Properties --
 * <<#_camel_apache_org_v1_Task, Task>>
 
 KanikoTask is used to configure Kaniko.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===
@@ -4181,6 +4321,7 @@ docker image to use
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
 
 KanikoTaskCache is used to configure Kaniko cache.
+Deprecated: no longer in use.
 
 [cols="2,2a",options="header"]
 |===
@@ -4363,7 +4504,7 @@ A reference to the ConfigMap or Secret key that contains
 the security of the Maven settings.
 
 |`caSecrets` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#secretkeyselector-v1-core[[\]Kubernetes core/v1.SecretKeySelector]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core[[\]Kubernetes core/v1.SecretKeySelector]*
 |
 
 
@@ -4485,21 +4626,21 @@ PipeCondition describes the state of a resource at a certain point.
 Type of pipe condition.
 
 |`status` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#conditionstatus-v1-core[Kubernetes core/v1.ConditionStatus]*
 |
 
 
 Status of the condition, one of True, False, Unknown.
 
 |`lastUpdateTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
 The last time this condition was updated.
 
 |`lastTransitionTime` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#time-v1-meta[Kubernetes meta/v1.Time]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#time-v1-meta[Kubernetes meta/v1.Time]*
 |
 
 
@@ -4824,7 +4965,7 @@ string
 
 
 |`condition` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#podcondition-v1-core[Kubernetes core/v1.PodCondition]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podcondition-v1-core[Kubernetes core/v1.PodCondition]*
 |
 
 
@@ -4854,36 +4995,43 @@ PodSpec defines a group of Kubernetes resources.
 |Field
 |Description
 
+|`automountServiceAccountToken` +
+bool
+|
+
+
+AutomountServiceAccountToken
+
 |`volumes` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#volume-v1-core[[\]Kubernetes core/v1.Volume]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volume-v1-core[[\]Kubernetes core/v1.Volume]*
 |
 
 
 Volumes
 
 |`initContainers` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#container-v1-core[[\]Kubernetes core/v1.Container]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#container-v1-core[[\]Kubernetes core/v1.Container]*
 |
 
 
 InitContainers
 
 |`containers` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#container-v1-core[[\]Kubernetes core/v1.Container]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#container-v1-core[[\]Kubernetes core/v1.Container]*
 |
 
 
 Containers
 
 |`ephemeralContainers` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#ephemeralcontainer-v1-core[[\]Kubernetes core/v1.EphemeralContainer]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#ephemeralcontainer-v1-core[[\]Kubernetes core/v1.EphemeralContainer]*
 |
 
 
 EphemeralContainers
 
 |`restartPolicy` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#restartpolicy-v1-core[Kubernetes core/v1.RestartPolicy]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#restartpolicy-v1-core[Kubernetes core/v1.RestartPolicy]*
 |
 
 
@@ -4904,7 +5052,7 @@ int64
 ActiveDeadlineSeconds
 
 |`dnsPolicy` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#dnspolicy-v1-core[Kubernetes core/v1.DNSPolicy]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#dnspolicy-v1-core[Kubernetes core/v1.DNSPolicy]*
 |
 
 
@@ -4918,14 +5066,14 @@ map[string]string
 NodeSelector
 
 |`topologySpreadConstraints` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#topologyspreadconstraint-v1-core[[\]Kubernetes core/v1.TopologySpreadConstraint]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#topologyspreadconstraint-v1-core[[\]Kubernetes core/v1.TopologySpreadConstraint]*
 |
 
 
 TopologySpreadConstraints
 
 |`securityContext` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#podsecuritycontext-v1-core[Kubernetes core/v1.PodSecurityContext]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podsecuritycontext-v1-core[Kubernetes core/v1.PodSecurityContext]*
 |
 
 
@@ -4977,6 +5125,7 @@ Properties -- .
 * <<#_camel_apache_org_v1_BuildahTask, BuildahTask>>
 * <<#_camel_apache_org_v1_JibTask, JibTask>>
 * <<#_camel_apache_org_v1_KanikoTask, KanikoTask>>
+* <<#_camel_apache_org_v1_S2iTask, S2iTask>>
 * <<#_camel_apache_org_v1_SpectrumTask, SpectrumTask>>
 
 PublishTask image publish configuration.
@@ -5196,6 +5345,7 @@ ResourceCondition is a common type for all conditions.
 
 *Appears on:*
 
+* <<#_camel_apache_org_v1_Catalog, Catalog>>
 * <<#_camel_apache_org_v1_IntegrationKitStatus, IntegrationKitStatus>>
 * <<#_camel_apache_org_v1_IntegrationPlatformBuildSpec, IntegrationPlatformBuildSpec>>
 * <<#_camel_apache_org_v1_IntegrationProfileBuildSpec, IntegrationProfileBuildSpec>>
@@ -5286,12 +5436,12 @@ S2iTask is used to configure S2I.
 
 
 
-|`contextDir` +
-string
-|
+|`PublishTask` +
+*xref:#_camel_apache_org_v1_PublishTask[PublishTask]*
+|(Members of `PublishTask` are embedded into this type.)
 
 
-can be useful to share info with other tasks
+
 
 |`tag` +
 string
@@ -5364,7 +5514,7 @@ string
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language.
 
@@ -5537,7 +5687,7 @@ a PackageTask, used to package the project
 
 
 a BuildahTask, for Buildah strategy
-Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
+Deprecated: use jib, s2i or a custom publishing strategy instead
 
 |`kaniko` +
 *xref:#_camel_apache_org_v1_KanikoTask[KanikoTask]*
@@ -5545,7 +5695,7 @@ Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 
 a KanikoTask, for Kaniko strategy
-Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
+Deprecated: use jib, s2i or a custom publishing strategy instead
 
 |`spectrum` +
 *xref:#_camel_apache_org_v1_SpectrumTask[SpectrumTask]*
@@ -5553,6 +5703,7 @@ Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
 
 
 a SpectrumTask, for Spectrum strategy
+Deprecated: use jib, s2i or a custom publishing strategy instead
 
 |`s2i` +
 *xref:#_camel_apache_org_v1_S2iTask[S2iTask]*
@@ -5576,7 +5727,7 @@ a JibTask, for Jib strategy
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 Template is an unstructured object representing a Kamelet template in YAML/JSON DSL.
 
@@ -5666,7 +5817,6 @@ TraitConfiguration parameters configuration
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 * <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
-* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
 Traits represents the collection of trait configurations.
 
@@ -5883,7 +6033,8 @@ The configuration of Quarkus trait
 |
 
 
-The configuration of Registry trait
+The configuration of Registry trait (support removed since version 2.5.0).
+Deprecated: use jvm trait or read documentation.
 
 |`route` +
 *xref:#_camel_apache_org_v1_trait_RouteTrait[RouteTrait]*
@@ -5891,6 +6042,13 @@ The configuration of Registry trait
 
 
 The configuration of Route trait
+
+|`security-context` +
+*xref:#_camel_apache_org_v1_trait_SecurityContextTrait[SecurityContextTrait]*
+|
+
+
+The configuration of Security Context trait
 
 |`service` +
 *xref:#_camel_apache_org_v1_trait_ServiceTrait[ServiceTrait]*
@@ -5905,6 +6063,13 @@ The configuration of Service trait
 
 
 The configuration of Service Binding trait
+
+|`telemetry` +
+*xref:#_camel_apache_org_v1_trait_TelemetryTrait[TelemetryTrait]*
+|
+
+
+The configuration of Telemetry trait
 
 |`toleration` +
 *xref:#_camel_apache_org_v1_trait_TolerationTrait[TolerationTrait]*
@@ -6039,14 +6204,14 @@ ValueSource --.
 |Description
 
 |`configMapKeyRef` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#configmapkeyselector-v1-core[Kubernetes core/v1.ConfigMapKeySelector]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core[Kubernetes core/v1.ConfigMapKeySelector]*
 |
 
 
 Selects a key of a ConfigMap.
 
 |`secretKeyRef` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#secretkeyselector-v1-core[Kubernetes core/v1.SecretKeySelector]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core[Kubernetes core/v1.SecretKeySelector]*
 |
 
 
@@ -6171,7 +6336,8 @@ string
 |
 
 
-Specify a base image
+Specify a base image. In order to have the application working properly it must be a container image which has a Java JDK
+installed and ready to use on path (ie `/usr/bin/java`).
 
 |`incrementalImageBuild` +
 bool
@@ -6185,7 +6351,7 @@ string
 |
 
 
-The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default `sequential`)
+The build order strategy to use, either `dependencies`, `fifo` or `sequential` (default is the platform default)
 
 |`requestCPU` +
 string
@@ -6225,6 +6391,7 @@ Deprecated: use TasksRequestCPU instead with task name `builder`.
 
 
 A list of references pointing to configmaps/secrets that contains a maven profile.
+This configmap/secret is a resource of the IntegrationKit created, therefore it needs to be present in the namespace where the operator is going to create the IntegrationKit.
 The content of the maven profile is expected to be a text containing a valid maven profile starting with `<profile>` and ending with `</profile>` that will be integrated as an inline profile in the POM.
 Syntax: [configmap{vbar}secret]:name[/key], where name represents the resource name, key optionally represents the resource key to be filtered (default key value = profile.xml).
 
@@ -6241,7 +6408,7 @@ string
 
 
 A list of tasks sorted by the order of execution in a csv format, ie, `<taskName1>,<taskName2>,...`.
-Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `spectrum`, `s2i`)
+Mind that you must include also the operator tasks (`builder`, `quarkus-native`, `package`, `jib`, `s2i`)
 if you need to execute them. Useful only with `pod` strategy.
 
 |`tasksRequestCPU` +
@@ -6286,6 +6453,13 @@ map[string]string
 
 When using `pod` strategy, annotation to use for the builder pod.
 
+|`platforms` +
+[]string
+|
+
+
+The list of manifest platforms to use to build a container image (default `linux/amd64`).
+
 
 |===
 
@@ -6318,6 +6492,8 @@ string
 
 
 The camel-k-runtime version to use for the integration. It overrides the default version set in the Integration Platform.
+You can use a fixed version (for example "3.2.3") or a semantic version (for example "3.x") which will try to resolve
+to the best matching Catalog existing on the cluster.
 
 |`properties` +
 []string
@@ -6366,7 +6542,6 @@ The Container trait can be used to configure properties of the container where t
 
 It also provides configuration for Services associated to the container.
 
-nolint: tagliatelle
 
 [cols="2,2a",options="header"]
 |===
@@ -6392,28 +6567,28 @@ string
 |
 
 
-The minimum amount of CPU required.
+The minimum amount of CPU required (default 125 millicores).
 
 |`requestMemory` +
 string
 |
 
 
-The minimum amount of memory required.
+The minimum amount of memory required (default 128 Mi).
 
 |`limitCPU` +
 string
 |
 
 
-The maximum amount of CPU required.
+The maximum amount of CPU to be provided (default 500 millicores).
 
 |`limitMemory` +
 string
 |
 
 
-The maximum amount of memory required.
+The maximum amount of memory to be provided (default 512 Mi).
 
 |`expose` +
 bool
@@ -6462,14 +6637,58 @@ string
 |
 
 
-The main container image
+The main container image to use for the Integration. When using this parameter the operator will create a synthetic IntegrationKit which
+won't be able to execute traits requiring CamelCatalog. If the container image you're using is coming from an IntegrationKit, use instead
+Integration `.spec.integrationKit` parameter. If you're moving the Integration across environments, you will also need to create an "external" IntegrationKit.
 
 |`imagePullPolicy` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#pullpolicy-v1-core[Kubernetes core/v1.PullPolicy]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#pullpolicy-v1-core[Kubernetes core/v1.PullPolicy]*
 |
 
 
 The pull policy: Always{vbar}Never{vbar}IfNotPresent
+
+|`runAsUser` +
+int64
+|
+
+
+Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
+
+|`runAsNonRoot` +
+bool
+|
+
+
+Security Context RunAsNonRoot configuration (default false).
+
+|`seccompProfileType` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#seccompprofiletype-v1-core[Kubernetes core/v1.SeccompProfileType]*
+|
+
+
+Security Context SeccompProfileType configuration (default RuntimeDefault).
+
+|`allowPrivilegeEscalation` +
+bool
+|
+
+
+Security Context AllowPrivilegeEscalation configuration (default false).
+
+|`capabilitiesDrop` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#capability-v1-core[[\]Kubernetes core/v1.Capability]*
+|
+
+
+Security Context Capabilities Drop configuration (default ALL).
+
+|`capabilitiesAdd` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#capability-v1-core[[\]Kubernetes core/v1.Capability]*
+|
+
+
+Security Context Capabilities Add configuration (default none).
 
 
 |===
@@ -6488,7 +6707,7 @@ require to be activated at specific hours of the day or with a periodic delay of
 For such tasks, the cron trait can materialize the integration as a Kubernetes CronJob instead of a standard deployment,
 in order to save resources when the integration does not need to be executed.
 
-Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`.
+Integrations that start from the following components are evaluated by the cron trait: `timer`, `cron`, `quartz`. The trait does support multiple evaluated components only if they have the same schedule, else it will fallback to Camel implementation instead of instanciating a Kubernetes CronJob.
 
 WARNING: In case of native build-mode defined in xref:traits:quarkus.adoc[quarkus] trait, the component can't be customized.
 
@@ -6520,6 +6739,13 @@ string
 
 The CronJob schedule for the whole integration. If multiple routes are declared, they must have the same schedule for this
 mechanism to work correctly.
+
+|`timeZone` +
+string
+|
+
+
+The timezone that the CronJob will run on
 
 |`components` +
 string
@@ -6651,6 +6877,7 @@ bool
 |
 
 
+Deprecated: won't be able to enforce client side update in the future.
 Use server-side apply to update the owned resources (default `true`).
 Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
 
@@ -6689,14 +6916,14 @@ The maximum time in seconds for the deployment to make progress before it
 is considered to be failed. It defaults to `60s`.
 
 |`strategy` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#deploymentstrategytype-v1-apps[Kubernetes apps/v1.DeploymentStrategyType]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#deploymentstrategytype-v1-apps[Kubernetes apps/v1.DeploymentStrategyType]*
 |
 
 
 The deployment strategy to use to replace existing pods with new ones.
 
 |`rollingUpdateMaxUnavailable` +
-int
+k8s.io/apimachinery/pkg/util/intstr.IntOrString
 |
 
 
@@ -6707,7 +6934,7 @@ This can not be 0 if MaxSurge is 0.
 Defaults to `25%`.
 
 |`rollingUpdateMaxSurge` +
-int
+k8s.io/apimachinery/pkg/util/intstr.IntOrString
 |
 
 
@@ -6774,8 +7001,9 @@ Propagates the `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY` environment variables 
 
 
 A list of environment variables to be added to the integration container.
-The syntax is KEY=VALUE, e.g., `MY_VAR="my value"`.
-These take precedence over the previously defined environment variables.
+The syntax is either VAR=VALUE or VAR=[configmap{vbar}secret]:name/key, where name represents the resource name,
+and key represents the resource key to be mapped as and environment variable.
+These take precedence over any previously defined environment variables.
 
 
 |===
@@ -6854,7 +7082,7 @@ Deprecated: to be removed from trait configuration.
 
 The health trait is responsible for configuring the health probes on the integration container.
 
-It's disabled by default.
+NOTE: this trait is disabled by default.
 
 
 [cols="2,2a",options="header"]
@@ -6918,6 +7146,13 @@ int32
 
 Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
 
+|`livenessProbe` +
+string
+|
+
+
+The liveness probe path to use (default provided by the Catalog runtime used).
+
 |`readinessProbeEnabled` +
 bool
 |
@@ -6966,6 +7201,13 @@ int32
 
 
 Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
+
+|`readinessProbe` +
+string
+|
+
+
+The readiness probe path to use (default provided by the Catalog runtime used).
 
 |`startupProbeEnabled` +
 bool
@@ -7016,6 +7258,13 @@ int32
 
 Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
 
+|`startupProbe` +
+string
+|
+
+
+The startup probe path to use (default provided by the Catalog runtime used).
+
 
 |===
 
@@ -7044,6 +7293,14 @@ It's enabled by default whenever a Service is added to the integration (through 
 
 
 
+|`ingressClassName` +
+string
+|
+
+
+The Ingress class name as defined by the Ingress spec
+See https://kubernetes.io/docs/concepts/services-networking/ingress/
+
 |`annotations` +
 map[string]string
 |
@@ -7068,7 +7325,7 @@ string
 To configure the path exposed by the ingress (default `/`).
 
 |`pathType` +
-*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#pathtype-v1-networking[Kubernetes networking/v1.PathType]*
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#pathtype-v1-networking[Kubernetes networking/v1.PathType]*
 |
 
 
@@ -7081,6 +7338,20 @@ bool
 
 
 To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
+
+|`tlsHosts` +
+[]string
+|
+
+
+To configure tls hosts
+
+|`tlsSecretName` +
+string
+|
+
+
+To configure tls secret name
 
 
 |===
@@ -7136,8 +7407,6 @@ The JVM trait is used to configure the JVM that runs the Integration. This trait
 (bound to a container image) built by Camel K operator. If the system detects the usage of a different container image (ie, built externally), then, the
 trait is disabled by the platform.
 
-WARNING: you can still enable the trait explicitly even when it is disabled by the platform but you should be aware that some configurations could fail.
-
 
 [cols="2,2a",options="header"]
 |===
@@ -7171,6 +7440,7 @@ bool
 
 
 Prints the command used the start the JVM in the container logs (default `true`)
+Deprecated: no longer in use.
 
 |`debugAddress` +
 string
@@ -7193,6 +7463,13 @@ string
 
 Additional JVM classpath (use `Linux` classpath separator)
 
+|`jar` +
+string
+|
+
+
+The Jar dependency which will run the application. Leave it empty for managed Integrations.
+
 
 |===
 
@@ -7204,10 +7481,11 @@ Additional JVM classpath (use `Linux` classpath separator)
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
 The Jolokia trait activates and configures the Jolokia Java agent.
+This trait is useful to enable JMX access to Camel application.
+Make sure you have the right privileges to perform such an action on the cluster.
 
-See https://jolokia.org/reference/html/agents.html
+See https://jolokia.org/reference/html/manual/agents.html
 
-nolint: tagliatelle
 
 [cols="2,2a",options="header"]
 |===
@@ -7466,6 +7744,16 @@ Automatically deploy the integration as Knative service when all conditions hold
 * Integration is using the Knative profile
 * All routes are either starting from an HTTP based consumer or a passive consumer (e.g. `direct` is a passive consumer)
 
+|`timeoutSeconds` +
+int64
+|
+
+
+The maximum duration in seconds that the request instance is allowed to respond to a request.
+This field propagates to the integration pod's terminationGracePeriodSeconds
+
+Refer to the Knative documentation for more information.
+
 
 |===
 
@@ -7584,6 +7872,24 @@ Enables the camel-k-operator to set the "bindings.knative.dev/include=true" labe
 As Knative requires this label to perform injection of K_SINK URL into the service.
 If this is false, the integration pod may start and fail, read the SinkBinding Knative documentation. (default: true)
 
+|`filters` +
+[]string
+|
+
+
+Sets filter attributes on the event stream (such as event type, source, subject and so on).
+A list of key-value pairs that represent filter attributes and its values.
+The syntax is KEY=VALUE, e.g., `source="my.source"`.
+Filter attributes get set on the Knative trigger that is being created as part of this integration.
+
+|`filterEventType` +
+bool
+|
+
+
+Enables the default filtering for the Knative trigger using the event type
+If this is true, the created Knative trigger uses the event type as a filter on the event stream when no other filter criteria is given. (default: true)
+
 
 |===
 
@@ -7657,7 +7963,6 @@ Enable "pretty printing" of the JSON logs
 
 The Mount trait can be used to configure volumes mounted on the Integration Pods.
 
-nolint: tagliatelle
 
 [cols="2,2a",options="header"]
 |===
@@ -7698,13 +8003,28 @@ Syntax: [configmap{vbar}secret]:name[/key][@path], where name represents the res
 
 A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 
+|`emptyDirs` +
+[]string
+|
+
+
+A list of EmptyDir volumes to be mounted. Syntax: [name:/container/path]
+
 |`hotReload` +
 bool
 |
 
 
 Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
-marked with `camel.apache.org/integration` label to be taken in account.
+marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
+changes in metadata.
+
+|`scanKameletsImplicitLabelSecrets` +
+bool
+|
+
+
+Deprecated: no longer available since version 2.5.
 
 
 |===
@@ -7736,7 +8056,7 @@ The OpenAPI DSL trait is internally used to allow creating integrations from a O
 |
 
 
-The configmaps holding the spec of the OpenAPI
+The configmaps holding the spec of the OpenAPI (compatible with > 3.0 spec only).
 
 
 |===
@@ -7841,6 +8161,7 @@ Only one of `max-unavailable` and `min-available` can be specified.
 * <<#_camel_apache_org_v1_trait_OpenAPITrait, OpenAPITrait>>
 * <<#_camel_apache_org_v1_trait_PlatformTrait, PlatformTrait>>
 * <<#_camel_apache_org_v1_trait_QuarkusTrait, QuarkusTrait>>
+* <<#_camel_apache_org_v1_trait_SecurityContextTrait, SecurityContextTrait>>
 
 PlatformBaseTrait is the base type for platform traits. It cannot be disabled by the user.
 
@@ -8163,6 +8484,8 @@ Deprecated: for backward compatibility.
 * <<#_camel_apache_org_v1_IntegrationKitTraits, IntegrationKitTraits>>
 * <<#_camel_apache_org_v1_Traits, Traits>>
 
+WARNING: The Registry trait was deprecated in version 2.2.0 and is no longer active since version 2.5.0.
+
 The Registry trait sets up Maven to use the Image registry
 as a Maven repository.
 
@@ -8199,7 +8522,6 @@ The recommended approach to set the key and certificates is to use `secrets` to 
 following parameters to reference them: `tls-certificate-secret`, `tls-key-secret`, `tls-ca-certificate-secret`, `tls-destination-ca-certificate-secret`
 See the examples section at the end of this page to see the setup options.
 
-nolint: tagliatelle
 
 [cols="2,2a",options="header"]
 |===
@@ -8327,6 +8649,52 @@ Refer to the OpenShift route documentation for additional information.
 
 |===
 
+[#_camel_apache_org_v1_trait_SecurityContextTrait]
+=== SecurityContextTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Security Context trait can be used to configure the security setting of the Pod running the application.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`PlatformBaseTrait` +
+*xref:#_camel_apache_org_v1_trait_PlatformBaseTrait[PlatformBaseTrait]*
+|(Members of `PlatformBaseTrait` are embedded into this type.)
+
+
+
+
+|`runAsUser` +
+int64
+|
+
+
+Security Context RunAsUser configuration (default none): this value is automatically retrieved in Openshift clusters when not explicitly set.
+
+|`runAsNonRoot` +
+bool
+|
+
+
+Security Context RunAsNonRoot configuration (default false).
+
+|`seccompProfileType` +
+*https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#seccompprofiletype-v1-core[Kubernetes core/v1.SeccompProfileType]*
+|
+
+
+Security Context SeccompProfileType configuration (default RuntimeDefault).
+
+
+|===
+
 [#_camel_apache_org_v1_trait_ServiceBindingTrait]
 === ServiceBindingTrait
 
@@ -8421,6 +8789,79 @@ The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'
 
 
 
+[#_camel_apache_org_v1_trait_TelemetryTrait]
+=== TelemetryTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Telemetry trait can be used to automatically publish tracing information to an OTLP compatible collector.
+
+The trait is able to automatically discover the telemetry OTLP endpoint available in the namespace (supports **Jaerger** in version 1.35+).
+
+The Telemetry trait is disabled by default.
+
+WARNING: The Telemetry trait can't be enabled at the same time as the Tracing trait.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
+
+|`serviceName` +
+string
+|
+
+
+The name of the service that publishes telemetry data (defaults to the integration name)
+
+|`endpoint` +
+string
+|
+
+
+The target endpoint of the Telemetry service (automatically discovered by default)
+
+|`sampler` +
+string
+|
+
+
+The sampler of the telemetry used for tracing (default "on")
+
+|`sampler-ratio` +
+string
+|
+
+
+The sampler ratio of the telemetry used for tracing
+
+|`sampler-parent-based` +
+bool
+|
+
+
+The sampler of the telemetry used for tracing is parent based (default "true")
+
+
+|===
+
 [#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait
 
@@ -8490,6 +8931,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_RouteTrait, RouteTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceBindingTrait, ServiceBindingTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
+* <<#_camel_apache_org_v1_trait_TelemetryTrait, TelemetryTrait>>
 * <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
 
 Trait is the base type for all traits. It could be disabled by the user.

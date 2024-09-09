@@ -40,12 +40,14 @@ superpowers.
 `
 
 // RootCmdOptions --.
-// nolint: containedctx
+//
+//nolint:containedctx
 type RootCmdOptions struct {
 	RootContext   context.Context    `mapstructure:"-"`
 	Context       context.Context    `mapstructure:"-"`
 	ContextCancel context.CancelFunc `mapstructure:"-"`
 	_client       client.Client      `mapstructure:"-"`
+	Flags         *viper.Viper       `mapstructure:"-"`
 	KubeConfig    string             `mapstructure:"kube-config"`
 	Namespace     string             `mapstructure:"namespace"`
 	Verbose       bool               `mapstructure:"verbose" yaml:",omitempty"`
@@ -58,6 +60,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		RootContext:   ctx,
 		Context:       childCtx,
 		ContextCancel: childCancel,
+		Flags:         viper.New(),
 	}
 
 	cmd := kamelPreAddCommandInit(&options)
@@ -67,7 +70,7 @@ func NewKamelCommand(ctx context.Context) (*cobra.Command, error) {
 		return cmd, err
 	}
 
-	err := kamelPostAddCommandInit(cmd)
+	err := kamelPostAddCommandInit(cmd, options.Flags)
 
 	return cmd, err
 }
@@ -92,8 +95,8 @@ func kamelPreAddCommandInit(options *RootCmdOptions) *cobra.Command {
 	return &cmd
 }
 
-func kamelPostAddCommandInit(cmd *cobra.Command) error {
-	if err := bindPFlagsHierarchy(cmd); err != nil {
+func kamelPostAddCommandInit(cmd *cobra.Command, v *viper.Viper) error {
+	if err := bindPFlagsHierarchy(cmd, v); err != nil {
 		return err
 	}
 
@@ -102,26 +105,26 @@ func kamelPostAddCommandInit(cmd *cobra.Command) error {
 		configName = DefaultConfigName
 	}
 
-	viper.SetConfigName(configName)
+	v.SetConfigName(configName)
 
 	configPath := os.Getenv("KAMEL_CONFIG_PATH")
 	if configPath != "" {
 		// if a specific config path is set, don't add
 		// default locations
-		viper.AddConfigPath(configPath)
+		v.AddConfigPath(configPath)
 	} else {
-		viper.AddConfigPath(".")
-		viper.AddConfigPath(".kamel")
-		viper.AddConfigPath("$HOME/.kamel")
+		v.AddConfigPath(".")
+		v.AddConfigPath(".kamel")
+		v.AddConfigPath("$HOME/.kamel")
 	}
 
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(
 		".", "_",
 		"-", "_",
 	))
 
-	if err := viper.ReadInConfig(); err != nil {
+	if err := v.ReadInConfig(); err != nil {
 		if !errors.As(err, &viper.ConfigFileNotFoundError{}) {
 			return err
 		}
@@ -143,7 +146,7 @@ func addKamelSubcommands(cmd *cobra.Command, options *RootCmdOptions) {
 	cmd.AddCommand(cmdOnly(newCmdReset(options)))
 	cmd.AddCommand(newCmdDescribe(options))
 	cmd.AddCommand(cmdOnly(newCmdRebuild(options)))
-	cmd.AddCommand(cmdOnly(newCmdOperator()))
+	cmd.AddCommand(cmdOnly(newCmdOperator(options)))
 	cmd.AddCommand(cmdOnly(newCmdBuilder(options)))
 	cmd.AddCommand(cmdOnly(newCmdDebug(options)))
 	cmd.AddCommand(cmdOnly(newCmdDump(options)))
@@ -179,7 +182,7 @@ func (command *RootCmdOptions) preRun(cmd *cobra.Command, _ []string) error {
 			return fmt.Errorf("cannot get command client: %w", err)
 		}
 		if command.Namespace == "" {
-			current := viper.GetString("kamel.config.default-namespace")
+			current := command.Flags.GetString("kamel.config.default-namespace")
 			if current == "" {
 				defaultNS, err := c.GetCurrentNamespace(command.KubeConfig)
 				if err != nil {

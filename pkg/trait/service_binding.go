@@ -21,7 +21,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	sb "github.com/redhat-developer/service-binding-operator/apis/binding/v1alpha1"
 	"github.com/redhat-developer/service-binding-operator/pkg/client/kubernetes"
@@ -33,11 +33,15 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/reference"
 )
 
 const (
+	serviceBindingTraitID    = "service-binding"
+	serviceBindingTraitOrder = 250
+
 	serviceBindingMountPointAnnotation = "camel.apache.org/serviceBinding.mount-point"
 	serviceBindingLabel                = "camel.apache.org/serviceBinding"
 )
@@ -59,7 +63,7 @@ type serviceBindingTrait struct {
 
 func newServiceBindingTrait() Trait {
 	return &serviceBindingTrait{
-		BaseTrait: NewBaseTrait("service-binding", 250),
+		BaseTrait: NewBaseTrait(serviceBindingTraitID, serviceBindingTraitOrder),
 	}
 }
 
@@ -67,8 +71,8 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, *TraitCondition, 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+	if !ptr.Deref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled("ServiceBinding"), nil
 	}
 	if len(t.Services) == 0 {
 		return false, nil, nil
@@ -88,12 +92,36 @@ func (t *serviceBindingTrait) Apply(e *Environment) error {
 		return err
 	}
 
+	if e.CamelCatalog.Runtime.Capabilities["service-binding"].RuntimeProperties != nil {
+		t.setCatalogConfiguration(e)
+	} else {
+		t.setProperties(e)
+	}
+
 	secret := createSecret(ctx, e.Integration.Namespace, e.Integration.Name)
 	if secret != nil {
 		e.Resources.Add(secret)
-		e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = "true"
 	}
+
 	return nil
+}
+
+func (t *serviceBindingTrait) setCatalogConfiguration(e *Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	e.ApplicationProperties["camel.k.serviceBinding.enabled"] = boolean.TrueString
+	for _, cp := range e.CamelCatalog.Runtime.Capabilities["service-binding"].RuntimeProperties {
+		e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+	}
+}
+
+// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
+func (t *serviceBindingTrait) setProperties(e *Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	e.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"] = boolean.TrueString
 }
 
 func (t *serviceBindingTrait) getContext(e *Environment) (pipeline.Context, error) {
@@ -194,7 +222,7 @@ func createSecret(ctx pipeline.Context, ns, integrationName string) *corev1.Secr
 			Name:      name,
 			Labels: map[string]string{
 				v1.IntegrationLabel: integrationName,
-				serviceBindingLabel: "true",
+				serviceBindingLabel: boolean.TrueString,
 			},
 			Annotations: map[string]string{
 				serviceBindingMountPointAnnotation: camel.ServiceBindingsMountPath,

@@ -45,15 +45,15 @@ const (
 	ConfigFolderUsed ConfigFolder = "used"
 )
 
-// nolint: unparam
 func newCmdConfig(rootCmdOptions *RootCmdOptions) (*cobra.Command, *configCmdOptions) {
 	options := configCmdOptions{}
 	cmd := cobra.Command{
-		Use:     "config",
-		Short:   "Configure the default settings",
-		PreRunE: decode(&options),
-		Args:    options.validateArgs,
-		RunE:    options.run,
+		Use:        "config",
+		Short:      "Configure the default settings",
+		Deprecated: "no longer supported.",
+		PreRunE:    decode(&options, rootCmdOptions.Flags),
+		Args:       options.validateArgs,
+		RunE:       options.run,
 	}
 
 	cmd.Flags().String("folder", "used", "The type of folder containing the configuration file to read/write. The supported values are 'env', 'home', 'sub', 'working' and 'used' for respectively $KAMEL_CONFIG_PATH, $HOME/.kamel, .kamel, . and the folder used by kamel")

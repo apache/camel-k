@@ -23,9 +23,8 @@ import (
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Resume trait can be used to manage and configure resume strategies.
@@ -76,27 +75,23 @@ func NewResumeTrait() trait.Trait {
 }
 
 func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if !pointer.BoolDeref(r.Enabled, false) {
+	if !ptr.Deref(r.Enabled, false) {
 		return false, nil, nil
 	}
 	if !environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !environment.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
 
-	if pointer.BoolDeref(r.Auto, true) {
-		// Check which components have been used
-		sources, err := kubernetes.ResolveIntegrationSources(environment.Ctx, r.Client, environment.Integration, environment.Resources)
+	if ptr.Deref(r.Auto, true) {
+		_, err := environment.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+			for _, endpoint := range meta.FromURIs {
+				log.Infof("Processing component %s", endpoint)
+			}
+
+			return true
+		})
 		if err != nil {
 			return false, nil, err
-		}
-
-		meta, err := metadata.ExtractAll(environment.CamelCatalog, sources)
-		if err != nil {
-			return false, nil, err
-		}
-
-		for _, endpoint := range meta.FromURIs {
-			log.Infof("Processing component %s", endpoint)
 		}
 
 		if r.ResumeStrategy == "" {

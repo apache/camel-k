@@ -25,8 +25,12 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-
 	"github.com/apache/camel-k/v2/pkg/util"
+)
+
+const (
+	errorHandlerTraitID    = "error-handler"
+	errorHandlerTraitOrder = 470
 )
 
 type errorHandlerTrait struct {
@@ -37,7 +41,7 @@ type errorHandlerTrait struct {
 func newErrorHandlerTrait() Trait {
 	return &errorHandlerTrait{
 		// NOTE: Must run before dependency trait
-		BasePlatformTrait: NewBasePlatformTrait("error-handler", 470),
+		BasePlatformTrait: NewBasePlatformTrait(errorHandlerTraitID, errorHandlerTraitOrder),
 	}
 }
 
@@ -45,11 +49,9 @@ func (t *errorHandlerTrait) Configure(e *Environment) (bool, *TraitCondition, er
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
 	if t.ErrorHandlerRef == "" {
 		t.ErrorHandlerRef = e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName)
 	}
@@ -67,7 +69,7 @@ func (t *errorHandlerTrait) Apply(e *Environment) error {
 			t.addErrorHandlerDependencies(e, defaultErrorHandlerURI)
 		}
 
-		return t.addErrorHandlerAsSource(e)
+		return t.addGlobalErrorHandlerAsSource(e)
 	}
 	return nil
 }
@@ -84,10 +86,10 @@ func (t *errorHandlerTrait) addErrorHandlerDependencies(e *Environment, uri stri
 	}
 }
 
-func (t *errorHandlerTrait) addErrorHandlerAsSource(e *Environment) error {
+func (t *errorHandlerTrait) addGlobalErrorHandlerAsSource(e *Environment) error {
 	flowErrorHandler := map[string]interface{}{
-		"error-handler": map[string]string{
-			"ref-error-handler": t.ErrorHandlerRef,
+		"errorHandler": map[string]string{
+			"refErrorHandler": t.ErrorHandlerRef,
 		},
 	}
 	encodedFlowErrorHandler, err := yaml.Marshal([]map[string]interface{}{flowErrorHandler})

@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func NoErrorAndNotEmptyBytes(t *testing.T, path string, callable func(path string) ([]byte, error)) {
@@ -32,7 +33,7 @@ func NoErrorAndNotEmptyBytes(t *testing.T, path string, callable func(path strin
 
 	object, err := callable(path)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, object)
 }
 func NoErrorAndNotEmptyString(t *testing.T, path string, callable func(path string) (string, error)) {
@@ -40,7 +41,7 @@ func NoErrorAndNotEmptyString(t *testing.T, path string, callable func(path stri
 
 	object, err := callable(path)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotEmpty(t, object)
 }
 
@@ -49,7 +50,7 @@ func NoErrorAndContains(t *testing.T, path string, contains string, callable fun
 
 	elements, err := callable(path)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, elements, contains)
 }
 func NoErrorAndNotContains(t *testing.T, path string, contains string, callable func(path string) ([]string, error)) {
@@ -57,7 +58,7 @@ func NoErrorAndNotContains(t *testing.T, path string, contains string, callable 
 
 	elements, err := callable(path)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotContains(t, elements, contains)
 }
 func NoErrorAndEmpty(t *testing.T, path string, callable func(path string) ([]string, error)) {
@@ -65,7 +66,7 @@ func NoErrorAndEmpty(t *testing.T, path string, callable func(path string) ([]st
 
 	elements, err := callable(path)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Empty(t, elements)
 }
 
@@ -73,14 +74,14 @@ func ErrorBytes(t *testing.T, path string, callable func(path string) ([]byte, e
 	t.Helper()
 
 	_, err := callable(path)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 func ErrorString(t *testing.T, path string, callable func(path string) (string, error)) {
 
 	t.Helper()
 
 	_, err := callable(path)
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestGetResource(t *testing.T) {
@@ -106,7 +107,7 @@ func TestResources(t *testing.T) {
 	NoErrorAndEmpty(t, "config/dirnotexist", Resources)
 
 	_, err := Resources("/")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestResourcesWithPrefix(t *testing.T) {
@@ -137,14 +138,14 @@ func TestTemplateResource(t *testing.T) {
 	}
 
 	data, err := TemplateResource(fmt.Sprintf("/resources/addons/master/%s", fname), templateData)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	jsonSrc, err := yaml.ToJSON([]byte(data))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	uns := unstructured.Unstructured{}
 	err = uns.UnmarshalJSON(jsonSrc)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, uns.GetName(), name)
 	assert.Equal(t, uns.GetNamespace(), ns)

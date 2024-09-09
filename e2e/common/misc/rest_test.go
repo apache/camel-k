@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package misc
+package common
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -30,8 +31,7 @@ import (
 	"time"
 
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
@@ -39,37 +39,36 @@ import (
 )
 
 func TestRunRest(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		ocp, err := openshift.IsOpenShift(TestClient(t))
+		require.NoError(t, err)
 
-	ocp, err := openshift.IsOpenShift(TestClient())
-	assert.Nil(t, err)
+		g.Expect(KamelRun(t, ctx, ns, "files/rest-consumer.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-	Expect(KamelRunWithID(operatorID, ns, "files/rest-consumer.yaml").Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, "rest-consumer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-
-	t.Run("Service works", func(t *testing.T) {
-		name := RandomizedSuffixName("John")
-		service := Service(ns, "rest-consumer")
-		Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
-		Expect(KamelRunWithID(operatorID, ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "rest-producer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
-		Eventually(IntegrationLogs(ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
-	})
-
-	if ocp {
-		t.Run("Route works", func(t *testing.T) {
-			name := RandomizedSuffixName("Peter")
-			route := Route(ns, "rest-consumer")
-			Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
-			Eventually(RouteStatus(ns, "rest-consumer"), TestTimeoutMedium).Should(Equal("True"))
-			url := fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name)
-			Eventually(httpRequest(url), TestTimeoutMedium).Should(Equal(fmt.Sprintf("%s Doe", name)))
-			Eventually(IntegrationLogs(ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+		t.Run("Service works", func(t *testing.T) {
+			name := RandomizedSuffixName("John")
+			service := Service(t, ctx, ns, "rest-consumer")
+			g.Eventually(service, TestTimeoutShort).ShouldNot(BeNil())
+			g.Expect(KamelRun(t, ctx, ns, "files/rest-producer.yaml", "-p", "serviceName=rest-consumer", "-p", "name="+name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "rest-producer"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "rest-consumer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "rest-producer"), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("%s Doe", name)))
 		})
-	}
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		if ocp {
+			t.Run("Route works", func(t *testing.T) {
+				name := RandomizedSuffixName("Peter")
+				route := Route(t, ctx, ns, "rest-consumer")
+				g.Eventually(route, TestTimeoutShort).ShouldNot(BeNil())
+				g.Eventually(RouteStatus(t, ctx, ns, "rest-consumer")).Should(Equal("True"))
+				url := fmt.Sprintf("http://%s/customers/%s", route().Spec.Host, name)
+				g.Eventually(httpRequest(url), TestTimeoutMedium).Should(Equal(fmt.Sprintf("%s Doe", name)))
+				g.Eventually(IntegrationLogs(t, ctx, ns, "rest-consumer"), TestTimeoutShort).Should(ContainSubstring(fmt.Sprintf("get %s", name)))
+			})
+		}
+	})
 }
 
 func httpRequest(url string) func() (string, error) {

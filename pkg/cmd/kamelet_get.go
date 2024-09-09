@@ -36,10 +36,11 @@ func newKameletGetCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kameletG
 	}
 
 	cmd := cobra.Command{
-		Use:     "get",
-		Short:   "Get defined Kamelet",
-		Long:    `Get defined Kamelet.`,
-		PreRunE: decode(&options),
+		Use:        "get",
+		Short:      "Get defined Kamelet",
+		Long:       `Get defined Kamelet.`,
+		Deprecated: "consider using kubectl (or oc) command instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(); err != nil {
 				return err

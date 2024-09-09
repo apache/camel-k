@@ -7,6 +7,7 @@
 /kamel.*
 /license-check
 /**/platform-check
+bin/
 
 # Config files
 /kamel-config.yaml
@@ -37,6 +38,7 @@ index.Dockerfile
 .gopath
 
 # Temporary Build Files
+/api_*
 build/_output
 build/_offline
 build/camel-k-runtime-*-maven-offline.tar.gz
@@ -48,7 +50,7 @@ build/_maven_overlay/
 build/maven/target/
 build/maven
 build/m2
-/api_*
+_scratch/
 
 # YAKS test output
 .yaks-jbang/

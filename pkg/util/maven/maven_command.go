@@ -26,8 +26,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
-	"strconv"
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util"
@@ -46,17 +44,21 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
-		// Prepare maven wrapper helps when running the builder as Pod as it makes
-		// the builder container, Maven agnostic
-		if err := c.prepareMavenWrapper(ctx); err != nil {
-			return err
-		}
-	}
-
-	mvnCmd := "./mvnw"
+	mvnCmd := ""
 	if c, ok := os.LookupEnv("MAVEN_CMD"); ok {
 		mvnCmd = c
+	}
+
+	if mvnCmd == "" {
+		if e, ok := os.LookupEnv("MAVEN_WRAPPER"); (ok && e == "true") || !ok {
+			// Prepare maven wrapper helps when running the builder as Pod as it makes
+			// the builder container, Maven agnostic
+			if err := c.prepareMavenWrapper(ctx); err != nil {
+				return err
+			}
+		}
+
+		mvnCmd = "./mvnw"
 	}
 
 	args := make([]string, 0)
@@ -89,58 +91,11 @@ func (c *Command) Do(ctx context.Context) error {
 		args = append(args, "-Dsettings.security="+settingsSecurityPath)
 	}
 
-	if !util.StringContainsPrefix(c.context.AdditionalArguments, "-Dmaven.artifact.threads") {
-		args = append(args, "-Dmaven.artifact.threads="+strconv.Itoa(runtime.GOMAXPROCS(0)))
-	}
-
-	if !util.StringSliceExists(c.context.AdditionalArguments, "-T") {
-		args = append(args, "-T", strconv.Itoa(runtime.GOMAXPROCS(0)))
-	}
+	mavenOptions, env := c.optionsFromEnv()
 
 	cmd := exec.CommandContext(ctx, mvnCmd, args...)
 	cmd.Dir = c.context.Path
-
-	var mavenOptions string
-	if len(c.context.ExtraMavenOpts) > 0 {
-		// Inherit the parent process environment
-		env := os.Environ()
-
-		mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
-		if !ok {
-			mavenOptions = strings.Join(c.context.ExtraMavenOpts, " ")
-			env = append(env, "MAVEN_OPTS="+mavenOptions)
-		} else {
-			var extraOptions []string
-			options := strings.Fields(mavenOpts)
-			for _, extraOption := range c.context.ExtraMavenOpts {
-				// Basic duplicated key detection, that should be improved
-				// to support a wider range of JVM options
-				key := strings.SplitN(extraOption, "=", 2)[0]
-				exists := false
-				for _, opt := range options {
-					if strings.HasPrefix(opt, key) {
-						exists = true
-
-						break
-					}
-				}
-				if !exists {
-					extraOptions = append(extraOptions, extraOption)
-				}
-			}
-
-			options = append(options, extraOptions...)
-			mavenOptions = strings.Join(options, " ")
-			for i, e := range env {
-				if strings.HasPrefix(e, "MAVEN_OPTS=") {
-					env[i] = "MAVEN_OPTS=" + mavenOptions
-					break
-				}
-			}
-		}
-
-		cmd.Env = env
-	}
+	cmd.Env = env
 
 	Log.WithValues("MAVEN_OPTS", mavenOptions).Infof("executing: %s", strings.Join(cmd.Args, " "))
 
@@ -149,7 +104,54 @@ func (c *Command) Do(ctx context.Context) error {
 		return err
 	}
 
-	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
+	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
+}
+
+func (c *Command) optionsFromEnv() (string, []string) {
+	if len(c.context.ExtraMavenOpts) == 0 {
+		return "", nil
+	}
+
+	var mavenOptions string
+
+	// Inherit the parent process environment
+	env := os.Environ()
+
+	mavenOpts, ok := os.LookupEnv("MAVEN_OPTS")
+	if !ok {
+		mavenOptions = strings.Join(c.context.ExtraMavenOpts, " ")
+		env = append(env, "MAVEN_OPTS="+mavenOptions)
+	} else {
+		var extraOptions []string
+		options := strings.Fields(mavenOpts)
+		for _, extraOption := range c.context.ExtraMavenOpts {
+			// Basic duplicated key detection, that should be improved
+			// to support a wider range of JVM options
+			key := strings.SplitN(extraOption, "=", 2)[0]
+			exists := false
+			for _, opt := range options {
+				if strings.HasPrefix(opt, key) {
+					exists = true
+
+					break
+				}
+			}
+			if !exists {
+				extraOptions = append(extraOptions, extraOption)
+			}
+		}
+
+		options = append(options, extraOptions...)
+		mavenOptions = strings.Join(options, " ")
+		for i, e := range env {
+			if strings.HasPrefix(e, "MAVEN_OPTS=") {
+				env[i] = "MAVEN_OPTS=" + mavenOptions
+				break
+			}
+		}
+	}
+
+	return mavenOptions, env
 }
 
 func NewContext(buildDir string) Context {
@@ -196,7 +198,7 @@ func (c *Context) AddSystemProperty(name string, value string) {
 }
 
 func generateProjectStructure(context Context, project Project) error {
-	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", project); err != nil {
+	if err := util.WriteFileWithBytesMarshallerContent(context.Path, "pom.xml", &project); err != nil {
 		return err
 	}
 
@@ -250,7 +252,7 @@ func generateProjectStructure(context Context, project Project) error {
 func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 	cmd := exec.CommandContext(ctx, "cp", "--recursive", "/usr/share/maven/mvnw/.", ".")
 	cmd.Dir = c.context.Path
-	return util.RunAndLog(ctx, cmd, MavenLogHandler, MavenLogHandler)
+	return util.RunAndLog(ctx, cmd, LogHandler, LogHandler)
 }
 
 // ParseGAV decodes the provided Maven GAV into the corresponding Dependency.
@@ -258,6 +260,8 @@ func (c *Command) prepareMavenWrapper(ctx context.Context) error {
 // The artifact id is in the form of:
 //
 //	<groupId>:<artifactId>[:<packagingType>]:(<version>)[:<classifier>]
+//
+//nolint:mnd
 func ParseGAV(gav string) (Dependency, error) {
 	dep := Dependency{}
 	res := strings.Split(gav, ":")

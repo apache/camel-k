@@ -174,6 +174,8 @@ func HandlePlatformStateChanges(ctx context.Context, c client.Client, platform *
 
 // HandleIntegrationPlatformEvents watches all events related to the given integration platform.
 // This function blocks until the handler function returns true or either the events channel or the context is closed.
+//
+//nolint:nestif
 func HandleIntegrationPlatformEvents(ctx context.Context, c client.Client, p *v1.IntegrationPlatform,
 	handler func(event *corev1.Event) bool) error {
 	watcher, err := c.CoreV1().Events(p.Namespace).
@@ -199,6 +201,7 @@ func HandleIntegrationPlatformEvents(ctx context.Context, c client.Client, p *v1
 			if !ok {
 				return nil
 			}
+
 			if e.Object != nil {
 				if evt, ok := e.Object.(*corev1.Event); ok {
 					if isAllowed(lastEvent, evt, p.CreationTimestamp.UnixNano()) {

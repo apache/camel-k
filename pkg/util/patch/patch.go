@@ -92,7 +92,7 @@ func removeNilValues(v reflect.Value, parent reflect.Value) {
 	}
 	switch v.Kind() {
 	case reflect.Array, reflect.Slice:
-		for i := 0; i < v.Len(); i++ {
+		for i := range v.Len() {
 			removeNilValues(v.Index(i), v)
 		}
 	case reflect.Map:

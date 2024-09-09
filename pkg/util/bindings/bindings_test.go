@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
@@ -31,6 +31,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBindings(t *testing.T) {
@@ -124,6 +125,12 @@ func TestBindings(t *testing.T) {
 				}),
 			},
 			uri: "knative:event/myeventtype?apiVersion=eventing.knative.dev%2Fv1&kind=Broker&name=default",
+			traits: v1.Traits{
+				Knative: &traitv1.KnativeTrait{
+					Filters:         []string{"type=myeventtype"},
+					FilterEventType: ptr.To(true),
+				},
+			},
 		},
 		{
 			endpointType: v1.EndpointTypeSource,
@@ -157,6 +164,24 @@ func TestBindings(t *testing.T) {
 			},
 		},
 		{
+			endpointType: v1.EndpointTypeSink,
+			endpoint: v1.Endpoint{
+				Ref: &corev1.ObjectReference{
+					Kind:       "Kamelet",
+					APIVersion: "camel.apache.org/v1any1",
+					Name:       "mykamelet",
+				},
+				Properties: asEndpointProperties(map[string]string{
+					"mymessage":      "myval",
+					"kameletVersion": "v1",
+				}),
+			},
+			uri: "kamelet:mykamelet/sink?kameletVersion=v1",
+			props: map[string]string{
+				"camel.kamelet.mykamelet.sink.mymessage": "myval",
+			},
+		},
+		{
 			endpoint: v1.Endpoint{
 				Ref: &corev1.ObjectReference{
 					Kind:       "Kamelet",
@@ -176,7 +201,7 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1.EndpointTypeSink,
 			endpoint: v1.Endpoint{
-				URI: pointer.String("https://myurl/hey"),
+				URI: ptr.To("https://myurl/hey"),
 				Properties: asEndpointProperties(map[string]string{
 					"ce.override.ce-type": "mytype",
 				}),
@@ -184,7 +209,7 @@ func TestBindings(t *testing.T) {
 			uri: "knative:endpoint/sink?ce.override.ce-type=mytype",
 			traits: v1.Traits{
 				Knative: &traitv1.KnativeTrait{
-					SinkBinding:   pointer.Bool(false),
+					SinkBinding:   ptr.To(false),
 					Configuration: asKnativeConfig("https://myurl/hey"),
 				},
 			},
@@ -192,7 +217,7 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1.EndpointTypeSink,
 			endpoint: v1.Endpoint{
-				URI: pointer.String("https://myurl/hey"),
+				URI: ptr.To("https://myurl/hey"),
 			},
 			profile: v1.TraitProfileKubernetes,
 			uri:     "https://myurl/hey",
@@ -200,7 +225,7 @@ func TestBindings(t *testing.T) {
 		{
 			endpointType: v1.EndpointTypeSink,
 			endpoint: v1.Endpoint{
-				URI: pointer.String("docker://xxx"),
+				URI: ptr.To("docker://xxx"),
 			},
 			uri: "docker://xxx",
 		},
@@ -212,7 +237,7 @@ func TestBindings(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			profile := tc.profile
 			if profile == "" {
@@ -229,7 +254,7 @@ func TestBindings(t *testing.T) {
 			binding, err := Translate(bindingContext, EndpointContext{
 				Type: tc.endpointType,
 			}, tc.endpoint)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.NotNil(t, binding)
 			assert.Equal(t, tc.uri, binding.URI)
 			assert.Equal(t, tc.traits, binding.Traits)

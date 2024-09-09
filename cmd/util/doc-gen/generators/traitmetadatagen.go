@@ -70,12 +70,16 @@ func (g *traitMetaDataGen) Filename() string {
 }
 
 func (g *traitMetaDataGen) Filter(context *generator.Context, t *types.Type) bool {
+	filter := false
 	for _, c := range t.CommentLines {
 		if strings.Contains(c, tagTrait) {
-			return true
+			filter = true
+		}
+		if strings.Contains(c, tagInternal) {
+			filter = false
 		}
 	}
-	return false
+	return filter
 }
 
 func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Type, out io.Writer) error {
@@ -90,7 +94,7 @@ func (g *traitMetaDataGen) GenerateType(context *generator.Context, t *types.Typ
 func (g *traitMetaDataGen) getTraitID(t *types.Type) string {
 	for _, s := range t.CommentLines {
 		if strings.Contains(s, tagTrait) {
-			matches := tagTraitID.FindStringSubmatch(s)
+			matches := tagTraitRegex.FindStringSubmatch(s)
 			if len(matches) < 2 {
 				panic(fmt.Sprintf("unable to extract trait ID from tag line `%s`", s))
 			}

@@ -68,12 +68,16 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.CamelCatalogStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelLoader"):
 		return &camelv1.CamelLoaderApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("CamelProperty"):
+		return &camelv1.CamelPropertyApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelScheme"):
 		return &camelv1.CamelSchemeApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("CamelSchemeScope"):
 		return &camelv1.CamelSchemeScopeApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("Capability"):
 		return &camelv1.CapabilityApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("Catalog"):
+		return &camelv1.CatalogApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("ConfigurationSpec"):
 		return &camelv1.ConfigurationSpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("DataSpec"):
@@ -164,6 +168,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.KameletRepositorySpecApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletSpec"):
 		return &camelv1.KameletSpecApplyConfiguration{}
+	case v1.SchemeGroupVersion.WithKind("KameletSpecBase"):
+		return &camelv1.KameletSpecBaseApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KameletStatus"):
 		return &camelv1.KameletStatusApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("KanikoTask"):

@@ -20,62 +20,48 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestMasterTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("master works", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/Master.java").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "master"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+		})
 
-	t.Run("master works", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/Master.java").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "master"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "master"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		t.Run("only one integration with master runs", func(t *testing.T) {
+			nameFirst := RandomizedSuffixName("first")
+			g.Expect(KamelRun(t, ctx, ns, "files/Master.java", "--name", nameFirst,
+				"--label", "leader-group=same", "-t", "master.label-key=leader-group", "-t", "master.label-value=same", "-t", "owner.target-labels=leader-group",
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameFirst, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameFirst), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			// Start a second integration with the same lock (it should not start the route before 15 seconds)
+			nameSecond := RandomizedSuffixName("second")
+			g.Expect(KamelRun(t, ctx, ns, "files/Master.java", "--name", nameSecond,
+				"--label", "leader-group=same", "-t", "master.label-key=leader-group", "-t", "master.label-value=same", "-t", "owner.target-labels=leader-group",
+				"-t", fmt.Sprintf("master.resource-name=%s-lock", nameFirst),
+			).Execute()).To(Succeed())
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameSecond), TestTimeoutShort).Should(ContainSubstring("started in"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, nameSecond), 15*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, nameSecond, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+		})
 	})
-
-	t.Run("only one integration with master runs", func(t *testing.T) {
-		nameFirst := RandomizedSuffixName("first")
-		Expect(KamelRunWithID(operatorID, ns, "files/Master.java",
-			"--name", nameFirst,
-			"--label", "leader-group=same",
-			"-t", "master.label-key=leader-group",
-			"-t", "master.label-value=same",
-			"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, nameFirst), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, nameFirst), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		// Start a second integration with the same lock (it should not start the route)
-		nameSecond := RandomizedSuffixName("second")
-		Expect(KamelRunWithID(operatorID, ns, "files/Master.java",
-			"--name", nameSecond,
-			"--label", "leader-group=same",
-			"-t", "master.label-key=leader-group",
-			"-t", "master.label-value=same",
-			"-t", "master.resource-name=first-lock",
-			"-t", "owner.target-labels=leader-group").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, nameSecond), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, nameSecond), TestTimeoutShort).Should(ContainSubstring("started in"))
-		Eventually(IntegrationLogs(ns, nameSecond), 30*time.Second).ShouldNot(ContainSubstring("Magicstring!"))
-
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, nameFirst)).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, nameFirst)()
-		builderTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "addons", "master")
-		Expect(builderTrait).ToNot(BeNil())
-		Expect(len(builderTrait)).To(Equal(2))
-		Expect(builderTrait["labelKey"]).To(Equal("leader-group"))
-		Expect(builderTrait["labelValue"]).To(Equal("same"))
-	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

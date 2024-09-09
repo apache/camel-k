@@ -44,18 +44,7 @@ type spectrumTask struct {
 var _ Task = &spectrumTask{}
 
 func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
-	status := v1.BuildStatus{}
-
-	baseImage := t.build.Status.BaseImage
-	if baseImage == "" {
-		baseImage = t.task.BaseImage
-	}
-	status.BaseImage = baseImage
-	rootImage := t.build.Status.RootImage
-	if rootImage == "" {
-		rootImage = t.task.BaseImage
-	}
-	status.RootImage = rootImage
+	status := initializeStatusFrom(t.build.Status, t.task.BaseImage)
 
 	contextDir := t.task.ContextDir
 	if contextDir == "" {
@@ -83,17 +72,17 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 	if !exists || empty {
 		// this can only indicate that there are no more resources to add to the base image,
 		// because transitive resolution is the same even if spec differs.
-		log.Infof("No new image to build, reusing existing image %s", baseImage)
-		status.Image = baseImage
-		return status
+		status.Image = status.BaseImage
+		log.Infof("No new image to build, reusing existing image %s", status.Image)
+		return *status
 	}
 
 	pullInsecure := t.task.Registry.Insecure // incremental build case
 
 	log.Debugf("Registry address: %s", t.task.Registry.Address)
-	log.Debugf("Base image: %s", baseImage)
+	log.Debugf("Base image: %s", status.BaseImage)
 
-	if !strings.HasPrefix(baseImage, t.task.Registry.Address) {
+	if !strings.HasPrefix(status.BaseImage, t.task.Registry.Address) {
 		if pullInsecure {
 			log.Info("Assuming secure pull because the registry for the base image and the main registry are different")
 			pullInsecure = false
@@ -122,7 +111,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		PushInsecure:  t.task.Registry.Insecure,
 		PullConfigDir: registryConfigDir,
 		PushConfigDir: registryConfigDir,
-		Base:          baseImage,
+		Base:          status.BaseImage,
 		Target:        t.task.Image,
 		Stdout:        newStdW,
 		Stderr:        newStdW,
@@ -149,7 +138,7 @@ func (t *spectrumTask) Do(ctx context.Context) v1.BuildStatus {
 		}
 	}
 
-	return status
+	return *status
 }
 
 func readSpectrumLogs(newStdOut io.Reader) {

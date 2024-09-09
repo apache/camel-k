@@ -23,38 +23,37 @@ limitations under the License.
 package knative
 
 import (
+	"context"
 	"testing"
+
+	"io/ioutil"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"github.com/stretchr/testify/require"
 )
 
+/*
+	go test -v -tags=integration ./e2e/knative --run TestOpenAPIService
+*/
+
 func TestOpenAPIService(t *testing.T) {
-	RegisterTestingT(t)
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		openapiContent, err := ioutil.ReadFile("./files/petstore-api.yaml")
+		require.NoError(t, err)
+		var cmDataProps = make(map[string]string)
+		cmDataProps["petstore-api.yaml"] = string(openapiContent)
+		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi-knative", cmDataProps)
 
-	openapiContent, err := ioutil.ReadFile("./files/petstore-api.yaml")
-	assert.Nil(t, err)
-	var cmDataProps = make(map[string]string)
-	cmDataProps["petstore-api.yaml"] = string(openapiContent)
-	CreatePlainTextConfigmap(ns, "my-openapi-knative", cmDataProps)
+		g.Expect(KamelRun(t, ctx, ns, "--name", "petstore", "--open-api", "configmap:my-openapi-knative", "files/petstore.yaml").Execute()).To(Succeed())
 
-	Expect(KamelRunWithID(operatorID, ns,
-		"--name", "petstore",
-		"--open-api", "configmap:my-openapi-knative",
-		"files/petstore.groovy",
-	).Execute()).To(Succeed())
-
-	Eventually(KnativeService(ns, "petstore"), TestTimeoutLong).
-		Should(Not(BeNil()))
-
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-	Eventually(IntegrationLogs(ns, "petstore"), TestTimeoutMedium).
-		Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Eventually(KnativeService(t, ctx, ns, "petstore"), TestTimeoutLong).
+			Should(Not(BeNil()))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
+			Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
+			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
+			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
+	})
 }

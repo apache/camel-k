@@ -42,8 +42,11 @@ import (
 	image "github.com/apache/camel-k/v2/pkg/util/registry"
 )
 
-// BuilderServiceAccount --.
-const BuilderServiceAccount = "camel-k-builder"
+const (
+	BuilderServiceAccount = "camel-k-builder"
+
+	defaultBuildTimeout = 5 * time.Minute
+)
 
 // ConfigureDefaults fills with default values all missing details about the integration platform.
 // Defaults are set in the status fields, not in the spec.
@@ -87,7 +90,7 @@ func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	if p.Status.Build.BuildConfiguration.OrderStrategy == "" {
-		p.Status.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategySequential
+		p.Status.Build.BuildConfiguration.OrderStrategy = v1.BuildOrderStrategyDependencies
 		log.Debugf("Integration Platform %s [%s]: setting build order strategy %s", p.Name, p.Namespace, p.Status.Build.BuildConfiguration.OrderStrategy)
 	}
 
@@ -138,40 +141,10 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	if p.Status.Cluster == v1.IntegrationPlatformClusterOpenShift &&
 		p.Status.Build.PublishStrategy != v1.IntegrationPlatformBuildPublishStrategyS2I &&
 		p.Status.Build.Registry.Address == "" {
-		log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
-		// Default to using OpenShift internal container images registry when using a strategy other than S2I
-		p.Status.Build.Registry.Address = defaults.OpenShiftRegistryAddress
 
-		// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
-		cm, err := createServiceCaBundleConfigMap(ctx, c, p)
+		err := configureForOpenShiftS2i(ctx, c, p)
 		if err != nil {
 			return err
-		}
-		log.Debugf("Integration Platform %s [%s]: setting registry certificate authority", p.Name, p.Namespace)
-		p.Status.Build.Registry.CA = cm.Name
-
-		// Default to using the registry secret that's configured for the builder service account
-		if p.Status.Build.Registry.Secret == "" {
-			log.Debugf("Integration Platform %s [%s]: setting registry secret", p.Name, p.Namespace)
-			// Bind the required role to push images to the registry
-			err := createBuilderRegistryRoleBinding(ctx, c, p)
-			if err != nil {
-				return err
-			}
-
-			sa := corev1.ServiceAccount{}
-			err = c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: BuilderServiceAccount}, &sa)
-			if err != nil {
-				return err
-			}
-			// We may want to read the secret keys instead of relying on the secret name scheme
-			for _, secret := range sa.Secrets {
-				if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
-					p.Status.Build.Registry.Secret = secret.Name
-
-					break
-				}
-			}
 		}
 	}
 	if p.Status.Build.Registry.Address == "" {
@@ -185,6 +158,47 @@ func configureRegistry(ctx context.Context, c client.Client, p *v1.IntegrationPl
 	}
 
 	log.Debugf("Final Registry Address: %s", p.Status.Build.Registry.Address)
+	return nil
+}
+
+func configureForOpenShiftS2i(ctx context.Context, c client.Client, p *v1.IntegrationPlatform) error {
+	log.Debugf("Integration Platform %s [%s]: setting registry address", p.Name, p.Namespace)
+	// Default to using OpenShift internal container images registry when using a strategy other than S2I
+	p.Status.Build.Registry.Address = defaults.OpenShiftRegistryAddress
+
+	// OpenShift automatically injects the service CA certificate into the service-ca.crt key on the ConfigMap
+	cm, err := createServiceCaBundleConfigMap(ctx, c, p)
+	if err != nil {
+		return err
+	}
+
+	log.Debugf("Integration Platform %s [%s]: setting registry certificate authority", p.Name, p.Namespace)
+	p.Status.Build.Registry.CA = cm.Name
+
+	// Default to using the registry secret that's configured for the builder service account
+	if p.Status.Build.Registry.Secret == "" {
+		log.Debugf("Integration Platform %s [%s]: setting registry secret", p.Name, p.Namespace)
+		// Bind the required role to push images to the registry
+		err := createBuilderRegistryRoleBinding(ctx, c, p)
+		if err != nil {
+			return err
+		}
+
+		sa := corev1.ServiceAccount{}
+		err = c.Get(ctx, types.NamespacedName{Namespace: p.Namespace, Name: BuilderServiceAccount}, &sa)
+		if err != nil {
+			return err
+		}
+		// We may want to read the secret keys instead of relying on the secret name scheme
+		for _, secret := range sa.Secrets {
+			if strings.Contains(secret.Name, "camel-k-builder-dockercfg") {
+				p.Status.Build.Registry.Secret = secret.Name
+
+				break
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -216,10 +230,7 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 	if target.Status.Build.PublishStrategy == "" {
 		target.Status.Build.PublishStrategy = source.Status.Build.PublishStrategy
 	}
-	if target.Status.Build.PublishStrategyOptions == nil {
-		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", target.Name, target.Namespace)
-		target.Status.Build.PublishStrategyOptions = source.Status.Build.PublishStrategyOptions
-	}
+
 	if target.Status.Build.BuildConfiguration.Strategy == "" {
 		target.Status.Build.BuildConfiguration.Strategy = source.Status.Build.BuildConfiguration.Strategy
 	}
@@ -297,10 +308,6 @@ func applyPlatformSpec(source *v1.IntegrationPlatform, target *v1.IntegrationPla
 }
 
 func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
-	if p.Status.Build.PublishStrategyOptions == nil {
-		log.Debugf("Integration Platform %s [%s]: setting publish strategy options", p.Name, p.Namespace)
-		p.Status.Build.PublishStrategyOptions = map[string]string{}
-	}
 	if p.Status.Build.RuntimeVersion == "" {
 		log.Debugf("Integration Platform %s [%s]: setting runtime version", p.Name, p.Namespace)
 		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
@@ -325,7 +332,7 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	// Build timeout
 	if p.Status.Build.GetTimeout().Duration == 0 {
 		p.Status.Build.Timeout = &metav1.Duration{
-			Duration: 5 * time.Minute,
+			Duration: defaultBuildTimeout,
 		}
 	} else {
 		d := p.Status.Build.GetTimeout().Duration.Truncate(time.Second)
@@ -357,9 +364,17 @@ func setPlatformDefaults(p *v1.IntegrationPlatform, verbose bool) error {
 	}
 	setStatusAdditionalInfo(p)
 
+	buildConfig := &p.Status.Build.BuildConfiguration
+	if buildConfig.ImagePlatforms == nil {
+		if runtime.GOARCH == "arm64" {
+			buildConfig.ImagePlatforms = []string{"linux/arm64"}
+		}
+	}
+
 	if verbose {
 		log.Log.Infof("RuntimeVersion set to %s", p.Status.Build.RuntimeVersion)
 		log.Log.Infof("BaseImage set to %s", p.Status.Build.BaseImage)
+		log.Log.Infof("ImagePlatforms set to %s", buildConfig.ImagePlatforms)
 		log.Log.Infof("LocalRepository set to %s", p.Status.Build.Maven.LocalRepository)
 		log.Log.Infof("Timeout set to %s", p.Status.Build.GetTimeout())
 	}

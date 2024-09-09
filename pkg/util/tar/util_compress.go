@@ -24,27 +24,27 @@ import (
 	"io"
 	"os"
 
-	"github.com/spf13/cobra"
+	"github.com/apache/camel-k/v2/pkg/util"
 )
 
-func CreateTarFile(fileNames []string, archiveName string, cmd *cobra.Command) {
+func CreateTarFile(fileNames []string, archiveName string, buf io.Writer) {
 	out, err := os.Create(archiveName)
 	if err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), "Error writing archive:", err.Error())
+		_, _ = fmt.Fprintln(buf, "Error writing archive:", err.Error())
 	}
-	defer out.Close()
+	defer util.CloseQuietly(out)
 
 	err = createArchiveFile(fileNames, out)
 	if err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), "Error writing archive:", err.Error())
+		_, _ = fmt.Fprintln(buf, "Error writing archive:", err.Error())
 	}
 }
 
 func createArchiveFile(files []string, buf io.Writer) error {
 	gw := gzip.NewWriter(buf)
-	defer gw.Close()
+	defer util.CloseQuietly(gw)
 	tw := tar.NewWriter(gw)
-	defer tw.Close()
+	defer util.CloseQuietly(tw)
 
 	// Iterate over files and add them to the tar archive
 	for _, file := range files {
@@ -61,7 +61,8 @@ func addEntryToArchive(tw *tar.Writer, filename string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer util.CloseQuietly(file)
+
 	info, err := file.Stat()
 	if err != nil {
 		return err
@@ -79,6 +80,11 @@ func addEntryToArchive(tw *tar.Writer, filename string) error {
 	if err != nil {
 		return err
 	}
-	defer os.Remove(filename)
+
+	err = os.Remove(filename)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

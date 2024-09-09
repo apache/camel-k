@@ -27,20 +27,25 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/kamelet/repository"
+	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/dsl"
-	"github.com/apache/camel-k/v2/pkg/util/kamelets"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 )
 
 const (
+	kameletsTraitID    = "kamelets"
+	kameletsTraitOrder = 450
+
 	contentKey                  = "content"
 	KameletLocationProperty     = "camel.component.kamelet.location"
 	kameletLabel                = "camel.apache.org/kamelet"
@@ -48,17 +53,7 @@ const (
 	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
 
-type configurationKey struct {
-	kamelet         string
-	configurationID string
-}
-
-func newConfigurationKey(kamelet, configurationID string) configurationKey {
-	return configurationKey{
-		kamelet:         kamelet,
-		configurationID: configurationID,
-	}
-}
+var kameletVersionProperty = fmt.Sprintf("?%s=", v1.KameletVersionProperty)
 
 type kameletsTrait struct {
 	BaseTrait
@@ -67,7 +62,7 @@ type kameletsTrait struct {
 
 func newKameletsTrait() Trait {
 	return &kameletsTrait{
-		BaseTrait: NewBaseTrait("kamelets", 450),
+		BaseTrait: NewBaseTrait(kameletsTraitID, kameletsTraitOrder),
 	}
 }
 
@@ -75,30 +70,36 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+	if !ptr.Deref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled("Kamelets"), nil
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-
-	if pointer.BoolDeref(t.Auto, true) {
-		kamelets, err := kamelets.ExtractKameletFromSources(e.Ctx, e.Client, e.CamelCatalog, e.Resources, e.Integration)
+	if t.MountPoint == "" {
+		t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
+	}
+	if ptr.Deref(t.Auto, true) {
+		var kamelets []string
+		_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+			util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
+			return true
+		})
 		if err != nil {
 			return false, nil, err
 		}
-
+		// Check if a Kamelet is configured as default error handler URI
+		defaultErrorHandlerURI := e.Integration.Spec.GetConfigurationProperty(v1.ErrorHandlerAppPropertiesPrefix + ".deadLetterUri")
+		if defaultErrorHandlerURI != "" && strings.HasPrefix(defaultErrorHandlerURI, "kamelet:") {
+			kamelets = append(kamelets, source.ExtractKamelet(defaultErrorHandlerURI))
+		}
 		if len(kamelets) > 0 {
 			sort.Strings(kamelets)
 			t.List = strings.Join(kamelets, ",")
 		}
-
-		if t.MountPoint == "" {
-			t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
-		}
 	}
 
-	return len(t.getKameletKeys()) > 0, nil, nil
+	return len(t.getKameletKeys(false)) > 0, nil, nil
 }
 
 func (t *kameletsTrait) Apply(e *Environment) error {
@@ -107,13 +108,10 @@ func (t *kameletsTrait) Apply(e *Environment) error {
 			return err
 		}
 	}
-	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return t.addConfigurationSecrets(e)
-	}
-
 	return nil
 }
 
+// collectKamelets load a Kamelet specification setting the specific version specification.
 func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet, error) {
 	repo, err := repository.NewForPlatform(e.Ctx, e.Client, e.Platform, e.Integration.Namespace, platform.GetOperatorNamespace())
 	if err != nil {
@@ -124,18 +122,27 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	missingKamelets := make([]string, 0)
 	availableKamelets := make([]string, 0)
 
-	for _, key := range t.getKameletKeys() {
-		kamelet, err := repo.Get(e.Ctx, key)
+	for _, kml := range strings.Split(t.List, ",") {
+		name := getKameletKey(kml, false)
+		if !v1.ValidKameletName(name) {
+			// Skip kamelet sink and source id
+			continue
+		}
+		kamelet, err := repo.Get(e.Ctx, name)
 		if err != nil {
 			return nil, err
 		}
-
 		if kamelet == nil {
-			missingKamelets = append(missingKamelets, key)
+			missingKamelets = append(missingKamelets, name)
+			continue
 		} else {
-			availableKamelets = append(availableKamelets, key)
-			kamelets[key] = kamelet
+			availableKamelets = append(availableKamelets, name)
 		}
+		clonedKamelet, err := kamelet.CloneWithVersion(getKameletVersion(kml))
+		if err != nil {
+			return nil, err
+		}
+		kamelets[clonedKamelet.Name] = clonedKamelet
 	}
 
 	sort.Strings(availableKamelets)
@@ -168,44 +175,45 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 }
 
 func (t *kameletsTrait) addKamelets(e *Environment) error {
-	if len(t.getKameletKeys()) > 0 {
-		kamelets, err := t.collectKamelets(e)
-		if err != nil {
-			return err
-		}
-		kb := newKameletBundle()
-		for _, key := range t.getKameletKeys() {
-			kamelet := kamelets[key]
-			if err := t.addKameletAsSource(e, kamelet); err != nil {
-				return err
-			}
-			// Adding dependencies from Kamelets
-			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
-			// Add to Kamelet bundle configmap
-			kb.add(kamelet)
-		}
-		bundleConfigmaps, err := kb.toConfigmaps(e.Integration.Name, e.Integration.Namespace)
-		if err != nil {
-			return err
-		}
-		// set kamelets runtime location
-		if e.ApplicationProperties == nil {
-			e.ApplicationProperties = map[string]string{}
-		}
-		for _, cm := range bundleConfigmaps {
-			kameletMountPoint := fmt.Sprintf("%s/%s", t.MountPoint, cm.Name)
-			cm.Annotations[kameletMountPointAnnotation] = kameletMountPoint
-			e.Resources.Add(cm)
-			if e.ApplicationProperties[KameletLocationProperty] == "" {
-				e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s", kameletMountPoint)
-			} else {
-				e.ApplicationProperties[KameletLocationProperty] += fmt.Sprintf(",file:%s", kameletMountPoint)
-			}
-		}
-		e.ApplicationProperties[KameletLocationProperty] += ",classpath:/kamelets"
-		// resort dependencies
-		sort.Strings(e.Integration.Status.Dependencies)
+	if len(t.getKameletKeys(false)) == 0 {
+		return nil
 	}
+	kamelets, err := t.collectKamelets(e)
+	if err != nil {
+		return err
+	}
+	kb := newKameletBundle()
+	for _, kamelet := range kamelets {
+		if err := t.addKameletAsSource(e, kamelet); err != nil {
+			return err
+		}
+		// Adding dependencies from Kamelets
+		util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, kamelet.Spec.Dependencies)
+		// Add to Kamelet bundle configmap
+		kb.add(kamelet)
+	}
+	bundleConfigmaps, err := kb.toConfigmaps(e.Integration.Name, e.Integration.Namespace)
+	if err != nil {
+		return err
+	}
+	// set kamelets runtime location
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = map[string]string{}
+	}
+	for _, cm := range bundleConfigmaps {
+		kameletMountPoint := fmt.Sprintf("%s/%s", t.MountPoint, cm.Name)
+		cm.Annotations[kameletMountPointAnnotation] = kameletMountPoint
+		e.Resources.Add(cm)
+		if e.ApplicationProperties[KameletLocationProperty] == "" {
+			e.ApplicationProperties[KameletLocationProperty] = fmt.Sprintf("file:%s", kameletMountPoint)
+		} else {
+			e.ApplicationProperties[KameletLocationProperty] += fmt.Sprintf(",file:%s", kameletMountPoint)
+		}
+	}
+	e.ApplicationProperties[KameletLocationProperty] += ",classpath:/kamelets"
+	// resort dependencies
+	sort.Strings(e.Integration.Status.Dependencies)
+
 	return nil
 }
 
@@ -216,19 +224,16 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 	sources := make([]v1.SourceSpec, 0)
 
 	if kamelet.Spec.Template != nil {
-		template := kamelet.Spec.Template
-		flowData, err := dsl.TemplateToYamlDSL(*template, kamelet.Name)
+		flowData, err := dsl.TemplateToYamlDSL(*kamelet.Spec.Template, kamelet.Name)
 		if err != nil {
 			return err
 		}
-
 		flowSource := v1.SourceSpec{
 			DataSpec: v1.DataSpec{
 				Name:    fmt.Sprintf("%s.yaml", kamelet.Name),
 				Content: string(flowData),
 			},
-			Language:    v1.LanguageYaml,
-			FromKamelet: true,
+			Language: v1.LanguageYaml,
 		}
 		flowSource, err = integrationSourceFromKameletSource(e, kamelet, flowSource, fmt.Sprintf("%s-kamelet-%s-template", e.Integration.Name, kamelet.Name))
 		if err != nil {
@@ -261,40 +266,10 @@ func (t *kameletsTrait) addKameletAsSource(e *Environment, kamelet *v1.Kamelet) 
 	return nil
 }
 
-func (t *kameletsTrait) addConfigurationSecrets(e *Environment) error {
-	for _, k := range t.getConfigurationKeys() {
-		options := metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", kameletLabel, k.kamelet),
-		}
-		if k.configurationID != "" {
-			options.LabelSelector = fmt.Sprintf("%s=%s,%s=%s", kameletLabel, k.kamelet, kameletConfigurationLabel, k.configurationID)
-		}
-		secrets, err := t.Client.CoreV1().Secrets(e.Integration.Namespace).List(e.Ctx, options)
-		if err != nil {
-			return err
-		}
-
-		for _, item := range secrets.Items {
-			if item.Labels != nil && item.Labels[kameletConfigurationLabel] != k.configurationID {
-				continue
-			}
-
-			e.Integration.Status.AddConfigurationsIfMissing(v1.ConfigurationSpec{
-				Type:  "secret",
-				Value: item.Name,
-			})
-		}
-	}
-	return nil
-}
-
-func (t *kameletsTrait) getKameletKeys() []string {
+func (t *kameletsTrait) getKameletKeys(withVersion bool) []string {
 	answer := make([]string, 0)
 	for _, item := range strings.Split(t.List, ",") {
-		i := strings.Trim(item, " \t\"")
-		if strings.Contains(i, "/") {
-			i = strings.SplitN(i, "/", 2)[0]
-		}
+		i := getKameletKey(item, withVersion)
 		if i != "" && v1.ValidKameletName(i) {
 			util.StringSliceUniqueAdd(&answer, i)
 		}
@@ -303,34 +278,28 @@ func (t *kameletsTrait) getKameletKeys() []string {
 	return answer
 }
 
-func (t *kameletsTrait) getConfigurationKeys() []configurationKey {
-	answer := make([]configurationKey, 0)
-	for _, item := range t.getKameletKeys() {
-		answer = append(answer, newConfigurationKey(item, ""))
+func getKameletKey(item string, withVersion bool) string {
+	i := strings.Trim(item, " \t\"")
+	if strings.Contains(i, "/") {
+		i = strings.SplitN(i, "/", 2)[0]
 	}
-	for _, item := range strings.Split(t.List, ",") {
-		i := strings.Trim(item, " \t\"")
-		if strings.Contains(i, "/") {
-			parts := strings.SplitN(i, "/", 2)
-			newKey := newConfigurationKey(parts[0], parts[1])
-			alreadyPresent := false
-			for _, existing := range answer {
-				if existing == newKey {
-					alreadyPresent = true
-					break
-				}
-			}
-			if !alreadyPresent {
-				answer = append(answer, newKey)
-			}
+	if strings.Contains(i, kameletVersionProperty) {
+		versionedKamelet := strings.SplitN(i, kameletVersionProperty, 2)
+		if withVersion {
+			i = fmt.Sprintf("%s-%s", versionedKamelet[0], versionedKamelet[1])
+		} else {
+			i = versionedKamelet[0]
 		}
 	}
-	sort.Slice(answer, func(i, j int) bool {
-		o1 := answer[i]
-		o2 := answer[j]
-		return o1.kamelet < o2.kamelet || (o1.kamelet == o2.kamelet && o1.configurationID < o2.configurationID)
-	})
-	return answer
+	return i
+}
+
+func getKameletVersion(item string) string {
+	if strings.Contains(item, fmt.Sprintf("?%s=", v1.KameletVersionProperty)) {
+		versionedKamelet := strings.SplitN(item, kameletVersionProperty, 2)
+		return versionedKamelet[1]
+	}
+	return ""
 }
 
 func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, source v1.SourceSpec, name string) (v1.SourceSpec, error) {
@@ -339,6 +308,8 @@ func integrationSourceFromKameletSource(e *Environment, kamelet *v1.Kamelet, sou
 		language := source.InferLanguage()
 		source.Name = fmt.Sprintf("%s.%s", kamelet.Name, string(language))
 	}
+
+	source.FromKamelet = true
 
 	if source.DataSpec.ContentRef != "" {
 		return source, nil
@@ -377,7 +348,7 @@ func initializeConfigmapKameletSource(source v1.SourceSpec, hash, name, namespac
 				sourceLanguageAnnotation:            string(source.Language),
 				sourceNameAnnotation:                name,
 				sourceCompressionAnnotation:         strconv.FormatBool(source.Compression),
-				"camel.apache.org/source.generated": "true",
+				"camel.apache.org/source.generated": boolean.TrueString,
 				"camel.apache.org/source.type":      string(source.Type),
 				"camel.apache.org/source.digest":    hash,
 			},

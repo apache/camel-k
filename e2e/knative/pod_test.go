@@ -23,6 +23,7 @@ limitations under the License.
 package knative
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,16 +35,13 @@ import (
 )
 
 func TestPodTraitWithKnative(t *testing.T) {
-	RegisterTestingT(t)
-
-	Expect(KamelRunWithID(operatorID, ns, "files/podtest-knative2.groovy",
-		"--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, "podtest-knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, "podtest-knative2", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-	Expect(KamelRunWithID(operatorID, ns, "files/podtest-knative1.groovy").Execute()).To(Succeed())
-	Eventually(IntegrationPodPhase(ns, "podtest-knative1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-	Eventually(IntegrationConditionStatus(ns, "podtest-knative1", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-	Eventually(IntegrationLogs(ns, "podtest-knative1"), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		g.Expect(KamelRun(t, ctx, ns, "files/podtest-knative2.yaml", "--pod-template", "files/template-knative.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "podtest-knative2"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "podtest-knative2", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		g.Expect(KamelRun(t, ctx, ns, "files/podtest-knative1.yaml").Execute()).To(Succeed())
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, "podtest-knative1"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, "podtest-knative1", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationLogs(t, ctx, ns, "podtest-knative1"), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
+	})
 }

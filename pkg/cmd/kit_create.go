@@ -43,7 +43,7 @@ func newKitCreateCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *kitCreate
 		Short:   "Create an Integration Kit",
 		Long:    `Create an Integration Kit.`,
 		Args:    options.validateArgs,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, options.Flags),
 		RunE:    options.run,
 	}
 
@@ -153,7 +153,7 @@ func (command *kitCreateCommandOptions) run(cmd *cobra.Command, args []string) e
 	if err := command.parseAndConvertToTrait(command.Secrets, "mount.config"); err != nil {
 		return err
 	}
-	if err := configureTraits(command.Traits, &kit.Spec.Traits, catalog); err != nil {
+	if err := trait.ConfigureTraits(command.Traits, &kit.Spec.Traits, catalog); err != nil {
 		return err
 	}
 	existed := false

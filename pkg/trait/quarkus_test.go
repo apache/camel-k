@@ -20,9 +20,13 @@ package trait
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/builder"
@@ -37,11 +41,11 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	configured, condition, err := quarkusTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	build := getBuilderTask(environment.Pipeline)
 	assert.NotNil(t, t, build)
@@ -52,38 +56,34 @@ func TestConfigureQuarkusTraitBuildSubmitted(t *testing.T) {
 	assert.Len(t, packageTask.Steps, 4)
 }
 
+func TestConfigureQuarkusTraitNativeNotSupported(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	// Set a source not supporting Quarkus native
+	environment.Integration.Spec.Sources[0].Language = v1.LanguageJavaScript
+	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
+	quarkusTrait.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
+
+	configured, condition, err := quarkusTrait.Configure(environment)
+
+	assert.False(t, configured)
+	require.Error(t, err)
+	assert.Equal(t, "invalid native support: Integration default/my-it contains a js source that cannot be compiled to native executable", err.Error())
+	assert.Nil(t, condition)
+}
+
 func TestApplyQuarkusTraitDefaultKitLayout(t *testing.T) {
 	quarkusTrait, environment := createNominalQuarkusTest()
 	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
 
 	configured, condition, err := quarkusTrait.Configure(environment)
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	err = quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.IntegrationKits, 1)
 	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
-}
-
-func TestApplyQuarkusTraitAnnotationKitConfiguration(t *testing.T) {
-	quarkusTrait, environment := createNominalQuarkusTest()
-	environment.Integration.Status.Phase = v1.IntegrationPhaseBuildingKit
-
-	v1.SetAnnotation(&environment.Integration.ObjectMeta, v1.TraitAnnotationPrefix+"quarkus.foo", "camel-k")
-
-	configured, condition, err := quarkusTrait.Configure(environment)
-	assert.True(t, configured)
-	assert.Nil(t, err)
-	assert.Nil(t, condition)
-
-	err = quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
-	assert.Len(t, environment.IntegrationKits, 1)
-	assert.Equal(t, v1.IntegrationKitLayoutFastJar, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel])
-	assert.Equal(t, "camel-k", environment.IntegrationKits[0].Annotations[v1.TraitAnnotationPrefix+"quarkus.foo"])
-
 }
 
 func TestQuarkusTraitBuildModeOrder(t *testing.T) {
@@ -97,7 +97,7 @@ func TestQuarkusTraitBuildModeOrder(t *testing.T) {
 	}
 
 	err := quarkusTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Len(t, environment.IntegrationKits, 2)
 	// assure jvm mode is executed before native mode
 	assert.Equal(t, environment.IntegrationKits[0].Labels[v1.IntegrationKitLayoutLabel], v1.IntegrationKitLayoutFastJar)
@@ -112,6 +112,10 @@ func createNominalQuarkusTest() (*quarkusTrait, *Environment) {
 		Catalog:      NewCatalog(client),
 		CamelCatalog: &camel.RuntimeCatalog{},
 		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "default",
+				Name:      "my-it",
+			},
 			Spec: v1.IntegrationSpec{
 				Sources: []v1.SourceSpec{
 					{
@@ -187,31 +191,31 @@ func TestGetLanguageSettingsWithLoaders(t *testing.T) {
 				Loaders: map[string]v1.CamelLoader{
 					"java": {
 						Metadata: map[string]string{
-							"native":                         "true",
-							"sources-required-at-build-time": "true",
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
 					"groovy": {
 						Metadata: map[string]string{
-							"native":                         "false",
-							"sources-required-at-build-time": "false",
+							"native":                         boolean.FalseString,
+							"sources-required-at-build-time": boolean.FalseString,
 						},
 					},
 					"js": {
 						Metadata: map[string]string{
-							"native":                         "true",
-							"sources-required-at-build-time": "false",
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.FalseString,
 						},
 					},
 					"kts": {
 						Metadata: map[string]string{
-							"native":                         "false",
-							"sources-required-at-build-time": "true",
+							"native":                         boolean.FalseString,
+							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
 					"jsh": {
 						Metadata: map[string]string{
-							"native": "true",
+							"native": boolean.TrueString,
 						},
 					},
 				},
@@ -223,4 +227,32 @@ func TestGetLanguageSettingsWithLoaders(t *testing.T) {
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageKotlin))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
+}
+
+func TestQuarkusMatches(t *testing.T) {
+	qt := quarkusTrait{
+		BasePlatformTrait: NewBasePlatformTrait("quarkus", 600),
+		QuarkusTrait: traitv1.QuarkusTrait{
+			Modes: []traitv1.QuarkusMode{traitv1.JvmQuarkusMode},
+		},
+	}
+	qt2 := quarkusTrait{
+		BasePlatformTrait: NewBasePlatformTrait("quarkus", 600),
+		QuarkusTrait: traitv1.QuarkusTrait{
+			Modes:           []traitv1.QuarkusMode{traitv1.JvmQuarkusMode},
+			NativeBaseImage: QuarkusNativeDefaultBaseImageName,
+		},
+	}
+
+	assert.True(t, qt.Matches(&qt2))
+	qt2.Modes = append(qt2.Modes, traitv1.NativeQuarkusMode)
+	assert.True(t, qt.Matches(&qt2))
+	qt2.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
+	assert.False(t, qt.Matches(&qt2))
+	qt2.Modes = nil
+	assert.True(t, qt.Matches(&qt2))
+	qt2.Modes = []traitv1.QuarkusMode{}
+	assert.True(t, qt.Matches(&qt2))
+	qt2.NativeBaseImage = "docker.io/my-new-native-base"
+	assert.False(t, qt.Matches(&qt2))
 }

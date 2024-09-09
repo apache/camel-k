@@ -18,7 +18,6 @@ limitations under the License.
 package azure
 
 import (
-	"regexp"
 	"strconv"
 
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -27,7 +26,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Azure Key Vault trait can be used to use secrets from Azure Key Vault service
@@ -42,7 +41,7 @@ import (
 //
 // To enable the automatic context reload on secrets updates you should define
 // the following trait options:
-// -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true" -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000" -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string" -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t azure-key-vault.blob-access-key="account-name"
+// -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true" -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000" -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string" -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t azure-key-vault.blob-access-key="account-name" -t azure-key-vault.azure-identity-enabled="true"
 //
 // +camel-k:trait=azure-key-vault.
 type Trait struct {
@@ -63,6 +62,8 @@ type Trait struct {
 	ContextReloadEnabled *bool `property:"context-reload-enabled" json:"contextReloadEnabled,omitempty"`
 	// Define if we want to use the Refresh Feature for secrets
 	RefreshEnabled *bool `property:"refresh-enabled" json:"refreshEnabled,omitempty"`
+	// Whether the Azure Identity Authentication should be used or not
+	AzureIdentityEnabled *bool `property:"azure-identity-enabled" json:"azureIdentityEnabled,omitempty"`
 	// If Refresh is enabled, this defines the interval to check the refresh event
 	RefreshPeriod string `property:"refresh-period" json:"refreshPeriod,omitempty"`
 	// If Refresh is enabled, the regular expression representing the secrets we want to track
@@ -91,7 +92,7 @@ func NewAzureKeyVaultTrait() trait.Trait {
 }
 
 func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if environment.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -100,58 +101,65 @@ func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, *t
 	}
 
 	if t.ContextReloadEnabled == nil {
-		t.ContextReloadEnabled = pointer.Bool(false)
+		t.ContextReloadEnabled = ptr.To(false)
 	}
 
 	if t.RefreshEnabled == nil {
-		t.RefreshEnabled = pointer.Bool(false)
+		t.RefreshEnabled = ptr.To(false)
+	}
+
+	if t.AzureIdentityEnabled == nil {
+		t.AzureIdentityEnabled = ptr.To(false)
 	}
 
 	return true, nil, nil
 }
 
 func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
-	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
+
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAzureKeyVault)
 	}
 
-	if environment.IntegrationInRunningPhases() {
-		hits := rex.FindAllStringSubmatch(t.ClientSecret, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.ClientSecret, "azure-key-vault-client-secret", "The Azure Key Vault Client Secret provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.azure.clientSecret"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.azure.clientSecret"] = t.ClientSecret
-		}
-		hits = rex.FindAllStringSubmatch(t.BlobAccessKey, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.BlobAccessKey, "azure-storage-blob-access-key", "The Azure Storage Blob Access Key provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.azure.blobAccessKey"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.azure.blobAccessKey"] = t.BlobAccessKey
-		}
-		environment.ApplicationProperties["camel.vault.azure.tenantId"] = t.TenantID
-		environment.ApplicationProperties["camel.vault.azure.clientId"] = t.ClientID
-		environment.ApplicationProperties["camel.vault.azure.vaultName"] = t.VaultName
-		environment.ApplicationProperties["camel.vault.azure.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
-		environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
-		environment.ApplicationProperties["camel.vault.azure.refreshPeriod"] = t.RefreshPeriod
-		if t.Secrets != "" {
-			environment.ApplicationProperties["camel.vault.azure.secrets"] = t.Secrets
-		}
-		environment.ApplicationProperties["camel.vault.azure.eventhubConnectionString"] = t.EventhubConnectionString
-		environment.ApplicationProperties["camel.vault.azure.blobAccountName"] = t.BlobAccountName
-		environment.ApplicationProperties["camel.vault.azure.blobContainerName"] = t.BlobContainerName
+	if !environment.IntegrationInRunningPhases() {
+		return nil
 	}
+
+	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.ClientSecret, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.ClientSecret, "azure-key-vault-client-secret", "The Azure Key Vault Client Secret provided is not valid")
+		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+			return err
+		} else if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.azure.clientSecret"] = string([]byte(secretValue))
+		}
+	} else {
+		environment.ApplicationProperties["camel.vault.azure.clientSecret"] = t.ClientSecret
+	}
+	hits = v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.BlobAccessKey, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.BlobAccessKey, "azure-storage-blob-access-key", "The Azure Storage Blob Access Key provided is not valid")
+		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+			return err
+		} else if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.azure.blobAccessKey"] = string([]byte(secretValue))
+		}
+	} else {
+		environment.ApplicationProperties["camel.vault.azure.blobAccessKey"] = t.BlobAccessKey
+	}
+	environment.ApplicationProperties["camel.vault.azure.tenantId"] = t.TenantID
+	environment.ApplicationProperties["camel.vault.azure.clientId"] = t.ClientID
+	environment.ApplicationProperties["camel.vault.azure.vaultName"] = t.VaultName
+	environment.ApplicationProperties["camel.vault.azure.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
+	environment.ApplicationProperties["camel.vault.azure.azureIdentityEnabled"] = strconv.FormatBool(*t.AzureIdentityEnabled)
+	environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
+	environment.ApplicationProperties["camel.vault.azure.refreshPeriod"] = t.RefreshPeriod
+	if t.Secrets != "" {
+		environment.ApplicationProperties["camel.vault.azure.secrets"] = t.Secrets
+	}
+	environment.ApplicationProperties["camel.vault.azure.eventhubConnectionString"] = t.EventhubConnectionString
+	environment.ApplicationProperties["camel.vault.azure.blobAccountName"] = t.BlobAccountName
+	environment.ApplicationProperties["camel.vault.azure.blobContainerName"] = t.BlobContainerName
 
 	return nil
 }

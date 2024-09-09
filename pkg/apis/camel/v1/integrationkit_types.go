@@ -74,6 +74,8 @@ type IntegrationKitSpec struct {
 	Repositories []string `json:"repositories,omitempty"`
 	// the sources to add at build time
 	Sources []SourceSpec `json:"sources,omitempty"`
+	// features offered by the IntegrationKit
+	Capabilities []string `json:"capabilities,omitempty"`
 }
 
 // IntegrationKitTraits defines traits assigned to an `IntegrationKit`.
@@ -86,7 +88,8 @@ type IntegrationKitTraits struct {
 	// It's enabled by default.
 	// NOTE: Compiling to a native executable, requires at least 4GiB of memory, so the Pod running the native build must have enough memory available.
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
-	// The Registry trait sets up Maven to use the Image registry as a Maven repository.
+	// The Registry trait sets up Maven to use the Image registry as a Maven repository (support removed since version 2.5.0).
+	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The collection of addon trait configurations
 	Addons map[string]AddonTrait `json:"addons,omitempty"`
@@ -114,14 +117,14 @@ type IntegrationKitStatus struct {
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime provider for which this kit was configured
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the catalog used to build/operate the IntegrationKit.
+	Catalog *Catalog `json:"catalog,omitempty"`
 	// the platform for which this kit was configured
 	Platform string `json:"platform,omitempty"`
 	// the Camel K operator version for which this kit was configured
 	Version string `json:"version,omitempty"`
 	// a list of conditions which happened for the events related the kit
 	Conditions []IntegrationKitCondition `json:"conditions,omitempty"`
-	// generated traits executed by the kit
-	Traits IntegrationKitTraits `json:"traits,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -146,12 +149,15 @@ const (
 	// IntegrationKitTypeLabel labels the kit type.
 	IntegrationKitTypeLabel = "camel.apache.org/kit.type"
 
-	// IntegrationKitTypePlatform identifies a kit created by the platform.
+	// IntegrationKitTypePlatform identifies a Kit created by the platform.
 	IntegrationKitTypePlatform = "platform"
-	// IntegrationKitTypeUser identifies a kit created by the user.
+	// IntegrationKitTypeUser identifies a Kit created by the user.
 	IntegrationKitTypeUser = "user"
-	// IntegrationKitTypeExternal identifies a kit created by any third party.
+	// IntegrationKitTypeExternal identifies a Kit created by any third party.
 	IntegrationKitTypeExternal = "external"
+	// Deprecated: synthetic Integration Kits are replaced by non managed build Integrations.
+	// IntegrationKitTypeSynthetic identifies a synthetic Kit (generated for any container image for which the operator cannot make any assumption).
+	IntegrationKitTypeSynthetic = "synthetic"
 
 	// IntegrationKitLayoutLabel labels the kit layout.
 	IntegrationKitLayoutLabel = "camel.apache.org/kit.layout"

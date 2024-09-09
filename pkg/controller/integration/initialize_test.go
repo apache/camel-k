@@ -30,6 +30,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCamelImportDeployment(t *testing.T) {
@@ -52,7 +53,7 @@ func TestCamelImportDeployment(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := initializeAction{}
 	a.InjectLogger(log.Log)
@@ -60,7 +61,7 @@ func TestCamelImportDeployment(t *testing.T) {
 	assert.Equal(t, "initialize", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	// Ready condition
 	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
@@ -92,7 +93,7 @@ func TestCamelImportCronJob(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := initializeAction{}
 	a.InjectLogger(log.Log)
@@ -100,7 +101,7 @@ func TestCamelImportCronJob(t *testing.T) {
 	assert.Equal(t, "initialize", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	// Ready condition
 	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
@@ -132,7 +133,7 @@ func TestCamelImportKnativeService(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := initializeAction{}
 	a.InjectLogger(log.Log)
@@ -140,7 +141,7 @@ func TestCamelImportKnativeService(t *testing.T) {
 	assert.Equal(t, "initialize", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
 	// Ready condition
 	assert.Equal(t, corev1.ConditionTrue, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)
@@ -172,7 +173,7 @@ func TestCamelImportUnsupportedKind(t *testing.T) {
 		},
 	}
 	c, err := test.NewFakeClient(importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	a := initializeAction{}
 	a.InjectLogger(log.Log)
@@ -180,7 +181,7 @@ func TestCamelImportUnsupportedKind(t *testing.T) {
 	assert.Equal(t, "initialize", a.Name())
 	assert.True(t, a.CanHandle(importedIt))
 	handledIt, err := a.Handle(context.TODO(), importedIt)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, v1.IntegrationPhaseError, handledIt.Status.Phase)
 	// Ready condition
 	assert.Equal(t, corev1.ConditionFalse, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Status)

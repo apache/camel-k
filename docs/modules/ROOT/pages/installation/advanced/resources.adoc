@@ -1,58 +1,61 @@
 [[scheduling-infra-pod]]
 = Infrastructure Pods and Resource Management
 
-During the installation procedure you will be able to provide information on how to best "operationalize" your infrastructure. Through the configuration of `--node-selector`, `--toleration` and `--operator-resources` you will be able to drive the operator `Pods` scheduling and to be able to assign resources.
+During the installation procedure you will be able to provide information on how to best "operationalize" your infrastructure. Here we give you some Kubernetes best practices you can use in order to configure a production ready environment.
 
-The usage of these advanced properties assumes you're familiar with the https://kubernetes.io/docs/concepts/scheduling-eviction/[Kubernetes Scheduling] concepts and configurations.
+The usage of these advanced configuration assumes you're familiar with the https://kubernetes.io/docs/concepts/scheduling-eviction/[Kubernetes Scheduling] concepts and configurations.
 
-NOTE: The aforementioned flags setting will work both with `OLM` installation and regular installation.
+Depending on the installation methodology (ie, Helm) provided you may have certain configuration parameters out of the box. Otherwise you should be able to fine tune those parameters altering directly the Camel K operator Deployment.
 
-[[scheduling-infra-pod-scheduling]]
-== Scheduling
+== Scheduling Node Selectors, Affinity and Tolerations
 
-=== Node Selectors
-The most basic operation we provide is to let you assign Camel K operator `Pods` to a specific cluster `Node` via `--node-selector` option. The functionality is based on https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/[`NodeSelector` Kubernetes feature]. As an example, you can schedule Camel K infra `Pods` to a specific `Node` of your cluster:
+=== Operator Pod
 
-```
-kamel install --node-selector kubernetes.io/hostname=ip-172-20-114-199.ec2.internal ...
-```
+We suggest to edit the Deployment to configure the https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/[`NodeSelector` Kubernetes feature] and the https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/[`Taint` and `Toleration` Kubernetes feature].
 
-The option will accept any `key=value` pair as specified and supported by Kubernetes. You can specify more than one `node-selector`.
+=== Builder Pods and Integrations
 
-=== Tolerations
-The `--toleration` option will let you tolerate a Camel K infra `Pod` to support any matching `Taint` according the https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/[`Taint` and `Toleration` Kubernetes feature]. As an example, let's suppose we have a node tainted as "dedicated=camel-k:NoSchedule". In order to allow the infra `Pods` to be scheduled on that `Node` we can provide the following option during installation procedure:
-
-```
-kamel install --toleration dedicated=camel-k:NoSchedule ...
-```
-
-The option accept a value in the following format `Key[=Value]:Effect[:Seconds]` where the values in squared bracket are considered optional and `Effect` must admit any of the `Taints` accepted values: `NoSchedule`, `PreferNoSchedule`, `NoExecute`. You can specify more than one `toleration`.
+Builder Pods and Integration Pods can be also scheduled and assigned in the cluster. For this reason you need to use xref:traits:builder.adoc[builder trait] configuration (for builder Pod when using `pod` building strategy) and xref:traits:affinity.adoc[affinity], xref:traits:pod.adoc[pod], xref:traits:toleration.adoc[toleration] traits for Integration Pods.
 
 [[scheduling-infra-pod-resources]]
 == Resources
 
-While installing the Camel K operator, you can also specify the resources requests and limits to assign to the operator `Pod` with `--operator-resources` option. The option will expect the configuration as required by https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Kubernetes Resource Management].
-
-```
-kamel install --operator-resources requests.cpu=256m --operator-resources limits.cpu=500m --operator-resources limits.memory=512Mi ...
-```
-
-The value expected by the option are in the form `requestType.requestResource=value` where `requestType` must be either `requests` or `limits`, `requestResource` must be either `cpu` or `memory` and `value` expressed in the numeric value as expected by the resource. You can specify more than one `operator-resources`.
+While installing the Camel K operator, you can also specify the resources requests and limits to assign to the operator `Pod`. This configuration will expect the setting as required by https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/[Kubernetes Resource Management].
 
 NOTE: if you specify a limit, but does not specify a request, Kubernetes automatically assigns a request that matches the limit.
 
-=== Suggested configuration
+=== Default Operator Pod configuration
 
-The main contributor to compute resources consumption is likely to be the Maven builds that are performed in the operator `Pod` (assuming you use the default build strategy). So the resource requirements should be defined accordingly. The following requirements are sensible defaults that should work in most cases:
+The main Camel K Operator Pod contributor resources consumption is likely to be the number of parallel builds that are performed in the operator `Pod`. So the resource requirements should be defined accordingly. The following requirements are sensible defaults that should work in most cases:
 
 ```
 resources:
-  limits:
-    cpu: "1"
-    memory: 1Gi
   requests:
-    cpu: 500m
-    memory: 512Mi
+    memory: "2Gi"
+    cpu: "500m"
+  limits:
+    memory: "8Gi"
+    cpu: "2"
 ```
 
-Note that if you plan to perform **native builds**, then the memory requirements must be increased significantly. Also, the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
+Note that if you plan to perform **native builds**, then the memory requirements may be increased significantly. Also, the CPU requirements are rather "soft", in the sense that it won't break the operator, but it'll perform slower in general.
+
+=== Default Integration Pod configuration
+
+The resource set on the container here is highly dependant on what your application is doing. You can control this behavior by setting opportunely the resources on the Integration via xref:traits:container.adoc[container] trait.
+
+Be aware that the default are actually the following:
+
+```
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "125m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+```
+
+=== Builder Pod configuration
+
+You can set the resources requests and limits for the builder Pod using xref:traits:builder.adoc[container] trait.

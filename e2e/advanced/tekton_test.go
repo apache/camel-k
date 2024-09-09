@@ -23,26 +23,56 @@ limitations under the License.
 package advanced
 
 import (
+	"context"
+	"os"
 	"testing"
 
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/require"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // TestTektonLikeBehavior verifies that the kamel binary can be invoked from within the Camel K image.
 // This feature is used in Tekton pipelines.
 func TestTektonLikeBehavior(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
-		Expect(CreateOperatorServiceAccount(ns)).To(Succeed())
-		Expect(CreateOperatorRole(ns)).To(Succeed())
-		Expect(CreateOperatorRoleBinding(ns)).To(Succeed())
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		InstallOperator(t, ctx, g, ns)
 
-		Eventually(OperatorPod(ns)).Should(BeNil())
-		Expect(CreateKamelPod(ns, "tekton-task", "install", "--skip-cluster-setup", "--force")).To(Succeed())
-
-		Eventually(OperatorPod(ns)).ShouldNot(BeNil())
+		// Store a configmap holding an integration source
+		var cmData = make(map[string][]byte)
+		source, err := os.ReadFile("./files/Java.java")
+		require.NoError(t, err)
+		cmData["Java.java"] = source
+		err = CreateBinaryConfigmap(t, ctx, ns, "integration-file", cmData)
+		require.NoError(t, err)
+		integration := v1.ValueSource{
+			ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "integration-file",
+				},
+				Key: "Java.java",
+			},
+		}
+		t.Run("Run tekton task like delegate build and run to operator", func(t *testing.T) {
+			name := RandomizedSuffixName("java-tekton-basic")
+			g.Expect(CreateKamelPodWithIntegrationSource(t, ctx, ns, "tekton-task-basic", integration, "run", "/tmp/Java.java", "--name", name)).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		})
+		t.Run("Run tekton task like delegate run to operator", func(t *testing.T) {
+			name := RandomizedSuffixName("java-tekton-run")
+			// Use an external image as source
+			externalImage := "quay.io/fuse_qe/echo-server:0.3.3"
+			g.Expect(CreateKamelPodWithIntegrationSource(t, ctx, ns, "tekton-task-run", integration, "run", "/tmp/Java.java", "-t", "container.image="+externalImage, "--name", name)).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Echo"))
+		})
 	})
 }

@@ -1,23 +1,31 @@
-[[configuration]]
 = Configure Integrations
 
-Runtime properties associated to an integration can be configured using the `--property` flag when running the integration. If the property is a *build time property* (ie, certain `Quarkus` configuration), then, you can use xref:configuration/build-time-properties.adoc[`--build-property`] instead.
+Camel K is highly configurable and attempts to be as much as automatic as possible in order to provide a nice development experience. However, as soon as you start playing harder you will need to provide more tuning to your applications. In this section we're exploring specifically Integration configuration, make sure not to get confused with the xref:installation/integrationplatform.adoc[IntegrationPlatform configuration] section, which influences the general building and publishing behavior.
 
-The property value can be used inside Camel K integrations using the *property placeholder* mechanism.
+We can distinguish a series of different configurations for an Integration:
 
-The syntax for properties has the form `{{my.property}}`, for example:
+* Build time configuration
+* Runtime configuration
+* Deployment configuration
 
-[source,groovy]
-.props.groovy
-----
-from('timer:props?period=1000')
-    .log('{{my.message}}')
-----
+== Build time configuration
 
-In order to give a value to the `my.message` property you can pass it using the command line:
+Most of the time you won't need to influence the building process. There may be circumstances where you need to provide a given Maven dependency to your application, provide some build time property or fine tune the application and the container image resulting from the build process.
 
-```
-kamel run --property my.message="Hello World" props.groovy
-```
+Camel K does the best it can to discover automatically dependencies required by your application. However, when you're using external code or the operator can't discover dependencies, you'll need to add them manually. See more in the xref:configuration/dependencies.adoc[dependencies] section.
 
-For more details and advanced use cases, see the xref:configuration/runtime-properties.adoc[runtime properties] section.
+Build time properties are the configuration injected during the building of the project. They are mainly used by Camel Quarkus and you may not need at all depending on the kind of applications you're building. See more in the xref:configuration/build-time-properties.adoc[build time properties] section.
+
+If you want to optimize your application to run natively on the cloud, then you may see how to xref:configuration/quarkus-native.adoc[run your application with Quarkus Native compilation].
+
+While building the container image, the operator will use a default JDK based image. See how you can xref:configuration/base-image.adoc[change the default base image].
+
+== Runtime configuration
+
+The runtime configuration are probably the ones you'll be using mostly during your development. Majority of the time you will need to provide xref:configuration/camel-properties.adoc[Camel properties], xref:configuration/runtime-config.adoc[runtime configuration] and xref:configuration/runtime-resources.adoc[runtime resources] files.
+
+Another configuration you may be interested in controlling is the xref:configuration/runtime-version.adoc[Camel runtime version].
+
+== Deployment configuration
+
+The goal of the operator is to simplify the building and deployment process of a Camel application on the cloud. Most of the time the default settings to configure the deployment resources should be enough. However, if you need to fine tune the final resulting deployment, then you need to know how to configure the so called xref:traits:traits.adoc[Camel K traits].

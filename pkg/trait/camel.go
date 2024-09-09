@@ -35,6 +35,8 @@ import (
 
 const (
 	CamelPropertiesType = "camel-properties"
+	camelTraitID        = "camel"
+	camelTraitOrder     = 200
 )
 
 type camelTrait struct {
@@ -44,7 +46,7 @@ type camelTrait struct {
 
 func newCamelTrait() Trait {
 	return &camelTrait{
-		BasePlatformTrait: NewBasePlatformTrait("camel", 200),
+		BasePlatformTrait: NewBasePlatformTrait(camelTraitID, camelTraitOrder),
 	}
 }
 
@@ -53,12 +55,20 @@ func (t *camelTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild only when the runtime has changed.
-func (t *camelTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return this["runtimeVersion"] != prev["runtimeVersion"]
+func (t *camelTrait) Matches(trait Trait) bool {
+	otherTrait, ok := trait.(*camelTrait)
+	if !ok {
+		return false
+	}
+
+	return otherTrait.RuntimeVersion == t.RuntimeVersion
 }
 
 func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+	if e.Integration != nil && e.Integration.IsSynthetic() {
+		return false, NewIntegrationConditionPlatformDisabledWithMessage("Camel", "synthetic integration"), nil
+	}
+
 	if t.RuntimeVersion == "" {
 		if runtimeVersion, err := determineRuntimeVersion(e); err != nil {
 			return false, nil, err
@@ -67,38 +77,64 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	// Don't run this trait for a synthetic Integration
-	return e.Integration == nil || !e.Integration.IsSynthetic(), nil, nil
+	var cond *TraitCondition
+	//nolint: staticcheck
+	if (e.Integration != nil && !e.Integration.IsManagedBuild()) || (e.IntegrationKit != nil && e.IntegrationKit.IsSynthetic()) {
+		// We set a condition to warn the user the catalog used to run the Integration
+		// may differ from the runtime version which we don't control
+		cond = NewIntegrationCondition(
+			"Camel",
+			v1.IntegrationConditionTraitInfo,
+			corev1.ConditionTrue,
+			traitConfigurationReason,
+			fmt.Sprintf(
+				"Operated with CamelCatalog version %s which may be different from the runtime used in the container",
+				t.RuntimeVersion,
+			),
+		)
+	}
+
+	return true, cond, nil
 }
 
 func (t *camelTrait) Apply(e *Environment) error {
-	if t.RuntimeVersion == "" {
-		return errors.New("unable to determine runtime version")
-	}
-
+	// This is an important action to do as most of the traits
+	// expects a CamelCatalog to be loaded regardless it's a managed or
+	// non managed build Integration
 	if e.CamelCatalog == nil {
 		if err := t.loadOrCreateCatalog(e, t.RuntimeVersion); err != nil {
 			return err
 		}
 	}
 
-	e.RuntimeVersion = t.RuntimeVersion
-
 	if e.Integration != nil {
-		e.Integration.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
-		e.Integration.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
+		if e.Integration.IsManagedBuild() {
+			// If it's not managed we don't know which is the runtime running
+			e.Integration.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
+			e.Integration.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
+		}
+		e.Integration.Status.Catalog = &v1.Catalog{
+			Version:  e.CamelCatalog.Runtime.Version,
+			Provider: e.CamelCatalog.Runtime.Provider,
+		}
 	}
 	if e.IntegrationKit != nil {
-		e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
-		e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
+		//nolint: staticcheck
+		if !e.IntegrationKit.IsSynthetic() {
+			e.IntegrationKit.Status.RuntimeVersion = e.CamelCatalog.Runtime.Version
+			e.IntegrationKit.Status.RuntimeProvider = e.CamelCatalog.Runtime.Provider
+		}
+		e.IntegrationKit.Status.Catalog = &v1.Catalog{
+			Version:  e.CamelCatalog.Runtime.Version,
+			Provider: e.CamelCatalog.Runtime.Provider,
+		}
 	}
 
-	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseReady) && e.IntegrationInRunningPhases() {
+	if e.IntegrationInRunningPhases() {
 		// Get all resources
 		maps := t.computeConfigMaps(e)
 		e.Resources.AddAll(maps)
 	}
-
 	return nil
 }
 

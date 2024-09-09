@@ -18,14 +18,12 @@ limitations under the License.
 package hashicorp
 
 import (
-	"regexp"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Hashicorp Vault trait can be used to use secrets from Hashicorp Vault
@@ -69,7 +67,7 @@ func NewHashicorpVaultTrait() trait.Trait {
 }
 
 func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if environment.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -81,28 +79,33 @@ func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, *
 }
 
 func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
-	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityHashicorpVault)
 	}
 
-	if environment.IntegrationInRunningPhases() {
-		hits := rex.FindAllStringSubmatch(t.Token, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.Token, "hashicorp-vault-token", "The Hashicorp Vault Token provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.hashicorp.token"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.hashicorp.token"] = t.Token
-		}
-		environment.ApplicationProperties["camel.vault.hashicorp.host"] = t.Host
-		environment.ApplicationProperties["camel.vault.hashicorp.port"] = t.Port
-		environment.ApplicationProperties["camel.vault.hashicorp.engine"] = t.Engine
-		environment.ApplicationProperties["camel.vault.hashicorp.scheme"] = t.Scheme
+	if !environment.IntegrationInRunningPhases() {
+		return nil
 	}
+
+	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.Token, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.Token, "hashicorp-vault-token", "The Hashicorp Vault Token provided is not valid")
+
+		secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res)
+		if err != nil {
+			return err
+		}
+		if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.hashicorp.token"] = secretValue
+		}
+	} else {
+		environment.ApplicationProperties["camel.vault.hashicorp.token"] = t.Token
+	}
+
+	environment.ApplicationProperties["camel.vault.hashicorp.host"] = t.Host
+	environment.ApplicationProperties["camel.vault.hashicorp.port"] = t.Port
+	environment.ApplicationProperties["camel.vault.hashicorp.engine"] = t.Engine
+	environment.ApplicationProperties["camel.vault.hashicorp.scheme"] = t.Scheme
 
 	return nil
 }

@@ -30,6 +30,8 @@ type XMLInspector struct {
 }
 
 // Extract --.
+//
+//nolint:goconst,nestif
 func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)

@@ -20,9 +20,12 @@ package trait
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -35,7 +38,8 @@ import (
 )
 
 const (
-	builderTraitID = "builder"
+	builderTraitID    = "builder"
+	builderTraitOrder = 600
 )
 
 var commandsRegexp = regexp.MustCompile(`"[^"]+"|[\w/-]+`)
@@ -47,7 +51,7 @@ type builderTrait struct {
 
 func newBuilderTrait() Trait {
 	return &builderTrait{
-		BasePlatformTrait: NewBasePlatformTrait("builder", 600),
+		BasePlatformTrait: NewBasePlatformTrait(builderTraitID, builderTraitOrder),
 	}
 }
 
@@ -56,54 +60,98 @@ func (t *builderTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild overrides base class method.
-func (t *builderTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return true
+func (t *builderTrait) Matches(trait Trait) bool {
+	otherTrait, ok := trait.(*builderTrait)
+	if !ok {
+		return false
+	}
+	if t.BaseImage != otherTrait.BaseImage || len(t.Properties) != len(otherTrait.Properties) || len(t.Tasks) != len(otherTrait.Tasks) {
+		return false
+	}
+	// More sofisticated check if len is the same. Sort and compare via slices equal func.
+	// Although the Matches func is used as a support for comparison, it makes sense
+	// to copy the properties and avoid possible inconsistencies caused by the sorting operation.
+	srtThisProps := make([]string, len(t.Properties))
+	srtOtheProps := make([]string, len(otherTrait.Properties))
+	copy(srtThisProps, t.Properties)
+	copy(srtOtheProps, otherTrait.Properties)
+	slices.Sort(srtThisProps)
+	slices.Sort(srtOtheProps)
+	if !slices.Equal(srtThisProps, srtOtheProps) {
+		return false
+	}
+	srtThisTasks := make([]string, len(t.Tasks))
+	srtOtheTasks := make([]string, len(otherTrait.Tasks))
+	copy(srtThisTasks, t.Tasks)
+	copy(srtOtheTasks, otherTrait.Tasks)
+	slices.Sort(srtThisTasks)
+	slices.Sort(srtOtheTasks)
+	return slices.Equal(srtThisTasks, srtOtheTasks)
 }
 
 func (t *builderTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.IntegrationKit == nil {
 		return false, nil, nil
 	}
-
 	condition := t.adaptDeprecatedFields()
-
-	if e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
-		if trait := e.Catalog.GetTrait(quarkusTraitID); trait != nil {
-			quarkus, ok := trait.(*quarkusTrait)
-			isNativeIntegration := quarkus.isNativeIntegration(e)
-			isNativeKit, err := quarkus.isNativeKit(e)
-			if err != nil {
-				return false, condition, err
-			}
-			if ok && (isNativeIntegration || isNativeKit) {
-				// TODO expect maven repository in local repo (need to change builder pod accordingly!)
-				command := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).BuildCommands()
-				nativeBuilderImage := quarkus.NativeBuilderImage
-				if nativeBuilderImage == "" {
-					// default from the catalog
-					nativeBuilderImage = e.CamelCatalog.GetQuarkusToolingImage()
-				}
-				// it should be performed as the last custom task
-				t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, nativeBuilderImage, command))
-				// Force the build to run in a separate Pod and strictly sequential
-				m := "This is a Quarkus native build: setting build configuration with build Pod strategy and native container sensible resources (if not specified by the user). Make sure your cluster can handle it."
-				t.L.Info(m)
-				condition = newOrAppend(condition, m)
-				t.Strategy = string(v1.BuildStrategyPod)
-				t.OrderStrategy = string(v1.BuildOrderStrategySequential)
-				if !existsTaskRequest(t.TasksRequestCPU, "quarkus-native") {
-					t.TasksRequestCPU = append(t.TasksRequestCPU, "quarkus-native:1000m")
-				}
-				if !existsTaskRequest(t.TasksRequestMemory, "quarkus-native") {
-					t.TasksRequestMemory = append(t.TasksRequestMemory, "quarkus-native:4Gi")
-				}
-			}
-		}
-		return true, condition, nil
+	if e.Platform.Status.Build.PublishStrategy == v1.IntegrationPlatformBuildPublishStrategySpectrum {
+		condition = newOrAppend(condition, "Spectrum publishing strategy is deprecated and may be removed in future releases. Make sure to use any supported publishing strategy instead.")
 	}
 
-	return false, condition, nil
+	t.setPlatform(e)
+
+	if !e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) {
+		return false, condition, nil
+	}
+
+	trait := e.Catalog.GetTrait(quarkusTraitID)
+	if trait != nil {
+		condition, err := t.configureForQuarkus(trait, e, condition)
+		if err != nil {
+			return false, condition, err
+		}
+	}
+
+	return true, condition, nil
+}
+
+func (t *builderTrait) configureForQuarkus(trait Trait, e *Environment, condition *TraitCondition) (*TraitCondition, error) {
+	quarkus, ok := trait.(*quarkusTrait)
+	isNativeIntegration := quarkus.isNativeIntegration(e)
+
+	isNativeKit, err := quarkus.isNativeKit(e)
+	if err != nil {
+		return condition, err
+	}
+
+	if ok && (isNativeIntegration || isNativeKit) {
+		// TODO expect maven repository in local repo (need to change builder pod accordingly!)
+		command := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).BuildCommands()
+		nativeBuilderImage := quarkus.NativeBuilderImage
+		if nativeBuilderImage == "" {
+			// default from the catalog
+			nativeBuilderImage = e.CamelCatalog.GetQuarkusToolingImage()
+		}
+
+		// it should be performed as the last custom task
+		t.Tasks = append(t.Tasks, fmt.Sprintf(`quarkus-native;%s;/bin/bash -c "%s"`, nativeBuilderImage, command))
+		// Force the build to run in a separate Pod and strictly sequential
+		m := "This is a Quarkus native build: setting build configuration with build Pod strategy and native container sensible resources (if not specified by the user). Make sure your cluster can handle it."
+		t.L.Info(m)
+
+		condition = newOrAppend(condition, m)
+		t.Strategy = string(v1.BuildStrategyPod)
+		t.OrderStrategy = string(v1.BuildOrderStrategySequential)
+
+		if !existsTaskRequest(t.TasksRequestCPU, "quarkus-native") {
+			t.TasksRequestCPU = append(t.TasksRequestCPU, "quarkus-native:1000m")
+		}
+		if !existsTaskRequest(t.TasksRequestMemory, "quarkus-native") {
+			t.TasksRequestMemory = append(t.TasksRequestMemory, "quarkus-native:4Gi")
+		}
+	}
+
+	return condition, nil
 }
 
 func existsTaskRequest(tasks []string, taskName string) bool {
@@ -140,7 +188,7 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 		m := "The limit-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-memory parameter instead."
 		t.L.Info(m)
 		if condition == nil {
-			condition = NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, "")
+			condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, "")
 		}
 		condition = newOrAppend(condition, m)
 		t.TasksLimitMemory = append(t.TasksLimitMemory, fmt.Sprintf("builder:%s", t.LimitMemory))
@@ -151,7 +199,7 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 
 func newOrAppend(condition *TraitCondition, message string) *TraitCondition {
 	if condition == nil {
-		condition = NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+		condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
 	} else {
 		condition.message += "; " + message
 	}
@@ -190,31 +238,15 @@ func (t *builderTrait) Apply(e *Environment) error {
 
 	// Custom tasks
 	if t.Tasks != nil {
-		realBuildStrategy := builderTask.Configuration.Strategy
-		if realBuildStrategy == "" {
-			realBuildStrategy = e.Platform.Status.Build.BuildConfiguration.Strategy
-		}
-		if len(t.Tasks) > 0 && realBuildStrategy != v1.BuildStrategyPod {
-			if err := failIntegrationKit(
-				e,
-				"IntegrationKitTasksValid",
-				corev1.ConditionFalse,
-				"IntegrationKitTasksValid",
-				fmt.Sprintf("Pipeline tasks unavailable when using `%s` platform build strategy: use `%s` instead.",
-					realBuildStrategy,
-					v1.BuildStrategyPod),
-			); err != nil {
-				return err
-			}
-			return nil
-		}
-
-		customTasks, err := t.customTasks(tasksConf, imageName)
+		ct, err := t.determineCustomTasks(e, builderTask, tasksConf)
 		if err != nil {
 			return err
 		}
+		if ct == nil {
+			return nil
+		}
 
-		pipelineTasks = append(pipelineTasks, customTasks...)
+		pipelineTasks = append(pipelineTasks, ct...)
 	}
 
 	// Packaging task
@@ -241,7 +273,7 @@ func (t *builderTrait) Apply(e *Environment) error {
 		}})
 
 	case v1.IntegrationPlatformBuildPublishStrategyJib:
-		pipelineTasks = append(pipelineTasks, v1.Task{Jib: &v1.JibTask{
+		jibTask := v1.Task{Jib: &v1.JibTask{
 			BaseTask: v1.BaseTask{
 				Name:          "jib",
 				Configuration: *taskConfOrDefault(tasksConf, "jib"),
@@ -251,13 +283,21 @@ func (t *builderTrait) Apply(e *Environment) error {
 				Image:     imageName,
 				Registry:  e.Platform.Status.Build.Registry,
 			},
-		}})
+		}}
+		if t.ImagePlatforms != nil {
+			jibTask.Jib.Configuration.ImagePlatforms = t.ImagePlatforms
+		}
+		pipelineTasks = append(pipelineTasks, jibTask)
 
 	case v1.IntegrationPlatformBuildPublishStrategyS2I:
 		pipelineTasks = append(pipelineTasks, v1.Task{S2i: &v1.S2iTask{
 			BaseTask: v1.BaseTask{
 				Name:          "s2i",
 				Configuration: *taskConfOrDefault(tasksConf, "s2i"),
+			},
+			PublishTask: v1.PublishTask{
+				BaseImage: t.getBaseImage(e),
+				Image:     imageName,
 			},
 			Tag: e.IntegrationKit.ResourceVersion,
 		}})
@@ -355,7 +395,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 	if task.Maven.Properties == nil {
 		task.Maven.Properties = make(map[string]string)
 	}
-	// User provided Maven properties
+	// User provided build-time properties
 	if t.Properties != nil {
 		for _, v := range t.Properties {
 			key, value := property.SplitPropertyFileEntry(v)
@@ -364,6 +404,14 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 			}
 
 			task.Maven.Properties[key] = value
+		}
+	}
+
+	// Build time property required by master capability
+	if e.IntegrationKit.HasCapability("master") && e.CamelCatalog.Runtime.Capabilities["master"].BuildTimeProperties != nil {
+		task.Maven.Properties["camel.k.master.enabled"] = boolean.TrueString
+		for _, cp := range e.CamelCatalog.Runtime.Capabilities["master"].BuildTimeProperties {
+			task.Maven.Properties[CapabilityPropertyKey(cp.Key, task.Maven.Properties)] = cp.Value
 		}
 	}
 
@@ -421,6 +469,35 @@ func (t *builderTrait) getBaseImage(e *Environment) string {
 		baseImage = e.Platform.Status.Build.BaseImage
 	}
 	return baseImage
+}
+
+func (t *builderTrait) determineCustomTasks(e *Environment, builderTask *v1.BuilderTask, tasksConf map[string]*v1.BuildConfiguration) ([]v1.Task, error) {
+	imageName := getImageName(e)
+
+	realBuildStrategy := builderTask.Configuration.Strategy
+	if realBuildStrategy == "" {
+		realBuildStrategy = e.Platform.Status.Build.BuildConfiguration.Strategy
+	}
+
+	if len(t.Tasks) > 0 && realBuildStrategy != v1.BuildStrategyPod {
+		err := failIntegrationKit(
+			e,
+			"IntegrationKitTasksValid",
+			corev1.ConditionFalse,
+			"IntegrationKitTasksValid",
+			fmt.Sprintf("Pipeline tasks unavailable when using `%s` platform build strategy: use `%s` instead.",
+				realBuildStrategy,
+				v1.BuildStrategyPod),
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	}
+
+	return t.customTasks(tasksConf, imageName)
 }
 
 // the format expected is "<task-name>;<task-image>;<task-container-command>[;<task-container-user-id>]".
@@ -589,4 +666,13 @@ func publishingOrUserTask(t v1.Task) bool {
 	}
 
 	return false
+}
+
+// Will set a default platform if either specified in the trait or the platform/profile configuration.
+func (t *builderTrait) setPlatform(e *Environment) {
+	if t.ImagePlatforms == nil {
+		if e.Platform != nil && e.Platform.Status.Build.BuildConfiguration.ImagePlatforms != nil {
+			t.ImagePlatforms = e.Platform.Status.Build.BuildConfiguration.ImagePlatforms
+		}
+	}
 }

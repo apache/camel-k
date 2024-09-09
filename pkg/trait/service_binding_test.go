@@ -22,8 +22,10 @@ import (
 
 	"github.com/redhat-developer/service-binding-operator/pkg/reconcile/pipeline"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
@@ -36,25 +38,31 @@ func TestServiceBinding(t *testing.T) {
 	configured, condition, err := sbTrait.Configure(environment)
 
 	assert.True(t, configured)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, condition)
 
 	// Required for local testing purposes only
 	handlers = []pipeline.Handler{}
 	err = sbTrait.Apply(environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
+	assert.Equal(t, boolean.TrueString, environment.ApplicationProperties["camel.k.serviceBinding.enabled"])
+	assert.Equal(t, "${camel.k.serviceBinding.enabled}", environment.ApplicationProperties["quarkus.kubernetes-service-binding.enabled"])
 	// TODO we should make the service binding trait to easily work with fake client
-	// and test the apply result in the environment accordingly.
+	// and test the apply secret in the environment accordingly.
 }
 
 func createNominalServiceBindingTest() (*serviceBindingTrait, *Environment) {
 	trait, _ := newServiceBindingTrait().(*serviceBindingTrait)
 	client, _ := test.NewFakeClient()
-
+	catalog := NewCatalog(client)
+	c, err := camel.DefaultCatalog()
+	if err != nil {
+		panic(err)
+	}
 	environment := &Environment{
 		Client:       client,
-		Catalog:      NewCatalog(client),
-		CamelCatalog: &camel.RuntimeCatalog{},
+		Catalog:      catalog,
+		CamelCatalog: c,
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Sources: []v1.SourceSpec{

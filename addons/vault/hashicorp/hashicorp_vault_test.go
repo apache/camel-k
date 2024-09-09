@@ -22,15 +22,16 @@ import (
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -38,19 +39,19 @@ func TestHashicorpVaultTraitApply(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	hashicorp := NewHashicorpVaultTrait()
 	secrets, _ := hashicorp.(*hashicorpVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Engine = "test"
 	secrets.Token = "wwww.testx1234590"
 	secrets.Host = "localhost"
 	secrets.Port = "9091"
 	secrets.Scheme = "http"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "test", e.ApplicationProperties["camel.vault.hashicorp.engine"])
@@ -72,19 +73,19 @@ func TestHashicorpVaultTraitWithSecretApply(t *testing.T) {
 	})
 	hashicorp := NewHashicorpVaultTrait()
 	secrets, _ := hashicorp.(*hashicorpVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Engine = "test"
 	secrets.Token = "secret:my-secret1/hashicorp-vault-token"
 	secrets.Host = "localhost"
 	secrets.Port = "9091"
 	secrets.Scheme = "http"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "test", e.ApplicationProperties["camel.vault.hashicorp.engine"])
@@ -106,19 +107,19 @@ func TestHashicorpVaultTraitWithConfigMapApply(t *testing.T) {
 	})
 	hashicorp := NewHashicorpVaultTrait()
 	secrets, _ := hashicorp.(*hashicorpVaultTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Engine = "test"
 	secrets.Token = "configmap:my-configmap1/hashicorp-vault-token"
 	secrets.Host = "localhost"
 	secrets.Port = "9091"
 	secrets.Scheme = "http"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "test", e.ApplicationProperties["camel.vault.hashicorp.engine"])
@@ -133,7 +134,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 
 	catalog, err := catalogGen()
 	client, _ := test.NewFakeClient(objects...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,

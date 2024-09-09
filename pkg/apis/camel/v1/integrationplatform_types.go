@@ -64,7 +64,7 @@ type IntegrationPlatformStatus struct {
 
 // +genclient
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=ip;itp,categories=kamel;camel
+// +kubebuilder:resource:path=integrationplatforms,scope=Namespaced,shortName=itp,categories=kamel;camel
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration platform phase"
@@ -72,6 +72,7 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:printcolumn:name="Publish strategy",type=string,JSONPath=`.status.build.publishStrategy`,description="The default publish strategy"
 // +kubebuilder:printcolumn:name="Registry address",type=string,JSONPath=`.status.build.registry.address`,description="The container registry address"
 // +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.build.runtimeVersion`,description="The default runtime version"
+// +kubebuilder:printcolumn:name="Camel version",type=string,JSONPath=`.status.build.runtimeCoreVersion`,description="The default Camel core version"
 
 // IntegrationPlatform is the resource used to drive the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
@@ -119,6 +120,8 @@ type IntegrationPlatformBuildSpec struct {
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the Camel core version used by this IntegrationPlatform
+	RuntimeCoreVersion string `json:"runtimeCoreVersion,omitempty"`
 	// a base image that can be used as base layer for all images.
 	// It can be useful if you want to provide some custom base image with further utility software
 	BaseImage string `json:"baseImage,omitempty"`
@@ -131,7 +134,7 @@ type IntegrationPlatformBuildSpec struct {
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
 	// Maven configuration used to build the Camel/Camel-Quarkus applications
 	Maven MavenSpec `json:"maven,omitempty"`
-	// Generic options that can used by any publish strategy
+	// Deprecated: no longer in use
 	PublishStrategyOptions map[string]string `json:"PublishStrategyOptions,omitempty"`
 	// the maximum amount of parallel running pipelines started by this operator instance
 	MaxRunningBuilds int32 `json:"maxRunningBuilds,omitempty"`
@@ -153,6 +156,7 @@ const (
 	IntegrationPlatformBuildPublishStrategyS2I IntegrationPlatformBuildPublishStrategy = "S2I"
 	// IntegrationPlatformBuildPublishStrategySpectrum uses Spectrum project (https://github.com/container-tools/spectrum)
 	// in order to push the incremental images to the image repository. It is the default choice on vanilla Kubernetes cluster.
+	// Deprecated: use jib, s2i or a custom publishing strategy instead.
 	IntegrationPlatformBuildPublishStrategySpectrum IntegrationPlatformBuildPublishStrategy = "Spectrum"
 	// IntegrationPlatformBuildPublishStrategyJib uses Jib maven plugin (https://github.com/GoogleContainerTools/jib)
 	// in order to push the incremental images to the image repository.

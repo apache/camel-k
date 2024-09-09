@@ -37,8 +37,6 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 
 	for id, artifact := range catalog.Artifacts {
 		for _, scheme := range artifact.Schemes {
-			scheme := scheme
-
 			// In case of duplicate only, choose the "org.apache.camel.quarkus" artifact (if present).
 			// Workaround for https://github.com/apache/camel-k/v2-runtime/issues/592
 			if _, duplicate := catalog.artifactByScheme[scheme.ID]; duplicate {
@@ -51,7 +49,6 @@ func NewRuntimeCatalog(cat v1.CamelCatalog) *RuntimeCatalog {
 			catalog.schemesByID[scheme.ID] = scheme
 		}
 		for _, dataFormat := range artifact.DataFormats {
-			dataFormat := dataFormat
 			catalog.artifactByDataFormat[dataFormat] = id
 		}
 		for _, language := range artifact.Languages {
@@ -183,10 +180,25 @@ func (c *RuntimeCatalog) VisitSchemes(visitor func(string, v1.CamelScheme) bool)
 
 // DecodeComponent parses the given URI and return a camel artifact and a scheme.
 func (c *RuntimeCatalog) DecodeComponent(uri string) (*v1.CamelArtifact, *v1.CamelScheme) {
-	uriSplit := strings.SplitN(uri, ":", 2)
-	if len(uriSplit) < 2 {
-		return nil, nil
+
+	var uriSplit []string
+
+	// Decode URI using formats http://my-site/test?param=value or log:info
+	switch {
+	case strings.Contains(uri, ":"):
+		uriSplit = strings.SplitN(uri, ":", 2)
+		if len(uriSplit) < 2 {
+			return nil, nil
+		}
+	case strings.Contains(uri, "?"):
+		uriSplit = strings.SplitN(uri, "?", 2)
+		if len(uriSplit) < 2 {
+			return nil, nil
+		}
+	default:
+		uriSplit = append(uriSplit, uri)
 	}
+
 	uriStart := uriSplit[0]
 	var schemeRef *v1.CamelScheme
 	if scheme, ok := c.GetScheme(uriStart); ok {

@@ -31,18 +31,20 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        ref-branch: [main, release-2.1.x, release-2.2.x]
+        ref-branch: [main, release-2.3.x, release-2.4.x]
 
     if: github.repository == 'apache/camel-k'
     runs-on: ubuntu-latest
     name: Automatic updates on ${{ matrix.ref-branch }} branch
     steps:
+
     - name: "Checkout code"
       uses: actions/checkout@v4
       with:
         ref: ${{ matrix.ref-branch }}
         persist-credentials: false
         submodules: recursive
+
     - name: "Run upgrade action"
       uses: ./.github/actions/automatic-updates
       with:

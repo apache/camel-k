@@ -19,8 +19,6 @@ package integration
 
 import (
 	"context"
-	"fmt"
-	"reflect"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
@@ -34,6 +32,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
@@ -54,8 +53,8 @@ func lookupKitsForIntegration(ctx context.Context, c client.Client, integration 
 	listOptions := []ctrl.ListOption{
 		ctrl.InNamespace(integration.GetIntegrationKitNamespace(pl)),
 		ctrl.MatchingLabels{
-			"camel.apache.org/runtime.version":  integration.Status.RuntimeVersion,
-			"camel.apache.org/runtime.provider": string(integration.Status.RuntimeProvider),
+			kubernetes.CamelLabelRuntimeVersion:  integration.Status.RuntimeVersion,
+			kubernetes.CamelLabelRuntimeProvider: string(integration.Status.RuntimeProvider),
 		},
 		ctrl.MatchingLabelsSelector{
 			Selector: labels.NewSelector().Add(*kitTypes),
@@ -123,16 +122,16 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 		return false, err
 	}
 
-	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(integration, pl)
+	itc, err := trait.NewSpecTraitsOptionsForIntegrationAndPlatform(c, integration, pl)
 	if err != nil {
 		return false, err
 	}
-	ikc, err := trait.NewStatusTraitsOptionsForIntegrationKit(kit)
+	ikc, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, kit)
 	if err != nil {
 		return false, err
 	}
 
-	if match, err := hasMatchingTraits(itc, ikc); !match || err != nil {
+	if match, err := trait.HasMatchingTraits(itc, ikc); !match || err != nil {
 		ilog.Debug("Integration and integration-kit traits do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false, err
 	}
@@ -152,10 +151,6 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 }
 
 func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *log.Logger) bool {
-	if kit.Status.Version != integration.Status.Version {
-		ilog.Debug("Integration and integration-kit versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
-		return false
-	}
 	if kit.Status.RuntimeProvider != integration.Status.RuntimeProvider {
 		ilog.Debug("Integration and integration-kit runtime providers do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false
@@ -166,19 +161,20 @@ func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *lo
 	}
 	if len(integration.Status.Dependencies) != len(kit.Spec.Dependencies) {
 		ilog.Debug("Integration and integration-kit have different number of dependencies", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false
 	}
 
 	return true
 }
 
 // kitMatches returns whether the kit matches with the existing target kit.
-func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
-	version := kit.Status.Version
+func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
+	version := kit.Status.RuntimeVersion
 	if version == "" {
 		// Defaults with the version that is going to be set during the kit initialization
-		version = defaults.Version
+		version = defaults.DefaultRuntimeVersion
 	}
-	if version != target.Status.Version {
+	if version != target.Status.RuntimeVersion {
 		return false, nil
 	}
 	if len(kit.Spec.Dependencies) != len(target.Spec.Dependencies) {
@@ -186,16 +182,16 @@ func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error)
 	}
 
 	// We cannot have yet the status set
-	c1, err := trait.NewSpecTraitsOptionsForIntegrationKit(kit)
+	c1, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, kit)
 	if err != nil {
 		return false, err
 	}
-	c2, err := trait.NewStatusTraitsOptionsForIntegrationKit(target)
+	c2, err := trait.NewSpecTraitsOptionsForIntegrationKit(c, target)
 	if err != nil {
 		return false, err
 	}
 
-	if match, err := hasMatchingTraits(c1, c2); !match || err != nil {
+	if match, err := trait.HasMatchingTraits(c1, c2); !match || err != nil {
 		return false, err
 	}
 	if !util.StringSliceContains(kit.Spec.Dependencies, target.Spec.Dependencies) {
@@ -203,67 +199,6 @@ func kitMatches(kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error)
 	}
 
 	return true, nil
-}
-
-func hasMatchingTraits(traitMap trait.Options, kitTraitMap trait.Options) (bool, error) {
-	catalog := trait.NewCatalog(nil)
-
-	for _, t := range catalog.AllTraits() {
-		if t == nil {
-			continue
-		}
-
-		id := string(t.ID())
-		it, ok1 := traitMap.Get(id)
-		kt, ok2 := kitTraitMap.Get(id)
-
-		if !ok1 && !ok2 {
-			continue
-		}
-
-		if t.InfluencesKit() && t.InfluencesBuild(it, kt) {
-			if ct, ok := t.(trait.ComparableTrait); ok {
-				// if it's match trait use its matches method to determine the match
-				if match, err := matchesComparableTrait(ct, it, kt); !match || err != nil {
-					return false, err
-				}
-			} else {
-				if !matchesTrait(it, kt) {
-					return false, nil
-				}
-			}
-		}
-	}
-
-	return true, nil
-}
-
-func matchesComparableTrait(ct trait.ComparableTrait, it map[string]interface{}, kt map[string]interface{}) (bool, error) {
-	t1 := reflect.New(reflect.TypeOf(ct).Elem()).Interface()
-	if err := trait.ToTrait(it, &t1); err != nil {
-		return false, err
-	}
-
-	t2 := reflect.New(reflect.TypeOf(ct).Elem()).Interface()
-	if err := trait.ToTrait(kt, &t2); err != nil {
-		return false, err
-	}
-
-	ct2, ok := t2.(trait.ComparableTrait)
-	if !ok {
-		return false, fmt.Errorf("type assertion failed: %v", t2)
-	}
-	tt1, ok := t1.(trait.Trait)
-	if !ok {
-		return false, fmt.Errorf("type assertion failed: %v", t1)
-	}
-
-	return ct2.Matches(tt1), nil
-}
-
-func matchesTrait(it map[string]interface{}, kt map[string]interface{}) bool {
-	// perform exact match on the two trait maps
-	return reflect.DeepEqual(it, kt)
 }
 
 func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) bool {

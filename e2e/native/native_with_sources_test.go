@@ -1,5 +1,5 @@
-//go:build integration && high_memory
-// +build integration,high_memory
+//go:build integration
+// +build integration
 
 // To enable compilation of this file in Goland, go to "Settings -> Go -> Vendoring & Build Tags -> Custom Tags" and add "integration"
 
@@ -23,6 +23,7 @@ limitations under the License.
 package native
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -33,105 +34,75 @@ import (
 )
 
 func TestNativeHighMemoryIntegrations(t *testing.T) {
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := "camel-k-quarkus-high-memory-native"
-		Expect(KamelInstallWithID(operatorID, ns,
-			"--build-timeout", "90m0s",
-			"--maven-cli-option", "-Dquarkus.native.native-image-xmx=9g",
-		).Execute()).To(Succeed())
-		Eventually(PlatformPhase(ns), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
-
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		javaNativeName := RandomizedSuffixName("java-native")
 		javaNativeCloneName := RandomizedSuffixName("java-native-clone")
 		javaNative2Name := RandomizedSuffixName("java-native-2")
 
 		t.Run("java native support", func(t *testing.T) {
 			name := javaNativeName
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-				"-t", "quarkus.build-mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
-			).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
 
 			t.Run("java native same should not rebuild", func(t *testing.T) {
 				name := javaNativeCloneName
-				Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-					"-t", "quarkus.build-mode=native",
-					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
-				).Execute()).To(Succeed())
+				g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
 				// This one should run quickly as it suppose to reuse an IntegrationKit
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 					Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
-				Eventually(IntegrationKit(ns, javaNativeCloneName)).Should(Equal(IntegrationKit(ns, javaNativeName)()))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magicstring!"))
+				g.Eventually(IntegrationKit(t, ctx, ns, javaNativeCloneName)).Should(Equal(IntegrationKit(t, ctx, ns, javaNativeName)()))
 			})
 
 			t.Run("java native should rebuild", func(t *testing.T) {
 				name := javaNative2Name
-				Expect(KamelRunWithID(operatorID, ns, "files/Java2.java", "--name", name,
-					"-t", "quarkus.build-mode=native",
-					"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
-				).Execute()).To(Succeed())
+				g.Expect(KamelRun(t, ctx, ns, "files/Java2.java", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
-				Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
-				Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 					Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-				Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 					Should(Equal(corev1.ConditionTrue))
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magic2string!"))
-				Eventually(IntegrationKit(ns, javaNative2Name)).ShouldNot(Equal(IntegrationKit(ns, javaNativeName)()))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Java Magic2string!"))
+				g.Eventually(IntegrationKit(t, ctx, ns, javaNative2Name)).ShouldNot(Equal(IntegrationKit(t, ctx, ns, javaNativeName)()))
 			})
 
-			// Clean up
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
 		})
 
 		t.Run("groovy native support", func(t *testing.T) {
 			name := RandomizedSuffixName("groovy-native")
-			Expect(KamelRunWithID(operatorID, ns, "files/Groovy.groovy", "--name", name,
-				"-t", "quarkus.build-mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
-			).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Groovy.groovy", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Groovy Magicstring!"))
-
-			// Clean up
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Groovy Magicstring!"))
 		})
 
 		t.Run("kotlin native support", func(t *testing.T) {
 			name := RandomizedSuffixName("kotlin-native")
-			Expect(KamelRunWithID(operatorID, ns, "files/Kotlin.kts", "--name", name,
-				"-t", "quarkus.build-mode=native",
-				"-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi",
-			).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/Kotlin.kts", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:9.5Gi").Execute()).To(Succeed())
 
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationPod(ns, name), TestTimeoutShort).
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutVeryLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutShort).
 				Should(WithTransform(getContainerCommand(), MatchRegexp(".*camel-k-integration-\\d+\\.\\d+\\.\\d+[-A-Za-z]*-runner.*")))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionTrue))
 
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Kotlin Magicstring!"))
-
-			// Clean up
-			Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Kotlin Magicstring!"))
 		})
 	})
 }

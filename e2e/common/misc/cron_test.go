@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package misc
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -31,45 +32,65 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRunCronExample(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	t.Run("cron", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/cron.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationCronJob(ns, "cron"), TestTimeoutMedium).ShouldNot(BeNil())
-		Eventually(IntegrationConditionStatus(ns, "cron", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "cron"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("cron-yaml", func(t *testing.T) {
+			name := RandomizedSuffixName("cron-yaml")
+			g.Expect(KamelRun(t, ctx, ns, "files/cron-yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationCronJob(t, ctx, ns, name)).ShouldNot(BeNil())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("cron-timer", func(t *testing.T) {
+			name := RandomizedSuffixName("cron-timer")
+			g.Expect(KamelRun(t, ctx, ns, "files/cron-timer.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationCronJob(t, ctx, ns, name), TestTimeoutLong).ShouldNot(BeNil())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("cron-fallback", func(t *testing.T) {
+			name := RandomizedSuffixName("cron-fallback")
+			g.Expect(KamelRun(t, ctx, ns, "files/cron-fallback.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("cron-quartz", func(t *testing.T) {
+			name := RandomizedSuffixName("cron-quartz")
+			g.Expect(KamelRun(t, ctx, ns, "files/cron-quartz.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+		})
+
+		t.Run("cron-trait-yaml", func(t *testing.T) {
+			name := RandomizedSuffixName("cron-trait-yaml")
+			g.Expect(KamelRun(t, ctx, ns, "files/cron-trait-yaml.yaml", "--name", name, "-t", "cron.enabled=true", "-t", "cron.schedule=0/2 * * * *").Execute()).To(Succeed())
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady)).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationCronJob(t, ctx, ns, name)).ShouldNot(BeNil())
+
+			// Verify that `-t cron.schedule` overrides the schedule in the yaml
+			//
+			// kubectl get cronjobs -n test-de619ae2-eddc-4bac-86a6-53d80be030ea
+			// NAME               SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+			// cron-trait-yaml    0/2 * * * *   False     0        <none>          38s
+
+			cronJob := IntegrationCronJob(t, ctx, ns, name)()
+			assert.Equal(t, "0/2 * * * *", cronJob.Spec.Schedule)
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+		})
 	})
-
-	t.Run("cron-yaml", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/cron-yaml.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationCronJob(ns, "cron-yaml"), TestTimeoutMedium).ShouldNot(BeNil())
-		Eventually(IntegrationConditionStatus(ns, "cron-yaml", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "cron-yaml"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
-	})
-
-	t.Run("cron-timer", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/cron-timer.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationCronJob(ns, "cron-timer"), TestTimeoutMedium).ShouldNot(BeNil())
-		Eventually(IntegrationConditionStatus(ns, "cron-timer", v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "cron-timer"), TestTimeoutMedium).Should(ContainSubstring("Magicstring!"))
-	})
-
-	t.Run("cron-fallback", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/cron-fallback.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "cron-fallback"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "cron-fallback", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "cron-fallback"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-	})
-
-	t.Run("cron-quartz", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/cron-quartz.yaml").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "cron-quartz"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "cron-quartz", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "cron-quartz"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

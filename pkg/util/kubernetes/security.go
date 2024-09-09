@@ -19,18 +19,17 @@ package kubernetes
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/utils/ptr"
 )
 
 // DefaultOperatorSecurityContext to ensure a container with low privilege and limited permissions.
 func DefaultOperatorSecurityContext() *corev1.SecurityContext {
-	runAsNonRoot := true
-	allowPrivilegeEscalation := false
 	sc := corev1.SecurityContext{
-		RunAsNonRoot: &runAsNonRoot,
+		RunAsNonRoot: ptr.To(true),
 		SeccompProfile: &corev1.SeccompProfile{
 			Type: corev1.SeccompProfileTypeRuntimeDefault,
 		},
-		AllowPrivilegeEscalation: &allowPrivilegeEscalation,
+		AllowPrivilegeEscalation: ptr.To(false),
 		Capabilities:             &corev1.Capabilities{Drop: []corev1.Capability{"ALL"}},
 	}
 

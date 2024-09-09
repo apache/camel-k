@@ -24,10 +24,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	eventingduckv1 "knative.dev/eventing/pkg/apis/duck/v1"
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
@@ -40,20 +41,26 @@ import (
 	knativeapi "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	k8sutils "github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
 func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -68,9 +75,9 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
-						Auto:            pointer.Bool(false),
+						Auto:            ptr.To(false),
 						ChannelSources:  []string{"channel-source-1"},
 						ChannelSinks:    []string{"channel-sink-1"},
 						EndpointSources: []string{"endpoint-source-1"},
@@ -103,24 +110,24 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
 	err = tc.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 	ok, condition, err := tr.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ne, err := fromCamelProperties(environment.ApplicationProperties)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	cSource1 := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "messaging.knative.dev/v1", "Channel")
 	assert.NotNil(t, cSource1)
@@ -146,17 +153,28 @@ func TestKnativeEnvConfigurationFromTrait(t *testing.T) {
 	eEventSink := ne.FindService("default", knativeapi.CamelEndpointKindSink, knativeapi.CamelServiceTypeEvent, "eventing.knative.dev/v1", "Broker")
 	assert.NotNil(t, eEventSink)
 	assert.Equal(t, "http://broker-default.host/", eEventSink.URL)
+
+	assert.NotNil(t, environment.Resources.GetKnativeSubscription(func(subscription *messaging.Subscription) bool {
+		return assert.Equal(t, "channel-source-1-test", subscription.Name)
+	}))
+
+	assert.NotNil(t, environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return assert.Equal(t, "default-test", trigger.Name)
+	}))
 }
 
 func TestKnativeEnvConfigurationFromSource(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
 		CamelCatalog: catalog,
 		Catalog:      traitCatalog,
+		Client:       client,
 		Integration: &v1.Integration{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
@@ -192,7 +210,7 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -220,25 +238,25 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
 	err = tc.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tr, _ := tc.GetTrait("knative").(*knativeTrait)
 
 	ok, condition, err := tr.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = tr.Apply(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	ne, err := fromCamelProperties(environment.ApplicationProperties)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	source := ne.FindService("s3fileMover1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEndpoint, "serving.knative.dev/v1", "Service")
 	assert.NotNil(t, source)
@@ -247,11 +265,881 @@ func TestKnativeEnvConfigurationFromSource(t *testing.T) {
 
 	channel := ne.FindService("channel-source-1", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeChannel, "", "")
 	assert.NotNil(t, channel)
-	assert.Equal(t, "false", channel.Metadata[knativeapi.CamelMetaKnativeReply])
+	assert.Equal(t, boolean.FalseString, channel.Metadata[knativeapi.CamelMetaKnativeReply])
 
 	broker := ne.FindService("evt.type", knativeapi.CamelEndpointKindSource, knativeapi.CamelServiceTypeEvent, "", "")
 	assert.NotNil(t, broker)
-	assert.Equal(t, "false", broker.Metadata[knativeapi.CamelMetaKnativeReply])
+	assert.Equal(t, boolean.FalseString, broker.Metadata[knativeapi.CamelMetaKnativeReply])
+
+	assert.NotNil(t, environment.Resources.GetKnativeSubscription(func(subscription *messaging.Subscription) bool {
+		return assert.Equal(t, "channel-source-1-test", subscription.Name)
+	}))
+
+	assert.NotNil(t, environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return assert.Equal(t, "default-test-evttype", trigger.Name)
+	}))
+}
+
+func TestKnativeTriggerExplicitFilterConfig(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event/evt.type")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+						Filters: []string{"source=my-source"},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	trigger := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type")
+	})
+
+	assert.NotNil(t, trigger)
+
+	assert.Equal(t, "default", trigger.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type", trigger.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype", trigger.Name)
+
+	assert.NotNil(t, trigger.Spec.Filter)
+	assert.Len(t, trigger.Spec.Filter.Attributes, 2)
+	assert.Equal(t, trigger.Spec.Filter.Attributes["type"], "evt.type")
+	assert.Equal(t, trigger.Spec.Filter.Attributes["source"], "my-source")
+}
+
+func TestKnativeTriggerExplicitFilterConfigNoEventTypeFilter(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event/evt.type")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+						Filters:         []string{"source=my-source"},
+						FilterEventType: ptr.To(false),
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	trigger := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type")
+	})
+
+	assert.NotNil(t, trigger)
+
+	assert.Equal(t, "default", trigger.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type", trigger.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype", trigger.Name)
+
+	assert.NotNil(t, trigger.Spec.Filter)
+	assert.Len(t, trigger.Spec.Filter.Attributes, 1)
+	assert.Equal(t, trigger.Spec.Filter.Attributes["source"], "my-source")
+}
+
+func TestKnativeTriggerDefaultEventTypeFilter(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event/evt.type")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	trigger := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type")
+	})
+
+	assert.NotNil(t, trigger)
+	assert.Equal(t, "default", trigger.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type", trigger.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype", trigger.Name)
+
+	assert.NotNil(t, trigger.Spec.Filter)
+	assert.Len(t, trigger.Spec.Filter.Attributes, 1)
+	assert.Equal(t, "evt.type", trigger.Spec.Filter.Attributes["type"])
+}
+
+func TestKnativeTriggerDefaultEventTypeFilterDisabled(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event/evt.type")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+						FilterEventType: ptr.To(false),
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	trigger := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type")
+	})
+
+	assert.NotNil(t, trigger)
+	assert.Equal(t, "default", trigger.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type", trigger.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype", trigger.Name)
+
+	assert.Nil(t, trigger.Spec.Filter)
+}
+
+func TestKnativeMultipleTrigger(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event/evt.type.1")
+ 											.log("${body}");
+
+										from("knative:event/evt.type.2")
+ 											.log("${body}");
+
+										from("knative:event")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	triggerNames := make([]string, 0)
+	environment.Resources.VisitKnativeTrigger(func(trigger *eventing.Trigger) {
+		triggerNames = append(triggerNames, trigger.Name)
+	})
+
+	assert.Len(t, triggerNames, 3)
+
+	trigger1 := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type.1")
+	})
+
+	assert.NotNil(t, trigger1)
+	assert.Equal(t, "default", trigger1.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger1.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger1.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type.1", trigger1.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype1", trigger1.Name)
+
+	assert.NotNil(t, trigger1.Spec.Filter)
+	assert.Len(t, trigger1.Spec.Filter.Attributes, 1)
+	assert.Equal(t, "evt.type.1", trigger1.Spec.Filter.Attributes["type"])
+
+	trigger2 := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type.2")
+	})
+
+	assert.NotNil(t, trigger2)
+	assert.Equal(t, "default", trigger2.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger2.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger2.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type.2", trigger2.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype2", trigger2.Name)
+
+	assert.NotNil(t, trigger2.Spec.Filter)
+	assert.Len(t, trigger2.Spec.Filter.Attributes, 1)
+	assert.Equal(t, "evt.type.2", trigger2.Spec.Filter.Attributes["type"])
+
+	trigger3 := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "")
+	})
+
+	assert.NotNil(t, trigger3)
+	assert.Equal(t, "default", trigger3.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger3.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger3.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/", trigger3.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test", trigger3.Name)
+
+	assert.Nil(t, trigger3.Spec.Filter)
+}
+
+func TestKnativeMultipleTriggerAdditionalFilterConfig(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event/evt.type.1")
+ 											.log("${body}");
+
+										from("knative:event/evt.type.2")
+ 											.log("${body}");
+
+										from("knative:event")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+						Filters: []string{"subject=Hello"},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	triggerNames := make([]string, 0)
+	environment.Resources.VisitKnativeTrigger(func(trigger *eventing.Trigger) {
+		triggerNames = append(triggerNames, trigger.Name)
+	})
+
+	assert.Len(t, triggerNames, 3)
+
+	trigger1 := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type.1")
+	})
+
+	assert.NotNil(t, trigger1)
+	assert.Equal(t, "default", trigger1.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger1.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger1.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type.1", trigger1.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype1", trigger1.Name)
+
+	assert.NotNil(t, trigger1.Spec.Filter)
+	assert.Len(t, trigger1.Spec.Filter.Attributes, 2)
+	assert.Equal(t, "evt.type.1", trigger1.Spec.Filter.Attributes["type"])
+	assert.Equal(t, "Hello", trigger1.Spec.Filter.Attributes["subject"])
+
+	trigger2 := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type.2")
+	})
+
+	assert.NotNil(t, trigger2)
+	assert.Equal(t, "default", trigger2.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger2.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger2.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type.2", trigger2.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype2", trigger2.Name)
+
+	assert.NotNil(t, trigger2.Spec.Filter)
+	assert.Len(t, trigger2.Spec.Filter.Attributes, 2)
+	assert.Equal(t, "evt.type.2", trigger2.Spec.Filter.Attributes["type"])
+	assert.Equal(t, "Hello", trigger2.Spec.Filter.Attributes["subject"])
+
+	trigger3 := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "")
+	})
+
+	assert.NotNil(t, trigger3)
+	assert.Equal(t, "default", trigger3.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger3.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger3.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/", trigger3.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test", trigger3.Name)
+
+	assert.NotNil(t, trigger3.Spec.Filter)
+	assert.Len(t, trigger3.Spec.Filter.Attributes, 1)
+	assert.Equal(t, "Hello", trigger3.Spec.Filter.Attributes["subject"])
+}
+
+func TestKnativeTriggerNoEventType(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	trigger := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "")
+	})
+
+	assert.NotNil(t, trigger)
+	assert.Equal(t, "default", trigger.Spec.Broker)
+	assert.Equal(t, serving.SchemeGroupVersion.String(), trigger.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/", trigger.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test", trigger.Name)
+
+	assert.Nil(t, trigger.Spec.Filter)
+}
+
+func TestKnativeTriggerNoServingAvailable(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	c, err := NewFakeClient("ns")
+	require.NoError(t, err)
+
+	fakeClient := c.(*test.FakeClient) //nolint
+	fakeClient.DisableKnativeServing()
+
+	traitCatalog := NewCatalog(c)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       c,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name: "route.java",
+							Content: `
+								public class CartoonMessagesMover extends RouteBuilder {
+									public void configure() {
+										from("knative:event/evt.type")
+ 											.log("${body}");
+									}
+								}
+							`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, err = traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("knative"))
+
+	trigger := environment.Resources.GetKnativeTrigger(func(trigger *eventing.Trigger) bool {
+		return trigger.Name == knative.GetTriggerName("default", "test", "evt.type")
+	})
+
+	assert.NotNil(t, trigger)
+
+	assert.Equal(t, "default", trigger.Spec.Broker)
+	assert.Equal(t, "v1", trigger.Spec.Subscriber.Ref.APIVersion)
+	assert.Equal(t, "Service", trigger.Spec.Subscriber.Ref.Kind)
+	assert.Equal(t, "/events/evt.type", trigger.Spec.Subscriber.URI.Path)
+	assert.Equal(t, "default-test-evttype", trigger.Name)
+
+	assert.NotNil(t, trigger.Spec.Filter)
+	assert.Len(t, trigger.Spec.Filter.Attributes, 1)
+	assert.Equal(t, "evt.type", trigger.Spec.Filter.Attributes["type"])
 }
 
 func TestKnativePlatformHttpConfig(t *testing.T) {
@@ -285,15 +1173,15 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 			environment := NewFakeEnvironment(t, source)
 
 			c, err := NewFakeClient("ns")
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			tc := NewCatalog(c)
 
 			err = tc.Configure(&environment)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			_, err = tc.apply(&environment)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 		})
 	}
@@ -331,20 +1219,160 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 			environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
 			c, err := NewFakeClient("ns")
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			tc := NewCatalog(c)
 
 			err = tc.Configure(&environment)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			conditions, err := tc.apply(&environment)
-			assert.Nil(t, err)
-			assert.Empty(t, conditions)
+			require.NoError(t, err)
+			assert.NotEmpty(t, conditions)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-platform-http")
 		})
 	}
+}
+
+func TestKnativeEnabled(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "route.groovy",
+							Content: `from('timer:foo').to('knative:channel/channel-source-1')`,
+						},
+						Language: v1.LanguageGroovy,
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// configure the init trait
+	init := NewInitTrait()
+	ok, condition, err := init.Configure(&environment)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+
+	// apply the init trait
+	require.NoError(t, init.Apply(&environment))
+
+	// configure the knative trait
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	ok, condition, err = knTrait.Configure(&environment)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+
+	// apply the knative trait
+	require.NoError(t, knTrait.Apply(&environment))
+	assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityKnative)
+}
+
+func TestKnativeNotEnabled(t *testing.T) {
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "route.groovy",
+							Content: `from('timer:foo').to('log:info')`,
+						},
+						Language: v1.LanguageGroovy,
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// configure the init trait
+	init := NewInitTrait()
+	ok, condition, err := init.Configure(&environment)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+
+	// apply the init trait
+	require.NoError(t, init.Apply(&environment))
+
+	// configure the knative trait
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	ok, condition, err = knTrait.Configure(&environment)
+	require.NoError(t, err)
+	assert.False(t, ok)
+	assert.Nil(t, condition)
+
+	assert.NotContains(t, environment.Integration.Status.Capabilities, v1.CapabilityKnative)
 }
 
 func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
@@ -352,7 +1380,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 
 	client, _ := NewFakeClient("ns")
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	traitCatalog := NewCatalog(nil)
 
@@ -376,7 +1404,7 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 				Traits: v1.Traits{
 					Knative: &traitv1.KnativeTrait{
 						Trait: traitv1.Trait{
-							Enabled: pointer.Bool(true),
+							Enabled: ptr.To(true),
 						},
 					},
 				},
@@ -394,6 +1422,60 @@ func NewFakeEnvironment(t *testing.T, source v1.SourceSpec) Environment {
 					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
 					Registry:        v1.RegistrySpec{Address: "registry"},
 					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      k8sutils.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	return environment
+}
+
+func NewFakeEnvironmentForSyntheticKit(t *testing.T) Environment {
+	t.Helper()
+	client, _ := NewFakeClient("ns")
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		Catalog: traitCatalog,
+		Client:  client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Traits: v1.Traits{
+					Knative: &traitv1.KnativeTrait{
+						Trait: traitv1.Trait{
+							Enabled: ptr.To(true),
+						},
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
 				},
 				Profile: v1.TraitProfileKnative,
 			},
@@ -551,105 +1633,6 @@ func NewFakeClient(namespace string) (client.Client, error) {
 	)
 }
 
-func SortChannelFakeClient(namespace string) (client.Client, error) {
-	channelSourceURL1, err := apis.ParseURL("http://channel-source-1.host/")
-	if err != nil {
-		return nil, err
-	}
-	channelSourceURL2, err := apis.ParseURL("http://channel-source-2.host/")
-	if err != nil {
-		return nil, err
-	}
-	channelSourceURL3, err := apis.ParseURL("http://channel-source-3.host/")
-	if err != nil {
-		return nil, err
-	}
-	channelSourceURL4, err := apis.ParseURL("http://channel-source-4.host/")
-	if err != nil {
-		return nil, err
-	}
-
-	return test.NewFakeClient(
-		// Channels unsorted on purpose
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-2",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL2,
-						},
-					},
-				},
-			},
-		},
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-4",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL4,
-						},
-					},
-				},
-			},
-		},
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-1",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL1,
-						},
-					},
-				},
-			},
-		},
-		&messaging.Channel{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Channel",
-				APIVersion: messaging.SchemeGroupVersion.String(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: namespace,
-				Name:      "channel-source-3",
-			},
-			Status: messaging.ChannelStatus{
-				ChannelableStatus: eventingduckv1.ChannelableStatus{
-					AddressStatus: duckv1.AddressStatus{
-						Address: &duckv1.Addressable{
-							URL: channelSourceURL3,
-						},
-					},
-				},
-			},
-		},
-	)
-}
-
 func TestKnativeSinkBinding(t *testing.T) {
 	source := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
@@ -663,15 +1646,15 @@ func TestKnativeSinkBinding(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
 	c, err := NewFakeClient("ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	tc := NewCatalog(c)
 
 	err = tc.Configure(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	_, err = tc.apply(&environment)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	baseProp := "camel.component.knative.environment.resources[0]"
 	assert.Equal(t, "channel-sink-1", environment.ApplicationProperties[baseProp+".name"])
 	assert.Equal(t, "${K_SINK}", environment.ApplicationProperties[baseProp+".url"])
@@ -711,4 +1694,115 @@ func fromCamelProperties(appProps map[string]string) (*knativeapi.CamelEnvironme
 	}
 
 	return &env, nil
+}
+
+func TestKnativeSyntheticKitDefault(t *testing.T) {
+	e := NewFakeEnvironmentForSyntheticKit(t)
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	ok, condition, err := knTrait.Configure(&e)
+	require.NoError(t, err)
+	assert.False(t, ok)
+	assert.Nil(t, condition)
+}
+
+func TestKnativeSyntheticKitEnabled(t *testing.T) {
+	e := NewFakeEnvironmentForSyntheticKit(t)
+	knTrait, _ := newKnativeTrait().(*knativeTrait)
+	knTrait.Enabled = ptr.To(true)
+	ok, condition, err := knTrait.Configure(&e)
+	require.NoError(t, err)
+	assert.True(t, ok)
+	assert.Nil(t, condition)
+}
+
+func TestRunKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
+	environment := createEnvironmentMissingEventingCRDs()
+	trait, _ := newKnativeTrait().(*knativeTrait)
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name: "test.java",
+				Content: `
+				from("knative:channel/test").to("log:${body};
+			`,
+			},
+			Language: v1.LanguageJavaSource,
+		},
+	}
+	expectedCondition := NewIntegrationCondition(
+		"Knative",
+		v1.IntegrationConditionKnativeAvailable,
+		corev1.ConditionFalse,
+		v1.IntegrationConditionKnativeNotInstalledReason,
+		"integration cannot run. Knative is not installed in the cluster",
+	)
+	configured, condition, err := trait.Configure(environment)
+	require.Error(t, err)
+	assert.Equal(t, expectedCondition, condition)
+	assert.False(t, configured)
+}
+
+func TestRunNonKnativeEndpointWithKnativeNotInstalled(t *testing.T) {
+	environment := createEnvironmentMissingEventingCRDs()
+	trait, _ := newKnativeTrait().(*knativeTrait)
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name: "test.java",
+				Content: `
+				from("platform-http://my-site").to("log:${body}");
+			`,
+			},
+			Language: v1.LanguageJavaSource,
+		},
+	}
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.False(t, configured)
+	conditions := environment.Integration.Status.Conditions
+	assert.Empty(t, conditions)
+}
+
+func createEnvironmentMissingEventingCRDs() *Environment {
+	client, _ := test.NewFakeClient()
+	// disable the knative eventing api
+	fakeClient := client.(*test.FakeClient) //nolint
+	fakeClient.DisableAPIGroupDiscovery("eventing.knative.dev/v1")
+
+	replicas := int32(3)
+	catalog, _ := camel.QuarkusCatalog()
+
+	environment := &Environment{
+		CamelCatalog: catalog,
+		Catalog:      NewCatalog(nil),
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "integration-name",
+			},
+			Spec: v1.IntegrationSpec{
+				Replicas: &replicas,
+				Traits:   v1.Traits{},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "namespace",
+			},
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterKubernetes,
+				Profile: v1.TraitProfileKubernetes,
+			},
+		},
+		Resources:             kubernetes.NewCollection(),
+		ApplicationProperties: make(map[string]string),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	return environment
 }

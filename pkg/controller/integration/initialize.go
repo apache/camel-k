@@ -65,25 +65,18 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		return integration, err
 	}
 
-	if integration.Status.IntegrationKit == nil {
-		if integration.Spec.IntegrationKit != nil && integration.Spec.IntegrationKit.Name != "" {
-			kitNamespace := integration.Spec.IntegrationKit.Namespace
-			kitName := integration.Spec.IntegrationKit.Name
+	if integration.Status.Image != "" {
+		integration.Status.Phase = v1.IntegrationPhaseDeploying
+		return integration, nil
+	}
 
-			if kitNamespace == "" {
-				pl, err := platform.GetForResource(ctx, action.client, integration)
-				if err != nil && !k8serrors.IsNotFound(err) {
-					return nil, err
-				}
-				if pl != nil {
-					kitNamespace = pl.Namespace
-				}
-			}
-			kit := v1.NewIntegrationKit(kitNamespace, kitName)
-			integration.SetIntegrationKit(kit)
-		} else {
-			integration.Status.IntegrationKit = nil
+	if integration.Status.IntegrationKit == nil {
+		ikt, err := action.lookupIntegrationKit(ctx, integration)
+		if err != nil {
+			return nil, err
 		}
+
+		integration.SetIntegrationKit(ikt)
 	}
 
 	integration.Status.Phase = v1.IntegrationPhaseBuildingKit
@@ -95,6 +88,27 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 	}
 
 	return integration, nil
+}
+
+func (action *initializeAction) lookupIntegrationKit(ctx context.Context, integration *v1.Integration) (*v1.IntegrationKit, error) {
+	if integration.Spec.IntegrationKit == nil || integration.Spec.IntegrationKit.Name == "" {
+		return nil, nil
+	}
+
+	kitNamespace := integration.Spec.IntegrationKit.Namespace
+	kitName := integration.Spec.IntegrationKit.Name
+
+	if kitNamespace == "" {
+		pl, err := platform.GetForResource(ctx, action.client, integration)
+		if err != nil && !k8serrors.IsNotFound(err) {
+			return nil, err
+		}
+		if pl != nil {
+			kitNamespace = pl.Namespace
+		}
+	}
+
+	return v1.NewIntegrationKit(kitNamespace, kitName), nil
 }
 
 func (action *initializeAction) importFromExternalApp(integration *v1.Integration) (*v1.Integration, error) {

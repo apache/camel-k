@@ -18,6 +18,7 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
 	"sort"
 
 	corev1 "k8s.io/api/core/v1"
@@ -181,16 +182,6 @@ func ValidKameletName(name string) bool {
 	return !reservedKameletNames[name]
 }
 
-func ValidKameletProperties(kamelet *Kamelet) bool {
-	if kamelet == nil || kamelet.Spec.Definition == nil || kamelet.Spec.Definition.Properties == nil {
-		return true
-	}
-	if _, idPresent := kamelet.Spec.Definition.Properties[KameletIDProperty]; idPresent {
-		return false
-	}
-	return true
-}
-
 // NewKamelet creates a new Kamelet.
 func NewKamelet(namespace string, name string) Kamelet {
 	return Kamelet{
@@ -213,4 +204,26 @@ func NewKameletList() KameletList {
 			Kind:       KameletKind,
 		},
 	}
+}
+
+// SetOperatorID sets the given operator id as an annotation.
+func (k *Kamelet) SetOperatorID(operatorID string) {
+	SetAnnotation(&k.ObjectMeta, OperatorIDAnnotation, operatorID)
+}
+
+// CloneWithVersion clones a Kamelet and set the main specification with any version provided.
+// It also changes the name adding a suffix with the version provided.
+func (k *Kamelet) CloneWithVersion(version string) (*Kamelet, error) {
+	clone := k.DeepCopy()
+	if version != "" {
+		kameletVersionSpec, ok := k.Spec.Versions[version]
+		if !ok {
+			return nil, fmt.Errorf("could not find version %s for Kamelet %s/%s", version, k.Namespace, k.Name)
+		}
+		clone.Spec.KameletSpecBase = kameletVersionSpec
+	}
+	// Remove any existing version
+	clone.Spec.Versions = nil
+
+	return clone, nil
 }

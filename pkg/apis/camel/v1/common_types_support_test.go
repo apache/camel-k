@@ -26,18 +26,18 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestTraitsMerge(t *testing.T) {
 	t1 := Traits{
 		Container: &trait.ContainerTrait{
 			Name:        "test-container",
-			Auto:        pointer.Bool(false),
+			Auto:        ptr.To(false),
 			ServicePort: 81,
 		},
 		Logging: &trait.LoggingTrait{
-			Color: pointer.Bool(false),
+			Color: ptr.To(false),
 			Level: "INFO",
 		},
 		Addons: map[string]AddonTrait{
@@ -55,7 +55,7 @@ func TestTraitsMerge(t *testing.T) {
 			PortName: "http-8081",
 		},
 		Logging: &trait.LoggingTrait{
-			Color: pointer.Bool(true),
+			Color: ptr.To(true),
 			Level: "DEBUG",
 		},
 		Addons: map[string]AddonTrait{
@@ -70,13 +70,13 @@ func TestTraitsMerge(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.NotNil(t, t1.Container)
-	assert.False(t, pointer.BoolDeref(t1.Container.Auto, true))
+	assert.False(t, ptr.Deref(t1.Container.Auto, true))
 	assert.Equal(t, "http-8081", t1.Container.PortName)
 	assert.Equal(t, 81, t1.Container.ServicePort)
 
 	// values from merged trait take precedence over the original ones
 	assert.NotNil(t, t1.Logging)
-	assert.True(t, pointer.BoolDeref(t1.Logging.Color, false))
+	assert.True(t, ptr.Deref(t1.Logging.Color, false))
 	assert.Equal(t, "DEBUG", t1.Logging.Level)
 
 	assert.NotNil(t, t1.Addons)
@@ -236,7 +236,7 @@ func TestDecodeValueSourceInvalid(t *testing.T) {
 	for i, tc := range testcases {
 		t.Run(fmt.Sprintf("test-%d-%s", i, tc.name), func(t *testing.T) {
 			res, err := DecodeValueSource(tc.input, tc.defaultKey, tc.errorMessage)
-			assert.NotNil(t, err)
+			require.Error(t, err)
 			assert.Equal(t, ValueSource{}, res)
 			assert.Equal(t, err.Error(), tc.errorMessage)
 		})

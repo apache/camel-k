@@ -24,8 +24,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -48,11 +46,12 @@ func newCmdUninstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *uninstall
 	}
 
 	cmd := cobra.Command{
-		Use:     "uninstall",
-		Short:   "Uninstall Camel K from a Kubernetes cluster",
-		Long:    `Uninstalls Camel K from a Kubernetes or OpenShift cluster.`,
-		PreRunE: options.decode,
-		RunE:    options.uninstall,
+		Use:        "uninstall",
+		Short:      "Uninstall Camel K from a Kubernetes cluster",
+		Long:       `Uninstalls Camel K from a Kubernetes or OpenShift cluster.`,
+		Deprecated: "consider using Kustomize, Helm or OLM (see https://camel.apache.org/camel-k/next/installation/uninstalling.html)",
+		PreRunE:    options.decode,
+		RunE:       options.uninstall,
 	}
 
 	cmd.Flags().Bool("skip-operator", false, "Do not uninstall the Camel K Operator in the current namespace")
@@ -107,13 +106,14 @@ var defaultListOptions = metav1.ListOptions{
 
 func (o *uninstallCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	path := pathToRoot(cmd)
-	if err := decodeKey(o, path); err != nil {
+
+	if err := decodeKey(o, path, o.Flags.AllSettings()); err != nil {
 		return err
 	}
 
-	o.OlmOptions.OperatorName = viper.GetString(path + ".olm-operator-name")
-	o.OlmOptions.Package = viper.GetString(path + ".olm-package")
-	o.OlmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
+	o.OlmOptions.OperatorName = o.Flags.GetString(path + ".olm-operator-name")
+	o.OlmOptions.Package = o.Flags.GetString(path + ".olm-package")
+	o.OlmOptions.GlobalNamespace = o.Flags.GetString(path + ".olm-global-namespace")
 
 	return nil
 }
@@ -146,7 +146,7 @@ func (o *uninstallCmdOptions) uninstall(cmd *cobra.Command, _ []string) error {
 	uninstallViaOLM := false
 	if o.OlmEnabled {
 		var err error
-		if uninstallViaOLM, err = olm.IsAPIAvailable(o.Context, c, o.Namespace); err != nil {
+		if uninstallViaOLM, err = olm.IsAPIAvailable(c); err != nil {
 			return fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
 		}
 
@@ -230,7 +230,7 @@ func (o *uninstallCmdOptions) uninstallClusterWideResources(ctx context.Context,
 		if k8serrors.IsForbidden(err) {
 			// Let's print a warning message and continue
 			fmt.Fprintln(cmd.ErrOrStderr(), "Current user is not authorized to remove the operator ServiceAccount from the cluster role bindings")
-		} else if err != nil {
+		} else {
 			return err
 		}
 	}

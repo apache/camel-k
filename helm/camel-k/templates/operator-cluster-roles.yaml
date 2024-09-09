@@ -294,6 +294,7 @@ rules:
   - eventing.knative.dev
   resources:
   - triggers
+  - brokers
   verbs:
   - create
   - delete
@@ -305,6 +306,8 @@ rules:
   - messaging.knative.dev
   resources:
   - subscriptions
+  - channels
+  - inmemorychannels
   verbs:
   - create
   - delete
@@ -425,6 +428,7 @@ rules:
   - "kafka.strimzi.io"
   resources:
   - kafkatopics
+  - kafkatopics/status
   - kafkas
   verbs:
   - get

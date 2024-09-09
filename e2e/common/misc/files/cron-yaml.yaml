@@ -18,13 +18,18 @@
 - from:
     uri: "cron:tab"
     parameters:
-      schedule: "* * * * ?"
+      schedule: "*/2 * * * ?"
     steps:
       - setHeader:
           name: "m"
           constant: "string!"
       - setBody:
           simple: "Magic${header.m}"
+      # Simulate a job workload
+      - delay:
+          expression:
+            constant: 20000
+          asyncDelayed: false
       - to:
           uri: "log:info"
           parameters:

@@ -30,6 +30,14 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
 
+const (
+	deploymentTraitID               = "deployment"
+	deploymentTraitOrder            = 1100
+	deploymentStrategySelectorOrder = 10000
+
+	defaultProgressDeadline = int32(60)
+)
+
 type deploymentTrait struct {
 	BasePlatformTrait
 	traitv1.DeploymentTrait `property:",squash"`
@@ -39,7 +47,7 @@ var _ ControllerStrategySelector = &deploymentTrait{}
 
 func newDeploymentTrait() Trait {
 	return &deploymentTrait{
-		BasePlatformTrait: NewBasePlatformTrait("deployment", 1100),
+		BasePlatformTrait: NewBasePlatformTrait(deploymentTraitID, deploymentTraitOrder),
 	}
 }
 
@@ -57,6 +65,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 	strategy, err := e.DetermineControllerStrategy()
 	if err != nil {
 		return false, NewIntegrationCondition(
+			"Deployment",
 			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionDeploymentAvailableReason,
@@ -66,6 +75,7 @@ func (t *deploymentTrait) Configure(e *Environment) (bool, *TraitCondition, erro
 
 	if strategy != ControllerStrategyDeployment {
 		return false, NewIntegrationCondition(
+			"Deployment",
 			v1.IntegrationConditionDeploymentAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionDeploymentAvailableReason,
@@ -82,7 +92,7 @@ func (t *deploymentTrait) SelectControllerStrategy(e *Environment) (*ControllerS
 }
 
 func (t *deploymentTrait) ControllerStrategySelectorOrder() int {
-	return 10000
+	return deploymentStrategySelectorOrder
 }
 
 func (t *deploymentTrait) Apply(e *Environment) error {
@@ -108,7 +118,7 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 		}
 	}
 
-	deadline := int32(60)
+	deadline := defaultProgressDeadline
 	if t.ProgressDeadlineSeconds != nil {
 		deadline = *t.ProgressDeadlineSeconds
 	}
@@ -163,12 +173,12 @@ func (t *deploymentTrait) getDeploymentFor(e *Environment) *appsv1.Deployment {
 			var maxUnavailable *intstr.IntOrString
 
 			if t.RollingUpdateMaxSurge != nil {
-				v := intstr.FromInt(*t.RollingUpdateMaxSurge)
-				maxSurge = &v
+				v := t.RollingUpdateMaxSurge
+				maxSurge = v
 			}
 			if t.RollingUpdateMaxUnavailable != nil {
-				v := intstr.FromInt(*t.RollingUpdateMaxUnavailable)
-				maxUnavailable = &v
+				v := t.RollingUpdateMaxUnavailable
+				maxUnavailable = v
 			}
 
 			deployment.Spec.Strategy.RollingUpdate = &appsv1.RollingUpdateDeployment{

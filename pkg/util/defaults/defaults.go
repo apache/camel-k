@@ -23,10 +23,10 @@ package defaults
 
 const (
 	// Version --
-	Version = "2.3.0-SNAPSHOT"
+	Version = "2.5.0-SNAPSHOT"
 
 	// DefaultRuntimeVersion --
-	DefaultRuntimeVersion = "3.2.3"
+	DefaultRuntimeVersion = "3.8.1"
 
 	// baseImage --
 	baseImage = "eclipse-temurin:17"

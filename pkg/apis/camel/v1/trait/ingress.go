@@ -27,6 +27,9 @@ import networkingv1 "k8s.io/api/networking/v1"
 // +camel-k:trait=ingress.
 type IngressTrait struct {
 	Trait `property:",squash" json:",inline"`
+	// The Ingress class name as defined by the Ingress spec
+	// See https://kubernetes.io/docs/concepts/services-networking/ingress/
+	IngressClassName string `property:"ingress-class-name" json:"ingressClassName,omitempty"`
 	// The annotations added to the ingress.
 	// This can be used to set controller specific annotations, e.g., when using the NGINX Ingress controller:
 	// See https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md
@@ -41,4 +44,8 @@ type IngressTrait struct {
 	PathType *networkingv1.PathType `property:"path-type" json:"pathType,omitempty"`
 	// To automatically add an ingress whenever the integration uses an HTTP endpoint consumer.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
+	// To configure tls hosts
+	TLSHosts []string `property:"tls-hosts" json:"tlsHosts,omitempty"`
+	// To configure tls secret name
+	TLSSecretName string `property:"tls-secret-name" json:"tlsSecretName,omitempty"`
 }

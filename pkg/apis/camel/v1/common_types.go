@@ -59,6 +59,8 @@ type BuildConfiguration struct {
 	NodeSelector map[string]string `property:"node-selector" json:"nodeSelector,omitempty"`
 	// Annotation to use for the builder pod. Only used for `pod` strategy
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	// The list of platforms used in order to build a container image.
+	ImagePlatforms []string `property:"platforms" json:"platforms,omitempty"`
 }
 
 // BuildStrategy specifies how the Build should be executed.
@@ -119,6 +121,12 @@ type ConfigurationSpec struct {
 	Type string `json:"type"`
 	// the value to assign to the configuration (syntax may vary depending on the `Type`)
 	Value string `json:"value"`
+}
+
+// Catalog represents the Camel Catalog runtime specification.
+type Catalog struct {
+	Version  string          `json:"version,omitempty" yaml:"version,omitempty"`
+	Provider RuntimeProvider `json:"provider,omitempty" yaml:"provider,omitempty"`
 }
 
 // Artifact represents a materialized artifact (a jar dependency or in general a file used by the build).
@@ -231,14 +239,19 @@ type Traits struct {
 	PullSecret *trait.PullSecretTrait `property:"pull-secret" json:"pull-secret,omitempty"`
 	// The configuration of Quarkus trait
 	Quarkus *trait.QuarkusTrait `property:"quarkus" json:"quarkus,omitempty"`
-	// The configuration of Registry trait
+	// The configuration of Registry trait (support removed since version 2.5.0).
+	// Deprecated: use jvm trait or read documentation.
 	Registry *trait.RegistryTrait `property:"registry" json:"registry,omitempty"`
 	// The configuration of Route trait
 	Route *trait.RouteTrait `property:"route" json:"route,omitempty"`
+	// The configuration of Security Context trait
+	SecurityContext *trait.SecurityContextTrait `property:"security-context" json:"security-context,omitempty"`
 	// The configuration of Service trait
 	Service *trait.ServiceTrait `property:"service" json:"service,omitempty"`
 	// The configuration of Service Binding trait
 	ServiceBinding *trait.ServiceBindingTrait `property:"service-binding" json:"service-binding,omitempty"`
+	// The configuration of Telemetry trait
+	Telemetry *trait.TelemetryTrait `property:"telemetry" json:"telemetry,omitempty"`
 	// The configuration of Toleration trait
 	Toleration *trait.TolerationTrait `property:"toleration" json:"toleration,omitempty"`
 
@@ -341,10 +354,23 @@ type RuntimeSpec struct {
 	Capabilities map[string]Capability `json:"capabilities,omitempty" yaml:"capabilities,omitempty"`
 }
 
-// Capability is a particular feature which requires a well known set of dependencies
+// Capability is a particular feature which requires a well known set of dependencies and other properties
 // which are specified in the runtime catalog.
 type Capability struct {
-	Dependencies []MavenArtifact `json:"dependencies" yaml:"dependencies"`
+	// List of required Maven dependencies
+	Dependencies []MavenArtifact `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+	// Set of required Camel runtime properties
+	RuntimeProperties []CamelProperty `json:"runtimeProperties,omitempty" yaml:"runtimeProperties,omitempty"`
+	// Set of required Camel build time properties
+	BuildTimeProperties []CamelProperty `json:"buildTimeProperties,omitempty" yaml:"buildTimeProperties,omitempty"`
+	// Set of generic metadata
+	Metadata map[string]string `json:"metadata,omitempty" yaml:"metadata,omitempty"`
+}
+
+// CamelProperty represents a Camel property that may end up in an application.properties file.
+type CamelProperty struct {
+	Key   string `json:"key" yaml:"key"`
+	Value string `json:"value,omitempty" yaml:"value,omitempty"`
 }
 
 const (
@@ -360,7 +386,8 @@ const (
 	// CapabilityCron defines the cron execution capability.
 	CapabilityCron = "cron"
 	// CapabilityGcpSecretManager defines the gcp secret manager capability.
-	CapabilityGcpSecretManager = "gcp-secret-manager" // nolint: gosec
+	//nolint:gosec
+	CapabilityGcpSecretManager = "gcp-secret-manager"
 	// CapabilityHashicorpVault defines the Hashicorp Vault capability.
 	CapabilityHashicorpVault = "hashicorp-vault"
 	// CapabilityHealth defines the health monitoring capability.

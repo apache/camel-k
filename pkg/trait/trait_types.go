@@ -22,19 +22,23 @@ import (
 	"fmt"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
+	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
@@ -42,14 +46,23 @@ import (
 )
 
 const (
-	True  = "true"
-	False = "false"
-
 	sourceLanguageAnnotation    = "camel.apache.org/source.language"
 	sourceLoaderAnnotation      = "camel.apache.org/source.loader"
 	sourceNameAnnotation        = "camel.apache.org/source.name"
 	sourceCompressionAnnotation = "camel.apache.org/source.compression"
+
+	defaultContainerPortName = "http"
+	// Knative does not want name=http, it only supports http1 (HTTP/1) and h2c (HTTP/2)
+	// https://github.com/knative/specs/blob/main/specs/serving/runtime-contract.md#protocols-and-ports
+	defaultKnativeContainerPortName = "h2c"
+
+	secretStorageType    = "secret"
+	configmapStorageType = "configmap"
+	pvcStorageType       = "pvc"
+	emptyDirStorageType  = "emptyDir"
 )
+
+var capabilityDynamicProperty = regexp.MustCompile(`(\$\{([^}]*)\})`)
 
 // Identifiable represent an identifiable type.
 type Identifiable interface {
@@ -73,11 +86,6 @@ type Trait interface {
 	// InfluencesKit determines if the trait has any influence on Integration Kits
 	InfluencesKit() bool
 
-	// InfluencesBuild defines a low level of granularity for those traits which influences the build.
-	// The trait can specify if any particular trait configuration influences a build or not.
-	// Note: You must override this method if you override `InfluencesKit()`
-	InfluencesBuild(this, prev map[string]interface{}) bool
-
 	// IsPlatformTrait marks all fundamental traits that allow the platform to work
 	IsPlatformTrait() bool
 
@@ -85,16 +93,18 @@ type Trait interface {
 	RequiresIntegrationPlatform() bool
 
 	// IsAllowedInProfile tells if the trait supports the given profile
-	IsAllowedInProfile(v1.TraitProfile) bool
+	IsAllowedInProfile(traitProfile v1.TraitProfile) bool
 
 	// Order is the order in which the trait should be executed in the normal flow
 	Order() int
 }
 
+// Comparable is the interface exposing comparable funcs.
 type Comparable interface {
-	Matches(Trait) bool
+	Matches(trait Trait) bool
 }
 
+// ComparableTrait is the interface used to compare two traits between them.
 type ComparableTrait interface {
 	Trait
 	Comparable
@@ -154,12 +164,6 @@ func (trait *BaseTrait) InfluencesKit() bool {
 	return false
 }
 
-// InfluencesBuild defines a low level of granularity for those traits which influences the build.
-// The trait can specify if any particular trait configuration influences a build or not.
-func (trait *BaseTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return false
-}
-
 // IsPlatformTrait marks all fundamental traits that allow the platform to work.
 func (trait *BaseTrait) IsPlatformTrait() bool {
 	return false
@@ -194,17 +198,17 @@ func (trait *BasePlatformTrait) IsPlatformTrait() bool {
 // ControllerStrategySelector is the interface for traits that can determine the kind of controller that will run the integration.
 type ControllerStrategySelector interface {
 	// SelectControllerStrategy tells if the trait with current configuration can select a specific controller to use
-	SelectControllerStrategy(*Environment) (*ControllerStrategy, error)
+	SelectControllerStrategy(env *Environment) (*ControllerStrategy, error)
 	// ControllerStrategySelectorOrder returns the order (priority) of the controller strategy selector
 	ControllerStrategySelectorOrder() int
 }
 
 // An Environment provides the context for the execution of the traits.
-// nolint: containedctx
+//
+//nolint:containedctx
 type Environment struct {
-	CamelCatalog   *camel.RuntimeCatalog
-	RuntimeVersion string
-	Catalog        *Catalog
+	CamelCatalog *camel.RuntimeCatalog
+	Catalog      *Catalog
 	// The Go standard context for the traits execution
 	Ctx context.Context
 	// The client to the API server
@@ -343,6 +347,19 @@ func (e *Environment) DetermineControllerStrategy() (ControllerStrategy, error) 
 	return defaultStrategy, nil
 }
 
+// determineDefaultContainerPortName determines the default port name, according the controller strategy used.
+func (e *Environment) determineDefaultContainerPortName() string {
+	controller, err := e.DetermineControllerStrategy()
+	if err != nil {
+		log.WithValues("Function", "trait.determineDefaultContainerPortName").Errorf(err, "could not determine controller strategy, using default deployment container name")
+		return defaultContainerPortName
+	}
+	if controller == ControllerStrategyKnativeService {
+		return defaultKnativeContainerPortName
+	}
+	return defaultContainerPortName
+}
+
 func (e *Environment) getControllerStrategyChoosers() []ControllerStrategySelector {
 	var res []ControllerStrategySelector
 	for _, t := range e.ConfiguredTraits {
@@ -470,7 +487,7 @@ func (e *Environment) addSourcesProperties() {
 			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
 		}
 		if s.Compression {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = "true"
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = boolean.TrueString
 		}
 
 		interceptors := make([]string, 0, len(s.Interceptors))
@@ -553,48 +570,6 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 			}
 		})
 	}
-
-	// Deprecated - should use mount trait
-	// User provided configmaps
-	for _, configmaps := range e.collectConfigurations("configmap") {
-		refName := kubernetes.SanitizeLabel(configmaps["value"])
-		mountPath := getMountPoint(configmaps["value"], configmaps["resourceMountPoint"], "configmap", configmaps["resourceType"])
-		vol := getVolume(refName, "configmap", configmaps["value"], configmaps["resourceKey"], configmaps["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-
-	// Deprecated - should use mount trait
-	// User provided secrets
-	for _, secret := range e.collectConfigurations("secret") {
-		refName := kubernetes.SanitizeLabel(secret["value"])
-		mountPath := getMountPoint(secret["value"], secret["resourceMountPoint"], "secret", secret["resourceType"])
-		vol := getVolume(refName, "secret", secret["value"], secret["resourceKey"], secret["resourceKey"])
-		mnt := getMount(refName, mountPath, "", true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
-	// Deprecated - should use mount trait
-	// User provided volumes
-	for _, volumeConfig := range e.collectConfigurationValues("volume") {
-		configParts := strings.Split(volumeConfig, ":")
-
-		if len(configParts) != 2 {
-			continue
-		}
-
-		pvcName := configParts[0]
-		mountPath := configParts[1]
-		volumeName := pvcName + "-data"
-
-		vol := getVolume(volumeName, "pvc", pvcName, "", "")
-		mnt := getMount(volumeName, mountPath, "", false)
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-	}
 }
 
 func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {
@@ -604,21 +579,29 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 		VolumeSource: corev1.VolumeSource{},
 	}
 	switch storageType {
-	case "configmap":
+	case configmapStorageType:
 		volume.VolumeSource.ConfigMap = &corev1.ConfigMapVolumeSource{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: storageName,
 			},
 			Items: items,
 		}
-	case "secret":
+	case secretStorageType:
 		volume.VolumeSource.Secret = &corev1.SecretVolumeSource{
 			SecretName: storageName,
 			Items:      items,
 		}
-	case "pvc":
+	case pvcStorageType:
 		volume.VolumeSource.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
 			ClaimName: storageName,
+		}
+	case emptyDirStorageType:
+		size, err := resource.ParseQuantity("1Gi")
+		if err != nil {
+			log.WithValues("Function", "trait.getVolume").Errorf(err, "could not parse empty dir quantity, skipping")
+		}
+		volume.VolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{
+			SizeLimit: &size,
 		}
 	}
 
@@ -660,18 +643,18 @@ func getMountPoint(resourceName string, mountPoint string, storagetype, resource
 		return mountPoint
 	}
 	if resourceType == "data" {
-		return filepath.Join(camel.ResourcesDefaultMountPath, resourceName)
+		defaultResourceMountPoint := camel.ResourcesConfigmapsMountPath
+		if storagetype == secretStorageType {
+			defaultResourceMountPoint = camel.ResourcesSecretsMountPath
+		}
+		return filepath.Join(defaultResourceMountPoint, resourceName)
 	}
 	defaultMountPoint := camel.ConfigConfigmapsMountPath
-	if storagetype == "secret" {
+	if storagetype == secretStorageType {
 		defaultMountPoint = camel.ConfigSecretsMountPath
 	}
 
 	return filepath.Join(defaultMountPoint, resourceName)
-}
-
-func (e *Environment) collectConfigurationValues(configurationType string) []string {
-	return collectConfigurationValues(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
 type variable struct {
@@ -680,10 +663,6 @@ type variable struct {
 
 func (e *Environment) collectConfigurationPairs(configurationType string) []variable {
 	return collectConfigurationPairs(configurationType, e.Platform, e.IntegrationKit, e.Integration)
-}
-
-func (e *Environment) collectConfigurations(configurationType string) []map[string]string {
-	return collectConfigurations(configurationType, e.Platform, e.IntegrationKit, e.Integration)
 }
 
 func (e *Environment) GetIntegrationContainerName() string {
@@ -718,14 +697,17 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 		return nil
 	}
 
+	// User specified port name
 	portName := ""
 	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
 		if ct, ok := t.(*containerTrait); ok {
 			portName = ct.PortName
 		}
 	}
+
+	// default port name (may change according the controller strategy, ie Knative)
 	if portName == "" {
-		portName = defaultContainerPortName
+		portName = e.determineDefaultContainerPortName()
 	}
 
 	for i, port := range container.Ports {
@@ -735,4 +717,75 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 	}
 
 	return nil
+}
+
+// createContainerPort creates a new container port with values taken from Container trait or default.
+func (e *Environment) createContainerPort() *corev1.ContainerPort {
+	var name string
+	var port int
+
+	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
+		if ct, ok := t.(*containerTrait); ok {
+			name = ct.PortName
+			port = ct.Port
+		}
+	}
+
+	if name == "" {
+		name = e.determineDefaultContainerPortName()
+	}
+
+	return &corev1.ContainerPort{
+		Name:          name,
+		ContainerPort: int32(port),
+		Protocol:      corev1.ProtocolTCP,
+	}
+}
+
+// CapabilityPropertyKey returns the key or expand any variable provided in it. vars variable contain the
+// possible dynamic values to use.
+func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) string {
+	if capabilityDynamicProperty.MatchString(camelPropertyKey) && vars != nil {
+		match := capabilityDynamicProperty.FindStringSubmatch(camelPropertyKey)
+		if len(match) < 2 {
+			// Should not happen, but fallback to the key not expanded instead of panic if it comes to happen
+			return camelPropertyKey
+		}
+		return strings.ReplaceAll(camelPropertyKey, match[1], vars[match[2]])
+	}
+	return camelPropertyKey
+}
+
+// ConsumeMeta is used to consume metadata information coming from Integration sources. If no sources available,
+// would return false.
+func (e *Environment) ConsumeMeta(consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
+	return e.consumeSourcesMeta(nil, consumeMeta)
+}
+
+// consumeSourcesMeta is used to consume both sources and metadata information coming from Integration sources.
+// If no sources available would return false.
+func (e *Environment) consumeSourcesMeta(
+	consumeSources func(sources []v1.SourceSpec) bool,
+	consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
+	var sources []v1.SourceSpec
+	var err error
+	if sources, err = resolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources); err != nil {
+		return false, err
+	}
+	if len(sources) < 1 {
+		// No sources available
+		return false, nil
+	}
+	if consumeSources != nil {
+		consumeSources(sources)
+	}
+	if e.CamelCatalog == nil {
+		return false, fmt.Errorf("cannot extract metadata from sources. Camel Catalog is null")
+	}
+	meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
+	if err != nil {
+		return false, err
+	}
+
+	return consumeMeta(meta), nil
 }

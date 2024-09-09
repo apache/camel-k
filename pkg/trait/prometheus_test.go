@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -38,7 +39,7 @@ func TestConfigurePrometheusTraitInRightPhaseDoesSucceed(t *testing.T) {
 
 	configured, condition, err := trait.Configure(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, configured)
 	assert.Nil(t, condition)
 }
@@ -49,7 +50,7 @@ func TestConfigurePrometheusTraitInWrongPhaseDoesNotSucceed(t *testing.T) {
 
 	configured, condition, err := trait.Configure(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, configured)
 	assert.Nil(t, condition)
 }
@@ -59,7 +60,7 @@ func TestApplyNominalPrometheusTraitDoesSucceed(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
@@ -88,7 +89,7 @@ func TestApplyPrometheusTraitWithoutContainerDoesNotSucceed(t *testing.T) {
 
 	err := trait.Apply(environment)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Len(t, environment.Integration.Status.Conditions, 1)
 	condition := environment.Integration.Status.Conditions[0]
@@ -101,7 +102,7 @@ func TestPrometheusTraitGetPodMonitor(t *testing.T) {
 
 	podMonitor, err := trait.getPodMonitorFor(environment, defaultContainerPortName)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.NotNil(t, podMonitor)
 	assert.Equal(t, "PodMonitor", podMonitor.Kind)

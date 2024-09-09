@@ -50,10 +50,11 @@ func init() {
 	AddToTraits(newPrometheusTrait)
 	AddToTraits(newPullSecretTrait)
 	AddToTraits(newQuarkusTrait)
-	AddToTraits(newRegistryTrait)
 	AddToTraits(newRouteTrait)
+	AddToTraits(newSecurityContextTrait)
 	AddToTraits(newServiceTrait)
 	AddToTraits(newServiceBindingTrait)
+	AddToTraits(NewTelemetryTrait)
 	AddToTraits(newTolerationTrait)
 	// ^^ Declaration order is not important, but let's keep them sorted for debugging.
 }

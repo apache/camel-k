@@ -20,28 +20,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package languages
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestRunSimpleGroovyExamples(t *testing.T) {
-	RegisterTestingT(t)
-
-	t.Run("run groovy", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/groovy.groovy").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "groovy"), TestTimeoutLong).Should(Equal(v1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "groovy", camelv1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(v1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("run groovy", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/groovy.groovy").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "groovy"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "groovy", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "groovy"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+		})
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

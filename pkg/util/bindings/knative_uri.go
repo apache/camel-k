@@ -21,12 +21,11 @@ import (
 	"net/url"
 	"strings"
 
-	"k8s.io/utils/pointer"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
+	"k8s.io/utils/ptr"
 
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
@@ -40,6 +39,8 @@ func (k KnativeURIBindingProvider) ID() string {
 }
 
 // Translate --.
+//
+//nolint:dupl
 func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris
@@ -89,7 +90,7 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx End
 		Traits: v1.Traits{
 			Knative: &traitv1.KnativeTrait{
 				Configuration: config,
-				SinkBinding:   pointer.Bool(false),
+				SinkBinding:   ptr.To(false),
 			},
 		},
 	}, nil
@@ -111,6 +112,8 @@ func (k V1alpha1KnativeURIBindingProvider) ID() string {
 
 // Translate --.
 // Deprecated.
+//
+//nolint:dupl
 func (k V1alpha1KnativeURIBindingProvider) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.URI == nil {
 		// works only on uris
@@ -160,7 +163,7 @@ func (k V1alpha1KnativeURIBindingProvider) Translate(ctx V1alpha1BindingContext,
 		Traits: v1.Traits{
 			Knative: &traitv1.KnativeTrait{
 				Configuration: config,
-				SinkBinding:   pointer.Bool(false),
+				SinkBinding:   ptr.To(false),
 			},
 		},
 	}, nil

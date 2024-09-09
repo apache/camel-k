@@ -21,6 +21,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
+
+	"github.com/apache/camel-k/v2/pkg/util/io"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/log"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -88,7 +93,7 @@ func executableDockerfile(ctx *builderContext) error {
 		USER nonroot
 	`)
 
-	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, io.FilePerm400)
 	if err != nil {
 		return err
 	}
@@ -112,7 +117,7 @@ func jvmDockerfile(ctx *builderContext) error {
 		USER 1000
 	`)
 
-	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, 0o400)
+	err := os.WriteFile(filepath.Join(ctx.Path, ContextDir, "Dockerfile"), dockerfile, io.FilePerm400)
 	if err != nil {
 		return err
 	}
@@ -132,6 +137,7 @@ func incrementalImageContext(ctx *builderContext) error {
 		bestImage, commonLibs := findBestImage(images, ctx.Artifacts)
 		if bestImage.Image != "" {
 
+			log.Infof("Selected %s as base image for %s", bestImage.Image, ctx.Build.Name)
 			ctx.BaseImage = bestImage.Image
 			ctx.SelectedArtifacts = make([]v1.Artifact, 0)
 
@@ -154,7 +160,7 @@ func imageContext(ctx *builderContext, selector artifactsSelector) error {
 
 	contextDir := filepath.Join(ctx.Path, ContextDir)
 
-	err = os.MkdirAll(contextDir, 0o700)
+	err = os.MkdirAll(contextDir, io.FilePerm700)
 	if err != nil {
 		return err
 	}
@@ -188,9 +194,9 @@ func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, er
 	options := []ctrl.ListOption{
 		ctrl.InNamespace(context.Namespace),
 		ctrl.MatchingLabels{
-			v1.IntegrationKitTypeLabel:          v1.IntegrationKitTypePlatform,
-			"camel.apache.org/runtime.version":  context.Catalog.Runtime.Version,
-			"camel.apache.org/runtime.provider": string(context.Catalog.Runtime.Provider),
+			v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
+			kubernetes.CamelLabelRuntimeVersion:  context.Catalog.Runtime.Version,
+			kubernetes.CamelLabelRuntimeProvider: string(context.Catalog.Runtime.Provider),
 		},
 		ctrl.MatchingLabelsSelector{
 			Selector: labels.NewSelector().Add(*excludeNativeImages),
@@ -232,11 +238,19 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 	}
 
 	bestImageCommonLibs := make(map[string]bool)
-	bestImageSurplusLibs := 0
 
 	for _, image := range images {
+		nonLibArtifacts := 0
 		common := make(map[string]bool)
+
 		for _, artifact := range image.Artifacts {
+			// the application artifacts should not be considered as dependencies for image reuse
+			// otherwise, checksums would never match and we would always use the root image
+			if !strings.HasPrefix(artifact.Target, "dependencies/lib") {
+				nonLibArtifacts++
+				continue
+			}
+
 			// If the Artifact's checksum is not defined we can't reliably determine if for some
 			// reason the artifact has been changed but not the ID (as example for snapshots or
 			// other generated jar) thus we do not take this artifact into account.
@@ -249,18 +263,16 @@ func findBestImage(images []v1.IntegrationKitStatus, artifacts []v1.Artifact) (v
 		}
 
 		numCommonLibs := len(common)
-		surplus := len(image.Artifacts) - numCommonLibs
+		surplus := len(image.Artifacts) - numCommonLibs - nonLibArtifacts
 
-		if numCommonLibs != len(image.Artifacts) && surplus >= numCommonLibs/3 {
-			// Heuristic approach: if there are too many unrelated libraries then this image is
-			// not suitable to be used as base image
+		if surplus > 0 {
+			// the base image cannot have extra libs that we don't need
 			continue
 		}
 
-		if numCommonLibs > len(bestImageCommonLibs) || (numCommonLibs == len(bestImageCommonLibs) && surplus < bestImageSurplusLibs) {
+		if numCommonLibs >= len(bestImageCommonLibs) {
 			bestImage = image
 			bestImageCommonLibs = common
-			bestImageSurplusLibs = surplus
 		}
 	}
 

@@ -38,11 +38,12 @@ func newDescribeKameletCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *des
 	}
 
 	cmd := cobra.Command{
-		Use:     "kamelet",
-		Aliases: []string{"kl"},
-		Short:   "Describe a Kamelet",
-		Long:    `Describe a Kamelet.`,
-		PreRunE: decode(&options),
+		Use:        "kamelet",
+		Aliases:    []string{"kl"},
+		Short:      "Describe a Kamelet",
+		Long:       `Describe a Kamelet.`,
+		Deprecated: "consider using kubectl (or oc) custom resource describe command instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err

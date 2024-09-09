@@ -184,16 +184,6 @@ func ValidKameletName(name string) bool {
 	return !reservedKameletNames[name]
 }
 
-func ValidKameletProperties(kamelet *Kamelet) bool {
-	if kamelet == nil || kamelet.Spec.Definition == nil || kamelet.Spec.Definition.Properties == nil {
-		return true
-	}
-	if _, idPresent := kamelet.Spec.Definition.Properties[KameletIDProperty]; idPresent {
-		return false
-	}
-	return true
-}
-
 // NewKamelet creates a new Kamelet.
 func NewKamelet(namespace string, name string) Kamelet {
 	return Kamelet{

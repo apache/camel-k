@@ -18,7 +18,6 @@ limitations under the License.
 package aws
 
 import (
-	"regexp"
 	"strconv"
 
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -27,7 +26,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // The Secrets Manager trait can be used to use secrets from AWS Secrets Manager
@@ -83,7 +82,7 @@ func NewAwsSecretsManagerTrait() trait.Trait {
 }
 
 func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if environment.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if environment.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -92,55 +91,56 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 	}
 
 	if t.UseDefaultCredentialsProvider == nil {
-		t.UseDefaultCredentialsProvider = pointer.Bool(false)
+		t.UseDefaultCredentialsProvider = ptr.To(false)
 	}
 	if t.ContextReloadEnabled == nil {
-		t.ContextReloadEnabled = pointer.Bool(false)
+		t.ContextReloadEnabled = ptr.To(false)
 	}
 	if t.RefreshEnabled == nil {
-		t.RefreshEnabled = pointer.Bool(false)
+		t.RefreshEnabled = ptr.To(false)
 	}
 
 	return true, nil, nil
 }
 
 func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
-	rex := regexp.MustCompile(`^(configmap|secret):([a-zA-Z0-9][a-zA-Z0-9-]*)(/([a-zA-Z0-9].*))?$`)
 	if environment.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&environment.Integration.Status.Capabilities, v1.CapabilityAwsSecretsManager)
 	}
 
-	if environment.IntegrationInRunningPhases() {
-		hits := rex.FindAllStringSubmatch(t.AccessKey, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key", "The access Key provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.aws.accessKey"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.aws.accessKey"] = t.AccessKey
+	if !environment.IntegrationInRunningPhases() {
+		return nil
+	}
+
+	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.AccessKey, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key", "The access Key provided is not valid")
+		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+			return err
+		} else if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.aws.accessKey"] = string([]byte(secretValue))
 		}
-		hits = rex.FindAllStringSubmatch(t.SecretKey, -1)
-		if len(hits) >= 1 {
-			var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key", "The secret Key provided is not valid")
-			if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
-				return err
-			} else if secretValue != "" {
-				environment.ApplicationProperties["camel.vault.aws.secretKey"] = string([]byte(secretValue))
-			}
-		} else {
-			environment.ApplicationProperties["camel.vault.aws.secretKey"] = t.SecretKey
+	} else {
+		environment.ApplicationProperties["camel.vault.aws.accessKey"] = t.AccessKey
+	}
+	hits = v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.SecretKey, -1)
+	if len(hits) >= 1 {
+		var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key", "The secret Key provided is not valid")
+		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
+			return err
+		} else if secretValue != "" {
+			environment.ApplicationProperties["camel.vault.aws.secretKey"] = string([]byte(secretValue))
 		}
-		environment.ApplicationProperties["camel.vault.aws.region"] = t.Region
-		environment.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"] = strconv.FormatBool(*t.UseDefaultCredentialsProvider)
-		environment.ApplicationProperties["camel.vault.aws.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
-		environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
-		environment.ApplicationProperties["camel.vault.aws.refreshPeriod"] = t.RefreshPeriod
-		if t.Secrets != "" {
-			environment.ApplicationProperties["camel.vault.aws.secrets"] = t.Secrets
-		}
+	} else {
+		environment.ApplicationProperties["camel.vault.aws.secretKey"] = t.SecretKey
+	}
+	environment.ApplicationProperties["camel.vault.aws.region"] = t.Region
+	environment.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"] = strconv.FormatBool(*t.UseDefaultCredentialsProvider)
+	environment.ApplicationProperties["camel.vault.aws.refreshEnabled"] = strconv.FormatBool(*t.RefreshEnabled)
+	environment.ApplicationProperties["camel.main.context-reload-enabled"] = strconv.FormatBool(*t.ContextReloadEnabled)
+	environment.ApplicationProperties["camel.vault.aws.refreshPeriod"] = t.RefreshPeriod
+	if t.Secrets != "" {
+		environment.ApplicationProperties["camel.vault.aws.secrets"] = t.Secrets
 	}
 
 	return nil

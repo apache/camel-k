@@ -22,12 +22,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
-	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+)
+
+const (
+	serviceTraitID    = "service"
+	serviceTraitOrder = 1500
 )
 
 type serviceTrait struct {
@@ -35,11 +39,9 @@ type serviceTrait struct {
 	traitv1.ServiceTrait `property:",squash"`
 }
 
-const serviceTraitID = "service"
-
 func newServiceTrait() Trait {
 	return &serviceTrait{
-		BaseTrait: NewBaseTrait(serviceTraitID, 1500),
+		BaseTrait: NewBaseTrait(serviceTraitID, serviceTraitOrder),
 	}
 }
 
@@ -47,21 +49,21 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
+			"Service",
 			v1.IntegrationConditionServiceAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionServiceNotAvailableReason,
 			"explicitly disabled",
 		), nil
 	}
-
 	// in case the knative-service and service trait are enabled, the knative-service has priority
 	// then this service is disabled
 	if e.GetTrait(knativeServiceTraitID) != nil {
 		knativeServiceTrait, _ := e.GetTrait(knativeServiceTraitID).(*knativeServiceTrait)
-		if pointer.BoolDeref(knativeServiceTrait.Enabled, true) {
-			return false, newIntegrationConditionPlatformDisabledWithMessage("knative-service trait has priority over this trait"), nil
+		if ptr.Deref(knativeServiceTrait.Enabled, true) {
+			return false, NewIntegrationConditionPlatformDisabledWithMessage("Service", "knative-service trait has priority over this trait"), nil
 		}
 	}
 
@@ -69,11 +71,14 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, nil, nil
 	}
 
-	if pointer.BoolDeref(t.Auto, true) {
-		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
+	if ptr.Deref(t.Auto, true) {
+		exposeHTTPServices, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+			return meta.ExposesHTTPServices
+		})
 		var condition *TraitCondition
 		if err != nil {
 			condition = NewIntegrationCondition(
+				"Service",
 				v1.IntegrationConditionServiceAvailable,
 				corev1.ConditionFalse,
 				v1.IntegrationConditionServiceNotAvailableReason,
@@ -81,16 +86,10 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			)
 			return false, condition, err
 		}
-
-		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-		if err != nil {
-			return false, nil, err
-		}
-		if !meta.ExposesHTTPServices {
-			return false, nil, nil
-		}
+		return exposeHTTPServices, nil, nil
 	}
-	return true, nil, nil
+
+	return ptr.Deref(t.Enabled, false), nil, nil
 }
 
 func (t *serviceTrait) Apply(e *Environment) error {
@@ -111,7 +110,7 @@ func (t *serviceTrait) Apply(e *Environment) error {
 			default:
 				return fmt.Errorf("unsupported service type: %s", *t.Type)
 			}
-		} else if pointer.BoolDeref(t.NodePort, false) {
+		} else if ptr.Deref(t.NodePort, false) {
 			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s should no more use the flag node-port as it is deprecated, use type instead", e.Integration.Namespace, e.Integration.Name)
 			serviceType = corev1.ServiceTypeNodePort
 		}

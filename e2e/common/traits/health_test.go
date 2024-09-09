@@ -20,12 +20,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -36,54 +36,127 @@ import (
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestHealthTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Readiness condition with stopped route scaled", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+				"-t", "health.enabled=true",
+				"-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false",
+				"-t", "jolokia.protocol=http",
+				"--name", name).Execute()).To(Succeed())
 
-	t.Run("Readiness condition with stopped route scaled", func(t *testing.T) {
-		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"-t", "health.enabled=true",
-			// Enable Jolokia for the test to stop the Camel route
-			"-t", "jolokia.enabled=true",
-			"-t", "jolokia.use-ssl-client-authentication=false",
-			"-t", "jolokia.protocol=http",
-			"--name", name,
-		).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(ScaleIntegration(t, ctx, ns, name, 3)).To(Succeed())
+			// Check the readiness condition becomes falsy
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
+			// Check the scale cascades into the Deployment scale
+			g.Eventually(IntegrationPods(t, ctx, ns, name), TestTimeoutShort).Should(HaveLen(3))
+			// Check it also cascades into the Integration scale subresource Status field
+			g.Eventually(IntegrationStatusReplicas(t, ctx, ns, name), TestTimeoutShort).
+				Should(gstruct.PointTo(BeNumerically("==", 3)))
+			// Finally check the readiness condition becomes truthy back
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
 
-		Expect(ScaleIntegration(ns, name, 3)).To(Succeed())
-		// Check the readiness condition becomes falsy
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionFalse))
-		// Check the scale cascades into the Deployment scale
-		Eventually(IntegrationPods(ns, name), TestTimeoutShort).Should(HaveLen(3))
-		// Check it also cascades into the Integration scale subresource Status field
-		Eventually(IntegrationStatusReplicas(ns, name), TestTimeoutShort).
-			Should(gstruct.PointTo(BeNumerically("==", 3)))
-		// Finally check the readiness condition becomes truthy back
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(Equal(corev1.ConditionTrue))
+			pods := IntegrationPods(t, ctx, ns, name)()
 
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, name)()
-		healthTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "health")
-		Expect(healthTrait).ToNot(BeNil())
-		Expect(len(healthTrait)).To(Equal(1))
-		Expect(healthTrait["enabled"]).To(Equal(true))
+			t.Logf("Stopping routes for integration %s/%s (%d)", ns, name, len(pods))
 
-		pods := IntegrationPods(ns, name)()
+			for i, pod := range pods {
+				t.Logf("Stopping route on integration pod %s/%s", pod.Namespace, pod.Name)
+				// Stop the Camel route
+				request := map[string]string{
+					"type":      "exec",
+					"mbean":     "org.apache.camel:context=camel-1,name=\"route1\",type=routes",
+					"operation": "stop()",
+				}
+				body, err := json.Marshal(request)
+				g.Expect(err).To(BeNil())
 
-		for i, pod := range pods {
+				response, err := TestClient(t).CoreV1().RESTClient().Post().
+					AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
+					Timeout(30 * time.Second).
+					Body(body).
+					DoRaw(ctx)
+				g.Expect(err).To(BeNil())
+				g.Expect(response).To(ContainSubstring(`"status":200`))
+
+				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+					Should(Equal(corev1.ConditionFalse))
+				g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+					WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+					WithTransform(IntegrationConditionMessage, Equal(fmt.Sprintf("%d/3 pods are not ready", i+1)))))
+
+				t.Logf("Route on integration pod %s/%s stopped", pod.Namespace, pod.Name)
+			}
+
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+				Satisfy(func(c *v1.IntegrationCondition) bool {
+					if c.Status != corev1.ConditionFalse {
+						return false
+					}
+					if len(c.Pods) != 3 {
+						return false
+					}
+
+					var r *v1.HealthCheckResponse
+
+					for _, pod := range c.Pods {
+						for h := range pod.Health {
+							if pod.Health[h].Name == "camel-routes" {
+								r = &pod.Health[h]
+							}
+						}
+
+						if r == nil {
+							return false
+						}
+
+						if r.Data == nil {
+							return false
+						}
+
+						var data map[string]interface{}
+						if err := json.Unmarshal(r.Data, &data); err != nil {
+							return false
+						}
+						if data["check.kind"].(string) != "READINESS" || data["route.status"].(string) != "Stopped" {
+							return false
+						}
+					}
+					return true
+				}))
+
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+		})
+
+		t.Run("Readiness condition with stopped route", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java",
+				"-t", "health.enabled=true",
+				"-t", "jolokia.enabled=true", "-t", "jolokia.use-ssl-client-authentication=false",
+				"-t", "jolokia.protocol=http",
+				"--name", name).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+			pod := IntegrationPod(t, ctx, ns, name)()
+
 			// Stop the Camel route
 			request := map[string]string{
 				"type":      "exec",
@@ -91,38 +164,50 @@ func TestHealthTrait(t *testing.T) {
 				"operation": "stop()",
 			}
 			body, err := json.Marshal(request)
-			Expect(err).To(BeNil())
+			g.Expect(err).To(BeNil())
 
-			response, err := TestClient().CoreV1().RESTClient().Post().
+			response, err := TestClient(t).CoreV1().RESTClient().Post().
 				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
+				Timeout(30 * time.Second).
 				Body(body).
-				DoRaw(TestContext)
-			Expect(err).To(BeNil())
-			Expect(response).To(ContainSubstring(`"status":200`))
+				DoRaw(ctx)
+			g.Expect(err).To(BeNil())
+			g.Expect(response).To(ContainSubstring(`"status":200`))
 
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+			// Check the ready condition has turned false
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
 				Should(Equal(corev1.ConditionFalse))
+			// And it contains details about the runtime state
 
-			Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+			//
+			// TODO
+			// Integration has different runtime state reporting on OCP4
+			//
+			// lastProbeTime: null
+			// lastTransitionTime: "2021-12-08T20:12:14Z"
+			// message: 'containers with unready status: [integration]'
+			// reason: ContainersNotReady
+			// status: False
+			// type: Ready
+			//
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
 				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-				WithTransform(IntegrationConditionMessage, Equal(fmt.Sprintf("%d/3 pods are not ready", i+1)))))
-		}
+				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
 
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *v1.IntegrationCondition) bool {
-				if c.Status != corev1.ConditionFalse {
-					return false
-				}
-				if len(c.Pods) != 3 {
-					return false
-				}
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+				Satisfy(func(c *v1.IntegrationCondition) bool {
+					if c.Status != corev1.ConditionFalse {
+						return false
+					}
+					if len(c.Pods) != 1 {
+						return false
+					}
 
-				var r *v1.HealthCheckResponse
+					var r *v1.HealthCheckResponse
 
-				for _, pod := range c.Pods {
-					for h := range pod.Health {
-						if pod.Health[h].Name == "camel-routes" {
-							r = &pod.Health[h]
+					for h := range c.Pods[0].Health {
+						if c.Pods[0].Health[h].Name == "camel-routes" {
+							r = &c.Pods[0].Health[h]
 						}
 					}
 
@@ -138,378 +223,246 @@ func TestHealthTrait(t *testing.T) {
 					if err := json.Unmarshal(r.Data, &data); err != nil {
 						return false
 					}
-					if data["check.kind"].(string) != "READINESS" || data["route.status"].(string) != "Stopped" {
+
+					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped"
+				}))
+
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
+		})
+
+		t.Run("Readiness condition with stopped binding", func(t *testing.T) {
+			name := RandomizedSuffixName("stopped-binding")
+			source := RandomizedSuffixName("my-health-timer-source")
+			sink := RandomizedSuffixName("my-health-log-sink")
+
+			g.Expect(CreateTimerKamelet(t, ctx, ns, source)()).To(Succeed())
+			g.Expect(CreateLogKamelet(t, ctx, ns, sink)()).To(Succeed())
+
+			g.Expect(KamelBind(t, ctx, ns, source, sink, "-p",
+				"source.message=Magicstring!", "-p", "sink.loggerName=binding",
+				"--trait", "health.enabled=true",
+				"--trait", "jolokia.enabled=true",
+				"--trait", "jolokia.use-ssl-client-authentication=false",
+				"--trait", "jolokia.protocol=http",
+				"--name", name).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+			pod := IntegrationPod(t, ctx, ns, name)()
+
+			// Stop the Camel route
+			request := map[string]string{
+				"type":      "exec",
+				"mbean":     "org.apache.camel:context=camel-1,name=\"binding\",type=routes",
+				"operation": "stop()",
+			}
+			body, err := json.Marshal(request)
+			g.Expect(err).To(BeNil())
+
+			response, err := TestClient(t).CoreV1().RESTClient().Post().
+				AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
+				Timeout(30 * time.Second).
+				Body(body).
+				DoRaw(ctx)
+
+			g.Expect(err).To(BeNil())
+			g.Expect(response).To(ContainSubstring(`"status":200`))
+
+			// Check the ready condition has turned false
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
+				Should(Equal(corev1.ConditionFalse))
+			// And it contains details about the runtime state
+
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
+
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+				Satisfy(func(c *v1.IntegrationCondition) bool {
+					if c.Status != corev1.ConditionFalse {
 						return false
 					}
-				}
-				return true
-			}))
-
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-
-		// Clean-up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-
-	t.Run("Readiness condition with stopped route", func(t *testing.T) {
-		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"-t", "health.enabled=true",
-			// Enable Jolokia for the test to stop the Camel route
-			"-t", "jolokia.enabled=true",
-			"-t", "jolokia.use-ssl-client-authentication=false",
-			"-t", "jolokia.protocol=http",
-			"--name", name,
-		).Execute()).To(Succeed())
-
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-		pod := IntegrationPod(ns, name)()
-
-		// Stop the Camel route
-		request := map[string]string{
-			"type":      "exec",
-			"mbean":     "org.apache.camel:context=camel-1,name=\"route1\",type=routes",
-			"operation": "stop()",
-		}
-		body, err := json.Marshal(request)
-		Expect(err).To(BeNil())
-
-		response, err := TestClient().CoreV1().RESTClient().Post().
-			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
-			Body(body).
-			DoRaw(TestContext)
-		Expect(err).To(BeNil())
-		Expect(response).To(ContainSubstring(`"status":200`))
-
-		// Check the ready condition has turned false
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionFalse))
-		// And it contains details about the runtime state
-
-		//
-		// TODO
-		// Integration has different runtime state reporting on OCP4
-		//
-		// lastProbeTime: null
-		// lastTransitionTime: "2021-12-08T20:12:14Z"
-		// message: 'containers with unready status: [integration]'
-		// reason: ContainersNotReady
-		// status: "False"
-		// type: Ready
-		//
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-			WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *v1.IntegrationCondition) bool {
-				if c.Status != corev1.ConditionFalse {
-					return false
-				}
-				if len(c.Pods) != 1 {
-					return false
-				}
-
-				var r *v1.HealthCheckResponse
-
-				for h := range c.Pods[0].Health {
-					if c.Pods[0].Health[h].Name == "camel-routes" {
-						r = &c.Pods[0].Health[h]
+					if len(c.Pods) != 1 {
+						return false
 					}
-				}
 
-				if r == nil {
-					return false
-				}
+					var r *v1.HealthCheckResponse
 
-				if r.Data == nil {
-					return false
-				}
-
-				var data map[string]interface{}
-				if err := json.Unmarshal(r.Data, &data); err != nil {
-					return false
-				}
-
-				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped"
-			}))
-
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseError))
-
-		// Clean-up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-
-	t.Run("Readiness condition with stopped binding", func(t *testing.T) {
-		name := RandomizedSuffixName("stopped-binding")
-		source := RandomizedSuffixName("my-health-timer-source")
-		sink := RandomizedSuffixName("my-health-log-sink")
-
-		Expect(CreateTimerKamelet(ns, source)()).To(Succeed())
-		Expect(CreateLogKamelet(ns, sink)()).To(Succeed())
-
-		Expect(KamelBindWithID(operatorID, ns,
-			source,
-			sink,
-			"-p", "source.message=Magicstring!",
-			"-p", "sink.loggerName=binding",
-			"--annotation", "trait.camel.apache.org/health.enabled=true",
-			"--annotation", "trait.camel.apache.org/jolokia.enabled=true",
-			"--annotation", "trait.camel.apache.org/jolokia.use-ssl-client-authentication=false",
-			"--annotation", "trait.camel.apache.org/jolokia.protocol=http",
-			"--name", name,
-		).Execute()).To(Succeed())
-
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-		pod := IntegrationPod(ns, name)()
-
-		// Stop the Camel route
-		request := map[string]string{
-			"type":      "exec",
-			"mbean":     "org.apache.camel:context=camel-1,name=\"binding\",type=routes",
-			"operation": "stop()",
-		}
-		body, err := json.Marshal(request)
-		Expect(err).To(BeNil())
-
-		response, err := TestClient().CoreV1().RESTClient().Post().
-			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/jolokia/", ns, pod.Name)).
-			Body(body).
-			DoRaw(TestContext)
-
-		Expect(err).To(BeNil())
-		Expect(response).To(ContainSubstring(`"status":200`))
-
-		// Check the ready condition has turned false
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).
-			Should(Equal(corev1.ConditionFalse))
-		// And it contains details about the runtime state
-
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-			WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *v1.IntegrationCondition) bool {
-				if c.Status != corev1.ConditionFalse {
-					return false
-				}
-				if len(c.Pods) != 1 {
-					return false
-				}
-
-				var r *v1.HealthCheckResponse
-
-				for h := range c.Pods[0].Health {
-					if c.Pods[0].Health[h].Name == "camel-routes" {
-						r = &c.Pods[0].Health[h]
+					for h := range c.Pods[0].Health {
+						if c.Pods[0].Health[h].Name == "camel-routes" {
+							r = &c.Pods[0].Health[h]
+						}
 					}
-				}
 
-				if r == nil {
-					return false
-				}
-
-				if r.Data == nil {
-					return false
-				}
-
-				var data map[string]interface{}
-				if err := json.Unmarshal(r.Data, &data); err != nil {
-					return false
-				}
-
-				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
-			}))
-
-		Eventually(PipeCondition(ns, name, camelv1.PipeConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *camelv1.PipeCondition) bool {
-				if c.Status != corev1.ConditionFalse {
-					return false
-				}
-				if len(c.Pods) != 1 {
-					return false
-				}
-
-				var r *v1.HealthCheckResponse
-
-				for h := range c.Pods[0].Health {
-					if c.Pods[0].Health[h].Name == "camel-routes" {
-						r = &c.Pods[0].Health[h]
+					if r == nil {
+						return false
 					}
-				}
 
-				if r == nil {
-					return false
-				}
-
-				if r.Data == nil {
-					return false
-				}
-
-				var data map[string]interface{}
-				if err := json.Unmarshal(r.Data, &data); err != nil {
-					return false
-				}
-
-				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
-			}))
-
-		// Clean-up
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		Expect(DeleteKamelet(ns, source)).To(Succeed())
-		Expect(DeleteKamelet(ns, sink)).To(Succeed())
-	})
-
-	t.Run("Readiness condition with never ready route", func(t *testing.T) {
-		name := RandomizedSuffixName("never-ready")
-
-		Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
-			"--name", name,
-			"-t", "health.enabled=true",
-		).Execute()).To(Succeed())
-
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
-		Consistently(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), 1*time.Minute).
-			Should(Equal(corev1.ConditionFalse))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
-
-		// Check that the error message is propagated from health checks even if deployment never becomes ready
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-			WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *v1.IntegrationCondition) bool {
-				if c.Status != corev1.ConditionFalse {
-					return false
-				}
-				if len(c.Pods) != 1 {
-					return false
-				}
-
-				var r *v1.HealthCheckResponse
-
-				for h := range c.Pods[0].Health {
-					if c.Pods[0].Health[h].Name == "camel-routes" {
-						r = &c.Pods[0].Health[h]
+					if r.Data == nil {
+						return false
 					}
-				}
 
-				if r == nil {
-					return false
-				}
-
-				if r.Data == nil {
-					return false
-				}
-
-				var data map[string]interface{}
-				if err := json.Unmarshal(r.Data, &data); err != nil {
-					return false
-				}
-
-				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "never-ready"
-			}))
-	})
-
-	t.Run("Startup condition with never ready route", func(t *testing.T) {
-		name := RandomizedSuffixName("startup-probe-never-ready-route")
-
-		Expect(KamelRunWithID(operatorID, ns, "files/NeverReady.java",
-			"--name", name,
-			"-t", "health.enabled=true",
-			"-t", "health.startup-probe-enabled=true",
-			"-t", "health.startup-timeout=60",
-		).Execute()).To(Succeed())
-
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-		Consistently(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), 1*time.Minute).Should(Equal(corev1.ConditionFalse))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
-
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
-			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
-			WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
-
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
-			Satisfy(func(c *v1.IntegrationCondition) bool {
-				if c.Status != corev1.ConditionFalse {
-					return false
-				}
-				if len(c.Pods) != 1 {
-					return false
-				}
-
-				var r *v1.HealthCheckResponse
-
-				for h := range c.Pods[0].Health {
-					if c.Pods[0].Health[h].Name == "camel-routes" && c.Pods[0].Health[h].Status == "DOWN" {
-						r = &c.Pods[0].Health[h]
+					var data map[string]interface{}
+					if err := json.Unmarshal(r.Data, &data); err != nil {
+						return false
 					}
-				}
 
-				if r == nil {
-					return false
-				}
+					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
+				}))
 
-				if r.Data == nil {
-					return false
-				}
+			g.Eventually(PipeCondition(t, ctx, ns, name, camelv1.PipeConditionReady), TestTimeoutLong).Should(
+				Satisfy(func(c *camelv1.PipeCondition) bool {
+					if c.Status != corev1.ConditionFalse {
+						return false
+					}
+					if len(c.Pods) != 1 {
+						return false
+					}
 
-				var data map[string]interface{}
-				if err := json.Unmarshal(r.Data, &data); err != nil {
-					return false
-				}
+					var r *v1.HealthCheckResponse
 
-				return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "never-ready"
-			}))
+					for h := range c.Pods[0].Health {
+						if c.Pods[0].Health[h].Name == "camel-routes" {
+							r = &c.Pods[0].Health[h]
+						}
+					}
 
-		Satisfy(func(events *corev1.EventList) bool {
-			for e := range events.Items {
-				if events.Items[e].Type == "Warning" && events.Items[e].Reason == "Unhealthy" && strings.Contains(events.Items[e].Message, "Startup probe failed") {
-					return true
-				}
-			}
-			return false
-		})
-	})
+					if r == nil {
+						return false
+					}
 
-	t.Run("Startup condition with ready route", func(t *testing.T) {
-		name := RandomizedSuffixName("startup-probe-ready-route")
+					if r.Data == nil {
+						return false
+					}
 
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-t", "health.enabled=true",
-			"-t", "health.startup-probe-enabled=true",
-			"-t", "health.startup-timeout=60",
-		).Execute()).To(Succeed())
+					var data map[string]interface{}
+					if err := json.Unmarshal(r.Data, &data); err != nil {
+						return false
+					}
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationPhase(ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
-
-		Eventually(IntegrationCondition(ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(And(
-			WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
-			WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
-
-		Satisfy(func(is *v1.IntegrationSpec) bool {
-			if *is.Traits.Health.Enabled == true && *is.Traits.Health.StartupProbeEnabled == true && is.Traits.Health.StartupTimeout == 60 {
-				return true
-			}
-			return false
+					return data["check.kind"].(string) == "READINESS" && data["route.status"].(string) == "Stopped" && data["route.id"].(string) == "binding"
+				}))
 		})
 
-	})
+		t.Run("Readiness condition with never ready route", func(t *testing.T) {
+			name := RandomizedSuffixName("never-ready")
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(KamelRun(t, ctx, ns, "files/NeverReady.java", "--name", name,
+				"-t", "health.enabled=true",
+				"-p", "camel.health.routesEnabled=false",
+			).Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), 1*time.Minute).
+				Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+
+			// Check that the error message is propagated from health checks even if deployment never becomes ready
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
+
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+				Satisfy(func(c *v1.IntegrationCondition) bool {
+					if c.Status != corev1.ConditionFalse {
+						return false
+					}
+					if len(c.Pods) != 1 {
+						return false
+					}
+
+					var r *v1.HealthCheckResponse
+
+					for h := range c.Pods[0].Health {
+						if c.Pods[0].Health[h].Name == "never-ready" {
+							r = &c.Pods[0].Health[h]
+						}
+					}
+
+					if r == nil {
+						return false
+					}
+
+					if r.Data == nil {
+						return false
+					}
+
+					var data map[string]interface{}
+					if err := json.Unmarshal(r.Data, &data); err != nil {
+						return false
+					}
+
+					return r.Status == v1.HealthCheckStatusDown && data["check.kind"].(string) == "READINESS"
+				}))
+		})
+
+		t.Run("Startup condition with never ready route", func(t *testing.T) {
+			name := RandomizedSuffixName("startup-probe-never-ready-route")
+
+			g.Expect(KamelRun(t, ctx, ns, "files/NeverReady.java", "--name", name,
+				"-t", "health.enabled=true",
+				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+			g.Consistently(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), 1*time.Minute).Should(Equal(corev1.ConditionFalse))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(v1.IntegrationPhaseError))
+
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionRuntimeNotReadyReason)),
+				WithTransform(IntegrationConditionMessage, Equal("1/1 pods are not ready"))))
+
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutLong).Should(
+				Satisfy(func(c *v1.IntegrationCondition) bool {
+					if c.Status != corev1.ConditionFalse {
+						return false
+					}
+					if len(c.Pods) != 1 {
+						return false
+					}
+
+					var r *v1.HealthCheckResponse
+
+					for h := range c.Pods[0].Health {
+						if c.Pods[0].Health[h].Name == "never-ready" && c.Pods[0].Health[h].Status == "DOWN" {
+							r = &c.Pods[0].Health[h]
+						}
+					}
+
+					if r == nil {
+						return false
+					}
+
+					if r.Data == nil {
+						return false
+					}
+
+					var data map[string]interface{}
+					if err := json.Unmarshal(r.Data, &data); err != nil {
+						return false
+					}
+
+					return data["check.kind"].(string) == "READINESS"
+				}))
+		})
+
+		t.Run("Startup condition with ready route", func(t *testing.T) {
+			name := RandomizedSuffixName("startup-probe-ready-route")
+
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name,
+				"-t", "health.enabled=true",
+				"-t", "health.startup-probe-enabled=true", "-t", "health.startup-timeout=60").Execute()).To(Succeed())
+
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationPhase(t, ctx, ns, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseRunning))
+
+			g.Eventually(IntegrationCondition(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).Should(And(
+				WithTransform(IntegrationConditionReason, Equal(v1.IntegrationConditionDeploymentReadyReason)),
+				WithTransform(IntegrationConditionMessage, Equal("1/1 ready replicas"))))
+		})
+	})
 }

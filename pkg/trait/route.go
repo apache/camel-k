@@ -25,13 +25,18 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	routev1 "github.com/openshift/api/route/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+)
+
+const (
+	routeTraitID    = "route"
+	routeTraitOrder = 2200
 )
 
 type routeTrait struct {
@@ -42,7 +47,7 @@ type routeTrait struct {
 
 func newRouteTrait() Trait {
 	return &routeTrait{
-		BaseTrait: NewBaseTrait("route", 2200),
+		BaseTrait: NewBaseTrait(routeTraitID, routeTraitOrder),
 		RouteTrait: traitv1.RouteTrait{
 			Annotations: map[string]string{},
 		},
@@ -58,8 +63,9 @@ func (t *routeTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
+	if !ptr.Deref(t.Enabled, true) {
 		return false, NewIntegrationCondition(
+			"Route",
 			v1.IntegrationConditionExposureAvailable,
 			corev1.ConditionFalse,
 			v1.IntegrationConditionRouteNotAvailableReason,
@@ -79,11 +85,14 @@ func (t *routeTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 }
 
 func (t *routeTrait) Apply(e *Environment) error {
-	servicePortName := defaultContainerPortName
+	servicePortName := ""
 	if dt := e.Catalog.GetTrait(containerTraitID); dt != nil {
 		if ct, ok := dt.(*containerTrait); ok {
 			servicePortName = ct.ServicePortName
 		}
+	}
+	if servicePortName == "" {
+		servicePortName = e.determineDefaultContainerPortName()
 	}
 
 	tlsConfig, err := t.getTLSConfig(e)

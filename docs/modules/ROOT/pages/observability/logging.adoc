@@ -1,8 +1,7 @@
 [[logging]]
 = Camel K Logging
 
-Logs are an essential aspect of observability, and traditionally used to check nominal operation, or for troubleshooting.
-The following pages contain some details on the logging provided by the various Camel K components:
+Logs are an essential aspect of observability, and traditionally used to check nominal operation, or for troubleshooting. The following pages contain some details on the logging provided by the various Camel K components:
 
 - xref:observability/logging/operator.adoc[Camel K operator logging]
 - xref:observability/logging/integration.adoc[Camel K integration logging]

@@ -82,7 +82,7 @@ func (action *monitorAction) Handle(ctx context.Context, binding *v1alpha1.Kamel
 	integrationProfileNamespaceChanged := v1.GetIntegrationProfileNamespaceAnnotation(binding) != "" &&
 		(v1.GetIntegrationProfileNamespaceAnnotation(binding) != v1.GetIntegrationProfileNamespaceAnnotation(&it))
 
-	sameTraits, err := trait.IntegrationAndKameletBindingSameTraits(&it, binding)
+	sameTraits, err := trait.IntegrationAndKameletBindingSameTraits(action.client, &it, binding)
 	if err != nil {
 		return nil, err
 	}

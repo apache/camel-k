@@ -20,21 +20,14 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strings"
-	"time"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
-	"github.com/apache/camel-k/v2/pkg/util/maven"
 	"github.com/apache/camel-k/v2/pkg/util/resource"
 	"github.com/magiconair/properties"
 	"github.com/spf13/cobra"
@@ -125,39 +118,6 @@ func fromMapToProperties(data interface{}, toString func(reflect.Value) string, 
 	return result, nil
 }
 
-// downloadDependency downloads the file located at the given URL into a temporary folder and returns the local path to the generated temporary file.
-func downloadDependency(ctx context.Context, url url.URL) (string, error) {
-	tctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-
-	req, err := http.NewRequestWithContext(tctx, http.MethodGet, url.String(), nil)
-	if err != nil {
-		return "", err
-	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-	base := filepath.Base(url.Path)
-	if base == "." || base == "/" || filepath.Ext(base) == "" {
-		base = filepath.Base(url.String())
-		if base == "." || base == "/" {
-			base = "tmp"
-		}
-	}
-	out, err := os.CreateTemp("", fmt.Sprintf("*.%s", base))
-	if err != nil {
-		return "", err
-	}
-	defer out.Close()
-	_, err = io.Copy(out, res.Body)
-	if err != nil {
-		return "", err
-	}
-	return out.Name(), nil
-}
-
 func validatePropertyFiles(propertyFiles []string) error {
 	for _, fileName := range propertyFiles {
 		if err := validatePropertyFile(fileName); err != nil {
@@ -182,36 +142,9 @@ func validatePropertyFile(fileName string) error {
 	return nil
 }
 
-func createCamelCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
+func createCamelCatalog() (*camel.RuntimeCatalog, error) {
 	// Attempt to reuse existing Camel catalog if one is present
 	catalog, err := camel.DefaultCatalog()
-	if err != nil {
-		return nil, err
-	}
-
-	// Generate catalog if one was not found
-	if catalog == nil {
-		catalog, err = generateCatalog(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return catalog, nil
-}
-
-func generateCatalog(ctx context.Context) (*camel.RuntimeCatalog, error) {
-	// A Camel catalog is required for this operation
-	mvn := v1.MavenSpec{
-		LocalRepository: "",
-	}
-	runtime := v1.RuntimeSpec{
-		Version:  defaults.DefaultRuntimeVersion,
-		Provider: v1.RuntimeProviderQuarkus,
-	}
-	var providerDependencies []maven.Dependency
-	var caCert [][]byte
-	catalog, err := camel.GenerateCatalogCommon(ctx, nil, nil, caCert, mvn, runtime, providerDependencies)
 	if err != nil {
 		return nil, err
 	}

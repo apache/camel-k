@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package misc
+package common
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -34,20 +35,19 @@ import (
 )
 
 func TestTraitUpdates(t *testing.T) {
-	RegisterTestingT(t)
-
-	t.Run("run and update trait", func(t *testing.T) {
-		name := RandomizedSuffixName("yaml-route")
-		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		var numberOfPods = func(pods *int32) bool {
-			return *pods >= 1 && *pods <= 2
-		}
-		// Adding a property will change the camel trait
-		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name, "-p", "hello=world").Execute()).To(Succeed())
-		Consistently(IntegrationPodsNumbers(ns, name), TestTimeoutShort, 1*time.Second).Should(Satisfy(numberOfPods))
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("run and update trait", func(t *testing.T) {
+			name := RandomizedSuffixName("yaml-route")
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			var numberOfPods = func(pods *int32) bool {
+				return *pods >= 1 && *pods <= 2
+			}
+			// Adding a property will change the camel trait
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name, "-p", "hello=world").Execute()).To(Succeed())
+			g.Consistently(IntegrationPodsNumbers(t, ctx, ns, name), TestTimeoutShort, 1*time.Second).Should(Satisfy(numberOfPods))
+		})
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

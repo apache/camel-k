@@ -27,8 +27,7 @@ package trait
 // following parameters to reference them: `tls-certificate-secret`, `tls-key-secret`, `tls-ca-certificate-secret`, `tls-destination-ca-certificate-secret`
 // See the examples section at the end of this page to see the setup options.
 //
-// +camel-k:trait=route
-// nolint: tagliatelle
+// +camel-k:trait=route.
 type RouteTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// The annotations added to route.

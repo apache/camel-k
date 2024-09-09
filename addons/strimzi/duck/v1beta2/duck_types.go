@@ -28,7 +28,7 @@ const (
 
 	StrimziKafkaClusterLabel = "strimzi.io/cluster"
 
-	StrimziListenerTypePlain = "plain"
+	StrimziListenerNamePlain = "plain"
 )
 
 // +genclient
@@ -40,6 +40,12 @@ const (
 type KafkaTopic struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Status            KafkaTopicStatus `json:"status,omitempty"`
+}
+
+// KafkaTopicStatus is the duck of a KafkaTopic status.
+type KafkaTopicStatus struct {
+	TopicName string `json:"topicName,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -72,7 +78,7 @@ type KafkaStatus struct {
 // KafkaStatusListener contains listener information.
 type KafkaStatusListener struct {
 	BootstrapServers string `json:"bootstrapServers,omitempty"`
-	Type             string `json:"type,omitempty"`
+	Name             string `json:"name,omitempty"`
 }
 
 // +kubebuilder:object:root=true

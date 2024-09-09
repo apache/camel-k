@@ -27,33 +27,35 @@ import (
 )
 
 func maybeErrorHandler(errHandlConf *v1.ErrorHandlerSpec, bindingContext bindings.BindingContext) (*bindings.Binding, error) {
-	var errorHandlerBinding *bindings.Binding
-	if errHandlConf != nil {
-		errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse error handler: %w", err)
-		}
-		// We need to get the translated URI from any referenced resource (ie, kamelets)
-		if errorHandlerSpec.Type() == v1.ErrorHandlerTypeSink {
-			errorHandlerBinding, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
-			if err != nil {
-				return nil, fmt.Errorf("could not determine error handler URI: %w", err)
-			}
-		} else {
-			// Create a new binding otherwise in order to store error handler application properties
-			errorHandlerBinding = &bindings.Binding{
-				ApplicationProperties: make(map[string]string),
-			}
-		}
-
-		err = setErrorHandlerConfiguration(errorHandlerBinding, errorHandlerSpec)
-		if err != nil {
-			return nil, fmt.Errorf("could not set integration error handler: %w", err)
-		}
-
-		return errorHandlerBinding, nil
+	if errHandlConf == nil {
+		return nil, nil
 	}
-	return nil, nil
+
+	var errorHandlerBinding *bindings.Binding
+
+	errorHandlerSpec, err := parseErrorHandler(errHandlConf.RawMessage)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse error handler: %w", err)
+	}
+	// We need to get the translated URI from any referenced resource (ie, kamelets)
+	if errorHandlerSpec.Type() == v1.ErrorHandlerTypeSink {
+		errorHandlerBinding, err = bindings.Translate(bindingContext, bindings.EndpointContext{Type: v1.EndpointTypeErrorHandler}, *errorHandlerSpec.Endpoint())
+		if err != nil {
+			return nil, fmt.Errorf("could not determine error handler URI: %w", err)
+		}
+	} else {
+		// Create a new binding otherwise in order to store error handler application properties
+		errorHandlerBinding = &bindings.Binding{
+			ApplicationProperties: make(map[string]string),
+		}
+	}
+
+	err = setErrorHandlerConfiguration(errorHandlerBinding, errorHandlerSpec)
+	if err != nil {
+		return nil, fmt.Errorf("could not set integration error handler: %w", err)
+	}
+
+	return errorHandlerBinding, nil
 }
 
 func parseErrorHandler(rawMessage v1.RawMessage) (v1.ErrorHandler, error) {
@@ -105,7 +107,7 @@ func setErrorHandlerConfiguration(errorHandlerBinding *bindings.Binding, errorHa
 		errorHandlerBinding.ApplicationProperties[key] = fmt.Sprintf("%v", value)
 	}
 	if errorHandler.Type() == v1.ErrorHandlerTypeSink && errorHandlerBinding.URI != "" {
-		errorHandlerBinding.ApplicationProperties[fmt.Sprintf("%s.deadLetterUri", v1.ErrorHandlerAppPropertiesPrefix)] = fmt.Sprintf("%v", errorHandlerBinding.URI)
+		errorHandlerBinding.ApplicationProperties[fmt.Sprintf("%s.deadLetterUri", v1.ErrorHandlerAppPropertiesPrefix)] = errorHandlerBinding.URI
 	}
 	return nil
 }

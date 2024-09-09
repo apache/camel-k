@@ -67,12 +67,13 @@ type Task struct {
 	// Application Publishing
 
 	// a BuildahTask, for Buildah strategy
-	// Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
+	// Deprecated: use jib, s2i or a custom publishing strategy instead
 	Buildah *BuildahTask `json:"buildah,omitempty"`
 	// a KanikoTask, for Kaniko strategy
-	// Deprecated: use spectrum, jib, s2i or a custom publishing strategy instead
+	// Deprecated: use jib, s2i or a custom publishing strategy instead
 	Kaniko *KanikoTask `json:"kaniko,omitempty"`
 	// a SpectrumTask, for Spectrum strategy
+	// Deprecated: use jib, s2i or a custom publishing strategy instead
 	Spectrum *SpectrumTask `json:"spectrum,omitempty"`
 	// a S2iTask, for S2I strategy
 	S2i *S2iTask `json:"s2i,omitempty"`
@@ -130,6 +131,7 @@ type PublishTask struct {
 }
 
 // BuildahTask is used to configure Buildah.
+// Deprecated: no longer in use.
 type BuildahTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
@@ -142,6 +144,7 @@ type BuildahTask struct {
 }
 
 // KanikoTask is used to configure Kaniko.
+// Deprecated: no longer in use.
 type KanikoTask struct {
 	BaseTask    `json:",inline"`
 	PublishTask `json:",inline"`
@@ -154,6 +157,7 @@ type KanikoTask struct {
 }
 
 // KanikoTaskCache is used to configure Kaniko cache.
+// Deprecated: no longer in use.
 type KanikoTaskCache struct {
 	// true if a cache is enabled
 	Enabled *bool `json:"enabled,omitempty"`
@@ -175,9 +179,8 @@ type SpectrumTask struct {
 
 // S2iTask is used to configure S2I.
 type S2iTask struct {
-	BaseTask `json:",inline"`
-	// can be useful to share info with other tasks
-	ContextDir string `json:"contextDir,omitempty"`
+	BaseTask    `json:",inline"`
+	PublishTask `json:",inline"`
 	// used by the ImageStream
 	Tag string `json:"tag,omitempty"`
 }

@@ -36,10 +36,10 @@ type IntegrationKitStatusApplyConfiguration struct {
 	Failure            *FailureApplyConfiguration                  `json:"failure,omitempty"`
 	RuntimeVersion     *string                                     `json:"runtimeVersion,omitempty"`
 	RuntimeProvider    *v1.RuntimeProvider                         `json:"runtimeProvider,omitempty"`
+	Catalog            *CatalogApplyConfiguration                  `json:"catalog,omitempty"`
 	Platform           *string                                     `json:"platform,omitempty"`
 	Version            *string                                     `json:"version,omitempty"`
 	Conditions         []IntegrationKitConditionApplyConfiguration `json:"conditions,omitempty"`
-	Traits             *IntegrationKitTraitsApplyConfiguration     `json:"traits,omitempty"`
 }
 
 // IntegrationKitStatusApplyConfiguration constructs an declarative configuration of the IntegrationKitStatus type for use with
@@ -133,6 +133,14 @@ func (b *IntegrationKitStatusApplyConfiguration) WithRuntimeProvider(value v1.Ru
 	return b
 }
 
+// WithCatalog sets the Catalog field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Catalog field is set to the value of the last call.
+func (b *IntegrationKitStatusApplyConfiguration) WithCatalog(value *CatalogApplyConfiguration) *IntegrationKitStatusApplyConfiguration {
+	b.Catalog = value
+	return b
+}
+
 // WithPlatform sets the Platform field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Platform field is set to the value of the last call.
@@ -159,13 +167,5 @@ func (b *IntegrationKitStatusApplyConfiguration) WithConditions(values ...*Integ
 		}
 		b.Conditions = append(b.Conditions, *values[i])
 	}
-	return b
-}
-
-// WithTraits sets the Traits field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Traits field is set to the value of the last call.
-func (b *IntegrationKitStatusApplyConfiguration) WithTraits(value *IntegrationKitTraitsApplyConfiguration) *IntegrationKitStatusApplyConfiguration {
-	b.Traits = value
 	return b
 }

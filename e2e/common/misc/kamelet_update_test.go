@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package misc
+package common
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -35,20 +36,19 @@ import (
 const customLabel = "custom-label"
 
 func TestBundleKameletUpdate(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		g.Expect(createBundleKamelet(t, ctx, ns, "my-http-sink")()).To(Succeed()) // Going to be replaced
+		g.Expect(createUserKamelet(t, ctx, ns, "user-sink")()).To(Succeed())      // Left intact by the operator
 
-	Expect(createBundleKamelet(ns, "my-http-sink")()).To(Succeed()) // Going to be replaced
-	Expect(createUserKamelet(ns, "user-sink")()).To(Succeed())      // Left intact by the operator
-
-	Eventually(Kamelet("my-http-sink", ns)).
-		Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
-	Consistently(Kamelet("user-sink", ns), 5*time.Second, 1*time.Second).
-		Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+		g.Eventually(Kamelet(t, ctx, "my-http-sink", ns)).
+			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
+		g.Consistently(Kamelet(t, ctx, "user-sink", ns), 5*time.Second, 1*time.Second).
+			Should(WithTransform(KameletLabels, HaveKeyWithValue(customLabel, "true")))
+	})
 }
 
-func createBundleKamelet(ns string, name string) func() error {
+func createBundleKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -59,10 +59,10 @@ func createBundleKamelet(ns string, name string) func() error {
 		customLabel:            "true",
 		v1.KameletBundledLabel: "true",
 	}
-	return CreateKamelet(ns, name, flow, nil, labels)
+	return CreateKamelet(t, ctx, ns, name, flow, nil, labels)
 }
 
-func createUserKamelet(ns string, name string) func() error {
+func createUserKamelet(t *testing.T, ctx context.Context, ns string, name string) func() error {
 	flow := map[string]interface{}{
 		"from": map[string]interface{}{
 			"uri": "kamelet:source",
@@ -72,5 +72,5 @@ func createUserKamelet(ns string, name string) func() error {
 	labels := map[string]string{
 		customLabel: "true",
 	}
-	return CreateKamelet(ns, name, flow, nil, labels)
+	return CreateKamelet(t, ctx, ns, name, flow, nil, labels)
 }

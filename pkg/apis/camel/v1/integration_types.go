@@ -23,7 +23,7 @@ import (
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-// Important: Run "make generate-deepcopy" to regenerate code after modifying this file
+// Important: Run "make generate" to regenerate code after modifying this file
 
 // +genclient
 // +genclient:method=GetScale,verb=get,subresource=scale,result=k8s.io/api/autoscaling/v1.Scale
@@ -34,8 +34,10 @@ import (
 // +kubebuilder:storageversion
 // +kubebuilder:subresource:scale:specpath=.spec.replicas,statuspath=.status.replicas,selectorpath=.status.selector
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=`.status.phase`,description="The integration phase"
+// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`,description="The integration readiness"
 // +kubebuilder:printcolumn:name="Runtime Provider",type=string,JSONPath=`.status.runtimeProvider`,description="The runtime version"
 // +kubebuilder:printcolumn:name="Runtime Version",type=string,JSONPath=`.status.runtimeVersion`,description="The runtime provider"
+// +kubebuilder:printcolumn:name="Catalog Version",type=string,JSONPath=`.status.catalog.version`,description="The catalog version"
 // +kubebuilder:printcolumn:name="Kit",type=string,JSONPath=`.status.integrationKit.name`,description="The integration kit"
 // +kubebuilder:printcolumn:name="Replicas",type=integer,JSONPath=`.status.replicas`,description="The number of pods"
 
@@ -105,6 +107,8 @@ type IntegrationStatus struct {
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime provider targeted for this Integration
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the catalog used to build/operate the Integration.
+	Catalog *Catalog `json:"catalog,omitempty"`
 	// Deprecated:
 	// a list of configuration specification
 	Configuration []ConfigurationSpec `json:"configuration,omitempty"`
@@ -118,8 +122,6 @@ type IntegrationStatus struct {
 	Selector string `json:"selector,omitempty"`
 	// features offered by the Integration
 	Capabilities []string `json:"capabilities,omitempty"`
-	// the traits generated and executed for this Integration
-	Traits Traits `json:"traits,omitempty"`
 	// the timestamp representing the last time when this integration was initialized.
 	InitializationTimestamp *metav1.Time `json:"lastInitTimestamp,omitempty"`
 }
@@ -285,6 +287,8 @@ type PodSpecTemplate struct {
 
 // PodSpec defines a group of Kubernetes resources.
 type PodSpec struct {
+	// AutomountServiceAccountToken
+	AutomountServiceAccountToken *bool `json:"automountServiceAccountToken,omitempty" protobuf:"varint,21,opt,name=automountServiceAccountToken"`
 	// Volumes
 	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge,retainKeys" patchMergeKey:"name" protobuf:"bytes,1,rep,name=volumes"`
 	// InitContainers

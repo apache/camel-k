@@ -21,10 +21,15 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+)
+
+const (
+	tolerationTraitID    = "toleration"
+	tolerationTraitOrder = 1200
 )
 
 type tolerationTrait struct {
@@ -34,12 +39,12 @@ type tolerationTrait struct {
 
 func newTolerationTrait() Trait {
 	return &tolerationTrait{
-		BaseTrait: NewBaseTrait("toleration", 1200),
+		BaseTrait: NewBaseTrait(tolerationTraitID, tolerationTraitOrder),
 	}
 }
 
 func (t *tolerationTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 

@@ -29,8 +29,14 @@ import (
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
+)
+
+const (
+	mountTraitID    = "mount"
+	mountTraitOrder = 1610
 )
 
 type mountTrait struct {
@@ -41,7 +47,7 @@ type mountTrait struct {
 func newMountTrait() Trait {
 	return &mountTrait{
 		// Must follow immediately the container trait
-		BasePlatformTrait: NewBasePlatformTrait("mount", 1610),
+		BasePlatformTrait: NewBasePlatformTrait(mountTraitID, mountTraitOrder),
 	}
 }
 
@@ -64,11 +70,7 @@ func (t *mountTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		}
 	}
 
-	// mount trait needs to be executed only when it has sources attached or any trait configuration
-	return len(e.Integration.AllSources()) > 0 ||
-		len(t.Configs) > 0 ||
-		len(t.Resources) > 0 ||
-		len(t.Volumes) > 0, nil, nil
+	return true, nil, nil
 }
 
 func (t *mountTrait) Apply(e *Environment) error {
@@ -142,6 +144,13 @@ func (t *mountTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]co
 			return parseErr
 		}
 	}
+	for _, v := range t.EmptyDirs {
+		if vol, parseErr := utilResource.ParseEmptyDirVolume(v); parseErr == nil {
+			t.mountResource(vols, mnts, vol)
+		} else {
+			return parseErr
+		}
+	}
 
 	return nil
 }
@@ -160,7 +169,8 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile)
 	mntPath := getMountPoint(conf.Name(), dstDir, string(conf.StorageType()), string(conf.ContentType()))
 	readOnly := true
-	if conf.StorageType() == utilResource.StorageTypePVC {
+	if conf.StorageType() == utilResource.StorageTypePVC ||
+		conf.StorageType() == utilResource.StorageTypeEmptyDir {
 		readOnly = false
 	}
 	mnt := getMount(refName, mntPath, dstFile, readOnly)
@@ -171,7 +181,7 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 
 func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 	e.Resources.VisitSecret(func(secret *corev1.Secret) {
-		if secret.Labels[serviceBindingLabel] == "true" {
+		if secret.Labels[serviceBindingLabel] == boolean.TrueString {
 			t.Configs = append(t.Configs, "secret:"+secret.Name)
 		}
 	})

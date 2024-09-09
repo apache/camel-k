@@ -18,16 +18,19 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/apache/camel-k/v2/pkg/cmd/operator"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/spf13/cobra"
-
-	"github.com/apache/camel-k/v2/pkg/cmd/operator"
 )
 
-const operatorCommand = "operator"
+const (
+	operatorCommand       = "operator"
+	defaultHealthPort     = 8081
+	defaultMonitoringPort = 8080
+)
 
-func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
+func newCmdOperator(rootCmdOptions *RootCmdOptions) (*cobra.Command, *operatorCmdOptions) {
 	options := operatorCmdOptions{}
 
 	cmd := cobra.Command{
@@ -35,12 +38,12 @@ func newCmdOperator() (*cobra.Command, *operatorCmdOptions) {
 		Short:   "Run the Camel K operator",
 		Long:    `Run the Camel K operator`,
 		Hidden:  true,
-		PreRunE: decode(&options),
+		PreRunE: decode(&options, rootCmdOptions.Flags),
 		Run:     options.run,
 	}
 
-	cmd.Flags().Int32("health-port", 8081, "The port of the health endpoint")
-	cmd.Flags().Int32("monitoring-port", 8080, "The port of the metrics endpoint")
+	cmd.Flags().Int32("health-port", defaultHealthPort, "The port of the health endpoint")
+	cmd.Flags().Int32("monitoring-port", defaultMonitoringPort, "The port of the metrics endpoint")
 	cmd.Flags().Bool("leader-election", true, "Use leader election")
 	cmd.Flags().String("leader-election-id", "", "Use the given ID as the leader election Lease name")
 

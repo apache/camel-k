@@ -52,6 +52,15 @@ func LookupConfigmap(ctx context.Context, c client.Client, ns string, name strin
 	return &cm
 }
 
+// LookupResourceVersion will look for any k8s resource with a given name in a given namespace, returning its resource version only.
+// It makes this safe against any resource that the operator is not allowed to inspect.
+func LookupResourceVersion(ctx context.Context, c client.Client, object ctrl.Object) string {
+	if err := c.Get(ctx, ctrl.ObjectKeyFromObject(object), object); err != nil {
+		return ""
+	}
+	return object.GetResourceVersion()
+}
+
 // LookupSecret will look for any k8s Secret with a given name in a given namespace.
 func LookupSecret(ctx context.Context, c client.Client, ns string, name string) *corev1.Secret {
 	secret := corev1.Secret{

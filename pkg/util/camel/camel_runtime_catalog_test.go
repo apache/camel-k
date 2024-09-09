@@ -57,11 +57,12 @@ func TestIsResolvable(t *testing.T) {
 		expected bool
 	}{
 		// static dependencies
+		{desc: "Basic static dependency single component", uri: "log", expected: true},
 		{desc: "Basic static dependency", uri: "log:info", expected: true},
 		{desc: "Basic static dependency with path and param", uri: "http://my-site/test?param=value", expected: true},
 		{desc: "Basic static dependency with path and param placeholder", uri: "http://my-site/test?{{params}}", expected: true},
 		{desc: "Basic static dependency with path placeholder and param", uri: "http://my-site/{{path}}?key=val", expected: true},
-
+		{desc: "Basic static dependency with path placeholder and name", uri: "direct?name=val", expected: true},
 		// placeholders
 		{desc: "Basic", uri: "{{url}}", expected: false},
 		{desc: "With query param placeholder", uri: "{{url}}?authMethod={{authMethod}}", expected: false},
@@ -77,6 +78,29 @@ func TestIsResolvable(t *testing.T) {
 			if got := catalog.IsResolvable(testCase.uri); got != testCase.expected {
 				t.Errorf("IsResolvable(%v) = %v, want %v", testCase.uri, got, testCase.expected)
 
+			}
+		})
+	}
+}
+
+func TestDecodeComponent(t *testing.T) {
+	catalog, err := DefaultCatalog()
+	require.NoError(t, err)
+
+	testCases := []struct {
+		desc       string
+		uri        string
+		expectedID string
+	}{
+		{desc: "Basic static dependency", uri: "direct", expectedID: "direct"},
+		{desc: "Basic static dependency", uri: "log:info", expectedID: "log"},
+		{desc: "Basic static dependency witch path and name", uri: "direct?name=route", expectedID: "direct"},
+		{desc: "Basic static dependency with path and param placeholder", uri: "http://my-site/test?{{params}}", expectedID: "http"},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.desc, func(t *testing.T) {
+			if _, gotScheme := catalog.DecodeComponent(testCase.uri); gotScheme.ID != testCase.expectedID {
+				t.Errorf("DecodeComponent(%v) = %v, want %v", testCase.uri, gotScheme.ID, testCase.expectedID)
 			}
 		})
 	}

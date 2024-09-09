@@ -20,7 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package common
 
 import (
 	"context"
@@ -34,123 +34,103 @@ import (
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	"github.com/apache/camel-k/v2/e2e/support/util"
+	"github.com/apache/camel-k/v2/pkg/platform"
 )
 
 func TestRunDevMode(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("run yaml dev mode", func(t *testing.T) {
+			ctx, cancel := context.WithCancel(ctx)
+			defer cancel()
+			piper, pipew := io.Pipe()
+			defer pipew.Close()
+			defer piper.Close()
 
-	/*
-	 * TODO
-	 * The changing of the yaml file constant from "string" to "magic" is not being
-	 * picked up when deploying on OCP4 and so the test is failing.
-	 *
-	 * Adding CAMEL_K_TEST_SKIP_PROBLEMATIC env var for the moment.
-	 */
-	if os.Getenv("CAMEL_K_TEST_SKIP_PROBLEMATIC") == "true" {
-		t.Skip("WARNING: Test marked as problematic ... skipping")
-	}
+			file := util.MakeTempCopy(t, "files/yaml.yaml")
+			name := RandomizedSuffixName("yaml")
 
-	t.Run("run yaml dev mode", func(t *testing.T) {
-		RegisterTestingT(t)
-		ctx, cancel := context.WithCancel(TestContext)
-		defer cancel()
-		piper, pipew := io.Pipe()
-		defer pipew.Close()
-		defer piper.Close()
+			kamelRun := KamelRunWithContext(t, ctx, platform.DefaultPlatformName, ns, file, "--name", name, "--dev")
+			kamelRun.SetOut(pipew)
 
-		file := util.MakeTempCopy(t, "files/yaml.yaml")
-		name := RandomizedSuffixName("yaml")
+			logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!", "Magicjordan!")
 
-		kamelRun := KamelRunWithContext(ctx, operatorID, ns, file, "--name", name, "--dev")
-		kamelRun.SetOut(pipew)
+			args := os.Args
+			defer func() { os.Args = args }()
 
-		logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!", "Magicjordan!")
+			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", platform.DefaultPlatformName, file, "--name", name, "--dev"}
+			go kamelRun.Execute()
 
-		args := os.Args
-		defer func() { os.Args = args }()
+			g.Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), TestTimeoutMedium).Should(BeTrue())
+			g.Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+			g.Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
 
-		os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
-		go kamelRun.Execute()
+			util.ReplaceInFile(t, file, "string!", "jordan!")
+			g.Eventually(logScanner.IsFound("Magicjordan!"), TestTimeoutMedium).Should(BeTrue())
+		})
 
-		Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), TestTimeoutMedium).Should(BeTrue())
-		Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
-		Expect(logScanner.IsFound("Magicjordan!")()).To(BeFalse())
+		t.Run("run yaml remote dev mode", func(t *testing.T) {
+			ctx, cancel := context.WithCancel(ctx)
+			defer cancel()
+			piper, pipew := io.Pipe()
+			defer pipew.Close()
+			defer piper.Close()
 
-		util.ReplaceInFile(t, file, "string!", "jordan!")
-		Eventually(logScanner.IsFound("Magicjordan!"), TestTimeoutMedium).Should(BeTrue())
+			remoteFile := "https://raw.githubusercontent.com/apache/camel-k/b29333f0a878d5d09fb3965be8fe586d77dd95d0/e2e/common/files/yaml.yaml"
+			name := RandomizedSuffixName("yaml")
+			kamelRun := KamelRunWithContext(t, ctx, platform.DefaultPlatformName, ns, remoteFile, "--name", name, "--dev")
+			kamelRun.SetOut(pipew)
+
+			logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
+
+			args := os.Args
+			defer func() { os.Args = args }()
+
+			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", platform.DefaultPlatformName, remoteFile, "--name", name, "--dev"}
+
+			go kamelRun.Execute()
+
+			g.Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
+		})
+
+		// This test makes sure that `kamel run --dev` runs in seconds after initial build is
+		// already done for the same integration.
+		t.Run("dev mode rebuild in seconds", func(t *testing.T) {
+			name := RandomizedSuffixName("yaml")
+
+			// First run (warm up)
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutShort).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			g.Expect(Kamel(t, ctx, "delete", name, "-n", ns).Execute()).To(Succeed())
+			g.Eventually(Integration(t, ctx, ns, name)).Should(BeNil())
+			g.Eventually(IntegrationPod(t, ctx, ns, name), TestTimeoutMedium).Should(BeNil())
+
+			// Second run (rebuild)
+			ctx, cancel := context.WithCancel(ctx)
+			defer cancel()
+			piper, pipew := io.Pipe()
+			defer pipew.Close()
+			defer piper.Close()
+
+			file := util.MakeTempCopy(t, "files/yaml.yaml")
+
+			kamelRun := KamelRunWithContext(t, ctx, platform.DefaultPlatformName, ns, file, "--name", name, "--dev")
+			kamelRun.SetOut(pipew)
+
+			logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!")
+
+			args := os.Args
+			defer func() { os.Args = args }()
+
+			os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", platform.DefaultPlatformName, file, "--name", name, "--dev"}
+
+			go kamelRun.Execute()
+
+			// Second run should start up within a few seconds
+			timeout := 20 * time.Second
+			g.Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), timeout).Should(BeTrue())
+			g.Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
+		})
 	})
-
-	t.Run("run yaml remote dev mode", func(t *testing.T) {
-		RegisterTestingT(t)
-		ctx, cancel := context.WithCancel(TestContext)
-		defer cancel()
-		piper, pipew := io.Pipe()
-		defer pipew.Close()
-		defer piper.Close()
-
-		remoteFile := "https://raw.githubusercontent.com/apache/camel-k/b29333f0a878d5d09fb3965be8fe586d77dd95d0/e2e/common/files/yaml.yaml"
-		name := RandomizedSuffixName("yaml")
-		kamelRun := KamelRunWithContext(ctx, operatorID, ns, remoteFile, "--name", name, "--dev")
-		kamelRun.SetOut(pipew)
-
-		logScanner := util.NewLogScanner(ctx, piper, "Magicstring!")
-
-		args := os.Args
-		defer func() { os.Args = args }()
-
-		os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, remoteFile, "--name", name, "--dev"}
-
-		go kamelRun.Execute()
-
-		Eventually(logScanner.IsFound("Magicstring!"), TestTimeoutMedium).Should(BeTrue())
-	})
-
-	// This test makes sure that `kamel run --dev` runs in seconds after initial build is
-	// already done for the same integration.
-	t.Run("dev mode rebuild in seconds", func(t *testing.T) {
-		/*
-		 * !!! NOTE !!!
-		 * If you find this test flaky, instead of thinking it as simply unstable, investigate
-		 * why it does not finish in a few seconds and remove the bottlenecks which are lagging
-		 * the integration startup.
-		 */
-		RegisterTestingT(t)
-		name := RandomizedSuffixName("yaml")
-
-		// First run (warm up)
-		Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml", "--name", name).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-		Expect(Kamel("delete", name, "-n", ns).Execute()).To(Succeed())
-		Eventually(Integration(ns, name)).Should(BeNil())
-		Eventually(IntegrationPod(ns, name), TestTimeoutMedium).Should(BeNil())
-
-		// Second run (rebuild)
-		ctx, cancel := context.WithCancel(TestContext)
-		defer cancel()
-		piper, pipew := io.Pipe()
-		defer pipew.Close()
-		defer piper.Close()
-
-		file := util.MakeTempCopy(t, "files/yaml.yaml")
-
-		kamelRun := KamelRunWithContext(ctx, operatorID, ns, file, "--name", name, "--dev")
-		kamelRun.SetOut(pipew)
-
-		logScanner := util.NewLogScanner(ctx, piper, `integration "`+name+`" in phase Running`, "Magicstring!")
-
-		args := os.Args
-		defer func() { os.Args = args }()
-
-		os.Args = []string{"kamel", "run", "-n", ns, "--operator-id", operatorID, file, "--name", name, "--dev"}
-
-		go kamelRun.Execute()
-
-		// Second run should start up within a few seconds
-		timeout := 10 * time.Second
-		Eventually(logScanner.IsFound(`integration "`+name+`" in phase Running`), timeout).Should(BeTrue())
-		Eventually(logScanner.IsFound("Magicstring!"), timeout).Should(BeTrue())
-	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

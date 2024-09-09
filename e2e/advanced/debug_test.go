@@ -24,7 +24,6 @@ package advanced
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -32,74 +31,69 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
 )
 
 func TestKamelCLIDebug(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
-		operatorID := fmt.Sprintf("camel-k-%s", ns)
-		Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-		Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-
-		Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		InstallOperator(t, ctx, g, ns)
 
 		t.Run("debug local default port check", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Expect(portIsInUse("127.0.0.1", "5005")()).To(BeFalse())
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Expect(portIsInUse("127.0.0.1", "5005")()).To(BeFalse())
 
-			debugTestContext, cancel := context.WithCancel(TestContext)
+			debugTestContext, cancel := context.WithCancel(ctx)
 			defer cancelAndWait(cancel)
-			go KamelWithContext(debugTestContext, "debug", "yaml", "-n", ns).ExecuteContext(debugTestContext)
+			go KamelWithContext(t, debugTestContext, "debug", "yaml", "-n", ns).ExecuteContext(debugTestContext)
 
-			Eventually(portIsInUse("127.0.0.1", "5005"), TestTimeoutMedium, 5*time.Second).Should(BeTrue())
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(portIsInUse("127.0.0.1", "5005"), TestTimeoutMedium, 5*time.Second).Should(BeTrue())
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationPods(t, ctx, ns, "yaml"), TestTimeoutMedium, 5*time.Second).Should(HaveLen(0))
 		})
 
 		t.Run("debug local port check", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
-			Expect(portIsInUse("127.0.0.1", "5006")()).To(BeFalse())
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Expect(portIsInUse("127.0.0.1", "5006")()).To(BeFalse())
 
-			debugTestContext, cancel := context.WithCancel(TestContext)
+			debugTestContext, cancel := context.WithCancel(ctx)
 			defer cancelAndWait(cancel)
-			go KamelWithContext(debugTestContext, "debug", "yaml", "--port", "5006", "-n", ns).ExecuteContext(debugTestContext)
+			go KamelWithContext(t, debugTestContext, "debug", "yaml", "--port", "5006", "-n", ns).ExecuteContext(debugTestContext)
 
-			Eventually(portIsInUse("127.0.0.1", "5006"), TestTimeoutMedium, 5*time.Second).Should(BeTrue())
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(portIsInUse("127.0.0.1", "5006"), TestTimeoutMedium, 5*time.Second).Should(BeTrue())
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationPods(t, ctx, ns, "yaml"), TestTimeoutMedium, 5*time.Second).Should(HaveLen(0))
 		})
 
 		t.Run("debug logs check", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
-			debugTestContext, cancel := context.WithCancel(TestContext)
+			debugTestContext, cancel := context.WithCancel(ctx)
 			defer cancelAndWait(cancel)
-			go KamelWithContext(debugTestContext, "debug", "yaml", "-n", ns).ExecuteContext(debugTestContext)
+			go KamelWithContext(t, debugTestContext, "debug", "yaml", "-n", ns).ExecuteContext(debugTestContext)
 
-			Eventually(IntegrationLogs(ns, "yaml"), TestTimeoutMedium).Should(ContainSubstring("Listening for transport dt_socket at address: 5005"))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(ContainSubstring("Listening for transport dt_socket at address: 5005"))
+			g.Expect(Kamel(t, ctx, "delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Eventually(IntegrationPods(t, ctx, ns, "yaml"), TestTimeoutMedium, 5*time.Second).Should(HaveLen(0))
 		})
 
 		t.Run("Pod config test", func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutMedium).Should(Equal(corev1.PodRunning))
 
-			debugTestContext, cancel := context.WithCancel(TestContext)
+			debugTestContext, cancel := context.WithCancel(ctx)
 			defer cancelAndWait(cancel)
-			go KamelWithContext(debugTestContext, "debug", "yaml", "-n", ns).ExecuteContext(debugTestContext)
+			go KamelWithContext(t, debugTestContext, "debug", "yaml", "-n", ns).ExecuteContext(debugTestContext)
 
-			Eventually(func() string {
-				return IntegrationPod(ns, "yaml")().Spec.Containers[0].Args[0]
+			g.Eventually(func() string {
+				return IntegrationPod(t, ctx, ns, "yaml")().Spec.Containers[0].Args[0]
 			}).Should(ContainSubstring("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005"))
-			Expect(IntegrationPod(ns, "yaml")().GetLabels()["camel.apache.org/debug"]).To(Not(BeNil()))
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			g.Expect(IntegrationPod(t, ctx, ns, "yaml")().GetLabels()["camel.apache.org/debug"]).To(Not(BeNil()))
 		})
-
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 	})
 }
 

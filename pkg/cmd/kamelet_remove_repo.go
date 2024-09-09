@@ -33,10 +33,11 @@ func newKameletRemoveRepoCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *k
 	}
 
 	cmd := cobra.Command{
-		Use:     "remove-repo github:owner/repo[/path_to_kamelets_folder][@version] ...",
-		Short:   "Remove a Kamelet repository",
-		Long:    `Remove a Kamelet repository.`,
-		PreRunE: decode(&options),
+		Use:        "remove-repo github:owner/repo[/path_to_kamelets_folder][@version] ...",
+		Short:      "Remove a Kamelet repository",
+		Long:       `Remove a Kamelet repository.`,
+		Deprecated: "consider using kubectl (or oc) command instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(args); err != nil {
 				return err

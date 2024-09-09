@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -41,13 +42,13 @@ func TestRunAndLog(t *testing.T) {
 	cmd := exec.CommandContext(context.Background(), "date")
 	err := RunAndLog(context.Background(), cmd, loggerInfo, loggerError)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestRunAndLogInvalid(t *testing.T) {
 	cmd := exec.CommandContext(context.Background(), "go", "help", "dsa")
 	err := RunAndLog(context.Background(), cmd, loggerInfo, loggerError)
 
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assert.Equal(t, "go help dsa: unknown help topic. Run 'go help'.: exit status 2", err.Error())
 }

@@ -1,34 +1,18 @@
 [[logging]]
 = Camel K Operator Logging
 
-The operator provides https://kubernetes.io/blog/2020/09/04/kubernetes-1-19-introducing-structured-logs/[structured logging], so that the logs are more easily parseable.
-
-This includes the output of components managed by the operator, such as the Maven build, and the Integration container image build.
-
-For example, the Maven build logs display like this:
+The operator provides https://kubernetes.io/blog/2020/09/04/kubernetes-1-19-introducing-structured-logs/[structured logging], so that the logs are more easily parsable. This includes the output of components managed by the operator, such as the Maven build, and the Integration container image build. For example, the Maven build logs display like this:
 
 [source,json]
 ----
-{"level":"info","ts":1620393185.321101,"logger":"camel-k.maven.build","msg":"Downloading from repository-000: http://my.repository.com:8081/artifactory/fuse-brno/org/jboss/shrinkwrap/resolver/shrinkwrap-resolver-bom/2.2.4/shrinkwrap-resolver-bom-2.2.4.pom"}
+...
+{"level":"info","ts":"2024-09-04T09:09:18Z","logger":"camel-k.maven.build","msg":"Building camel-k-integration 2.5.0-SNAPSHOT"}
+...
 ----
-
-This may differ when running the operator locally, for development purposes, in which case the local Maven installation that is used may provide a different output.
 
 [[operator-logging-level]]
 == Logging Level
 
-The operator log level is controlled by an environment setting (`LOG_LEVEL`) on the operator deployment. You can set the log level on the kamel install command like this
+The operator log level is controlled by an environment setting (`LOG_LEVEL`) on the operator deployment. You can set the log level during installation procedure (see details in installation section). The default level is `info`.
 
-[source,bash]
-----
-kamel install --log-level debug
-----
-
-This will set the log level to `debug`, so you can expect a more verbose operator output. The default level is `info`.
-
-In general log levels are represented by numeric verbosity levels where `0` is the standard
-info log level and `1` is debug level. All values `2-10` represent different trace levels.
-You can set numeric values or one of the preset values `info`, `debug`, `error`.
-
-As an alternative to using the `--log-level` option on the kamel CLI you can add an environment variable (`LOG_LEVEL=debug`) directly to the Camel K operator deployment.
-You may need to restart the operator pods controlled by the deployment to see the effect in the log output.
+In general log levels are represented by numeric verbosity levels where `0` is the standard info log level and `1` is debug level. All values `2-10` represent different trace levels. You can set numeric values or one of the preset values `info`, `debug`, `error`.

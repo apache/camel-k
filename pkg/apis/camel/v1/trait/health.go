@@ -19,7 +19,7 @@ package trait
 
 // The health trait is responsible for configuring the health probes on the integration container.
 //
-// It's disabled by default.
+// NOTE: this trait is disabled by default.
 //
 // +camel-k:trait=health.
 type HealthTrait struct {
@@ -39,6 +39,8 @@ type HealthTrait struct {
 	LivenessSuccessThreshold int32 `property:"liveness-success-threshold" json:"livenessSuccessThreshold,omitempty"`
 	// Minimum consecutive failures for the liveness probe to be considered failed after having succeeded.
 	LivenessFailureThreshold int32 `property:"liveness-failure-threshold" json:"livenessFailureThreshold,omitempty"`
+	// The liveness probe path to use (default provided by the Catalog runtime used).
+	LivenessProbe string `property:"liveness-probe" json:"livenessProbe,omitempty"`
 
 	// Configures the readiness probe for the integration container (default `true`).
 	ReadinessProbeEnabled *bool `property:"readiness-probe-enabled" json:"readinessProbeEnabled,omitempty"`
@@ -54,6 +56,8 @@ type HealthTrait struct {
 	ReadinessSuccessThreshold int32 `property:"readiness-success-threshold" json:"readinessSuccessThreshold,omitempty"`
 	// Minimum consecutive failures for the readiness probe to be considered failed after having succeeded.
 	ReadinessFailureThreshold int32 `property:"readiness-failure-threshold" json:"readinessFailureThreshold,omitempty"`
+	// The readiness probe path to use (default provided by the Catalog runtime used).
+	ReadinessProbe string `property:"readiness-probe" json:"readinessProbe,omitempty"`
 
 	// Configures the startup probe for the integration container (default `false`).
 	StartupProbeEnabled *bool `property:"startup-probe-enabled" json:"startupProbeEnabled,omitempty"`
@@ -69,4 +73,6 @@ type HealthTrait struct {
 	StartupSuccessThreshold int32 `property:"startup-success-threshold" json:"startupSuccessThreshold,omitempty"`
 	// Minimum consecutive failures for the startup probe to be considered failed after having succeeded.
 	StartupFailureThreshold int32 `property:"startup-failure-threshold" json:"startupFailureThreshold,omitempty"`
+	// The startup probe path to use (default provided by the Catalog runtime used).
+	StartupProbe string `property:"startup-probe" json:"startupProbe,omitempty"`
 }

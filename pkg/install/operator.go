@@ -87,7 +87,8 @@ type OperatorStorageConfiguration struct {
 }
 
 // OperatorOrCollect installs the operator resources or adds them to the collector if present.
-// nolint: maintidx // TODO: refactor the code
+//
+//nolint:maintidx,goconst
 func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client, cfg OperatorConfiguration, collection *kubernetes.Collection, force bool) error {
 	isOpenShift, err := isOpenShift(c, cfg.ClusterType)
 	if err != nil {
@@ -130,7 +131,7 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse the configured resources requests!")
 					}
-					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
+					for i := range len(d.Spec.Template.Spec.Containers) {
 						d.Spec.Template.Spec.Containers[i].Resources = resourceReq
 					}
 				}
@@ -144,8 +145,10 @@ func OperatorOrCollect(ctx context.Context, cmd *cobra.Command, c client.Client,
 					if err != nil {
 						fmt.Fprintln(cmd.ErrOrStderr(), "Warning: could not parse environment variables!")
 					}
-					for i := 0; i < len(d.Spec.Template.Spec.Containers); i++ {
-						d.Spec.Template.Spec.Containers[i].Env = append(d.Spec.Template.Spec.Containers[i].Env, envVars...)
+					for i := range len(d.Spec.Template.Spec.Containers) {
+						for _, envVar := range envVars {
+							envvar.SetVar(&d.Spec.Template.Spec.Containers[i].Env, envVar)
+						}
 					}
 				}
 			}
@@ -352,7 +355,7 @@ func installNamespacedRoleBinding(ctx context.Context, c client.Client, collecti
 	if err != nil {
 		return err
 	}
-	// nolint: forcetypeassert
+	//nolint:forcetypeassert
 	target := obj.(*rbacv1.RoleBinding)
 
 	bound := false
@@ -464,7 +467,7 @@ func installClusterRoleBinding(ctx context.Context, c client.Client, collection 
 func installOpenShiftRoles(ctx context.Context, c client.Client, namespace string, customizer ResourceCustomizer, collection *kubernetes.Collection, force bool, global bool) error {
 	if global {
 		return ResourcesOrCollect(ctx, c, namespace, collection, force, customizer,
-			"/config/openshift/descoped/operator-cluster-role-openshift.yaml",
+			"/config/rbac/openshift/descoped/operator-cluster-role-openshift.yaml",
 			"/config/rbac/openshift/descoped/operator-cluster-role-binding-openshift.yaml",
 		)
 	} else {

@@ -18,20 +18,21 @@ limitations under the License.
 package trait
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	routev1 "github.com/openshift/api/route/v1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -93,7 +94,7 @@ func TestOpenShiftTraitsWithWebAndDisabledTrait(t *testing.T) {
 	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('netty-http:http').to('log:info')")
 	env.Integration.Spec.Traits.Service = &traitv1.ServiceTrait{
 		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(false),
+			Enabled: ptr.To(false),
 		},
 	}
 	res := processTestEnv(t, env)
@@ -142,26 +143,26 @@ func TestTraitHierarchyDecode(t *testing.T) {
 
 	env.Platform.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
 		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(false),
+			Enabled: ptr.To(false),
 		},
-		MinScale: pointer.Int(1),
-		MaxScale: pointer.Int(10),
-		Target:   pointer.Int(15),
+		MinScale: ptr.To(1),
+		MaxScale: ptr.To(10),
+		Target:   ptr.To(15),
 	}
 	env.Platform.ResyncStatusFullConfig()
 
 	env.Integration.Spec.Traits.KnativeService = &traitv1.KnativeServiceTrait{
 		Trait: traitv1.Trait{
-			Enabled: pointer.Bool(true),
+			Enabled: ptr.To(true),
 		},
-		MinScale: pointer.Int(5),
-		MaxScale: pointer.Int(20),
+		MinScale: ptr.To(5),
+		MaxScale: ptr.To(20),
 	}
 
 	c := NewTraitTestCatalog()
 	err := c.Configure(env)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	knt := c.GetTrait("knative-service")
 	assert.NotNil(t, knt)
@@ -181,79 +182,6 @@ func TestTraitHierarchyDecode(t *testing.T) {
 
 	assert.NotNil(t, kns.Target)
 	assert.Equal(t, 15, *kns.Target)
-}
-
-func TestConfigureVolumesAndMountsTextResourcesAndProperties(t *testing.T) {
-	env := Environment{
-		Resources: kubernetes.NewCollection(),
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      TestDeploymentName,
-				Namespace: "ns",
-			},
-			Spec: v1.IntegrationSpec{
-				Configuration: []v1.ConfigurationSpec{
-					{
-						Type:  "property",
-						Value: "a=b",
-					},
-					{
-						Type:  "configmap",
-						Value: "test-configmap",
-					},
-					{
-						Type:  "secret",
-						Value: "test-secret",
-					},
-					{
-						Type:  "volume",
-						Value: "testvolume:/foo/bar",
-					},
-					{
-						Type:  "volume",
-						Value: "an-invalid-volume-spec",
-					},
-				},
-			},
-		},
-	}
-
-	vols := make([]corev1.Volume, 0)
-	mnts := make([]corev1.VolumeMount, 0)
-
-	env.configureVolumesAndMounts(&vols, &mnts)
-
-	assert.Len(t, vols, 3)
-	assert.Len(t, mnts, 3)
-
-	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "test-configmap" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource.ConfigMap)
-	assert.NotNil(t, v.VolumeSource.ConfigMap.LocalObjectReference)
-	assert.Equal(t, "test-configmap", v.VolumeSource.ConfigMap.LocalObjectReference.Name)
-
-	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-configmap" })
-	assert.NotNil(t, m)
-	assert.Equal(t, filepath.Join(camel.ConfigConfigmapsMountPath, "test-configmap"), m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "test-secret" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.Secret)
-	assert.Equal(t, "test-secret", v.Secret.SecretName)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "test-secret" })
-	assert.NotNil(t, m)
-	assert.Equal(t, filepath.Join(camel.ConfigSecretsMountPath, "test-secret"), m.MountPath)
-
-	v = findVolume(vols, func(v corev1.Volume) bool { return v.Name == "testvolume-data" })
-	assert.NotNil(t, v)
-	assert.NotNil(t, v.VolumeSource)
-	assert.NotNil(t, v.VolumeSource.PersistentVolumeClaim)
-	assert.Equal(t, "testvolume", v.VolumeSource.PersistentVolumeClaim.ClaimName)
-
-	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == "testvolume-data" })
-	assert.NotNil(t, m)
-	assert.Equal(t, "/foo/bar", m.MountPath)
 }
 
 func TestConfigureVolumesAndMountsSources(t *testing.T) {
@@ -381,8 +309,8 @@ func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
 				Loaders: map[string]v1.CamelLoader{
 					"java": {
 						Metadata: map[string]string{
-							"native":                         "true",
-							"sources-required-at-build-time": "true",
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.TrueString,
 						},
 					},
 				},
@@ -433,7 +361,7 @@ func TestOnlySomeTraitsInfluenceBuild(t *testing.T) {
 func TestOnlySomeTraitsArePlatform(t *testing.T) {
 	c := NewTraitTestCatalog()
 	platformTraits := []string{
-		"builder", "camel", "jvm", "runtime", "container", "mount", "dependencies", "deployer",
+		"builder", "camel", "jvm", "runtime", "container", "security-context", "mount", "dependencies", "deployer",
 		"deployment", "environment", "error-handler", "kamelets", "openapi", "owner", "platform", "quarkus",
 	}
 
@@ -486,7 +414,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 
 	catalog := NewTraitTestCatalog()
 	_, err := catalog.apply(env)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	return env.Resources
 }
 
@@ -495,7 +423,7 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 
 	client, _ := test.NewFakeClient()
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	res := &Environment{
 		CamelCatalog: catalog,
@@ -547,4 +475,20 @@ func createTestEnv(t *testing.T, cluster v1.IntegrationPlatformCluster, script s
 
 func NewTraitTestCatalog() *Catalog {
 	return NewCatalog(nil)
+}
+
+func TestExecutedTraitsCondition(t *testing.T) {
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
+	catalog := NewTraitTestCatalog()
+	conditions, err := catalog.apply(env)
+	require.NoError(t, err)
+
+	expectedCondition := NewIntegrationCondition(
+		"",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		"TraitConfiguration",
+		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,quarkus,jvm,owner",
+	)
+	assert.Contains(t, conditions, expectedCondition)
 }

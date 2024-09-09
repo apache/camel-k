@@ -68,6 +68,7 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		return nil, err
 	}
 
+	//nolint:nestif
 	if pod == nil {
 		switch build.Status.Phase {
 
@@ -143,7 +144,6 @@ func (action *monitorPodAction) Handle(ctx context.Context, build *v1.Build) (*v
 		// Account for the Build metrics
 		observeBuildResult(build, build.Status.Phase, buildCreator, duration)
 
-		build.Status.Image = publishTaskImageName(build.Spec.Tasks)
 		// operator supported publishing tasks should provide the digest in the builder command process execution
 		if !operatorSupportedPublishingStrategy(build.Spec.Tasks) {
 			build.Status.Digest = publishTaskDigest(build.Spec.Tasks, pod.Status.ContainerStatuses)
@@ -214,6 +214,7 @@ func (action *monitorPodAction) sigterm(ctx context.Context, pod *corev1.Pod) er
 			Resource("pods").
 			Namespace(pod.Namespace).
 			Name(pod.Name).
+			Timeout(1*time.Minute).
 			SubResource("exec").
 			Param("container", container.Name)
 
@@ -308,7 +309,7 @@ func (action *monitorPodAction) setConditionsFromTerminationMessages(ctx context
 			var err error
 			terminationMessage := t.Message
 			// Dynamic condition type (it depends on each container name)
-			containerConditionType := v1.BuildConditionType(fmt.Sprintf("Container %s succeeded", container.Name))
+			containerConditionType := v1.BuildConditionType(fmt.Sprintf("Container%sSucceeded", container.Name))
 			containerSucceeded := corev1.ConditionTrue
 			if t.ExitCode != 0 {
 				containerSucceeded = corev1.ConditionFalse
@@ -349,23 +350,6 @@ func publishTask(tasks []v1.Task) *v1.Task {
 	return nil
 }
 
-func publishTaskImageName(tasks []v1.Task) string {
-	t := publishTask(tasks)
-	if t == nil {
-		return ""
-	}
-	switch {
-	case t.Custom != nil:
-		return t.Custom.PublishingImage
-	case t.Spectrum != nil:
-		return t.Spectrum.Image
-	case t.Jib != nil:
-		return t.Jib.Image
-	}
-
-	return ""
-}
-
 func publishTaskName(tasks []v1.Task) string {
 	t := publishTask(tasks)
 	if t == nil {
@@ -378,6 +362,8 @@ func publishTaskName(tasks []v1.Task) string {
 		return t.Spectrum.Name
 	case t.Jib != nil:
 		return t.Jib.Name
+	case t.S2i != nil:
+		return t.S2i.Name
 	}
 
 	return ""

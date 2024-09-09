@@ -74,25 +74,24 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 		return nil, fmt.Errorf("error during trait customization: %w", err)
 	}
 
+	postActionErrors := make([]error, 0)
 	// execute post actions registered by traits
 	for _, postAction := range environment.PostActions {
 		err := postAction(environment)
 		if err != nil {
-			return nil, fmt.Errorf("error executing post actions: %w", err)
+			postActionErrors = append(postActionErrors, err)
 		}
+	}
+
+	if len(postActionErrors) > 0 {
+		return nil, fmt.Errorf("error executing post actions - %d/%d failed: %s", len(postActionErrors), len(environment.PostActions), postActionErrors)
 	}
 
 	switch {
 	case integration != nil:
 		ilog.Debug("Applied traits to Integration", "integration", integration.Name, "namespace", integration.Namespace)
-		// The spec.traits may have been altered by other traits execution. We can save here the status for future
-		// reference
-		integration.Status.Traits = integration.Spec.Traits
 	case kit != nil:
 		ilog.Debug("Applied traits to Integration kit", "integration kit", kit.Name, "namespace", kit.Namespace)
-		// The spec.traits may have been altered by other traits execution We can save here the status for future
-		// reference
-		kit.Status.Traits = kit.Spec.Traits
 	default:
 		ilog.Debug("Applied traits")
 	}

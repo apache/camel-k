@@ -25,6 +25,11 @@
           constant: "string!"
       - setBody:
           simple: "Magic${header.m}"
+      # Simulate a job workload
+      - delay:
+          expression:
+            constant: 20000
+          asyncDelayed: false
       - to:
           uri: "log:info"
           parameters:

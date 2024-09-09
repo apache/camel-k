@@ -25,13 +25,15 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 )
+
+const podTraitOrder = 1800
 
 type podTrait struct {
 	BaseTrait
@@ -40,7 +42,7 @@ type podTrait struct {
 
 func newPodTrait() Trait {
 	return &podTrait{
-		BaseTrait: NewBaseTrait("pod", 1800),
+		BaseTrait: NewBaseTrait("pod", podTraitOrder),
 	}
 }
 
@@ -48,8 +50,8 @@ func (t *podTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !pointer.BoolDeref(t.Enabled, true) {
-		return false, NewIntegrationConditionUserDisabled(), nil
+	if !ptr.Deref(t.Enabled, true) {
+		return false, NewIntegrationConditionUserDisabled("Pod"), nil
 	}
 	if e.Integration.Spec.PodTemplate == nil {
 		return false, nil, nil

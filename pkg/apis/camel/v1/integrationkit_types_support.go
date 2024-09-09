@@ -18,8 +18,11 @@ limitations under the License.
 package v1
 
 import (
+	"fmt"
+	"path/filepath"
 	"strconv"
 
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -106,6 +109,23 @@ func (in *IntegrationKit) IsExternal() bool {
 	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeExternal
 }
 
+// Deprecated: synthetic Integration Kits are replaced by syntentic Integrations.
+// IsSynthetic returns true for synthetic IntegrationKits.
+func (in *IntegrationKit) IsSynthetic() bool {
+	return in.Labels[IntegrationKitTypeLabel] == IntegrationKitTypeSynthetic
+}
+
+// HasCapability returns true if the Kit is enabled with such a capability.
+func (in *IntegrationKit) HasCapability(capability string) bool {
+	for _, cap := range in.Spec.Capabilities {
+		if cap == capability {
+			return true
+		}
+	}
+
+	return false
+}
+
 // GetCondition returns the condition with the provided type.
 func (in *IntegrationKitStatus) GetCondition(condType IntegrationKitConditionType) *IntegrationKitCondition {
 	for i := range in.Conditions {
@@ -187,6 +207,17 @@ func (in *IntegrationKitStatus) GetConditions() []ResourceCondition {
 		res = append(res, c)
 	}
 	return res
+}
+
+// GetDependenciesPaths returns the set of dependency paths.
+func (in *IntegrationKitStatus) GetDependenciesPaths() *sets.Set {
+	s := sets.NewSet()
+	for _, dep := range in.Artifacts {
+		path := filepath.Dir(dep.Target)
+		s.Add(fmt.Sprintf("%s/*", path))
+	}
+
+	return s
 }
 
 func (c IntegrationKitCondition) GetType() string {

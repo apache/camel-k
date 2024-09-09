@@ -23,11 +23,18 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+)
+
+const (
+	jolokiaTraitID    = "jolokia"
+	jolokiaTraitOrder = 1800
+
+	defaultJolokiaPort = 8778
 )
 
 type jolokiaTrait struct {
@@ -37,15 +44,15 @@ type jolokiaTrait struct {
 
 func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
-		BaseTrait: NewBaseTrait("jolokia", 1800),
+		BaseTrait: NewBaseTrait(jolokiaTraitID, jolokiaTraitOrder),
 		JolokiaTrait: traitv1.JolokiaTrait{
-			Port: 8778,
+			Port: defaultJolokiaPort,
 		},
 	}
 }
 
 func (t *jolokiaTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, false) {
+	if e.Integration == nil || !ptr.Deref(t.Enabled, false) {
 		return false, nil, nil
 	}
 
@@ -120,6 +127,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 		}
 	}
 	container.Args = append(container.Args, "-javaagent:"+jolokiaFilepath+"="+strings.Join(optionValues, ","))
+	container.Args = append(container.Args, "-cp", jolokiaFilepath)
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",

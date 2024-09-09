@@ -20,13 +20,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
+	"os/exec"
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
@@ -38,68 +39,95 @@ import (
 )
 
 func TestRecreateDeploymentStrategyTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Run with Recreate Deployment Strategy", func(t *testing.T) {
+			name := RandomizedSuffixName("java")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "deployment.strategy="+string(appsv1.RecreateDeploymentStrategyType)).
+				Execute()).To(Succeed())
 
-	t.Run("Run with Recreate Deployment Strategy", func(t *testing.T) {
-		name := RandomizedSuffixName("java")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"--name", name,
-			"-t", "deployment.strategy="+string(appsv1.RecreateDeploymentStrategyType)).
-			Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-		Eventually(Deployment(ns, name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
-			Fields{
-				"Spec": MatchFields(IgnoreExtras,
-					Fields{
-						"Strategy": MatchFields(IgnoreExtras,
-							Fields{
-								"Type": Equal(appsv1.RecreateDeploymentStrategyType),
-							}),
-					}),
-			}),
-		))
-
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, name)()
-		deploymentTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "deployment")
-		Expect(deploymentTrait).ToNot(BeNil())
-		Expect(len(deploymentTrait)).To(Equal(1))
-		Expect(deploymentTrait["strategy"]).To(Equal(string(appsv1.RecreateDeploymentStrategyType)))
-
+			g.Eventually(Deployment(t, ctx, ns, name), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+				Fields{
+					"Spec": MatchFields(IgnoreExtras,
+						Fields{
+							"Strategy": MatchFields(IgnoreExtras,
+								Fields{
+									"Type": Equal(appsv1.RecreateDeploymentStrategyType),
+								}),
+						}),
+				}),
+			))
+		})
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }
 
 func TestRollingUpdateDeploymentStrategyTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Run with RollingUpdate Deployment Strategy", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "-t", "deployment.strategy="+string(appsv1.RollingUpdateDeploymentStrategyType)).
+				Execute()).To(Succeed())
 
-	t.Run("Run with RollingUpdate Deployment Strategy", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java",
-			"-t", "deployment.strategy="+string(appsv1.RollingUpdateDeploymentStrategyType)).
-			Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-		Eventually(IntegrationPodPhase(ns, "java"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, "java", v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, "java"), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-		Eventually(Deployment(ns, "java"), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
-			Fields{
-				"Spec": MatchFields(IgnoreExtras,
-					Fields{
-						"Strategy": MatchFields(IgnoreExtras,
-							Fields{
-								"Type": Equal(appsv1.RollingUpdateDeploymentStrategyType),
-							}),
-					}),
-			}),
-		))
+			g.Eventually(Deployment(t, ctx, ns, "java"), TestTimeoutMedium).Should(PointTo(MatchFields(IgnoreExtras,
+				Fields{
+					"Spec": MatchFields(IgnoreExtras,
+						Fields{
+							"Strategy": MatchFields(IgnoreExtras,
+								Fields{
+									"Type": Equal(appsv1.RollingUpdateDeploymentStrategyType),
+								}),
+						}),
+				}),
+			))
+		})
 	})
+}
 
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+func TestDeploymentFailureShouldReportIntegrationCondition(t *testing.T) {
+	t.Parallel()
+
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		nsRestr := "restr"
+		// Create restricted namespace
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"kubectl",
+				"create",
+				"ns",
+				nsRestr,
+			),
+		)
+		ExpectExecSucceed(t, g,
+			exec.Command(
+				"kubectl",
+				"label",
+				"--overwrite",
+				"ns",
+				nsRestr,
+				"pod-security.kubernetes.io/enforce=baseline",
+				"pod-security.kubernetes.io/enforce-version=latest",
+				"pod-security.kubernetes.io/enforce=restricted",
+				"pod-security.kubernetes.io/warn-version=latest",
+				"pod-security.kubernetes.io/audit=restricted",
+				"pod-security.kubernetes.io/audit-version=latest",
+			),
+		)
+		// Create an Integration into a restricted namespace
+		name := RandomizedSuffixName("java-fail")
+		g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-n", nsRestr).Execute()).To(Succeed())
+		// Check the error is reported into the Integration
+		g.Eventually(IntegrationPhase(t, ctx, nsRestr, name), TestTimeoutMedium).Should(Equal(v1.IntegrationPhaseError))
+		g.Eventually(IntegrationCondition(t, ctx, nsRestr, name, v1.IntegrationConditionReady)().Status).
+			Should(Equal(corev1.ConditionFalse))
+		g.Eventually(IntegrationCondition(t, ctx, nsRestr, name, v1.IntegrationConditionReady)().Message).
+			Should(ContainSubstring("is forbidden: violates PodSecurity"))
+	})
 }

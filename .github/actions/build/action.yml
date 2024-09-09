@@ -1,0 +1,92 @@
+# ---------------------------------------------------------------------------
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ---------------------------------------------------------------------------
+
+name: build
+description: Build and calculate coverage
+
+inputs:
+  artifact-name:
+    description: 'The name of the artifact to store coverage results'
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+
+  - name: Set up JDK 17
+    uses: actions/setup-java@v4
+    if: ${{ env.ENV_PREPARED != 'true' }}
+    with:
+      java-version: '17'
+      distribution: 'temurin'
+
+  - name: Set up Go
+    uses: actions/setup-go@v5
+    if: ${{ env.KAMEL_PREPARE_ENV != 'true' }}
+    with:
+      go-version-file: 'go.mod'
+      check-latest: true
+
+  - name: Test new branch
+    shell: bash
+    run: |
+      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out" make build
+
+  # Only run these on pull request events
+  - name: Save new coverage value
+    if: github.event_name == 'pull_request'
+    shell: bash
+    run: |
+      mkdir -p /tmp/${{ inputs.artifact-name }}
+      # Remove mock and generated code from account
+      grep -v "github.com/apache/camel-k/v2/pkg/client" coverage.out \
+        | grep -v "zz_generated" \
+        | grep -v "github.com/apache/camel-k/v2/addons/strimzi/duck/" \
+        | grep -v "github.com/apache/camel-k/v2/addons/keda/duck/" \
+        | grep -v "github.com/apache/camel-k/v2/cmd/util"  > coverage.mod.out
+      go tool cover -func=coverage.mod.out -o=coverage.mod.out
+      grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.mod.out | xargs > /tmp/${{ inputs.artifact-name }}/coverage_new
+      echo ${{ github.event.number }} > /tmp/${{ inputs.artifact-name }}/id
+
+  - name: Checkout target branch code
+    if: github.event_name == 'pull_request'
+    uses: actions/checkout@v4
+    with:
+      persist-credentials: false
+      submodules: recursive
+      ref: ${{ github.event.pull_request.base.ref }}
+
+  - name: Test and save target coverage value
+    if: github.event_name == 'pull_request'
+    shell: bash
+    run: |
+      COVERAGE_OPTS="-covermode=count -coverprofile=coverage.out" make build
+      # Remove mock and generated code from account
+      grep -v "github.com/apache/camel-k/v2/pkg/client" coverage.out \
+        | grep -v "zz_generated" \
+        | grep -v "github.com/apache/camel-k/v2/addons/strimzi/duck/" \
+        | grep -v "github.com/apache/camel-k/v2/addons/keda/duck/" \
+        | grep -v "github.com/apache/camel-k/v2/cmd/util"  > coverage.mod.out
+      go tool cover -func=coverage.mod.out -o=coverage.mod.out
+      grep -o -P '(?<=\(statements\))(.+)(?=%)' coverage.mod.out | xargs > /tmp/${{ inputs.artifact-name }}/coverage_old
+
+  - uses: actions/upload-artifact@v4
+    if: github.event_name == 'pull_request'
+    with:
+      name: ${{ inputs.artifact-name }}
+      path: /tmp/${{ inputs.artifact-name }}/

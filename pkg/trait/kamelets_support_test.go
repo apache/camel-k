@@ -23,13 +23,14 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestKameletBundleSingle(t *testing.T) {
 	kb := newKameletBundle()
 	kb.add(kamelet("my-ns", "test"))
 	cmBundle, err := kb.toConfigmaps("my-it", "my-ns")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cmBundle)
 	assert.Len(t, cmBundle, 1)
 	assert.Equal(t, "my-ns", cmBundle[0].Namespace)
@@ -47,7 +48,7 @@ func TestKameletBundleMultiKameletsSingleConfigmap(t *testing.T) {
 	kb.add(kamelet("default", "test5"))
 	kb.add(kamelet("default", "test6"))
 	cmBundle, err := kb.toConfigmaps("my-it", "default")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cmBundle)
 	assert.Len(t, cmBundle, 1)
 	assert.Equal(t, "default", cmBundle[0].Namespace)
@@ -68,7 +69,7 @@ func TestKameletBundleMultiKameletsMultiConfigmap(t *testing.T) {
 		kb.add(kamelet("default", fmt.Sprintf("test%d", i)))
 	}
 	cmBundle, err := kb.toConfigmaps("my-it", "default")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, cmBundle)
 	assert.Len(t, cmBundle, 2)
 	assert.Equal(t, "default", cmBundle[0].Namespace)
@@ -85,29 +86,31 @@ func TestKameletBundleMultiKameletsMultiConfigmap(t *testing.T) {
 func kamelet(ns, name string) *v1.Kamelet {
 	kamelet := v1.NewKamelet(ns, name)
 	kamelet.Spec = v1.KameletSpec{
-		Sources: []v1.SourceSpec{
-			{
-				DataSpec: v1.DataSpec{
-					Name: "mykamelet.groovy",
-					Content: `from("timer1").to("log:info")
-					from("timer2").to("log:info")
-					from("timer3").to("log:info")
-					from("timer4").to("log:info")
-					from("timer5").to("log:info")
-					from("timer6").to("log:info")
-					from("timer7").to("log:info")
-					from("timer8").to("log:info")
-					from("timer9").to("log:info")
-					from("timer10").to("log:info")
-					from("timer11").to("log:info")
-					from("timer12").to("log:info")
-					from("timer13").to("log:info")
-					from("timer14").to("log:info")
-					from("timer15").to("log:info")
-					from("timer16").to("log:info")
-					from("timer17").to("log:info")`,
+		KameletSpecBase: v1.KameletSpecBase{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name: "mykamelet.groovy",
+						Content: `from("timer1").to("log:info")
+						from("timer2").to("log:info")
+						from("timer3").to("log:info")
+						from("timer4").to("log:info")
+						from("timer5").to("log:info")
+						from("timer6").to("log:info")
+						from("timer7").to("log:info")
+						from("timer8").to("log:info")
+						from("timer9").to("log:info")
+						from("timer10").to("log:info")
+						from("timer11").to("log:info")
+						from("timer12").to("log:info")
+						from("timer13").to("log:info")
+						from("timer14").to("log:info")
+						from("timer15").to("log:info")
+						from("timer16").to("log:info")
+						from("timer17").to("log:info")`,
+					},
+					Type: v1.SourceTypeTemplate,
 				},
-				Type: v1.SourceTypeTemplate,
 			},
 		},
 	}

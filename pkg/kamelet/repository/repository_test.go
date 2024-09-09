@@ -102,9 +102,9 @@ func TestURIParse(t *testing.T) {
 		t.Run(fmt.Sprintf("%d-%s", i, test.uri), func(t *testing.T) {
 			catalog, err := newFromURI(context.Background(), test.uri)
 			if test.error {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				switch r := test.repository.(type) {
 				case *githubKameletRepository:
 					gc, ok := catalog.(*githubKameletRepository)
@@ -149,7 +149,7 @@ func TestNewRepositoryWithCamelKamelets(t *testing.T) {
 	require.NoError(t, err)
 	list, err := repo.List(ctx)
 	require.NoError(t, err)
-	assert.True(t, len(list) > 2)
+	assert.Greater(t, len(list), 2)
 	k1, err := repo.Get(ctx, "kamelet1")
 	require.NoError(t, err)
 	assert.Equal(t, "kamelet1", k1.Name)

@@ -35,12 +35,42 @@ import (
 
 	routev1 "github.com/openshift/api/route/v1"
 	olm "github.com/operator-framework/api/pkg/operators/v1alpha1"
+	eventingv1 "knative.dev/eventing/pkg/apis/eventing/v1"
+	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
+	"github.com/apache/camel-k/v2/pkg/util/knative"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 )
+
+// DumpClusterState prints informations about the cluster state
+func DumpClusterState(ctx context.Context, c client.Client, ns string, t *testing.T) error {
+	t.Logf("-------------------- start dumping cluster state --------------------\n")
+
+	nodes, err := c.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	for _, node := range nodes.Items {
+		nodeReady := false
+		nodeConditions := node.Status.Conditions
+		for _, condition := range nodeConditions {
+			if condition.Type == corev1.NodeReady && condition.Status == corev1.ConditionTrue {
+				nodeReady = true
+			}
+		}
+		t.Logf("node: Name='%s', Ready='%t'", node.ObjectMeta.Name, nodeReady)
+		if node.Spec.Taints != nil {
+			t.Logf("node taints: Taints='%s'", node.Spec.Taints)
+		}
+	}
+
+	t.Logf("-------------------- dumping cluster state --------------------\n")
+	return nil
+}
 
 // Dump prints all information about the given namespace to debug errors
 func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
@@ -202,6 +232,41 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		t.Logf("---\n%s\n---\n", string(pdata))
 	}
 
+	// Knative resources
+	if installed, _ := knative.IsEventingInstalled(c); installed {
+		var trgs eventingv1.TriggerList
+		err = c.List(ctx, &trgs)
+		if err != nil {
+			return err
+		}
+		t.Logf("Found %d Knative trigger:\n", len(trgs.Items))
+		for _, p := range trgs.Items {
+			ref := p
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
+		}
+	}
+
+	if installed, _ := knative.IsServingInstalled(c); installed {
+		var ksrvs servingv1.ServiceList
+		err = c.List(ctx, &ksrvs)
+		if err != nil {
+			return err
+		}
+		t.Logf("Found %d Knative services:\n", len(ksrvs.Items))
+		for _, p := range ksrvs.Items {
+			ref := p
+			pdata, err := kubernetes.ToYAMLNoManagedFields(&ref)
+			if err != nil {
+				return err
+			}
+			t.Logf("---\n%s\n---\n", string(pdata))
+		}
+	}
+
 	// CamelCatalogs
 	cats, err := camelClient.CamelV1().CamelCatalogs(ns).List(ctx, metav1.ListOptions{})
 	if err != nil {
@@ -255,10 +320,25 @@ func Dump(ctx context.Context, c client.Client, ns string, t *testing.T) error {
 		}
 	}
 
+	// Cronjobs
+	cronjobs, err := c.BatchV1().CronJobs(ns).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	t.Logf("\nFound %d cronjobs:\n", len(cronjobs.Items))
+	for _, cronjobs := range cronjobs.Items {
+		ref := cronjobs
+		data, err := kubernetes.ToYAMLNoManagedFields(&ref)
+		if err != nil {
+			return err
+		}
+		t.Logf("---\n%s\n---\n", string(data))
+	}
+
 	// OLM CSV
 	csvs := olm.ClusterServiceVersionList{}
 	err = c.List(ctx, &csvs, ctrl.InNamespace(ns))
-	if err != nil {
+	if err != nil && !kubernetes.IsUnknownAPIError(err) {
 		return err
 	}
 	t.Logf("\nFound %d OLM CSVs:\n", len(csvs.Items))

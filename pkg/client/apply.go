@@ -19,6 +19,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -31,7 +32,6 @@ import (
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -78,12 +78,17 @@ func (a *ServerOrClientSideApplier) Apply(ctx context.Context, object ctrl.Objec
 	return nil
 }
 
-func (a *ServerOrClientSideApplier) serverSideApply(ctx context.Context, resource runtime.Object) error {
+func (a *ServerOrClientSideApplier) serverSideApply(ctx context.Context, resource ctrl.Object) error {
 	target, err := patch.ApplyPatch(resource)
 	if err != nil {
 		return err
 	}
-	return a.Client.Patch(ctx, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator"))
+	if err = a.Client.Patch(ctx, target, ctrl.Apply, ctrl.ForceOwnership, ctrl.FieldOwner("camel-k-operator")); err != nil {
+		return fmt.Errorf("error during apply resource: %s/%s: %w", resource.GetNamespace(), resource.GetName(), err)
+	}
+
+	// Update the resource with the response returned from the API server
+	return unstructuredToRuntimeObject(target, resource)
 }
 
 func (a *ServerOrClientSideApplier) clientSideApply(ctx context.Context, resource ctrl.Object) error {
@@ -105,7 +110,8 @@ func (a *ServerOrClientSideApplier) clientSideApply(ctx context.Context, resourc
 	if err != nil {
 		return err
 	} else if len(p) == 0 {
-		return nil
+		// Update the resource with the object returned from the API server
+		return unstructuredToRuntimeObject(object, resource)
 	}
 	return a.Client.Patch(ctx, resource, ctrl.RawPatch(types.MergePatchType, p))
 }
@@ -123,4 +129,12 @@ func isIncompatibleServerError(err error) bool {
 	}
 	// Non-StatusError means the error isn't because the server is incompatible.
 	return false
+}
+
+func unstructuredToRuntimeObject(u *unstructured.Unstructured, obj ctrl.Object) error {
+	data, err := json.Marshal(u)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, obj)
 }

@@ -19,6 +19,7 @@ package v1
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -27,6 +28,9 @@ import (
 
 // IntegrationLabel is used to tag k8s object created by a given Integration.
 const IntegrationLabel = "camel.apache.org/integration"
+
+// IntegrationGenerationLabel is used to check on outdated integration resources that can be removed by garbage collection.
+const IntegrationGenerationLabel = "camel.apache.org/generation"
 
 // IntegrationSyntheticLabel is used to tag k8s synthetic Integrations.
 const IntegrationSyntheticLabel = "camel.apache.org/is-synthetic"
@@ -85,6 +89,15 @@ func (in *Integration) UserDefinedSources() []SourceSpec {
 	return sources
 }
 
+// IsManagedBuild returns true when the Integration requires to be built by the operator.
+func (in *Integration) IsManagedBuild() bool {
+	if in.Spec.Traits.Container == nil || in.Spec.Traits.Container.Image == "" {
+		return true
+	}
+	isManagedBuild, err := regexp.MatchString("(.*)/(.*)/camel-k-kit-(.*)@sha256:(.*)", in.Spec.Traits.Container.Image)
+	return err == nil && isManagedBuild
+}
+
 func (in *IntegrationSpec) AddSource(name string, content string, language Language) {
 	in.Sources = append(in.Sources, NewSourceSpec(name, content, language))
 }
@@ -114,6 +127,11 @@ func (in *IntegrationSpec) AddDependency(dependency string) {
 		}
 	}
 	in.Dependencies = append(in.Dependencies, dependency)
+}
+
+// AddConfigurationProperty adds a new configuration property.
+func (in *IntegrationSpec) AddConfigurationProperty(confValue string) {
+	in.AddConfiguration("property", confValue)
 }
 
 // GetConfigurationProperty returns a configuration property.
@@ -153,21 +171,6 @@ func (in *IntegrationStatus) AddOrReplaceGeneratedSources(sources ...SourceSpec)
 	}
 
 	in.GeneratedSources = append(in.GeneratedSources, newSources...)
-}
-
-func (in *IntegrationStatus) AddConfigurationsIfMissing(configurations ...ConfigurationSpec) {
-	for _, config := range configurations {
-		alreadyPresent := false
-		for _, r := range in.Configuration {
-			if r.Type == config.Type && r.Value == config.Value {
-				alreadyPresent = true
-				break
-			}
-		}
-		if !alreadyPresent {
-			in.Configuration = append(in.Configuration, config)
-		}
-	}
 }
 
 func (in *IntegrationSpec) Configurations() []ConfigurationSpec {

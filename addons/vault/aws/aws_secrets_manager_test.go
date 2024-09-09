@@ -20,17 +20,20 @@ package aws
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	corev1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -38,47 +41,47 @@ func TestAwsSecretsManagerTraitApply(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
-	secrets.UseDefaultCredentialsProvider = pointer.Bool(false)
+	secrets.Enabled = ptr.To(true)
+	secrets.UseDefaultCredentialsProvider = ptr.To(false)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "access-key"
 	secrets.SecretKey = "secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
@@ -102,23 +105,23 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "secret:my-secret2/aws-access-key"
 	secrets.SecretKey = "secret:my-secret1/aws-secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "my-access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "my-secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
@@ -142,23 +145,23 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 
 	aws := NewAwsSecretsManagerTrait()
 	secrets, _ := aws.(*awsSecretsManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
+	secrets.Enabled = ptr.To(true)
 	secrets.Region = "eu-west-1"
 	secrets.AccessKey = "configmap:my-configmap2/aws-access-key"
 	secrets.SecretKey = "configmap:my-configmap1/aws-secret-key"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Empty(t, e.ApplicationProperties["quarkus.jaeger.enabled"])
 	assert.Equal(t, "eu-west-1", e.ApplicationProperties["camel.vault.aws.region"])
 	assert.Equal(t, "my-access-key", e.ApplicationProperties["camel.vault.aws.accessKey"])
 	assert.Equal(t, "my-secret-key", e.ApplicationProperties["camel.vault.aws.secretKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.aws.defaultCredentialsProvider"])
 }
 
 func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error), objects ...runtime.Object) *trait.Environment {
@@ -166,7 +169,7 @@ func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, e
 
 	catalog, err := catalogGen()
 	client, _ := test.NewFakeClient(objects...)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,

@@ -20,15 +20,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -36,64 +36,51 @@ import (
 )
 
 func TestPullSecretTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		ocp, err := openshift.IsOpenShift(TestClient(t))
+		g.Expect(err).To(BeNil())
 
-	ocp, err := openshift.IsOpenShift(TestClient())
-	Expect(err).To(BeNil())
+		t.Run("Image pull secret is set on pod", func(t *testing.T) {
+			name := RandomizedSuffixName("java1")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "pull-secret.enabled=true", "-t", "pull-secret.secret-name=dummy-secret").Execute()).To(Succeed())
+			// pod may not run because the pull secret is dummy
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Or(Equal(corev1.PodRunning), Equal(corev1.PodPending)))
 
-	t.Run("Image pull secret is set on pod", func(t *testing.T) {
-		name := RandomizedSuffixName("java1")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-			"-t", "pull-secret.enabled=true",
-			"-t", "pull-secret.secret-name=dummy-secret").Execute()).To(Succeed())
-		// pod may not run because the pull secret is dummy
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Or(Equal(corev1.PodRunning), Equal(corev1.PodPending)))
+			pod := IntegrationPod(t, ctx, ns, name)()
+			g.Expect(pod.Spec.ImagePullSecrets).NotTo(BeEmpty())
+			g.Expect(pod.Spec.ImagePullSecrets[0].Name).To(Equal("dummy-secret"))
+		})
 
-		pod := IntegrationPod(ns, name)()
-		Expect(pod.Spec.ImagePullSecrets).NotTo(BeEmpty())
-		Expect(pod.Spec.ImagePullSecrets[0].Name).To(Equal("dummy-secret"))
-	})
+		t.Run("Explicitly disable image pull secret", func(t *testing.T) {
+			name := RandomizedSuffixName("java2")
+			g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name, "-t", "pull-secret.enabled=false").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
 
-	t.Run("Explicitly disable image pull secret", func(t *testing.T) {
-		name := RandomizedSuffixName("java2")
-		Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name,
-			"-t", "pull-secret.enabled=false").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+			pod := IntegrationPod(t, ctx, ns, name)()
+			if ocp {
+				// OpenShift `default` service account has imagePullSecrets so it's always set
+				g.Expect(pod.Spec.ImagePullSecrets).NotTo(BeEmpty())
+			} else {
+				g.Expect(pod.Spec.ImagePullSecrets).To(BeNil())
+			}
+		})
 
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, name)).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, name)()
-		pullSecretTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "pull-secret")
-		Expect(pullSecretTrait).ToNot(BeNil())
-		Expect(len(pullSecretTrait)).To(Equal(1))
-		Expect(pullSecretTrait["enabled"]).To(Equal(false))
-
-		pod := IntegrationPod(ns, name)()
 		if ocp {
-			// OpenShift `default` service account has imagePullSecrets so it's always set
-			Expect(pod.Spec.ImagePullSecrets).NotTo(BeEmpty())
-		} else {
-			Expect(pod.Spec.ImagePullSecrets).To(BeNil())
+			// OpenShift always has an internal registry so image pull secret is set by default
+			t.Run("Image pull secret is automatically set by default", func(t *testing.T) {
+				name := RandomizedSuffixName("java3")
+				g.Expect(KamelRun(t, ctx, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+				g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
+
+				pod := IntegrationPod(t, ctx, ns, name)()
+				g.Expect(pod.Spec.ImagePullSecrets).NotTo(BeEmpty())
+				g.Expect(pod.Spec.ImagePullSecrets[0].Name).To(HavePrefix("default-dockercfg-"))
+			})
 		}
 	})
-
-	if ocp {
-		// OpenShift always has an internal registry so image pull secret is set by default
-		t.Run("Image pull secret is automatically set by default", func(t *testing.T) {
-			name := RandomizedSuffixName("java3")
-			Expect(KamelRunWithID(operatorID, ns, "files/Java.java", "--name", name).Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-			Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Magicstring!"))
-
-			pod := IntegrationPod(ns, name)()
-			Expect(pod.Spec.ImagePullSecrets).NotTo(BeEmpty())
-			Expect(pod.Spec.ImagePullSecrets[0].Name).To(HavePrefix("default-dockercfg-"))
-		})
-	}
-
-	// Clean-up
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

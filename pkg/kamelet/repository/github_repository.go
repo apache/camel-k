@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	neturl "net/url"
 	"os"
 	"sort"
 	"strings"
@@ -112,12 +113,20 @@ func (c *githubKameletRepository) listFiles(ctx context.Context) ([]*github.Repo
 }
 
 func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url string) (*v1.Kamelet, error) {
+	return downloadGithubKamelet(ctx, url, c.httpClient)
+}
+
+func downloadGithubKamelet(ctx context.Context, url string, httpClient *http.Client) (*v1.Kamelet, error) {
+	parsedURL, err := neturl.Parse(url)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +140,7 @@ func (c *githubKameletRepository) downloadKamelet(ctx context.Context, url strin
 	if err != nil {
 		return nil, err
 	}
-	if strings.HasSuffix(url, ".yaml") || strings.HasSuffix(url, ".yml") {
+	if strings.HasSuffix(parsedURL.Path, ".yaml") || strings.HasSuffix(parsedURL.Path, ".yml") {
 		content, err = yaml.ToJSON(content)
 		if err != nil {
 			return nil, err

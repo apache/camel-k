@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -212,6 +213,8 @@ func addRegistryMavenDependency(project *maven.Project, dependency string) error
 	}
 	plugin := getOrCreateBuildPlugin(project, "com.googlecode.maven-download-plugin", "download-maven-plugin", "1.6.8")
 	outputDirectory := "../context"
+
+	//nolint:mnd
 	isClasspath := len(mapping) == 3 && mapping[2] == "classpath"
 	if isClasspath {
 		outputDirectory = "src/main/resources"
@@ -226,7 +229,7 @@ func addRegistryMavenDependency(project *maven.Project, dependency string) error
 	properties.Add("type", gav.Type)
 
 	exec := maven.Execution{
-		ID:    fmt.Sprint(len(plugin.Executions)),
+		ID:    strconv.Itoa(len(plugin.Executions)),
 		Phase: "validate",
 		Goals: []string{
 			"artifact",
@@ -342,7 +345,7 @@ func postProcessDependencies(project *maven.Project, catalog *RuntimeCatalog) {
 
 // SanitizeIntegrationDependencies --.
 func SanitizeIntegrationDependencies(dependencies []maven.Dependency) error {
-	for i := 0; i < len(dependencies); i++ {
+	for i := range len(dependencies) {
 		dep := dependencies[i]
 
 		// It may be externalized into runtime provider specific steps

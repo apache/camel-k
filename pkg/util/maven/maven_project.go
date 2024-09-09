@@ -47,14 +47,14 @@ func NewProjectWithGAV(group string, artifact string, version string) Project {
 	return p
 }
 
-func (p Project) Command(context Context) *Command {
+func (p *Project) Command(context Context) *Command {
 	return &Command{
 		context: context,
-		project: p,
+		project: *p,
 	}
 }
 
-func (p Project) MarshalBytes() ([]byte, error) {
+func (p *Project) MarshalBytes() ([]byte, error) {
 	w := &bytes.Buffer{}
 	w.WriteString(xml.Header)
 

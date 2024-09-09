@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,20 +35,15 @@ import (
 )
 
 func TestErrorHandlerTrait(t *testing.T) {
-	RegisterTestingT(t)
-
-	t.Run("Run errored integration with error handler", func(t *testing.T) {
-		name := RandomizedSuffixName("error-handler")
-		Expect(KamelRunWithID(operatorID, ns, "files/ErroredRoute.java",
-			"--name", name,
-			"-t", "error-handler.enabled=true",
-			"-t", "error-handler.ref=defaultErrorHandler",
-			"-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder",
-			"-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false",
-		).Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).ShouldNot(ContainSubstring("InvalidPayloadException"))
-		Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("my-special-error-handler-in-place"))
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("Run errored integration with error handler", func(t *testing.T) {
+			name := RandomizedSuffixName("error-handler")
+			g.Expect(KamelRun(t, ctx, ns, "files/ErroredRoute.java", "--name", name, "-t", "error-handler.enabled=true", "-t", "error-handler.ref=defaultErrorHandler", "-p", "camel.beans.defaultErrorHandler=#class:org.apache.camel.builder.DeadLetterChannelBuilder", "-p", "camel.beans.defaultErrorHandler.deadLetterUri=log:my-special-error-handler-in-place?level=ERROR&showCaughtException=false&showBody=false&showBodyType=false&showExchangePattern=false").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).ShouldNot(ContainSubstring("InvalidPayloadException"))
+			g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("my-special-error-handler-in-place"))
+		})
 	})
 }

@@ -30,13 +30,11 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/client"
-	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
 	p "github.com/gertd/go-pluralize"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -59,13 +57,13 @@ func DeleteIntegration(ctx context.Context, c client.Client, name string, namesp
 	return c.Delete(ctx, &integration)
 }
 
-func bindPFlagsHierarchy(cmd *cobra.Command) error {
+func bindPFlagsHierarchy(cmd *cobra.Command, v *viper.Viper) error {
 	for _, c := range cmd.Commands() {
-		if err := bindPFlags(c); err != nil {
+		if err := bindPFlags(c, v); err != nil {
 			return err
 		}
 
-		if err := bindPFlagsHierarchy(c); err != nil {
+		if err := bindPFlagsHierarchy(c, v); err != nil {
 			return err
 		}
 	}
@@ -73,7 +71,7 @@ func bindPFlagsHierarchy(cmd *cobra.Command) error {
 	return nil
 }
 
-func bindPFlags(cmd *cobra.Command) error {
+func bindPFlags(cmd *cobra.Command, v *viper.Viper) error {
 	prefix := pathToRoot(cmd)
 	pl := p.NewClient()
 
@@ -82,16 +80,16 @@ func bindPFlags(cmd *cobra.Command) error {
 		name = strings.ReplaceAll(name, "_", "-")
 		name = strings.ReplaceAll(name, ".", "-")
 
-		if err := viper.BindPFlag(prefix+"."+name, flag); err != nil {
+		if err := v.BindPFlag(prefix+"."+name, flag); err != nil {
 			log.Printf("error binding flag %s with prefix %s to viper: %v", flag.Name, prefix, err)
 		}
 
-		// this is a little bit of an hack to register plural version of properties
+		// this is a little bit of a hack to register plural version of properties
 		// based on the naming conventions used by the flag type because it is not
-		// possible to know what is the type of a flag
+		// possible to know what is the type of the flag
 		flagType := strings.ToUpper(flag.Value.Type())
 		if strings.Contains(flagType, "SLICE") || strings.Contains(flagType, "ARRAY") {
-			if err := viper.BindPFlag(prefix+"."+pl.Plural(name), flag); err != nil {
+			if err := v.BindPFlag(prefix+"."+pl.Plural(name), flag); err != nil {
 				log.Printf("error binding plural flag %s with prefix %s to viper: %v", flag.Name, prefix, err)
 			}
 		}
@@ -113,9 +111,8 @@ func pathToRoot(cmd *cobra.Command) string {
 	return path
 }
 
-func decodeKey(target interface{}, key string) error {
+func decodeKey(target interface{}, key string, settings map[string]any) error {
 	nodes := strings.Split(key, ".")
-	settings := viper.AllSettings()
 
 	for _, node := range nodes {
 		v := settings[node]
@@ -154,10 +151,10 @@ func decodeKey(target interface{}, key string) error {
 	return nil
 }
 
-func decode(target interface{}) func(*cobra.Command, []string) error {
+func decode(target interface{}, v *viper.Viper) func(*cobra.Command, []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		path := pathToRoot(cmd)
-		if err := decodeKey(target, path); err != nil {
+		if err := decodeKey(target, path, v.AllSettings()); err != nil {
 			return err
 		}
 
@@ -222,7 +219,7 @@ func clone(dst interface{}, src interface{}) error {
 func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.StructField, bool) {
 	pl := p.NewClient()
 
-	for i := 0; i < target.Type().NumField(); i++ {
+	for i := range target.Type().NumField() {
 		f := target.Type().Field(i)
 
 		tag, ok := f.Tag.Lookup(MapstructureTagName)
@@ -238,18 +235,4 @@ func fieldByMapstructureTagName(target reflect.Value, tagName string) (reflect.S
 	}
 
 	return reflect.StructField{}, false
-}
-
-func verifyOperatorID(ctx context.Context, client client.Client, operatorID string) error {
-	if pl, err := platformutil.LookupForPlatformName(ctx, client, operatorID); err != nil {
-		if k8serrors.IsForbidden(err) {
-			return nil
-		}
-
-		return err
-	} else if pl == nil {
-		return fmt.Errorf("unable to find operator with given id [%s] - resource may not be reconciled and get stuck in waiting state", operatorID)
-	}
-
-	return nil
 }

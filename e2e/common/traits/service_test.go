@@ -20,102 +20,80 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
 
 func TestServiceTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		t.Run("NodePort service", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true",
+				"-t", "service.node-port=true").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-	t.Run("NodePort service", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
-			"-t", "service.enabled=true",
-			"-t", "service.node-port=true").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
+		})
 
-		//
-		// Service names can vary with the ExternalName Service
-		// sometimes being created first and being given the root name
-		//
-		Eventually(ServicesByType(ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
+		t.Run("Default service (ClusterIP)", func(t *testing.T) {
+			// Service trait is enabled by default
+			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
+		})
 
-	t.Run("Default service (ClusterIP)", func(t *testing.T) {
-		// Service trait is enabled by default
-		Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+		t.Run("NodePort service from Type", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true",
+				"-t", "service.type=NodePort").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		//
-		// Service names can vary with the ExternalName Service
-		// sometimes being created first and being given the root name
-		//
-		Eventually(ServicesByType(ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
+		})
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
+		t.Run("ClusterIP service from Type", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java",
+				"-t", "service.enabled=true", "-t", "service.type=ClusterIP").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-	t.Run("NodePort service from Type", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
-			"-t", "service.enabled=true",
-			"-t", "service.type=NodePort").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
+		})
 
-		//
-		// Service names can vary with the ExternalName Service
-		// sometimes being created first and being given the root name
-		//
-		Eventually(ServicesByType(ns, corev1.ServiceTypeNodePort), TestTimeoutLong).ShouldNot(BeEmpty())
+		t.Run("LoadBalancer service from Type", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=true",
+				"-t", "service.type=LoadBalancer").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
 
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-
-	t.Run("ClusterIP service from Type", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
-			"-t", "service.enabled=true",
-			"-t", "service.type=ClusterIP").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-
-		//
-		// Service names can vary with the ExternalName Service
-		// sometimes being created first and being given the root name
-		//
-		Eventually(ServicesByType(ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
-
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, "platform-http-server")).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, "platform-http-server")()
-		serviceTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "service")
-		Expect(serviceTrait).ToNot(BeNil())
-		Expect(len(serviceTrait)).To(Equal(2))
-		Expect(serviceTrait["enabled"]).To(Equal(true))
-		Expect(serviceTrait["type"]).To(Equal("ClusterIP"))
-
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-	})
-
-	t.Run("LoadBalancer service from Type", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/PlatformHttpServer.java",
-			"-t", "service.enabled=true",
-			"-t", "service.type=LoadBalancer").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-
-		//
-		// Service names can vary with the ExternalName Service
-		// sometimes being created first and being given the root name
-		//
-		Eventually(ServicesByType(ns, corev1.ServiceTypeLoadBalancer), TestTimeoutLong).ShouldNot(BeEmpty())
-
-		Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+			//
+			// Service names can vary with the ExternalName Service
+			// sometimes being created first and being given the root name
+			//
+			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeLoadBalancer), TestTimeoutLong).ShouldNot(BeEmpty())
+		})
 	})
 }

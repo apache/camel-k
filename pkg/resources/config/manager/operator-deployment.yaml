@@ -25,7 +25,7 @@ metadata:
     name: camel-k-operator
     app.kubernetes.io/component: operator
     app.kubernetes.io/name: camel-k
-    app.kubernetes.io/version: "2.3.0-SNAPSHOT"
+    app.kubernetes.io/version: "2.5.0-SNAPSHOT"
 spec:
   replicas: 1
   strategy:
@@ -41,12 +41,12 @@ spec:
         app: "camel-k"
         app.kubernetes.io/component: operator
         app.kubernetes.io/name: camel-k
-        app.kubernetes.io/version: "2.3.0-SNAPSHOT"
+        app.kubernetes.io/version: "2.5.0-SNAPSHOT"
     spec:
       serviceAccountName: camel-k-operator
       containers:
         - name: camel-k-operator
-          image: docker.io/apache/camel-k:2.3.0-SNAPSHOT
+          image: docker.io/apache/camel-k:2.5.0-SNAPSHOT
           imagePullPolicy: IfNotPresent
           command:
             - kamel
@@ -72,15 +72,19 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            # Change to true to be able to create synthetic Integrations
-            - name: CAMEL_K_SYNTHETIC_INTEGRATIONS
-              value: "false"
           livenessProbe:
             httpGet:
               path: /healthz
               port: 8081
             initialDelaySeconds: 20
             periodSeconds: 10
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "8Gi"
+              cpu: "2"
           securityContext:
             runAsNonRoot: true
             seccompProfile:
@@ -89,4 +93,3 @@ spec:
             capabilities:
               drop:
               - ALL
-

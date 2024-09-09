@@ -9,11 +9,9 @@ from("imap://admin@myserver.com")
   .to("seda:output")
 ```
 
-Since the integration has a endpoint starting with the **"imap:" prefix**, Camel K is able to **automatically add the "camel-mail" component** to the list of required dependencies.
-The `seda:` endpoint belongs to `camel-core` that is automatically added to all integrations, so Camel K will not add additional dependencies for it.
-This dependency resolution mechanism is transparent to the user, that will just see the integration running.
+Since the integration has a endpoint starting with the **"imap:" prefix**, Camel K is able to **automatically add the "camel-mail" component** to the list of required dependencies. The `seda:` endpoint belongs to `camel-core` that is automatically added to all integrations, so Camel K will not add additional dependencies for it. This dependency resolution mechanism is transparent to the user, that will just see the integration running.
 
-Automatic resolution is also a nice feature in xref:running/dev-mode.adoc[dev mode], because you are allowed to add all components you need *without exiting the dev loop*.
+Automatic resolution is also a nice feature in _dev mode_, because you are allowed to add all components you need *without exiting the dev loop*.
 
 NOTE: Camel K won't be able to resolve automatically the dependencies when your routes specify dynamic URIs.
 
@@ -73,37 +71,6 @@ Please do not use one of the reserved the Camel groupIds (`org.apache.camel`) in
 kamel run -d mvn:com.google.guava:guava:26.0-jre Integration.java
 ```
 Note that if your dependencies belong to a private repository, this repository needs to be defined. See xref:installation/advanced/maven.adoc[Configure maven].
-
-[[local-remote-dependencies]]
-=== Local and remote dependencies
-
-*Local dependencies* can be added using the `-d` flag and the `file://` prefix:
-```
-kamel run -d file://path/to/integration-dep.jar Integration.java
-```
-
-You can also specify data files and directories which will be mounted in the running container relative to the working directory:
-
-```
-kamel run -d file://path/to/data.csv?targetPath=/in/container/data.csv Integration.java
-```
-
-If the data files needs to be present at build time, you can also set `classpath` option to `true`:
-
-```
-kamel run -d file://path/to/data.csv?targetPath=/in/container/data.csv&classpath=true Integration.java
-```
-
-Similarly, *remote dependencies* can be added with the `http(s)://` prefix:
-
-```
-kamel run -d https://raw.githubusercontent.com/example/data.csv|targetPath=/tmp/foo&classpath=true Integration.java
-```
-
-For a full list of options checkout `kamel run --help`.
-
-
-*Important note*: this will upload the dependencies and data files to the Image Registry. The CLI  and Operator need to be setup xref:cli/cli.adoc[correctly], especially if authentication or custom certificates are required.
 
 [[dependencies-kind-jitpack]]
 === Jitpack dependencies

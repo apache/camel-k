@@ -30,8 +30,6 @@ import (
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"go.uber.org/multierr"
 
 	corev1 "k8s.io/api/core/v1"
@@ -61,10 +59,11 @@ func newCmdInstall(rootCmdOptions *RootCmdOptions) (*cobra.Command, *installCmdO
 		RootCmdOptions: rootCmdOptions,
 	}
 	cmd := cobra.Command{
-		Use:     installCommand,
-		Short:   "Install Camel K on a Kubernetes cluster",
-		Long:    `Install Camel K on a Kubernetes or OpenShift cluster.`,
-		PreRunE: options.decode,
+		Use:        installCommand,
+		Short:      "Install Camel K on a Kubernetes cluster",
+		Long:       `Install Camel K on a Kubernetes or OpenShift cluster.`,
+		Deprecated: "consider using Kustomize, Helm or OLM (see https://camel.apache.org/camel-k/next/installation/installation.html)",
+		PreRunE:    options.decode,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err
@@ -277,7 +276,7 @@ func (o *installCmdOptions) tryInstallViaOLM(
 	if err != nil {
 		return false, err
 	}
-	if olmAvailable, err := olm.IsAPIAvailable(o.Context, olmClient, o.Namespace); err != nil {
+	if olmAvailable, err := olm.IsAPIAvailable(olmClient); err != nil {
 		return false, fmt.Errorf("error while checking OLM availability. Run with '--olm=false' to skip this check: %w", err)
 
 	} else if !olmAvailable {
@@ -313,7 +312,14 @@ func (o *installCmdOptions) tryInstallViaOLM(
 }
 
 func (o *installCmdOptions) installOperator(cmd *cobra.Command, output *kubernetes.Collection, olm bool) error {
-	operatorID, err := getOperatorID(o.EnvVars)
+	var operatorID string
+	var err error
+	if o.OperatorID != "" {
+		operatorID = o.OperatorID
+	} else {
+		operatorID, err = getOperatorID(o.EnvVars)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -370,15 +376,14 @@ func (o *installCmdOptions) installOperator(cmd *cobra.Command, output *kubernet
 		}
 	}
 
-	strategy := ""
+	message := "Camel K installed in namespace " + namespace
 	if olm {
-		strategy = "via OLM subscription"
+		message += " via OLM subscription"
 	}
 	if o.Global {
-		fmt.Fprintln(cmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy, "(global mode)")
-	} else {
-		fmt.Fprintln(cmd.OutOrStdout(), "Camel K installed in namespace", namespace, strategy)
+		message += " (global mode)"
 	}
+	fmt.Fprintln(cmd.OutOrStdout(), message)
 
 	return nil
 }
@@ -630,7 +635,7 @@ func (o *installCmdOptions) printOutput(cmd *cobra.Command, collection *kubernet
 	return nil
 }
 
-// nolint:errcheck
+//nolint:errcheck
 func (o *installCmdOptions) waitForPlatformReady(cmd *cobra.Command, platform *v1.IntegrationPlatform) error {
 	c, err := o.GetCmdClient()
 	if err != nil {
@@ -669,25 +674,26 @@ func (o *installCmdOptions) postRun(cmd *cobra.Command, _ []string) error {
 
 func (o *installCmdOptions) decode(cmd *cobra.Command, _ []string) error {
 	path := pathToRoot(cmd)
-	if err := decodeKey(o, path); err != nil {
+
+	if err := decodeKey(o, path, o.Flags.AllSettings()); err != nil {
 		return err
 	}
 
-	o.registry.Address = viper.GetString(path + ".registry")
-	o.registry.Organization = viper.GetString(path + ".organization")
-	o.registry.Secret = viper.GetString(path + ".registry-secret")
-	o.registry.Insecure = viper.GetBool(path + ".registry-insecure")
-	o.registryAuth.Username = viper.GetString(path + ".registry-auth-username")
-	o.registryAuth.Password = viper.GetString(path + ".registry-auth-password")
-	o.registryAuth.Server = viper.GetString(path + ".registry-auth-server")
+	o.registry.Address = o.Flags.GetString(path + ".registry")
+	o.registry.Organization = o.Flags.GetString(path + ".organization")
+	o.registry.Secret = o.Flags.GetString(path + ".registry-secret")
+	o.registry.Insecure = o.Flags.GetBool(path + ".registry-insecure")
+	o.registryAuth.Username = o.Flags.GetString(path + ".registry-auth-username")
+	o.registryAuth.Password = o.Flags.GetString(path + ".registry-auth-password")
+	o.registryAuth.Server = o.Flags.GetString(path + ".registry-auth-server")
 
-	o.olmOptions.OperatorName = viper.GetString(path + ".olm-operator-name")
-	o.olmOptions.Package = viper.GetString(path + ".olm-package")
-	o.olmOptions.Channel = viper.GetString(path + ".olm-channel")
-	o.olmOptions.Source = viper.GetString(path + ".olm-source")
-	o.olmOptions.SourceNamespace = viper.GetString(path + ".olm-source-namespace")
-	o.olmOptions.StartingCSV = viper.GetString(path + ".olm-starting-csv")
-	o.olmOptions.GlobalNamespace = viper.GetString(path + ".olm-global-namespace")
+	o.olmOptions.OperatorName = o.Flags.GetString(path + ".olm-operator-name")
+	o.olmOptions.Package = o.Flags.GetString(path + ".olm-package")
+	o.olmOptions.Channel = o.Flags.GetString(path + ".olm-channel")
+	o.olmOptions.Source = o.Flags.GetString(path + ".olm-source")
+	o.olmOptions.SourceNamespace = o.Flags.GetString(path + ".olm-source-namespace")
+	o.olmOptions.StartingCSV = o.Flags.GetString(path + ".olm-starting-csv")
+	o.olmOptions.GlobalNamespace = o.Flags.GetString(path + ".olm-global-namespace")
 
 	return nil
 }
@@ -783,10 +789,6 @@ func (o *installCmdOptions) validate(_ *cobra.Command, _ []string) error {
 	}
 
 	return result
-}
-
-func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
-	return v1.DecodeValueSource(mavenSettings, "settings.xml", "illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
 }
 
 func decodeSecretKeySelector(secretKey string) (*corev1.SecretKeySelector, error) {

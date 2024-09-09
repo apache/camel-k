@@ -21,11 +21,12 @@ import (
 	"fmt"
 	"strings"
 
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/trait"
@@ -76,63 +77,53 @@ func NewMasterTrait() trait.Trait {
 }
 
 const (
-	masterComponent = "master"
-)
-
-var (
-	leaseResourceType     = "Lease"
-	configMapResourceType = "ConfigMap"
+	masterComponent   = "master"
+	leaseResourceType = "Lease"
 )
 
 func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitCondition, error) {
-	if e.Integration == nil || !pointer.BoolDeref(t.Enabled, true) {
+	if e.Integration == nil {
 		return false, nil, nil
 	}
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
+	if !ptr.Deref(t.Enabled, true) {
+		return false, trait.NewIntegrationConditionUserDisabled(masterComponent), nil
+	}
+	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization, v1.IntegrationPhaseBuildingKit) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if pointer.BoolDeref(t.Auto, true) {
-		// Check if the master component has been used
-		sources, err := kubernetes.ResolveIntegrationSources(e.Ctx, t.Client, e.Integration, e.Resources)
-		if err != nil {
-			return false, nil, err
-		}
+	if !ptr.Deref(t.Auto, true) {
+		return ptr.Deref(t.Enabled, false), nil, nil
+	}
 
-		meta, err := metadata.ExtractAll(e.CamelCatalog, sources)
-		if err != nil {
-			return false, nil, err
-		}
-
-		if t.Enabled == nil {
-			for _, endpoint := range meta.FromURIs {
-				if uri.GetComponent(endpoint) == masterComponent {
-					enabled := true
-					t.Enabled = &enabled
-				}
+	enabled, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		found := false
+	loop:
+		for _, endpoint := range meta.FromURIs {
+			if uri.GetComponent(endpoint) == masterComponent {
+				found = true
+				break loop
 			}
 		}
-		if !pointer.BoolDeref(t.Enabled, false) {
-			return false, trait.NewIntegrationConditionUserDisabled(), nil
-		}
-		if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
-			t.delegateDependencies = findAdditionalDependencies(e, meta)
+		if found {
+			if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
+				t.delegateDependencies = findAdditionalDependencies(e, meta)
+			}
 		}
 
+		return found
+	})
+
+	if err != nil {
+		return false, nil, err
+	}
+	if enabled {
 		if t.ResourceName == nil {
-			val := fmt.Sprintf("%s-lock", e.Integration.Name)
+			val := e.Integration.Name + "-lock"
 			t.ResourceName = &val
 		}
 
 		if t.ResourceType == nil {
-			canUseLeases, err := t.canUseLeases(e)
-			if err != nil {
-				return false, nil, err
-			}
-			if canUseLeases {
-				t.ResourceType = &leaseResourceType
-			} else {
-				t.ResourceType = &configMapResourceType
-			}
+			t.ResourceType = ptr.To(leaseResourceType)
 		}
 
 		if t.LabelKey == nil {
@@ -143,89 +134,85 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 		if t.LabelValue == nil {
 			t.LabelValue = &e.Integration.Name
 		}
+
+		return true, nil, nil
 	}
 
-	return pointer.BoolDeref(t.Enabled, true), nil, nil
+	return false, nil, nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityMaster)
-
 		// Master sub endpoints need to be added to the list of dependencies
 		for _, dep := range t.delegateDependencies {
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, dep)
 		}
-
 	} else if e.IntegrationInRunningPhases() {
-		serviceAccount := e.Integration.Spec.ServiceAccountName
-		if serviceAccount == "" {
-			serviceAccount = "default"
-		}
-
-		templateData := struct {
-			Namespace      string
-			Name           string
-			ServiceAccount string
-		}{
-			Namespace:      e.Integration.Namespace,
-			Name:           fmt.Sprintf("%s-master", e.Integration.Name),
-			ServiceAccount: serviceAccount,
-		}
-
-		roleSuffix := leaseResourceType
-		if t.ResourceType != nil {
-			roleSuffix = *t.ResourceType
-		}
-		roleSuffix = strings.ToLower(roleSuffix)
-
-		role, err := loadResource(e, fmt.Sprintf("master-role-%s.tmpl", roleSuffix), templateData)
+		// Master trait requires the ServiceAccount certain privileges
+		privileges, err := t.prepareRBAC(e.Client, e.Integration.Spec.ServiceAccountName, e.Integration.Name, e.Integration.Namespace)
 		if err != nil {
 			return err
 		}
-		roleBinding, err := loadResource(e, "master-role-binding.tmpl", templateData)
-		if err != nil {
-			return err
-		}
+		// Add the RBAC privileges
+		e.Resources.AddAll(privileges)
 
-		e.Resources.Add(role)
-		e.Resources.Add(roleBinding)
-
-		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
-		)
-
-		if t.ResourceName != nil {
-			resourceName := t.ResourceName
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.kubernetesResourceName=%s", *resourceName)},
-			)
-		}
-
-		if t.ResourceType != nil {
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.leaseResourceType=%s", *t.ResourceType)},
-			)
-		}
-
-		if t.LabelKey != nil {
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelKey=%s", *t.LabelKey)},
-			)
-		}
-
-		if t.LabelValue != nil {
-			e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-				v1.ConfigurationSpec{Type: "property", Value: fmt.Sprintf("customizer.master.labelValue=%s", *t.LabelValue)},
-			)
+		if e.CamelCatalog.Runtime.Capabilities["master"].RuntimeProperties != nil {
+			t.setCatalogConfiguration(e)
+		} else {
+			t.setCustomizerConfiguration(e)
 		}
 	}
 
 	return nil
 }
 
-func (t *masterTrait) canUseLeases(e *trait.Environment) (bool, error) {
-	return kubernetes.CheckPermission(e.Ctx, t.Client, "coordination.k8s.io", "leases", e.Integration.Namespace, "", "create")
+// Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
+func (t *masterTrait) setCustomizerConfiguration(e *trait.Environment) {
+	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
+	)
+	if t.ResourceName != nil {
+		resourceName := t.ResourceName
+		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.kubernetesResourceNames=" + *resourceName},
+		)
+	}
+	if t.ResourceType != nil {
+		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.leaseResourceType" + *t.ResourceType},
+		)
+	}
+	if t.LabelKey != nil {
+		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelKey=" + *t.LabelKey},
+		)
+	}
+	if t.LabelValue != nil {
+		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelValue=" + *t.LabelValue},
+		)
+	}
+}
+
+func (t *masterTrait) setCatalogConfiguration(e *trait.Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	if t.ResourceName != nil {
+		e.ApplicationProperties["camel.k.master.resourceName"] = *t.ResourceName
+	}
+	if t.ResourceType != nil {
+		e.ApplicationProperties["camel.k.master.resourceType"] = *t.ResourceType
+	}
+	if t.LabelKey != nil && t.LabelValue != nil {
+		e.ApplicationProperties["camel.k.master.labelKey"] = *t.LabelKey
+		e.ApplicationProperties["camel.k.master.labelValue"] = *t.LabelValue
+	}
+
+	for _, cp := range e.CamelCatalog.Runtime.Capabilities["master"].RuntimeProperties {
+		e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
+	}
 }
 
 func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) []string {
@@ -246,14 +233,49 @@ func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationM
 	return dependencies
 }
 
-func loadResource(e *trait.Environment, name string, params interface{}) (ctrl.Object, error) {
-	data, err := resources.TemplateResource(fmt.Sprintf("/resources/addons/master/%s", name), params)
+func loadResource(cli client.Client, name string, params interface{}) (ctrl.Object, error) {
+	data, err := resources.TemplateResource(fmt.Sprintf("resources/addons/master/%s", name), params)
 	if err != nil {
 		return nil, err
 	}
-	obj, err := kubernetes.LoadResourceFromYaml(e.Client.GetScheme(), data)
+	obj, err := kubernetes.LoadResourceFromYaml(cli.GetScheme(), data)
 	if err != nil {
 		return nil, err
 	}
 	return obj, nil
+}
+
+func (t *masterTrait) prepareRBAC(cli client.Client, serviceAccount, itName, itNamespace string) ([]ctrl.Object, error) {
+	objs := make([]ctrl.Object, 0, 2)
+	if serviceAccount == "" {
+		serviceAccount = "default"
+	}
+
+	templateData := struct {
+		Namespace      string
+		Name           string
+		ServiceAccount string
+	}{
+		Namespace:      itNamespace,
+		Name:           fmt.Sprintf("%s-master", itName),
+		ServiceAccount: serviceAccount,
+	}
+
+	roleSuffix := leaseResourceType
+	if t.ResourceType != nil {
+		roleSuffix = *t.ResourceType
+	}
+	roleSuffix = strings.ToLower(roleSuffix)
+
+	role, err := loadResource(cli, fmt.Sprintf("master-role-%s.tmpl", roleSuffix), templateData)
+	if err != nil {
+		return nil, err
+	}
+	objs = append(objs, role)
+	roleBinding, err := loadResource(cli, "master-role-binding.tmpl", templateData)
+	if err != nil {
+		return nil, err
+	}
+	objs = append(objs, roleBinding)
+	return objs, nil
 }

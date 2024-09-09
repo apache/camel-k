@@ -341,9 +341,10 @@ __custom_func() {
 
 func newCmdCompletionBash(root *cobra.Command) *cobra.Command {
 	return &cobra.Command{
-		Use:   "bash",
-		Short: "Generates bash completion scripts",
-		Long:  bashCompletionCmdLongDescription,
+		Use:        "bash",
+		Short:      "Generates bash completion scripts",
+		Long:       bashCompletionCmdLongDescription,
+		Deprecated: "no longer supported.",
 		Run: func(_ *cobra.Command, _ []string) {
 			err := root.GenBashCompletion(root.OutOrStdout())
 			if err != nil {

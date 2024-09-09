@@ -20,33 +20,32 @@ package trait
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/rs/xid"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/builder"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
 const (
-	quarkusTraitID = "quarkus"
+	quarkusTraitID    = "quarkus"
+	quarkusTraitOrder = 1700
+
+	fastJarPackageType       quarkusPackageType = "fast-jar"
+	nativeSourcesPackageType quarkusPackageType = "native-sources"
 
 	QuarkusNativeDefaultBaseImageName = "quay.io/quarkus/quarkus-micro-image:2.0"
 )
 
 type quarkusPackageType string
-
-const (
-	fastJarPackageType       quarkusPackageType = "fast-jar"
-	nativeSourcesPackageType quarkusPackageType = "native-sources"
-)
 
 var kitPriority = map[quarkusPackageType]string{
 	fastJarPackageType:       "1000",
@@ -81,8 +80,8 @@ func getLanguageSettings(e *Environment, language v1.Language) languageSettings 
 		}
 		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
 		return languageSettings{
-			native:                     native == "true",
-			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == "true",
+			native:                     native == boolean.TrueString,
+			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == boolean.TrueString,
 		}
 	}
 	log.Debugf("No loader could be found for the language %q, the legacy language settings are applied", string(language))
@@ -101,7 +100,7 @@ func getLegacyLanguageSettings(language v1.Language) languageSettings {
 
 func newQuarkusTrait() Trait {
 	return &quarkusTrait{
-		BasePlatformTrait: NewBasePlatformTrait(quarkusTraitID, 1700),
+		BasePlatformTrait: NewBasePlatformTrait(quarkusTraitID, quarkusTraitOrder),
 	}
 }
 
@@ -110,23 +109,14 @@ func (t *quarkusTrait) InfluencesKit() bool {
 	return true
 }
 
-// InfluencesBuild overrides base class method.
-func (t *quarkusTrait) InfluencesBuild(this, prev map[string]interface{}) bool {
-	return true
-}
-
-var _ ComparableTrait = &quarkusTrait{}
-
 func (t *quarkusTrait) Matches(trait Trait) bool {
 	qt, ok := trait.(*quarkusTrait)
 	if !ok {
 		return false
 	}
-
 	if len(t.Modes) == 0 && len(qt.Modes) != 0 && !qt.containsMode(traitv1.JvmQuarkusMode) {
 		return false
 	}
-
 	for _, md := range t.Modes {
 		if md == traitv1.JvmQuarkusMode && len(qt.Modes) == 0 {
 			continue
@@ -136,12 +126,30 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 		}
 		return false
 	}
+	// We need to check if the native base image used is the same
+	thisNativeBaseImage := t.NativeBaseImage
+	if thisNativeBaseImage == "" {
+		thisNativeBaseImage = QuarkusNativeDefaultBaseImageName
+	}
+	otherNativeBaseImage := qt.NativeBaseImage
+	if otherNativeBaseImage == "" {
+		otherNativeBaseImage = QuarkusNativeDefaultBaseImageName
+	}
 
-	return true
+	return thisNativeBaseImage == otherNativeBaseImage
 }
 
 func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	condition := t.adaptDeprecatedFields()
+
+	if t.containsMode(traitv1.NativeQuarkusMode) && e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
+		// Native compilation is only supported for a subset of languages,
+		// so let's check for compatibility, and fail-fast the Integration,
+		// to save compute resources and user time.
+		if err := t.validateNativeSupport(e); err != nil {
+			return false, nil, err
+		}
+	}
 
 	return e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) ||
 			e.IntegrationKitInPhase(v1.IntegrationKitPhaseBuildSubmitted) ||
@@ -162,7 +170,18 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
 			}
 		}
-		return NewIntegrationCondition(v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+		return NewIntegrationCondition("Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+	}
+
+	return nil
+}
+
+func (t *quarkusTrait) validateNativeSupport(e *Environment) error {
+	for _, source := range e.Integration.AllSources() {
+		if language := source.InferLanguage(); !getLanguageSettings(e, language).native {
+			return fmt.Errorf("invalid native support: Integration %s/%s contains a %s source that cannot be compiled to native executable",
+				e.Integration.Namespace, e.Integration.Name, language)
+		}
 	}
 
 	return nil
@@ -171,7 +190,6 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 func (t *quarkusTrait) Apply(e *Environment) error {
 	if e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		t.applyWhileBuildingKit(e)
-
 		return nil
 	}
 
@@ -191,16 +209,6 @@ func (t *quarkusTrait) Apply(e *Environment) error {
 }
 
 func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
-	if t.containsMode(traitv1.NativeQuarkusMode) {
-		// Native compilation is only supported for a subset of languages,
-		// so let's check for compatibility, and fail-fast the Integration,
-		// to save compute resources and user time.
-		if !t.validateNativeSupport(e) {
-			// Let the calling controller handle the Integration update
-			return
-		}
-	}
-
 	switch len(t.Modes) {
 	case 0:
 		// Default behavior
@@ -225,32 +233,14 @@ func (t *quarkusTrait) applyWhileBuildingKit(e *Environment) {
 	}
 }
 
-func (t *quarkusTrait) validateNativeSupport(e *Environment) bool {
-	for _, source := range e.Integration.AllSources() {
-		if language := source.InferLanguage(); !getLanguageSettings(e, language).native {
-			t.L.ForIntegration(e.Integration).Infof("Integration %s/%s contains a %s source that cannot be compiled to native executable", e.Integration.Namespace, e.Integration.Name, language)
-			e.Integration.Status.Phase = v1.IntegrationPhaseError
-			e.Integration.Status.SetCondition(
-				v1.IntegrationConditionKitAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionUnsupportedLanguageReason,
-				fmt.Sprintf("native compilation for language %q is not supported", language))
-
-			return false
-		}
-	}
-
-	return true
-}
-
 func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPackageType) *v1.IntegrationKit {
 	integration := e.Integration
 	kit := v1.NewIntegrationKit(integration.GetIntegrationKitNamespace(e.Platform), fmt.Sprintf("kit-%s", xid.New()))
 
 	kit.Labels = map[string]string{
 		v1.IntegrationKitTypeLabel:            v1.IntegrationKitTypePlatform,
-		"camel.apache.org/runtime.version":    integration.Status.RuntimeVersion,
-		"camel.apache.org/runtime.provider":   string(integration.Status.RuntimeProvider),
+		kubernetes.CamelLabelRuntimeVersion:   integration.Status.RuntimeVersion,
+		kubernetes.CamelLabelRuntimeProvider:  string(integration.Status.RuntimeProvider),
 		v1.IntegrationKitLayoutLabel:          string(packageType),
 		v1.IntegrationKitPriorityLabel:        kitPriority[packageType],
 		kubernetes.CamelCreatorLabelKind:      v1.IntegrationKind,
@@ -274,26 +264,20 @@ func (t *quarkusTrait) newIntegrationKit(e *Environment, packageType quarkusPack
 			v1.SetAnnotation(&kit.ObjectMeta, v1.IntegrationProfileNamespaceAnnotation, e.Integration.Namespace)
 		}
 	}
-
-	for k, v := range integration.Annotations {
-		if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
-			v1.SetAnnotation(&kit.ObjectMeta, k, v)
-		}
-	}
-
 	operatorID := defaults.OperatorID()
 	if operatorID != "" {
 		kit.SetOperatorID(operatorID)
 	}
-
 	kit.Spec = v1.IntegrationKitSpec{
 		Dependencies: e.Integration.Status.Dependencies,
 		Repositories: e.Integration.Spec.Repositories,
 		Traits:       propagateKitTraits(e),
 	}
-
 	if packageType == nativeSourcesPackageType {
 		kit.Spec.Sources = propagateSourcesRequiredAtBuildTime(e)
+	}
+	if e.Integration.Status.Capabilities != nil {
+		kit.Spec.Capabilities = e.Integration.Status.Capabilities
 	}
 	return kit
 }
@@ -316,10 +300,9 @@ func propagateKitTraits(e *Environment) v1.IntegrationKitTraits {
 
 func propagate(traitSource string, traits v1.Traits, kitTraits *v1.IntegrationKitTraits, e *Environment) {
 	ikt := v1.IntegrationKitTraits{
-		Builder:  traits.Builder.DeepCopy(),
-		Camel:    traits.Camel.DeepCopy(),
-		Quarkus:  traits.Quarkus.DeepCopy(),
-		Registry: traits.Registry.DeepCopy(),
+		Builder: traits.Builder.DeepCopy(),
+		Camel:   traits.Camel.DeepCopy(),
+		Quarkus: traits.Quarkus.DeepCopy(),
 	}
 
 	if err := kitTraits.Merge(ikt); err != nil {
@@ -373,6 +356,7 @@ func (t *quarkusTrait) applyWhenBuildSubmitted(e *Environment) error {
 	// The LoadCamelQuarkusCatalog is required to have catalog information available by the builder
 	packageSteps = append(packageSteps, builder.Quarkus.LoadCamelQuarkusCatalog)
 
+	//nolint:nestif
 	if native {
 		if nativePackageType := builder.QuarkusRuntimeSupport(e.CamelCatalog.GetCamelQuarkusVersion()).NativeMavenProperty(); nativePackageType != "" {
 			buildTask.Maven.Properties["quarkus.package.type"] = nativePackageType
@@ -431,7 +415,7 @@ func (t *quarkusTrait) isIncrementalImageBuild(e *Environment) bool {
 	// We need to get this information from the builder trait
 	if trait := e.Catalog.GetTrait(builderTraitID); trait != nil {
 		builder, ok := trait.(*builderTrait)
-		return ok && pointer.BoolDeref(builder.IncrementalImageBuild, true)
+		return ok && ptr.Deref(builder.IncrementalImageBuild, true)
 	}
 
 	// Default always to true for performance reasons
@@ -454,7 +438,8 @@ func (t *quarkusTrait) applyWhenKitReady(e *Environment) error {
 
 func (t *quarkusTrait) isNativeIntegration(e *Environment) bool {
 	// The current IntegrationKit determines the Integration runtime type
-	return e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNativeSources
+	return e.IntegrationKit != nil &&
+		e.IntegrationKit.Labels[v1.IntegrationKitLayoutLabel] == v1.IntegrationKitLayoutNativeSources
 }
 
 // Indicates whether the given source code is embedded into the final binary.

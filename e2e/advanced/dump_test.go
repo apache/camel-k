@@ -23,8 +23,7 @@ limitations under the License.
 package advanced
 
 import (
-	"fmt"
-	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -35,31 +34,28 @@ import (
 )
 
 func TestKamelCLIDump(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
 
-	WithNewTestNamespace(t, func(ns string) {
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		t.Run("dump empty namespace", func(t *testing.T) {
-			dump := GetOutputString(Kamel("dump", "-n", ns))
+			dump := GetOutputString(Kamel(t, ctx, "dump", "-n", ns))
 
-			Expect(dump).To(ContainSubstring("Found 0 integrations:"))
-			Expect(dump).To(ContainSubstring("Found 0 deployments:"))
+			g.Expect(dump).To(ContainSubstring("Found 0 integrations:"))
+			g.Expect(dump).To(ContainSubstring("Found 0 deployments:"))
 		})
 
+		InstallOperator(t, ctx, g, ns)
+
 		t.Run("dump non-empty namespace", func(t *testing.T) {
-			operatorID := fmt.Sprintf("camel-k-%s", ns)
-			Expect(CopyCamelCatalog(ns, operatorID)).To(Succeed())
-			Expect(KamelInstallWithID(operatorID, ns).Execute()).To(Succeed())
-			Eventually(SelectedPlatformPhase(ns, operatorID), TestTimeoutMedium).Should(Equal(v1.IntegrationPlatformPhaseReady))
+			g.Expect(KamelRun(t, ctx, ns, "files/yaml.yaml").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "yaml")).Should(ContainSubstring("Magicstring!"))
 
-			Expect(KamelRunWithID(operatorID, ns, "files/yaml.yaml").Execute()).To(Succeed())
-			Eventually(IntegrationPodPhase(ns, "yaml"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationLogs(ns, "yaml")).Should(ContainSubstring("Magicstring!"))
-
-			dump := GetOutputString(Kamel("dump", "-n", ns))
-			Expect(dump).To(ContainSubstring("Found 1 platforms"))
-			Expect(dump).To(ContainSubstring("Found 1 integrations"))
-			Expect(dump).To(ContainSubstring("name: yaml"))
-			Expect(dump).To(ContainSubstring("Magicstring!"))
+			dump := GetOutputString(Kamel(t, ctx, "dump", "-n", ns))
+			g.Expect(dump).To(ContainSubstring("Found 1 platforms"))
+			g.Expect(dump).To(ContainSubstring("Found 1 integrations"))
+			g.Expect(dump).To(ContainSubstring("name: yaml"))
+			g.Expect(dump).To(ContainSubstring("Magicstring!"))
 		})
 	})
 }

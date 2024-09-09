@@ -75,9 +75,10 @@ func describeTraits(w *indentedwriter.Writer, traits interface{}) error {
 
 func newCmdDescribe(rootCmdOptions *RootCmdOptions) *cobra.Command {
 	cmd := cobra.Command{
-		Use:   "describe",
-		Short: "Describe a resource",
-		Long:  `Describe a Camel K resource.`,
+		Use:        "describe",
+		Deprecated: "consider using kubectl (or oc) custom resource describe command instead.",
+		Short:      "Describe a resource",
+		Long:       `Describe a Camel K resource.`,
 	}
 
 	cmd.AddCommand(cmdOnly(newDescribeKitCmd(rootCmdOptions)))

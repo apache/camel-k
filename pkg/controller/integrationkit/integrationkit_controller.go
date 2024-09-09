@@ -45,6 +45,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
+const (
+	requeueAfterDuration = 2 * time.Second
+)
+
 // Add creates a new IntegrationKit Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -235,9 +239,11 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 	target := instance.DeepCopy()
 	targetLog := rlog.ForIntegrationKit(target)
 
+	//nolint:nestif
 	if target.Status.Phase == v1.IntegrationKitPhaseNone || target.Status.Phase == v1.IntegrationKitPhaseWaitingForPlatform {
 		rlog.Debug("Preparing to shift integration kit phase")
-		if target.IsExternal() {
+		//nolint: staticcheck
+		if target.IsExternal() || target.IsSynthetic() {
 			target.Status.Phase = v1.IntegrationKitPhaseInitialization
 			return r.update(ctx, &instance, target)
 		}
@@ -279,44 +285,47 @@ func (r *reconcileIntegrationKit) Reconcile(ctx context.Context, request reconci
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
-		if a.CanHandle(target) {
-			targetLog.Infof("Invoking action %s", a.Name())
-
-			newTarget, err := a.Handle(ctx, target)
-
-			if err != nil {
-				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
-				return reconcile.Result{}, err
-			}
-
-			if newTarget != nil {
-				if res, err := r.update(ctx, &instance, newTarget); err != nil {
-					camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
-					return res, err
-				}
-
-				targetPhase = newTarget.Status.Phase
-
-				if targetPhase != instance.Status.Phase {
-					targetLog.Info(
-						"State transition",
-						"phase-from", instance.Status.Phase,
-						"phase-to", targetPhase,
-					)
-				}
-			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyIntegrationKitUpdated(ctx, r.client, r.recorder, &instance, newTarget)
-			break
+		if !a.CanHandle(target) {
+			continue
 		}
+
+		targetLog.Infof("Invoking action %s", a.Name())
+
+		newTarget, err := a.Handle(ctx, target)
+
+		if err != nil {
+			camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+			return reconcile.Result{}, err
+		}
+
+		if newTarget != nil {
+			if res, err := r.update(ctx, &instance, newTarget); err != nil {
+				camelevent.NotifyIntegrationKitError(ctx, r.client, r.recorder, &instance, newTarget, err)
+				return res, err
+			}
+
+			targetPhase = newTarget.Status.Phase
+
+			if targetPhase != instance.Status.Phase {
+				targetLog.Info(
+					"State transition",
+					"phase-from", instance.Status.Phase,
+					"phase-to", targetPhase,
+				)
+			}
+		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyIntegrationKitUpdated(ctx, r.client, r.recorder, &instance, newTarget)
+
+		break
 	}
 
 	if targetPhase == v1.IntegrationKitPhaseWaitingForCatalog {
 		// Requeue
 		return reconcile.Result{
-			RequeueAfter: 2 * time.Second,
+			RequeueAfter: requeueAfterDuration,
 		}, nil
 	}
 
@@ -330,9 +339,7 @@ func (r *reconcileIntegrationKit) update(ctx context.Context, base *v1.Integrati
 	}
 
 	target.Status.Digest = dgst
-
 	target.Status.ObservedGeneration = base.Generation
-
 	err = r.client.Status().Patch(ctx, target, ctrl.MergeFrom(base))
 
 	return reconcile.Result{}, err

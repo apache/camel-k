@@ -20,63 +20,66 @@ package gcp
 import (
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGcpSecretManagerTraitApply(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	gcp := NewGcpSecretManagerTrait()
 	secrets, _ := gcp.(*gcpSecretManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
-	secrets.UseDefaultInstance = pointer.Bool(false)
+	secrets.Enabled = ptr.To(true)
+	secrets.UseDefaultInstance = ptr.To(false)
 	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "project-gcp", e.ApplicationProperties["camel.vault.gcp.projectId"])
 	assert.Equal(t, "file:////usr/local/serviceaccount.json", e.ApplicationProperties["camel.vault.gcp.serviceAccountKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
 }
 
 func TestGcpSecretManagerTraitNoDefaultCreds(t *testing.T) {
 	e := createEnvironment(t, camel.QuarkusCatalog)
 	gcp := NewGcpSecretManagerTrait()
 	secrets, _ := gcp.(*gcpSecretManagerTrait)
-	secrets.Enabled = pointer.Bool(true)
-	secrets.UseDefaultInstance = pointer.Bool(false)
+	secrets.Enabled = ptr.To(true)
+	secrets.UseDefaultInstance = ptr.To(false)
 	secrets.ProjectID = "project-gcp"
 	secrets.ServiceAccountKey = "file:////usr/local/serviceaccount.json"
 	ok, condition, err := secrets.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = secrets.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "project-gcp", e.ApplicationProperties["camel.vault.gcp.projectId"])
 	assert.Equal(t, "file:////usr/local/serviceaccount.json", e.ApplicationProperties["camel.vault.gcp.serviceAccountKey"])
-	assert.Equal(t, "false", e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
+	assert.Equal(t, boolean.FalseString, e.ApplicationProperties["camel.vault.gcp.useDefaultInstance"])
 }
 
 func createEnvironment(t *testing.T, catalogGen func() (*camel.RuntimeCatalog, error)) *trait.Environment {
 	t.Helper()
 
 	catalog, err := catalogGen()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog:          catalog,

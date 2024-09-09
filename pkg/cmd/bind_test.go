@@ -40,7 +40,7 @@ func initializeBindCmdOptions(t *testing.T) (*bindCmdOptions, *cobra.Command, Ro
 
 	options, rootCmd := kamelTestPreAddCommandInitWithClient(fakeClient)
 	bindCmdOptions := addTestBindCmd(*options, rootCmd)
-	kamelTestPostAddCommandInit(t, rootCmd)
+	kamelTestPostAddCommandInit(t, rootCmd, options)
 
 	return bindCmdOptions, rootCmd, *options
 }
@@ -58,7 +58,7 @@ func TestBindOutputJSON(t *testing.T) {
 	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "json")
 	assert.Equal(t, "json", buildCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `{"kind":"Pipe","apiVersion":"camel.apache.org/v1","metadata":{"name":"my-to-my","creationTimestamp":null,"annotations":{"camel.apache.org/operator.id":"camel-k"}},"spec":{"source":{"uri":"my:src"},"sink":{"uri":"my:dst"}},"status":{}}`, output)
 }
 
@@ -67,7 +67,7 @@ func TestBindOutputYAML(t *testing.T) {
 	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
@@ -98,7 +98,7 @@ func TestBindErrorHandlerDLCKamelet(t *testing.T) {
 		"--error-handler", "sink:my-kamelet", "-p", "error-handler.my-prop=value")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
@@ -130,7 +130,7 @@ func TestBindErrorHandlerNone(t *testing.T) {
 		"--error-handler", "none")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
@@ -155,7 +155,7 @@ func TestBindErrorHandlerLog(t *testing.T) {
 		"--error-handler", "log")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
@@ -176,26 +176,45 @@ status: {}
 
 func TestBindTraits(t *testing.T) {
 	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
-	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml", "-t", "mount.configs=configmap:my-cm", "-c", "my-service-binding")
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+		"-t", "mount.configs=configmap:my-cm", "-c", "my-service-binding")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
   annotations:
     camel.apache.org/operator.id: camel-k
+    trait.camel.apache.org/mount.configs: configmap:my-cm
+    trait.camel.apache.org/service-binding.services: my-service-binding
   creationTimestamp: null
   name: my-to-my
 spec:
-  integration:
-    traits:
-      mount:
-        configs:
-        - configmap:my-cm
-      service-binding:
-        services:
-        - my-service-binding
+  sink:
+    uri: my:dst
+  source:
+    uri: my:src
+status: {}
+`, output)
+}
+
+func TestBindTraitsArray(t *testing.T) {
+	buildCmdOptions, bindCmd, _ := initializeBindCmdOptions(t)
+	output, err := test.ExecuteCommand(bindCmd, cmdBind, "my:src", "my:dst", "-o", "yaml",
+		"-t", "camel.properties=a=1", "-t", "camel.properties=b=2")
+	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
+
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    camel.apache.org/operator.id: camel-k
+    trait.camel.apache.org/camel.properties: '[a=1,b=2]'
+  creationTimestamp: null
+  name: my-to-my
+spec:
   sink:
     uri: my:dst
   source:
@@ -212,7 +231,7 @@ func TestBindSteps(t *testing.T) {
 		"-p", "step-2.var1=my-step2-var1", "-p", "step-2.var2=my-step2-var2")
 	assert.Equal(t, "yaml", buildCmdOptions.OutputFormat)
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, `apiVersion: camel.apache.org/v1
 kind: Pipe
 metadata:
@@ -244,7 +263,7 @@ func TestBindServiceAccountName(t *testing.T) {
 		"-o", "yaml",
 		"--service-account", "my-service-account")
 
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Contains(t, output, "serviceAccountName: my-service-account")
 }
 

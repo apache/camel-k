@@ -49,6 +49,8 @@ var (
 	reservedKameletNames = map[string]bool{"source": true, "sink": true}
 	// KameletIDProperty used to identify.
 	KameletIDProperty = "id"
+	// KameletVersionProperty used to specify the version to use.
+	KameletVersionProperty = "kameletVersion"
 )
 
 // +genclient
@@ -56,7 +58,10 @@ var (
 // +kubebuilder:storageversion
 // +kubebuilder:resource:path=kamelets,scope=Namespaced,shortName=kl,categories=kamel;camel
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.status.phase`,description="The Kamelet phase"
+// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kamelet\.type`,description="The Kamelet type"
+// +kubebuilder:printcolumn:name="Provider",type=string,JSONPath=`.metadata.annotations.camel\.apache\.org\/provider`,description="The Kamelet provider"
+// +kubebuilder:printcolumn:name="Bundled",type=string,JSONPath=`.metadata.labels.camel\.apache\.org\/kamelet\.bundled`,description="The Kamelet bundled"
+// +kubebuilder:printcolumn:name="Camel Version",type=string,JSONPath=`.metadata.annotations.camel\.apache\.org\/catalog\.version`,description="The Camel compatible version"
 
 // Kamelet is the Schema for the kamelets API.
 type Kamelet struct {
@@ -73,6 +78,15 @@ type Kamelet struct {
 
 // KameletSpec specifies the configuration required to execute a Kamelet.
 type KameletSpec struct {
+	KameletSpecBase `json:",inline"`
+	// the optional versions available for this Kamelet. This field may not be taken in account by Camel core and is meant to support
+	// any user defined versioning model on cluster only. If the user wants to use any given version, she must materialize a file with the given version spec
+	// as the `main` Kamelet spec on the runtime.
+	Versions map[string]KameletSpecBase `json:"versions,omitempty"`
+}
+
+// KameletSpecBase specifies the base configuration of a Kamelet.
+type KameletSpecBase struct {
 	// defines the formal configuration of the Kamelet
 	Definition *JSONSchemaProps `json:"definition,omitempty"`
 	// sources in any Camel DSL supported

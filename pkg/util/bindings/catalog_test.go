@@ -27,7 +27,7 @@ import (
 	eventing "knative.dev/eventing/pkg/apis/eventing/v1"
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidateEndpoint(t *testing.T) {
@@ -108,7 +108,7 @@ func TestValidateEndpoint(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			bindingContext := BindingContext{
 				Ctx:       ctx,
@@ -118,7 +118,7 @@ func TestValidateEndpoint(t *testing.T) {
 			}
 
 			err = validateEndpoint(bindingContext, tc.endpoint)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 }
@@ -181,7 +181,7 @@ func TestValidateEndpointError(t *testing.T) {
 			defer cancel()
 
 			client, err := test.NewFakeClient()
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			bindingContext := BindingContext{
 				Ctx:       ctx,
@@ -191,7 +191,7 @@ func TestValidateEndpointError(t *testing.T) {
 			}
 
 			err = validateEndpoint(bindingContext, tc.endpoint)
-			assert.Error(t, err, "cross-namespace references are not allowed in Pipe")
+			require.Error(t, err, "cross-namespace references are not allowed in Pipe")
 		})
 	}
 }

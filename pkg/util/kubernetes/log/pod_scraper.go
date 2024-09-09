@@ -146,6 +146,8 @@ func (s *PodScraper) handleAndRestart(ctx context.Context, err error, wait time.
 
 // waitForPodRunning waits for a given pod to reach the running state.
 // It may return the internal container to watch if present.
+//
+//nolint:nestif
 func (s *PodScraper) waitForPodRunning(ctx context.Context, namespace string, podName string, defaultContainerName string) (string, error) {
 	pod := corev1.Pod{
 		TypeMeta: metav1.TypeMeta{

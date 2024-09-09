@@ -19,6 +19,7 @@ package repository
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"testing"
 
@@ -34,8 +35,8 @@ func TestGithubRepository(t *testing.T) {
 	ctx := context.Background()
 	repo := newGithubKameletRepository(ctx, "apache", "camel-kamelets", "kamelets", "")
 	list, err := repo.List(ctx)
-	assert.NoError(t, err)
-	require.True(t, len(list) > 0)
+	require.NoError(t, err)
+	require.Greater(t, len(list), 0)
 	// Repeat multiple times to be sure cache is working and we don't hit rate limits
 	maxDistinct := 5
 	for i := 0; i < 200; i++ {
@@ -45,8 +46,21 @@ func TestGithubRepository(t *testing.T) {
 		}
 		kameletName := list[i%maxPos]
 		kamelet, err := repo.Get(ctx, kameletName)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, kameletName, kamelet.Name)
 	}
 
+}
+
+func TestDownloadKamelet(t *testing.T) {
+	c := &http.Client{}
+	kamelet, err := downloadGithubKamelet(
+		context.Background(),
+		// the appended parameter test the strength of the func which should load the kamelet regardless any
+		// additional parameter provided
+		"https://raw.githubusercontent.com/apache/camel-kamelets/main/kamelets/timer-source.kamelet.yaml?test=test",
+		c,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "timer-source", kamelet.Name)
 }

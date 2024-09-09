@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -30,6 +31,7 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/utils/ptr"
 
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -41,6 +43,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/digest"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NewMonitorAction is an action used to monitor manager Integrations.
@@ -62,6 +65,7 @@ func (action *monitorAction) CanHandle(integration *v1.Integration) bool {
 		integration.Status.Phase == v1.IntegrationPhaseError
 }
 
+//nolint:nestif
 func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integration) (*v1.Integration, error) {
 	// When in InitializationFailed condition a kit is not available for the integration
 	// so handle it differently from the rest
@@ -70,22 +74,26 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return action.checkDigestAndRebuild(ctx, integration, nil)
 	}
 
-	// At this stage the Integration must have a Kit
-	if integration.Status.IntegrationKit == nil {
-		return nil, fmt.Errorf("no kit set on integration %s", integration.Name)
+	var kit *v1.IntegrationKit
+	var err error
+	if integration.Status.IntegrationKit == nil && integration.Status.Image == "" {
+		return nil, fmt.Errorf("no kit nor container image set on integration %s", integration.Name)
 	}
 
-	kit, err := kubernetes.GetIntegrationKit(ctx, action.client,
-		integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
-	if err != nil {
-		return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
-			integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
-	}
+	if integration.Status.IntegrationKit != nil {
+		// Managed Integration
+		kit, err = kubernetes.GetIntegrationKit(ctx, action.client,
+			integration.Status.IntegrationKit.Name, integration.Status.IntegrationKit.Namespace)
+		if err != nil {
+			return nil, fmt.Errorf("unable to find integration kit %s/%s: %w",
+				integration.Status.IntegrationKit.Namespace, integration.Status.IntegrationKit.Name, err)
+		}
 
-	// If integration is in error and its kit is also in error then integration does not change
-	if isInIntegrationKitFailed(integration.Status) &&
-		kit.Status.Phase == v1.IntegrationKitPhaseError {
-		return nil, nil
+		// If integration is in error and its kit is also in error then integration does not change
+		if isInIntegrationKitFailed(integration.Status) &&
+			kit.Status.Phase == v1.IntegrationKitPhaseError {
+			return nil, nil
+		}
 	}
 
 	// Check if the Integration requires a rebuild
@@ -95,38 +103,65 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 		return changed, nil
 	}
 
-	// Check if an IntegrationKit with higher priority is ready
-	priority, ok := kit.Labels[v1.IntegrationKitPriorityLabel]
-	if !ok {
-		priority = "0"
-	}
-	withHigherPriority, err := labels.NewRequirement(v1.IntegrationKitPriorityLabel,
-		selection.GreaterThan, []string{priority})
-	if err != nil {
-		return nil, err
-	}
+	if kit != nil {
+		// Check if an IntegrationKit with higher priority is ready
+		priority, ok := kit.Labels[v1.IntegrationKitPriorityLabel]
+		if !ok {
+			priority = "0"
+		}
+		withHigherPriority, err := labels.NewRequirement(v1.IntegrationKitPriorityLabel,
+			selection.GreaterThan, []string{priority})
+		if err != nil {
+			return nil, err
+		}
 
-	kits, err := lookupKitsForIntegration(ctx, action.client, integration, ctrl.MatchingLabelsSelector{
-		Selector: labels.NewSelector().Add(*withHigherPriority),
-	})
-	if err != nil {
-		return nil, err
+		kits, err := lookupKitsForIntegration(ctx, action.client, integration, ctrl.MatchingLabelsSelector{
+			Selector: labels.NewSelector().Add(*withHigherPriority),
+		})
+		if err != nil {
+			return nil, err
+		}
+		priorityReadyKit, err := findHighestPriorityReadyKit(kits)
+		if err != nil {
+			return nil, err
+		}
+		if priorityReadyKit != nil {
+			integration.SetIntegrationKit(priorityReadyKit)
+		}
 	}
-	priorityReadyKit, err := findHighestPriorityReadyKit(kits)
-	if err != nil {
-		return nil, err
-	}
-	if priorityReadyKit != nil {
-		integration.SetIntegrationKit(priorityReadyKit)
-	}
-
 	// Run traits that are enabled for the phase
 	environment, err := trait.Apply(ctx, action.client, integration, kit)
 	if err != nil {
-		return nil, err
+		integration.Status.Phase = v1.IntegrationPhaseError
+		integration.SetReadyCondition(corev1.ConditionFalse,
+			v1.IntegrationConditionInitializationFailedReason, err.Error())
+		return integration, err
 	}
 
+	action.checkTraitAnnotationsDeprecatedNotice(integration)
+
 	return action.monitorPods(ctx, environment, integration)
+}
+
+// Deprecated: to be removed in future versions, when we won't support any longer trait annotations into Integrations.
+func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(integration *v1.Integration) {
+	if integration.Annotations != nil {
+		for k := range integration.Annotations {
+			if strings.HasPrefix(k, v1.TraitAnnotationPrefix) {
+				integration.Status.SetCondition(
+					v1.IntegrationConditionType("AnnotationTraitsDeprecated"),
+					corev1.ConditionTrue,
+					"DeprecationNotice",
+					"Annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration instead.",
+				)
+				action.L.Infof(
+					"WARN: annotation traits configuration is deprecated and will be removed soon. Use .spec.traits configuration for %s integration instead.",
+					integration.Name,
+				)
+				return
+			}
+		}
+	}
 }
 
 func (action *monitorAction) monitorPods(ctx context.Context, environment *trait.Environment, integration *v1.Integration) (*v1.Integration, error) {
@@ -228,19 +263,17 @@ func isInIntegrationKitFailed(status v1.IntegrationStatus) bool {
 }
 
 func (action *monitorAction) checkDigestAndRebuild(ctx context.Context, integration *v1.Integration, kit *v1.IntegrationKit) (*v1.Integration, error) {
-	secrets, configmaps := getIntegrationSecretsAndConfigmaps(ctx, action.client, integration)
+	secrets, configmaps := getIntegrationSecretAndConfigmapResourceVersions(ctx, action.client, integration)
 	hash, err := digest.ComputeForIntegration(integration, configmaps, secrets)
 	if err != nil {
 		return nil, err
 	}
 
 	if hash != integration.Status.Digest {
-		action.L.Info("Monitor: Integration needs a rebuild")
-
+		action.L.Infof("Integration %s digest has changed: resetting its status. Will check if it needs to be rebuilt and restarted.", integration.Name)
 		if isIntegrationKitResetRequired(integration, kit) {
 			integration.SetIntegrationKit(nil)
 		}
-
 		integration.Initialize()
 		integration.Status.Digest = hash
 
@@ -279,29 +312,40 @@ func isIntegrationKitResetRequired(integration *v1.Integration, kit *v1.Integrat
 	return false
 }
 
-func getIntegrationSecretsAndConfigmaps(ctx context.Context, client client.Client, integration *v1.Integration) ([]*corev1.Secret, []*corev1.ConfigMap) {
-	configmaps := make([]*corev1.ConfigMap, 0)
-	secrets := make([]*corev1.Secret, 0)
-	if integration.Spec.Traits.Mount != nil {
-		for _, c := range integration.Spec.Traits.Mount.Configs {
+// getIntegrationSecretAndConfigmapResourceVersions returns the list of resource versions only useful to watch for changes.
+func getIntegrationSecretAndConfigmapResourceVersions(ctx context.Context, client client.Client, integration *v1.Integration) ([]string, []string) {
+	configmaps := make([]string, 0)
+	secrets := make([]string, 0)
+	if integration.Spec.Traits.Mount != nil && ptr.Deref(integration.Spec.Traits.Mount.HotReload, false) {
+		mergedResources := make([]string, 0)
+		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Configs...)
+		mergedResources = append(mergedResources, integration.Spec.Traits.Mount.Resources...)
+		for _, c := range mergedResources {
 			if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 				if conf.StorageType() == utilResource.StorageTypeConfigmap {
-					configmap := kubernetes.LookupConfigmap(ctx, client, integration.Namespace, conf.Name())
-					configmaps = append(configmaps, configmap)
+					cm := corev1.ConfigMap{
+						TypeMeta: metav1.TypeMeta{
+							Kind:       "ConfigMap",
+							APIVersion: corev1.SchemeGroupVersion.String(),
+						},
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: integration.Namespace,
+							Name:      conf.Name(),
+						},
+					}
+					configmaps = append(configmaps, kubernetes.LookupResourceVersion(ctx, client, &cm))
 				} else if conf.StorageType() == utilResource.StorageTypeSecret {
-					secret := kubernetes.LookupSecret(ctx, client, integration.Namespace, conf.Name())
-					secrets = append(secrets, secret)
-				}
-			}
-		}
-		for _, r := range integration.Spec.Traits.Mount.Resources {
-			if conf, parseErr := utilResource.ParseConfig(r); parseErr == nil {
-				if conf.StorageType() == utilResource.StorageTypeConfigmap {
-					configmap := kubernetes.LookupConfigmap(ctx, client, integration.Namespace, conf.Name())
-					configmaps = append(configmaps, configmap)
-				} else if conf.StorageType() == utilResource.StorageTypeSecret {
-					secret := kubernetes.LookupSecret(ctx, client, integration.Namespace, conf.Name())
-					secrets = append(secrets, secret)
+					sec := corev1.Secret{
+						TypeMeta: metav1.TypeMeta{
+							Kind:       "Secret",
+							APIVersion: corev1.SchemeGroupVersion.String(),
+						},
+						ObjectMeta: metav1.ObjectMeta{
+							Namespace: integration.Namespace,
+							Name:      conf.Name(),
+						},
+					}
+					secrets = append(secrets, kubernetes.LookupResourceVersion(ctx, client, &sec))
 				}
 			}
 		}
@@ -487,6 +531,10 @@ func (action *monitorAction) probeReadiness(ctx context.Context, environment *tr
 		if container == nil {
 			return readyPods, false, fmt.Errorf("integration container not found in Pod %s/%s", pod.Namespace, pod.Name)
 		}
+
+		// TODO: this code must be moved to a dedicated function
+		//
+		//nolint:nestif
 		if probe := container.ReadinessProbe; probe != nil && probe.HTTPGet != nil {
 			body, err := proxyGetHTTPProbe(ctx, action.client, probe, pod, container)
 			// When invoking the HTTP probe, the kubernetes client exposes a very

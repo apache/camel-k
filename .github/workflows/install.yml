@@ -19,6 +19,8 @@ name: install
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  CAMEL_K_TEST_TIMEOUT_SHORT: 5m
+  CAMEL_K_TEST_TIMEOUT_MEDIUM: 10m
 
 on:
   pull_request:
@@ -48,38 +50,25 @@ on:
       - 'LICENSE'
       - 'NOTICE'
   workflow_dispatch:
-    inputs:
-      log-level:
-        description: 'Set the operator log level (info or debug)'
-        required: false
-      pre-built-kamel-image:
-        description: 'Kamel image url for skipping building of kamel stages. Used for debugging'
-        required: false
-      skip-problematic:
-        description: 'Whether tests marked as problematic should be skipped - false by default (sets CAMEL_K_TEST_SKIP_PROBLEMATIC)'
-        required: false
-        default: false
-      test-filters:
-        description: |
-          List of comma-separated key/value pairs to filter the tests in this test suite:
-            TEST_INSTALL_RUN,           TEST_INSTALL_CLI_RUN,
-            TEST_INSTALL_KUSTOMIZE_RUN, TEST_QUARKUS_RUN
-          eg. TEST_INTEGRATION_COMMON_RUN=TestBasic will only run tests prefixed with 'TestBasic'
-        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
-  non-olm:
+  install-and-upgrade:
     runs-on: ubuntu-latest
     steps:
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         persist-credentials: false
         submodules: recursive
+
+    - name: Infra setting
+      uses: ./.github/actions/infra-setting
+
     - name: Install Helm
       shell: bash
       run: |
@@ -88,65 +77,13 @@ jobs:
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
         sudo apt-get update
         sudo apt-get install helm
-    - name: Convert input parameters to env vars
+
+    - name: Build Helm chart
       shell: bash
       run: |
-        ./.github/workflows/manual-exec-process-inputs.sh \
-          -i "${{ github.event.inputs.pre-built-kamel-image }}" \
-          -p "${{ github.event.inputs.skip-problematic }}" \
-          -q "${{ github.event.inputs.log-level }}" \
-          -t "${{ github.event.inputs.test-filters }}"
+        make release-helm
 
-    - name: Install (Non OLM)
-      uses: ./.github/actions/e2e-install
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-
-  olm:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        submodules: recursive
-    - name: Convert input parameters to env vars
+    - name: Run tests
       shell: bash
       run: |
-        ./.github/workflows/manual-exec-process-inputs.sh \
-          -i "${{ github.event.inputs.pre-built-kamel-image }}" \
-          -p "${{ github.event.inputs.skip-problematic }}" \
-          -q "${{ github.event.inputs.log-level }}" \
-          -t "${{ github.event.inputs.test-filters }}"
-
-    - name: Install (OLM)
-      uses: ./.github/actions/e2e-install-olm
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
-
-  upgrade:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        submodules: recursive
-    - name: Convert input parameters to env vars
-      shell: bash
-      run: |
-        ./.github/workflows/manual-exec-process-inputs.sh \
-          -i "${{ github.event.inputs.pre-built-kamel-image }}" \
-          -p "${{ github.event.inputs.skip-problematic }}" \
-          -q "${{ github.event.inputs.log-level }}" \
-          -t "${{ github.event.inputs.test-filters }}"
-
-    - name: Upgrade
-      uses: ./.github/actions/e2e-install-upgrade
-      with:
-        cluster-config-data: ${{ secrets.E2E_CLUSTER_CONFIG }}
-        cluster-kube-config-data: ${{ secrets.E2E_KUBE_CONFIG }}
+        DO_TEST_PREBUILD=false GOTESTFMT="-json 2>&1 | gotestfmt" make test-install

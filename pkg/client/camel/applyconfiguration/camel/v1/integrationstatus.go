@@ -39,13 +39,13 @@ type IntegrationStatusApplyConfiguration struct {
 	GeneratedSources        []SourceSpecApplyConfiguration           `json:"generatedSources,omitempty"`
 	RuntimeVersion          *string                                  `json:"runtimeVersion,omitempty"`
 	RuntimeProvider         *v1.RuntimeProvider                      `json:"runtimeProvider,omitempty"`
+	Catalog                 *CatalogApplyConfiguration               `json:"catalog,omitempty"`
 	Configuration           []ConfigurationSpecApplyConfiguration    `json:"configuration,omitempty"`
 	Conditions              []IntegrationConditionApplyConfiguration `json:"conditions,omitempty"`
 	Version                 *string                                  `json:"version,omitempty"`
 	Replicas                *int32                                   `json:"replicas,omitempty"`
 	Selector                *string                                  `json:"selector,omitempty"`
 	Capabilities            []string                                 `json:"capabilities,omitempty"`
-	Traits                  *TraitsApplyConfiguration                `json:"traits,omitempty"`
 	InitializationTimestamp *metav1.Time                             `json:"lastInitTimestamp,omitempty"`
 }
 
@@ -150,6 +150,14 @@ func (b *IntegrationStatusApplyConfiguration) WithRuntimeProvider(value v1.Runti
 	return b
 }
 
+// WithCatalog sets the Catalog field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Catalog field is set to the value of the last call.
+func (b *IntegrationStatusApplyConfiguration) WithCatalog(value *CatalogApplyConfiguration) *IntegrationStatusApplyConfiguration {
+	b.Catalog = value
+	return b
+}
+
 // WithConfiguration adds the given value to the Configuration field in the declarative configuration
 // and returns the receiver, so that objects can be build by chaining "With" function invocations.
 // If called multiple times, values provided by each call will be appended to the Configuration field.
@@ -207,14 +215,6 @@ func (b *IntegrationStatusApplyConfiguration) WithCapabilities(values ...string)
 	for i := range values {
 		b.Capabilities = append(b.Capabilities, values[i])
 	}
-	return b
-}
-
-// WithTraits sets the Traits field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the Traits field is set to the value of the last call.
-func (b *IntegrationStatusApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *IntegrationStatusApplyConfiguration {
-	b.Traits = value
 	return b
 }
 

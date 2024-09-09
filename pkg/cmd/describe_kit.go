@@ -36,11 +36,12 @@ func newDescribeKitCmd(rootCmdOptions *RootCmdOptions) (*cobra.Command, *describ
 	}
 
 	cmd := cobra.Command{
-		Use:     "kit",
-		Aliases: []string{"ik"},
-		Short:   "Describe an Integration Kit",
-		Long:    `Describe an Integration Kit.`,
-		PreRunE: decode(&options),
+		Use:        "kit",
+		Aliases:    []string{"ik"},
+		Short:      "Describe an Integration Kit",
+		Long:       `Describe an Integration Kit.`,
+		Deprecated: "consider using kubectl (or oc) custom resource describe command instead.",
+		PreRunE:    decode(&options, options.Flags),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := options.validate(cmd, args); err != nil {
 				return err

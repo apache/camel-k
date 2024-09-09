@@ -29,6 +29,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/bindings"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -38,7 +39,7 @@ func TestStrimziDirect(t *testing.T) {
 	defer cancel()
 
 	client, err := test.NewFakeClient()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	bindingContext := bindings.BindingContext{
 		Ctx:       ctx,
@@ -61,7 +62,7 @@ func TestStrimziDirect(t *testing.T) {
 	binding, err := BindingProvider{}.Translate(bindingContext, bindings.EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopic?brokers=my-cluster-kafka-bootstrap%3A9092", binding.URI)
 	assert.Equal(t, camelv1.Traits{}, binding.Traits)
@@ -79,11 +80,11 @@ func TestStrimziLookup(t *testing.T) {
 		Status: v1beta2.KafkaStatus{
 			Listeners: []v1beta2.KafkaStatusListener{
 				{
-					Type: "tls",
+					Name: "tls",
 				},
 				{
 					BootstrapServers: "my-clusterx-kafka-bootstrap:9092",
-					Type:             "plain",
+					Name:             "plain",
 				},
 			},
 		},
@@ -121,7 +122,7 @@ func TestStrimziLookup(t *testing.T) {
 	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopicy?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
 	assert.Equal(t, camelv1.Traits{}, binding.Traits)
@@ -135,4 +136,168 @@ func asEndpointProperties(props map[string]string) *camelv1.EndpointProperties {
 	return &camelv1.EndpointProperties{
 		RawMessage: serialized,
 	}
+}
+
+func TestStrimziLookupByTopicName(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cluster := v1beta2.Kafka{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "myclusterx",
+		},
+		Status: v1beta2.KafkaStatus{
+			Listeners: []v1beta2.KafkaStatusListener{
+				{
+					Name: "tls",
+				},
+				{
+					BootstrapServers: "my-clusterx-kafka-bootstrap:9092",
+					Name:             "plain",
+				},
+			},
+		},
+	}
+
+	topic := v1beta2.KafkaTopic{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "mytopicy",
+			Labels: map[string]string{
+				v1beta2.StrimziKafkaClusterLabel: "myclusterx",
+			},
+		},
+		Status: v1beta2.KafkaTopicStatus{
+			TopicName: "my-topic-name",
+		},
+	}
+
+	client := fake.NewSimpleClientset(&cluster, &topic)
+	provider := BindingProvider{
+		Client: client,
+	}
+
+	bindingContext := bindings.BindingContext{
+		Ctx:       ctx,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	endpoint := camelv1.Endpoint{
+		Ref: &v1.ObjectReference{
+			Kind:       "KafkaTopic",
+			Name:       "my-topic-name",
+			APIVersion: "kafka.strimzi.io/v1beta2",
+		},
+	}
+
+	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "kafka:my-topic-name?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
+	assert.Equal(t, camelv1.Traits{}, binding.Traits)
+}
+
+func TestStrimziKafkaCR(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cluster := v1beta2.Kafka{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-kafka",
+		},
+		Status: v1beta2.KafkaStatus{
+			Listeners: []v1beta2.KafkaStatusListener{
+				{
+					Name: "tls",
+				},
+				{
+					BootstrapServers: "my-clusterx-kafka-bootstrap:9092",
+					Name:             "plain",
+				},
+			},
+		},
+	}
+
+	client := fake.NewSimpleClientset(&cluster)
+	provider := BindingProvider{
+		Client: client,
+	}
+
+	bindingContext := bindings.BindingContext{
+		Ctx:       ctx,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	endpoint := camelv1.Endpoint{
+		Ref: &v1.ObjectReference{
+			Kind:       "Kafka",
+			Name:       "my-kafka",
+			APIVersion: "kafka.strimzi.io/v1beta2",
+		},
+		Properties: asEndpointProperties(map[string]string{
+			"topic": "my-topic",
+		}),
+	}
+
+	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.NoError(t, err)
+	assert.NotNil(t, binding)
+	assert.Equal(t, "kafka:my-topic?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
+	assert.Equal(t, camelv1.Traits{}, binding.Traits)
+}
+
+func TestStrimziPassThrough(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cluster := v1beta2.Kafka{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "test",
+			Name:      "my-kafka",
+		},
+		Status: v1beta2.KafkaStatus{
+			Listeners: []v1beta2.KafkaStatusListener{
+				{
+					Name: "tls",
+				},
+				{
+					BootstrapServers: "my-clusterx-kafka-bootstrap:9092",
+					Name:             "plain",
+				},
+			},
+		},
+	}
+
+	client := fake.NewSimpleClientset(&cluster)
+	provider := BindingProvider{
+		Client: client,
+	}
+
+	bindingContext := bindings.BindingContext{
+		Ctx:       ctx,
+		Namespace: "test",
+		Profile:   camelv1.TraitProfileKubernetes,
+	}
+
+	endpoint := camelv1.Endpoint{
+		Ref: &v1.ObjectReference{
+			Kind:       "AnotherKind",
+			Name:       "my-kafka",
+			APIVersion: "anotherApiVersion",
+		},
+	}
+
+	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+		Type: camelv1.EndpointTypeSink,
+	}, endpoint)
+	require.NoError(t, err)
+	assert.Nil(t, binding)
 }

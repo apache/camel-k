@@ -21,34 +21,32 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDigestUsesAnnotations(t *testing.T) {
 	it := v1.Integration{}
 	digest1, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	it.Annotations = map[string]string{
 		"another.annotation": "hello",
 	}
 	digest2, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, digest1, digest2)
 
 	it.Annotations = map[string]string{
-		"another.annotation":                   "hello",
-		"trait.camel.apache.org/cron.fallback": "true",
+		"another.annotation":                       "hello",
+		v1.TraitAnnotationPrefix + "cron.fallback": "true",
 	}
 	digest3, err := ComputeForIntegration(&it, nil, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest3)
 }
 
@@ -60,10 +58,10 @@ func TestDigestSHA1FromTempFile(t *testing.T) {
 	}
 
 	assert.Nil(t, tmpFile.Close())
-	assert.Nil(t, os.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
+	require.NoError(t, os.WriteFile(tmpFile.Name(), []byte("hello test!"), 0o400))
 
 	sha1, err := ComputeSHA1(tmpFile.Name())
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "OXPdxTeLf5rqnsqvTi0CgmWoN/0=", sha1)
 }
 
@@ -73,7 +71,7 @@ func TestDigestUsesConfigmap(t *testing.T) {
 			Traits: v1.Traits{
 				Mount: &trait.MountTrait{
 					Configs:   []string{"configmap:cm"},
-					HotReload: pointer.Bool(true),
+					HotReload: ptr.To(true),
 				},
 			},
 		},
@@ -81,19 +79,13 @@ func TestDigestUsesConfigmap(t *testing.T) {
 
 	digest1, err := ComputeForIntegration(&it, nil, nil)
 	require.NoError(t, err)
-
-	cm := corev1.ConfigMap{
-		Data: map[string]string{
-			"foo": "bar",
-		},
-	}
-	cms := []*corev1.ConfigMap{&cm}
+	cms := []string{"123456"}
 
 	digest2, err := ComputeForIntegration(&it, cms, nil)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest2)
 
-	cm.Data["foo"] = "bar updated"
+	cms = []string{"1234567"}
 	digest3, err := ComputeForIntegration(&it, cms, nil)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest2, digest3)
@@ -109,7 +101,7 @@ func TestDigestUsesSecret(t *testing.T) {
 			Traits: v1.Traits{
 				Mount: &trait.MountTrait{
 					Configs:   []string{"secret:mysec"},
-					HotReload: pointer.Bool(true),
+					HotReload: ptr.To(true),
 				},
 			},
 		},
@@ -117,23 +109,12 @@ func TestDigestUsesSecret(t *testing.T) {
 
 	digest1, err := ComputeForIntegration(&it, nil, nil)
 	require.NoError(t, err)
-
-	sec := corev1.Secret{
-		Data: map[string][]byte{
-			"foo": []byte("bar"),
-		},
-		StringData: map[string]string{
-			"foo2": "bar2",
-		},
-	}
-
-	secrets := []*corev1.Secret{&sec}
-
+	secrets := []string{"123456"}
 	digest2, err := ComputeForIntegration(&it, nil, secrets)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest1, digest2)
 
-	sec.Data["foo"] = []byte("bar updated")
+	secrets = []string{"1234567"}
 	digest3, err := ComputeForIntegration(&it, nil, secrets)
 	require.NoError(t, err)
 	assert.NotEqual(t, digest2, digest3)
@@ -160,44 +141,10 @@ func TestDigestMatchingTraitsUpdated(t *testing.T) {
 		},
 	}
 
-	itStatusOnlyTraitUpdated := v1.Integration{
-		Spec: v1.IntegrationSpec{},
-		Status: v1.IntegrationStatus{
-			Traits: v1.Traits{
-				Camel: &trait.CamelTrait{
-					Properties: []string{"hello=world2"},
-				},
-			},
-		},
-	}
-
 	itDigest, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	itSpecOnlyTraitUpdatedDigest, err := ComputeForIntegration(&itSpecOnlyTraitUpdated, nil, nil)
-	assert.Nil(t, err)
-	itStatusOnlyTraitUpdatedDigest, err := ComputeForIntegration(&itStatusOnlyTraitUpdated, nil, nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.NotEqual(t, itSpecOnlyTraitUpdatedDigest, itDigest, "Digests must not be equal")
-	assert.NotEqual(t, itStatusOnlyTraitUpdatedDigest, itDigest, "Digests must not be equal")
-	assert.Equal(t, itSpecOnlyTraitUpdatedDigest, itStatusOnlyTraitUpdatedDigest, "Digests must be equal")
-}
-
-func TestSpecStatusDrift(t *testing.T) {
-	it := v1.Integration{}
-	it.Spec.Traits.Camel = &trait.CamelTrait{}
-	it.Status.Traits.Camel = &trait.CamelTrait{}
-
-	it.Spec.Traits.Camel.Properties = []string{"hello=world1"}
-	d1, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
-	it.Status.Traits.Camel.Properties = []string{"hello=world2"}
-	d2, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
-	it.Spec.Traits.Camel.Properties = []string{"hello=world3"}
-	d3, err := ComputeForIntegration(&it, nil, nil)
-	assert.Nil(t, err)
-
-	assert.NotEqual(t, d2, d1, "d2 must not be equal to d1")
-	assert.NotEqual(t, d3, d2, "d3 must not be equal to d2")
 }

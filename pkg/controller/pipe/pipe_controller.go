@@ -47,7 +47,7 @@ import (
 // Add creates a new Pipe Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
-	return add(mgr, newReconciler(mgr, c))
+	return add(mgr, newReconciler(mgr, c), c)
 }
 
 func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
@@ -65,14 +65,14 @@ func newReconciler(mgr manager.Manager, c client.Client) reconcile.Reconciler {
 	)
 }
 
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	c, err := controller.New("pipe-controller", mgr, controller.Options{Reconciler: r})
+func add(mgr manager.Manager, r reconcile.Reconciler, c client.Client) error {
+	ctrl, err := controller.New("pipe-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
 	// Watch for changes to primary resource Pipe
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Pipe{}),
+	err = ctrl.Watch(source.Kind(mgr.GetCache(), &v1.Pipe{}),
 		&handler.EnqueueRequestForObject{},
 		platform.FilteringFuncs{
 			UpdateFunc: func(e event.UpdateEvent) bool {
@@ -87,7 +87,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 				// If traits have changed, the reconciliation loop must kick in as
 				// traits may have impact
-				sameTraits, err := trait.PipesHaveSameTraits(oldPipe, newPipe)
+				sameTraits, err := trait.PipesHaveSameTraits(c, oldPipe, newPipe)
 				if err != nil {
 					Log.ForPipe(newPipe).Error(
 						err,
@@ -114,7 +114,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch Integration to propagate changes downstream
-	err = c.Watch(source.Kind(mgr.GetCache(), &v1.Integration{}),
+	err = ctrl.Watch(source.Kind(mgr.GetCache(), &v1.Integration{}),
 		handler.EnqueueRequestForOwner(
 			mgr.GetScheme(),
 			mgr.GetRESTMapper(),
@@ -193,31 +193,34 @@ func (r *ReconcilePipe) Reconcile(ctx context.Context, request reconcile.Request
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
-		if a.CanHandle(target) {
-			targetLog.Debugf("Invoking action %s", a.Name())
+		if !a.CanHandle(target) {
+			continue
+		}
 
-			target, err = a.Handle(ctx, target)
-			if err != nil {
+		targetLog.Debugf("Invoking action %s", a.Name())
+
+		target, err = a.Handle(ctx, target)
+		if err != nil {
+			camelevent.NotifyPipeError(ctx, r.client, r.recorder, &instance, target, err)
+			// Update the binding (mostly just to update its phase) if the new instance is returned
+			if target != nil {
+				_ = r.update(ctx, &instance, target, &targetLog)
+			}
+			return reconcile.Result{}, err
+		}
+
+		if target != nil {
+			if err := r.update(ctx, &instance, target, &targetLog); err != nil {
 				camelevent.NotifyPipeError(ctx, r.client, r.recorder, &instance, target, err)
-				// Update the binding (mostly just to update its phase) if the new instance is returned
-				if target != nil {
-					_ = r.update(ctx, &instance, target, &targetLog)
-				}
 				return reconcile.Result{}, err
 			}
-
-			if target != nil {
-				if err := r.update(ctx, &instance, target, &targetLog); err != nil {
-					camelevent.NotifyPipeError(ctx, r.client, r.recorder, &instance, target, err)
-					return reconcile.Result{}, err
-				}
-			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyPipeUpdated(ctx, r.client, r.recorder, &instance, target)
-			break
 		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyPipeUpdated(ctx, r.client, r.recorder, &instance, target)
+
+		break
 	}
 
 	return reconcile.Result{}, nil
@@ -237,15 +240,6 @@ func (r *ReconcilePipe) update(ctx context.Context, base *v1.Pipe, target *v1.Pi
 			"phase-from", base.Status.Phase,
 			"phase-to", target.Status.Phase,
 		)
-
-		if target.Status.Phase == v1.PipePhaseError {
-			if cond := target.Status.GetCondition(v1.PipeIntegrationConditionError); cond != nil {
-				log.Info(
-					"Integration error",
-					"reason", cond.GetReason(),
-					"error-message", cond.GetMessage())
-			}
-		}
 	}
 
 	return nil

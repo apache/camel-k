@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/spf13/cobra"
@@ -42,10 +43,10 @@ func TestUninstallOlmFlags(t *testing.T) {
 
 	uninstallCmdOptions := addTestUninstallCmd(options, cmd)
 
-	kamelTestPostAddCommandInit(t, cmd)
+	kamelTestPostAddCommandInit(t, cmd, options)
 
 	_, err := test.ExecuteCommand(cmd, "uninstall", "--olm=false", "--olm-operator-name", "my-operator")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, uninstallCmdOptions.OlmEnabled)
 	assert.Equal(t, "my-operator", uninstallCmdOptions.OlmOptions.OperatorName)
 }
@@ -55,10 +56,10 @@ func TestUninstallSkipFlags(t *testing.T) {
 
 	uninstallCmdOptions := addTestUninstallCmd(options, cmd)
 
-	kamelTestPostAddCommandInit(t, cmd)
+	kamelTestPostAddCommandInit(t, cmd, options)
 
 	_, err := test.ExecuteCommand(cmd, "uninstall", "--skip-crd", "--skip-cluster-roles", "--skip-integration-platform", "--skip-integration-profile")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, uninstallCmdOptions.SkipCrd)
 	assert.True(t, uninstallCmdOptions.SkipClusterRoles)
 	assert.True(t, uninstallCmdOptions.SkipIntegrationPlatform)
@@ -70,10 +71,10 @@ func TestUninstallAllFlag(t *testing.T) {
 
 	uninstallCmdOptions := addTestUninstallCmd(options, cmd)
 
-	kamelTestPostAddCommandInit(t, cmd)
+	kamelTestPostAddCommandInit(t, cmd, options)
 
 	_, err := test.ExecuteCommand(cmd, "uninstall", "--all")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, uninstallCmdOptions.SkipCrd)
 	assert.True(t, uninstallCmdOptions.SkipClusterRoles)
 	assert.False(t, uninstallCmdOptions.SkipIntegrationPlatform)

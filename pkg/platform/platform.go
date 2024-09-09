@@ -66,13 +66,14 @@ func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object)
 	}
 
 	if ip == nil {
-		if it, ok := o.(*v1.Integration); ok {
-			ip, err = getOrFindAny(ctx, c, it.Namespace, it.Status.Platform)
+		switch t := o.(type) {
+		case *v1.Integration:
+			ip, err = getOrFindAny(ctx, c, t.Namespace, t.Status.Platform)
 			if err != nil {
 				return nil, err
 			}
-		} else if ik, ok := o.(*v1.IntegrationKit); ok {
-			ip, err = getOrFindAny(ctx, c, ik.Namespace, ik.Status.Platform)
+		case *v1.IntegrationKit:
+			ip, err = getOrFindAny(ctx, c, t.Namespace, t.Status.Platform)
 			if err != nil {
 				return nil, err
 			}
@@ -88,7 +89,6 @@ func GetForResource(ctx context.Context, c k8sclient.Reader, o k8sclient.Object)
 
 	return ip, nil
 }
-
 func GetForName(ctx context.Context, c k8sclient.Reader, namespace string, name string) (*v1.IntegrationPlatform, error) {
 	return getOrFindAny(ctx, c, namespace, name)
 }
@@ -135,13 +135,14 @@ func findAny(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.Int
 
 // findLocal returns the currently installed platform or any platform existing in local namespace.
 func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.IntegrationPlatform, error) {
-	log.Debug("Finding available platforms")
+	log.Debugf("Finding available platforms in namespace %s", namespace)
 
 	operatorNamespace := GetOperatorNamespace()
 	if namespace == operatorNamespace {
 		operatorID := defaults.OperatorID()
 		if operatorID != "" {
 			if p, err := get(ctx, c, operatorNamespace, operatorID); err == nil {
+				log.Debugf("Found integration platform %s for operator %s in namespace %s", operatorID, operatorID, operatorNamespace)
 				return p, nil
 			}
 		}
@@ -153,10 +154,10 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 	}
 
 	var fallback *v1.IntegrationPlatform
-	for _, platform := range lst.Items {
-		platform := platform // pin
+	for i := range lst.Items {
+		platform := lst.Items[i]
 		if IsActive(&platform) {
-			log.Debugf("Found active integration platform %s", platform.Name)
+			log.Debugf("Found active integration platform %s in namespace %s", platform.Name, namespace)
 			return &platform, nil
 		} else {
 			fallback = &platform
@@ -164,11 +165,11 @@ func findLocal(ctx context.Context, c k8sclient.Reader, namespace string) (*v1.I
 	}
 
 	if fallback != nil {
-		log.Debugf("Found inactive integration platform %s", fallback.Name)
+		log.Debugf("Found inactive integration platform %s in namespace %s", fallback.Name, namespace)
 		return fallback, nil
 	}
 
-	log.Debugf("Unable to find integration platform")
+	log.Debugf("Unable to find integration platform in namespace %s", namespace)
 	return nil, k8serrors.NewNotFound(v1.Resource("IntegrationPlatform"), DefaultPlatformName)
 }
 

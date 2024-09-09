@@ -41,6 +41,10 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
 )
 
+const (
+	requeueAfterDuration = 5 * time.Second
+)
+
 // Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields
 // on the Controller and Start it when the Manager is Started.
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
@@ -170,41 +174,44 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		a.InjectClient(r.client)
 		a.InjectLogger(targetLog)
 
-		if a.CanHandle(target) {
-			targetLog.Infof("Invoking action %s", a.Name())
+		if !a.CanHandle(target) {
+			continue
+		}
 
-			phaseFrom := target.Status.Phase
+		targetLog.Infof("Invoking action %s", a.Name())
 
-			target, err = a.Handle(ctx, target)
-			if err != nil {
+		phaseFrom := target.Status.Phase
+
+		target, err = a.Handle(ctx, target)
+		if err != nil {
+			camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
+			return reconcile.Result{}, err
+		}
+
+		if target != nil {
+			target.Status.ObservedGeneration = instance.Generation
+
+			if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
 				camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
 				return reconcile.Result{}, err
 			}
 
-			if target != nil {
-				target.Status.ObservedGeneration = instance.Generation
+			targetPhase = target.Status.Phase
 
-				if err := r.client.Status().Patch(ctx, target, ctrl.MergeFrom(&instance)); err != nil {
-					camelevent.NotifyIntegrationPlatformError(ctx, r.client, r.recorder, &instance, target, err)
-					return reconcile.Result{}, err
-				}
-
-				targetPhase = target.Status.Phase
-
-				if targetPhase != phaseFrom {
-					targetLog.Info(
-						"State transition",
-						"phase-from", phaseFrom,
-						"phase-to", target.Status.Phase,
-					)
-				}
+			if targetPhase != phaseFrom {
+				targetLog.Info(
+					"State transition",
+					"phase-from", phaseFrom,
+					"phase-to", target.Status.Phase,
+				)
 			}
-
-			// handle one action at time so the resource
-			// is always at its latest state
-			camelevent.NotifyIntegrationPlatformUpdated(ctx, r.client, r.recorder, &instance, target)
-			break
 		}
+
+		// handle one action at time so the resource
+		// is always at its latest state
+		camelevent.NotifyIntegrationPlatformUpdated(ctx, r.client, r.recorder, &instance, target)
+
+		break
 	}
 
 	if targetPhase == v1.IntegrationPlatformPhaseReady {
@@ -213,6 +220,6 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 
 	// Requeue
 	return reconcile.Result{
-		RequeueAfter: 5 * time.Second,
+		RequeueAfter: requeueAfterDuration,
 	}, nil
 }

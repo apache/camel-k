@@ -81,7 +81,7 @@ func registerSteps(steps interface{}) {
 	v := reflect.ValueOf(steps)
 	t := reflect.TypeOf(steps)
 
-	for i := 0; i < v.NumField(); i++ {
+	for i := range v.NumField() {
 		field := t.Field(i)
 		if step, ok := v.Field(i).Interface().(Step); ok {
 			id := t.PkgPath() + "/" + field.Name

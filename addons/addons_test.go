@@ -20,10 +20,7 @@ package addons
 import (
 	"testing"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/apache/camel-k/v2/addons/master"
-	"github.com/apache/camel-k/v2/addons/telemetry"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
 
@@ -63,42 +60,4 @@ func TestTraitConfiguration(t *testing.T) {
 	assert.Equal(t, "test-label", *master.LabelKey)
 	assert.Equal(t, "test-value", *master.LabelValue)
 
-	require.NotNil(t, c.GetTrait("telemetry"))
-	telemetry, ok := c.GetTrait("telemetry").(*telemetry.TestTelemetryTrait)
-	require.True(t, ok)
-	assert.True(t, *telemetry.Enabled)
-}
-
-func TestTraitConfigurationFromAnnotations(t *testing.T) {
-	env := trait.Environment{
-		Integration: &v1.Integration{
-			ObjectMeta: metav1.ObjectMeta{
-				Annotations: map[string]string{
-					"trait.camel.apache.org/master.enabled":       "true",
-					"trait.camel.apache.org/master.resource-name": "test-lock",
-					"trait.camel.apache.org/master.label-key":     "test-label",
-					"trait.camel.apache.org/master.label-value":   "test-value",
-					"trait.camel.apache.org/telemetry.enabled":    "true",
-				},
-			},
-			Spec: v1.IntegrationSpec{
-				Profile: v1.TraitProfileKubernetes,
-			},
-		},
-	}
-	c := trait.NewCatalog(nil)
-	require.NoError(t, c.Configure(&env))
-
-	require.NotNil(t, c.GetTrait("master"))
-	master, ok := c.GetTrait("master").(*master.TestMasterTrait)
-	require.True(t, ok)
-	assert.True(t, *master.Enabled)
-	assert.Equal(t, "test-lock", *master.ResourceName)
-	assert.Equal(t, "test-label", *master.LabelKey)
-	assert.Equal(t, "test-value", *master.LabelValue)
-
-	require.NotNil(t, c.GetTrait("telemetry"))
-	telemetry, ok := c.GetTrait("telemetry").(*telemetry.TestTelemetryTrait)
-	require.True(t, ok)
-	assert.True(t, *telemetry.Enabled)
 }

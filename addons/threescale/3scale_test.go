@@ -25,14 +25,15 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestThreeScaleDisabled(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := &trait.Environment{
 		CamelCatalog: catalog,
@@ -40,7 +41,7 @@ func TestThreeScaleDisabled(t *testing.T) {
 
 	threeScale := NewThreeScaleTrait()
 	enabled, condition, err := threeScale.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.False(t, enabled)
 	assert.Nil(t, condition)
 }
@@ -49,14 +50,14 @@ func TestThreeScaleInjection(t *testing.T) {
 	svc, e := createEnvironment(t)
 	threeScale := NewThreeScaleTrait()
 	tst, _ := threeScale.(*threeScaleTrait)
-	tst.Enabled = pointer.Bool(true)
+	tst.Enabled = ptr.To(true)
 	ok, condition, err := threeScale.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = threeScale.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "true", svc.Labels["discovery.3scale.net"])
 	assert.Equal(t, "http", svc.Annotations["discovery.3scale.net/scheme"])
@@ -69,15 +70,15 @@ func TestThreeScaleInjectionNoAPIPath(t *testing.T) {
 	svc, e := createEnvironment(t)
 	threeScale := NewThreeScaleTrait()
 	tst, _ := threeScale.(*threeScaleTrait)
-	tst.Enabled = pointer.Bool(true)
-	tst.DescriptionPath = pointer.String("")
+	tst.Enabled = ptr.To(true)
+	tst.DescriptionPath = ptr.To("")
 	ok, condition, err := threeScale.Configure(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, ok)
 	assert.Nil(t, condition)
 
 	err = threeScale.Apply(e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, "true", svc.Labels["discovery.3scale.net"])
 	assert.Equal(t, "http", svc.Annotations["discovery.3scale.net/scheme"])
@@ -91,7 +92,7 @@ func createEnvironment(t *testing.T) (*corev1.Service, *trait.Environment) {
 	t.Helper()
 
 	catalog, err := camel.DefaultCatalog()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	e := trait.Environment{
 		CamelCatalog: catalog,

@@ -20,24 +20,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package misc
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
 )
 
 func TestKameletClasspathLoading(t *testing.T) {
-	RegisterTestingT(t)
-
-	// Store a configmap on the cluster
-	var cmData = make(map[string]string)
-	cmData["my-timer-source.kamelet.yaml"] = `
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		// Store a configmap on the cluster
+		var cmData = make(map[string]string)
+		cmData["my-timer-source.kamelet.yaml"] = `
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -108,27 +108,13 @@ spec:
             constant: "{{contentType}}"
         - to: kamelet:sink
 `
-	CreatePlainTextConfigmap(ns, "my-kamelet-cm", cmData)
+		CreatePlainTextConfigmap(t, ctx, ns, "my-kamelet-cm", cmData)
 
-	// Basic
-	t.Run("test basic case", func(t *testing.T) {
-		Expect(KamelRunWithID(operatorID, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false",
-			"--resource", "configmap:my-kamelet-cm@/kamelets",
-			"-p camel.component.kamelet.location=file:/kamelets",
-			"-d", "camel:yaml-dsl",
-			// kamelet dependencies
-			"-d", "camel:timer").Execute()).To(Succeed())
-		Eventually(IntegrationPodPhase(ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-		Eventually(IntegrationLogs(ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
-
-		// check integration schema does not contains unwanted default trait value.
-		Eventually(UnstructuredIntegration(ns, "timer-kamelet-integration")).ShouldNot(BeNil())
-		unstructuredIntegration := UnstructuredIntegration(ns, "timer-kamelet-integration")()
-		kameletsTrait, _, _ := unstructured.NestedMap(unstructuredIntegration.Object, "spec", "traits", "kamelets")
-		Expect(kameletsTrait).ToNot(BeNil())
-		Expect(len(kameletsTrait)).To(Equal(1))
-		Expect(kameletsTrait["enabled"]).To(Equal(false))
+		// Basic
+		t.Run("test basic case", func(t *testing.T) {
+			g.Expect(KamelRun(t, ctx, ns, "files/TimerKameletIntegration.java", "-t", "kamelets.enabled=false", "--resource", "configmap:my-kamelet-cm@/kamelets", "-p camel.component.kamelet.location=file:/kamelets", "-d", "camel:yaml-dsl", "-d", "camel:timer").Execute()).To(Succeed())
+			g.Eventually(IntegrationPodPhase(t, ctx, ns, "timer-kamelet-integration"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+			g.Eventually(IntegrationLogs(t, ctx, ns, "timer-kamelet-integration")).Should(ContainSubstring("important message"))
+		})
 	})
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
 }

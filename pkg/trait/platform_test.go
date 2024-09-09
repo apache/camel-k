@@ -22,13 +22,15 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestPlatformTraitChangeStatus(t *testing.T) {
@@ -59,19 +61,19 @@ func TestPlatformTraitChangeStatus(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = pointer.Bool(false)
+			trait.CreateDefault = ptr.To(false)
 
 			var err error
 			trait.Client, err = test.NewFakeClient()
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			enabled, condition, err := trait.Configure(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.True(t, enabled)
 			assert.Nil(t, condition)
 
 			err = trait.Apply(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 			assert.Empty(t, e.Resources.Items())
@@ -94,24 +96,24 @@ func TestPlatformTraitCreatesDefaultPlatform(t *testing.T) {
 	}
 
 	trait, _ := newPlatformTrait().(*platformTrait)
-	trait.CreateDefault = pointer.Bool(true)
+	trait.CreateDefault = ptr.To(true)
 
 	var err error
 	trait.Client, err = test.NewFakeClient()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	enabled, condition, err := trait.Configure(&e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.True(t, enabled)
 	assert.Nil(t, condition)
 
 	err = trait.Apply(&e)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, v1.IntegrationPhaseWaitingForPlatform, e.Integration.Status.Phase)
 	assert.Equal(t, 1, len(e.Resources.Items()))
 	defPlatform := v1.NewIntegrationPlatform("ns1", platform.DefaultPlatformName)
-	defPlatform.Labels = map[string]string{"app": "camel-k", "camel.apache.org/platform.generated": True}
+	defPlatform.Labels = map[string]string{"app": "camel-k", "camel.apache.org/platform.generated": boolean.TrueString}
 	assert.Contains(t, e.Resources.Items(), &defPlatform)
 }
 
@@ -150,21 +152,21 @@ func TestPlatformTraitExisting(t *testing.T) {
 			}
 
 			trait, _ := newPlatformTrait().(*platformTrait)
-			trait.CreateDefault = pointer.Bool(true)
+			trait.CreateDefault = ptr.To(true)
 
 			var err error
 			existingPlatform := v1.NewIntegrationPlatform("ns1", "existing")
 			existingPlatform.Status.Phase = input.platformPhase
 			trait.Client, err = test.NewFakeClient(&existingPlatform)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			enabled, condition, err := trait.Configure(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 			assert.True(t, enabled)
 			assert.Nil(t, condition)
 
 			err = trait.Apply(&e)
-			assert.Nil(t, err)
+			require.NoError(t, err)
 
 			assert.Equal(t, input.expectedPhase, e.Integration.Status.Phase)
 			assert.Empty(t, e.Resources.Items())

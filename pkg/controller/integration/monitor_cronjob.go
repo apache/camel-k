@@ -42,31 +42,35 @@ var _ controller = &cronJobController{}
 
 func (c *cronJobController) checkReadyCondition(ctx context.Context) (bool, error) {
 	// Check latest job result
-	if lastScheduleTime := c.obj.Status.LastScheduleTime; lastScheduleTime != nil && len(c.obj.Status.Active) == 0 {
-		jobs := batchv1.JobList{}
-		if err := c.client.List(ctx, &jobs,
-			ctrl.InNamespace(c.integration.Namespace),
-			ctrl.MatchingLabels{v1.IntegrationLabel: c.integration.Name},
-		); err != nil {
-			return true, err
+	lastScheduleTime := c.obj.Status.LastScheduleTime
+
+	if lastScheduleTime == nil || len(c.obj.Status.Active) != 0 {
+		return false, nil
+	}
+
+	jobs := batchv1.JobList{}
+	if err := c.client.List(ctx, &jobs,
+		ctrl.InNamespace(c.integration.Namespace),
+		ctrl.MatchingLabels{v1.IntegrationLabel: c.integration.Name},
+	); err != nil {
+		return true, err
+	}
+	t := lastScheduleTime.Time
+	for i, job := range jobs.Items {
+		if job.Status.Active == 0 && job.CreationTimestamp.Time.Before(t) {
+			continue
 		}
-		t := lastScheduleTime.Time
-		for i, job := range jobs.Items {
-			if job.Status.Active == 0 && job.CreationTimestamp.Time.Before(t) {
-				continue
-			}
-			c.lastCompletedJob = &jobs.Items[i]
-			t = c.lastCompletedJob.CreationTimestamp.Time
-		}
-		if c.lastCompletedJob != nil {
-			if failed := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobFailed); failed != nil &&
-				failed.Status == corev1.ConditionTrue {
-				c.integration.SetReadyCondition(corev1.ConditionFalse,
-					v1.IntegrationConditionLastJobFailedReason,
-					fmt.Sprintf("last job %s failed: %s", c.lastCompletedJob.Name, failed.Message))
-				c.integration.Status.Phase = v1.IntegrationPhaseError
-				return true, nil
-			}
+		c.lastCompletedJob = &jobs.Items[i]
+		t = c.lastCompletedJob.CreationTimestamp.Time
+	}
+	if c.lastCompletedJob != nil {
+		if failed := kubernetes.GetJobCondition(*c.lastCompletedJob, batchv1.JobFailed); failed != nil &&
+			failed.Status == corev1.ConditionTrue {
+			c.integration.SetReadyCondition(corev1.ConditionFalse,
+				v1.IntegrationConditionLastJobFailedReason,
+				fmt.Sprintf("last job %s failed: %s", c.lastCompletedJob.Name, failed.Message))
+			c.integration.Status.Phase = v1.IntegrationPhaseError
+			return true, nil
 		}
 	}
 

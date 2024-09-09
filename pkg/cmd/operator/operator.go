@@ -36,14 +36,11 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
-	coordination "k8s.io/api/coordination/v1"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
-	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -52,6 +49,7 @@ import (
 	zapctrl "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	servingv1 "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -60,7 +58,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/controller"
 	"github.com/apache/camel-k/v2/pkg/controller/synthetic"
-	"github.com/apache/camel-k/v2/pkg/event"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
@@ -144,20 +141,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	bootstrapClient, err := client.NewClientWithConfig(false, cfg)
 	exitOnError(err, "cannot initialize client")
 
-	// We do not rely on the event broadcaster managed by controller runtime,
-	// so that we can check the operator has been granted permission to create
-	// Events. This is required for the operator to be installable by standard
-	// admin users, that are not granted create permission on Events by default.
-	broadcaster := record.NewBroadcaster()
-	defer broadcaster.Shutdown()
-
-	if ok, err := kubernetes.CheckPermission(ctx, bootstrapClient, corev1.GroupName, "events", watchNamespace, "", "create"); err != nil || !ok {
-		// Do not sink Events to the server as they'll be rejected
-		broadcaster = event.NewSinkLessBroadcaster(broadcaster)
-		exitOnError(err, "cannot check permissions for creating Events")
-		log.Info("Event broadcasting is disabled because of missing permissions to create Events")
-	}
-
 	operatorNamespace := platform.GetOperatorNamespace()
 	if operatorNamespace == "" {
 		// Fallback to using the watch namespace when the operator is not in-cluster.
@@ -174,47 +157,55 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	platform.OperatorImage, err = getOperatorImage(ctx, bootstrapClient)
 	exitOnError(err, "cannot get operator container image")
 
-	if ok, err := kubernetes.CheckPermission(ctx, bootstrapClient, coordination.GroupName, "leases", operatorNamespace, "", "create"); err != nil || !ok {
-		leaderElection = false
-		exitOnError(err, "cannot check permissions for creating Leases")
-		log.Info("The operator is not granted permissions to create Leases")
-	}
-
 	if !leaderElection {
 		log.Info("Leader election is disabled!")
 	}
 
 	hasIntegrationLabel, err := labels.NewRequirement(v1.IntegrationLabel, selection.Exists, []string{})
 	exitOnError(err, "cannot create Integration label selector")
-	selector := labels.NewSelector().Add(*hasIntegrationLabel)
+	labelsSelector := labels.NewSelector().Add(*hasIntegrationLabel)
+
+	selector := cache.ByObject{
+		Label: labelsSelector,
+	}
+
+	if !platform.IsCurrentOperatorGlobal() {
+		selector = cache.ByObject{
+			Label:      labelsSelector,
+			Namespaces: getNamespacesSelector(operatorNamespace, watchNamespace),
+		}
+	}
 
 	selectors := map[ctrl.Object]cache.ByObject{
-		&corev1.Pod{}:        {Label: selector},
-		&appsv1.Deployment{}: {Label: selector},
-		&batchv1.Job{}:       {Label: selector},
-		&servingv1.Service{}: {Label: selector},
+		&corev1.Pod{}:        selector,
+		&appsv1.Deployment{}: selector,
+		&batchv1.Job{}:       selector,
+	}
+
+	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, servingv1.SchemeGroupVersion.String(), reflect.TypeOf(servingv1.Service{}).Name()); ok && err == nil {
+		selectors[&servingv1.Service{}] = selector
 	}
 
 	if ok, err := kubernetes.IsAPIResourceInstalled(bootstrapClient, batchv1.SchemeGroupVersion.String(), reflect.TypeOf(batchv1.CronJob{}).Name()); ok && err == nil {
-		selectors[&batchv1.CronJob{}] = cache.ByObject{
-			Label: selector,
-		}
+		selectors[&batchv1.CronJob{}] = selector
 	}
 
 	options := cache.Options{
 		ByObject: selectors,
 	}
 
+	if !platform.IsCurrentOperatorGlobal() {
+		options.DefaultNamespaces = getNamespacesSelector(operatorNamespace, watchNamespace)
+	}
+
 	mgr, err := manager.New(cfg, manager.Options{
-		Namespace:                     watchNamespace,
-		EventBroadcaster:              broadcaster,
 		LeaderElection:                leaderElection,
 		LeaderElectionNamespace:       operatorNamespace,
 		LeaderElectionID:              leaderElectionID,
 		LeaderElectionResourceLock:    resourcelock.LeasesResourceLock,
 		LeaderElectionReleaseOnCancel: true,
 		HealthProbeBindAddress:        ":" + strconv.Itoa(int(healthPort)),
-		MetricsBindAddress:            ":" + strconv.Itoa(int(monitoringPort)),
+		Metrics:                       metricsserver.Options{BindAddress: ":" + strconv.Itoa(int(monitoringPort))},
 		Cache:                         options,
 	})
 	exitOnError(err, "")
@@ -230,7 +221,6 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	installCtx, installCancel := context.WithTimeout(ctx, 1*time.Minute)
 	defer installCancel()
 	install.OperatorStartupOptionalTools(installCtx, bootstrapClient, watchNamespace, operatorNamespace, log)
-	exitOnError(findOrCreateIntegrationPlatform(installCtx, bootstrapClient, operatorNamespace), "failed to create integration platform")
 
 	synthEnvVal, synth := os.LookupEnv("CAMEL_K_SYNTHETIC_INTEGRATIONS")
 	if synth && synthEnvVal == "true" {
@@ -243,42 +233,14 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 	exitOnError(mgr.Start(ctx), "manager exited non-zero")
 }
 
-// findOrCreateIntegrationPlatform create default integration platform in operator namespace if not already exists.
-func findOrCreateIntegrationPlatform(ctx context.Context, c client.Client, operatorNamespace string) error {
-	operatorID := defaults.OperatorID()
-	var platformName string
-	if operatorID != "" {
-		platformName = operatorID
-	} else {
-		platformName = platform.DefaultPlatformName
+func getNamespacesSelector(operatorNamespace string, watchNamespace string) map[string]cache.Config {
+	namespacesSelector := map[string]cache.Config{
+		operatorNamespace: {},
 	}
-
-	if pl, err := kubernetes.GetIntegrationPlatform(ctx, c, platformName, operatorNamespace); pl == nil || k8serrors.IsNotFound(err) {
-		defaultPlatform := v1.NewIntegrationPlatform(operatorNamespace, platformName)
-
-		if defaultPlatform.Labels == nil {
-			defaultPlatform.Labels = make(map[string]string)
-		}
-		defaultPlatform.Labels["app"] = "camel-k"
-		defaultPlatform.Labels["camel.apache.org/platform.generated"] = "true"
-
-		if operatorID != "" {
-			defaultPlatform.SetOperatorID(operatorID)
-		}
-
-		if _, err := c.CamelV1().IntegrationPlatforms(operatorNamespace).Create(ctx, &defaultPlatform, metav1.CreateOptions{}); err != nil {
-			return err
-		}
-
-		// Make sure that IntegrationPlatform installed in operator namespace can be seen by others
-		if err := install.IntegrationPlatformViewerRole(ctx, c, operatorNamespace); err != nil && !k8serrors.IsAlreadyExists(err) {
-			return fmt.Errorf("error while installing global IntegrationPlatform viewer role: %w", err)
-		}
-	} else {
-		return err
+	if operatorNamespace != watchNamespace {
+		namespacesSelector[watchNamespace] = cache.Config{}
 	}
-
-	return nil
+	return namespacesSelector
 }
 
 // getWatchNamespace returns the Namespace the operator should be watching for changes.

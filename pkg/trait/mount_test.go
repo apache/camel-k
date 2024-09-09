@@ -46,7 +46,7 @@ func TestMountVolumesEmpty(t *testing.T) {
 	conditions, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
 
@@ -69,7 +69,7 @@ func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 	conditions, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
 
@@ -108,6 +108,52 @@ func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 	})
 }
 
+func TestEmptyDirVolumeIntegrationPhaseDeploying(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+
+	environment := getNominalEnv(t, traitCatalog)
+	environment.Integration.Spec.Traits.Mount = &traitv1.MountTrait{
+		EmptyDirs: []string{"my-empty-dir:/some/path"},
+	}
+	environment.Platform.ResyncStatusFullConfig()
+	conditions, err := traitCatalog.apply(environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, conditions)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.NotNil(t, environment.GetTrait("mount"))
+
+	deployment := environment.Resources.GetDeployment(func(service *appsv1.Deployment) bool {
+		return service.Name == "hello"
+	})
+	assert.NotNil(t, deployment)
+	spec := deployment.Spec.Template.Spec
+
+	assert.Len(t, spec.Containers[0].VolumeMounts, 3)
+	assert.Len(t, spec.Volumes, 3)
+
+	assert.Condition(t, func() bool {
+		for _, v := range spec.Volumes {
+			if v.Name == "my-empty-dir" {
+				return true
+			}
+		}
+		return false
+	})
+	assert.Condition(t, func() bool {
+		for _, container := range spec.Containers {
+			if container.Name == "integration" {
+				for _, volumeMount := range container.VolumeMounts {
+					if volumeMount.Name == "my-empty-dir" {
+						return true
+					}
+				}
+			}
+		}
+		return false
+	})
+}
+
 func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
@@ -118,7 +164,7 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 	conditions, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("mount"))
 

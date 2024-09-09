@@ -20,9 +20,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package traits
+package common
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -34,72 +35,65 @@ import (
 )
 
 func TestPodTrait(t *testing.T) {
-	RegisterTestingT(t)
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		tc := []struct {
+			name         string
+			templateName string
+			assertions   func(t *testing.T, ns string, name string)
+		}{
+			{
+				name:         "pod trait with env vars and volume mounts",
+				templateName: "files/template.yaml",
+				//nolint: thelper
+				assertions: func(t *testing.T, ns string, name string) {
+					// check that integrations is working and reading data created by sidecar container
+					g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
+					// check that env var is injected
+					g.Eventually(IntegrationLogs(t, ctx, ns, name), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
+					pod := IntegrationPod(t, ctx, ns, name)()
 
-	tc := []struct {
-		name         string
-		templateName string
-		assertions   func(t *testing.T, ns string, name string)
-	}{
-		{
-			name:         "pod trait with env vars and volume mounts",
-			templateName: "files/template.yaml",
-			//nolint: thelper
-			assertions: func(t *testing.T, ns string, name string) {
-				// check that integrations is working and reading data created by sidecar container
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("Content from the sidecar container"))
-				// check that env var is injected
-				Eventually(IntegrationLogs(ns, name), TestTimeoutShort).Should(ContainSubstring("hello from the template"))
-				pod := IntegrationPod(ns, name)()
-
-				// check if ENV variable is applied
-				envValue := getEnvVar("TEST_VARIABLE", pod.Spec)
-				Expect(envValue).To(Equal("hello from the template"))
+					// check if ENV variable is applied
+					envValue := getEnvVar("TEST_VARIABLE", pod.Spec)
+					g.Expect(envValue).To(Equal("hello from the template"))
+				},
 			},
-		},
-		{
-			name:         "pod trait with supplemental groups",
-			templateName: "files/template-with-supplemental-groups.yaml",
-			//nolint: thelper
-			assertions: func(t *testing.T, ns string, name string) {
-				Eventually(IntegrationPodHas(ns, name, func(pod *corev1.Pod) bool {
-					if pod.Spec.SecurityContext == nil {
-						return false
-					}
-					for _, sg := range pod.Spec.SecurityContext.SupplementalGroups {
-						if sg == 666 {
-							return true
+			{
+				name:         "pod trait with supplemental groups",
+				templateName: "files/template-with-supplemental-groups.yaml",
+				//nolint: thelper
+				assertions: func(t *testing.T, ns string, name string) {
+					g.Eventually(IntegrationPodHas(t, ctx, ns, name, func(pod *corev1.Pod) bool {
+						if pod.Spec.SecurityContext == nil {
+							return false
 						}
-					}
-					return false
-				}), TestTimeoutShort).Should(BeTrue())
+						for _, sg := range pod.Spec.SecurityContext.SupplementalGroups {
+							if sg == 666 {
+								return true
+							}
+						}
+						return false
+					}), TestTimeoutShort).Should(BeTrue())
+				},
 			},
-		},
-	}
+		}
 
-	name := RandomizedSuffixName("pod-template-test")
+		name := RandomizedSuffixName("pod-template-test")
 
-	for i := range tc {
-		test := tc[i]
+		for i := range tc {
+			test := tc[i]
 
-		t.Run(test.name, func(t *testing.T) {
-			Expect(KamelRunWithID(operatorID, ns, "files/PodTest.groovy",
-				"--name", name,
-				"--pod-template", test.templateName,
-			).Execute()).To(Succeed())
+			t.Run(test.name, func(t *testing.T) {
+				g.Expect(KamelRun(t, ctx, ns, "files/PodTest.yaml", "--name", name, "--pod-template", test.templateName).Execute()).To(Succeed())
 
-			// check integration is deployed
-			Eventually(IntegrationPodPhase(ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			Eventually(IntegrationConditionStatus(ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
+				// check integration is deployed
+				g.Eventually(IntegrationPodPhase(t, ctx, ns, name), TestTimeoutLong).Should(Equal(corev1.PodRunning))
+				g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutShort).Should(Equal(corev1.ConditionTrue))
 
-			test.assertions(t, ns, name)
-
-			// Clean up
-			Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
-		})
-	}
-
-	Expect(Kamel("delete", "--all", "-n", ns).Execute()).To(Succeed())
+				test.assertions(t, ns, name)
+			})
+		}
+	})
 }
 
 func getEnvVar(name string, spec corev1.PodSpec) string {

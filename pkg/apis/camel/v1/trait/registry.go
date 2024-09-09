@@ -17,10 +17,13 @@ limitations under the License.
 
 package trait
 
+// WARNING: The Registry trait was deprecated in version 2.2.0 and is no longer active since version 2.5.0.
+//
 // The Registry trait sets up Maven to use the Image registry
 // as a Maven repository.
 //
 // +camel-k:trait=registry.
+// +camel-k:internal.
 type RegistryTrait struct {
 	Trait `property:",squash" json:",inline"`
 }
