@@ -32,8 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 
-	ctrl "sigs.k8s.io/controller-runtime/pkg/client"
-
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
@@ -315,20 +313,8 @@ func TestContainerWithCustomImage(t *testing.T) {
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployer"))
 	assert.NotNil(t, environment.GetTrait("container"))
-	assert.Equal(t, "kit-"+ServiceTestName, environment.Integration.Status.IntegrationKit.Name)
-
-	ikt := v1.IntegrationKit{}
-	key := ctrl.ObjectKey{
-		Namespace: "ns",
-		Name:      "kit-" + ServiceTestName,
-	}
-
-	err = client.Get(context.TODO(), key, &ikt)
-	require.NoError(t, err)
-	assert.Equal(t, environment.Integration.ObjectMeta.UID, ikt.ObjectMeta.OwnerReferences[0].UID)
-
-	trait := environment.Integration.Spec.Traits.Container
-	assert.Equal(t, trait.Image, ikt.Spec.Image)
+	assert.Nil(t, environment.Integration.Status.IntegrationKit)
+	assert.Equal(t, environment.Integration.Spec.Traits.Container.Image, environment.Integration.Status.Image)
 }
 
 func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
@@ -386,7 +372,7 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 
 	conditions, err := traitCatalog.apply(&environment)
 	require.Error(t, err)
-	assert.Empty(t, conditions)
+	assert.NotEmpty(t, conditions)
 	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
 }
 
@@ -398,10 +384,11 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		Ctx:          context.TODO(),
-		Client:       client,
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
+		Ctx:            context.TODO(),
+		Client:         client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
@@ -445,10 +432,11 @@ func TestDeploymentContainerPorts(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		Ctx:          context.TODO(),
-		Client:       client,
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
+		Ctx:            context.TODO(),
+		Client:         client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKubernetes,
@@ -510,10 +498,11 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
 
 	environment := Environment{
-		Ctx:          context.TODO(),
-		Client:       client,
-		CamelCatalog: catalog,
-		Catalog:      traitCatalog,
+		Ctx:            context.TODO(),
+		Client:         client,
+		CamelCatalog:   catalog,
+		Catalog:        traitCatalog,
+		IntegrationKit: &v1.IntegrationKit{},
 		Integration: &v1.Integration{
 			Spec: v1.IntegrationSpec{
 				Profile: v1.TraitProfileKnative,

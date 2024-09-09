@@ -41,8 +41,6 @@ func (k BindingConverter) ID() string {
 }
 
 // Translate --.
-//
-//nolint:dupl
 func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointContext, e v1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs
@@ -71,6 +69,12 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 	} else {
 		id = endpointCtx.GenerateID()
 	}
+	version, versionPresent := props[v1.KameletVersionProperty]
+	if versionPresent {
+		delete(props, v1.KameletVersionProperty)
+	}
+
+	kameletTranslated := getKameletName(kameletName, id, version)
 
 	binding := Binding{}
 	binding.ApplicationProperties = make(map[string]string)
@@ -97,7 +101,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 
 		steps = append(steps, map[string]interface{}{
 			"kamelet": map[string]interface{}{
-				"name": fmt.Sprintf("%s/%s", kameletName, url.PathEscape(id)),
+				"name": kameletTranslated,
 			},
 		})
 
@@ -126,7 +130,7 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 			}
 		}
 
-		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+		binding.URI = fmt.Sprintf("kamelet:%s", kameletTranslated)
 	case v1.EndpointTypeSink:
 		if in, applicationProperties := k.DataTypeStep(e, id, v1.TypeSlotIn, dataTypeActionKamelet); in != nil {
 			binding.Step = in
@@ -135,12 +139,20 @@ func (k BindingConverter) Translate(ctx BindingContext, endpointCtx EndpointCont
 			}
 		}
 
-		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+		binding.URI = fmt.Sprintf("kamelet:%s", kameletTranslated)
 	default:
-		binding.URI = fmt.Sprintf("kamelet:%s/%s", kameletName, url.PathEscape(id))
+		binding.URI = fmt.Sprintf("kamelet:%s", kameletTranslated)
 	}
 
 	return &binding, nil
+}
+
+func getKameletName(name, id, version string) string {
+	kamelet := fmt.Sprintf("%s/%s", name, url.PathEscape(id))
+	if version != "" {
+		kamelet = fmt.Sprintf("%s?%s=%s", kamelet, v1.KameletVersionProperty, version)
+	}
+	return kamelet
 }
 
 // DataTypeStep --.
@@ -193,8 +205,6 @@ func (k V1alpha1BindingConverter) ID() string {
 
 // Translate -- .
 // Deprecated.
-//
-//nolint:dupl
 func (k V1alpha1BindingConverter) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
 	if e.Ref == nil {
 		// works only on refs

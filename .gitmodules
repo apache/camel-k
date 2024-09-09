@@ -1,6 +1,3 @@
-[submodule ".github/actions/changelog"]
-	path = .github/actions/changelog
-	url = https://github.com/CharMixer/auto-changelog-action
 [submodule ".github/actions/gh-go-mod-generate-sbom"]
 	path = .github/actions/gh-go-mod-generate-sbom
 	url = https://github.com/CycloneDX/gh-gomod-generate-sbom/

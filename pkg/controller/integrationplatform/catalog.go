@@ -51,12 +51,13 @@ func (action *catalogAction) Handle(ctx context.Context, platform *v1.Integratio
 		Provider: v1.RuntimeProviderQuarkus,
 	}
 
-	if catalog, err := camel.LoadCatalog(ctx, action.client, platform.Namespace, runtimeSpec); err != nil {
+	catalog, err := camel.LoadCatalog(ctx, action.client, platform.Namespace, runtimeSpec)
+	if err != nil {
 		action.L.Error(err, "IntegrationPlatform unable to load Camel catalog",
 			"runtime-version", runtimeSpec.Version, "runtime-provider", runtimeSpec.Provider)
 		return platform, nil
 	} else if catalog == nil {
-		if _, err = camel.CreateCatalog(ctx, action.client, platform.Namespace, platform, runtimeSpec); err != nil {
+		if catalog, err = camel.CreateCatalog(ctx, action.client, platform.Namespace, platform, runtimeSpec); err != nil {
 			action.L.Error(err, "IntegrationPlatform unable to create Camel catalog",
 				"runtime-version", runtimeSpec.Version, "runtime-provider", runtimeSpec.Provider)
 
@@ -77,6 +78,7 @@ func (action *catalogAction) Handle(ctx context.Context, platform *v1.Integratio
 		corev1.ConditionTrue,
 		v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
 		fmt.Sprintf("camel catalog %s available", runtimeSpec.Version))
+	platform.Status.Build.RuntimeCoreVersion = catalog.Runtime.Metadata["camel.version"]
 
 	return platform, nil
 }

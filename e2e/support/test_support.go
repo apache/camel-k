@@ -36,6 +36,7 @@ import (
 	"reflect"
 	"regexp"
 	"runtime/debug"
+	"sort"
 	"strings"
 	"sync"
 	"testing"
@@ -546,6 +547,10 @@ func IntegrationPod(t *testing.T, ctx context.Context, ns string, name string) f
 		if len(pods) == 0 {
 			return nil
 		}
+
+		sort.SliceStable(pods, func(i, j int) bool {
+			return pods[i].GetCreationTimestamp().Time.After(pods[j].GetCreationTimestamp().Time)
+		})
 		return &pods[0]
 	}
 }
@@ -1291,18 +1296,10 @@ func KitWithPhase(phase v1.IntegrationKitPhase) KitFilter {
 	}
 }
 
-func KitWithVersion(version string) KitFilter {
+func KitWithRuntimeVersion(version string) KitFilter {
 	return &kitFilter{
 		filter: func(kit *v1.IntegrationKit) bool {
-			return kit.Status.Version == version
-		},
-	}
-}
-
-func KitWithVersionPrefix(versionPrefix string) KitFilter {
-	return &kitFilter{
-		filter: func(kit *v1.IntegrationKit) bool {
-			return strings.HasPrefix(kit.Status.Version, versionPrefix)
+			return kit.Status.RuntimeVersion == version
 		},
 	}
 }
@@ -2124,6 +2121,16 @@ func PlatformVersion(t *testing.T, ctx context.Context, ns string) func() string
 	}
 }
 
+func PlatformRuntimeVersion(t *testing.T, ctx context.Context, ns string) func() string {
+	return func() string {
+		p := Platform(t, ctx, ns)()
+		if p == nil {
+			return ""
+		}
+		return p.Status.Build.RuntimeVersion
+	}
+}
+
 func PlatformPhase(t *testing.T, ctx context.Context, ns string) func() v1.IntegrationPlatformPhase {
 	return func() v1.IntegrationPlatformPhase {
 		p := Platform(t, ctx, ns)()
@@ -2666,10 +2673,12 @@ func CreateKameletWithID(t *testing.T, operatorID string, ctx context.Context, n
 				Labels:    labels,
 			},
 			Spec: v1.KameletSpec{
-				Definition: &v1.JSONSchemaProps{
-					Properties: properties,
+				KameletSpecBase: v1.KameletSpecBase{
+					Definition: &v1.JSONSchemaProps{
+						Properties: properties,
+					},
+					Template: asTemplate(t, template),
 				},
-				Template: asTemplate(t, template),
 			},
 		}
 

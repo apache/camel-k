@@ -1,0 +1,71 @@
+[[configuring-container-registry]]
+= Configuring a Namespace on IBM Container Registry (ICR)
+
+You can use a namespace of IBM Container Registry to host Camel K images.
+
+In order to push images to `icr.io`, you need to provide valid credentials (secret) to Camel K.
+
+[[creating-namespace]]
+== Creating a Namespace
+
+The fast way to obtain a namespace on ICR is by https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
+
+- Install https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli[IBM Command line tool]:
++
+[source,console]
+----
+$ ibmcloud plugin install container-registry -r 'IBM Cloud'
+----
+- Log in to your IBM Cloud account:
++
+[source,console]
+----
+$ ibmcloud login -a https://cloud.ibm.com
+----
+- Ensure that you're targeting the correct IBM Cloud Container Registry region:
++
+[source,console]
+----
+$ ibmcloud cr region-set us-south
+----
+- Choose a name for your namespace, and create that namespace:
++
+[source,console]
+----
+$ ibmcloud cr namespace-add <my_namespace>
+----
+
+[[providing-registry-secret]]
+== Providing Registry Secret
+
+Once you have a registry namespace, create a secret with the credentials in order for Camel K to access it.
+
+Firstly, make sure to log in to ICR so that the local Docker config file has the credentials for it:
+
+[source,console]
+----
+$ ibmcloud cr login
+----
+
+Then create a secret with the Docker config file `$HOME/.docker/config.json` (or in case of Podman, `$XDG_RUNTIME_DIR/containers/auth.json`):
+
+[source,console]
+----
+$ kubectl create secret generic my-icr-secret --from-file=.dockerconfigjson=$HOME/.docker/config.json --type=kubernetes.io/dockerconfigjson
+----
+
+Now you can provide the secret to the IntegrationPlatform:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    registry:
+      address: <region>.icr.io
+      organization: <my_namespace>
+      secret: my-icr-secret
+----

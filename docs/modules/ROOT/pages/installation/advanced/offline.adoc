@@ -2,7 +2,7 @@
 
 Camel K is naturally developed to fit in an "open world" cluster model. It basically means that the default installation assumes it can pull and push resources from the Internet. However, there could be certain domains or use cases where this is a limitation. For this reason this guide will show you how to setup properly Camel K in an offline (or disconnected, or air gapped) cluster environment.
 
-In order to understand the content of this guide. It is good to have familiarity with the default xref:installation/advanced/network.adoc[network architecture]. Let's see again the diagram here:
+In order to understand the content of this guide. It is good to have familiarity with the default xref:installation/advanced/network.adoc[components topology]. Let's see again the diagram here:
 
 image::architecture/camel-k-network.svg[Network architecture, width=800]
 
@@ -11,7 +11,7 @@ We can easily identify those components which requires access to the Internet an
 [[registry]]
 == Container images registry
 
-The xref:installation/registry/registry.adoc[registry] is the component in charge to host the containers which are built from the operator and are used by the cluster to run the Camel applications. This component could be provided out of the box by the cluster, or should be operated by you (see the guide on xref:installation/registry/own.adoc[how to run your own registry]).
+The xref:installation/registry/registry.adoc[registry] is the component in charge to host the containers which are built from the operator and are used by the cluster to run the Camel applications. This component could be provided out of the box by the cluster, or should be operated by you (see the guide on xref:installation/registry/special/own.adoc[how to run your own registry]).
 
 As we're in a disconnected environment, we assume this component to be accessible by the cluster (through an IP or URL). However, the cluster need to use the Camel K container image in order to be installed. You therefore need to make sure that the cluster registry has preloaded the Camel K container image, which is `docker.io/apache/camel-k:2.3.0` (or any version you're willing to use).
 

@@ -19,6 +19,7 @@ package v1
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -86,6 +87,15 @@ func (in *Integration) UserDefinedSources() []SourceSpec {
 	sources := make([]SourceSpec, 0, len(in.Spec.Sources))
 	sources = append(sources, in.Spec.Sources...)
 	return sources
+}
+
+// IsManagedBuild returns true when the Integration requires to be built by the operator.
+func (in *Integration) IsManagedBuild() bool {
+	if in.Spec.Traits.Container == nil || in.Spec.Traits.Container.Image == "" {
+		return true
+	}
+	isManagedBuild, err := regexp.MatchString("(.*)/(.*)/camel-k-kit-(.*)@sha256:(.*)", in.Spec.Traits.Container.Image)
+	return err == nil && isManagedBuild
 }
 
 func (in *IntegrationSpec) AddSource(name string, content string, language Language) {

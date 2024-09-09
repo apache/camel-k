@@ -66,7 +66,7 @@ Deprecated: no longer in use.
 
 The `jar` parameter is something the user should not worry about, unless that, for any reason, he wants to specify which is the executable dependency to use. Mind that, in order to do that, the base image used to build the container require a java binary executable from path (ie, `/usr/bin/java`).
 
-This parameters enables also the possibility to use the trait when running a synthetic IntegrationKit (ie, "sourceless" Integrations). In such circumstances, the user can run a Camel application built externally and make use of the trait configuration as well as for example:
+This parameters enables also the possibility to use the trait when running a self managed build Integrations. In such circumstances, the user can run a Camel application built externally and make use of the trait configuration as well as for example:
 
 [source,console]
 $ kamel run --image docker.io/squakez/my-camel-sb:1.0.0 -t jvm.jar=/deployments/my-camel-app.jar -t jvm.options=-Xmx1024M

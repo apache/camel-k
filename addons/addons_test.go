@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/apache/camel-k/v2/addons/master"
-	"github.com/apache/camel-k/v2/addons/telemetry"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/trait"
 
@@ -61,8 +60,4 @@ func TestTraitConfiguration(t *testing.T) {
 	assert.Equal(t, "test-label", *master.LabelKey)
 	assert.Equal(t, "test-value", *master.LabelValue)
 
-	require.NotNil(t, c.GetTrait("telemetry"))
-	telemetry, ok := c.GetTrait("telemetry").(*telemetry.TestTelemetryTrait)
-	require.True(t, ok)
-	assert.True(t, *telemetry.Enabled)
 }

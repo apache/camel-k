@@ -438,6 +438,7 @@ func TestConfigureTraits(t *testing.T) {
 		"--trait", "affinity.pod-affinity=false",
 		"--trait", "environment.container-meta=false",
 		"--trait", "prometheus.pod-monitor=false",
+		"--trait", "telemetry.auto=true",
 		"example.js")
 	if err != nil {
 		t.Error(err)
@@ -454,10 +455,12 @@ func TestConfigureTraits(t *testing.T) {
 	require.NoError(t, err)
 	traitMap, err := trait.ToTraitMap(traits)
 	require.NoError(t, err)
-	assert.Len(t, traitMap, 3)
+	assert.Len(t, traits.Addons, 0)
+	assert.Len(t, traitMap, 4)
 	assertTraitConfiguration(t, traits.Affinity, &traitv1.AffinityTrait{PodAffinity: ptr.To(false)})
 	assertTraitConfiguration(t, traits.Environment, &traitv1.EnvironmentTrait{ContainerMeta: ptr.To(false)})
 	assertTraitConfiguration(t, traits.Prometheus, &traitv1.PrometheusTrait{PodMonitor: ptr.To(false)})
+	assertTraitConfiguration(t, traits.Telemetry, &traitv1.TelemetryTrait{Auto: ptr.To(true)})
 }
 
 func assertTraitConfiguration(t *testing.T, trait interface{}, expected interface{}) {
@@ -934,7 +937,7 @@ func TestRunOutputWithoutKubernetesCluster(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestSourceLessIntegration(t *testing.T) {
+func TestSelfManagedBuildIntegration(t *testing.T) {
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
 	output, err := test.ExecuteCommand(runCmd, cmdRun, "--image", "docker.io/my-org/my-app:1.0.0", "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)

@@ -69,9 +69,11 @@ func TestApplyCamelTraitSucceeds(t *testing.T) {
 	assert.False(t, exactVersionRegexp.MatchString("wroong"))
 }
 
-func TestApplyCamelTraitExternalKit(t *testing.T) {
+func TestApplyCamelTraitNonManagedBuild(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
-	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeSynthetic
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Image: "my-image",
+	}
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)
@@ -91,11 +93,8 @@ func TestApplyCamelTraitExternalKit(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "", environment.Integration.Status.RuntimeVersion)
 	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
-	assert.Equal(t, "", environment.IntegrationKit.Status.RuntimeVersion)
-	assert.Equal(t, v1.RuntimeProvider(""), environment.Integration.Status.RuntimeProvider)
 	expectedCatalog := &v1.Catalog{Version: "0.0.1", Provider: v1.RuntimeProviderQuarkus}
 	assert.Equal(t, expectedCatalog, environment.Integration.Status.Catalog)
-	assert.Equal(t, expectedCatalog, environment.IntegrationKit.Status.Catalog)
 }
 
 func TestApplyCamelTraitWithoutEnvironmentCatalogAndUnmatchableVersionFails(t *testing.T) {
@@ -176,8 +175,7 @@ func createNominalCamelTest(withSources bool) (*camelTrait, *Environment) {
 				Sources: sources,
 			},
 			Status: v1.IntegrationStatus{
-				RuntimeVersion: "0.0.1",
-				Phase:          v1.IntegrationPhaseDeploying,
+				Phase: v1.IntegrationPhaseDeploying,
 			},
 		},
 		IntegrationKit: &v1.IntegrationKit{
@@ -194,6 +192,14 @@ func createNominalCamelTest(withSources bool) (*camelTrait, *Environment) {
 		Platform: &v1.IntegrationPlatform{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: "namespace",
+			},
+			Status: v1.IntegrationPlatformStatus{
+				IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+					Build: v1.IntegrationPlatformBuildSpec{
+						RuntimeProvider: v1.RuntimeProviderQuarkus,
+						RuntimeVersion:  "0.0.1",
+					},
+				},
 			},
 		},
 		Resources:             kubernetes.NewCollection(),
@@ -224,10 +230,12 @@ func TestApplyCamelTraitWithProperties(t *testing.T) {
 	}, userPropertiesCm.Data)
 }
 
-func TestApplyCamelTraitSyntheticKitWithProperties(t *testing.T) {
+func TestApplyCamelTraitNonManagedBuildWithProperties(t *testing.T) {
 	trait, environment := createNominalCamelTest(false)
 	trait.Properties = []string{"a=b", "c=d"}
-	environment.IntegrationKit.Labels[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeSynthetic
+	environment.Integration.Spec.Traits.Container = &traitv1.ContainerTrait{
+		Image: "my-image",
+	}
 
 	configured, condition, err := trait.Configure(environment)
 	require.NoError(t, err)

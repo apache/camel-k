@@ -57,6 +57,10 @@ spec:
       jsonPath: .status.build.runtimeVersion
       name: Default runtime
       type: string
+    - description: The default Camel core version
+      jsonPath: .status.build.runtimeCoreVersion
+      name: Camel version
+      type: string
     name: v1
     schema:
       openAPIV3Schema:
@@ -416,6 +420,9 @@ spec:
                         description: the secret where credentials are stored
                         type: string
                     type: object
+                  runtimeCoreVersion:
+                    description: the Camel core version used by this IntegrationPlatform
+                    type: string
                   runtimeProvider:
                     description: the runtime used. Likely Camel Quarkus (we used to
                       have main runtime which has been discontinued since version
@@ -917,6 +924,7 @@ spec:
                         type: string
                       useSSA:
                         description: |-
+                          Deprecated: won't be able to enforce client side update in the future.
                           Use server-side apply to update the owned resources (default `true`).
                           Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
                         type: boolean
@@ -2105,6 +2113,43 @@ spec:
                     required:
                     - configuration
                     type: object
+                  telemetry:
+                    description: The configuration of Telemetry trait
+                    properties:
+                      auto:
+                        description: Enables automatic configuration of the trait,
+                          including automatic discovery of the telemetry endpoint.
+                        type: boolean
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      endpoint:
+                        description: The target endpoint of the Telemetry service
+                          (automatically discovered by default)
+                        type: string
+                      sampler:
+                        description: The sampler of the telemetry used for tracing
+                          (default "on")
+                        type: string
+                      sampler-parent-based:
+                        description: The sampler of the telemetry used for tracing
+                          is parent based (default "true")
+                        type: boolean
+                      sampler-ratio:
+                        description: The sampler ratio of the telemetry used for tracing
+                        type: string
+                      serviceName:
+                        description: The name of the service that publishes telemetry
+                          data (defaults to the integration name)
+                        type: string
+                    type: object
                   toleration:
                     description: The configuration of Toleration trait
                     properties:
@@ -2469,6 +2514,9 @@ spec:
                         description: the secret where credentials are stored
                         type: string
                     type: object
+                  runtimeCoreVersion:
+                    description: the Camel core version used by this IntegrationPlatform
+                    type: string
                   runtimeProvider:
                     description: the runtime used. Likely Camel Quarkus (we used to
                       have main runtime which has been discontinued since version
@@ -3018,6 +3066,7 @@ spec:
                         type: string
                       useSSA:
                         description: |-
+                          Deprecated: won't be able to enforce client side update in the future.
                           Use server-side apply to update the owned resources (default `true`).
                           Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
                         type: boolean
@@ -4205,6 +4254,43 @@ spec:
                         x-kubernetes-preserve-unknown-fields: true
                     required:
                     - configuration
+                    type: object
+                  telemetry:
+                    description: The configuration of Telemetry trait
+                    properties:
+                      auto:
+                        description: Enables automatic configuration of the trait,
+                          including automatic discovery of the telemetry endpoint.
+                        type: boolean
+                      configuration:
+                        description: |-
+                          Legacy trait configuration parameters.
+                          Deprecated: for backward compatibility.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      enabled:
+                        description: Can be used to enable or disable a trait. All
+                          traits share this common property.
+                        type: boolean
+                      endpoint:
+                        description: The target endpoint of the Telemetry service
+                          (automatically discovered by default)
+                        type: string
+                      sampler:
+                        description: The sampler of the telemetry used for tracing
+                          (default "on")
+                        type: string
+                      sampler-parent-based:
+                        description: The sampler of the telemetry used for tracing
+                          is parent based (default "true")
+                        type: boolean
+                      sampler-ratio:
+                        description: The sampler ratio of the telemetry used for tracing
+                        type: string
+                      serviceName:
+                        description: The name of the service that publishes telemetry
+                          data (defaults to the integration name)
+                        type: string
                     type: object
                   toleration:
                     description: The configuration of Toleration trait

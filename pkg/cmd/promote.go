@@ -21,12 +21,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/sets"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -133,20 +135,12 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	// Pipe promotion
 	if promotePipe {
-		destPipe, destKit := o.editPipe(sourcePipe, sourceIntegration, sourceKit)
+		destPipe := o.editPipe(sourcePipe, sourceIntegration, sourceKit)
 		if o.OutputFormat != "" {
-			if err := showIntegrationKitOutput(cmd, destKit, o.OutputFormat); err != nil {
-				return err
-			}
-			fmt.Fprintln(cmd.OutOrStdout(), `---`)
 			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
 		}
 		// Ensure the destination namespace has access to the source namespace images
 		err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destPipe.Namespace)
-		if err != nil {
-			return err
-		}
-		_, err = o.replaceResource(destKit)
 		if err != nil {
 			return err
 		}
@@ -163,20 +157,12 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Plain Integration promotion
-	destIntegration, destKit := o.editIntegration(sourceIntegration, sourceKit)
+	destIntegration := o.editIntegration(sourceIntegration, sourceKit)
 	if o.OutputFormat != "" {
-		if err := showIntegrationKitOutput(cmd, destKit, o.OutputFormat); err != nil {
-			return err
-		}
-		fmt.Fprintln(cmd.OutOrStdout(), `---`)
 		return showIntegrationOutput(cmd, destIntegration, o.OutputFormat)
 	}
 	// Ensure the destination namespace has access to the source namespace images
 	err = addSystemPullerRoleBinding(o.Context, c, sourceIntegration.Namespace, destIntegration.Namespace)
-	if err != nil {
-		return err
-	}
-	_, err = o.replaceResource(destKit)
 	if err != nil {
 		return err
 	}
@@ -233,6 +219,9 @@ func (o *promoteCmdOptions) getIntegration(c client.Client, name string) (*v1.In
 }
 
 func (o *promoteCmdOptions) getIntegrationKit(c client.Client, ref *corev1.ObjectReference) (*v1.IntegrationKit, error) {
+	if ref == nil {
+		return nil, nil
+	}
 	ik := v1.NewIntegrationKit(ref.Namespace, ref.Name)
 	key := k8sclient.ObjectKey{
 		Name:      ref.Name,
@@ -245,41 +234,63 @@ func (o *promoteCmdOptions) getIntegrationKit(c client.Client, ref *corev1.Objec
 	return ik, nil
 }
 
-func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.IntegrationKit) (*v1.Integration, *v1.IntegrationKit) {
+func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.IntegrationKit) *v1.Integration {
 	contImage := it.Status.Image
-	// IntegrationKit
-	dstKit := v1.NewIntegrationKit(o.To, kit.Name)
-	dstKit.Spec = *kit.Spec.DeepCopy()
-	dstKit.Annotations = cloneAnnotations(kit.Annotations, o.ToOperator)
-	dstKit.Labels = cloneLabels(kit.Labels)
-	dstKit.Labels = alterKitLabels(dstKit.Labels, kit)
-	dstKit.Spec.Image = contImage
 	// Integration
 	dstIt := v1.NewIntegration(o.To, it.Name)
 	dstIt.Spec = *it.Spec.DeepCopy()
 	dstIt.Annotations = cloneAnnotations(it.Annotations, o.ToOperator)
 	dstIt.Labels = cloneLabels(it.Labels)
-	dstIt.Spec.IntegrationKit = &corev1.ObjectReference{
-		Namespace: dstKit.Namespace,
-		Name:      dstKit.Name,
-		Kind:      dstKit.Kind,
+	dstIt.Spec.IntegrationKit = nil
+	if dstIt.Spec.Traits.Container == nil {
+		dstIt.Spec.Traits.Container = &traitv1.ContainerTrait{}
 	}
-	// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
-	// would get lost when creating the promoted IntegrationKit (which is in .status.artifacts). For this reason
-	// we must report it in the promoted Integration.
-	kitClasspath := kit.Status.GetDependenciesPaths()
-	if len(kitClasspath) > 0 {
+	dstIt.Spec.Traits.Container.Image = contImage
+	if kit != nil {
+		// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
+		// would get lost when creating the non managed build Integration. For this reason
+		// we must report it in the promoted Integration.
 		if dstIt.Spec.Traits.JVM == nil {
 			dstIt.Spec.Traits.JVM = &traitv1.JVMTrait{}
 		}
 		jvmTrait := dstIt.Spec.Traits.JVM
-		if jvmTrait.Classpath != "" {
-			jvmTrait.Classpath += ":"
+		mergedClasspath := getClasspath(kit, jvmTrait.Classpath)
+		jvmTrait.Classpath = mergedClasspath
+		// We must also set the runtime version so we pin it to the given catalog on which
+		// the container image was built
+		if dstIt.Spec.Traits.Camel == nil {
+			dstIt.Spec.Traits.Camel = &traitv1.CamelTrait{}
 		}
-		jvmTrait.Classpath += strings.Join(kitClasspath, ":")
+		dstIt.Spec.Traits.Camel.RuntimeVersion = kit.Status.RuntimeVersion
 	}
 
-	return &dstIt, dstKit
+	return &dstIt
+}
+
+// getClasspath merges the classpath required by the kit with any value provided in the trait.
+func getClasspath(kit *v1.IntegrationKit, jvmTraitClasspath string) string {
+	kitClasspathSet := kit.Status.GetDependenciesPaths()
+	if !kitClasspathSet.IsEmpty() {
+		if jvmTraitClasspath != "" {
+			jvmTraitClasspathSet := getClasspathSet(jvmTraitClasspath)
+			kitClasspathSet = sets.Union(kitClasspathSet, jvmTraitClasspathSet)
+		}
+		classPaths := kitClasspathSet.List()
+		sort.Strings(classPaths)
+
+		return strings.Join(classPaths, ":")
+	}
+
+	return jvmTraitClasspath
+}
+
+func getClasspathSet(cps string) *sets.Set {
+	s := sets.NewSet()
+	for _, cp := range strings.Split(cps, ":") {
+		s.Add(cp)
+	}
+
+	return s
 }
 
 // Return all annotations overriding the operator Id if provided.
@@ -311,54 +322,14 @@ func cloneLabels(lbs map[string]string) map[string]string {
 	return newMap
 }
 
-// Change labels expected by Integration Kit replacing the creator to reflect the
-// fact the new kit was cloned by another one instead.
-func alterKitLabels(lbs map[string]string, kit *v1.IntegrationKit) map[string]string {
-	lbs[v1.IntegrationKitTypeLabel] = v1.IntegrationKitTypeExternal
-	if lbs[kubernetes.CamelCreatorLabelKind] != "" {
-		delete(lbs, kubernetes.CamelCreatorLabelKind)
-	}
-	if lbs[kubernetes.CamelCreatorLabelName] != "" {
-		delete(lbs, kubernetes.CamelCreatorLabelName)
-	}
-	if lbs[kubernetes.CamelCreatorLabelNamespace] != "" {
-		delete(lbs, kubernetes.CamelCreatorLabelNamespace)
-	}
-	if lbs[kubernetes.CamelCreatorLabelVersion] != "" {
-		delete(lbs, kubernetes.CamelCreatorLabelVersion)
-	}
-
-	lbs[kubernetes.CamelClonedLabelKind] = v1.IntegrationKitKind
-	lbs[kubernetes.CamelClonedLabelName] = kit.Name
-	lbs[kubernetes.CamelClonedLabelNamespace] = kit.Namespace
-	lbs[kubernetes.CamelClonedLabelVersion] = kit.ResourceVersion
-
-	return lbs
-}
-
-func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) (*v1.Pipe, *v1.IntegrationKit) {
+func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) *v1.Pipe {
 	contImage := it.Status.Image
-	// IntegrationKit
-	dstKit := v1.NewIntegrationKit(o.To, kit.Name)
-	dstKit.Spec = *kit.Spec.DeepCopy()
-	dstKit.Annotations = cloneAnnotations(kit.Annotations, o.ToOperator)
-	dstKit.Labels = cloneLabels(kit.Labels)
-	dstKit.Labels = alterKitLabels(dstKit.Labels, kit)
-	dstKit.Spec.Image = contImage
 	// Pipe
 	dst := v1.NewPipe(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	dst.Annotations = cloneAnnotations(kb.Annotations, o.ToOperator)
 	dst.Labels = cloneLabels(kb.Labels)
-	if dst.Spec.Integration == nil {
-		dst.Spec.Integration = &v1.IntegrationSpec{}
-	}
-	dst.Spec.Integration.IntegrationKit = &corev1.ObjectReference{
-		Namespace: dstKit.Namespace,
-		Name:      dstKit.Name,
-		Kind:      dstKit.Kind,
-	}
-
+	dst.Annotations[fmt.Sprintf("%scontainer.image", v1.TraitAnnotationPrefix)] = contImage
 	if dst.Spec.Source.Ref != nil {
 		dst.Spec.Source.Ref.Namespace = o.To
 	}
@@ -373,22 +344,18 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 		}
 	}
 
-	// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
-	// would get lost when creating the promoted IntegrationKit (which is in .status.artifacts). For this reason
-	// we must report it in the promoted Integration.
-	kitClasspath := kit.Status.GetDependenciesPaths()
-	if len(kitClasspath) > 0 {
-		if dst.Spec.Integration.Traits.JVM == nil {
-			dst.Spec.Integration.Traits.JVM = &traitv1.JVMTrait{}
-		}
-		jvmTrait := dst.Spec.Integration.Traits.JVM
-		if jvmTrait.Classpath != "" {
-			jvmTrait.Classpath += ":"
-		}
-		jvmTrait.Classpath += strings.Join(kitClasspath, ":")
+	if kit != nil {
+		// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
+		// would get lost when creating the non managed build Integration. For this reason
+		// we must report it in the promoted Integration.
+		mergedClasspath := getClasspath(kit, dst.Annotations[fmt.Sprintf("%sjvm.classpath", v1.TraitAnnotationPrefix)])
+		dst.Annotations[fmt.Sprintf("%sjvm.classpath", v1.TraitAnnotationPrefix)] = mergedClasspath
+		// We must also set the runtime version so we pin it to the given catalog on which
+		// the container image was built
+		dst.Annotations[fmt.Sprintf("%scamel.runtime-version", v1.TraitAnnotationPrefix)] = kit.Status.RuntimeVersion
 	}
 
-	return &dst, dstKit
+	return &dst
 }
 
 func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) {

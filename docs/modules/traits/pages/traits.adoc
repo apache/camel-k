@@ -1,35 +1,27 @@
 [[traits]]
 = Traits
 
-Traits are high level named features of Camel K that can be enabled/disabled or configured to customize the
-behavior of the final integration.
+A Camel K trait is a feature which encapsulate a specific Kubernetes behavior. The traits are used to fine tune the building and deployment process of a Camel workload on the cloud.
 
-Camel K provide sensible defaults for all such traits, taking into account the details of the target platform where
-the integration is going to run into. However, it's possible for a **expert user** to configure them in
-order to obtain a different behavior.
+Camel K provide sensible defaults for all such traits, taking into account the details of the target platform where the integration is going to run into. However, it's possible for a **expert user** to configure them in order to obtain a different behavior.
 
 [[traits-configuration]]
 == Configuration
 
-Each trait has a unique ID that can be used to configure it using the command line tool.
-
-E.g. in order to disable the creation of a Service for a integration, a user can execute:
+Each trait has a unique ID that can be used to configure it using the CLI or changing the Integration `.spec.traits` parameter. For example, in order to disable the creation of a Service for an Integration, a user can execute:
 
 [source]
 ----
 kamel run --trait service.enabled=false file.yaml
 ----
 
-The flag `--trait` can be also abbreviated with `-t`.
+NOTE: the flag `--trait` can be also abbreviated with `-t`.
 
-The `enabled` property is available on all traits and can be used to enable/disable them. All traits have their own
-internal logic to determine if they need to be enabled when the user does not activate them explicitly.
+The `enabled` property is available on all traits and can be used to enable/disable them. All traits have their own internal logic to determine if they need to be enabled when the user does not activate them explicitly.
 
-Some traits share also a `auto` property that can be used to enable/disable auto-configuration of the trait based on the
-environment. The auto-configuration mechanism is able to enable/disable the trait when the `enabled` property is not explicitly
-set by the user and also change the trait configuration.
+Some traits share also a `auto` property that can be used to enable/disable auto-configuration of the trait based on the environment. The auto-configuration mechanism is able to enable/disable the trait when the `enabled` property is not explicitly set by the user and also change the trait configuration.
 
-NOTE: Some traits are applicable only to specific platforms (see the "profiles" in the trait description page).
+NOTE: some traits are applicable only to specific platforms (see the "profiles" in the trait description page).
 
 A trait may have additional properties that can be configured by the end user.
 
@@ -54,12 +46,11 @@ metadata:
 spec:
   traits:
     jvm:
-      configuration:
-        classpath: /path/to/my.jar
+      classpath: /path/to/my.jar
 ...
 ----
 
-The `.spec.traits` holds an array of traits, identified by their id (`jvm`, in this case). Then, the `.jvm.configuration.classpath` is the property we want to set. If you need to set a trait directly in the `Integration` spec, then, you should proceed in the way illustrated above.
+The `.spec.traits` holds an array of traits, identified by their id (`jvm`, in this case). Then, the `.jvm.classpath` is the property we want to set. If you need to set a trait directly in the `Integration` spec, then, you should proceed in the way illustrated above.
 
 [[traits-list]]
 == List of available traits

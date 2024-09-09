@@ -129,21 +129,23 @@ func TestKameletAutoDetection(t *testing.T) {
 				},
 			},
 			Spec: camelv1.KameletSpec{
-				Definition: &camelv1.JSONSchemaProps{
-					Properties: map[string]camelv1.JSONSchemaProp{
-						"a": {
-							XDescriptors: []string{
-								"urn:keda:metadata:a",
+				KameletSpecBase: camelv1.KameletSpecBase{
+					Definition: &camelv1.JSONSchemaProps{
+						Properties: map[string]camelv1.JSONSchemaProp{
+							"a": {
+								XDescriptors: []string{
+									"urn:keda:metadata:a",
+								},
 							},
-						},
-						"b": {
-							XDescriptors: []string{
-								"urn:keda:metadata:bb",
+							"b": {
+								XDescriptors: []string{
+									"urn:keda:metadata:bb",
+								},
 							},
-						},
-						"c": {
-							XDescriptors: []string{
-								"urn:keda:authentication:cc",
+							"c": {
+								XDescriptors: []string{
+									"urn:keda:authentication:cc",
+								},
 							},
 						},
 					},
@@ -245,21 +247,23 @@ func TestPipeAutoDetection(t *testing.T) {
 				},
 			},
 			Spec: camelv1.KameletSpec{
-				Definition: &camelv1.JSONSchemaProps{
-					Properties: map[string]camelv1.JSONSchemaProp{
-						"a": {
-							XDescriptors: []string{
-								"urn:keda:metadata:a",
+				KameletSpecBase: camelv1.KameletSpecBase{
+					Definition: &camelv1.JSONSchemaProps{
+						Properties: map[string]camelv1.JSONSchemaProp{
+							"a": {
+								XDescriptors: []string{
+									"urn:keda:metadata:a",
+								},
 							},
-						},
-						"b": {
-							XDescriptors: []string{
-								"urn:keda:metadata:bb",
+							"b": {
+								XDescriptors: []string{
+									"urn:keda:metadata:bb",
+								},
 							},
-						},
-						"c": {
-							XDescriptors: []string{
-								"urn:keda:authentication:cc",
+							"c": {
+								XDescriptors: []string{
+									"urn:keda:authentication:cc",
+								},
 							},
 						},
 					},

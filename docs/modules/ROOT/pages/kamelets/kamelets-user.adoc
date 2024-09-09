@@ -218,6 +218,21 @@ You can now write an integration that uses the Kamelet with the named configurat
 You can run this integration without specifying other parameters, the Kamelet endpoint will be implicitly configured by the Camel K operator that will
 automatically mount the secret into the integration Pod.
 
+=== Kamelet versioning
+
+Kamelets provided in a catalog are generally meant to work with a given runtime version (the same for which they are released). However, when you create a Kamelet and publish to a cluster, you may want to store and use different versions. If the Kamelet is provided with more than the `main` version, then, you can specify which version to use in your Integration by adding the version parameter. For instance:
+
+[source,yaml]
+.kamlet-namedconfig-route.yaml
+----
+- from:
+    uri: "timer:tick?kameletVersion=v2"
+    steps:
+      - to: "log:info"
+----
+
+The operator will be able to automatically pick the right version and use it at runtime. If no version is specified, then you will use the default one.
+
 [[kamelets-usage-binding]]
 == Binding Kamelets in Pipes
 

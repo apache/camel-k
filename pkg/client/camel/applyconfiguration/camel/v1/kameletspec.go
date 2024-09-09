@@ -26,12 +26,8 @@ import (
 // KameletSpecApplyConfiguration represents an declarative configuration of the KameletSpec type for use
 // with apply.
 type KameletSpecApplyConfiguration struct {
-	Definition   *JSONSchemaPropsApplyConfiguration                   `json:"definition,omitempty"`
-	Sources      []SourceSpecApplyConfiguration                       `json:"sources,omitempty"`
-	Template     *TemplateApplyConfiguration                          `json:"template,omitempty"`
-	Types        map[camelv1.TypeSlot]EventTypeSpecApplyConfiguration `json:"types,omitempty"`
-	DataTypes    map[camelv1.TypeSlot]DataTypesSpecApplyConfiguration `json:"dataTypes,omitempty"`
-	Dependencies []string                                             `json:"dependencies,omitempty"`
+	KameletSpecBaseApplyConfiguration `json:",inline"`
+	Versions                          map[string]KameletSpecBaseApplyConfiguration `json:"versions,omitempty"`
 }
 
 // KameletSpecApplyConfiguration constructs an declarative configuration of the KameletSpec type for use with
@@ -103,6 +99,20 @@ func (b *KameletSpecApplyConfiguration) WithDataTypes(entries map[camelv1.TypeSl
 func (b *KameletSpecApplyConfiguration) WithDependencies(values ...string) *KameletSpecApplyConfiguration {
 	for i := range values {
 		b.Dependencies = append(b.Dependencies, values[i])
+	}
+	return b
+}
+
+// WithVersions puts the entries into the Versions field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, the entries provided by each call will be put on the Versions field,
+// overwriting an existing map entries in Versions field with the same key.
+func (b *KameletSpecApplyConfiguration) WithVersions(entries map[string]KameletSpecBaseApplyConfiguration) *KameletSpecApplyConfiguration {
+	if b.Versions == nil && len(entries) > 0 {
+		b.Versions = make(map[string]KameletSpecBaseApplyConfiguration, len(entries))
+	}
+	for k, v := range entries {
+		b.Versions[k] = v
 	}
 	return b
 }

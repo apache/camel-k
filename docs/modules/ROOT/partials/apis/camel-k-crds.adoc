@@ -1756,7 +1756,7 @@ the expected schema for the data type
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 DataTypesSpec represents the specification for a set of data types.
 
@@ -2005,7 +2005,7 @@ ErrorHandlerType a type of error handler (ie, sink).
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 EventTypeSpec represents a specification for an event type.
 Deprecated: In favor of using DataTypeSpec.
@@ -2829,6 +2829,13 @@ the Camel K Runtime dependency version
 
 
 the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
+
+|`runtimeCoreVersion` +
+string
+|
+
+
+the Camel core version used by this IntegrationPlatform
 
 |`baseImage` +
 string
@@ -3864,7 +3871,7 @@ XDescriptors is a list of extended properties that trigger a custom behavior in 
 
 * <<#_camel_apache_org_v1_DataTypeSpec, DataTypeSpec>>
 * <<#_camel_apache_org_v1_EventTypeSpec, EventTypeSpec>>
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 JSONSchemaProps is a JSON-Schema following Specification Draft 4 (http://json-schema.org/).
 
@@ -4123,6 +4130,39 @@ the remote repository in the format github:ORG/REPO/PATH_TO_KAMELETS_FOLDER
 * <<#_camel_apache_org_v1_Kamelet, Kamelet>>
 
 KameletSpec specifies the configuration required to execute a Kamelet.
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`KameletSpecBase` +
+*xref:#_camel_apache_org_v1_KameletSpecBase[KameletSpecBase]*
+|(Members of `KameletSpecBase` are embedded into this type.)
+
+
+
+
+|`versions` +
+*xref:#_camel_apache_org_v1_KameletSpecBase[map[string\]github.com/apache/camel-k/v2/pkg/apis/camel/v1.KameletSpecBase]*
+|
+
+
+the optional versions available for this Kamelet. This field may not be taken in account by Camel core and is meant to support
+any user defined versioning model on cluster only. If the user wants to use any given version, she must materialize a file with the given version spec
+as the `main` Kamelet spec on the runtime.
+
+
+|===
+
+[#_camel_apache_org_v1_KameletSpecBase]
+=== KameletSpecBase
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+
+KameletSpecBase specifies the base configuration of a Kamelet.
 
 [cols="2,2a",options="header"]
 |===
@@ -5474,7 +5514,7 @@ string
 * <<#_camel_apache_org_v1_IntegrationKitSpec, IntegrationKitSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
 * <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 SourceSpec defines the configuration for one or more routes to be executed in a certain Camel DSL language.
 
@@ -5687,7 +5727,7 @@ a JibTask, for Jib strategy
 
 *Appears on:*
 
-* <<#_camel_apache_org_v1_KameletSpec, KameletSpec>>
+* <<#_camel_apache_org_v1_KameletSpecBase, KameletSpecBase>>
 
 Template is an unstructured object representing a Kamelet template in YAML/JSON DSL.
 
@@ -6023,6 +6063,13 @@ The configuration of Service trait
 
 
 The configuration of Service Binding trait
+
+|`telemetry` +
+*xref:#_camel_apache_org_v1_trait_TelemetryTrait[TelemetryTrait]*
+|
+
+
+The configuration of Telemetry trait
 
 |`toleration` +
 *xref:#_camel_apache_org_v1_trait_TolerationTrait[TolerationTrait]*
@@ -6830,6 +6877,7 @@ bool
 |
 
 
+Deprecated: won't be able to enforce client side update in the future.
 Use server-side apply to update the owned resources (default `true`).
 Note that it automatically falls back to client-side patching, if SSA is not available, e.g., on old Kubernetes clusters.
 
@@ -8741,6 +8789,79 @@ The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'
 
 
 
+[#_camel_apache_org_v1_trait_TelemetryTrait]
+=== TelemetryTrait
+
+*Appears on:*
+
+* <<#_camel_apache_org_v1_Traits, Traits>>
+
+The Telemetry trait can be used to automatically publish tracing information to an OTLP compatible collector.
+
+The trait is able to automatically discover the telemetry OTLP endpoint available in the namespace (supports **Jaerger** in version 1.35+).
+
+The Telemetry trait is disabled by default.
+
+WARNING: The Telemetry trait can't be enabled at the same time as the Tracing trait.
+
+
+[cols="2,2a",options="header"]
+|===
+|Field
+|Description
+
+|`Trait` +
+*xref:#_camel_apache_org_v1_trait_Trait[Trait]*
+|(Members of `Trait` are embedded into this type.)
+
+
+
+
+|`auto` +
+bool
+|
+
+
+Enables automatic configuration of the trait, including automatic discovery of the telemetry endpoint.
+
+|`serviceName` +
+string
+|
+
+
+The name of the service that publishes telemetry data (defaults to the integration name)
+
+|`endpoint` +
+string
+|
+
+
+The target endpoint of the Telemetry service (automatically discovered by default)
+
+|`sampler` +
+string
+|
+
+
+The sampler of the telemetry used for tracing (default "on")
+
+|`sampler-ratio` +
+string
+|
+
+
+The sampler ratio of the telemetry used for tracing
+
+|`sampler-parent-based` +
+bool
+|
+
+
+The sampler of the telemetry used for tracing is parent based (default "true")
+
+
+|===
+
 [#_camel_apache_org_v1_trait_TolerationTrait]
 === TolerationTrait
 
@@ -8810,6 +8931,7 @@ The list of taints to tolerate, in the form `Key[=Value]:Effect[:Seconds]`
 * <<#_camel_apache_org_v1_trait_RouteTrait, RouteTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceBindingTrait, ServiceBindingTrait>>
 * <<#_camel_apache_org_v1_trait_ServiceTrait, ServiceTrait>>
+* <<#_camel_apache_org_v1_trait_TelemetryTrait, TelemetryTrait>>
 * <<#_camel_apache_org_v1_trait_TolerationTrait, TolerationTrait>>
 
 Trait is the base type for all traits. It could be disabled by the user.

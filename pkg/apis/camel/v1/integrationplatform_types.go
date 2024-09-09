@@ -72,6 +72,7 @@ type IntegrationPlatformStatus struct {
 // +kubebuilder:printcolumn:name="Publish strategy",type=string,JSONPath=`.status.build.publishStrategy`,description="The default publish strategy"
 // +kubebuilder:printcolumn:name="Registry address",type=string,JSONPath=`.status.build.registry.address`,description="The container registry address"
 // +kubebuilder:printcolumn:name="Default runtime",type=string,JSONPath=`.status.build.runtimeVersion`,description="The default runtime version"
+// +kubebuilder:printcolumn:name="Camel version",type=string,JSONPath=`.status.build.runtimeCoreVersion`,description="The default Camel core version"
 
 // IntegrationPlatform is the resource used to drive the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
@@ -119,6 +120,8 @@ type IntegrationPlatformBuildSpec struct {
 	RuntimeVersion string `json:"runtimeVersion,omitempty"`
 	// the runtime used. Likely Camel Quarkus (we used to have main runtime which has been discontinued since version 1.5)
 	RuntimeProvider RuntimeProvider `json:"runtimeProvider,omitempty"`
+	// the Camel core version used by this IntegrationPlatform
+	RuntimeCoreVersion string `json:"runtimeCoreVersion,omitempty"`
 	// a base image that can be used as base layer for all images.
 	// It can be useful if you want to provide some custom base image with further utility software
 	BaseImage string `json:"baseImage,omitempty"`

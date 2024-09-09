@@ -1,8 +1,33 @@
-{{/*
-Constraints
-*/}}
-{{- if or (not .Values.platform.cluster) (ne .Values.platform.cluster "OpenShift") }}
-{{ required "Field \"platform.build.registry.address\" is required when not running on OpenShift (set \"platform.cluster=OpenShift\" if you're using OpenShift instead)!" .Values.platform.build.registry.address | substr 0 0 }}
+Thanks for installing Camel K version {{ .Chart.Version }}!
+
+{{- if .Values.platform }}
+WARNING: you're setting some IntegrationPlatform values. This is deprecated and may remove in future releases. Make sure to install an IntegrationPlatform as a separate process.
 {{- end }}
 
-Connect the world with Camel K on {{ include "camel-k.cluster" . }}!
+{{- if not (.Values.platform) }}
+- How to configure the container registry
+
+  Please, install an IntegrationPlatform containing your container registry configuration before running any Integration.
+  You can run the following script:
+
+  printf "\
+  apiVersion: camel.apache.org/v1
+  kind: IntegrationPlatform
+  metadata:
+    labels:
+      app: camel-k
+    name: camel-k
+  spec:
+    build:
+      registry:
+        address: <my-registry-address>
+        organization: <my-organization>
+        secret: <my-k8s-secret>
+  " | kubectl apply -f -
+
+  More info on https://camel.apache.org/camel-k/next/installation/integrationplatform.html
+{{- end }}
+
+- How to run a Camel application
+
+  Learn more about running an Integration: https://camel.apache.org/camel-k/next/running/running.html

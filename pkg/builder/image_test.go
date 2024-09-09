@@ -28,6 +28,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/cancellable"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
@@ -45,9 +46,9 @@ func TestListPublishedImages(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-1",
 				Labels: map[string]string{
-					v1.IntegrationKitTypeLabel:          v1.IntegrationKitTypePlatform,
-					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
-					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
+					v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
+					kubernetes.CamelLabelRuntimeVersion:  catalog.Runtime.Version,
+					kubernetes.CamelLabelRuntimeProvider: string(catalog.Runtime.Provider),
 				},
 			},
 			Status: v1.IntegrationKitStatus{
@@ -66,9 +67,9 @@ func TestListPublishedImages(t *testing.T) {
 				Namespace: "ns",
 				Name:      "my-kit-2",
 				Labels: map[string]string{
-					v1.IntegrationKitTypeLabel:          v1.IntegrationKitTypePlatform,
-					"camel.apache.org/runtime.version":  catalog.Runtime.Version,
-					"camel.apache.org/runtime.provider": string(catalog.Runtime.Provider),
+					v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
+					kubernetes.CamelLabelRuntimeVersion:  catalog.Runtime.Version,
+					kubernetes.CamelLabelRuntimeProvider: string(catalog.Runtime.Provider),
 				},
 			},
 			Status: v1.IntegrationKitStatus{

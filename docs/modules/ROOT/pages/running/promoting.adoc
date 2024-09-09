@@ -1,21 +1,13 @@
 [[promoting-integration]]
-= Promoting across environments
+= Promoting Integrations across environments
 
 As soon as you have an Integration running in your cluster, you will be challenged to move that Integration to an higher environment. Ie, you can test your Integration in a **development** environment, and, as soon as you're happy with the result, you will need to move it into a **production** environment.
-
-== External IntegrationKits
-
-When you create an Integration, the operator takes care to use an existing IntegrationKit or creating one from scratch. When you're moving your Integration across environments you'll therefore need to create an IntegrationKit accordingly. The creation of the IntegrationKit, in this case, is a simple copy of the original IntegrationKit with the `.spec.image` coming from the `.status.image` of the original IntegrationKit. Additionally, it has to be labelled as `camel.apache.org/kit.type: external`.
-
-NOTE: these two configuration are required to avoid the new IntegrationKit to kick off a new build operation.
-
-The copy is something you can do with any external tooling or using the `kamel promote` command as provided below:
 
 == CLI `promote` command
 
 Camel K has an opinionated way to achieve the promotion goal through the usage of `kamel promote` command. With this command you will be able to easily move an Integration from one namespace to another without worrying about any low level detail such as resources needed by the Integration. You only need to make sure that both the source operator and the destination operator are using the same container registry and that the destination namespace provides the required Configmaps, Secrets or Kamelets required by the Integration.
 
-NOTE: in order to use the same container registry, you can use the `--registry` option during installation phase or change the IntegrationPlatform to reflect that accordingly.
+NOTE: use dry run option (`-o yaml`) and export the result to any separated cluster or Git repository to perform a GitOps strategy.
 
 Let's see a simple Integration that uses a Configmap to expose some message on an HTTP endpoint. We can start creating such an Integration and testing in a namespace called `development`:
 

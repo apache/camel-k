@@ -155,6 +155,7 @@ const (
 	IntegrationKitTypeUser = "user"
 	// IntegrationKitTypeExternal identifies a Kit created by any third party.
 	IntegrationKitTypeExternal = "external"
+	// Deprecated: synthetic Integration Kits are replaced by non managed build Integrations.
 	// IntegrationKitTypeSynthetic identifies a synthetic Kit (generated for any container image for which the operator cannot make any assumption).
 	IntegrationKitTypeSynthetic = "synthetic"
 

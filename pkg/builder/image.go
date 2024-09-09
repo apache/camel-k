@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/apache/camel-k/v2/pkg/util/io"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 
 	"k8s.io/apimachinery/pkg/labels"
@@ -193,9 +194,9 @@ func listPublishedImages(context *builderContext) ([]v1.IntegrationKitStatus, er
 	options := []ctrl.ListOption{
 		ctrl.InNamespace(context.Namespace),
 		ctrl.MatchingLabels{
-			v1.IntegrationKitTypeLabel:          v1.IntegrationKitTypePlatform,
-			"camel.apache.org/runtime.version":  context.Catalog.Runtime.Version,
-			"camel.apache.org/runtime.provider": string(context.Catalog.Runtime.Provider),
+			v1.IntegrationKitTypeLabel:           v1.IntegrationKitTypePlatform,
+			kubernetes.CamelLabelRuntimeVersion:  context.Catalog.Runtime.Version,
+			kubernetes.CamelLabelRuntimeProvider: string(context.Catalog.Runtime.Provider),
 		},
 		ctrl.MatchingLabelsSelector{
 			Selector: labels.NewSelector().Add(*excludeNativeImages),

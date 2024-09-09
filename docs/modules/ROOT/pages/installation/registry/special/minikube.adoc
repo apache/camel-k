@@ -1,0 +1,42 @@
+= Configuring registry on Minikube
+
+You can run Camel K integrations on plain Kubernetes using the Minikube cluster creation tool. Follow the instructions in the https://github.com/kubernetes/minikube#installation[official doc] for the installation.
+
+Start a new instance of Minikube using the command:
+
+```
+minikube start
+```
+
+Minikube provides a simple embedded local container registry that it makes the default choice for local development and demo purposes. After the startup process is completed, you need to **enable the `registry` addon**:
+
+```
+minikube addons enable registry
+```
+
+Alternatively, you can also start an instance with the `registry` addon in one command:
+```
+minikube start --addons registry
+```
+
+Once the registry is available, you can check the IP address by typing:
+
+```
+$ kubectl -n kube-system get service registry -o jsonpath='{.spec.clusterIP}'
+10.100.107.57
+```
+
+Now you can use such value into your IntegrationPlatform:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: IntegrationPlatform
+metadata:
+  name: camel-k
+spec:
+  build:
+    registry:
+      address: 10.100.107.57
+      insecure: true
+----

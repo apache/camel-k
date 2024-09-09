@@ -32,6 +32,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 )
 
@@ -52,8 +53,8 @@ func lookupKitsForIntegration(ctx context.Context, c client.Client, integration 
 	listOptions := []ctrl.ListOption{
 		ctrl.InNamespace(integration.GetIntegrationKitNamespace(pl)),
 		ctrl.MatchingLabels{
-			"camel.apache.org/runtime.version":  integration.Status.RuntimeVersion,
-			"camel.apache.org/runtime.provider": string(integration.Status.RuntimeProvider),
+			kubernetes.CamelLabelRuntimeVersion:  integration.Status.RuntimeVersion,
+			kubernetes.CamelLabelRuntimeProvider: string(integration.Status.RuntimeProvider),
 		},
 		ctrl.MatchingLabelsSelector{
 			Selector: labels.NewSelector().Add(*kitTypes),
@@ -150,10 +151,6 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 }
 
 func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *log.Logger) bool {
-	if kit.Status.Version != integration.Status.Version {
-		ilog.Debug("Integration and integration-kit versions do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
-		return false
-	}
 	if kit.Status.RuntimeProvider != integration.Status.RuntimeProvider {
 		ilog.Debug("Integration and integration-kit runtime providers do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false
@@ -164,6 +161,7 @@ func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *lo
 	}
 	if len(integration.Status.Dependencies) != len(kit.Spec.Dependencies) {
 		ilog.Debug("Integration and integration-kit have different number of dependencies", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
+		return false
 	}
 
 	return true
@@ -171,12 +169,12 @@ func statusMatches(integration *v1.Integration, kit *v1.IntegrationKit, ilog *lo
 
 // kitMatches returns whether the kit matches with the existing target kit.
 func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationKit) (bool, error) {
-	version := kit.Status.Version
+	version := kit.Status.RuntimeVersion
 	if version == "" {
 		// Defaults with the version that is going to be set during the kit initialization
-		version = defaults.Version
+		version = defaults.DefaultRuntimeVersion
 	}
-	if version != target.Status.Version {
+	if version != target.Status.RuntimeVersion {
 		return false, nil
 	}
 	if len(kit.Spec.Dependencies) != len(target.Spec.Dependencies) {

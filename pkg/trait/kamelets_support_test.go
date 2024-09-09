@@ -86,29 +86,31 @@ func TestKameletBundleMultiKameletsMultiConfigmap(t *testing.T) {
 func kamelet(ns, name string) *v1.Kamelet {
 	kamelet := v1.NewKamelet(ns, name)
 	kamelet.Spec = v1.KameletSpec{
-		Sources: []v1.SourceSpec{
-			{
-				DataSpec: v1.DataSpec{
-					Name: "mykamelet.groovy",
-					Content: `from("timer1").to("log:info")
-					from("timer2").to("log:info")
-					from("timer3").to("log:info")
-					from("timer4").to("log:info")
-					from("timer5").to("log:info")
-					from("timer6").to("log:info")
-					from("timer7").to("log:info")
-					from("timer8").to("log:info")
-					from("timer9").to("log:info")
-					from("timer10").to("log:info")
-					from("timer11").to("log:info")
-					from("timer12").to("log:info")
-					from("timer13").to("log:info")
-					from("timer14").to("log:info")
-					from("timer15").to("log:info")
-					from("timer16").to("log:info")
-					from("timer17").to("log:info")`,
+		KameletSpecBase: v1.KameletSpecBase{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name: "mykamelet.groovy",
+						Content: `from("timer1").to("log:info")
+						from("timer2").to("log:info")
+						from("timer3").to("log:info")
+						from("timer4").to("log:info")
+						from("timer5").to("log:info")
+						from("timer6").to("log:info")
+						from("timer7").to("log:info")
+						from("timer8").to("log:info")
+						from("timer9").to("log:info")
+						from("timer10").to("log:info")
+						from("timer11").to("log:info")
+						from("timer12").to("log:info")
+						from("timer13").to("log:info")
+						from("timer14").to("log:info")
+						from("timer15").to("log:info")
+						from("timer16").to("log:info")
+						from("timer17").to("log:info")`,
+					},
+					Type: v1.SourceTypeTemplate,
 				},
-				Type: v1.SourceTypeTemplate,
 			},
 		},
 	}

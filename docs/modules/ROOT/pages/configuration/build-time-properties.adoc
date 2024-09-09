@@ -3,6 +3,8 @@
 
 You may be required to provide certain *build-time properties* that are needed only during the process of `Integration` building. Since Camel K version 1.5, we introduced a `--build-property` flag that will be handful in such circumstances. The property value may be also used inside Camel K integrations using the *property placeholder* mechanism.
 
+NOTE: the --build-property option is syntactic sugar for `builder.properties` trait.
+
 [[build-time-single-prop]]
 == Single property
 
@@ -93,7 +95,7 @@ The key-value pairs of the `ConfigMap` are loaded and used as build-time propert
 [[build-time-configmap-as-file]]
 == Property from ConfigMap/Secret as file
 
-When you have a lot of key-value pairs to store into a given `ConfigMap`/`Secret`, you may consider storing some build-time properties as a file into a specific key-value pair for the sake of simplicity. 
+When you have a lot of key-value pairs to store into a given `ConfigMap`/`Secret`, you may consider storing some build-time properties as a file into a specific key-value pair for the sake of simplicity.
 
 The only constraint is to use `.properties` as a suffix of the key to indicate that the value is actually a property file, not a simple value.
 
@@ -120,7 +122,7 @@ Then we launch the `run` command with the `--build-property` flag whose value ma
 kamel run --build-property configmap:my-cm-bps build-property-route.yaml
 ----
 
-The value of the key-value of the `ConfigMap` is loaded as a property file and used as build-time properties of the `Integration`. you will see the log with the expected configuration.
+The value of the key-value of the `ConfigMap` is loaded as a property file and used as build-time properties of the `Integration`. You will see the log with the expected configuration.
 
 [[build-time-props-file-precedence]]
 == Property collision priority
@@ -130,4 +132,4 @@ If you have a property repeated more than once, the general rule is that the las
 [[build-time-runtime-conf]]
 == Run time properties
 
-If you're looking for *runtime properties configuration* you can look at the xref:configuration/runtime-properties.adoc[runtime properties] section.
+If you're looking for *runtime properties configuration* you can look at the xref:configuration/camel-properties.adoc[Camel properties] section.

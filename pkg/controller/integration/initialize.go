@@ -65,6 +65,11 @@ func (action *initializeAction) Handle(ctx context.Context, integration *v1.Inte
 		return integration, err
 	}
 
+	if integration.Status.Image != "" {
+		integration.Status.Phase = v1.IntegrationPhaseDeploying
+		return integration, nil
+	}
+
 	if integration.Status.IntegrationKit == nil {
 		ikt, err := action.lookupIntegrationKit(ctx, integration)
 		if err != nil {

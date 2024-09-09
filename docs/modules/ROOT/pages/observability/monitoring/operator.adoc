@@ -163,5 +163,4 @@ spec:
               for {{ $labels.job }} have their first time to readiness above 1m.
 ----
 
-More information can be found in the Prometheus Operator https://prometheus-operator.dev/docs/user-guides/alerting/[Alerting] user guide.
-You can also find more details in https://docs.openshift.com/container-platform/4.12/monitoring/managing-alerts.html#creating-alerting-rules-for-user-defined-projects_managing-alerts[Creating alerting rules] from the OpenShift documentation.
+More information can be found in the Prometheus Operator https://prometheus-operator.dev/docs/user-guides/alerting/[Alerting] user guide. You can also find more details in https://docs.openshift.com/container-platform/4.12/monitoring/managing-alerts.html#creating-alerting-rules-for-user-defined-projects_managing-alerts[Creating alerting rules] from the OpenShift documentation.
