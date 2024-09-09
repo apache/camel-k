@@ -502,37 +502,6 @@ func TestRestClosureDependencyGroovy(t *testing.T) {
 		meta.Dependencies.List())
 }
 
-func TestRestClosureDependencyKotlin(t *testing.T) {
-	code := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "Request.groovy",
-			Content: `
-                rest {
-                }
-			    from("http:test")
-                    .to("log:info")
-		    `,
-		},
-		Language: v1.LanguageKotlin,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	meta, err := extract(catalog, code)
-	require.NoError(t, err)
-
-	assert.ElementsMatch(
-		t,
-		[]string{
-			"camel:http",
-			"camel:log",
-			"mvn:org.apache.camel.quarkus:camel-quarkus-rest",
-			"mvn:org.apache.camel.quarkus:camel-quarkus-platform-http",
-		},
-		meta.Dependencies.List())
-}
-
 func TestXMLCircuitBreakerDependency(t *testing.T) {
 	code := v1.SourceSpec{
 

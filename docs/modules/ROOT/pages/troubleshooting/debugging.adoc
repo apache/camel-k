@@ -42,7 +42,7 @@ As you can see in the logs, the CLI has configured the integration in debug mode
 
 The JVM is suspended and waits for a debugger to attach by default: this behavior can be turned off using the `--suspend=false` option.
 
-Last thing to do is, to start a remote debugger on `localhost:5005` with the **integration file (if using Java, Groovy or Kotlin), the Apache Camel project, or the Camel K Runtime project**, opened on your IDE.
+Last thing to do is, to start a remote debugger on `localhost:5005` with the **integration file (if using Java or Groovy), the Apache Camel project, or the Camel K Runtime project**, opened on your IDE.
 
 The following picture shows the configuration of a remote debugger in IntelliJ IDEA:
 

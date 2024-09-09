@@ -40,22 +40,6 @@ func TestParseGroovyFile(t *testing.T) {
 	assert.Contains(t, opts, Option{Name: "ciao"})
 }
 
-func TestParseKotlinFile(t *testing.T) {
-	it := `
-		//     camel-k: pippo=pluto     paperino ciao=1
-		// camel-k : ciao
-
-		from("timer:tick").log("Ciao")
-    `
-	opts, err := Parse("example.kts", it)
-	require.NoError(t, err)
-	assert.Len(t, opts, 4)
-	assert.Contains(t, opts, Option{Name: "pippo", Value: "pluto"})
-	assert.Contains(t, opts, Option{Name: "paperino"})
-	assert.Contains(t, opts, Option{Name: "ciao", Value: "1"})
-	assert.Contains(t, opts, Option{Name: "ciao"})
-}
-
 func TestParseJavaFile(t *testing.T) {
 	it := `
 		//     camel-k: pippo=pluto     paperino ciao=1

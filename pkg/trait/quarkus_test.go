@@ -150,7 +150,6 @@ func TestGetLanguageSettingsWithoutLoaders(t *testing.T) {
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaSource))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKotlin))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKamelet))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageXML))
@@ -177,7 +176,6 @@ func TestGetLanguageSettingsWithoutMetadata(t *testing.T) {
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaSource))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKotlin))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageKamelet))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageXML))
@@ -225,7 +223,6 @@ func TestGetLanguageSettingsWithLoaders(t *testing.T) {
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageJavaSource))
 	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageGroovy))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaScript))
-	assert.Equal(t, languageSettings{native: false, sourcesRequiredAtBuildTime: true}, getLanguageSettings(environment, v1.LanguageKotlin))
 	assert.Equal(t, languageSettings{native: true, sourcesRequiredAtBuildTime: false}, getLanguageSettings(environment, v1.LanguageJavaShell))
 }
 

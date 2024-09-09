@@ -12,7 +12,6 @@ Camel K supports multiple languages for writing integrations:
 | xref:languages/xml.adoc[XML]                  | Integrations written in plain XML DSL are supported (Spring XML with <beans> or Blueprint XML with <blueprint> not supported)
 | xref:languages/yaml.adoc[YAML]                | Integrations written in YAML DSL are supported
 | xref:languages/groovy.adoc[Groovy]            | Groovy `.groovy` files are supported (experimental)
-| xref:languages/kotlin.adoc[Kotlin]            | Kotlin Script `.kts` files are supported (experimental)
 | xref:languages/jsh.adoc[JShell]               | JShell (Java Shell) `.jsh` files are supported (experimental)
 | xref:languages/javascript.adoc[JavaScript]    | JavaScript `.js` files are supported (experimental)
 |=======================

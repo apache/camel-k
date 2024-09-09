@@ -23,7 +23,6 @@ import "strings"
 var DefaultKits = []string{
 	"platform-integration-kit-jvm.yaml",
 	"platform-integration-kit-groovy.yaml",
-	"platform-integration-kit-kotlin.yaml",
 }
 
 // KnativeKits --.

@@ -29,7 +29,6 @@ func TestAllLanguages(t *testing.T) {
 	assert.Contains(t, Languages, LanguageJavaSource)
 	assert.Contains(t, Languages, LanguageJavaScript)
 	assert.Contains(t, Languages, LanguageGroovy)
-	assert.Contains(t, Languages, LanguageKotlin)
 	assert.Contains(t, Languages, LanguageXML)
 	assert.Contains(t, Languages, LanguageYaml)
 }

@@ -501,8 +501,6 @@ const (
 	LanguageJavaScript Language = "js"
 	// LanguageXML used for XML.
 	LanguageXML Language = "xml"
-	// LanguageKotlin used for Kotlin.
-	LanguageKotlin Language = "kts"
 	// LanguageYaml used for YAML.
 	LanguageYaml Language = "yaml"
 	// LanguageKamelet used for Kamelets.
@@ -517,7 +515,6 @@ var Languages = []Language{
 	LanguageGroovy,
 	LanguageJavaScript,
 	LanguageXML,
-	LanguageKotlin,
 	LanguageYaml,
 	LanguageKamelet,
 	LanguageJavaShell,

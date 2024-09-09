@@ -195,12 +195,6 @@ func InspectorForLanguage(catalog *camel.RuntimeCatalog, language v1.Language) I
 				catalog: catalog,
 			},
 		}
-	case v1.LanguageKotlin:
-		return &KotlinInspector{
-			baseInspector: baseInspector{
-				catalog: catalog,
-			},
-		}
 	case v1.LanguageYaml:
 		return &YAMLInspector{
 			baseInspector: baseInspector{

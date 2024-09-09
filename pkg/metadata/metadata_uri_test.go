@@ -199,44 +199,6 @@ func TestXml1(t *testing.T) {
 	assert.Len(t, metadata.ToURIs, 3)
 }
 
-func TestKotlin1(t *testing.T) {
-	source := v1.SourceSpec{
-		DataSpec: v1.DataSpec{
-			Name: "test",
-			Content: `
-
-		  	from( "timer:tick")
-		    	.setBody().constant("aa")
-				.to   ("log:info?skipBodyLineSeparator=false").to(
-											"http://url" )
-
-			from("direct:2")
-		    	.setBody().constant("aa")
-				.to("direct:3")
-				.toD("direct:4")
-				.toF("direct:%s", 5)
-		`,
-		},
-		Language: v1.LanguageKotlin,
-	}
-
-	catalog, err := camel.DefaultCatalog()
-	require.NoError(t, err)
-
-	metadata, err := extract(catalog, source)
-	require.NoError(t, err)
-
-	assert.Contains(t, metadata.FromURIs, "timer:tick")
-	assert.Contains(t, metadata.FromURIs, "direct:2")
-	assert.Len(t, metadata.FromURIs, 2)
-	assert.Contains(t, metadata.ToURIs, "log:info?skipBodyLineSeparator=false")
-	assert.Contains(t, metadata.ToURIs, "http://url")
-	assert.Contains(t, metadata.ToURIs, "direct:3")
-	assert.Contains(t, metadata.ToURIs, "direct:4")
-	assert.Contains(t, metadata.ToURIs, "direct:%s") // resolution not supported yet
-	assert.Len(t, metadata.ToURIs, 5)
-}
-
 func TestJavascript1(t *testing.T) {
 	source := v1.SourceSpec{
 		DataSpec: v1.DataSpec{
