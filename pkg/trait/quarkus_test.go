@@ -256,3 +256,59 @@ func TestQuarkusMatches(t *testing.T) {
 	qt2.NativeBaseImage = "docker.io/my-new-native-base"
 	assert.False(t, qt.Matches(&qt2))
 }
+
+func TestConfigureQuarkusTraitDeprecatedPackageType(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	quarkusTrait.PackageTypes = []traitv1.QuarkusPackageType{
+		traitv1.FastJarPackageType,
+	}
+	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
+	configured, condition, err := quarkusTrait.Configure(environment)
+
+	assert.True(t, configured)
+	require.NoError(t, err)
+	assert.NotNil(t, condition)
+	assert.Equal(t, "The package-type parameter is deprecated and may be removed in future releases. Make sure to use mode parameter instead.", condition.message)
+	assert.Equal(t, traitv1.JvmQuarkusMode, quarkusTrait.QuarkusTrait.Modes[0])
+}
+
+func TestConfigureQuarkusTraitSupportedLanguages(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.CamelCatalog.Loaders = map[string]v1.CamelLoader{
+		"supportedLanguage": {
+			Metadata: map[string]string{
+				"deprecated":                     "false",
+				"native":                         "true",
+				"sources-required-at-build-time": "false",
+			},
+		},
+	}
+	environment.Integration.Spec.Sources[0].Language = v1.Language("supportedLanguage")
+	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
+	configured, condition, err := quarkusTrait.Configure(environment)
+
+	assert.True(t, configured)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+}
+
+func TestConfigureQuarkusTraitDeprecatedLanguages(t *testing.T) {
+	quarkusTrait, environment := createNominalQuarkusTest()
+	environment.CamelCatalog.Loaders = map[string]v1.CamelLoader{
+		"deprecatedLanguage": {
+			Metadata: map[string]string{
+				"deprecated":                     "true",
+				"native":                         "false",
+				"sources-required-at-build-time": "false",
+			},
+		},
+	}
+	environment.Integration.Spec.Sources[0].Language = v1.Language("deprecatedLanguage")
+	environment.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseBuildSubmitted
+	configured, condition, err := quarkusTrait.Configure(environment)
+
+	assert.True(t, configured)
+	require.NoError(t, err)
+	assert.NotNil(t, condition)
+	assert.Equal(t, "The sources contains some language marked as deprecated. This Integration may not be supported in future release.", condition.message)
+}
