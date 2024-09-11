@@ -57,6 +57,8 @@ type quarkusTrait struct {
 	traitv1.QuarkusTrait `property:",squash"`
 }
 type languageSettings struct {
+	// indicates whether the language is supported
+	deprecated bool
 	// indicates whether the native mode is supported
 	native bool
 	// indicates whether the sources are required at build time for native compilation
@@ -65,9 +67,9 @@ type languageSettings struct {
 
 var (
 	// settings for an unknown language.
-	defaultSettings = languageSettings{false, false}
+	defaultSettings = languageSettings{false, false, false}
 	// settings for languages supporting native mode for old catalogs.
-	nativeSupportSettings = languageSettings{true, false}
+	nativeSupportSettings = languageSettings{false, true, false}
 )
 
 // Retrieves the settings of the given language from the Camel catalog.
@@ -75,16 +77,16 @@ func getLanguageSettings(e *Environment, language v1.Language) languageSettings 
 	if loader, ok := e.CamelCatalog.Loaders[string(language)]; ok {
 		native, nExists := loader.Metadata["native"]
 		if !nExists {
-			log.Debug("The metadata 'native' is absent from the Camel catalog, the legacy language settings are applied")
 			return getLegacyLanguageSettings(language)
 		}
 		sourcesRequiredAtBuildTime, sExists := loader.Metadata["sources-required-at-build-time"]
+		deprecated, dpExists := loader.Metadata["deprecated"]
 		return languageSettings{
 			native:                     native == boolean.TrueString,
 			sourcesRequiredAtBuildTime: sExists && sourcesRequiredAtBuildTime == boolean.TrueString,
+			deprecated:                 dpExists && deprecated == boolean.TrueString,
 		}
 	}
-	log.Debugf("No loader could be found for the language %q, the legacy language settings are applied", string(language))
 	return getLegacyLanguageSettings(language)
 }
 
@@ -142,6 +144,16 @@ func (t *quarkusTrait) Matches(trait Trait) bool {
 func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	condition := t.adaptDeprecatedFields()
 
+	if t.languageSettingDeprecated(e) {
+		message := "The sources contains some language marked as deprecated. This Integration may not be supported in future release."
+		if condition == nil {
+			condition = NewIntegrationCondition(
+				"Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+		} else {
+			condition.message += message
+		}
+	}
+
 	if t.containsMode(traitv1.NativeQuarkusMode) && e.IntegrationInPhase(v1.IntegrationPhaseBuildingKit) {
 		// Native compilation is only supported for a subset of languages,
 		// so let's check for compatibility, and fail-fast the Integration,
@@ -174,6 +186,19 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 	}
 
 	return nil
+}
+
+func (t *quarkusTrait) languageSettingDeprecated(e *Environment) bool {
+	if e.Integration == nil {
+		return false
+	}
+	for _, source := range e.Integration.AllSources() {
+		if language := source.InferLanguage(); getLanguageSettings(e, language).deprecated {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (t *quarkusTrait) validateNativeSupport(e *Environment) error {
