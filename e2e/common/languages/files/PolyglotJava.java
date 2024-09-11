@@ -15,7 +15,14 @@
  * limitations under the License.
  */
 
-from("timer:tick")
-  .setHeader("m").constant("string!")
-  .setBody().simple("Magic\${header.m}")
-  .log("Kotlin \${body}");
+import org.apache.camel.builder.RouteBuilder;
+
+public class PolyglotJava extends RouteBuilder {
+  @Override
+  public void configure() throws Exception {
+	  from("timer:tick")
+	  .setHeader("m").constant("java")
+	  .setBody().simple("Magicpolyglot-${header.m}")
+      .log("${body}");
+  }
+}

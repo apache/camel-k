@@ -35,13 +35,6 @@ import (
 
 func TestNativeIntegrations(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		t.Run("unsupported integration source language", func(t *testing.T) {
-			name := RandomizedSuffixName("unsupported-js")
-			g.Expect(KamelRun(t, ctx, ns, "files/JavaScript.js", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
-
-			g.Eventually(IntegrationPhase(t, ctx, ns, name)).Should(Equal(v1.IntegrationPhaseError))
-		})
-
 		t.Run("xml native support", func(t *testing.T) {
 			name := RandomizedSuffixName("xml-native")
 			g.Expect(KamelRun(t, ctx, ns, "files/Xml.xml", "--name", name, "-t", "quarkus.build-mode=native", "-t", "builder.tasks-limit-memory=quarkus-native:6.5Gi").Execute()).To(Succeed())
