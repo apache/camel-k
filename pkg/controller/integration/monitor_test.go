@@ -128,6 +128,139 @@ func TestMonitorFailureIntegration(t *testing.T) {
 	assert.Equal(t, v1.IntegrationConditionInitializationFailedReason, handledIt.Status.GetCondition(v1.IntegrationConditionReady).Reason)
 }
 
+func TestMonitorIntegrationWhilePlatformRecreating(t *testing.T) {
+	catalog := &v1.CamelCatalog{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.CamelCatalogKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "camel-k-catalog",
+		},
+		Spec: v1.CamelCatalogSpec{
+			Runtime: v1.RuntimeSpec{
+				Provider: v1.RuntimeProviderQuarkus,
+				Version:  defaults.DefaultRuntimeVersion,
+			},
+		},
+	}
+	platform := &v1.IntegrationPlatform{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationPlatformKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "camel-k",
+		},
+		Status: v1.IntegrationPlatformStatus{
+			Phase: v1.IntegrationPlatformPhaseNone,
+		},
+	}
+	kit := &v1.IntegrationKit{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKitKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-kit",
+		},
+		Status: v1.IntegrationKitStatus{
+			Phase: v1.IntegrationKitPhaseReady,
+		},
+	}
+	it := &v1.Integration{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       v1.IntegrationKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-it",
+		},
+		Status: v1.IntegrationStatus{
+			RuntimeVersion: defaults.DefaultRuntimeVersion,
+			Phase:          v1.IntegrationPhaseRunning,
+			IntegrationKit: &corev1.ObjectReference{
+				Name:       kit.Name,
+				Namespace:  kit.Namespace,
+				Kind:       kit.Kind,
+				APIVersion: kit.APIVersion,
+			},
+			Conditions: []v1.IntegrationCondition{
+				{
+					Type:   v1.IntegrationConditionDeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
+				{
+					Type:   v1.IntegrationConditionReady,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+	hash, _ := digest.ComputeForIntegration(it, nil, nil)
+	it.Status.Digest = hash
+	pod := &corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: appsv1.SchemeGroupVersion.String(),
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "ns",
+			Name:      "my-pod",
+			Labels: map[string]string{
+				v1.IntegrationLabel: "my-it",
+			},
+		},
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:  "my-cnt",
+					Image: "my-img",
+				},
+			},
+		},
+		Status: corev1.PodStatus{
+			Phase: corev1.PodRunning,
+			Conditions: []corev1.PodCondition{
+				{
+					Type:   corev1.PodReady,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+	c, err := test.NewFakeClient(catalog, platform, it, kit, pod)
+	require.NoError(t, err)
+
+	a := monitorAction{}
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "monitor", a.Name())
+	assert.True(t, a.CanHandle(it))
+	handledIt, err := a.Handle(context.TODO(), it)
+	require.NoError(t, err)
+	assert.Equal(t, v1.IntegrationPhaseUnknown, handledIt.Status.Phase)
+}
+
+func TestMonitorIntegrationRecoverFromUnknown(t *testing.T) {
+	c, it, err := nominalEnvironment()
+	it.Status.Phase = v1.IntegrationPhaseUnknown
+	require.NoError(t, err)
+
+	a := monitorUnknownAction{}
+	a.InjectLogger(log.Log)
+	a.InjectClient(c)
+	assert.Equal(t, "monitor-unknown", a.Name())
+	assert.True(t, a.CanHandle(it))
+	handledIt, err := a.Handle(context.TODO(), it)
+	require.NoError(t, err)
+	assert.Equal(t, v1.IntegrationPhaseRunning, handledIt.Status.Phase)
+}
+
 func nominalEnvironment() (client.Client, *v1.Integration, error) {
 	catalog := &v1.CamelCatalog{
 		TypeMeta: metav1.TypeMeta{
