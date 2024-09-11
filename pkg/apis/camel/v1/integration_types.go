@@ -159,6 +159,8 @@ const (
 	IntegrationPhaseRunning IntegrationPhase = "Running"
 	// IntegrationPhaseError --.
 	IntegrationPhaseError IntegrationPhase = "Error"
+	// IntegrationPhaseUnknown --.
+	IntegrationPhaseUnknown IntegrationPhase = "Unknown"
 
 	// IntegrationConditionReady --.
 	IntegrationConditionReady IntegrationConditionType = "Ready"

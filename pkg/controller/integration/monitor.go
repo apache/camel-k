@@ -137,7 +137,13 @@ func (action *monitorAction) Handle(ctx context.Context, integration *v1.Integra
 			v1.IntegrationConditionInitializationFailedReason, err.Error())
 		return integration, err
 	}
-
+	// If the platform is not in ready status (it may happen when a new IntegrationPlatform is created), then, we may not be able to
+	// properly apply all the traits. We must set the phase in an unknown status which should be periodically reconciled in order to make sure that
+	// we eventually return in a ready phase (likely once the platform is done)
+	if environment.Platform != nil && environment.Platform.Status.Phase != v1.IntegrationPlatformPhaseReady {
+		integration.Status.Phase = v1.IntegrationPhaseUnknown
+		return integration, nil
+	}
 	action.checkTraitAnnotationsDeprecatedNotice(integration)
 
 	return action.monitorPods(ctx, environment, integration)

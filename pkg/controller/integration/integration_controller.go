@@ -56,6 +56,8 @@ import (
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
+const retryMonitoring = 5
+
 func Add(ctx context.Context, mgr manager.Manager, c client.Client) error {
 	err := mgr.GetFieldIndexer().IndexField(ctx, &corev1.Pod{}, "status.phase",
 		func(obj ctrl.Object) []string {
@@ -529,7 +531,7 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 	if instance.IsSynthetic() {
 		actions = append(actions, NewMonitorSyntheticAction())
 	} else {
-		actions = append(actions, NewMonitorAction())
+		actions = append(actions, NewMonitorAction(), NewMonitorUnknownAction())
 	}
 
 	for _, a := range actions {
@@ -556,6 +558,11 @@ func (r *reconcileIntegration) Reconcile(ctx context.Context, request reconcile.
 			if err := r.update(ctx, &instance, newTarget, &targetLog); err != nil {
 				camelevent.NotifyIntegrationError(ctx, r.client, r.recorder, &instance, newTarget, err)
 				return reconcile.Result{}, err
+			}
+
+			if newTarget.Status.Phase == v1.IntegrationPhaseUnknown {
+				// Wait for some time before trying to monitor again
+				return reconcile.Result{RequeueAfter: retryMonitoring * time.Second}, nil
 			}
 		}
 
