@@ -18,7 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -93,13 +92,6 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), n, "integration kits deleted from namespace", o.Namespace)
 	}
-
-	if err = o.resetIntegrationPlatform(c); err != nil {
-		fmt.Fprintln(cmd.ErrOrStderr(), err)
-		return
-	}
-
-	fmt.Fprintln(cmd.OutOrStdout(), "Camel K platform has been reset successfully!")
 }
 
 func (o *resetCmdOptions) deleteAllIntegrations(c client.Client) (int, error) {
@@ -161,22 +153,6 @@ func (o *resetCmdOptions) deleteAllKameletBindings(c client.Client) (int, error)
 		}
 	}
 	return len(list.Items), nil
-}
-
-func (o *resetCmdOptions) resetIntegrationPlatform(c client.Client) error {
-	list := v1.NewIntegrationPlatformList()
-	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return fmt.Errorf("could not retrieve integration platform from namespace %s: %w", o.Namespace, err)
-	}
-	if len(list.Items) > 1 {
-		return fmt.Errorf("expected 1 integration platform in the namespace, found: %d", len(list.Items))
-	} else if len(list.Items) == 0 {
-		return errors.New("no integration platforms found in the namespace")
-	}
-	platform := list.Items[0]
-	// Let's reset the status
-	platform.Status = v1.IntegrationPlatformStatus{}
-	return c.Status().Update(o.Context, &platform)
 }
 
 func isIntegrationOwned(it v1.Integration) bool {

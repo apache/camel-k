@@ -192,6 +192,7 @@ const (
 	// IntegrationPlatformPhaseError when the IntegrationPlatform had some error (see Conditions).
 	IntegrationPlatformPhaseError IntegrationPlatformPhase = "Error"
 	// IntegrationPlatformPhaseCreateCatalog when the IntegrationPlatform creates a new CamelCatalog.
+	// Deprecated no longer in use.
 	IntegrationPlatformPhaseCreateCatalog IntegrationPlatformPhase = "CreateCatalog"
 
 	// IntegrationPlatformConditionReady is the condition if the IntegrationPlatform is ready.
@@ -199,12 +200,12 @@ const (
 	IntegrationPlatformConditionReady = "Ready"
 	// IntegrationPlatformConditionTypeCreated is the condition if the IntegrationPlatform has been created.
 	IntegrationPlatformConditionTypeCreated IntegrationPlatformConditionType = "Created"
-
 	// IntegrationPlatformConditionTypeRegistryAvailable is the condition for the availability of a container registry.
 	IntegrationPlatformConditionTypeRegistryAvailable IntegrationPlatformConditionType = "RegistryAvailable"
-
-	// IntegrationPlatformConditionCamelCatalogAvailable is the condition for the availability of a container registry.
+	// IntegrationPlatformConditionCamelCatalogAvailable is the condition for the availability of a the CamelCatalog.
 	IntegrationPlatformConditionCamelCatalogAvailable IntegrationPlatformConditionType = "CamelCatalogAvailable"
+	// IntegrationPlatformConditionKameletCatalogAvailable is the condition for the availability of a Kamelet catalog.
+	IntegrationPlatformConditionKameletCatalogAvailable IntegrationPlatformConditionType = "KameletCatalogAvailable"
 
 	// IntegrationPlatformConditionCreatedReason represents the reason that the IntegrationPlatform is created.
 	IntegrationPlatformConditionCreatedReason = "IntegrationPlatformCreated"
