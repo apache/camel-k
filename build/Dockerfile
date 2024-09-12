@@ -43,20 +43,17 @@ ENV MAVEN_USER_HOME="${MAVEN_HOME}"
 RUN ${MVNW_DIR}/mvnw --version | grep "Maven home:" | sed 's/Maven home: //' >> ${MVNW_DIR}default \
     && cp -r /usr/share/maven/lib/. $(cat ${MVNW_DIR}default)/lib \
     && rm $(cat ${MVNW_DIR}default)/lib/maven-slf4j-provider* \
-    && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.* 
+    && rm $(cat ${MVNW_DIR}default)/lib/slf4j-api-1.*
 
 ENV MAVEN_OPTS="${MAVEN_OPTS} -Dlogback.configurationFile=${MAVEN_HOME}/conf/logback.xml"
 
 ADD build/_maven_output ${MVN_REPO}
 # Fix https://github.com/moby/moby/issues/37965
 RUN true
-ADD build/_kamelets /kamelets
 
 RUN chgrp -R 0 ${MVN_REPO} \
     && chown -R 1001:0 ${MVN_REPO} \
     && chmod -R 775 ${MVN_REPO} \
-    && chgrp -R 0 /kamelets \
-    && chmod -R g=u /kamelets \
     && chgrp -R 0 ${MAVEN_HOME} \
     && chown -R 1001:0 ${MAVEN_HOME} \
     && chmod -R 775 ${MAVEN_HOME}

@@ -121,6 +121,7 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 	kamelets := make(map[string]*v1.Kamelet)
 	missingKamelets := make([]string, 0)
 	availableKamelets := make([]string, 0)
+	bundledKamelets := make([]string, 0)
 
 	for _, kml := range strings.Split(t.List, ",") {
 		name := getKameletKey(kml, false)
@@ -138,6 +139,10 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 		} else {
 			availableKamelets = append(availableKamelets, name)
 		}
+		if kamelet.IsBundled() {
+			bundledKamelets = append(bundledKamelets, name)
+		}
+		// We control which version to use (if any is specified)
 		clonedKamelet, err := kamelet.CloneWithVersion(getKameletVersion(kml))
 		if err != nil {
 			return nil, err
@@ -147,13 +152,12 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 
 	sort.Strings(availableKamelets)
 	sort.Strings(missingKamelets)
+	sort.Strings(bundledKamelets)
 
 	if len(missingKamelets) > 0 {
-		message := fmt.Sprintf("kamelets [%s] found, kamelets [%s] not found in %s repositories",
-			strings.Join(availableKamelets, ","),
+		message := fmt.Sprintf("kamelets [%s] not found in %s repositories",
 			strings.Join(missingKamelets, ","),
 			repo.String())
-
 		e.Integration.Status.SetCondition(
 			v1.IntegrationConditionKameletsAvailable,
 			corev1.ConditionFalse,
@@ -162,6 +166,24 @@ func (t *kameletsTrait) collectKamelets(e *Environment) (map[string]*v1.Kamelet,
 		)
 
 		return nil, errors.New(message)
+	}
+
+	// TODO:
+	// We list the Kamelets coming from a bundle. We want to warn the user
+	// that in the future we'll use the specification coming from the dependency runtime
+	// instead of using the one installed in the cluster.
+	// It may be a good idea in the future to let the user specify the catalog dependency to use
+	// in order to override the one coming from Apache catalog
+	if len(bundledKamelets) > 0 {
+		message := fmt.Sprintf("using bundled kamelets [%s]: make sure the Kamelet specifications is compatible with this Integration runtime."+
+			" This feature is deprecated as in the future we will use directly the specification coming from the Kamelet catalog dependency jar.",
+			strings.Join(bundledKamelets, ","))
+		e.Integration.Status.SetCondition(
+			v1.IntegrationConditionType("KameletsDeprecationNotice"),
+			corev1.ConditionTrue,
+			"KameletsDeprecationNotice",
+			message,
+		)
 	}
 
 	e.Integration.Status.SetCondition(

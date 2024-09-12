@@ -506,7 +506,6 @@ func TestKameletConditionFalse(t *testing.T) {
 	cond := environment.Integration.Status.GetCondition(v1.IntegrationConditionKameletsAvailable)
 	assert.Equal(t, corev1.ConditionFalse, cond.Status)
 	assert.Equal(t, v1.IntegrationConditionKameletsAvailableReason, cond.Reason)
-	assert.Contains(t, cond.Message, "[timer] found")
 	assert.Contains(t, cond.Message, "kamelets [none] not found")
 }
 

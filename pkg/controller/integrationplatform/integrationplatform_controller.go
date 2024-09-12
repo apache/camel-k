@@ -19,7 +19,6 @@ package integrationplatform
 
 import (
 	"context"
-	"time"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -39,10 +38,6 @@ import (
 	camelevent "github.com/apache/camel-k/v2/pkg/event"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/monitoring"
-)
-
-const (
-	requeueAfterDuration = 5 * time.Second
 )
 
 // Add creates a new IntegrationPlatform Controller and adds it to the Manager. The Manager will set fields
@@ -161,7 +156,6 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		NewInitializeAction(),
 		NewCreateAction(),
 		NewMonitorAction(),
-		NewCreateCatalogAction(),
 	}
 
 	var targetPhase v1.IntegrationPlatformPhase
@@ -214,12 +208,5 @@ func (r *reconcileIntegrationPlatform) Reconcile(ctx context.Context, request re
 		break
 	}
 
-	if targetPhase == v1.IntegrationPlatformPhaseReady {
-		return reconcile.Result{}, nil
-	}
-
-	// Requeue
-	return reconcile.Result{
-		RequeueAfter: requeueAfterDuration,
-	}, nil
+	return reconcile.Result{}, nil
 }

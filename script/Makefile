@@ -90,12 +90,7 @@ OPM := opm
 
 # Used to push pre-release artifacts
 STAGING_IMAGE := docker.io/camelk/camel-k
-
-# Kamelets options
 INSTALL_DEFAULT_KAMELETS ?= true
-KAMELET_CATALOG_REPO := https://github.com/apache/camel-kamelets.git
-# Make sure to use a released tag or empty if you want to get the latest development bits
-KAMELET_CATALOG_REPO_TAG := v4.4.1
 
 # When performing integration tests, it is not necessary to always execute build, especially
 # in e2e tests when lots of tests are being executed sequentially & the build has already taken place.
@@ -356,16 +351,6 @@ endif
 build-resources:
 	./script/get_catalog.sh $(DEFAULT_RUNTIME_VERSION)
 
-bundle-kamelets:
-	@echo "Preparing Kamelets bundle resource..."
-ifneq (,$(findstring release,$(MAKECMDGOALS)))
-ifneq (,$(findstring $(KAMELET_CATALOG_REPO_TAG), main))
-	@echo "You cannot set KAMELET_CATALOG_REPO_TAG=$(KAMELET_CATALOG_REPO_TAG) when doing a release"
-	@exit 1
-endif
-endif
-	./script/bundle_kamelets.sh $(KAMELET_CATALOG_REPO) $(KAMELET_CATALOG_REPO_TAG)
-
 build-compile-integration-tests:
 	@echo "####### Compiling integration tests..."
 	export CAMEL_K_E2E_JUST_COMPILE="true"; \
@@ -445,7 +430,7 @@ endif
 
 DOCKER_TAG := $(CUSTOM_IMAGE):$(CUSTOM_VERSION)-$(IMAGE_ARCH)
 
-images: build maven-overlay bundle-kamelets image-build build-kamel-platform
+images: build maven-overlay image-build build-kamel-platform
 
 image-build:
 ifneq (,$(findstring SNAPSHOT,$(DEFAULT_RUNTIME_VERSION)))
@@ -550,7 +535,7 @@ release-kustomize:
 	RELEASE_NAME=$(PACKAGE) \
 	./script/release_kustomize.sh
 
-.PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version bundle-kamelets
+.PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 
 # find or download controller-gen if necessary

@@ -53,10 +53,20 @@ const (
 func ConfigureDefaults(ctx context.Context, c client.Client, p *v1.IntegrationPlatform, verbose bool) error {
 	// Reset the state to initial values
 	p.ResyncStatusFullConfig()
-
+	// Set the operator version controlling this resource
+	p.Status.Version = defaults.Version
 	// Apply settings from global integration platform that is bound to this operator
 	if err := applyGlobalPlatformDefaults(ctx, c, p); err != nil {
 		return err
+	}
+
+	if p.Status.Build.RuntimeProvider == "" {
+		p.Status.Build.RuntimeProvider = v1.RuntimeProviderQuarkus
+		log.Debugf("Integration Platform %s [%s]: setting default runtime provider %s", p.Name, p.Namespace, v1.RuntimeProviderQuarkus)
+	}
+	if p.Status.Build.RuntimeVersion == "" {
+		p.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+		log.Debugf("Integration Platform %s [%s]: setting default runtime version %s", p.Name, p.Namespace, p.Status.Build.PublishStrategy)
 	}
 
 	// update missing fields in the resource

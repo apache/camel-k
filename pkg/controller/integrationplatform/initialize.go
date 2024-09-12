@@ -19,10 +19,11 @@ package integrationplatform
 
 import (
 	"context"
+	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util/defaults"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // NewInitializeAction returns the action that initializes the integration platform when not provided by the user.
@@ -47,8 +48,18 @@ func (action *initializeAction) Handle(ctx context.Context, platform *v1.Integra
 	if err := platformutil.ConfigureDefaults(ctx, action.client, platform, true); err != nil {
 		return nil, err
 	}
-	platform.Status.Phase = v1.IntegrationPlatformPhaseCreating
-	platform.Status.Version = defaults.Version
+	if platform.Status.Build.RuntimeVersion == "" {
+		platform.Status.Phase = v1.IntegrationPlatformPhaseError
+		platform.Status.SetCondition(
+			v1.IntegrationPlatformConditionTypeCreated,
+			corev1.ConditionFalse,
+			"MissingRuntimeVersionSpec",
+			"Runtime version missing from build spec")
+
+		return platform, fmt.Errorf("runtime version missing from build spec")
+	} else {
+		platform.Status.Phase = v1.IntegrationPlatformPhaseCreating
+	}
 
 	return platform, nil
 }

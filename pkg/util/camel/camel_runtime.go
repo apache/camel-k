@@ -33,7 +33,8 @@ import (
 )
 
 // CreateCatalog --.
-func CreateCatalog(ctx context.Context, client client.Client, namespace string, platform *v1.IntegrationPlatform, runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
+func CreateCatalog(ctx context.Context, client client.Client, namespace string, platform *v1.IntegrationPlatform,
+	runtime v1.RuntimeSpec) (*RuntimeCatalog, error) {
 	ctx, cancel := context.WithTimeout(ctx, platform.Status.Build.GetTimeout().Duration)
 	defer cancel()
 	catalog, err := GenerateCatalog(ctx, client, namespace, platform.Status.Build.Maven, runtime, []maven.Dependency{})

@@ -178,6 +178,11 @@ func (k *Kamelet) SortedTypesKeys() []TypeSlot {
 	return res
 }
 
+// IsBundled returns true if the Kamelet is coming from a pre-bundled installation.
+func (k *Kamelet) IsBundled() bool {
+	return k.Labels != nil && k.Labels[KameletBundledLabel] == "true"
+}
+
 func ValidKameletName(name string) bool {
 	return !reservedKameletNames[name]
 }

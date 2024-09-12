@@ -1,4 +1,3 @@
-
 = Releasing Apache Camel K
 
 This procedure describes all the steps required to release a new version of Apache Camel K.

@@ -24,7 +24,6 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	platformutil "github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/openshift"
 	corev1 "k8s.io/api/core/v1"
@@ -47,22 +46,37 @@ func (action *monitorAction) CanHandle(platform *v1.IntegrationPlatform) bool {
 	return platform.Status.Phase == v1.IntegrationPlatformPhaseReady || platform.Status.Phase == v1.IntegrationPlatformPhaseError
 }
 
-//nolint:nestif
 func (action *monitorAction) Handle(ctx context.Context, platform *v1.IntegrationPlatform) (*v1.IntegrationPlatform, error) {
-	// Just track the version of the operator in the platform resource
-	if platform.Status.Version != defaults.Version {
-		platform.Status.Version = defaults.Version
-		action.L.Info("IntegrationPlatform version updated", "version", platform.Status.Version)
+	runtimeVersion := specOrDefault(platform.Spec.Build.RuntimeVersion)
+	if platform.Status.Build.RuntimeVersion != runtimeVersion {
+		action.L.Infof("IntegrationPlatform version updated from %s to %s", platform.Status.Build.RuntimeVersion, runtimeVersion)
+		// Reset the status to reinitialize the resource
+		platform.Status = v1.IntegrationPlatformStatus{}
+
+		return platform, nil
 	}
-
-	// TODO: refactor the phase transition as it is hard to reason
-	platformPhase := v1.IntegrationPlatformPhaseReady
-
-	// Refresh applied configuration
+	// Sync status configuration
 	if err := platformutil.ConfigureDefaults(ctx, action.client, platform, false); err != nil {
 		return nil, err
 	}
+	// Get the information about Camel version in the catalog
+	runtimeSpec := v1.RuntimeSpec{
+		Version:  platform.Status.Build.RuntimeVersion,
+		Provider: platform.Status.Build.RuntimeProvider,
+	}
+	catalog, err := loadCatalog(ctx, action.client, platform.Namespace, runtimeSpec)
+	if catalog == nil || err != nil {
+		// error, a catalog must be available
+		platform.Status.Phase = v1.IntegrationPlatformPhaseError
+		platform.Status.SetCondition(
+			v1.IntegrationPlatformConditionCamelCatalogAvailable,
+			corev1.ConditionFalse,
+			v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
+			fmt.Sprintf("camel catalog %s not available, please review given runtime version", runtimeSpec.Version))
 
+		return platform, err
+	}
+	platform.Status.Build.RuntimeCoreVersion = catalog.Spec.GetCamelVersion()
 	// Registry condition
 	isOpenshift, err := openshift.IsOpenShift(action.client)
 	if err != nil {
@@ -77,7 +91,7 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 	} else {
 		if platform.Status.Build.Registry.Address == "" {
 			// error, we need a registry if we're not on Openshift
-			platformPhase = v1.IntegrationPlatformPhaseError
+			platform.Status.Phase = v1.IntegrationPlatformPhaseError
 			platform.Status.SetCondition(
 				v1.IntegrationPlatformConditionTypeRegistryAvailable,
 				corev1.ConditionFalse,
@@ -91,41 +105,6 @@ func (action *monitorAction) Handle(ctx context.Context, platform *v1.Integratio
 				fmt.Sprintf("registry available at %s", platform.Status.Build.Registry.Address))
 		}
 	}
-
-	if platformPhase == v1.IntegrationPlatformPhaseReady {
-		// Camel catalog condition
-		runtimeSpec := v1.RuntimeSpec{
-			Version:  platform.Status.Build.RuntimeVersion,
-			Provider: v1.RuntimeProviderQuarkus,
-		}
-		if catalog, err := camel.LoadCatalog(ctx, action.client, platform.Namespace, runtimeSpec); err != nil {
-			action.L.Error(err, "IntegrationPlatform unable to load Camel catalog",
-				"runtime-version", runtimeSpec.Version, "runtime-provider", runtimeSpec.Provider)
-		} else if catalog == nil {
-			if platform.Status.Phase != v1.IntegrationPlatformPhaseError {
-				platformPhase = v1.IntegrationPlatformPhaseCreateCatalog
-			} else {
-				// IntegrationPlatform is in error phase for some reason - that error state must be resolved before we move into create catalog phase
-				// avoids to run into endless loop of error and catalog creation phase ping pong
-				platformPhase = v1.IntegrationPlatformPhaseError
-			}
-
-			platform.Status.SetCondition(
-				v1.IntegrationPlatformConditionCamelCatalogAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
-				fmt.Sprintf("camel catalog %s not available, please review given runtime version", runtimeSpec.Version))
-		} else {
-			platform.Status.SetCondition(
-				v1.IntegrationPlatformConditionCamelCatalogAvailable,
-				corev1.ConditionTrue,
-				v1.IntegrationPlatformConditionCamelCatalogAvailableReason,
-				fmt.Sprintf("camel catalog %s available", runtimeSpec.Version))
-			platform.Status.Build.RuntimeCoreVersion = catalog.Runtime.Metadata["camel.version"]
-		}
-	}
-
-	platform.Status.Phase = platformPhase
 	action.checkTraitAnnotationsDeprecatedNotice(platform)
 
 	return platform, nil
@@ -150,4 +129,11 @@ func (action *monitorAction) checkTraitAnnotationsDeprecatedNotice(platform *v1.
 			}
 		}
 	}
+}
+
+func specOrDefault(runtimeVersionSpec string) string {
+	if runtimeVersionSpec == "" {
+		return defaults.DefaultRuntimeVersion
+	}
+	return runtimeVersionSpec
 }
