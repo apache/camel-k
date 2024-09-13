@@ -159,10 +159,10 @@ func TestCreateNewCatalog(t *testing.T) {
 
 	// Set the folder where to install testing kamelets
 	tmpDir, err := os.MkdirTemp("/tmp", "kamelets*")
+	defer os.Unsetenv(kameletDirEnv)
 	assert.NoError(t, err)
 	os.Setenv(kameletDirEnv, tmpDir)
 	answer, err := action.Handle(context.TODO(), &ip)
-	os.Unsetenv(kameletDirEnv)
 	require.NoError(t, err)
 	assert.NotNil(t, answer)
 
@@ -180,6 +180,27 @@ func TestCreateNewCatalog(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, list.Items)
+
+	// Creating again a platform should not cause problem because any existing Kamelets file leftover
+	ip.Status = v1.IntegrationPlatformStatus{
+		IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+			Build: v1.IntegrationPlatformBuildSpec{
+				RuntimeProvider: v1.RuntimeProviderQuarkus,
+				RuntimeVersion:  defaults.DefaultRuntimeVersion,
+			},
+		},
+	}
+	// Refresh client with changed IP
+	c, err = test.NewFakeClient(&ip)
+	require.NoError(t, err)
+	action.InjectClient(c)
+	answer, err = action.Handle(context.TODO(), &ip)
+	require.NoError(t, err)
+	assert.NotNil(t, answer)
+
+	assert.Equal(t, v1.IntegrationPlatformPhaseReady, answer.Status.Phase)
+	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionCamelCatalogAvailable).Status)
+	assert.Equal(t, corev1.ConditionTrue, answer.Status.GetCondition(v1.IntegrationPlatformConditionKameletCatalogAvailable).Status)
 }
 
 func TestCreateCatalogError(t *testing.T) {

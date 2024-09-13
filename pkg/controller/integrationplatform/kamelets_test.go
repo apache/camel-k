@@ -106,7 +106,8 @@ func TestPrepareKameletsPermissions(t *testing.T) {
 }
 
 func TestPrepareKameletsDirectory(t *testing.T) {
-	kameletDir := prepareKameletDirectory()
+	kameletDir, err := prepareKameletDirectory()
+	assert.NoError(t, err)
 	assert.Equal(t, defaultKameletDir, kameletDir)
 }
 
