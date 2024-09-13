@@ -167,23 +167,22 @@ func installKamelets(ctx context.Context, c client.Client, platform *v1.Integrat
 		camelVersion := platform.Status.Build.RuntimeCoreVersion
 		installedKam, erroredKam, err := installKameletCatalog(ctx, c, platform, camelVersion)
 		if err != nil {
-			platform.Status.Phase = v1.IntegrationPlatformPhaseError
+			// An error here should not be disruptive, we just report it happened
 			platform.Status.SetCondition(
 				v1.IntegrationPlatformConditionKameletCatalogAvailable,
 				corev1.ConditionFalse,
 				"IntegrationPlatformKameletCatalogAvailable",
-				fmt.Sprintf("kamelet catalog %s not available, please review given camel version. Error: %s", camelVersion, err),
+				fmt.Sprintf("kamelet catalog %s not available. Error: %s", camelVersion, err),
 			)
-
-			return platform, nil
+		} else {
+			platform.Status.SetCondition(
+				v1.IntegrationPlatformConditionKameletCatalogAvailable,
+				corev1.ConditionTrue,
+				"IntegrationPlatformKameletCatalogAvailable",
+				fmt.Sprintf("successfully installed Kamelet catalog version %s: success %d Kamelets, failed %d Kamelets",
+					camelVersion, installedKam, erroredKam),
+			)
 		}
-		platform.Status.SetCondition(
-			v1.IntegrationPlatformConditionKameletCatalogAvailable,
-			corev1.ConditionTrue,
-			"IntegrationPlatformKameletCatalogAvailable",
-			fmt.Sprintf("successfully installed Kamelet catalog version %s: success %d Kamelets, failed %d Kamelets",
-				camelVersion, installedKam, erroredKam),
-		)
 	}
 
 	return platform, nil

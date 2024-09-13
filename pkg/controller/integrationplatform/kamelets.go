@@ -56,7 +56,10 @@ func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.In
 		return -1, -1, err
 	}
 	// Prepare directory to contains kamelets
-	kameletDir := prepareKameletDirectory()
+	kameletDir, err := prepareKameletDirectory()
+	if err != nil {
+		return -1, -1, err
+	}
 	// Download Kamelet dependency
 	if err := downloadKameletDependency(ctx, version, kameletDir); err != nil {
 		return -1, -1, err
@@ -65,7 +68,6 @@ func installKameletCatalog(ctx context.Context, c client.Client, platform *v1.In
 	if err := extractKameletsFromDependency(ctx, version, kameletDir); err != nil {
 		return -1, -1, err
 	}
-
 	// Store Kamelets as Kubernetes resources
 	return applyKamelets(ctx, c, platform, kameletDir)
 }
@@ -84,13 +86,18 @@ func prepareKameletsPermissions(ctx context.Context, c client.Client, installing
 	return nil
 }
 
-func prepareKameletDirectory() string {
+func prepareKameletDirectory() (string, error) {
 	kameletDir := os.Getenv(kameletDirEnv)
 	if kameletDir == "" {
 		kameletDir = defaultKameletDir
 	}
+	// If the directory exists, it is likely a leftover from any previous Kamelet
+	// catalog installation. We should remove to be able to proceed
+	if err := os.RemoveAll(kameletDir); err != nil {
+		return kameletDirEnv, err
+	}
 
-	return kameletDir
+	return kameletDir, nil
 }
 
 func downloadKameletDependency(ctx context.Context, version, kameletsDir string) error {
