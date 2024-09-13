@@ -1,14 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
-
-**Closed issues:**
-
-- openapi/swagger - avoid rest dsl generation if specs have not changed [\#330](https://github.com/apache/camel-k/issues/330)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-12)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-13)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -24,12 +16,14 @@
 - Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
 - Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
+- Provide Openshift compatibility in the matrix [\#5562](https://github.com/apache/camel-k/issues/5562)
 - Flaky TestRunCronExample [\#5533](https://github.com/apache/camel-k/issues/5533)
 - Don't build an IntegrationKit on upgrade with same runtime version [\#5513](https://github.com/apache/camel-k/issues/5513)
 - Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 - Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
 - "Kitless" Integration [\#2365](https://github.com/apache/camel-k/issues/2365)
+- openapi/swagger - avoid rest dsl generation if specs have not changed [\#330](https://github.com/apache/camel-k/issues/330)
 
 ## [2.5.0-nightly](https://github.com/apache/camel-k/tree/2.5.0-nightly) (2024-08-14)
 
