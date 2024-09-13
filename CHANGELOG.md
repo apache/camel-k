@@ -6,16 +6,16 @@
 
 **Closed issues:**
 
-- Mark Kotlin as deprecated [\#5837](https://github.com/apache/camel-k/issues/5837)
-- Integration reconciler error after operator re-install [\#5836](https://github.com/apache/camel-k/issues/5836)
-- Don't build an IntegrationKit on upgrade with same runtime version [\#5513](https://github.com/apache/camel-k/issues/5513)
+- openapi/swagger - avoid rest dsl generation if specs have not changed [\#330](https://github.com/apache/camel-k/issues/330)
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-11)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-12)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
 **Closed issues:**
 
+- Mark Kotlin as deprecated [\#5837](https://github.com/apache/camel-k/issues/5837)
+- Integration reconciler error after operator re-install [\#5836](https://github.com/apache/camel-k/issues/5836)
 - Nightly updates is updating when no change [\#5813](https://github.com/apache/camel-k/issues/5813)
 - Add ingressClassName field to Ingress trait [\#5793](https://github.com/apache/camel-k/issues/5793)
 - Error: io.quarkus.vertx.http.runtime.TrustedProxyCheckPartConverter not a subtype [\#5758](https://github.com/apache/camel-k/issues/5758)
@@ -25,6 +25,7 @@
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
 - Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
 - Flaky TestRunCronExample [\#5533](https://github.com/apache/camel-k/issues/5533)
+- Don't build an IntegrationKit on upgrade with same runtime version [\#5513](https://github.com/apache/camel-k/issues/5513)
 - Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 - Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
