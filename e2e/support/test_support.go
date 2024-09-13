@@ -439,6 +439,32 @@ func IntegrationLogs(t *testing.T, ctx context.Context, ns, name string) func() 
 	}
 }
 
+func OperatorLogs(t *testing.T, ctx context.Context, ns string) func() string {
+	return func() string {
+		pod := OperatorPod(t, ctx, ns)()
+		if pod == nil {
+			return ""
+		}
+
+		options := corev1.PodLogOptions{
+			TailLines: ptr.To(int64(200)),
+		}
+
+		for _, container := range pod.Status.ContainerStatuses {
+			if !container.Ready || container.State.Waiting != nil {
+				// avoid logs watch fail due to container creating state
+				return ""
+			}
+		}
+
+		if len(pod.Spec.Containers) > 1 {
+			options.Container = pod.Spec.Containers[0].Name
+		}
+
+		return Logs(t, ctx, ns, pod.Name, options)()
+	}
+}
+
 // TailedLogs Retrieve the Logs from the Pod defined by its name in the given namespace ns. The number of lines numLines from the end of the logs to show.
 func TailedLogs(t *testing.T, ctx context.Context, ns, name string, numLines int64) func() string {
 	return func() string {
@@ -2085,8 +2111,9 @@ func DeletePlatform(t *testing.T, ctx context.Context, ns string) func() bool {
 		}
 		if err := TestClient(t).Delete(ctx, pl); err != nil {
 			log.Error(err, "Got error while deleting the platform")
+			return false
 		}
-		return false
+		return true
 	}
 }
 
