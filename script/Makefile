@@ -530,11 +530,6 @@ release-nightly: cross-compile images-push
 release-helm:
 	./script/release_helm.sh ${VERSION}
 
-release-kustomize:
-	RELEASE_VERSION=$(CUSTOM_VERSION) \
-	RELEASE_NAME=$(PACKAGE) \
-	./script/release_kustomize.sh
-
 .PHONY: do-build build build-kamel build-kamel-platform build-resources dep codegen images images-push images-push-staging image-build test check clean release cross-compile package-examples set-version git-tag check-licenses build-resources release-helm release-staging release-nightly get-staging-repo get-version
 .PHONY: controller-gen kubectl kustomize operator-sdk opm
 

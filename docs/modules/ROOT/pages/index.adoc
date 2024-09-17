@@ -36,11 +36,7 @@ The integration code will immediately run in the cloud. Continue reading the doc
 
 == Camel dependencies matrix
 --
-ifdef::lts[This is a long term service release.]
-ifndef::lts[]
-ifdef::prerelease[This is a development version of {page-component-title}. It should not be used in production.]
-ifndef::prerelease[This release will not be updated, but rather replaced by a new release.]
-endif::[]
+ifdef::prerelease[NOTE: This is a development version of {page-component-title}. It should not be used in production.]
 --
 
 From Camel K version 2 onward you will be able to use any Camel K Runtime. Each runtime depends on a Camel Quarkus, Camel and Quarkus Platform version. Every Camel K has a default runtime used, but you can xref:configuration/runtime-version.adoc[pick any Camel K Runtime available] (backward and forward compatible).
@@ -54,13 +50,11 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 |Camel Quarkus
 |Camel
 |Quarkus
-|Kamelets
-|LTS
 |Branch
 |===
 
 //cannot use top level index.adoc as the page with the query is always omitted.
-indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|util.kameletsRef(camelKameletsVersion, camelKameletsDocsVersion)|lts|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
+indexTable::[version="*",relative="running/running.adoc",cellformats="util.ckRef(pageComponentDisplayVersion, pageComponentVersion)|camelKRuntimeVersion|util.camelQuarkusRef(camelQuarkusVersion, camelQuarkusDocsVersion)|util.camelRef(camelVersion, camelDocsVersion)|util.quarkusRef(quarkusVersion)|ck.branch(pageComponentVersion)", requires={requires},transform=util.sortCompatibilityItems]
 
 == Other APIs version matrix
 
