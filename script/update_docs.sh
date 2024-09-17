@@ -27,23 +27,9 @@ if [ ! -f $CATALOG ]; then
     exit 1
 fi
 
-KAMELET_CATALOG_REPO_TAG=$(grep '^KAMELET_CATALOG_REPO_TAG := ' Makefile | sed 's/^.* \?= //')
-KAMELETS_VERSION=$(echo $KAMELET_CATALOG_REPO_TAG | sed 's/^.//')
-if [[ "$KAMELET_CATALOG_REPO_TAG" == "main" ]]; then
-    KAMELETS_VERSION="latest"
-    KAMELETS_DOCS_VERSION="next"
-else
-    re="^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+).*$"
-    if ! [[ $KAMELETS_VERSION =~ $re ]]; then
-        echo "❗ argument must match semantic version: $KAMELETS_VERSION"
-        exit 1
-    fi
-    KAMELETS_DOCS_VERSION="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.x"
-fi
 KUSTOMIZE_VERSION=$(grep '^KUSTOMIZE_VERSION := ' Makefile | sed 's/^.* \?= //' | sed 's/^.//')
 
 echo "Camel K Runtime version: $RUNTIME_VERSION"
-echo "Kamelets version: $KAMELETS_VERSION"
 echo "Kustomize version: $KUSTOMIZE_VERSION"
 
 yq -i ".asciidoc.attributes.kustomize-version = \"$KUSTOMIZE_VERSION\"" $location/../docs/antora.yml
@@ -77,8 +63,6 @@ yq -i ".asciidoc.attributes.camel-docs-version = \"$CAMEL_DOCS_VERSION\"" $locat
 yq -i ".asciidoc.attributes.camel-quarkus-version = \"$CAMEL_QUARKUS_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.camel-quarkus-docs-version = \"$CAMEL_QUARKUS_DOCS_VERSION\"" $location/../docs/antora.yml
 yq -i ".asciidoc.attributes.quarkus-version = \"$QUARKUS_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.camel-kamelets-version = \"$KAMELETS_VERSION\"" $location/../docs/antora.yml
-yq -i ".asciidoc.attributes.camel-kamelets-docs-version = \"$KAMELETS_DOCS_VERSION\"" $location/../docs/antora.yml
 
 echo "Scraping information from go.mod"
 KNATIVE_API_VERSION=$(grep '^.*knative.dev/eventing ' $location/../go.mod | sed 's/^.* //' | sed 's/^.//')
