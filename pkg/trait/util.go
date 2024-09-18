@@ -37,10 +37,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/sets"
 )
 
-func ptrFrom[T any](value T) *T {
-	return &value
-}
-
 type Options map[string]map[string]interface{}
 
 func (u Options) Get(id string) (map[string]interface{}, bool) {

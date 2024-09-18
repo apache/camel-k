@@ -90,7 +90,7 @@ func TestHealthTrait(t *testing.T) {
 		Resources:      kubernetes.NewCollection(),
 	}
 	environment.Platform.ResyncStatusFullConfig()
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 
 	d := environment.Resources.GetDeploymentForIntegration(environment.Integration)
@@ -108,7 +108,7 @@ func TestHealthTrait(t *testing.T) {
 	environment.Integration.Spec.Traits.Health.StartupProbeEnabled = ptr.To(true)
 
 	environment.Platform.ResyncStatusFullConfig()
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 	d = environment.Resources.GetDeploymentForIntegration(environment.Integration)
 	assert.NotNil(t, d)

@@ -44,10 +44,6 @@ type securityContextTrait struct {
 func newSecurityContextTrait() Trait {
 	return &securityContextTrait{
 		BasePlatformTrait: NewBasePlatformTrait(securityContextTraitID, securityContextTraitOder),
-		SecurityContextTrait: traitv1.SecurityContextTrait{
-			RunAsNonRoot:       ptr.To(defaultPodRunAsNonRoot),
-			SeccompProfileType: defaultPodSeccompProfileType,
-		},
 	}
 }
 
@@ -66,7 +62,9 @@ func (t *securityContextTrait) Configure(e *Environment) (bool, *TraitCondition,
 	if condition != nil && condition.Status == corev1.ConditionTrue {
 		return false, NewIntegrationConditionPlatformDisabledWithMessage(
 			"SecurityContext",
-			"pod security context is disabled for Knative Service. PodSecurityContext properties can affect non-user sidecar containers that come from Knative or your service mesh. Use container security context instead.",
+			"pod security context is disabled for Knative Service. "+
+				"PodSecurityContext properties can affect non-user sidecar containers that come from Knative or your service mesh. "+
+				"Use container security context instead.",
 		), nil
 	}
 
@@ -83,9 +81,9 @@ func (t *securityContextTrait) Apply(e *Environment) error {
 
 func (t *securityContextTrait) setSecurityContext(e *Environment, podSpec *corev1.PodSpec) error {
 	sc := corev1.PodSecurityContext{
-		RunAsNonRoot: t.RunAsNonRoot,
+		RunAsNonRoot: t.getRunAsNonRoot(),
 		SeccompProfile: &corev1.SeccompProfile{
-			Type: t.SeccompProfileType,
+			Type: t.getSeccompProfileType(),
 		},
 	}
 
@@ -122,4 +120,20 @@ func (t *securityContextTrait) getUser(e *Environment) (*int64, error) {
 	}
 
 	return runAsUser, nil
+}
+
+func (t *securityContextTrait) getRunAsNonRoot() *bool {
+	if t.RunAsNonRoot == nil {
+		return ptr.To(defaultPodRunAsNonRoot)
+	}
+
+	return t.RunAsNonRoot
+}
+
+func (t *securityContextTrait) getSeccompProfileType() corev1.SeccompProfileType {
+	if t.SeccompProfileType == "" {
+		return defaultPodSeccompProfileType
+	}
+
+	return t.SeccompProfileType
 }

@@ -88,15 +88,6 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
 	}
-	if _, ok := e.CamelCatalog.Runtime.Capabilities[v1.CapabilityCron]; !ok {
-		return false, NewIntegrationCondition(
-			"Cron",
-			v1.IntegrationConditionCronJobAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionCronJobNotAvailableReason,
-			"the runtime provider %s does not declare 'cron' capability",
-		), nil
-	}
 
 	if ptr.Deref(t.Auto, true) {
 		err := t.autoConfigure(e)
@@ -143,7 +134,11 @@ func (t *cronTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, nil, nil
 	}
 
-	return t.Schedule != "", nil, nil
+	if t.Schedule != "" {
+		t.Enabled = ptr.To(true)
+	}
+
+	return ptr.Deref(t.Enabled, false), nil, nil
 }
 
 func (t *cronTrait) autoConfigure(e *Environment) error {
@@ -162,10 +157,6 @@ func (t *cronTrait) autoConfigure(e *Environment) error {
 			util.StringSliceUniqueAdd(&configuredComponents, c)
 		}
 		t.Components = strings.Join(configuredComponents, ",")
-	}
-
-	if t.ConcurrencyPolicy == "" {
-		t.ConcurrencyPolicy = string(batchv1.ForbidConcurrent)
 	}
 
 	if (t.Schedule == "" && t.Components == "") && t.Fallback == nil {
@@ -254,7 +245,7 @@ func (t *cronTrait) getCronJobFor(e *Environment) *batchv1.CronJob {
 		Spec: batchv1.CronJobSpec{
 			Schedule:                t.Schedule,
 			TimeZone:                t.TimeZone,
-			ConcurrencyPolicy:       batchv1.ConcurrencyPolicy(t.ConcurrencyPolicy),
+			ConcurrencyPolicy:       t.getConcurrentPolicy(),
 			StartingDeadlineSeconds: t.StartingDeadlineSeconds,
 			JobTemplate: batchv1.JobTemplateSpec{
 				Spec: batchv1.JobSpec{
@@ -359,6 +350,14 @@ func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
 	}
 
 	return fromUris, nil
+}
+
+func (t *cronTrait) getConcurrentPolicy() batchv1.ConcurrencyPolicy {
+	if t.ConcurrencyPolicy == "" {
+		return batchv1.ForbidConcurrent
+	}
+
+	return batchv1.ConcurrencyPolicy(t.ConcurrencyPolicy)
 }
 
 func getCronForURIs(camelURIs []string) *cronInfo {

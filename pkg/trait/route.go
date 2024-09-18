@@ -48,9 +48,6 @@ type routeTrait struct {
 func newRouteTrait() Trait {
 	return &routeTrait{
 		BaseTrait: NewBaseTrait(routeTraitID, routeTraitOrder),
-		RouteTrait: traitv1.RouteTrait{
-			Annotations: map[string]string{},
-		},
 	}
 }
 

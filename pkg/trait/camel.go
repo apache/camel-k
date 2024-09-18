@@ -42,6 +42,8 @@ const (
 type camelTrait struct {
 	BasePlatformTrait
 	traitv1.CamelTrait `property:",squash"`
+	// private configuration used only internally
+	runtimeVersion string
 }
 
 func newCamelTrait() Trait {
@@ -73,8 +75,10 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		if runtimeVersion, err := determineRuntimeVersion(e); err != nil {
 			return false, nil, err
 		} else {
-			t.RuntimeVersion = runtimeVersion
+			t.runtimeVersion = runtimeVersion
 		}
+	} else {
+		t.runtimeVersion = t.RuntimeVersion
 	}
 
 	var cond *TraitCondition
@@ -89,7 +93,7 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 			traitConfigurationReason,
 			fmt.Sprintf(
 				"Operated with CamelCatalog version %s which may be different from the runtime used in the container",
-				t.RuntimeVersion,
+				t.runtimeVersion,
 			),
 		)
 	}
@@ -102,7 +106,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 	// expects a CamelCatalog to be loaded regardless it's a managed or
 	// non managed build Integration
 	if e.CamelCatalog == nil {
-		if err := t.loadOrCreateCatalog(e, t.RuntimeVersion); err != nil {
+		if err := t.loadOrCreateCatalog(e, t.runtimeVersion); err != nil {
 			return err
 		}
 	}

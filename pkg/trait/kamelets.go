@@ -48,8 +48,6 @@ const (
 
 	contentKey                  = "content"
 	KameletLocationProperty     = "camel.component.kamelet.location"
-	kameletLabel                = "camel.apache.org/kamelet"
-	kameletConfigurationLabel   = "camel.apache.org/kamelet.configuration"
 	kameletMountPointAnnotation = "camel.apache.org/kamelet.mount-point"
 )
 
@@ -75,9 +73,6 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	}
 	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) && !e.IntegrationInRunningPhases() {
 		return false, nil, nil
-	}
-	if t.MountPoint == "" {
-		t.MountPoint = filepath.Join(camel.BasePath, "kamelets")
 	}
 	if ptr.Deref(t.Auto, true) {
 		var kamelets []string
@@ -223,7 +218,7 @@ func (t *kameletsTrait) addKamelets(e *Environment) error {
 		e.ApplicationProperties = map[string]string{}
 	}
 	for _, cm := range bundleConfigmaps {
-		kameletMountPoint := fmt.Sprintf("%s/%s", t.MountPoint, cm.Name)
+		kameletMountPoint := fmt.Sprintf("%s/%s", t.getMountPoint(), cm.Name)
 		cm.Annotations[kameletMountPointAnnotation] = kameletMountPoint
 		e.Resources.Add(cm)
 		if e.ApplicationProperties[KameletLocationProperty] == "" {
@@ -298,6 +293,14 @@ func (t *kameletsTrait) getKameletKeys(withVersion bool) []string {
 	}
 	sort.Strings(answer)
 	return answer
+}
+
+func (t *kameletsTrait) getMountPoint() string {
+	if t.MountPoint == "" {
+		return filepath.Join(camel.BasePath, "kamelets")
+	}
+
+	return t.MountPoint
 }
 
 func getKameletKey(item string, withVersion bool) string {

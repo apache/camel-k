@@ -57,21 +57,27 @@ func Apply(ctx context.Context, c client.Client, integration *v1.Integration, ki
 	environment.Catalog = catalog
 
 	// invoke the trait framework to determine the needed resources
-	conditions, err := catalog.apply(environment)
-	// Conditions contains informative message coming from the trait execution and useful to be reported into it or ik CR
+	conditions, traits, err := catalog.apply(environment)
+	// WARNING: Conditions contains informative message coming from the trait execution and useful to be reported into it or ik CR
 	// they must be applied before returning after an error
 	for _, tc := range conditions {
 		switch {
 		case integration != nil:
-			// set an Integration condition
 			integration.Status.SetCondition(tc.integrationCondition())
 		case kit != nil:
-			// set an IntegrationKit condition
 			kit.Status.SetCondition(tc.integrationKitCondition())
 		}
 	}
 	if err != nil {
 		return nil, fmt.Errorf("error during trait customization: %w", err)
+	}
+	// Set the executed traits taking care to merge in order to avoid the distinct execution
+	// phase to clean up any previous executed trait
+	if integration != nil {
+		integration.Status.Traits = integration.Spec.Traits.DeepCopy()
+		if err := integration.Status.Traits.Merge(*traits); err != nil {
+			return nil, fmt.Errorf("error setting status traits: %w", err)
+		}
 	}
 
 	postActionErrors := make([]error, 0)
@@ -172,7 +178,7 @@ func NewSyntheticEnvironment(ctx context.Context, c client.Client, integration *
 	// set the catalog
 	env.Catalog = catalog
 	// we need to simulate the execution of the traits to fill certain values used later by monitoring
-	_, err := catalog.apply(&env)
+	_, _, err := catalog.apply(&env)
 	if err != nil {
 		return nil, fmt.Errorf("error during trait customization: %w", err)
 	}

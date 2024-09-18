@@ -113,9 +113,10 @@ func NewLoggingTestCatalog() *Catalog {
 
 func TestEmptyLoggingTrait(t *testing.T) {
 	env := createDefaultLoggingTestEnv(t)
-	conditions, err := NewLoggingTestCatalog().apply(env)
+	conditions, traits, err := NewLoggingTestCatalog().apply(env)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
@@ -135,9 +136,10 @@ func TestEmptyLoggingTrait(t *testing.T) {
 func TestJsonLoggingTrait(t *testing.T) {
 	// When running, this log should look like "09:07:00 INFO  (main) Profile prod activated."
 	env := createLoggingTestEnv(t, true, true, true, "TRACE", "%d{HH:mm:ss} %-5p (%t) %s%e%n")
-	conditions, err := NewLoggingTestCatalog().apply(env)
+	conditions, traits, err := NewLoggingTestCatalog().apply(env)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 
@@ -162,9 +164,10 @@ func TestDefaultQuarkusLogging(t *testing.T) {
 		RuntimeProperties: nil,
 	}
 	env.EnvVars = []corev1.EnvVar{}
-	conditions, err := NewLoggingTestCatalog().apply(env)
+	conditions, traits, err := NewLoggingTestCatalog().apply(env)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 

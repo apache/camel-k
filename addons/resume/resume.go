@@ -20,10 +20,8 @@ package resume
 import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
-	"github.com/apache/camel-k/v2/pkg/util/log"
 	"k8s.io/utils/ptr"
 )
 
@@ -46,6 +44,7 @@ import (
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
+	// Deprecated: not in use.
 	Auto *bool `property:"auto" json:"auto,omitempty"`
 	// The type of the resume strategy to use
 	ResumeStrategy string `property:"resume-strategy,omitempty"`
@@ -64,8 +63,8 @@ type resumeTrait struct {
 }
 
 const (
-	KafkaSingle  = "org.apache.camel.processor.resume.kafka.SingleNodeKafkaResumeStrategy"
-	StrategyPath = "camel-k-offsets"
+	kafkaSingle  = "org.apache.camel.processor.resume.kafka.SingleNodeKafkaResumeStrategy"
+	strategyPath = "camel-k-offsets"
 )
 
 func NewResumeTrait() trait.Trait {
@@ -82,28 +81,7 @@ func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.Tr
 		return false, nil, nil
 	}
 
-	if ptr.Deref(r.Auto, true) {
-		_, err := environment.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
-			for _, endpoint := range meta.FromURIs {
-				log.Infof("Processing component %s", endpoint)
-			}
-
-			return true
-		})
-		if err != nil {
-			return false, nil, err
-		}
-
-		if r.ResumeStrategy == "" {
-			r.ResumeStrategy = KafkaSingle
-		}
-
-		if r.ResumePath == "" {
-			r.ResumePath = StrategyPath
-		}
-	}
-
-	return r.Enabled != nil && *r.Enabled, nil, nil
+	return ptr.Deref(r.Enabled, false), nil, nil
 }
 
 func (r *resumeTrait) Apply(environment *trait.Environment) error {
@@ -113,11 +91,27 @@ func (r *resumeTrait) Apply(environment *trait.Environment) error {
 
 	if environment.IntegrationInRunningPhases() {
 		environment.ApplicationProperties["customizer.resume.enabled"] = "true"
-		environment.ApplicationProperties["customizer.resume.resumeStrategy"] = r.ResumeStrategy
-		environment.ApplicationProperties["customizer.resume.resumePath"] = r.ResumePath
+		environment.ApplicationProperties["customizer.resume.resumeStrategy"] = r.getResumeStrategy()
+		environment.ApplicationProperties["customizer.resume.resumePath"] = r.getResumePath()
 		environment.ApplicationProperties["customizer.resume.resumeServer"] = r.ResumeServer
 		environment.ApplicationProperties["customizer.resume.cacheFillPolicy"] = r.CacheFillPolicy
 	}
 
 	return nil
+}
+
+func (r *resumeTrait) getResumeStrategy() string {
+	if r.ResumeStrategy == "" {
+		return kafkaSingle
+	}
+
+	return r.ResumeStrategy
+}
+
+func (r *resumeTrait) getResumePath() string {
+	if r.ResumePath == "" {
+		return strategyPath
+	}
+
+	return r.ResumePath
 }

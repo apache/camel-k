@@ -44,13 +44,10 @@ type loggingTrait struct {
 func newLoggingTraitTrait() Trait {
 	return &loggingTrait{
 		BaseTrait: NewBaseTrait(loggingTraitID, loggingTraitOrder),
-		LoggingTrait: traitv1.LoggingTrait{
-			Level: defaultLogLevel,
-		},
 	}
 }
 
-func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
+func (l *loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	if e.Integration == nil {
 		return false, nil, nil
 	}
@@ -61,7 +58,7 @@ func (l loggingTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 	return e.IntegrationInRunningPhases(), nil, nil
 }
 
-func (l loggingTrait) Apply(e *Environment) error {
+func (l *loggingTrait) Apply(e *Environment) error {
 	if e.CamelCatalog.Runtime.Capabilities["logging"].RuntimeProperties != nil {
 		l.setCatalogConfiguration(e)
 	} else {
@@ -72,8 +69,8 @@ func (l loggingTrait) Apply(e *Environment) error {
 }
 
 // Deprecated: to be removed in future release in favor of func setCatalogConfiguration().
-func (l loggingTrait) setEnvConfiguration(e *Environment) {
-	envvar.SetVal(&e.EnvVars, envVarQuarkusLogLevel, l.Level)
+func (l *loggingTrait) setEnvConfiguration(e *Environment) {
+	envvar.SetVal(&e.EnvVars, envVarQuarkusLogLevel, l.getLevel())
 
 	if l.Format != "" {
 		envvar.SetVal(&e.EnvVars, envVarQuarkusLogConsoleFormat, l.Format)
@@ -94,11 +91,11 @@ func (l loggingTrait) setEnvConfiguration(e *Environment) {
 	}
 }
 
-func (l loggingTrait) setCatalogConfiguration(e *Environment) {
+func (l *loggingTrait) setCatalogConfiguration(e *Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	e.ApplicationProperties["camel.k.logging.level"] = l.Level
+	e.ApplicationProperties["camel.k.logging.level"] = l.getLevel()
 	if l.Format != "" {
 		e.ApplicationProperties["camel.k.logging.format"] = l.Format
 	}
@@ -120,4 +117,12 @@ func (l loggingTrait) setCatalogConfiguration(e *Environment) {
 			e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 		}
 	}
+}
+
+func (l *loggingTrait) getLevel() string {
+	if l.Level == "" {
+		return defaultLogLevel
+	}
+
+	return l.Level
 }

@@ -66,7 +66,7 @@ type Trait struct {
 type masterTrait struct {
 	trait.BaseTrait
 	Trait                `property:",squash"`
-	delegateDependencies []string `json:"-"`
+	delegateDependencies []string
 }
 
 // NewMasterTrait --.
@@ -105,7 +105,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 			}
 		}
 		if found {
-			if t.IncludeDelegateDependencies == nil || *t.IncludeDelegateDependencies {
+			if ptr.Deref(t.IncludeDelegateDependencies, true) {
 				t.delegateDependencies = findAdditionalDependencies(e, meta)
 			}
 		}
@@ -117,28 +117,17 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 		return false, nil, err
 	}
 	if enabled {
+		t.Enabled = ptr.To(enabled)
 		if t.ResourceName == nil {
 			val := e.Integration.Name + "-lock"
 			t.ResourceName = &val
 		}
-
-		if t.ResourceType == nil {
-			t.ResourceType = ptr.To(leaseResourceType)
-		}
-
-		if t.LabelKey == nil {
-			val := v1.IntegrationLabel
-			t.LabelKey = &val
-		}
-
 		if t.LabelValue == nil {
 			t.LabelValue = &e.Integration.Name
 		}
-
-		return true, nil, nil
 	}
 
-	return false, nil, nil
+	return enabled, nil, nil
 }
 
 func (t *masterTrait) Apply(e *trait.Environment) error {
@@ -172,47 +161,48 @@ func (t *masterTrait) setCustomizerConfiguration(e *trait.Environment) {
 	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
 		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.enabled=true"},
 	)
-	if t.ResourceName != nil {
-		resourceName := t.ResourceName
-		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.kubernetesResourceNames=" + *resourceName},
-		)
-	}
-	if t.ResourceType != nil {
-		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.leaseResourceType" + *t.ResourceType},
-		)
-	}
-	if t.LabelKey != nil {
-		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelKey=" + *t.LabelKey},
-		)
-	}
-	if t.LabelValue != nil {
-		e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
-			v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelValue=" + *t.LabelValue},
-		)
-	}
+	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.kubernetesResourceNames=" + *t.ResourceName},
+	)
+	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.leaseResourceType" + t.getResourceKey()},
+	)
+	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelKey=" + t.getLabelKey()},
+	)
+	e.Integration.Status.Configuration = append(e.Integration.Status.Configuration,
+		v1.ConfigurationSpec{Type: "property", Value: "customizer.master.labelValue=" + *t.LabelValue},
+	)
 }
 
 func (t *masterTrait) setCatalogConfiguration(e *trait.Environment) {
 	if e.ApplicationProperties == nil {
 		e.ApplicationProperties = make(map[string]string)
 	}
-	if t.ResourceName != nil {
-		e.ApplicationProperties["camel.k.master.resourceName"] = *t.ResourceName
-	}
-	if t.ResourceType != nil {
-		e.ApplicationProperties["camel.k.master.resourceType"] = *t.ResourceType
-	}
-	if t.LabelKey != nil && t.LabelValue != nil {
-		e.ApplicationProperties["camel.k.master.labelKey"] = *t.LabelKey
-		e.ApplicationProperties["camel.k.master.labelValue"] = *t.LabelValue
-	}
+	e.ApplicationProperties["camel.k.master.resourceName"] = *t.ResourceName
+	e.ApplicationProperties["camel.k.master.resourceType"] = t.getResourceKey()
+	e.ApplicationProperties["camel.k.master.labelKey"] = t.getLabelKey()
+	e.ApplicationProperties["camel.k.master.labelValue"] = *t.LabelValue
 
 	for _, cp := range e.CamelCatalog.Runtime.Capabilities["master"].RuntimeProperties {
 		e.ApplicationProperties[trait.CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 	}
+}
+
+func (t *masterTrait) getResourceKey() string {
+	if t.ResourceType == nil {
+		return leaseResourceType
+	}
+
+	return *t.ResourceType
+}
+
+func (t *masterTrait) getLabelKey() string {
+	if t.LabelKey == nil {
+		return v1.IntegrationLabel
+	}
+
+	return *t.LabelKey
 }
 
 func findAdditionalDependencies(e *trait.Environment, meta metadata.IntegrationMetadata) []string {

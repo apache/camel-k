@@ -670,7 +670,7 @@ func (e *Environment) GetIntegrationContainerName() string {
 
 	if dt := e.Catalog.GetTrait(containerTraitID); dt != nil {
 		if ct, ok := dt.(*containerTrait); ok {
-			containerName = ct.Name
+			containerName = ct.getContainerName()
 		}
 	}
 	return containerName
@@ -727,7 +727,7 @@ func (e *Environment) createContainerPort() *corev1.ContainerPort {
 	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
 		if ct, ok := t.(*containerTrait); ok {
 			name = ct.PortName
-			port = ct.Port
+			port = ct.getPort()
 		}
 	}
 
@@ -757,7 +757,8 @@ func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) stri
 }
 
 // ConsumeMeta is used to consume metadata information coming from Integration sources. If no sources available,
-// would return false.
+// would return false. When consuming from meta you should make sure that the configuration is stored in the
+// status traits by setting each trait configuration when in "auto" mode.
 func (e *Environment) ConsumeMeta(consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
 	return e.consumeSourcesMeta(nil, consumeMeta)
 }

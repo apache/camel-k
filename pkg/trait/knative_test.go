@@ -355,7 +355,7 @@ func TestKnativeTriggerExplicitFilterConfig(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -455,7 +455,7 @@ func TestKnativeTriggerExplicitFilterConfigNoEventTypeFilter(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -552,7 +552,7 @@ func TestKnativeTriggerDefaultEventTypeFilter(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -649,7 +649,7 @@ func TestKnativeTriggerDefaultEventTypeFilterDisabled(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -749,7 +749,7 @@ func TestKnativeMultipleTrigger(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -887,7 +887,7 @@ func TestKnativeMultipleTriggerAdditionalFilterConfig(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -1022,7 +1022,7 @@ func TestKnativeTriggerNoEventType(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -1119,7 +1119,7 @@ func TestKnativeTriggerNoServingAvailable(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -1180,7 +1180,7 @@ func TestKnativePlatformHttpConfig(t *testing.T) {
 			err = tc.Configure(&environment)
 			require.NoError(t, err)
 
-			_, err = tc.apply(&environment)
+			_, _, err = tc.apply(&environment)
 			require.NoError(t, err)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 		})
@@ -1226,8 +1226,9 @@ func TestKnativePlatformHttpDependencies(t *testing.T) {
 			err = tc.Configure(&environment)
 			require.NoError(t, err)
 
-			conditions, err := tc.apply(&environment)
+			conditions, traits, err := tc.apply(&environment)
 			require.NoError(t, err)
+			assert.NotEmpty(t, traits)
 			assert.NotEmpty(t, conditions)
 			assert.Contains(t, environment.Integration.Status.Capabilities, v1.CapabilityPlatformHTTP)
 			assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-platform-http")
@@ -1653,7 +1654,7 @@ func TestKnativeSinkBinding(t *testing.T) {
 	err = tc.Configure(&environment)
 	require.NoError(t, err)
 
-	_, err = tc.apply(&environment)
+	_, _, err = tc.apply(&environment)
 	require.NoError(t, err)
 	baseProp := "camel.component.knative.environment.resources[0]"
 	assert.Equal(t, "channel-sink-1", environment.ApplicationProperties[baseProp+".name"])
@@ -1805,4 +1806,64 @@ func createEnvironmentMissingEventingCRDs() *Environment {
 	environment.Platform.ResyncStatusFullConfig()
 
 	return environment
+}
+
+func TestKnativeAutoConfiguration(t *testing.T) {
+	client, _ := test.NewFakeClient()
+	replicas := int32(3)
+	catalog, _ := camel.QuarkusCatalog()
+	environment := &Environment{
+		CamelCatalog: catalog,
+		Catalog:      NewCatalog(nil),
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "integration-name",
+			},
+			Spec: v1.IntegrationSpec{
+				Replicas: &replicas,
+				Traits:   v1.Traits{},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "namespace",
+			},
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterKubernetes,
+				Profile: v1.TraitProfileKubernetes,
+			},
+		},
+		Resources:             kubernetes.NewCollection(),
+		ApplicationProperties: make(map[string]string),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	trait, _ := newKnativeTrait().(*knativeTrait)
+	environment.Integration.Spec.Sources = []v1.SourceSpec{
+		{
+			DataSpec: v1.DataSpec{
+				Name: "test.java",
+				Content: `
+				from("knative:channel/test").to("log:${body};
+			`,
+			},
+			Language: v1.LanguageJavaSource,
+		},
+	}
+
+	configured, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.Nil(t, condition)
+	assert.True(t, configured)
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	expectedTrait, _ := newKnativeTrait().(*knativeTrait)
+	expectedTrait.Enabled = ptr.To(true)
+	expectedTrait.SinkBinding = ptr.To(false)
+	expectedTrait.ChannelSources = []string{"knative:channel/test"}
+	assert.Equal(t, expectedTrait, trait)
 }

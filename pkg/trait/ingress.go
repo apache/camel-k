@@ -32,6 +32,9 @@ import (
 const (
 	ingressTraitID    = "ingress"
 	ingressTraitOrder = 2400
+
+	defaultPath           = "/"
+	defaultPathTypePrefix = networkingv1.PathTypePrefix
 )
 
 type ingressTrait struct {
@@ -42,15 +45,6 @@ type ingressTrait struct {
 func newIngressTrait() Trait {
 	return &ingressTrait{
 		BaseTrait: NewBaseTrait(ingressTraitID, ingressTraitOrder),
-		IngressTrait: traitv1.IngressTrait{
-			IngressClassName: "",
-			Annotations:      map[string]string{},
-			Host:             "",
-			Path:             "/",
-			PathType:         ptrFrom(networkingv1.PathTypePrefix),
-			TLSHosts:         []string{},
-			TLSSecretName:    "",
-		},
 	}
 }
 
@@ -88,7 +82,7 @@ func (t *ingressTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 func (t *ingressTrait) Apply(e *Environment) error {
 	service := e.Resources.GetUserServiceForIntegration(e.Integration)
 	if service == nil {
-		return errors.New("cannot Apply ingress trait: no target service")
+		return errors.New("cannot apply ingress trait: no target service")
 	}
 
 	ingress := networkingv1.Ingress{
@@ -109,8 +103,8 @@ func (t *ingressTrait) Apply(e *Environment) error {
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
 								{
-									Path:     t.Path,
-									PathType: t.PathType,
+									Path:     t.getPath(),
+									PathType: t.getPathType(),
 									Backend: networkingv1.IngressBackend{
 										Service: &networkingv1.IngressServiceBackend{
 											Name: service.Name,
@@ -152,4 +146,20 @@ func (t *ingressTrait) Apply(e *Environment) error {
 	)
 
 	return nil
+}
+
+func (t *ingressTrait) getPath() string {
+	if t.Path == "" {
+		return defaultPath
+	}
+
+	return t.Path
+}
+
+func (t *ingressTrait) getPathType() *networkingv1.PathType {
+	if t.PathType == nil {
+		return ptr.To(defaultPathTypePrefix)
+	}
+
+	return t.PathType
 }

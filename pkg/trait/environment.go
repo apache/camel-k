@@ -59,9 +59,6 @@ const (
 func newEnvironmentTrait() Trait {
 	return &environmentTrait{
 		BasePlatformTrait: NewBasePlatformTrait(environmentTraitID, environmentTraitOrder),
-		EnvironmentTrait: traitv1.EnvironmentTrait{
-			ContainerMeta: ptr.To(true),
-		},
 	}
 }
 

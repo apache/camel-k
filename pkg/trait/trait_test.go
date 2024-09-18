@@ -18,10 +18,13 @@ limitations under the License.
 package trait
 
 import (
+	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v2"
 
 	routev1 "github.com/openshift/api/route/v1"
 
@@ -32,8 +35,10 @@ import (
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/resources"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
+	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
@@ -43,7 +48,7 @@ const (
 )
 
 func TestOpenShiftTraits(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('timer:my-timer').to('log:info')")
 	res := processTestEnv(t, env)
 
 	assert.NotEmpty(t, env.ExecutedTraits)
@@ -413,7 +418,7 @@ func processTestEnv(t *testing.T, env *Environment) *kubernetes.Collection {
 	t.Helper()
 
 	catalog := NewTraitTestCatalog()
-	_, err := catalog.apply(env)
+	_, _, err := catalog.apply(env)
 	require.NoError(t, err)
 	return env.Resources
 }
@@ -478,11 +483,11 @@ func NewTraitTestCatalog() *Catalog {
 }
 
 func TestExecutedTraitsCondition(t *testing.T) {
-	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "camel:core")
+	env := createTestEnv(t, v1.IntegrationPlatformClusterOpenShift, "from('timer:test').to('log:info')")
 	catalog := NewTraitTestCatalog()
-	conditions, err := catalog.apply(env)
+	conditions, traits, err := catalog.apply(env)
 	require.NoError(t, err)
-
+	assert.Empty(t, traits)
 	expectedCondition := NewIntegrationCondition(
 		"",
 		v1.IntegrationConditionTraitInfo,
@@ -491,4 +496,193 @@ func TestExecutedTraitsCondition(t *testing.T) {
 		"Applied traits: camel,environment,logging,deployer,deployment,gc,container,security-context,mount,quarkus,jvm,owner",
 	)
 	assert.Contains(t, conditions, expectedCondition)
+}
+
+func testDefaultIntegrationPhaseTraitsSetting(t *testing.T, phase v1.IntegrationPhase) {
+	it := &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-it",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "file.groovy",
+						Content: "from('timer:test').to('log:info')",
+					},
+					Language: v1.LanguageGroovy,
+				},
+			},
+		},
+		Status: v1.IntegrationStatus{
+			Phase: phase,
+			Conditions: []v1.IntegrationCondition{
+				{
+					Type:   v1.IntegrationConditionDeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+	platform := &v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-platform",
+			Namespace: "ns",
+		},
+		Status: v1.IntegrationPlatformStatus{
+			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeProvider: v1.RuntimeProviderQuarkus,
+					RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				},
+			},
+			Phase: v1.IntegrationPlatformPhaseReady,
+		},
+	}
+	// Load the default catalog
+	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.DefaultRuntimeVersion))
+	require.NoError(t, err)
+	var cat v1.CamelCatalog
+	err = yaml.Unmarshal(camelCatalogData, &cat)
+	require.NoError(t, err)
+	cat.SetAnnotations(platform.Annotations)
+	cat.SetNamespace(platform.Namespace)
+
+	client, err := test.NewFakeClient(platform, &cat)
+	require.NoError(t, err)
+	env, err := Apply(context.Background(), client, it, nil)
+	require.NoError(t, err)
+	assert.NotEmpty(t, env.Integration)
+	// We should get no values slicking from the spec
+	// only traits marked as "auto" should be able to scan
+	// the sources and set values.
+	// Neither default traits values should not be included here.
+	assert.Equal(t, &v1.Traits{}, env.Integration.Status.Traits)
+}
+
+func TestDefaultIntegrationRunningTraitsSetting(t *testing.T) {
+	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseRunning)
+}
+
+func TestDefaultIntegrationNoneTraitsSetting(t *testing.T) {
+	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseNone)
+}
+
+func TestDefaultIntegrationInitTraitsSetting(t *testing.T) {
+	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseInitialization)
+}
+
+func TestDefaultIntegrationWaitingPlatformTraitsSetting(t *testing.T) {
+	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseWaitingForPlatform)
+}
+
+func TestDefaultIntegrationBuildingKitTraitsSetting(t *testing.T) {
+	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseBuildingKit)
+}
+
+func TestDefaultIntegrationDeployingTraitsSetting(t *testing.T) {
+	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseDeploying)
+}
+
+func TestDefaultIntegrationErrorTraitsSetting(t *testing.T) {
+	testDefaultIntegrationPhaseTraitsSetting(t, v1.IntegrationPhaseError)
+}
+
+func TestIntegrationTraitsSetting(t *testing.T) {
+	it := &v1.Integration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-it",
+			Namespace: "ns",
+		},
+		Spec: v1.IntegrationSpec{
+			Sources: []v1.SourceSpec{
+				{
+					DataSpec: v1.DataSpec{
+						Name:    "file.groovy",
+						Content: "from('timer:test').to('log:info')",
+					},
+					Language: v1.LanguageGroovy,
+				},
+			},
+			Traits: v1.Traits{
+				Builder: &traitv1.BuilderTrait{
+					Properties: []string{
+						"building=yes",
+					},
+				},
+				Camel: &traitv1.CamelTrait{
+					Properties: []string{
+						"hello=world",
+					},
+				},
+				Container: &traitv1.ContainerTrait{
+					Name: "my-container-name",
+				},
+				Addons: map[string]v1.AddonTrait{
+					"master": ToAddonTrait(t, map[string]interface{}{
+						"resourceName": "test-lock",
+					}),
+				},
+			},
+		},
+		Status: v1.IntegrationStatus{
+			Phase: v1.IntegrationPhaseRunning,
+			Conditions: []v1.IntegrationCondition{
+				{
+					Type:   v1.IntegrationConditionDeploymentAvailable,
+					Status: corev1.ConditionTrue,
+				},
+			},
+		},
+	}
+	platform := &v1.IntegrationPlatform{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "my-platform",
+			Namespace: "ns",
+		},
+		Status: v1.IntegrationPlatformStatus{
+			IntegrationPlatformSpec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeProvider: v1.RuntimeProviderQuarkus,
+					RuntimeVersion:  defaults.DefaultRuntimeVersion,
+				},
+			},
+			Phase: v1.IntegrationPlatformPhaseReady,
+		},
+	}
+	// Load the default catalog
+	camelCatalogData, err := resources.Resource(fmt.Sprintf("/resources/camel-catalog-%s.yaml", defaults.DefaultRuntimeVersion))
+	require.NoError(t, err)
+	var cat v1.CamelCatalog
+	err = yaml.Unmarshal(camelCatalogData, &cat)
+	require.NoError(t, err)
+	cat.SetAnnotations(platform.Annotations)
+	cat.SetNamespace(platform.Namespace)
+
+	client, err := test.NewFakeClient(platform, &cat)
+	require.NoError(t, err)
+	env, err := Apply(context.Background(), client, it, nil)
+	require.NoError(t, err)
+	assert.NotEmpty(t, env.Integration)
+	assert.Equal(t, &v1.Traits{
+		Builder: &traitv1.BuilderTrait{
+			Properties: []string{
+				"building=yes",
+			},
+		},
+		Camel: &traitv1.CamelTrait{
+			Properties: []string{
+				"hello=world",
+			},
+		},
+		Container: &traitv1.ContainerTrait{
+			Name: "my-container-name",
+		},
+		Addons: map[string]v1.AddonTrait{
+			"master": ToAddonTrait(t, map[string]interface{}{
+				"resourceName": "test-lock",
+			}),
+		},
+	}, env.Integration.Status.Traits)
 }

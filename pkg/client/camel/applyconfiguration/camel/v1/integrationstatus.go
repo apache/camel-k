@@ -34,6 +34,7 @@ type IntegrationStatusApplyConfiguration struct {
 	Image                   *string                                  `json:"image,omitempty"`
 	Dependencies            []string                                 `json:"dependencies,omitempty"`
 	Profile                 *v1.TraitProfile                         `json:"profile,omitempty"`
+	Traits                  *TraitsApplyConfiguration                `json:"traits,omitempty"`
 	IntegrationKit          *corev1.ObjectReference                  `json:"integrationKit,omitempty"`
 	Platform                *string                                  `json:"platform,omitempty"`
 	GeneratedSources        []SourceSpecApplyConfiguration           `json:"generatedSources,omitempty"`
@@ -102,6 +103,14 @@ func (b *IntegrationStatusApplyConfiguration) WithDependencies(values ...string)
 // If called multiple times, the Profile field is set to the value of the last call.
 func (b *IntegrationStatusApplyConfiguration) WithProfile(value v1.TraitProfile) *IntegrationStatusApplyConfiguration {
 	b.Profile = &value
+	return b
+}
+
+// WithTraits sets the Traits field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Traits field is set to the value of the last call.
+func (b *IntegrationStatusApplyConfiguration) WithTraits(value *TraitsApplyConfiguration) *IntegrationStatusApplyConfiguration {
+	b.Traits = value
 	return b
 }
 

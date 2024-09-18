@@ -44,10 +44,6 @@ type affinityTrait struct {
 func newAffinityTrait() Trait {
 	return &affinityTrait{
 		BaseTrait: NewBaseTrait(affinityTraitID, affinityTraitOrder),
-		AffinityTrait: traitv1.AffinityTrait{
-			PodAffinity:     ptr.To(false),
-			PodAntiAffinity: ptr.To(false),
-		},
 	}
 }
 

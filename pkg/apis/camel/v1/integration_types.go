@@ -97,6 +97,8 @@ type IntegrationStatus struct {
 	Dependencies []string `json:"dependencies,omitempty"`
 	// the profile needed to run this Integration
 	Profile TraitProfile `json:"profile,omitempty"`
+	// the traits executed for the Integration
+	Traits *Traits `json:"traits,omitempty"`
 	// the reference of the `IntegrationKit` which is used for this Integration
 	IntegrationKit *corev1.ObjectReference `json:"integrationKit,omitempty"`
 	// The IntegrationPlatform watching this Integration
