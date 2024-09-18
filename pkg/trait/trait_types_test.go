@@ -198,7 +198,7 @@ func TestDetermineControllerStrategySyntheticKitForceKnative(t *testing.T) {
 		Auto: ptr.To(false),
 	}
 	e.Platform.ResyncStatusFullConfig()
-	_, err := e.Catalog.apply(e)
+	_, _, err := e.Catalog.apply(e)
 	require.NoError(t, err)
 
 	strategy, err := e.DetermineControllerStrategy()
@@ -270,7 +270,7 @@ func createTestEnvironment(t *testing.T, profile v1.TraitProfile) *Environment {
 
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(environment)
+	_, _, err = traitCatalog.apply(environment)
 	require.NoError(t, err)
 
 	return environment
@@ -321,7 +321,7 @@ func createNonManagedBuildTestEnvironment(t *testing.T, profile v1.TraitProfile)
 
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(environment)
+	_, _, err = traitCatalog.apply(environment)
 	require.NoError(t, err)
 
 	return environment

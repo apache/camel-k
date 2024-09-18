@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -29,6 +30,7 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 func TestMasterOn(t *testing.T) {
@@ -183,4 +185,80 @@ func TestMasterOff(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, conditions)
 	assert.False(t, configured)
+}
+
+func TestMasterAuto(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, err := test.NewFakeClient()
+	require.NoError(t, err)
+	traitCatalog := trait.NewCatalog(nil)
+
+	environment := trait.Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "Master.java",
+							Content: `from("master:lock:timer:tick").to("log:test")`,
+						},
+						Language: v1.LanguageJavaSource,
+					},
+				},
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+				Profile: v1.TraitProfileKnative,
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]trait.Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	mt := NewMasterTrait()
+	mt.InjectClient(client)
+	trait, _ := mt.(*masterTrait)
+	// Initialization phase
+	configured, conditions, err := trait.Configure(&environment)
+	require.NoError(t, err)
+	assert.Empty(t, conditions)
+	assert.True(t, configured)
+	err = trait.Apply(&environment)
+	require.NoError(t, err)
+
+	expectedTrait := &masterTrait{
+		Trait: Trait{
+			Trait: traitv1.Trait{
+				Enabled: ptr.To(true),
+			},
+			ResourceName: ptr.To("test-lock"),
+			LabelValue:   ptr.To("test"),
+		},
+	}
+	assert.Equal(t, expectedTrait.Trait, trait.Trait)
 }

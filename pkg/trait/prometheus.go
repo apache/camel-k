@@ -44,9 +44,6 @@ type prometheusTrait struct {
 func newPrometheusTrait() Trait {
 	return &prometheusTrait{
 		BaseTrait: NewBaseTrait(prometheusTraitID, prometheusTraitOrder),
-		PrometheusTrait: traitv1.PrometheusTrait{
-			PodMonitor: ptr.To(true),
-		},
 	}
 }
 
@@ -89,7 +86,7 @@ func (t *prometheusTrait) Apply(e *Environment) error {
 	condition.Message = fmt.Sprintf("%s(%d)", container.Name, containerPort.ContainerPort)
 
 	// Add the PodMonitor resource
-	if ptr.Deref(t.PodMonitor, false) {
+	if ptr.Deref(t.PodMonitor, true) {
 		portName := containerPort.Name
 		podMonitor, err := t.getPodMonitorFor(e, portName)
 		if err != nil {

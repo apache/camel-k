@@ -86,9 +86,10 @@ func TestContainerWithDefaults(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -167,9 +168,10 @@ func TestContainerWithOpenshift(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -235,9 +237,10 @@ func TestContainerWithCustomName(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -301,9 +304,10 @@ func TestContainerWithCustomImage(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	for _, postAction := range environment.PostActions {
@@ -370,8 +374,9 @@ func TestContainerWithCustomImageAndIntegrationKit(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 	require.Error(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.Contains(t, err.Error(), "unsupported configuration: a container image has been set in conjunction with an IntegrationKit")
 }
@@ -414,9 +419,10 @@ func TestContainerWithImagePullPolicy(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	container := environment.GetIntegrationContainer()
@@ -479,7 +485,7 @@ func TestDeploymentContainerPorts(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 	container := environment.GetIntegrationContainer()
 	assert.Len(t, container.Ports, 1)
@@ -545,7 +551,7 @@ func TestKnativeServiceContainerPorts(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 	require.NoError(t, err)
 	container := environment.GetIntegrationContainer()
 	assert.Len(t, container.Ports, 1)
@@ -557,9 +563,10 @@ func TestDefaultKubernetesSecurityContext(t *testing.T) {
 	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -587,9 +594,10 @@ func TestDefaultKnativeSecurityContext(t *testing.T) {
 	}
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("deployment"))
@@ -625,9 +633,10 @@ func TestUserSecurityContext(t *testing.T) {
 	}
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -648,9 +657,10 @@ func TestUserSecurityContext(t *testing.T) {
 func TestUserDefaultResources(t *testing.T) {
 	environment := createSettingContextEnvironment(t, v1.TraitProfileKubernetes)
 	traitCatalog := NewCatalog(nil)
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))

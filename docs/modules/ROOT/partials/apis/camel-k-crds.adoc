@@ -3533,6 +3533,13 @@ a list of dependencies needed by the application
 
 the profile needed to run this Integration
 
+|`traits` +
+*xref:#_camel_apache_org_v1_Traits[Traits]*
+|
+
+
+the traits executed for the Integration
+
 |`integrationKit` +
 *https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core[Kubernetes core/v1.ObjectReference]*
 |
@@ -5817,6 +5824,7 @@ TraitConfiguration parameters configuration
 * <<#_camel_apache_org_v1_IntegrationPlatformSpec, IntegrationPlatformSpec>>
 * <<#_camel_apache_org_v1_IntegrationProfileSpec, IntegrationProfileSpec>>
 * <<#_camel_apache_org_v1_IntegrationSpec, IntegrationSpec>>
+* <<#_camel_apache_org_v1_IntegrationStatus, IntegrationStatus>>
 
 Traits represents the collection of trait configurations.
 

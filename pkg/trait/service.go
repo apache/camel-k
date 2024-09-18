@@ -86,7 +86,8 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 			)
 			return false, condition, err
 		}
-		return exposeHTTPServices, nil, nil
+
+		t.Enabled = ptr.To(exposeHTTPServices)
 	}
 
 	return ptr.Deref(t.Enabled, false), nil, nil

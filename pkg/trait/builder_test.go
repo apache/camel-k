@@ -67,10 +67,11 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 		e.IntegrationKit.Status.Phase = v1.IntegrationKitPhaseInitialization
 
 		t.Run(string(e.Platform.Status.Cluster), func(t *testing.T) {
-			conditions, err := NewBuilderTestCatalog().apply(e)
+			conditions, traits, err := NewBuilderTestCatalog().apply(e)
 
 			require.NoError(t, err)
 			assert.NotEmpty(t, conditions)
+			assert.Empty(t, traits)
 			assert.NotEmpty(t, e.ExecutedTraits)
 			assert.Nil(t, e.GetTrait("builder"))
 			assert.Empty(t, e.Pipeline)
@@ -80,9 +81,10 @@ func TestBuilderTraitNotAppliedBecauseOfNilPhase(t *testing.T) {
 
 func TestS2IBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyS2I, v1.BuildStrategyRoutine)
-	conditions, err := NewBuilderTestCatalog().apply(env)
+	conditions, traits, err := NewBuilderTestCatalog().apply(env)
 
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))
@@ -97,9 +99,10 @@ func TestS2IBuilderTrait(t *testing.T) {
 
 func TestJibBuilderTrait(t *testing.T) {
 	env := createBuilderTestEnv(v1.IntegrationPlatformClusterOpenShift, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyRoutine)
-	conditions, err := NewBuilderTestCatalog().apply(env)
+	conditions, traits, err := NewBuilderTestCatalog().apply(env)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, env.ExecutedTraits)
 	assert.NotNil(t, env.GetTrait("builder"))

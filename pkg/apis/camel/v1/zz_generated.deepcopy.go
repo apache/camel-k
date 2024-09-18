@@ -1838,6 +1838,11 @@ func (in *IntegrationStatus) DeepCopyInto(out *IntegrationStatus) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.Traits != nil {
+		in, out := &in.Traits, &out.Traits
+		*out = new(Traits)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.IntegrationKit != nil {
 		in, out := &in.IntegrationKit, &out.IntegrationKit
 		*out = new(corev1.ObjectReference)

@@ -80,25 +80,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, nil, nil
 	}
 
-	knativeInstalled, err := knativeutil.IsEventingInstalled(e.Client)
-	if err != nil {
-		return false, nil, err
-	}
-
-	if !ptr.Deref(t.Auto, true) {
-		if !knativeInstalled {
-			return false, NewIntegrationCondition(
-				"Knative",
-				v1.IntegrationConditionKnativeAvailable,
-				corev1.ConditionFalse,
-				v1.IntegrationConditionKnativeNotInstalledReason,
-				"integration cannot run. Knative is not installed in the cluster",
-			), fmt.Errorf("integration cannot run. Knative is not installed in the cluster")
-		}
-		return true, nil, nil
-	}
-
-	_, err = e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+	_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
 		if len(t.ChannelSources) == 0 {
 			t.ChannelSources = filterMetaItems(meta, knativeapi.CamelServiceTypeChannel, "from")
 		}
@@ -123,30 +105,37 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, nil, err
 	}
 
-	hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 || len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 || len(t.EventSources) > 0 || len(t.EventSinks) > 0
-
-	if !hasKnativeEndpoint && !ptr.Deref(t.Enabled, false) {
-		return false, nil, nil
-	}
-	if !knativeInstalled {
-		return false, NewIntegrationCondition(
-			"Knative",
-			v1.IntegrationConditionKnativeAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionKnativeNotInstalledReason,
-			"integration cannot run. Knative is not installed in the cluster",
-		), fmt.Errorf("integration cannot run. Knative is not installed in the cluster")
-	}
-	if t.FilterSourceChannels == nil {
-		// Filtering is no longer used by default
-		t.FilterSourceChannels = ptr.To(false)
-	}
-	if t.SinkBinding == nil {
-		allowed := t.isSinkBindingAllowed(e)
-		t.SinkBinding = &allowed
+	if t.Enabled == nil {
+		// If the trait is enabled, then, we can skip this optimization
+		hasKnativeEndpoint := len(t.ChannelSources) > 0 || len(t.ChannelSinks) > 0 ||
+			len(t.EndpointSources) > 0 || len(t.EndpointSinks) > 0 ||
+			len(t.EventSources) > 0 || len(t.EventSinks) > 0
+		t.Enabled = ptr.To(hasKnativeEndpoint)
 	}
 
-	return true, nil, nil
+	if ptr.Deref(t.Enabled, false) {
+		// Verify if Knative eventing is installed
+		knativeInstalled, err := knativeutil.IsEventingInstalled(e.Client)
+		if err != nil {
+			return false, nil, err
+		}
+		if !knativeInstalled {
+			return false, NewIntegrationCondition(
+				"Knative",
+				v1.IntegrationConditionKnativeAvailable,
+				corev1.ConditionFalse,
+				v1.IntegrationConditionKnativeNotInstalledReason,
+				"integration cannot run. Knative is not installed in the cluster",
+			), fmt.Errorf("integration cannot run. Knative is not installed in the cluster")
+		}
+
+		if t.SinkBinding == nil {
+			allowed := t.isSinkBindingAllowed(e)
+			t.SinkBinding = &allowed
+		}
+	}
+
+	return ptr.Deref(t.Enabled, false), nil, nil
 }
 
 func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServiceType, uriType string) []string {
@@ -158,6 +147,9 @@ func filterMetaItems(meta metadata.IntegrationMetadata, cst knativeapi.CamelServ
 		uris = meta.ToURIs
 	}
 	items = append(items, knativeutil.FilterURIs(uris, cst)...)
+	if len(items) == 0 {
+		return nil
+	}
 	sort.Strings(items)
 	return items
 }

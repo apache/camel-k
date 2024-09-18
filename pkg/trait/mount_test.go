@@ -43,9 +43,10 @@ func TestMountVolumesEmpty(t *testing.T) {
 	environment.Integration.Spec.Traits = v1.Traits{} // empty traits
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
@@ -66,9 +67,10 @@ func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 	environment := getNominalEnv(t, traitCatalog)
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
@@ -116,9 +118,10 @@ func TestEmptyDirVolumeIntegrationPhaseDeploying(t *testing.T) {
 		EmptyDirs: []string{"my-empty-dir:/some/path"},
 	}
 	environment.Platform.ResyncStatusFullConfig()
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("mount"))
@@ -161,9 +164,10 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 	environment.Platform.ResyncStatusFullConfig()
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("mount"))

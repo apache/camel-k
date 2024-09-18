@@ -53,10 +53,11 @@ func TestApplyJolokiaTraitNominalShouldSucceed(t *testing.T) {
 	container := environment.Resources.GetContainerByName(defaultContainerName)
 	assert.NotNil(t, container)
 
-	assert.Equal(t, container.Args, []string{
+	assert.Equal(t, []string{
 		"-javaagent:dependencies/lib/main/org.jolokia.jolokia-agent-jvm-1.7.1.jar=discoveryEnabled=false,host=*,port=8778",
 		"-cp", "dependencies/lib/main/org.jolokia.jolokia-agent-jvm-1.7.1.jar",
-	})
+	},
+		container.Args)
 
 	assert.Len(t, container.Ports, 1)
 	containerPort := container.Ports[0]

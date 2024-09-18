@@ -39,6 +39,9 @@ const (
 type platformTrait struct {
 	BasePlatformTrait
 	traitv1.PlatformTrait `property:",squash"`
+	// Parameters to be used internally
+	createDefault *bool
+	global        *bool
 }
 
 func newPlatformTrait() Trait {
@@ -62,17 +65,17 @@ func (t *platformTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 		if ocp, err := openshift.IsOpenShift(t.Client); err != nil {
 			return false, nil, err
 		} else if ocp {
-			t.CreateDefault = ptr.To(true)
+			t.createDefault = ptr.To(true)
 		} else if addr, err := image.GetRegistryAddress(e.Ctx, t.Client); err != nil {
 			return false, nil, err
 		} else if addr != nil {
-			t.CreateDefault = ptr.To(true)
+			t.createDefault = ptr.To(true)
 		}
 	}
 
 	if t.Global == nil {
 		globalOperator := platform.IsCurrentOperatorGlobal()
-		t.Global = &globalOperator
+		t.global = &globalOperator
 	}
 
 	return true, nil, nil
@@ -117,7 +120,7 @@ func (t *platformTrait) getOrCreatePlatform(e *Environment) (*v1.IntegrationPlat
 	if err != nil && !apierrors.IsNotFound(err) {
 		return nil, err
 	}
-	if apierrors.IsNotFound(err) && ptr.Deref(t.CreateDefault, false) {
+	if apierrors.IsNotFound(err) && ptr.Deref(t.getCreateDefault(), false) {
 		pl = t.createDefaultPlatform(e)
 		e.Resources.Add(pl)
 
@@ -146,7 +149,7 @@ func (t *platformTrait) createDefaultPlatform(e *Environment) *v1.IntegrationPla
 		platformName = platform.DefaultPlatformName
 	}
 	namespace := e.Integration.Namespace
-	if ptr.Deref(t.Global, false) {
+	if ptr.Deref(t.getGlobal(), false) {
 		operatorNamespace := platform.GetOperatorNamespace()
 		if operatorNamespace != "" {
 			namespace = operatorNamespace
@@ -174,4 +177,20 @@ func (t *platformTrait) installViewerRole(e *Environment, itp *v1.IntegrationPla
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		t.L.Infof("Cannot install global IntegrationPlatform viewer role in namespace '%s': skipping.", itp.Namespace)
 	}
+}
+
+func (t *platformTrait) getCreateDefault() *bool {
+	if t.CreateDefault == nil {
+		return t.createDefault
+	}
+
+	return t.CreateDefault
+}
+
+func (t *platformTrait) getGlobal() *bool {
+	if t.Global == nil {
+		return t.global
+	}
+
+	return t.Global
 }

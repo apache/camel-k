@@ -40,9 +40,10 @@ func TestDefaultPodKubernetesSecurityContextInitializationPhase(t *testing.T) {
 	environment.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("security-context"))
@@ -52,9 +53,10 @@ func TestDefaultPodKubernetesSecurityContext(t *testing.T) {
 	environment := createPodSettingContextEnvironment(t, v1.TraitProfileKubernetes)
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -72,9 +74,10 @@ func TestDefaultPodOpenshiftSecurityContext(t *testing.T) {
 	environment := createOpenshiftPodSettingContextEnvironment(t, v1.TraitProfileOpenShift)
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))
@@ -97,9 +100,10 @@ func TestDefaultPodKnativeSecurityContext(t *testing.T) {
 	}
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.Nil(t, environment.GetTrait("deployment"))
@@ -125,9 +129,10 @@ func TestUserPodSecurityContext(t *testing.T) {
 	}
 	traitCatalog := NewCatalog(nil)
 
-	conditions, err := traitCatalog.apply(environment)
+	conditions, traits, err := traitCatalog.apply(environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait("deployment"))

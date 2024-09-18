@@ -45,9 +45,6 @@ type jolokiaTrait struct {
 func newJolokiaTrait() Trait {
 	return &jolokiaTrait{
 		BaseTrait: NewBaseTrait(jolokiaTraitID, jolokiaTraitOrder),
-		JolokiaTrait: traitv1.JolokiaTrait{
-			Port: defaultJolokiaPort,
-		},
 	}
 }
 
@@ -107,7 +104,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 	t.addToJolokiaOptions(options, "extendedClientCheck", t.ExtendedClientCheck)
 	t.addToJolokiaOptions(options, "host", t.Host)
 	t.addToJolokiaOptions(options, "password", t.Password)
-	t.addToJolokiaOptions(options, "port", t.Port)
+	t.addToJolokiaOptions(options, "port", t.getPort())
 	t.addToJolokiaOptions(options, "protocol", t.Protocol)
 	t.addToJolokiaOptions(options, "user", t.User)
 	t.addToJolokiaOptions(options, "useSslClientAuthentication", t.UseSslClientAuthentication)
@@ -131,7 +128,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",
-		ContainerPort: int32(t.Port),
+		ContainerPort: int32(t.getPort()),
 		Protocol:      corev1.ProtocolTCP,
 	}
 
@@ -145,6 +142,14 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 	container.Ports = append(container.Ports, containerPort)
 
 	return nil
+}
+
+func (t *jolokiaTrait) getPort() int {
+	if t.Port == 0 {
+		return defaultJolokiaPort
+	}
+
+	return t.Port
 }
 
 func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option interface{}, key string, value interface{}) {

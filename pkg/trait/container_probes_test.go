@@ -80,8 +80,9 @@ func TestProbesDependencies(t *testing.T) {
 	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseInitialization
 
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.Contains(t, env.Integration.Status.Dependencies, "mvn:org.apache.camel.quarkus:camel-quarkus-microprofile-health")
 }
@@ -105,8 +106,9 @@ func TestProbesOnDeployment(t *testing.T) {
 	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	container := env.GetIntegrationContainer()
@@ -143,8 +145,9 @@ func TestProbesOnDeploymentWithCustomScheme(t *testing.T) {
 	env := newTestProbesEnv(t, integration)
 	env.Integration.Status.Phase = v1.IntegrationPhaseDeploying
 
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	container := env.GetIntegrationContainer()
@@ -200,8 +203,9 @@ func TestProbesOnKnativeService(t *testing.T) {
 		"controller strategy: knative-service",
 	)
 
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.Contains(t, conditions, ctrlStrategyCondition)
 	assert.Contains(t, conditions, serviceOverrideCondition)
 

@@ -66,20 +66,6 @@ type containerTrait struct {
 func newContainerTrait() Trait {
 	return &containerTrait{
 		BasePlatformTrait: NewBasePlatformTrait(containerTraitID, containerTraitOrder),
-		ContainerTrait: traitv1.ContainerTrait{
-			Port:                     defaultContainerPort,
-			ServicePort:              defaultServicePort,
-			ServicePortName:          defaultContainerPortName,
-			Name:                     defaultContainerName,
-			RunAsNonRoot:             ptr.To(defaultContainerRunAsNonRoot),
-			SeccompProfileType:       defaultContainerSeccompProfileType,
-			AllowPrivilegeEscalation: ptr.To(defaultContainerAllowPrivilegeEscalation),
-			CapabilitiesDrop:         []corev1.Capability{defaultContainerCapabilitiesDrop},
-			RequestCPU:               defaultContainerResourceCPU,
-			RequestMemory:            defaultContainerResourceMemory,
-			LimitCPU:                 defaultContainerLimitCPU,
-			LimitMemory:              defaultContainerLimitMemory,
-		},
 	}
 }
 
@@ -94,8 +80,9 @@ func (t *containerTrait) Configure(e *Environment) (bool, *TraitCondition, error
 
 	if ptr.Deref(t.Auto, true) {
 		if t.Expose == nil {
-			e := e.Resources.GetServiceForIntegration(e.Integration) != nil
-			t.Expose = &e
+			if e.Resources.GetServiceForIntegration(e.Integration) != nil {
+				t.Expose = ptr.To(true)
+			}
 		}
 	}
 
@@ -138,7 +125,7 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 		e.ApplicationProperties = make(map[string]string)
 	}
 	container := corev1.Container{
-		Name:  t.Name,
+		Name:  t.getContainerName(),
 		Image: e.Integration.Status.Image,
 		Env:   make([]corev1.EnvVar, 0),
 	}
@@ -230,7 +217,7 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 	}
 	containerPort := corev1.ContainerPort{
 		Name:          name,
-		ContainerPort: int32(t.Port),
+		ContainerPort: int32(t.getPort()),
 		Protocol:      corev1.ProtocolTCP,
 	}
 	if !isKnative {
@@ -238,8 +225,8 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 		service := e.Resources.GetServiceForIntegration(e.Integration)
 		if service != nil {
 			servicePort := corev1.ServicePort{
-				Name:       t.ServicePortName,
-				Port:       int32(t.ServicePort),
+				Name:       t.getServicePortName(),
+				Port:       int32(t.getServicePort()),
 				Protocol:   corev1.ProtocolTCP,
 				TargetPort: intstr.FromString(name),
 			}
@@ -271,21 +258,21 @@ func (t *containerTrait) configureResources(container *corev1.Container) {
 		limitsList = make(corev1.ResourceList)
 	}
 
-	requestsList, err = kubernetes.ConfigureResource(t.RequestCPU, requestsList, corev1.ResourceCPU)
+	requestsList, err = kubernetes.ConfigureResource(t.getRequestCPU(), requestsList, corev1.ResourceCPU)
 	if err != nil {
-		t.L.Error(err, "unable to parse quantity", "request-cpu", t.RequestCPU)
+		t.L.Error(err, "unable to parse quantity", "request-cpu", t.getRequestCPU())
 	}
-	requestsList, err = kubernetes.ConfigureResource(t.RequestMemory, requestsList, corev1.ResourceMemory)
+	requestsList, err = kubernetes.ConfigureResource(t.getRequestMemory(), requestsList, corev1.ResourceMemory)
 	if err != nil {
-		t.L.Error(err, "unable to parse quantity", "request-memory", t.RequestMemory)
+		t.L.Error(err, "unable to parse quantity", "request-memory", t.getRequestMemory())
 	}
-	limitsList, err = kubernetes.ConfigureResource(t.LimitCPU, limitsList, corev1.ResourceCPU)
+	limitsList, err = kubernetes.ConfigureResource(t.getLimitCPU(), limitsList, corev1.ResourceCPU)
 	if err != nil {
-		t.L.Error(err, "unable to parse quantity", "limit-cpu", t.LimitCPU)
+		t.L.Error(err, "unable to parse quantity", "limit-cpu", t.getLimitCPU())
 	}
-	limitsList, err = kubernetes.ConfigureResource(t.LimitMemory, limitsList, corev1.ResourceMemory)
+	limitsList, err = kubernetes.ConfigureResource(t.getLimitMemory(), limitsList, corev1.ResourceMemory)
 	if err != nil {
-		t.L.Error(err, "unable to parse quantity", "limit-memory", t.LimitMemory)
+		t.L.Error(err, "unable to parse quantity", "limit-memory", t.getLimitMemory())
 	}
 
 	container.Resources.Requests = requestsList
@@ -300,12 +287,12 @@ func (t *containerTrait) configureCapabilities(e *Environment) {
 
 func (t *containerTrait) setSecurityContext(e *Environment, container *corev1.Container) error {
 	sc := corev1.SecurityContext{
-		RunAsNonRoot: t.RunAsNonRoot,
+		RunAsNonRoot: t.getRunAsNonRoot(),
 		SeccompProfile: &corev1.SeccompProfile{
-			Type: t.SeccompProfileType,
+			Type: t.getSeccompProfileType(),
 		},
-		AllowPrivilegeEscalation: t.AllowPrivilegeEscalation,
-		Capabilities:             &corev1.Capabilities{Drop: t.CapabilitiesDrop, Add: t.CapabilitiesAdd},
+		AllowPrivilegeEscalation: t.getAllowPrivilegeEscalation(),
+		Capabilities:             &corev1.Capabilities{Drop: t.getCapabilitiesDrop(), Add: t.CapabilitiesAdd},
 	}
 
 	runAsUser, err := t.getUser(e)
@@ -341,4 +328,100 @@ func (t *containerTrait) getUser(e *Environment) (*int64, error) {
 	}
 
 	return runAsUser, nil
+}
+
+func (t *containerTrait) getPort() int {
+	if t.Port == 0 {
+		return defaultContainerPort
+	}
+
+	return t.Port
+}
+
+func (t *containerTrait) getServicePort() int {
+	if t.ServicePort == 0 {
+		return defaultServicePort
+	}
+
+	return t.ServicePort
+}
+
+func (t *containerTrait) getServicePortName() string {
+	if t.ServicePortName == "" {
+		return defaultContainerPortName
+	}
+
+	return t.ServicePortName
+}
+
+func (t *containerTrait) getContainerName() string {
+	if t.Name == "" {
+		return defaultContainerName
+	}
+
+	return t.Name
+}
+
+func (t *containerTrait) getRunAsNonRoot() *bool {
+	if t.RunAsNonRoot == nil {
+		return ptr.To(defaultContainerRunAsNonRoot)
+	}
+
+	return t.RunAsNonRoot
+}
+
+func (t *containerTrait) getSeccompProfileType() corev1.SeccompProfileType {
+	if t.SeccompProfileType == "" {
+		return defaultContainerSeccompProfileType
+	}
+
+	return t.SeccompProfileType
+}
+
+func (t *containerTrait) getAllowPrivilegeEscalation() *bool {
+	if t.AllowPrivilegeEscalation == nil {
+		return ptr.To(defaultContainerAllowPrivilegeEscalation)
+	}
+
+	return t.AllowPrivilegeEscalation
+}
+
+func (t *containerTrait) getCapabilitiesDrop() []corev1.Capability {
+	if t.CapabilitiesDrop == nil {
+		return []corev1.Capability{defaultContainerCapabilitiesDrop}
+	}
+
+	return t.CapabilitiesDrop
+}
+
+func (t *containerTrait) getRequestCPU() string {
+	if t.RequestCPU == "" {
+		return defaultContainerResourceCPU
+	}
+
+	return t.RequestCPU
+}
+
+func (t *containerTrait) getRequestMemory() string {
+	if t.RequestMemory == "" {
+		return defaultContainerResourceMemory
+	}
+
+	return t.RequestMemory
+}
+
+func (t *containerTrait) getLimitCPU() string {
+	if t.LimitCPU == "" {
+		return defaultContainerLimitCPU
+	}
+
+	return t.LimitCPU
+}
+
+func (t *containerTrait) getLimitMemory() string {
+	if t.LimitMemory == "" {
+		return defaultContainerLimitMemory
+	}
+
+	return t.LimitMemory
 }

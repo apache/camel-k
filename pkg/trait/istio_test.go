@@ -102,8 +102,9 @@ func TestIstioInject(t *testing.T) {
 	}
 
 	env := NewIstioTestEnv(t, &d, &s, true)
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.Empty(t, s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.NotEmpty(t, d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
@@ -127,8 +128,9 @@ func TestIstioForcedInjectTrue(t *testing.T) {
 	env.Integration.Spec.Traits.Istio.Enabled = ptr.To(true)
 	env.Integration.Spec.Traits.Istio.Inject = ptr.To(true)
 
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.Equal(t, boolean.TrueString, s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, boolean.TrueString, d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
@@ -152,8 +154,9 @@ func TestIstioForcedInjectFalse(t *testing.T) {
 	env.Integration.Spec.Traits.Istio.Enabled = ptr.To(true)
 	env.Integration.Spec.Traits.Istio.Inject = ptr.To(false)
 
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.Equal(t, boolean.FalseString, s.Spec.ConfigurationSpec.Template.Annotations[istioSidecarInjectAnnotation])
 	assert.Equal(t, boolean.FalseString, d.Spec.Template.Annotations[istioSidecarInjectAnnotation])
@@ -175,8 +178,9 @@ func TestIstioDisabled(t *testing.T) {
 
 	env := NewIstioTestEnv(t, &d, &s, false)
 
-	conditions, err := env.Catalog.apply(&env)
+	conditions, traits, err := env.Catalog.apply(&env)
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 	assert.NotContains(t, env.ExecutedTraits, "istio")
 }

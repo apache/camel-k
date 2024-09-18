@@ -43,8 +43,9 @@ func TestDefaultEnvironment(t *testing.T) {
 	env := mockEnvironment(catalog)
 	env.Platform.ResyncStatusFullConfig()
 
-	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
+	assert.Empty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	ns := false
@@ -92,8 +93,9 @@ func TestEnabledContainerMetaDataEnvVars(t *testing.T) {
 	}
 	env.Platform.ResyncStatusFullConfig()
 
-	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	ns := false
@@ -132,8 +134,9 @@ func TestDisabledContainerMetaDataEnvVars(t *testing.T) {
 
 	env.Platform.ResyncStatusFullConfig()
 
-	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	ns := false
@@ -171,8 +174,9 @@ func TestCustomEnvVars(t *testing.T) {
 	}
 	env.Platform.ResyncStatusFullConfig()
 
-	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	userK1 := false
@@ -205,8 +209,9 @@ func TestValueSourceEnvVars(t *testing.T) {
 	}
 	env.Platform.ResyncStatusFullConfig()
 
-	conditions, err := NewEnvironmentTestCatalog().apply(&env)
+	conditions, traits, err := NewEnvironmentTestCatalog().apply(&env)
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.NotEmpty(t, conditions)
 
 	userK1 := false

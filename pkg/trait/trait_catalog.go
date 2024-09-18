@@ -27,6 +27,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/json"
 )
 
 // Catalog collects all information about traits in one place.
@@ -86,10 +87,10 @@ func (c *Catalog) TraitsForProfile(profile v1.TraitProfile) []Trait {
 	return res
 }
 
-func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
+func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, *v1.Traits, error) {
 	traitsConditions := []*TraitCondition{}
 	if err := c.Configure(environment); err != nil {
-		return traitsConditions, err
+		return traitsConditions, nil, err
 	}
 	traits := c.traitsFor(environment)
 	environment.ConfiguredTraits = traits
@@ -107,49 +108,89 @@ func (c *Catalog) apply(environment *Environment) ([]*TraitCondition, error) {
 			traitsConditions = append(traitsConditions, condition)
 		}
 		if err != nil {
-			return traitsConditions, fmt.Errorf("%s trait configuration failed: %w", trait.ID(), err)
+			return traitsConditions, nil, fmt.Errorf("%s trait configuration failed: %w", trait.ID(), err)
 		}
-
 		if enabled {
 			err = trait.Apply(environment)
 			if err != nil {
-				return traitsConditions, fmt.Errorf("%s trait execution failed: %w", trait.ID(), err)
+				return traitsConditions, nil, fmt.Errorf("%s trait execution failed: %w", trait.ID(), err)
 			}
 			environment.ExecutedTraits = append(environment.ExecutedTraits, trait)
 			// execute post step processors
 			for _, processor := range environment.PostStepProcessors {
 				err := processor(environment)
 				if err != nil {
-					return traitsConditions, fmt.Errorf("%s trait executing post step action failed: %w", trait.ID(), err)
+					return traitsConditions, nil, fmt.Errorf("%s trait executing post step action failed: %w", trait.ID(), err)
 				}
 			}
 		}
 	}
-	traitsConditions = append(traitsConditions, c.executedTraitCondition(environment.ExecutedTraits))
+	cs, ts, err := c.executedTraitCondition(environment.ExecutedTraits)
+	if err != nil {
+		return traitsConditions, &ts, err
+	}
+	traitsConditions = append(traitsConditions, cs)
 
 	if !applicable && environment.PlatformInPhase(v1.IntegrationPlatformPhaseReady) {
-		return traitsConditions, errors.New("no trait can be executed because of no ready platform found")
+		return traitsConditions, nil, errors.New("no trait can be executed because of no ready platform found")
 	}
 
 	for _, processor := range environment.PostProcessors {
 		err := processor(environment)
 		if err != nil {
-			return traitsConditions, fmt.Errorf("error executing post processor: %w", err)
+			return traitsConditions, nil, fmt.Errorf("error executing post processor: %w", err)
 		}
 	}
 
-	return traitsConditions, nil
+	return traitsConditions, &ts, nil
 }
 
-func (c *Catalog) executedTraitCondition(executedTrait []Trait) *TraitCondition {
+func (c *Catalog) executedTraitCondition(executedTrait []Trait) (*TraitCondition, v1.Traits, error) {
+	var traits v1.Traits
+	var traitMap = make(map[string]map[string]interface{})
 	traitIds := make([]string, 0)
 	for _, trait := range executedTrait {
+		data, err := json.Marshal(trait)
+		if err != nil {
+			return nil, traits, err
+		}
+		var traitIDMap map[string]interface{}
+		if err := json.Unmarshal(data, &traitIDMap); err != nil {
+			return nil, traits, err
+		}
+		if len(traitIDMap) > 0 {
+			if isAddon(string(trait.ID())) {
+				traitMap["addons"] = map[string]interface{}{
+					string(trait.ID()): traitIDMap,
+				}
+			} else {
+				traitMap[string(trait.ID())] = traitIDMap
+			}
+		}
+
 		traitIds = append(traitIds, string(trait.ID()))
 	}
+
+	traitData, err := json.Marshal(traitMap)
+	if err != nil {
+		return nil, traits, err
+	}
+	if err := json.Unmarshal(traitData, &traits); err != nil {
+		return nil, traits, err
+	}
+
 	message := fmt.Sprintf("Applied traits: %s", strings.Join(traitIds, ","))
 	c.L.Debugf(message)
 
-	return NewIntegrationCondition("", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+	return NewIntegrationCondition("", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message), traits, nil
+}
+
+// Deprecated: remove this check when we include the addons traits into regular traits
+// see https://github.com/apache/camel-k/issues/5787
+// isAddon returns true if the trait is an addon.
+func isAddon(id string) bool {
+	return id == "master" || id == "keda" || id == "3scale" || id == "tracing" ||
+		id == "aws-secrets-manager" || id == "azure-key-vault" || id == "gcp-secret-manager" || id == "hashicorp-vault"
 }
 
 // GetTrait returns the trait with the given ID.

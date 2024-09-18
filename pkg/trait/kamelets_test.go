@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -694,4 +695,56 @@ func TestKameletSyntheticKitAutoConditionFalse(t *testing.T) {
 		return cm.Labels[kubernetes.ConfigMapTypeLabel] == KameletBundleType
 	})
 	assert.Nil(t, kameletsBundle)
+}
+
+func TestKameletAuto(t *testing.T) {
+	flow := `
+- from:
+    uri: kamelet:timer
+    steps:
+    - to: kamelet:none
+`
+	trait, environment := createKameletsTestEnvironment(
+		flow,
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "timer",
+			},
+			Spec: v1.KameletSpec{
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
+			},
+		},
+		&v1.Kamelet{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "test",
+				Name:      "none",
+			},
+			Spec: v1.KameletSpec{
+				KameletSpecBase: v1.KameletSpecBase{
+					Template: templateOrFail(map[string]interface{}{
+						"from": map[string]interface{}{
+							"uri": "timer:tick",
+						},
+					}),
+				},
+			},
+		})
+
+	enabled, condition, err := trait.Configure(environment)
+	require.NoError(t, err)
+	assert.True(t, enabled)
+	assert.Nil(t, condition)
+
+	err = trait.Apply(environment)
+	require.NoError(t, err)
+	assert.Equal(t, traitv1.KameletsTrait{
+		List: "none,timer",
+	}, trait.KameletsTrait)
 }

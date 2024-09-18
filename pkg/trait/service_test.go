@@ -109,7 +109,7 @@ func TestServiceWithDefaults(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -216,7 +216,7 @@ func TestService(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -303,7 +303,7 @@ func TestServiceWithCustomContainerName(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -394,7 +394,7 @@ func TestServiceWithNodePort(t *testing.T) {
 	}
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -503,9 +503,10 @@ func TestServiceWithKnativeServiceEnabled(t *testing.T) {
 		"TraitConfiguration",
 		"explicitly disabled by the platform: knative-service trait has priority over this trait",
 	)
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.Contains(t, conditions, deploymentCondition)
 	assert.Contains(t, conditions, serviceCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -583,9 +584,10 @@ func TestServicesWithKnativeProfile(t *testing.T) {
 		"TraitConfiguration",
 		"explicitly disabled by the platform: knative-service trait has priority over this trait",
 	)
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.Contains(t, conditions, deploymentCondition)
 	assert.Contains(t, conditions, serviceCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -664,11 +666,77 @@ func TestServiceWithKnativeServiceDisabledInIntegrationPlatform(t *testing.T) {
 		"KnativeServiceNotAvailable",
 		"explicitly disabled",
 	)
-	conditions, err := traitCatalog.apply(&environment)
+	conditions, traits, err := traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
 	assert.Contains(t, conditions, expectedCondition)
 	assert.NotEmpty(t, environment.ExecutedTraits)
 	assert.NotNil(t, environment.GetTrait(serviceTraitID))
 	assert.Nil(t, environment.GetTrait(knativeServiceTraitID))
+}
+
+func TestServiceAutoConfiguration(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("netty-http:test").log("hello")`))
+	require.NoError(t, err)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      ServiceTestName,
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKubernetes,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.js",
+							Content:     string(compressedRoute),
+							Compression: true,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	_, traits, err := traitCatalog.apply(&environment)
+	require.NoError(t, err)
+	assert.Equal(t, ptr.To(true), traits.Service.Enabled)
 }

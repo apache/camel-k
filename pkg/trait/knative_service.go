@@ -61,9 +61,6 @@ var _ ControllerStrategySelector = &knativeServiceTrait{}
 func newKnativeServiceTrait() Trait {
 	return &knativeServiceTrait{
 		BaseTrait: NewBaseTrait(knativeServiceTraitID, knativeServiceTraitOrder),
-		KnativeServiceTrait: traitv1.KnativeServiceTrait{
-			Annotations: map[string]string{},
-		},
 	}
 }
 
@@ -92,13 +89,7 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 
 	if e.Resources.GetDeploymentForIntegration(e.Integration) != nil {
 		// A controller is already present for the integration
-		return false, NewIntegrationCondition(
-			"KnativeService",
-			v1.IntegrationConditionKnativeServiceAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			fmt.Sprintf("different controller strategy used (%s)", string(ControllerStrategyDeployment)),
-		), nil
+		return false, nil, nil
 	}
 
 	strategy, err := e.DetermineControllerStrategy()
@@ -111,22 +102,15 @@ func (t *knativeServiceTrait) Configure(e *Environment) (bool, *TraitCondition, 
 			err.Error(),
 		), err
 	}
-	if strategy != ControllerStrategyKnativeService {
-		return false, NewIntegrationCondition(
-			"KnativeService",
-			v1.IntegrationConditionKnativeServiceAvailable,
-			corev1.ConditionFalse,
-			v1.IntegrationConditionKnativeServiceNotAvailableReason,
-			fmt.Sprintf("different controller strategy used (%s)", string(strategy)),
-		), nil
-	}
 
-	if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
+	if strategy == ControllerStrategyKnativeService {
+		t.Enabled = ptr.To(true)
+	} else if e.IntegrationInPhase(v1.IntegrationPhaseRunning, v1.IntegrationPhaseError) {
 		condition := e.Integration.Status.GetCondition(v1.IntegrationConditionKnativeServiceAvailable)
-		return condition != nil && condition.Status == corev1.ConditionTrue, nil, nil
+		t.Enabled = ptr.To(condition != nil && condition.Status == corev1.ConditionTrue)
 	}
 
-	return true, nil, nil
+	return ptr.Deref(t.Enabled, false), nil, nil
 }
 
 func (t *knativeServiceTrait) Apply(e *Environment) error {

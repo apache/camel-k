@@ -57,9 +57,6 @@ type jvmTrait struct {
 func newJvmTrait() Trait {
 	return &jvmTrait{
 		BaseTrait: NewBaseTrait(jvmTraitID, jvmTraitOrder),
-		JVMTrait: traitv1.JVMTrait{
-			DebugAddress: "*:5005",
-		},
 	}
 }
 
@@ -230,6 +227,7 @@ func (t *jvmTrait) enableDebug(e *Environment) string {
 		}
 		meta.Labels["camel.apache.org/debug"] = "true"
 	})
+	t.DebugAddress = "*:5005"
 
 	return fmt.Sprintf("-agentlib:jdwp=transport=dt_socket,server=y,suspend=%s,address=%s",
 		suspend, t.DebugAddress)

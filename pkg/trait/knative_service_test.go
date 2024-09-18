@@ -124,7 +124,7 @@ func TestKnativeService(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -252,7 +252,7 @@ func TestKnativeServiceWithCustomContainerName(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -337,7 +337,7 @@ func TestKnativeServiceWithRest(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -405,7 +405,7 @@ func TestKnativeServiceNotApplicable(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -480,7 +480,7 @@ func TestKnativeServiceNoServingAvailable(t *testing.T) {
 	environment.Platform.ResyncStatusFullConfig()
 
 	// don't care about conditions in this unit test
-	_, err = traitCatalog.apply(&environment)
+	_, _, err = traitCatalog.apply(&environment)
 
 	require.NoError(t, err)
 	assert.NotEmpty(t, environment.ExecutedTraits)
@@ -606,7 +606,7 @@ func createKnativeServiceTestEnvironment(t *testing.T, trait *traitv1.KnativeSer
 
 	environment.Platform.ResyncStatusFullConfig()
 
-	_, err = traitCatalog.apply(environment)
+	_, _, err = traitCatalog.apply(environment)
 	require.NoError(t, err)
 
 	return environment
@@ -619,7 +619,7 @@ func TestServiceAnnotation(t *testing.T) {
 	})
 
 	traitsCatalog := environment.Catalog
-	_, err := traitsCatalog.apply(environment)
+	_, _, err := traitsCatalog.apply(environment)
 
 	require.NoError(t, err)
 
@@ -629,5 +629,77 @@ func TestServiceAnnotation(t *testing.T) {
 
 	assert.NotNil(t, service)
 	assert.True(t, reflect.DeepEqual(service.GetAnnotations(), annotationsTest))
+}
 
+func TestKnativeServiceAuto(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	require.NoError(t, err)
+
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	compressedRoute, err := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
+	require.NoError(t, err)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      KnativeServiceTestName,
+				Namespace: KnativeServiceTestNamespace,
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseDeploying,
+			},
+			Spec: v1.IntegrationSpec{
+				Profile: v1.TraitProfileKnative,
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:        "routes.js",
+							Content:     string(compressedRoute),
+							Compression: true,
+						},
+						Language: v1.LanguageJavaScript,
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Cluster: v1.IntegrationPlatformClusterOpenShift,
+				Build: v1.IntegrationPlatformBuildSpec{
+					PublishStrategy: v1.IntegrationPlatformBuildPublishStrategyS2I,
+					Registry:        v1.RegistrySpec{Address: "registry"},
+					RuntimeVersion:  catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	// don't care about conditions in this unit test
+	_, traits, err := traitCatalog.apply(&environment)
+
+	require.NoError(t, err)
+	assert.NotEmpty(t, traits)
+	assert.NotEmpty(t, environment.ExecutedTraits)
+	assert.Equal(t, &traitv1.KnativeServiceTrait{
+		Trait: traitv1.Trait{
+			Enabled: ptr.To(true),
+		},
+	}, traits.KnativeService)
 }

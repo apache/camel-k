@@ -47,11 +47,6 @@ type healthTrait struct {
 func newHealthTrait() Trait {
 	return &healthTrait{
 		BaseTrait: NewBaseTrait(healthTraitID, healthTraitOrder),
-		HealthTrait: traitv1.HealthTrait{
-			LivenessScheme:  string(corev1.URISchemeHTTP),
-			ReadinessScheme: string(corev1.URISchemeHTTP),
-			StartupScheme:   string(corev1.URISchemeHTTP),
-		},
 	}
 }
 
@@ -156,12 +151,36 @@ func (t *healthTrait) setProbes(container *corev1.Container, port *intstr.IntOrS
 	return nil
 }
 
+func (t *healthTrait) getLivenessScheme() corev1.URIScheme {
+	if t.LivenessScheme == "" {
+		return corev1.URISchemeHTTP
+	}
+
+	return corev1.URIScheme(t.LivenessScheme)
+}
+
+func (t *healthTrait) getReadinessScheme() corev1.URIScheme {
+	if t.ReadinessScheme == "" {
+		return corev1.URISchemeHTTP
+	}
+
+	return corev1.URIScheme(t.ReadinessScheme)
+}
+
+func (t *healthTrait) getStartupScheme() corev1.URIScheme {
+	if t.StartupScheme == "" {
+		return corev1.URISchemeHTTP
+	}
+
+	return corev1.URIScheme(t.StartupScheme)
+}
+
 func (t *healthTrait) newLivenessProbe(port *intstr.IntOrString, path string) *corev1.Probe {
 	p := corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
-				Scheme: corev1.URIScheme(t.LivenessScheme),
+				Scheme: t.getLivenessScheme(),
 			},
 		},
 		InitialDelaySeconds: t.LivenessInitialDelay,
@@ -183,7 +202,7 @@ func (t *healthTrait) newReadinessProbe(port *intstr.IntOrString, path string) *
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
-				Scheme: corev1.URIScheme(t.ReadinessScheme),
+				Scheme: t.getReadinessScheme(),
 			},
 		},
 		InitialDelaySeconds: t.ReadinessInitialDelay,
@@ -205,7 +224,7 @@ func (t *healthTrait) newStartupProbe(port *intstr.IntOrString, path string) *co
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   path,
-				Scheme: corev1.URIScheme(t.StartupScheme),
+				Scheme: t.getStartupScheme(),
 			},
 		},
 		InitialDelaySeconds: t.StartupInitialDelay,

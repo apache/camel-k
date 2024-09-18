@@ -43,6 +43,7 @@ The following configuration options are available:
 | resume.auto
 | bool
 | Enables automatic configuration of the trait.
+Deprecated: not in use.
 
 | resume.resume-strategy,omitempty
 | string
