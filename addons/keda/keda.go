@@ -66,7 +66,7 @@ const (
 // via markers in the Kamelets.
 //
 // For information on how to use KEDA enabled Kamelets with the KEDA trait, refer to
-// xref:ROOT:kamelets/kamelets-user.adoc#kamelet-keda-user[the KEDA section in the Kamelets user guide].
+// xref:ROOT:pipes/pipes.adoc#kamelet-keda-user[the KEDA section in the Pipes user guide].
 // If you want to create Kamelets that contain KEDA metadata, refer to
 // xref:ROOT:kamelets/keda.adoc[the KEDA section in the Kamelets development guide].
 //
