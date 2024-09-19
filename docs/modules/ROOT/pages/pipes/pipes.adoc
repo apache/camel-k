@@ -488,4 +488,4 @@ kamel run my-keda-integration.yaml -t keda.enabled=true
 
 NOTE: Make sure that the `my-keda-integration` uses at least one KEDA enabled Kamelet, otherwise enabling KEDA (without other options) will have no effect.
 
-For information on how to create KEDA enabled Kamelets, see the xref:kamelets/kamelets-dev.adoc#kamelet-keda-dev[KEDA section in the development guide].
+For information on how to create KEDA enabled Kamelets, see the xref:kamelets/keda.adoc[KEDA section in the development guide].
