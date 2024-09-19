@@ -18,7 +18,7 @@ The **Kamelet's interface** will define what parameters should be provided (e.g.
 **Internally**, the Kamelet defines how such events will be generated: it may involve connections to multiple systems using different protocols, transformations and so on.
 But everything will be **hidden to the end user**.
 
-Kamelets are the fundamental **unit of abstraction** in the next-gen architecture of Apache Camel K.
+Kamelets are a new **unit of abstraction** in the next-gen architecture of Apache Camel.
 A system as a whole can be technically described as the set of operations that you can do with it:
 if you use the language of Kamelets to describe a specific system, then other users can have access to all those operations with ease,
 no matter how complicated is the internal logic underlying all those operations.
@@ -29,4 +29,4 @@ Kamelets are also expected to be **rendered on visual tools** that will provide 
 They are generic connectors that can be used in multiples ways, depending on the context, so each UIs can use them
 for its own purpose.
 
-Have a look at the xref:kamelets/kamelets-user.adoc[Kamelets User Guide] to learn how to immediately use Kamelets in Camel K or check xref:kamelets/kamelets-distribution.adoc[Distribution][how to use your own Kamelet catalog].
+Have a look at the xref:kamelets/kamelets-user.adoc[Kamelets User Guide] to learn how to immediately use Kamelets in Camel K or check xref:kamelets/kamelets-distribution.adoc[how to use your own Kamelet catalog].
