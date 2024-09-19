@@ -54,7 +54,36 @@ spec:
   - uri: https://gist.githubusercontent.com/squakez/48b4ebf24c2579caf6bcb3e8a59fa509/raw/c7d9db6ee5e8851f5dc6a564172d85f00d87219c/gistfile1.txt
 ```
 
-In the example above we're making sure to call an intermediate resource in order to fill the content with some value.
+In the example above we're making sure to call an intermediate resource in order to fill the content with some value. This **action** is configured in the `.spec.steps` parameter.
+
+=== Traits configuration
+
+Although this should not be necessarily required (the operator do all the required configuration for you), you can tune your `Pipe` with xref:traits:traits.adoc[traits] configuration adding `.metadata.annotations`. Let's have a look at the following example:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: timer-2-log-annotation
+  annotations: # <1>
+    trait.camel.apache.org/logging.level: DEBUG
+    trait.camel.apache.org/logging.color: "false"
+spec:
+  source:
+    uri: timer:foo
+  sink:
+    uri: log:bar
+----
+<1> Include `.metadata.annotations` to specify the list of traits we want to configure
+
+In this example, we've set the `logging` trait to specify certain configuration we want to apply. You can do the same with all the traits available, just by setting `trait.camel.apache.org/trait-name.trait-property` with the expected value.
+
+NOTE: if you need to specify an array of values, the syntax will be `trait.camel.apache.org/trait.conf: "[\"opt1\", \"opt2\", ...]"`
+
+== Using Kamel CLI
+
+Camel K works very well with any Kubernetes compatible user interface (such as CLI as `kubectl`, `oc` or any other visual tooling). However we do provide a simple CLI that helps you performing most of the Pipe works in an easier fashion: it's xref:pipes/bind-cli.adoc[`kamel` CLI].
 
 == Differences with Integrations
 
@@ -64,7 +93,7 @@ Most of the time you will have consumer applications (one Pipe) which are consum
 
 NOTE: Camel K operator will allow you to use directly Kafka (Strimzi) and Knative endpoints custom resources.
 
-== Examples
+== More advanced examples
 
 Here some other examples involving Kamelets, Knative and Kafka.
 
@@ -99,9 +128,9 @@ spec:
       username: my-usr
 ```
 
-=== Consuming events from a Kafka topic
+=== Binding to Kafka topics
 
-Another typical use case is consume/produce events directly from a KafkaTopic custom resource (managed by Strimzi operator) or Knative resources:
+Another typical use case is consume/produce events directly from a KafkaTopic custom resource (managed by https://strimzi.io/[Strimzi] operator):
 
 ```yaml
 apiVersion: camel.apache.org/v1
@@ -123,6 +152,340 @@ spec:
       name: beer-events
 ```
 
-== Using Kamel CLI
+NOTE: the Strimzi operator is required to be installed and a KafkaTopic configured.
 
-Camel K works very well with any Kubernetes compatible user interface (such as CLI as `kubectl`, `oc` or any other visual tooling). However we do provide a simple CLI that helps you performing most of the Pipe works in an easier fashion: it's xref:pipes/bind-cli.adoc[`kamel` CLI].
+=== Binding to Knative resources
+
+A Pipe allows to move data from a system described by a Kamelet towards a https://knative.dev[Knative] destination, or from a Knative channel/broker to another external system described by a Kamelet. This means Pipes may act as event sources and sinks for the Knative eventing broker in a declarative way.
+
+NOTE: all examples require Knative operator installed and the related resources configured as well.
+
+For example, here is a Pipe that connects a Kamelet Telegram source to the Knative broker:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: telegram-to-knative
+spec:
+  source: # <1>
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: telegram-text-source
+    properties:
+      botToken: the-token-here
+  sink: # <2>
+    ref:
+      kind: Broker
+      apiVersion: eventing.knative.dev/v1
+      name: default
+----
+<1> Reference to the source that provides data
+<2> Reference to the sink where data should be sent to
+
+This binding takes the `telegram-text-source` Kamelet, configures it using specific properties ("botToken") and makes sure that messages produced by the Kamelet are forwarded to the Knative **Broker** named "default". Note that source and sink are specified as standard **Kubernetes object references** in a declarative way. Knative eventing uses the CloudEvents data format by default. You may want to set some properties that specify the event attributes such as the event type.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: telegram-to-knative
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: telegram-text-source
+    properties:
+      botToken: the-token-here
+  sink:
+    ref:
+      kind: Broker
+      apiVersion: eventing.knative.dev/v1
+      name: default
+    properties:
+      type: org.apache.camel.telegram.events # <1>
+----
+<1> Sets the event type attribute of the CloudEvent produced by this Pipe
+
+This way you may specify event attributes before publishing to the Knative broker. Note that Camel uses a default CloudEvents event type `org.apache.camel.event` for events produced by Camel. You can overwrite CloudEvent event attributes on the sink using the `ce.overwrite.` prefix when setting a property.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: telegram-to-knative
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: telegram-text-source
+    properties:
+      botToken: the-token-here
+  sink:
+    ref:
+      kind: Broker
+      apiVersion: eventing.knative.dev/v1
+      name: default
+    properties:
+      type: org.apache.camel.telegram.events
+      ce.overwrite.ce-source: my-source # <1>
+----
+<1> Use "ce.overwrite.ce-source" to explicitly set the CloudEvents source attribute.
+
+The example shows how we can reference the "telegram-text-source" resource in a Pipe. It's contained in the `source` section because it's a Kamelet of type "source". A Kamelet of type "sink", by contrast, can only be used in the `sink` section of a `Pipe`.
+
+Under the covers, a Pipe creates an Integration resource that implements the binding, but all details of how to connect with Telegram forwarding the data to the Knative broker is fully transparent to the end user. For instance the Integration uses a `SinkBinding` concept under the covers in order to retrieve the Knative broker endpoint URL.
+
+In the same way you can also connect a Kamelet source to a Knative channel.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: telegram-to-knative-channel
+spec:
+  source: # <1>
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: telegram-text-source
+    properties:
+      botToken: the-token-here
+  sink: # <2>
+    ref:
+      kind: InMemoryChannel
+      apiVersion: messaging.knative.dev/v1
+      name: messages
+----
+<1> Reference to the source that provides data
+<2> Reference to the Knative channel that acts as the sink where data should be sent to
+
+When reading data from Knative you just need to specify for instance the Knative broker as a source in the Pipe. Events consumed from Knative event stream will be pushed to the given sink of the Pipe.
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: knative-to-slack
+spec:
+  source: # <1>
+    ref:
+      kind: Broker
+      apiVersion: eventing.knative.dev/v1
+      name: default
+    properties:
+      type: org.apache.camel.event.messages
+  sink: # <2>
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: slack-sink
+    properties:
+      channel: "#my-channel"
+      webhookUrl: the-webhook-url
+----
+<1> Reference to the Knative broker source that provides data
+<2> Reference to the sink where data should be sent to
+
+Once again, the Pipe provides a declarative way of creating event sources and sinks for Knative eventing. In the example, all events of type `org.apache.camel.event.messages` get forwarded to the given Slack channel using the Webhook API.
+
+When consuming events from the Knative broker you most likely need to filter and select the events to process. You can do that with the properties set on the Knative broker source reference, for instance filtering by the even type as shown in the example. The filter possibilities include CloudEvent attributes such as event type, source, subject and extensions.
+
+In the background Camel K will automatically create a Knative Trigger resource for the Pipe that uses the filter attributes accordingly.
+
+.Sample trigger created by Camel K
+[source,yaml]
+----
+apiVersion: eventing.knative.dev/v1
+kind: Trigger
+metadata:
+  name: camel-event-messages
+spec:
+  broker: default # <1>
+  filter:
+    attributes:
+      type: org.apache.camel.event.messages
+      myextension: my-extension-value
+  subscriber:
+    ref:
+      apiVersion: serving.knative.dev/v1 # <2>
+      kind: Service
+      name: camel-service
+    uri: /events/camel.event.messages
+----
+<1> Reference to the Knative broker source that provides data
+<2> Reference to the Camel K integration/pipe service
+
+The trigger calls the Camel K integration service endpoint URL and pushes events with the given filter attributes to the Pipe. All properties that you have set on the Knative broker source reference will be set as a filter attribute on the trigger resource (except for reserved properties such as `name` and `cloudEventsType`).
+
+Note that Camel K creates the trigger resource only for Knative broker type event sources. In case you reference a Knative channel as a source in a Pipe Camel K assumes that the channel and the trigger are already present. Camel K will only create the subscription for the integration service on the channel.
+
+=== Binding to an explicit URI
+
+An alternative way to use a Pipe is to configure the source/sink to be an explicit Camel URI. For example, the following binding is allowed:
+
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: telegram-text-source-to-channel
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: telegram-text-source
+    properties:
+      botToken: the-token-here
+  sink:
+    uri: https://mycompany.com/the-service # <1>
+----
+<1> Pipe with explicitly URI
+
+This Pipe explicitly defines an URI where data is going to be pushed.
+
+NOTE: the `uri` option is also conventionally used in Knative to specify a non-kubernetes destination. To comply with the Knative specifications, in case an "http" or "https" URI is used, Camel will send https://cloudevents.io/[CloudEvents] to the destination.
+
+== Binding with data types
+
+When referencing Kamelets in a binding users may choose from one of the supported input/output data types provided by the Kamelet. The supported data types are declared on the Kamelet itself and give additional information about used header names, content type and content schema.
+
+.my-sample-source-to-log.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: my-sample-source-to-log
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: my-sample-source
+    data-types: # <1>
+      out:
+        format: text-plain # <2>
+  sink:
+    uri: "log:info"
+----
+<1> Specify the output data type on the referenced Kamelet source.
+<2> Select `text-plain` as an output data type of the `my-sample-source` Kamelet.
+
+The very same Kamelet `my-sample-source` may also provide a CloudEvents specific data type as an output which fits perfect for binding to a Knative broker.
+
+.my-sample-source-to-knative.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: my-sample-source-to-knative
+spec:
+  source:
+    ref:
+      kind: Kamelet
+      apiVersion: camel.apache.org/v1
+      name: my-sample-source
+    data-types:
+      out:
+        format: application-cloud-events # <1>
+  sink:
+    ref:
+      kind: Broker
+      apiVersion: eventing.knative.dev/v1
+      name: default
+----
+<1> Select `application-cloud-events` as an output data type of the `my-sample-source` Kamelet.
+
+Information about the supported data types can be found on the Kamelet itself.
+
+.my-sample-source.kamelet.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Kamelet
+metadata:
+  name: my-sample-source
+  labels:
+    camel.apache.org/kamelet.type: "source"
+spec:
+  definition:
+# ...
+  dataTypes:
+    out: # <1>
+      default: text-plain # <2>
+      types: # <3>
+        text-plain:
+          description: Output type as plain text.
+          mediaType: text/plain
+        application-cloud-events:
+          description: CloudEvents specific representation of the Kamelet output.
+          mediaType: application/cloudevents+json
+          schema: # <4>
+            # ...
+          dependencies: # <5>
+            - "camel:cloudevents"
+
+  template:
+    from:
+      uri: ...
+      steps:
+        - to: "kamelet:sink"
+----
+<1> Declared output data types of this Kamelet source
+<2> The output data type used by default
+<3> List of supported output types
+<4> Optional Json schema describing the `application/cloudevents+json` data type
+<5> Optional list of additional dependencies that are required by the data type.
+
+This way users may choose the best Kamelet data type for a specific use case when referencing Kamelets in a binding.
+
+[[kamelet-keda-user]]
+== KEDA enabled Pipes
+
+Some Kamelets are enhanced with https://keda.sh/[KEDA] metadata to allow users to automatically configure autoscalers on them. Kamelets with KEDA features can be distinguished by the presence of the annotation `camel.apache.org/keda.type`, which is set to the name of a specific KEDA autoscaler.
+
+WARNING: this feature is in an experimental phase.
+
+A KEDA enabled Kamelet can be used in the same way as any other Kamelet, in a Pipe or in an Integration. KEDA autoscalers are not enabled by default: they need to be manually enabled by the user via the `keda` trait.
+
+NOTE: KEDA operator is required to run on the cluster.
+
+In a Pipe, the KEDA trait can be enabled using annotations:
+
+.my-keda-binding.yaml
+[source,yaml]
+----
+apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  name: my-keda-binding
+  annotations:
+    trait.camel.apache.org/keda.enabled: "true"
+spec:
+  source:
+  # ...
+  sink:
+  # ...
+----
+
+In an integration, it can be enabled using `kamel run` args, for example:
+
+[source,shell]
+----
+kamel run my-keda-integration.yaml -t keda.enabled=true
+----
+
+NOTE: Make sure that the `my-keda-integration` uses at least one KEDA enabled Kamelet, otherwise enabling KEDA (without other options) will have no effect.
+
+For information on how to create KEDA enabled Kamelets, see the xref:kamelets/kamelets-dev.adoc#kamelet-keda-dev[KEDA section in the development guide].
