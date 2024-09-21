@@ -3,6 +3,7 @@
 
 As soon as you have an Integration running in your cluster, you will be challenged to move that Integration to an higher environment. Ie, you can test your Integration in a **development** environment, and, as soon as you're happy with the result, you will need to move it into a **production** environment.
 
+[[cli-promote]]
 == CLI `promote` command
 
 Camel K has an opinionated way to achieve the promotion goal through the usage of `kamel promote` command. With this command you will be able to easily move an Integration from one namespace to another without worrying about any low level detail such as resources needed by the Integration. You only need to make sure that both the source operator and the destination operator are using the same container registry and that the destination namespace provides the required Configmaps, Secrets or Kamelets required by the Integration.
@@ -52,3 +53,14 @@ hello, I am production!
 Something nice is that since the Integration is reusing the very same container image, the execution of the new application will be immediate. Also from a release perspective we are guaranteeing the **immutability** of the Integration as the container used is exactly the same of the one we have tested in development (what we change are just the configurations).
 
 Please notice that the Integration running in test is not altered in any way and will be running until any user will stop it.
+
+[[traits]]
+== Moving traits
+
+NOTE: this feature is available starting from version 2.5
+
+When you use the `promote` subcommand, you're also keeping the status of any configured trait along with the new promoted Integration. The tool is in fact in charge to recover the trait configuration of the source Integration and port it over to the new Integration promoted.
+
+This is particularly nice when you have certain traits which are requiring the scan the source code (for instance, Service trait). In this way, when you promote the new Integration, the traits will be automatically configured to copy any parameter, replicating the very exact behavior between the source and destination environment.
+
+With this approach, you won't need to worry any longer about any trait which was requiring the source to be attached in order to automatically scan for features.

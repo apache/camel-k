@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/platform"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/test"
@@ -30,6 +31,7 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr"
 )
 
 const cmdPromote = "promote"
@@ -368,6 +370,95 @@ spec:
       image: my-special-image
     jvm:
       classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
+status: {}
+`, output)
+}
+
+func TestIntegrationWithSavedTraitsDryRun(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultIntegration, defaultKit := nominalIntegration("my-it-test")
+	defaultIntegration.Status.Traits = &v1.Traits{
+		Service: &trait.ServiceTrait{
+			Trait: trait.Trait{
+				Enabled: ptr.To(true),
+			},
+		},
+	}
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-it-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  creationTimestamp: null
+  name: my-it-test
+  namespace: prod-namespace
+spec:
+  traits:
+    camel:
+      runtimeVersion: 1.2.3
+    container:
+      image: my-special-image
+    jvm:
+      classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
+    service:
+      enabled: true
+status: {}
+`, output)
+}
+
+func TestPipeWithSavedTraitsDryRun(t *testing.T) {
+	srcPlatform := v1.NewIntegrationPlatform("default", platform.DefaultPlatformName)
+	srcPlatform.Status.Version = defaults.Version
+	srcPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	srcPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	dstPlatform := v1.NewIntegrationPlatform("prod-namespace", platform.DefaultPlatformName)
+	dstPlatform.Status.Version = defaults.Version
+	dstPlatform.Status.Build.RuntimeVersion = defaults.DefaultRuntimeVersion
+	dstPlatform.Status.Phase = v1.IntegrationPlatformPhaseReady
+	defaultKB := nominalPipe("my-kb-test")
+	defaultKB.Annotations = map[string]string{
+		"camel.apache.org/operator.id": "camel-k",
+		"my-annotation":                "my-value",
+	}
+	defaultKB.Labels = map[string]string{
+		"my-label": "my-value",
+	}
+	defaultIntegration, defaultKit := nominalIntegration("my-kb-test")
+	srcCatalog := createTestCamelCatalog(srcPlatform)
+	dstCatalog := createTestCamelCatalog(dstPlatform)
+
+	promoteCmdOptions, promoteCmd, _ := initializePromoteCmdOptions(t, &srcPlatform, &dstPlatform, &defaultKB, &defaultIntegration, &defaultKit, &srcCatalog, &dstCatalog)
+	output, err := test.ExecuteCommand(promoteCmd, cmdPromote, "my-kb-test", "--to", "prod-namespace", "-o", "yaml", "-n", "default")
+	assert.Equal(t, "yaml", promoteCmdOptions.OutputFormat)
+	require.NoError(t, err)
+	assert.Equal(t, `apiVersion: camel.apache.org/v1
+kind: Pipe
+metadata:
+  annotations:
+    my-annotation: my-value
+    trait.camel.apache.org/camel.runtime-version: 1.2.3
+    trait.camel.apache.org/container.image: my-special-image
+    trait.camel.apache.org/jvm.classpath: /path/to/artifact-1/*:/path/to/artifact-2/*
+  creationTimestamp: null
+  labels:
+    my-label: my-value
+  name: my-kb-test
+  namespace: prod-namespace
+spec:
+  sink: {}
+  source: {}
 status: {}
 `, output)
 }

@@ -21,8 +21,10 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"k8s.io/utils/ptr"
 )
 
 func TestNumberConversion(t *testing.T) {
@@ -45,4 +47,47 @@ func TestNumberConversion(t *testing.T) {
 	assert.Equal(t, "10000000000", res["int64"])
 	assert.Equal(t, "123.123", res["float32"])
 	assert.Equal(t, "1111123.123", res["float64"])
+}
+
+func TestSetTraits(t *testing.T) {
+	traits := Traits{
+		Affinity: &trait.AffinityTrait{
+			Trait: trait.Trait{
+				Enabled: ptr.To(true),
+			},
+			PodAffinity: ptr.To(true),
+		},
+		Addons: map[string]AddonTrait{
+			"master": toAddonTrait(t, map[string]interface{}{
+				"enabled":      true,
+				"resourceName": "test-lock",
+				"labelKey":     "test-label",
+				"labelValue":   "test-value",
+			}),
+		},
+		Knative: &trait.KnativeTrait{
+			Trait: trait.Trait{
+				Enabled: ptr.To(true),
+			},
+			ChannelSources: []string{
+				"channel-a", "channel-b",
+			},
+		},
+	}
+
+	expectedAnnotations := map[string]string(map[string]string{
+		"trait.camel.apache.org/affinity.enabled":        "true",
+		"trait.camel.apache.org/affinity.pod-affinity":   "true",
+		"trait.camel.apache.org/knative.channel-sources": "[channel-a channel-b]",
+		"trait.camel.apache.org/knative.enabled":         "true",
+		"trait.camel.apache.org/master.enabled":          "true",
+		"trait.camel.apache.org/master.label-key":        "test-label",
+		"trait.camel.apache.org/master.label-value":      "test-value",
+		"trait.camel.apache.org/master.resource-name":    "test-lock",
+	})
+
+	pipe := NewPipe("my-pipe", "my-ns")
+	err := pipe.SetTraits(&traits)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedAnnotations, pipe.Annotations)
 }
