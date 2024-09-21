@@ -135,7 +135,10 @@ func (o *promoteCmdOptions) run(cmd *cobra.Command, args []string) error {
 
 	// Pipe promotion
 	if promotePipe {
-		destPipe := o.editPipe(sourcePipe, sourceIntegration, sourceKit)
+		destPipe, err := o.editPipe(sourcePipe, sourceIntegration, sourceKit)
+		if err != nil {
+			return err
+		}
 		if o.OutputFormat != "" {
 			return showPipeOutput(cmd, destPipe, o.OutputFormat, c.GetScheme())
 		}
@@ -242,6 +245,9 @@ func (o *promoteCmdOptions) editIntegration(it *v1.Integration, kit *v1.Integrat
 	dstIt.Annotations = cloneAnnotations(it.Annotations, o.ToOperator)
 	dstIt.Labels = cloneLabels(it.Labels)
 	dstIt.Spec.IntegrationKit = nil
+	if it.Status.Traits != nil {
+		dstIt.Spec.Traits = *it.Status.Traits
+	}
 	if dstIt.Spec.Traits.Container == nil {
 		dstIt.Spec.Traits.Container = &traitv1.ContainerTrait{}
 	}
@@ -322,14 +328,40 @@ func cloneLabels(lbs map[string]string) map[string]string {
 	return newMap
 }
 
-func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) *v1.Pipe {
+func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.IntegrationKit) (*v1.Pipe, error) {
 	contImage := it.Status.Image
 	// Pipe
 	dst := v1.NewPipe(o.To, kb.Name)
 	dst.Spec = *kb.Spec.DeepCopy()
 	dst.Annotations = cloneAnnotations(kb.Annotations, o.ToOperator)
 	dst.Labels = cloneLabels(kb.Labels)
-	dst.Annotations[fmt.Sprintf("%scontainer.image", v1.TraitAnnotationPrefix)] = contImage
+	traits := it.Status.Traits
+	if traits == nil {
+		traits = &v1.Traits{}
+	}
+	if traits.Container == nil {
+		traits.Container = &traitv1.ContainerTrait{}
+	}
+	traits.Container.Image = contImage
+	if kit != nil {
+		// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
+		// would get lost when creating the non managed build Integration. For this reason
+		// we must report it in the promoted Integration.
+		mergedClasspath := getClasspath(kit, dst.Annotations[fmt.Sprintf("%sjvm.classpath", v1.TraitAnnotationPrefix)])
+		if traits.JVM == nil {
+			traits.JVM = &traitv1.JVMTrait{}
+		}
+		traits.JVM.Classpath = mergedClasspath
+		// We must also set the runtime version so we pin it to the given catalog on which
+		// the container image was built
+		if traits.Camel == nil {
+			traits.Camel = &traitv1.CamelTrait{}
+		}
+		traits.Camel.RuntimeVersion = kit.Status.RuntimeVersion
+	}
+	if err := dst.SetTraits(traits); err != nil {
+		return nil, err
+	}
 	if dst.Spec.Source.Ref != nil {
 		dst.Spec.Source.Ref.Namespace = o.To
 	}
@@ -344,18 +376,7 @@ func (o *promoteCmdOptions) editPipe(kb *v1.Pipe, it *v1.Integration, kit *v1.In
 		}
 	}
 
-	if kit != nil {
-		// We must provide the classpath expected for the IntegrationKit. This is calculated dynamically and
-		// would get lost when creating the non managed build Integration. For this reason
-		// we must report it in the promoted Integration.
-		mergedClasspath := getClasspath(kit, dst.Annotations[fmt.Sprintf("%sjvm.classpath", v1.TraitAnnotationPrefix)])
-		dst.Annotations[fmt.Sprintf("%sjvm.classpath", v1.TraitAnnotationPrefix)] = mergedClasspath
-		// We must also set the runtime version so we pin it to the given catalog on which
-		// the container image was built
-		dst.Annotations[fmt.Sprintf("%scamel.runtime-version", v1.TraitAnnotationPrefix)] = kit.Status.RuntimeVersion
-	}
-
-	return &dst
+	return &dst, nil
 }
 
 func (o *promoteCmdOptions) replaceResource(res k8sclient.Object) (bool, error) {

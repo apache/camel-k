@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	scase "github.com/stoewer/go-strcase"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -68,6 +69,41 @@ func (c PipeCondition) GetMessage() string {
 // SetOperatorID sets the given operator id as an annotation.
 func (in *Pipe) SetOperatorID(operatorID string) {
 	SetAnnotation(&in.ObjectMeta, OperatorIDAnnotation, operatorID)
+}
+
+// SetTrait converts a trait into the related annotation.
+func (in *Pipe) SetTraits(traits *Traits) error {
+	var mappedTraits map[string]map[string]interface{}
+	data, err := json.Marshal(traits)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &mappedTraits)
+	if err != nil {
+		return err
+	}
+
+	addons := mappedTraits["addons"]
+	delete(mappedTraits, "addons")
+	if in.Annotations == nil && (len(mappedTraits) > 0 || len(addons) > 0) {
+		in.Annotations = make(map[string]string)
+	}
+	for id, trait := range mappedTraits {
+		for k, v := range trait {
+			in.Annotations[fmt.Sprintf("%s%s.%s", TraitAnnotationPrefix, id, scase.KebabCase(k))] = fmt.Sprintf("%v", v)
+		}
+	}
+	for id, trait := range addons {
+		castedMap, ok := trait.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("could not cast trait addon %v", trait)
+		}
+		for k, v := range castedMap {
+			in.Annotations[fmt.Sprintf("%s%s.%s", TraitAnnotationPrefix, id, scase.KebabCase(k))] = fmt.Sprintf("%v", v)
+		}
+	}
+
+	return nil
 }
 
 // GetCondition returns the condition with the provided type.

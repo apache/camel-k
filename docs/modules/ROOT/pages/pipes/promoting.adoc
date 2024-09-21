@@ -1,7 +1,9 @@
+[[promoting-pipes]]
 = Promoting Pipes across environments
 
 As soon as you have an Pipes running in your cluster, you will be challenged to move that Pipe to an higher environment. Ie, you can test your Pipe in a **development** environment, and, as soon as you're happy with the result, you will need to move it into a **production** environment.
 
+[[cli-promote]]
 == CLI `promote` command
 
 You may already be familiar with this command as seen when xref:running/promoting.adoc[promoting Integrations across environments]. The command is smart enough to detect when you want to promote a Pipe or an Integration and it works exactly in the same manner.
@@ -49,3 +51,14 @@ status: {}
 ```
 
 As you may already have seen with the Integration example, also here the Pipe is reusing the very same container image. From a release perspective we are guaranteeing the **immutability** of the Pipe as the container used is exactly the same of the one we have tested in development (what we change are just the configurations, if any).
+
+[[traits]]
+== Moving traits
+
+NOTE: this feature is available starting from version 2.5
+
+When you use the `promote` subcommand, you're also keeping the status of any configured trait along with the new promoted Pipe. The tool is in fact in charge to recover the trait configuration of the source Pipe and port it over to the new Pipe promoted.
+
+This is particularly nice when you have certain traits which are requiring the scan the source code (for instance, Service trait). In this way, when you promote the new Pipe, the traits will be automatically configured to copy any parameter, replicating the very exact behavior between the source and destination environment.
+
+With this approach, you won't need to worry any longer about any trait which was requiring the source to be attached in order to automatically scan for features.
