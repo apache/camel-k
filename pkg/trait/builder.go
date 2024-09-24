@@ -212,7 +212,11 @@ func (t *builderTrait) Apply(e *Environment) error {
 	var pipelineTasks []v1.Task
 
 	// task configuration resources
-	tasksConf, err := t.parseTasksConf()
+	defaultBuildConf := &v1.BuildConfiguration{}
+	if e.Platform != nil {
+		defaultBuildConf = &e.Platform.Status.Build.BuildConfiguration
+	}
+	tasksConf, err := t.parseTasksConf(defaultBuildConf)
 	if err != nil {
 		return err
 	}
@@ -539,7 +543,7 @@ func taskConfOrDefault(tasksConf map[string]*v1.BuildConfiguration, taskName str
 	return tasksConf[taskName]
 }
 
-func (t *builderTrait) parseTasksConf() (map[string]*v1.BuildConfiguration, error) {
+func (t *builderTrait) parseTasksConf(defaultBuildConf *v1.BuildConfiguration) (map[string]*v1.BuildConfiguration, error) {
 	tasksConf := make(map[string]*v1.BuildConfiguration)
 
 	for _, t := range t.TasksRequestCPU {
@@ -550,7 +554,7 @@ func (t *builderTrait) parseTasksConf() (map[string]*v1.BuildConfiguration, erro
 		taskName := splits[0]
 		taskResource := splits[1]
 		if tasksConf[taskName] == nil {
-			tasksConf[taskName] = &v1.BuildConfiguration{}
+			tasksConf[taskName] = defaultBuildConf
 		}
 		tasksConf[taskName].RequestCPU = taskResource
 	}
@@ -563,7 +567,7 @@ func (t *builderTrait) parseTasksConf() (map[string]*v1.BuildConfiguration, erro
 		taskName := splits[0]
 		taskResource := splits[1]
 		if tasksConf[taskName] == nil {
-			tasksConf[taskName] = &v1.BuildConfiguration{}
+			tasksConf[taskName] = defaultBuildConf
 		}
 		tasksConf[taskName].RequestMemory = taskResource
 	}
@@ -576,7 +580,7 @@ func (t *builderTrait) parseTasksConf() (map[string]*v1.BuildConfiguration, erro
 		taskName := splits[0]
 		taskResource := splits[1]
 		if tasksConf[taskName] == nil {
-			tasksConf[taskName] = &v1.BuildConfiguration{}
+			tasksConf[taskName] = defaultBuildConf
 		}
 		tasksConf[taskName].LimitCPU = taskResource
 	}
@@ -589,7 +593,7 @@ func (t *builderTrait) parseTasksConf() (map[string]*v1.BuildConfiguration, erro
 		taskName := splits[0]
 		taskResource := splits[1]
 		if tasksConf[taskName] == nil {
-			tasksConf[taskName] = &v1.BuildConfiguration{}
+			tasksConf[taskName] = defaultBuildConf
 		}
 		tasksConf[taskName].LimitMemory = taskResource
 	}
