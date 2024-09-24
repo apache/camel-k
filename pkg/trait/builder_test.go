@@ -389,7 +389,7 @@ func TestBuilderCustomTasksConfiguration(t *testing.T) {
 	builderTrait.TasksRequestMemory = append(builderTrait.TasksRequestMemory, "package:8Gi")
 	builderTrait.TasksLimitMemory = append(builderTrait.TasksLimitMemory, "spectrum:4Gi")
 
-	tasksConf, err := builderTrait.parseTasksConf()
+	tasksConf, err := builderTrait.parseTasksConf(&v1.BuildConfiguration{})
 
 	require.NoError(t, err)
 	assert.Equal(t, 4, len(tasksConf))
@@ -403,7 +403,7 @@ func TestBuilderCustomTasksConfigurationError(t *testing.T) {
 	builderTrait := createNominalBuilderTraitTest()
 	builderTrait.TasksLimitCPU = append(builderTrait.TasksLimitCPU, "syntax error")
 
-	_, err := builderTrait.parseTasksConf()
+	_, err := builderTrait.parseTasksConf(&v1.BuildConfiguration{})
 
 	require.Error(t, err)
 	assert.Equal(t, "could not parse syntax error, expected format <task-name>:<task-resource>", err.Error())
@@ -592,6 +592,20 @@ func TestBuilderTasksFilterAndReorderCustomTasks(t *testing.T) {
 	require.NoError(t, err)
 	pipelineTasks := tasksByName(env.Pipeline)
 	assert.Equal(t, []string{"builder", "my-custom-task", "package", "my-custom-publish"}, pipelineTasks)
+}
+
+func TestBuilderTasksNodeSelectorPlatformBuildStrategyPod(t *testing.T) {
+	env := createBuilderTestEnv(v1.IntegrationPlatformClusterKubernetes, v1.IntegrationPlatformBuildPublishStrategyJib, v1.BuildStrategyPod)
+	builderTrait := createNominalBuilderTraitTest()
+	builderTrait.NodeSelector = map[string]string{
+		"kubernetes.io/arch": "amd64",
+	}
+
+	err := builderTrait.Apply(env)
+	require.NoError(t, err)
+	builderTask := getBuilderTask(env.Pipeline)
+	assert.NotNil(t, builderTask)
+	assert.Equal(t, map[string]string{"kubernetes.io/arch": "amd64"}, builderTask.Configuration.NodeSelector)
 }
 
 func findCustomTaskByName(tasks []v1.Task, name string) v1.Task {
