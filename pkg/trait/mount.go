@@ -166,7 +166,7 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 			dstFile = conf.Key()
 		}
 	}
-	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile)
+	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile, conf.AdditionalParams())
 	mntPath := getMountPoint(conf.Name(), dstDir, string(conf.StorageType()), string(conf.ContentType()))
 	readOnly := true
 	if conf.StorageType() == utilResource.StorageTypePVC ||

@@ -21,15 +21,18 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // Config represents a config option.
 type Config struct {
-	storageType     StorageType
-	contentType     ContentType
-	resourceName    string
-	resourceKey     string
-	destinationPath string
+	storageType      StorageType
+	contentType      ContentType
+	resourceName     string
+	resourceKey      string
+	destinationPath  string
+	additionalParams map[string]interface{}
 }
 
 // DestinationPath is the location where the resource will be stored on destination.
@@ -55,6 +58,11 @@ func (config *Config) Name() string {
 // Key is the key specified for the resource.
 func (config *Config) Key() string {
 	return config.resourceKey
+}
+
+// Additional parameters for the config
+func (config *Config) AdditionalParams() map[string]interface{} {
+	return config.additionalParams
 }
 
 // String represents the unparsed value of the resource.
@@ -140,14 +148,26 @@ func ParseResource(item string) (*Config, error) {
 func ParseEmptyDirVolume(item string) (*Config, error) {
 	configParts := strings.Split(item, ":")
 
-	if len(configParts) != 2 {
+	if len(configParts) != 2 && len(configParts) != 3 {
 		return nil, fmt.Errorf("could not match emptyDir volume as %s", item)
+	}
+
+	var sizeLimit *resource.Quantity
+	if len(configParts) == 3 {
+		if parsed, err := resource.ParseQuantity(configParts[2]); err != nil {
+			return nil, fmt.Errorf("could not parse sizeLimit from emptyDir volume: %s", configParts[2])
+		} else {
+			sizeLimit = &parsed
+		}
 	}
 
 	return &Config{
 		storageType:     StorageTypeEmptyDir,
 		resourceName:    configParts[0],
 		destinationPath: configParts[1],
+		additionalParams: map[string]interface{}{
+			"SizeLimit": sizeLimit,
+		},
 	}, nil
 }
 

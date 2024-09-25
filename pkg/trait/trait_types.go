@@ -524,7 +524,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", idx)
 		resPath := filepath.Join(camel.SourcesMountPath, resName)
-		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
+		vol := getVolume(refName, "configmap", cmName, cmKey, resName, nil)
 		mnt := getMount(refName, resPath, resName, true)
 
 		*vols = append(*vols, *vol)
@@ -550,7 +550,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 				if propertiesType != "" {
 					refName := propertiesType + "-properties"
-					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
+					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName, nil)
 					mnt := getMount(refName, mountPath, resName, true)
 
 					*vols = append(*vols, *vol)
@@ -562,7 +562,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 				// Kamelets bundle configmap
 				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
 				refName := KameletBundleType
-				vol := getVolume(refName, "configmap", configMap.Name, "", "")
+				vol := getVolume(refName, "configmap", configMap.Name, "", "", nil)
 				mnt := getMount(refName, kameletMountPoint, "", true)
 
 				*vols = append(*vols, *vol)
@@ -572,7 +572,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	}
 }
 
-func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {
+func getVolume(volName, storageType, storageName, filterKey, filterValue string, additionalConfig map[string]interface{}) *corev1.Volume {
 	items := convertToKeyToPath(filterKey, filterValue)
 	volume := corev1.Volume{
 		Name:         volName,
@@ -596,12 +596,10 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string)
 			ClaimName: storageName,
 		}
 	case emptyDirStorageType:
-		size, err := resource.ParseQuantity("1Gi")
-		if err != nil {
-			log.WithValues("Function", "trait.getVolume").Errorf(err, "could not parse empty dir quantity, skipping")
-		}
+		sizeLimit, _ := additionalConfig["SizeLimit"].(*resource.Quantity) //; ok {
+
 		volume.VolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{
-			SizeLimit: &size,
+			SizeLimit: sizeLimit,
 		}
 	}
 
