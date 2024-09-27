@@ -56,6 +56,7 @@ type IntegrationProfileStatus struct {
 
 // IntegrationProfile is the resource used to apply user defined settings to the Camel K operator behavior.
 // It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
+// Deprecated: may be removed in future releases. Make use of IntegrationPlatform instead.
 type IntegrationProfile struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
