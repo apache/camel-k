@@ -39,7 +39,9 @@ func TestServiceBinding(t *testing.T) {
 
 	assert.True(t, configured)
 	require.NoError(t, err)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
+	assert.Equal(t, "ServiceBinding trait is deprecated as the Service Binding Operator is no longer supported. It may be removed in future version.",
+		condition.message)
 
 	// Required for local testing purposes only
 	handlers = []pipeline.Handler{}
