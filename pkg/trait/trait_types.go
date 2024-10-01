@@ -29,7 +29,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
@@ -524,7 +523,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 		resName := strings.TrimPrefix(s.Name, "/")
 		refName := fmt.Sprintf("i-source-%03d", idx)
 		resPath := filepath.Join(camel.SourcesMountPath, resName)
-		vol := getVolume(refName, "configmap", cmName, cmKey, resName, nil)
+		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
 		mnt := getMount(refName, resPath, resName, true)
 
 		*vols = append(*vols, *vol)
@@ -550,7 +549,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 
 				if propertiesType != "" {
 					refName := propertiesType + "-properties"
-					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName, nil)
+					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
 					mnt := getMount(refName, mountPath, resName, true)
 
 					*vols = append(*vols, *vol)
@@ -562,7 +561,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 				// Kamelets bundle configmap
 				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
 				refName := KameletBundleType
-				vol := getVolume(refName, "configmap", configMap.Name, "", "", nil)
+				vol := getVolume(refName, "configmap", configMap.Name, "", "")
 				mnt := getMount(refName, kameletMountPoint, "", true)
 
 				*vols = append(*vols, *vol)
@@ -572,7 +571,7 @@ func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]c
 	}
 }
 
-func getVolume(volName, storageType, storageName, filterKey, filterValue string, additionalConfig map[string]interface{}) *corev1.Volume {
+func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {
 	items := convertToKeyToPath(filterKey, filterValue)
 	volume := corev1.Volume{
 		Name:         volName,
@@ -594,12 +593,6 @@ func getVolume(volName, storageType, storageName, filterKey, filterValue string,
 	case pvcStorageType:
 		volume.VolumeSource.PersistentVolumeClaim = &corev1.PersistentVolumeClaimVolumeSource{
 			ClaimName: storageName,
-		}
-	case emptyDirStorageType:
-		sizeLimit, _ := additionalConfig["SizeLimit"].(*resource.Quantity) //; ok {
-
-		volume.VolumeSource.EmptyDir = &corev1.EmptyDirVolumeSource{
-			SizeLimit: sizeLimit,
 		}
 	}
 

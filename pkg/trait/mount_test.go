@@ -135,14 +135,18 @@ func TestEmptyDirVolumeIntegrationPhaseDeploying(t *testing.T) {
 	assert.Len(t, spec.Containers[0].VolumeMounts, 3)
 	assert.Len(t, spec.Volumes, 3)
 
-	assert.Condition(t, func() bool {
-		for _, v := range spec.Volumes {
-			if v.Name == "my-empty-dir" {
-				return true
-			}
+	var emptyDirVolume *corev1.Volume
+	for _, v := range spec.Volumes {
+		if v.Name == "my-empty-dir" {
+			emptyDirVolume = &v
+			break
 		}
-		return false
-	})
+	}
+
+	assert.NotNil(t, emptyDirVolume)
+	// Default applied by operator
+	assert.Equal(t, "500Mi", emptyDirVolume.EmptyDir.SizeLimit.String())
+
 	assert.Condition(t, func() bool {
 		for _, container := range spec.Containers {
 			if container.Name == "integration" {

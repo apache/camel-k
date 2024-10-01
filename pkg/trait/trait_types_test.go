@@ -120,7 +120,7 @@ func TestCollectConfigurationPairs(t *testing.T) {
 }
 
 func TestVolumeWithKeyAndPath(t *testing.T) {
-	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "SomePath", nil)
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "SomePath")
 	assert.NotNil(t, v)
 	assert.Equal(t, "SomeVolName", v.Name)
 	s := v.VolumeSource.Secret
@@ -134,7 +134,7 @@ func TestVolumeWithKeyAndPath(t *testing.T) {
 }
 
 func TestVolumeWithPathOnly(t *testing.T) {
-	v := getVolume("SomeVolName", "secret", "SomeSecretName", "", "SomePath", nil)
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "", "SomePath")
 	assert.NotNil(t, v)
 	assert.Equal(t, "SomeVolName", v.Name)
 	s := v.VolumeSource.Secret
@@ -145,7 +145,7 @@ func TestVolumeWithPathOnly(t *testing.T) {
 }
 
 func TestVolumeWithKeyOnly(t *testing.T) {
-	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "", nil)
+	v := getVolume("SomeVolName", "secret", "SomeSecretName", "SomeKey", "")
 	assert.NotNil(t, v)
 	assert.Equal(t, "SomeVolName", v.Name)
 	s := v.VolumeSource.Secret
