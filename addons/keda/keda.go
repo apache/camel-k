@@ -312,7 +312,7 @@ func (t *kedaTrait) getTopControllerReference(e *trait.Environment) *v1.ObjectRe
 
 func (t *kedaTrait) populateTriggersFromKamelets(e *trait.Environment) error {
 	kameletURIs := make(map[string][]string)
-	_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+	_, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 		for _, kameletURI := range meta.FromURIs {
 			if kameletStr := source.ExtractKamelet(kameletURI); kameletStr != "" && camelv1.ValidKameletName(kameletStr) {
 				kamelet := kameletStr

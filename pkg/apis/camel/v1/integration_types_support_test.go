@@ -18,11 +18,14 @@ limitations under the License.
 package v1
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"testing"
 
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAllLanguages(t *testing.T) {
@@ -124,4 +127,33 @@ func TestManagedBuild(t *testing.T) {
 		},
 	}
 	assert.True(t, integration.IsManagedBuild())
+}
+
+func TestReadWriteYaml(t *testing.T) {
+	// yaml in conventional form as marshalled by the go runtime
+	yaml := `- from:
+    parameters:
+      period: 3600001
+    steps:
+    - to: log:info
+    uri: timer:tick
+`
+
+	yamlReader := bytes.NewReader([]byte(yaml))
+	flows, err := FromYamlDSL(yamlReader)
+	require.NoError(t, err)
+	assert.NotNil(t, flows)
+	assert.Len(t, flows, 1)
+
+	flow := map[string]interface{}{}
+	err = json.Unmarshal(flows[0].RawMessage, &flow)
+	require.NoError(t, err)
+
+	assert.NotNil(t, flow["from"])
+	assert.Nil(t, flow["xx"])
+
+	data, err := ToYamlDSL(flows)
+	require.NoError(t, err)
+	assert.NotNil(t, data)
+	assert.Equal(t, yaml, string(data))
 }

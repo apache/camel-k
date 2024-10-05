@@ -507,7 +507,7 @@ func sourcesRequiredAtBuildTime(e *Environment, source v1.SourceSpec) bool {
 // Propagates the user defined sources that are required at build time for native compilation.
 func propagateSourcesRequiredAtBuildTime(e *Environment) []v1.SourceSpec {
 	array := make([]v1.SourceSpec, 0)
-	for _, source := range e.Integration.UserDefinedSources() {
+	for _, source := range e.Integration.OriginalSources() {
 		if sourcesRequiredAtBuildTime(e, source) {
 			array = append(array, source)
 		}

@@ -27,12 +27,12 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
-// YAMLInspector --.
+// YAMLInspector inspects YAML DSL spec.
 type YAMLInspector struct {
 	baseInspector
 }
 
-// Extract --.
+// Extract extracts all metadata from source spec.
 func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	definitions := make([]map[string]interface{}, 0)
 
@@ -199,4 +199,47 @@ func (i YAMLInspector) parseStepsParam(steps []interface{}, meta *Metadata) erro
 		}
 	}
 	return nil
+}
+
+// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
+func (i YAMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
+	definitions := make([]map[string]interface{}, 0)
+
+	if err := yaml2.Unmarshal([]byte(source.Content), &definitions); err != nil {
+		return false, err
+	}
+
+	// We expect the from in .route.from or .from location
+	for _, routeRaw := range definitions {
+		var from map[interface{}]interface{}
+		var fromOk bool
+		route, routeOk := routeRaw["route"].(map[interface{}]interface{})
+		if routeOk {
+			from, fromOk = route["from"].(map[interface{}]interface{})
+			if !fromOk {
+				return false, nil
+			}
+		}
+		if from == nil {
+			from, fromOk = routeRaw["from"].(map[interface{}]interface{})
+			if !fromOk {
+				return false, nil
+			}
+		}
+		delete(from, "parameters")
+		from["uri"] = newFromURI
+	}
+
+	newContentRaw, err := yaml2.Marshal(definitions)
+	if err != nil {
+		return false, err
+	}
+
+	newContent := string(newContentRaw)
+	if newContent != source.Content {
+		source.Content = newContent
+		return true, nil
+	}
+
+	return false, nil
 }

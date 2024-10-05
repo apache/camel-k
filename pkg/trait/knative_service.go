@@ -151,7 +151,7 @@ func (t *knativeServiceTrait) SelectControllerStrategy(e *Environment) (*Control
 		return &controllerStrategy, nil
 	}
 
-	enabled, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+	enabled, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 		return meta.ExposesHTTPServices || meta.PassiveEndpoints
 	})
 	if err != nil {

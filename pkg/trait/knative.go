@@ -80,7 +80,7 @@ func (t *knativeTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		return false, nil, nil
 	}
 
-	_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+	_, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 		if len(t.ChannelSources) == 0 {
 			t.ChannelSources = filterMetaItems(meta, knativeapi.CamelServiceTypeChannel, "from")
 		}

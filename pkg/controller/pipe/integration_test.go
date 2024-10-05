@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/util/dsl"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,7 +49,7 @@ func TestCreateIntegrationForPipe(t *testing.T) {
 	assert.Equal(t, "camel.apache.org/v1", it.OwnerReferences[0].APIVersion)
 	assert.Equal(t, "Pipe", it.OwnerReferences[0].Kind)
 	assert.Equal(t, "my-pipe", it.OwnerReferences[0].Name)
-	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
+	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
 	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRoute(), string(dsl))
 }
@@ -75,7 +74,7 @@ func TestCreateIntegrationForPipeWithSinkErrorHandler(t *testing.T) {
 	assert.Equal(t, "#class:org.apache.camel.builder.DeadLetterChannelBuilder", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
 	assert.Equal(t, "someUri", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.deadLetterUri"))
 	assert.Equal(t, "defaultErrorHandler", it.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
-	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
+	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
 	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRoute(), string(dsl))
 }
@@ -100,7 +99,7 @@ func TestCreateIntegrationForPipeWithLogErrorHandler(t *testing.T) {
 	assert.Equal(t, "#class:org.apache.camel.builder.DefaultErrorHandlerBuilder", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler"))
 	assert.Equal(t, "true", it.Spec.GetConfigurationProperty("camel.beans.defaultErrorHandler.showHeaders"))
 	assert.Equal(t, "defaultErrorHandler", it.Spec.GetConfigurationProperty(v1.ErrorHandlerRefName))
-	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
+	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
 	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRoute(), string(dsl))
 }
@@ -117,7 +116,7 @@ func TestCreateIntegrationForPipeDataType(t *testing.T) {
 	}
 	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
 	require.NoError(t, err)
-	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
+	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
 	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRouteWithDataType("data-type-action"), string(dsl))
 }
@@ -136,7 +135,7 @@ func TestCreateIntegrationForPipeDataTypeOverridden(t *testing.T) {
 	pipe.Annotations[v1.KameletDataTypeLabel] = newDataTypeKameletAction
 	it, err := CreateIntegrationFor(context.TODO(), client, &pipe)
 	require.NoError(t, err)
-	dsl, err := dsl.ToYamlDSL(it.Spec.Flows)
+	dsl, err := v1.ToYamlDSL(it.Spec.Flows)
 	require.NoError(t, err)
 	assert.Equal(t, expectedNominalRouteWithDataType(newDataTypeKameletAction), string(dsl))
 }
