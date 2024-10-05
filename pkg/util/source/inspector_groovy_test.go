@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 )
 
@@ -169,4 +170,36 @@ func TestGroovyDataFormat(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestGroovyReplaceURI(t *testing.T) {
+	inspector := newTestGroovyInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.groovy",
+			Content: "from('quartz:trigger?cron=0 0/1 * * * ?').to('log:info')",
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, "from('direct:newURI?hello=world').to('log:info')", sourceSpec.Content)
+
+	sourceSpec = &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.groovy",
+			Content: "from(\"quartz:trigger?cron=0 0/1 * * * ?\").to(\"log:info\")",
+		},
+	}
+	replaced, err = inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.True(t, replaced)
+	assert.Nil(t, err)
+	assert.Equal(t, "from(\"direct:newURI?hello=world\").to(\"log:info\")", sourceSpec.Content)
 }
