@@ -5560,6 +5560,7 @@ interpret this source at runtime
 
 Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
 uses to pre/post process sources
+Deprecated: no longer in use.
 
 |`type` +
 *xref:#_camel_apache_org_v1_SourceType[SourceType]*
@@ -6726,7 +6727,7 @@ The rules for using a Kubernetes CronJob are the following:
 
   - `cron`, `quartz`: when the cron expression does not contain seconds (or the "seconds" part is set to 0). E.g.
 
-    `cron:tab?schedule=0/2$\{plus}*\{plus}*\{plus}*\{plus}?` or `quartz:trigger?cron=0\{plus}0/2\{plus}*\{plus}*\{plus}*\{plus}?`.
+    `cron:tab?schedule=0/2 * * * ?` or `quartz:trigger?cron=0 0/2 * * * ?`.
 
 
 [cols="2,2a",options="header"]
@@ -6762,9 +6763,6 @@ string
 
 
 A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
-A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
-activated (it's present in the `org.apache.camel.k:camel-k-cron` library).
-
 Supported components are currently: `cron`, `timer` and `quartz`.
 
 |`fallback` +
