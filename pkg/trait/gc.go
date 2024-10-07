@@ -113,7 +113,9 @@ func (t *gcTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 		return false, NewIntegrationConditionUserDisabled("GC"), nil
 	}
 
-	return e.IntegrationInPhase(v1.IntegrationPhaseInitialization) || e.IntegrationInRunningPhases(), nil, nil
+	// We need to execute this trait only when all resources have been created and
+	// deployed with a new generation if there is was any change during the Integration drift.
+	return e.IntegrationInRunningPhases(), nil, nil
 }
 
 func (t *gcTrait) Apply(e *Environment) error {
