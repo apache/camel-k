@@ -36,7 +36,7 @@
     <maven.compiler.target>17</maven.compiler.target>
 
     <fabric8-version>6.13.4</fabric8-version>
-    <maven-surefire-plugin-version>3.5.0</maven-surefire-plugin-version>
+    <maven-surefire-plugin-version>3.5.1</maven-surefire-plugin-version>
   </properties>
 
   <developers>
