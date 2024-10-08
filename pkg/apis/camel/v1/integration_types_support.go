@@ -18,28 +18,34 @@ limitations under the License.
 package v1
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"regexp"
 	"strings"
 
+	yaml2 "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-// IntegrationLabel is used to tag k8s object created by a given Integration.
-const IntegrationLabel = "camel.apache.org/integration"
+const (
+	// IntegrationLabel is used to tag k8s object created by a given Integration.
+	IntegrationLabel = "camel.apache.org/integration"
+	// IntegrationGenerationLabel is used to check on outdated integration resources that can be removed by garbage collection.
+	IntegrationGenerationLabel = "camel.apache.org/generation"
+	// IntegrationSyntheticLabel is used to tag k8s synthetic Integrations.
+	IntegrationSyntheticLabel = "camel.apache.org/is-synthetic"
+	// IntegrationImportedKindLabel specifies from what kind of resource an Integration was imported.
+	IntegrationImportedKindLabel = "camel.apache.org/imported-from-kind"
+	// IntegrationImportedNameLabel specifies from what resource an Integration was imported.
+	IntegrationImportedNameLabel = "camel.apache.org/imported-from-name"
 
-// IntegrationGenerationLabel is used to check on outdated integration resources that can be removed by garbage collection.
-const IntegrationGenerationLabel = "camel.apache.org/generation"
-
-// IntegrationSyntheticLabel is used to tag k8s synthetic Integrations.
-const IntegrationSyntheticLabel = "camel.apache.org/is-synthetic"
-
-// IntegrationImportedKindLabel specifies from what kind of resource an Integration was imported.
-const IntegrationImportedKindLabel = "camel.apache.org/imported-from-kind"
-
-// IntegrationImportedNameLabel specifies from what resource an Integration was imported.
-const IntegrationImportedNameLabel = "camel.apache.org/imported-from-name"
+	// IntegrationFlowEmbeddedSourceName --.
+	IntegrationFlowEmbeddedSourceName = "camel-k-embedded-flow.yaml"
+)
 
 func NewIntegration(namespace string, name string) Integration {
 	return Integration{
@@ -74,18 +80,64 @@ func (in *Integration) Initialize() {
 	}
 }
 
-// Sources return a new slice containing all the sources associated to the integration.
+// AllSources returns a new slice containing all the sources associated to the Integration.
+// It merges any generated source, giving priority to this if the same
+// source exist both in spec and status.
 func (in *Integration) AllSources() []SourceSpec {
-	sources := make([]SourceSpec, 0, len(in.Spec.Sources)+len(in.Status.GeneratedSources))
-	sources = append(sources, in.Spec.Sources...)
+	var sources []SourceSpec
 	sources = append(sources, in.Status.GeneratedSources...)
+	for _, src := range in.Spec.Sources {
+		if len(in.Status.GeneratedSources) == 0 {
+			sources = append(sources, src)
+		} else {
+			for _, genSrc := range in.Status.GeneratedSources {
+				if src.Name != genSrc.Name {
+					sources = append(sources, src)
+				}
+			}
+		}
+	}
 
 	return sources
 }
 
-func (in *Integration) UserDefinedSources() []SourceSpec {
-	sources := make([]SourceSpec, 0, len(in.Spec.Sources))
+// OriginalSources return a new slice containing only the original sources provided within the Integration.
+// It checks if the spec source was transformed and available in the status, and return the latter in such a case.
+func (in *Integration) OriginalSources() []SourceSpec {
+	var sources []SourceSpec
+	for _, src := range in.Spec.Sources {
+		found := false
+	loop:
+		for _, genSrc := range in.Status.GeneratedSources {
+			if src.Name == genSrc.Name {
+				sources = append(sources, genSrc)
+				found = true
+				break loop
+			}
+		}
+		if !found {
+			sources = append(sources, src)
+		}
+	}
+
+	return sources
+}
+
+// OriginalSourcesOnly return a new slice containing only the original sources provided within the Integration spec
+// including the embedded yaml flow if it exists.
+func (in *Integration) OriginalSourcesOnly() []SourceSpec {
+	var sources []SourceSpec
 	sources = append(sources, in.Spec.Sources...)
+	if len(in.Spec.Flows) > 0 {
+		content, _ := ToYamlDSL(in.Spec.Flows)
+		sources = append(sources, SourceSpec{
+			DataSpec: DataSpec{
+				Name:    IntegrationFlowEmbeddedSourceName,
+				Content: string(content),
+			},
+		})
+	}
+
 	return sources
 }
 
@@ -417,4 +469,49 @@ func (c IntegrationCondition) GetReason() string {
 
 func (c IntegrationCondition) GetMessage() string {
 	return c.Message
+}
+
+// FromYamlDSLString creates a slice of flows from a Camel YAML DSL string.
+func FromYamlDSLString(flowsString string) ([]Flow, error) {
+	return FromYamlDSL(bytes.NewReader([]byte(flowsString)))
+}
+
+// FromYamlDSL creates a slice of flows from a Camel YAML DSL stream.
+func FromYamlDSL(reader io.Reader) ([]Flow, error) {
+	buffered, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+	var flows []Flow
+	// Using the Kubernetes decoder to turn them into JSON before unmarshal.
+	// This avoids having map[interface{}]interface{} objects which are not JSON compatible.
+	jsonData, err := yaml.ToJSON(buffered)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = json.Unmarshal(jsonData, &flows); err != nil {
+		return nil, err
+	}
+	return flows, err
+}
+
+// ToYamlDSL converts a flow into its Camel YAML DSL equivalent.
+func ToYamlDSL(flows []Flow) ([]byte, error) {
+	data, err := json.Marshal(&flows)
+	if err != nil {
+		return nil, err
+	}
+	jsondata := make([]map[string]interface{}, 0)
+	d := json.NewDecoder(bytes.NewReader(data))
+	d.UseNumber()
+	if err := d.Decode(&jsondata); err != nil {
+		return nil, fmt.Errorf("error unmarshalling json: %w", err)
+	}
+	yamldata, err := yaml2.Marshal(&jsondata)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling to yaml: %w", err)
+	}
+
+	return yamldata, nil
 }

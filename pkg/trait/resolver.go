@@ -87,13 +87,21 @@ func resolveIntegrationSources(
 	context context.Context,
 	client controller.Reader,
 	integration *v1.Integration,
+	originalSourcesOnly bool,
 	resources *kubernetes.Collection) ([]v1.SourceSpec, error) {
 
 	if integration == nil {
 		return nil, nil
 	}
 
-	return resolveSources(integration.AllSources(), func(name string) (*corev1.ConfigMap, error) {
+	var sources []v1.SourceSpec
+	if originalSourcesOnly {
+		sources = integration.OriginalSourcesOnly()
+	} else {
+		sources = integration.AllSources()
+	}
+
+	return resolveSources(sources, func(name string) (*corev1.ConfigMap, error) {
 		// the config map could be part of the resources created
 		// by traits
 		cm := resources.GetConfigMap(func(m *corev1.ConfigMap) bool {

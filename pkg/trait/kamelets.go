@@ -76,7 +76,7 @@ func (t *kameletsTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 	}
 	if ptr.Deref(t.Auto, true) {
 		var kamelets []string
-		_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		_, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 			util.StringSliceUniqueConcat(&kamelets, meta.Kamelets)
 			return true
 		})

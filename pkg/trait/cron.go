@@ -32,6 +32,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/util"
+	"github.com/apache/camel-k/v2/pkg/util/source"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -44,6 +45,8 @@ const (
 	defaultCronBackoffLimit            = int32(2)
 	genericCronComponent               = "cron"
 	genericCronComponentFallbackScheme = "quartz"
+
+	overriddenFromURI = "timer:camel-k-overridden-cron?delay=0&period=1&repeatCount=1"
 )
 
 type cronTrait struct {
@@ -177,9 +180,9 @@ func (t *cronTrait) autoConfigure(e *Environment) error {
 }
 
 func (t *cronTrait) Apply(e *Environment) error {
+	//nolint: nestif
 	if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
 		util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityCron)
-
 		if ptr.Deref(t.Fallback, false) {
 			fallbackArtifact := e.CamelCatalog.GetArtifactByScheme(genericCronComponentFallbackScheme)
 			if fallbackArtifact == nil {
@@ -187,17 +190,26 @@ func (t *cronTrait) Apply(e *Environment) error {
 			}
 			util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, fallbackArtifact.GetDependencyID())
 			util.StringSliceUniqueConcat(&e.Integration.Status.Dependencies, fallbackArtifact.GetConsumerDependencyIDs(genericCronComponentFallbackScheme))
+
+			return nil
 		}
+		// Will change the "from" URI in order to execute the task just once
+		if err := t.changeSourcesCronURI(e); err != nil {
+			return err
+		}
+		cronComponentArtifact := e.CamelCatalog.GetArtifactByScheme("timer")
+		if cronComponentArtifact == nil {
+			return fmt.Errorf("no timer artifact has been found in camel catalog")
+		}
+		util.StringSliceUniqueAdd(&e.Integration.Status.Dependencies, cronComponentArtifact.GetDependencyID())
 	}
 
-	if !ptr.Deref(t.Fallback, false) && e.IntegrationInRunningPhases() {
+	if e.IntegrationInRunningPhases() && !ptr.Deref(t.Fallback, false) {
 		if e.ApplicationProperties == nil {
 			e.ApplicationProperties = make(map[string]string)
 		}
-
-		e.ApplicationProperties["camel.main.duration-max-idle-seconds"] = "5"
-		e.ApplicationProperties["loader.interceptor.cron.overridable-components"] = t.Components
-		e.Interceptors = append(e.Interceptors, "cron")
+		// Will instruct the context to stop as soon as the first message is done
+		e.ApplicationProperties["camel.main.durationMaxMessages"] = "1"
 
 		cronJob := t.getCronJobFor(e)
 		e.Resources.Add(cronJob)
@@ -206,7 +218,12 @@ func (t *cronTrait) Apply(e *Environment) error {
 			v1.IntegrationConditionCronJobAvailable,
 			corev1.ConditionTrue,
 			v1.IntegrationConditionCronJobAvailableReason,
-			fmt.Sprintf("CronJob name is %s", cronJob.Name))
+			fmt.Sprintf(
+				"CronJob name is %s. Notice that the routes \"from\" parameter was changed to "+
+					"\"%s\" in order to be able to trigger the Camel application as a CronJob.",
+				cronJob.Name,
+				overriddenFromURI,
+			))
 	}
 
 	return nil
@@ -341,7 +358,7 @@ func (t *cronTrait) getGlobalCron(e *Environment) (*cronInfo, error) {
 
 func (t *cronTrait) getSourcesFromURIs(e *Environment) ([]string, error) {
 	var fromUris []string
-	_, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+	_, err := e.ConsumeMeta(true, func(meta metadata.IntegrationMetadata) bool {
 		fromUris = meta.FromURIs
 		return true
 	})
@@ -492,4 +509,21 @@ func checkedStringToUint64(str string) uint64 {
 		panic(err)
 	}
 	return res
+}
+
+// changeSourcesCronURI is in charge to change the value of the from route with a component that executes
+// the workload just once.
+func (t *cronTrait) changeSourcesCronURI(e *Environment) error {
+	for _, src := range e.Integration.AllSources() {
+		dslInspector := source.InspectorForLanguage(e.CamelCatalog, src.InferLanguage())
+		replaced, err := dslInspector.ReplaceFromURI(&src, overriddenFromURI)
+		if replaced {
+			// replace generated source
+			e.Integration.Status.AddOrReplaceGeneratedSources(src)
+		} else if err != nil {
+			return fmt.Errorf("wasn't able to replace cron uri trigger in source %s", src.Name)
+		}
+	}
+
+	return nil
 }

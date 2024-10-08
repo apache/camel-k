@@ -72,7 +72,7 @@ func (t *serviceTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 	}
 
 	if ptr.Deref(t.Auto, true) {
-		exposeHTTPServices, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+		exposeHTTPServices, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 			return meta.ExposesHTTPServices
 		})
 		var condition *TraitCondition

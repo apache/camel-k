@@ -15,23 +15,24 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
-- from:
-    uri: "cron:tab"
-    parameters:
-      # Every minute
-      schedule: "* * * * *"
-    steps:
-      - setHeader:
-          name: "m"
-          constant: "string!"
-      - setBody:
-          simple: "Magic${header.m}"
-      # Simulate a job workload
-      - delay:
-          expression:
-            constant: 20000
-          asyncDelayed: false
-      - to:
-          uri: "log:info"
-          parameters:
-            show-all: "false"
+- route:
+    id: "yaml"
+    from:
+      uri: "quartz:trigger"
+      parameters:
+        cron: "0 */1 * * * ?"
+      steps:
+        - setHeader:
+            name: "m"
+            constant: "string!"
+        - setBody:
+            simple: "Magic${header.m}"
+        # Simulate a job workload
+        - delay:
+            expression:
+              constant: 20000
+            asyncDelayed: false
+        - to:
+            uri: "log:info"
+            parameters:
+              show-all: "false"

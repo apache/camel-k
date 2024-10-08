@@ -55,7 +55,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/dsl"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/v2/pkg/util/property"
@@ -673,7 +672,7 @@ func (o *runCmdOptions) resolveSources(cmd *cobra.Command, sources []string, it 
 
 	for _, source := range resolvedSources {
 		if o.UseFlows && !o.Compression && source.IsYaml() {
-			flows, err := dsl.FromYamlDSLString(source.Content)
+			flows, err := v1.FromYamlDSLString(source.Content)
 			if err != nil {
 				return err
 			}

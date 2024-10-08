@@ -69,6 +69,7 @@ func (t *dependenciesTrait) Apply(e *Environment) error {
 	}
 
 	_, err := e.consumeSourcesMeta(
+		false,
 		func(sources []v1.SourceSpec) bool {
 			for _, s := range sources {
 				// Add source-related language dependencies

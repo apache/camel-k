@@ -805,6 +805,7 @@ spec:
                                 description: |-
                                   Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
                                   uses to pre/post process sources
+                                  Deprecated: no longer in use.
                                 items:
                                   type: string
                                 type: array
@@ -1685,6 +1686,7 @@ spec:
                                 description: |-
                                   Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
                                   uses to pre/post process sources
+                                  Deprecated: no longer in use.
                                 items:
                                   type: string
                                 type: array

@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
 
@@ -139,7 +140,8 @@ func generateQuarkusProjectCommon(runtimeVersion string, quarkusPlatformVersion 
 
 	// set fast-jar packaging by default, since it gives some startup time improvements
 	p.Properties.Add("quarkus.package.type", "fast-jar")
-
+	// Reproducible builds: https://maven.apache.org/guides/mini/guide-reproducible-builds.html
+	p.Properties.Add("project.build.outputTimestamp", time.Now().Format(time.RFC3339))
 	// DependencyManagement
 	p.DependencyManagement.Dependencies = append(p.DependencyManagement.Dependencies,
 		maven.Dependency{

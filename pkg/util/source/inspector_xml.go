@@ -24,18 +24,22 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-// XMLInspector --.
+const (
+	language = "language"
+	URI      = "uri"
+)
+
+// XMLInspector inspects XML DSL spec.
 type XMLInspector struct {
 	baseInspector
 }
 
-// Extract --.
-//
-//nolint:goconst,nestif
+// Extract extracts all metadata from source spec.
 func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	content := strings.NewReader(source.Content)
 	decoder := xml.NewDecoder(content)
 
+	//nolint: nestif
 	for {
 		// Read tokens from the XML document in a stream.
 		t, _ := decoder.Token()
@@ -60,9 +64,9 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				if dfDep := i.catalog.GetArtifactByDataFormat(dataFormatID); dfDep != nil {
 					meta.AddDependency(dfDep.GetDependencyID())
 				}
-			case "language":
+			case language:
 				for _, a := range se.Attr {
-					if a.Name.Local == "language" {
+					if a.Name.Local == language {
 						if dependency, ok := i.catalog.GetLanguageDependency(a.Value); ok {
 							meta.AddDependency(dependency)
 						}
@@ -70,13 +74,13 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 				}
 			case "from", "fromF":
 				for _, a := range se.Attr {
-					if a.Name.Local == "uri" {
+					if a.Name.Local == URI {
 						meta.FromURIs = append(meta.FromURIs, a.Value)
 					}
 				}
 			case "to", "toD", "toF", "wireTap":
 				for _, a := range se.Attr {
-					if a.Name.Local == "uri" {
+					if a.Name.Local == URI {
 						meta.ToURIs = append(meta.ToURIs, a.Value)
 					}
 				}
@@ -106,4 +110,26 @@ func (i XMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
 
 	return nil
+}
+
+// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI. Returns true if it applies a replacement.
+func (i XMLInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
+	metadata := NewMetadata()
+	if err := i.Extract(*source, &metadata); err != nil {
+		return false, err
+	}
+	newContent := source.Content
+	if metadata.FromURIs == nil {
+		return false, nil
+	}
+	for _, from := range metadata.FromURIs {
+		newContent = strings.ReplaceAll(newContent, from, newFromURI)
+	}
+	replaced := newContent != source.Content
+
+	if replaced {
+		source.Content = newContent
+	}
+
+	return replaced, nil
 }

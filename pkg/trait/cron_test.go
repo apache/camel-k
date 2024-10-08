@@ -18,6 +18,7 @@ limitations under the License.
 package trait
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -28,6 +29,7 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
 	"k8s.io/utils/ptr"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -296,7 +298,7 @@ func TestCronDeps(t *testing.T) {
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
 	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
-	assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-cron")
+	assert.Contains(t, environment.Integration.Status.Dependencies, "camel:timer")
 }
 
 func TestCronMultipleScheduleFallback(t *testing.T) {
@@ -459,7 +461,7 @@ func TestCronDepsFallback(t *testing.T) {
 	assert.NotNil(t, ct.Fallback)
 	assert.True(t, util.StringSliceExists(environment.Integration.Status.Capabilities, v1.CapabilityCron))
 	assert.Contains(t, environment.Integration.Status.Dependencies, "camel:quartz")
-	assert.Contains(t, environment.Integration.Status.Dependencies, "mvn:org.apache.camel.k:camel-k-cron")
+	assert.NotContains(t, environment.Integration.Status.Dependencies, "camel:timer")
 }
 
 func TestCronWithActiveDeadline(t *testing.T) {
@@ -540,7 +542,6 @@ func TestCronWithActiveDeadline(t *testing.T) {
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
-	assert.Contains(t, environment.Interceptors, "cron")
 
 	cronJob := environment.Resources.GetCronJob(func(job *batchv1.CronJob) bool { return true })
 	assert.NotNil(t, cronJob)
@@ -630,7 +631,6 @@ func TestCronWithBackoffLimit(t *testing.T) {
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
-	assert.Contains(t, environment.Interceptors, "cron")
 
 	cronJob := environment.Resources.GetCronJob(func(job *batchv1.CronJob) bool { return true })
 	assert.NotNil(t, cronJob)
@@ -724,7 +724,6 @@ func TestCronWithTimeZone(t *testing.T) {
 	ct, _ := environment.GetTrait("cron").(*cronTrait)
 	assert.NotNil(t, ct)
 	assert.Nil(t, ct.Fallback)
-	assert.Contains(t, environment.Interceptors, "cron")
 
 	cronJob := environment.Resources.GetCronJob(func(job *batchv1.CronJob) bool { return true })
 	assert.NotNil(t, cronJob)
@@ -800,4 +799,88 @@ func TestCronAuto(t *testing.T) {
 		Schedule:   "0 0/2 * * ?",
 		Components: "cron",
 	}, traits.Cron)
+}
+
+func TestCronRuntimeTriggerReplacement(t *testing.T) {
+	catalog, err := camel.DefaultCatalog()
+	assert.Nil(t, err)
+
+	client, _ := test.NewFakeClient()
+	traitCatalog := NewCatalog(nil)
+
+	environment := Environment{
+		CamelCatalog: catalog,
+		Catalog:      traitCatalog,
+		Client:       client,
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test",
+				Namespace: "ns",
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseInitialization,
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:    "routes.java",
+							Content: `from("quartz:trigger?cron=0 0/1 * * * ?").to("log:test")`,
+						},
+					},
+				},
+				Traits: v1.Traits{
+					Cron: &traitv1.CronTrait{
+						BackoffLimit: pointer.Int32(5),
+					},
+				},
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			Status: v1.IntegrationKitStatus{
+				Phase: v1.IntegrationKitPhaseReady,
+			},
+		},
+		Platform: &v1.IntegrationPlatform{
+			Spec: v1.IntegrationPlatformSpec{
+				Build: v1.IntegrationPlatformBuildSpec{
+					RuntimeVersion: catalog.Runtime.Version,
+				},
+			},
+			Status: v1.IntegrationPlatformStatus{
+				Phase: v1.IntegrationPlatformPhaseReady,
+			},
+		},
+		EnvVars:        make([]corev1.EnvVar, 0),
+		ExecutedTraits: make([]Trait, 0),
+		Resources:      kubernetes.NewCollection(),
+	}
+	environment.Platform.ResyncStatusFullConfig()
+
+	c, err := NewFakeClient("ns")
+	assert.Nil(t, err)
+
+	tc := NewCatalog(c)
+	_, _, err = tc.apply(&environment)
+	assert.Nil(t, err)
+
+	// Integration Initialization
+	assert.NotEmpty(t, environment.Integration.Status.GeneratedSources)
+	assert.Equal(t,
+		fmt.Sprintf("from(\"%s\").to(\"log:test\")", overriddenFromURI),
+		environment.Integration.Status.GeneratedSources[0].Content,
+	)
+
+	// Integration Deployment
+	environment.Integration.Status.Phase = v1.IntegrationPhaseDeploying
+	_, _, err = tc.apply(&environment)
+	assert.Nil(t, err)
+
+	cronJob := environment.Resources.GetCronJob(func(job *batchv1.CronJob) bool { return true })
+	assert.NotNil(t, cronJob)
+	assert.Equal(t, "1", environment.ApplicationProperties["camel.main.durationMaxMessages"])
+	assert.Equal(t,
+		fmt.Sprintf("from(\"%s\").to(\"log:test\")", overriddenFromURI),
+		environment.Integration.Status.GeneratedSources[0].Content,
+	)
 }
