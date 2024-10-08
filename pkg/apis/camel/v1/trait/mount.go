@@ -34,7 +34,8 @@ type MountTrait struct {
 	Resources []string `property:"resources" json:"resources,omitempty"`
 	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
-	// A list of EmptyDir volumes to be mounted. Syntax: [name:/container/path]
+	// A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+	// Syntax: name:/container/path[:sizeLimit]
 	EmptyDirs []string `property:"empty-dirs" json:"emptyDirs,omitempty"`
 	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
 	// marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for
