@@ -11,6 +11,7 @@
 - BuilderTrait nodeSelector configuration not working for jvm builds [\#5838](https://github.com/apache/camel-k/issues/5838)
 - Install on Kind with local registry lacks info about helm chart on a kind cluster with local repo [\#5651](https://github.com/apache/camel-k/issues/5651)
 - Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
+- Reproducible builds [\#4661](https://github.com/apache/camel-k/issues/4661)
 
 ## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-18)
 
