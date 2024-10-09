@@ -8746,6 +8746,8 @@ List of Services in the form [[apigroup/]version:]kind:[namespace/]name
 The Service trait exposes the integration with a Service resource so that it can be accessed by other applications
 (or integrations) in the same namespace.
 
+NOTE: this trait is automatically disabled if the Knative Service trait is enabled.
+
 It's enabled by default if the integration depends on a Camel component that can expose a HTTP endpoint.
 
 
