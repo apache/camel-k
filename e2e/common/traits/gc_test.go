@@ -25,6 +25,7 @@ package common
 import (
 	"context"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 
@@ -38,11 +39,19 @@ func TestGarbageCollectorTrait(t *testing.T) {
 		t.Run("Delete outdated resources", func(t *testing.T) {
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java").Execute()).To(Succeed())
 			g.Eventually(IntegrationPodPhase(t, ctx, ns, "platform-http-server"), TestTimeoutLong).Should(Equal(corev1.PodRunning))
-			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).ShouldNot(BeEmpty())
+			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutShort).ShouldNot(BeEmpty())
+			g.Eventually(Deployment(t, ctx, ns, "platform-http-server"), TestTimeoutShort).ShouldNot(BeNil())
+			genOneDeploymentUID := DeploymentUID(t, ctx, ns, "platform-http-server")()
 
 			// Update integration and disable service trait - existing service should be garbage collected
 			g.Expect(KamelRun(t, ctx, ns, "files/PlatformHttpServer.java", "-t", "service.enabled=false").Execute()).To(Succeed())
-			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutLong).Should(BeEmpty())
+			g.Eventually(ServicesByType(t, ctx, ns, corev1.ServiceTypeClusterIP), TestTimeoutShort).Should(BeEmpty())
+			g.Eventually(Deployment(t, ctx, ns, "platform-http-server"), TestTimeoutShort).ShouldNot(BeNil())
+
+			// IMPORTANT: The Deployment UID must not change, otherwise we won't honor rolling upgrades as we delete and create a
+			// new Deployment for every Integration change.
+			g.Consistently(DeploymentUID(t, ctx, ns, "platform-http-server"), 3*time.Second, 1*time.Minute).
+				Should(Equal(genOneDeploymentUID))
 		})
 	})
 }

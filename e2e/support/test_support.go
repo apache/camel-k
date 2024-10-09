@@ -839,16 +839,6 @@ func Service(t *testing.T, ctx context.Context, ns string, name string) func() *
 	}
 }
 
-func ServiceType(t *testing.T, ctx context.Context, ns string, name string) func() corev1.ServiceType {
-	return func() corev1.ServiceType {
-		svc := Service(t, ctx, ns, name)()
-		if svc == nil {
-			return ""
-		}
-		return svc.Spec.Type
-	}
-}
-
 // ServicesByType Find the service in the given namespace with the given type
 func ServicesByType(t *testing.T, ctx context.Context, ns string, svcType corev1.ServiceType) func() []corev1.Service {
 	return func() []corev1.Service {
@@ -1847,6 +1837,12 @@ func DeploymentCondition(t *testing.T, ctx context.Context, ns string, name stri
 		}
 
 		return condition
+	}
+}
+
+func DeploymentUID(t *testing.T, ctx context.Context, ns string, name string) func() string {
+	return func() string {
+		return string(Deployment(t, ctx, ns, name)().GetUID())
 	}
 }
 
