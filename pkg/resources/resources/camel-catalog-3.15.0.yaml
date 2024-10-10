@@ -18,24 +18,24 @@
 apiVersion: camel.apache.org/v1
 kind: CamelCatalog
 metadata:
-  name: camel-catalog-3.8.1
+  name: camel-catalog-3.15.0
   labels:
     app: camel-k
-    camel.apache.org/catalog.loader.version: 4.4.1
-    camel.apache.org/catalog.version: 4.4.1
-    camel.apache.org/runtime.version: 3.8.1
+    camel.apache.org/catalog.loader.version: 4.8.0
+    camel.apache.org/catalog.version: 4.8.0
+    camel.apache.org/runtime.version: 3.15.0
 spec:
   runtime:
-    version: 3.8.1
+    version: 3.15.0
     provider: quarkus
     applicationClass: io.quarkus.bootstrap.runner.QuarkusEntryPoint
     metadata:
-      camel-quarkus.version: 3.8.1
-      camel.version: 4.4.1
+      camel-quarkus.version: 3.15.0
+      camel.version: 4.8.0
       jib.layer-filter-extension-maven.version: 0.3.0
-      jib.maven-plugin.version: 3.4.1
+      jib.maven-plugin.version: 3.4.3
       quarkus.native-builder-image: quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-21
-      quarkus.version: 3.8.3
+      quarkus.version: 3.15.1
     dependencies:
     - groupId: org.apache.camel.k
       artifactId: camel-k-runtime
@@ -111,17 +111,14 @@ spec:
           value: "${camel.k.master.resourceName}"
         - key: quarkus.camel.cluster.kubernetes.resource-type
           value: "${camel.k.master.resourceType}"
-        buildTimeProperties:
-        - key: quarkus.camel.cluster.kubernetes.enabled
-          value: "${camel.k.master.enabled}"
       platform-http:
         dependencies:
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-platform-http
       prometheus:
         dependencies:
-        - groupId: io.micrometer
-          artifactId: micrometer-registry-prometheus
+        - groupId: io.quarkus
+          artifactId: quarkus-micrometer-registry-prometheus
         - groupId: org.apache.camel.quarkus
           artifactId: camel-quarkus-micrometer
       rest:
@@ -154,10 +151,6 @@ spec:
           value: "${camel.k.telemetry.samplerParentBased}"
         - key: quarkus.opentelemetry.tracer.sampler.ratio
           value: "${camel.k.telemetry.samplerRatio}"
-      tracing:
-        dependencies:
-        - groupId: org.apache.camel.quarkus
-          artifactId: camel-quarkus-opentracing
   artifacts:
     camel-k-cron:
       groupId: org.apache.camel.k
@@ -239,6 +232,23 @@ spec:
       - avro
       javaTypes:
       - org.apache.camel.dataformat.avro.AvroDataFormat
+    camel-quarkus-aws-bedrock:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-aws-bedrock
+      schemes:
+      - id: aws-bedrock
+        http: false
+        passive: false
+      - id: aws-bedrock-agent
+        http: false
+        passive: false
+      - id: aws-bedrock-agent-runtime
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.aws2.bedrock.agent.BedrockAgentComponent
+      - org.apache.camel.component.aws2.bedrock.agentruntime.BedrockAgentRuntimeComponent
+      - org.apache.camel.component.aws2.bedrock.runtime.BedrockComponent
     camel-quarkus-aws-secrets-manager:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-aws-secrets-manager
@@ -759,10 +769,15 @@ spec:
         passive: false
       dataformats:
       - crypto
-      - pgp
       javaTypes:
       - org.apache.camel.component.crypto.DigitalSignatureComponent
       - org.apache.camel.converter.crypto.CryptoDataFormat
+    camel-quarkus-crypto-pgp:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-crypto-pgp
+      dataformats:
+      - pgp
+      javaTypes:
       - org.apache.camel.converter.crypto.PGPDataFormat
     camel-quarkus-csimple:
       groupId: org.apache.camel.quarkus
@@ -1000,6 +1015,9 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.file.FileComponent
+    camel-quarkus-file-cluster-service:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-file-cluster-service
     camel-quarkus-file-watch:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-file-watch
@@ -1446,6 +1464,13 @@ spec:
     camel-quarkus-java-joor-dsl:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-java-joor-dsl
+    camel-quarkus-javascript:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-javascript
+      languages:
+      - js
+      javaTypes:
+      - org.apache.camel.language.js.JavaScriptLanguage
     camel-quarkus-jaxb:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-jaxb
@@ -1770,6 +1795,9 @@ spec:
       - org.apache.camel.component.openshift.build_configs.OpenshiftBuildConfigsComponent
       - org.apache.camel.component.openshift.builds.OpenshiftBuildsComponent
       - org.apache.camel.component.openshift.deploymentconfigs.OpenshiftDeploymentConfigsComponent
+    camel-quarkus-kubernetes-cluster-service:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-kubernetes-cluster-service
     camel-quarkus-kudu:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-kudu
@@ -1779,6 +1807,45 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.kudu.KuduComponent
+    camel-quarkus-langchain4j-chat:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-langchain4j-chat
+      schemes:
+      - id: langchain4j-chat
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.langchain4j.chat.LangChain4jChatComponent
+    camel-quarkus-langchain4j-embeddings:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-langchain4j-embeddings
+      schemes:
+      - id: langchain4j-embeddings
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.langchain4j.embeddings.LangChain4jEmbeddingsComponent
+    camel-quarkus-langchain4j-tokenizer:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-langchain4j-tokenizer
+    camel-quarkus-langchain4j-tools:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-langchain4j-tools
+      schemes:
+      - id: langchain4j-tools
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.langchain4j.tools.LangChain4jToolsComponent
+    camel-quarkus-langchain4j-web-search:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-langchain4j-web-search
+      schemes:
+      - id: langchain4j-web-search
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.langchain4j.web.search.LangChain4jWebSearchComponent
     camel-quarkus-language:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-language
@@ -1912,6 +1979,15 @@ spec:
     camel-quarkus-microprofile-health:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-microprofile-health
+    camel-quarkus-milvus:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-milvus
+      schemes:
+      - id: milvus
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.milvus.MilvusComponent
     camel-quarkus-minio:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-minio
@@ -2150,6 +2226,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.pgevent.PgEventComponent
+    camel-quarkus-pinecone:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-pinecone
+      schemes:
+      - id: pinecone
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.pinecone.PineconeVectorDbComponent
     camel-quarkus-platform-http:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-platform-http
@@ -2193,6 +2278,15 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.pulsar.PulsarComponent
+    camel-quarkus-qdrant:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-qdrant
+      schemes:
+      - id: qdrant
+        http: false
+        passive: false
+      javaTypes:
+      - org.apache.camel.component.qdrant.QdrantComponent
     camel-quarkus-quartz:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-quartz
@@ -2710,6 +2804,18 @@ spec:
         passive: false
       javaTypes:
       - org.apache.camel.component.vertx.websocket.VertxWebsocketComponent
+    camel-quarkus-wasm:
+      groupId: org.apache.camel.quarkus
+      artifactId: camel-quarkus-wasm
+      schemes:
+      - id: wasm
+        http: false
+        passive: false
+      languages:
+      - wasm
+      javaTypes:
+      - org.apache.camel.component.wasm.WasmComponent
+      - org.apache.camel.language.wasm.WasmLanguage
     camel-quarkus-weather:
       groupId: org.apache.camel.quarkus
       artifactId: camel-quarkus-weather
@@ -2899,6 +3005,7 @@ spec:
       languages:
       - js
       metadata:
+        deprecated: "true"
         native: "false"
     jsh:
       groupId: org.apache.camel.quarkus
@@ -2906,6 +3013,7 @@ spec:
       languages:
       - jsh
       metadata:
+        deprecated: "true"
         native: "false"
         sources-required-at-build-time: "true"
     kts:
@@ -2914,6 +3022,7 @@ spec:
       languages:
       - kts
       metadata:
+        deprecated: "true"
         native: "true"
         sources-required-at-build-time: "true"
     xml:
