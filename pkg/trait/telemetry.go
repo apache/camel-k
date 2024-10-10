@@ -123,7 +123,11 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 func (t *telemetryTrait) Apply(e *Environment) error {
 	util.StringSliceUniqueAdd(&e.Integration.Status.Capabilities, v1.CapabilityTelemetry)
 
-	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
+	// Hack for camel-k-runtime 3.15.0
+	if e.CamelCatalog.CamelCatalogSpec.Runtime.Provider == v1.RuntimeProviderQuarkus &&
+		e.CamelCatalog.CamelCatalogSpec.Runtime.Version == "3.15.0" {
+		t.setRuntimeProviderQuarkus315Properties(e)
+	} else if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
 		t.setCatalogConfiguration(e)
 	} else {
 		t.setRuntimeProviderProperties(e)
@@ -186,6 +190,46 @@ func (t *telemetryTrait) setRuntimeProviderProperties(e *Environment) {
 			e.ApplicationProperties[appPropSamplerParentBased] = boolean.TrueString
 		} else {
 			e.ApplicationProperties[appPropSamplerParentBased] = boolean.FalseString
+		}
+	}
+}
+
+// Hack for camel-k-runtime 3.15.0
+// Otel quarkus properties name breaking change not present in camel-k-runtime.
+func (t *telemetryTrait) setRuntimeProviderQuarkus315Properties(e *Environment) {
+	propEndpoint := "quarkus.otel.exporter.otlp.traces.endpoint"
+	propServiceName := "quarkus.otel.resource.attributes"
+	propSampler := "quarkus.otel.traces.sampler"
+	propSamplerRatio := "quarkus.otel.traces.sampler.ratio"
+	propSamplerParentBased := "quarkus.otel.traces.sampler.parent-based"
+
+	if t.Endpoint != "" {
+		e.ApplicationProperties["camel.k.telemetry.endpoint"] = t.Endpoint
+		e.ApplicationProperties[propEndpoint] = t.Endpoint
+	}
+	if t.ServiceName != "" {
+		e.ApplicationProperties["camel.k.telemetry.serviceName"] = fmt.Sprintf("service.name=%s", t.ServiceName)
+		e.ApplicationProperties[propServiceName] = fmt.Sprintf("service.name=%s", t.ServiceName)
+	}
+	if t.Sampler != "" {
+		e.ApplicationProperties["camel.k.telemetry.sampler"] = t.Sampler
+		e.ApplicationProperties[propSampler] = t.Sampler
+	}
+	if t.SamplerRatio != "" {
+		e.ApplicationProperties["camel.k.telemetry.samplerRatio"] = t.SamplerRatio
+		e.ApplicationProperties[propSamplerRatio] = t.SamplerRatio
+	}
+	if ptr.Deref(t.SamplerParentBased, true) {
+		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = boolean.TrueString
+		e.ApplicationProperties[propSamplerParentBased] = boolean.TrueString
+	} else {
+		e.ApplicationProperties["camel.k.telemetry.samplerParentBased"] = boolean.FalseString
+		e.ApplicationProperties[propSamplerParentBased] = boolean.FalseString
+	}
+
+	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
+		for _, cp := range e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties {
+			e.ApplicationProperties[CapabilityPropertyKey(cp.Key, e.ApplicationProperties)] = cp.Value
 		}
 	}
 }
