@@ -15,12 +15,14 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    controller-gen.kubebuilder.io/version: v0.6.1
+  creationTimestamp: null
   name: kamelets.camel.apache.org
 spec:
   group: camel.apache.org
@@ -59,19 +61,14 @@ spec:
         description: Kamelet is the Schema for the kamelets API.
         properties:
           apiVersion:
-            description: |-
-              APIVersion defines the versioned schema of this representation of an object.
-              Servers should convert recognized schemas to the latest internal value, and
-              may reject unrecognized values.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: |-
-              Kind is a string value representing the REST resource this object represents.
-              Servers may infer this from the endpoint the client submits requests to.
-              Cannot be updated.
-              In CamelCase.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -152,9 +149,10 @@ spec:
                               description:
                                 type: string
                               example:
-                                description: |-
-                                  JSON represents any valid JSON value.
-                                  These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
                                 x-kubernetes-preserve-unknown-fields: true
                               externalDocs:
                                 description: ExternalDocumentation allows referencing
@@ -180,49 +178,65 @@ spec:
                                       type: string
                                     enum:
                                       items:
-                                        description: |-
-                                          JSON represents any valid JSON value.
-                                          These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                        description: 'JSON represents any valid JSON
+                                          value. These types are supported: bool,
+                                          int64, float64, string, []interface{}, map[string]interface{}
+                                          and nil.'
                                         x-kubernetes-preserve-unknown-fields: true
                                       type: array
                                     example:
-                                      description: |-
-                                        JSON represents any valid JSON value.
-                                        These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                      description: 'JSON represents any valid JSON
+                                        value. These types are supported: bool, int64,
+                                        float64, string, []interface{}, map[string]interface{}
+                                        and nil.'
                                       x-kubernetes-preserve-unknown-fields: true
                                     exclusiveMaximum:
                                       type: boolean
                                     exclusiveMinimum:
                                       type: boolean
                                     format:
-                                      description: |-
-                                        format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                                        - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                                        - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                        - email: an email address as parsed by Golang net/mail.ParseAddress
-                                        - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                      description: "format is an OpenAPI v3 format
+                                        string. Unknown formats are ignored. The following
+                                        formats are validated: \n - bsonobjectid:
+                                        a bson object ID, i.e. a 24 characters hex
+                                        string - uri: an URI as parsed by Golang net/url.ParseRequestURI
+                                        - email: an email address as parsed by Golang
+                                        net/mail.ParseAddress - hostname: a valid
+                                        representation for an Internet host name,
+                                        as defined by RFC 1034, section 3.1 [RFC1034].
                                         - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
                                         - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
                                         - cidr: a CIDR as parsed by Golang net.ParseCIDR
                                         - mac: a MAC address as parsed by Golang net.ParseMAC
-                                        - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                                        - isbn10: an ISBN10 number string like "0321751043"
-                                        - isbn13: an ISBN13 number string like "978-0321751041"
-                                        - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                                        - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                                        - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                        - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                                        - byte: base64 encoded binary data
-                                        - password: any kind of string
-                                        - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                                        - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                                        - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                                        - uuid: an UUID that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                        - uuid3: an UUID3 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                        - uuid4: an UUID4 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                        - uuid5: an UUID5 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                        - isbn: an ISBN10 or ISBN13 number string
+                                        like \"0321751043\" or \"978-0321751041\"
+                                        - isbn10: an ISBN10 number string like \"0321751043\"
+                                        - isbn13: an ISBN13 number string like \"978-0321751041\"
+                                        - creditcard: a credit card number defined
+                                        by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                        with any non digit characters mixed in - ssn:
+                                        a U.S. social security number following the
+                                        regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$
+                                        - hexcolor: an hexadecimal color code like
+                                        \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                                        - rgbcolor: an RGB color code like rgb like
+                                        \"rgb(255,255,255)\" - byte: base64 encoded
+                                        binary data - password: any kind of string
+                                        - date: a date string like \"2006-01-02\"
+                                        as defined by full-date in RFC3339 - duration:
+                                        a duration string like \"22 ns\" as parsed
+                                        by Golang time.ParseDuration or compatible
+                                        with Scala duration format - datetime: a date
+                                        time string like \"2014-12-15T19:30:20.000Z\"
+                                        as defined by date-time in RFC3339."
                                       type: string
                                     id:
                                       type: string
@@ -303,9 +317,9 @@ spec:
                   description:
                     type: string
                   example:
-                    description: |-
-                      JSON represents any valid JSON value.
-                      These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                    description: 'JSON represents any valid JSON value. These types
+                      are supported: bool, int64, float64, string, []interface{},
+                      map[string]interface{} and nil.'
                     x-kubernetes-preserve-unknown-fields: true
                   externalDocs:
                     description: ExternalDocumentation allows referencing an external
@@ -331,49 +345,56 @@ spec:
                           type: string
                         enum:
                           items:
-                            description: |-
-                              JSON represents any valid JSON value.
-                              These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                            description: 'JSON represents any valid JSON value. These
+                              types are supported: bool, int64, float64, string, []interface{},
+                              map[string]interface{} and nil.'
                             x-kubernetes-preserve-unknown-fields: true
                           type: array
                         example:
-                          description: |-
-                            JSON represents any valid JSON value.
-                            These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                          description: 'JSON represents any valid JSON value. These
+                            types are supported: bool, int64, float64, string, []interface{},
+                            map[string]interface{} and nil.'
                           x-kubernetes-preserve-unknown-fields: true
                         exclusiveMaximum:
                           type: boolean
                         exclusiveMinimum:
                           type: boolean
                         format:
-                          description: |-
-                            format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                            - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                            - uri: an URI as parsed by Golang net/url.ParseRequestURI
+                          description: "format is an OpenAPI v3 format string. Unknown
+                            formats are ignored. The following formats are validated:
+                            \n - bsonobjectid: a bson object ID, i.e. a 24 characters
+                            hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI
                             - email: an email address as parsed by Golang net/mail.ParseAddress
-                            - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
-                            - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
-                            - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
-                            - cidr: a CIDR as parsed by Golang net.ParseCIDR
-                            - mac: a MAC address as parsed by Golang net.ParseMAC
-                            - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                            - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                            - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                            - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                            - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                            - isbn10: an ISBN10 number string like "0321751043"
-                            - isbn13: an ISBN13 number string like "978-0321751041"
-                            - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                            - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                            - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                            - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                            - byte: base64 encoded binary data
-                            - password: any kind of string
-                            - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                            - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                            - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                            - hostname: a valid representation for an Internet host
+                            name, as defined by RFC 1034, section 3.1 [RFC1034]. -
+                            ipv4: an IPv4 IP as parsed by Golang net.ParseIP - ipv6:
+                            an IPv6 IP as parsed by Golang net.ParseIP - cidr: a CIDR
+                            as parsed by Golang net.ParseCIDR - mac: a MAC address
+                            as parsed by Golang net.ParseMAC - uuid: an UUID that
+                            allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                            - uuid3: an UUID3 that allows uppercase defined by the
+                            regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                            - uuid4: an UUID4 that allows uppercase defined by the
+                            regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                            - uuid5: an UUID5 that allows uppercase defined by the
+                            regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                            - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
+                            or \"978-0321751041\" - isbn10: an ISBN10 number string
+                            like \"0321751043\" - isbn13: an ISBN13 number string
+                            like \"978-0321751041\" - creditcard: a credit card number
+                            defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                            with any non digit characters mixed in - ssn: a U.S. social
+                            security number following the regex ^\\\\d{3}[- ]?\\\\d{2}[-
+                            ]?\\\\d{4}$ - hexcolor: an hexadecimal color code like
+                            \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                            - rgbcolor: an RGB color code like rgb like \"rgb(255,255,255)\"
+                            - byte: base64 encoded binary data - password: any kind
+                            of string - date: a date string like \"2006-01-02\" as
+                            defined by full-date in RFC3339 - duration: a duration
+                            string like \"22 ns\" as parsed by Golang time.ParseDuration
+                            or compatible with Scala duration format - datetime: a
+                            date time string like \"2014-12-15T19:30:20.000Z\" as
+                            defined by date-time in RFC3339."
                           type: string
                         id:
                           type: string
@@ -461,10 +482,9 @@ spec:
                       description: True if the spec is generated from a Kamelet
                       type: boolean
                     interceptors:
-                      description: |-
-                        Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
-                        Deprecated: no longer in use.
+                      description: 'Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+                        uses to pre/post process sources Deprecated: no longer in
+                        use.'
                       items:
                         type: string
                       type: array
@@ -473,9 +493,8 @@ spec:
                         to interpret this source code
                       type: string
                     loader:
-                      description: |-
-                        Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
-                        interpret this source at runtime
+                      description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                        that will interpret this source at runtime
                       type: string
                     name:
                       description: the name of the specification
@@ -505,9 +524,8 @@ spec:
                 x-kubernetes-preserve-unknown-fields: true
               types:
                 additionalProperties:
-                  description: |-
-                    EventTypeSpec represents a specification for an event type.
-                    Deprecated: In favor of using DataTypeSpec.
+                  description: 'EventTypeSpec represents a specification for an event
+                    type. Deprecated: In favor of using DataTypeSpec.'
                   properties:
                     mediaType:
                       description: media type as expected for HTTP media types (ie,
@@ -522,9 +540,9 @@ spec:
                         description:
                           type: string
                         example:
-                          description: |-
-                            JSON represents any valid JSON value.
-                            These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                          description: 'JSON represents any valid JSON value. These
+                            types are supported: bool, int64, float64, string, []interface{},
+                            map[string]interface{} and nil.'
                           x-kubernetes-preserve-unknown-fields: true
                         externalDocs:
                           description: ExternalDocumentation allows referencing an
@@ -550,49 +568,61 @@ spec:
                                 type: string
                               enum:
                                 items:
-                                  description: |-
-                                    JSON represents any valid JSON value.
-                                    These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                  description: 'JSON represents any valid JSON value.
+                                    These types are supported: bool, int64, float64,
+                                    string, []interface{}, map[string]interface{}
+                                    and nil.'
                                   x-kubernetes-preserve-unknown-fields: true
                                 type: array
                               example:
-                                description: |-
-                                  JSON represents any valid JSON value.
-                                  These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
                                 x-kubernetes-preserve-unknown-fields: true
                               exclusiveMaximum:
                                 type: boolean
                               exclusiveMinimum:
                                 type: boolean
                               format:
-                                description: |-
-                                  format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                                  - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                                  - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                  - email: an email address as parsed by Golang net/mail.ParseAddress
-                                  - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                description: "format is an OpenAPI v3 format string.
+                                  Unknown formats are ignored. The following formats
+                                  are validated: \n - bsonobjectid: a bson object
+                                  ID, i.e. a 24 characters hex string - uri: an URI
+                                  as parsed by Golang net/url.ParseRequestURI - email:
+                                  an email address as parsed by Golang net/mail.ParseAddress
+                                  - hostname: a valid representation for an Internet
+                                  host name, as defined by RFC 1034, section 3.1 [RFC1034].
                                   - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
                                   - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
                                   - cidr: a CIDR as parsed by Golang net.ParseCIDR
                                   - mac: a MAC address as parsed by Golang net.ParseMAC
-                                  - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                  - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                  - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                  - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                  - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                                  - isbn10: an ISBN10 number string like "0321751043"
-                                  - isbn13: an ISBN13 number string like "978-0321751041"
-                                  - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                                  - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                                  - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                  - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                                  - byte: base64 encoded binary data
-                                  - password: any kind of string
-                                  - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                                  - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                                  - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                                  - uuid: an UUID that allows uppercase defined by
+                                  the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                  - uuid3: an UUID3 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                  - uuid4: an UUID4 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                  - uuid5: an UUID5 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                  - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
+                                  or \"978-0321751041\" - isbn10: an ISBN10 number
+                                  string like \"0321751043\" - isbn13: an ISBN13 number
+                                  string like \"978-0321751041\" - creditcard: a credit
+                                  card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                  with any non digit characters mixed in - ssn: a
+                                  U.S. social security number following the regex
+                                  ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor:
+                                  an hexadecimal color code like \"#FFFFFF\" following
+                                  the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ -
+                                  rgbcolor: an RGB color code like rgb like \"rgb(255,255,255)\"
+                                  - byte: base64 encoded binary data - password: any
+                                  kind of string - date: a date string like \"2006-01-02\"
+                                  as defined by full-date in RFC3339 - duration: a
+                                  duration string like \"22 ns\" as parsed by Golang
+                                  time.ParseDuration or compatible with Scala duration
+                                  format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\"
+                                  as defined by date-time in RFC3339."
                                 type: string
                               id:
                                 type: string
@@ -651,9 +681,8 @@ spec:
                           type: string
                       type: object
                   type: object
-                description: |-
-                  data specification types for the events consumed/produced by the Kamelet
-                  Deprecated: In favor of using DataTypes
+                description: 'data specification types for the events consumed/produced
+                  by the Kamelet Deprecated: In favor of using DataTypes'
                 type: object
               versions:
                 additionalProperties:
@@ -735,9 +764,10 @@ spec:
                                     description:
                                       type: string
                                     example:
-                                      description: |-
-                                        JSON represents any valid JSON value.
-                                        These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                      description: 'JSON represents any valid JSON
+                                        value. These types are supported: bool, int64,
+                                        float64, string, []interface{}, map[string]interface{}
+                                        and nil.'
                                       x-kubernetes-preserve-unknown-fields: true
                                     externalDocs:
                                       description: ExternalDocumentation allows referencing
@@ -763,49 +793,70 @@ spec:
                                             type: string
                                           enum:
                                             items:
-                                              description: |-
-                                                JSON represents any valid JSON value.
-                                                These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                              description: 'JSON represents any valid
+                                                JSON value. These types are supported:
+                                                bool, int64, float64, string, []interface{},
+                                                map[string]interface{} and nil.'
                                               x-kubernetes-preserve-unknown-fields: true
                                             type: array
                                           example:
-                                            description: |-
-                                              JSON represents any valid JSON value.
-                                              These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                            description: 'JSON represents any valid
+                                              JSON value. These types are supported:
+                                              bool, int64, float64, string, []interface{},
+                                              map[string]interface{} and nil.'
                                             x-kubernetes-preserve-unknown-fields: true
                                           exclusiveMaximum:
                                             type: boolean
                                           exclusiveMinimum:
                                             type: boolean
                                           format:
-                                            description: |-
-                                              format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                                              - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                                              - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                              - email: an email address as parsed by Golang net/mail.ParseAddress
-                                              - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
-                                              - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
-                                              - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
+                                            description: "format is an OpenAPI v3
+                                              format string. Unknown formats are ignored.
+                                              The following formats are validated:
+                                              \n - bsonobjectid: a bson object ID,
+                                              i.e. a 24 characters hex string - uri:
+                                              an URI as parsed by Golang net/url.ParseRequestURI
+                                              - email: an email address as parsed
+                                              by Golang net/mail.ParseAddress - hostname:
+                                              a valid representation for an Internet
+                                              host name, as defined by RFC 1034, section
+                                              3.1 [RFC1034]. - ipv4: an IPv4 IP as
+                                              parsed by Golang net.ParseIP - ipv6:
+                                              an IPv6 IP as parsed by Golang net.ParseIP
                                               - cidr: a CIDR as parsed by Golang net.ParseCIDR
-                                              - mac: a MAC address as parsed by Golang net.ParseMAC
-                                              - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                              - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                              - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                              - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                              - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                                              - isbn10: an ISBN10 number string like "0321751043"
-                                              - isbn13: an ISBN13 number string like "978-0321751041"
-                                              - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                                              - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                                              - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                              - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                                              - byte: base64 encoded binary data
-                                              - password: any kind of string
-                                              - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                                              - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                                              - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                                              - mac: a MAC address as parsed by Golang
+                                              net.ParseMAC - uuid: an UUID that allows
+                                              uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                              - uuid3: an UUID3 that allows uppercase
+                                              defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                              - uuid4: an UUID4 that allows uppercase
+                                              defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                              - uuid5: an UUID5 that allows uppercase
+                                              defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                              - isbn: an ISBN10 or ISBN13 number string
+                                              like \"0321751043\" or \"978-0321751041\"
+                                              - isbn10: an ISBN10 number string like
+                                              \"0321751043\" - isbn13: an ISBN13 number
+                                              string like \"978-0321751041\" - creditcard:
+                                              a credit card number defined by the
+                                              regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                              with any non digit characters mixed
+                                              in - ssn: a U.S. social security number
+                                              following the regex ^\\\\d{3}[- ]?\\\\d{2}[-
+                                              ]?\\\\d{4}$ - hexcolor: an hexadecimal
+                                              color code like \"#FFFFFF\" following
+                                              the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                                              - rgbcolor: an RGB color code like rgb
+                                              like \"rgb(255,255,255)\" - byte: base64
+                                              encoded binary data - password: any
+                                              kind of string - date: a date string
+                                              like \"2006-01-02\" as defined by full-date
+                                              in RFC3339 - duration: a duration string
+                                              like \"22 ns\" as parsed by Golang time.ParseDuration
+                                              or compatible with Scala duration format
+                                              - datetime: a date time string like
+                                              \"2014-12-15T19:30:20.000Z\" as defined
+                                              by date-time in RFC3339."
                                             type: string
                                           id:
                                             type: string
@@ -886,9 +937,9 @@ spec:
                         description:
                           type: string
                         example:
-                          description: |-
-                            JSON represents any valid JSON value.
-                            These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                          description: 'JSON represents any valid JSON value. These
+                            types are supported: bool, int64, float64, string, []interface{},
+                            map[string]interface{} and nil.'
                           x-kubernetes-preserve-unknown-fields: true
                         externalDocs:
                           description: ExternalDocumentation allows referencing an
@@ -914,49 +965,61 @@ spec:
                                 type: string
                               enum:
                                 items:
-                                  description: |-
-                                    JSON represents any valid JSON value.
-                                    These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                  description: 'JSON represents any valid JSON value.
+                                    These types are supported: bool, int64, float64,
+                                    string, []interface{}, map[string]interface{}
+                                    and nil.'
                                   x-kubernetes-preserve-unknown-fields: true
                                 type: array
                               example:
-                                description: |-
-                                  JSON represents any valid JSON value.
-                                  These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
                                 x-kubernetes-preserve-unknown-fields: true
                               exclusiveMaximum:
                                 type: boolean
                               exclusiveMinimum:
                                 type: boolean
                               format:
-                                description: |-
-                                  format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                                  - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                                  - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                  - email: an email address as parsed by Golang net/mail.ParseAddress
-                                  - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                description: "format is an OpenAPI v3 format string.
+                                  Unknown formats are ignored. The following formats
+                                  are validated: \n - bsonobjectid: a bson object
+                                  ID, i.e. a 24 characters hex string - uri: an URI
+                                  as parsed by Golang net/url.ParseRequestURI - email:
+                                  an email address as parsed by Golang net/mail.ParseAddress
+                                  - hostname: a valid representation for an Internet
+                                  host name, as defined by RFC 1034, section 3.1 [RFC1034].
                                   - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
                                   - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
                                   - cidr: a CIDR as parsed by Golang net.ParseCIDR
                                   - mac: a MAC address as parsed by Golang net.ParseMAC
-                                  - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                  - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                  - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                  - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                  - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                                  - isbn10: an ISBN10 number string like "0321751043"
-                                  - isbn13: an ISBN13 number string like "978-0321751041"
-                                  - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                                  - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                                  - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                  - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                                  - byte: base64 encoded binary data
-                                  - password: any kind of string
-                                  - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                                  - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                                  - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                                  - uuid: an UUID that allows uppercase defined by
+                                  the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                  - uuid3: an UUID3 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                  - uuid4: an UUID4 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                  - uuid5: an UUID5 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                  - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
+                                  or \"978-0321751041\" - isbn10: an ISBN10 number
+                                  string like \"0321751043\" - isbn13: an ISBN13 number
+                                  string like \"978-0321751041\" - creditcard: a credit
+                                  card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                  with any non digit characters mixed in - ssn: a
+                                  U.S. social security number following the regex
+                                  ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor:
+                                  an hexadecimal color code like \"#FFFFFF\" following
+                                  the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ -
+                                  rgbcolor: an RGB color code like rgb like \"rgb(255,255,255)\"
+                                  - byte: base64 encoded binary data - password: any
+                                  kind of string - date: a date string like \"2006-01-02\"
+                                  as defined by full-date in RFC3339 - duration: a
+                                  duration string like \"22 ns\" as parsed by Golang
+                                  time.ParseDuration or compatible with Scala duration
+                                  format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\"
+                                  as defined by date-time in RFC3339."
                                 type: string
                               id:
                                 type: string
@@ -1045,10 +1108,9 @@ spec:
                             description: True if the spec is generated from a Kamelet
                             type: boolean
                           interceptors:
-                            description: |-
-                              Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                              uses to pre/post process sources
-                              Deprecated: no longer in use.
+                            description: 'Interceptors are optional identifiers the
+                              org.apache.camel.k.RoutesLoader uses to pre/post process
+                              sources Deprecated: no longer in use.'
                             items:
                               type: string
                             type: array
@@ -1057,9 +1119,8 @@ spec:
                               used to interpret this source code
                             type: string
                           loader:
-                            description: |-
-                              Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
-                              interpret this source at runtime
+                            description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                              that will interpret this source at runtime
                             type: string
                           name:
                             description: the name of the specification
@@ -1089,9 +1150,8 @@ spec:
                       x-kubernetes-preserve-unknown-fields: true
                     types:
                       additionalProperties:
-                        description: |-
-                          EventTypeSpec represents a specification for an event type.
-                          Deprecated: In favor of using DataTypeSpec.
+                        description: 'EventTypeSpec represents a specification for
+                          an event type. Deprecated: In favor of using DataTypeSpec.'
                         properties:
                           mediaType:
                             description: media type as expected for HTTP media types
@@ -1106,9 +1166,10 @@ spec:
                               description:
                                 type: string
                               example:
-                                description: |-
-                                  JSON represents any valid JSON value.
-                                  These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
                                 x-kubernetes-preserve-unknown-fields: true
                               externalDocs:
                                 description: ExternalDocumentation allows referencing
@@ -1134,49 +1195,65 @@ spec:
                                       type: string
                                     enum:
                                       items:
-                                        description: |-
-                                          JSON represents any valid JSON value.
-                                          These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                        description: 'JSON represents any valid JSON
+                                          value. These types are supported: bool,
+                                          int64, float64, string, []interface{}, map[string]interface{}
+                                          and nil.'
                                         x-kubernetes-preserve-unknown-fields: true
                                       type: array
                                     example:
-                                      description: |-
-                                        JSON represents any valid JSON value.
-                                        These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                      description: 'JSON represents any valid JSON
+                                        value. These types are supported: bool, int64,
+                                        float64, string, []interface{}, map[string]interface{}
+                                        and nil.'
                                       x-kubernetes-preserve-unknown-fields: true
                                     exclusiveMaximum:
                                       type: boolean
                                     exclusiveMinimum:
                                       type: boolean
                                     format:
-                                      description: |-
-                                        format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                                        - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                                        - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                        - email: an email address as parsed by Golang net/mail.ParseAddress
-                                        - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                      description: "format is an OpenAPI v3 format
+                                        string. Unknown formats are ignored. The following
+                                        formats are validated: \n - bsonobjectid:
+                                        a bson object ID, i.e. a 24 characters hex
+                                        string - uri: an URI as parsed by Golang net/url.ParseRequestURI
+                                        - email: an email address as parsed by Golang
+                                        net/mail.ParseAddress - hostname: a valid
+                                        representation for an Internet host name,
+                                        as defined by RFC 1034, section 3.1 [RFC1034].
                                         - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
                                         - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
                                         - cidr: a CIDR as parsed by Golang net.ParseCIDR
                                         - mac: a MAC address as parsed by Golang net.ParseMAC
-                                        - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                                        - isbn10: an ISBN10 number string like "0321751043"
-                                        - isbn13: an ISBN13 number string like "978-0321751041"
-                                        - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                                        - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                                        - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                        - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                                        - byte: base64 encoded binary data
-                                        - password: any kind of string
-                                        - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                                        - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                                        - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                                        - uuid: an UUID that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                        - uuid3: an UUID3 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                        - uuid4: an UUID4 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                        - uuid5: an UUID5 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                        - isbn: an ISBN10 or ISBN13 number string
+                                        like \"0321751043\" or \"978-0321751041\"
+                                        - isbn10: an ISBN10 number string like \"0321751043\"
+                                        - isbn13: an ISBN13 number string like \"978-0321751041\"
+                                        - creditcard: a credit card number defined
+                                        by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                        with any non digit characters mixed in - ssn:
+                                        a U.S. social security number following the
+                                        regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$
+                                        - hexcolor: an hexadecimal color code like
+                                        \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                                        - rgbcolor: an RGB color code like rgb like
+                                        \"rgb(255,255,255)\" - byte: base64 encoded
+                                        binary data - password: any kind of string
+                                        - date: a date string like \"2006-01-02\"
+                                        as defined by full-date in RFC3339 - duration:
+                                        a duration string like \"22 ns\" as parsed
+                                        by Golang time.ParseDuration or compatible
+                                        with Scala duration format - datetime: a date
+                                        time string like \"2014-12-15T19:30:20.000Z\"
+                                        as defined by date-time in RFC3339."
                                       type: string
                                     id:
                                       type: string
@@ -1239,23 +1316,22 @@ spec:
                                 type: string
                             type: object
                         type: object
-                      description: |-
-                        data specification types for the events consumed/produced by the Kamelet
-                        Deprecated: In favor of using DataTypes
+                      description: 'data specification types for the events consumed/produced
+                        by the Kamelet Deprecated: In favor of using DataTypes'
                       type: object
                   type: object
-                description: |-
-                  the optional versions available for this Kamelet. This field may not be taken in account by Camel core and is meant to support
-                  any user defined versioning model on cluster only. If the user wants to use any given version, she must materialize a file with the given version spec
-                  as the `main` Kamelet spec on the runtime.
+                description: the optional versions available for this Kamelet. This
+                  field may not be taken in account by Camel core and is meant to
+                  support any user defined versioning model on cluster only. If the
+                  user wants to use any given version, she must materialize a file
+                  with the given version spec as the `main` Kamelet spec on the runtime.
                 type: object
             type: object
           status:
             default:
               phase: Ready
-            description: |-
-              the actual status of the resource
-              Deprecated no longer in use
+            description: the actual status of the resource Deprecated no longer in
+              use
             properties:
               conditions:
                 description: Conditions --
@@ -1331,19 +1407,14 @@ spec:
         description: Kamelet is the Schema for the kamelets API.
         properties:
           apiVersion:
-            description: |-
-              APIVersion defines the versioned schema of this representation of an object.
-              Servers should convert recognized schemas to the latest internal value, and
-              may reject unrecognized values.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: |-
-              Kind is a string value representing the REST resource this object represents.
-              Servers may infer this from the endpoint the client submits requests to.
-              Cannot be updated.
-              In CamelCase.
-              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -1424,9 +1495,10 @@ spec:
                               description:
                                 type: string
                               example:
-                                description: |-
-                                  JSON represents any valid JSON value.
-                                  These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
                                 x-kubernetes-preserve-unknown-fields: true
                               externalDocs:
                                 description: ExternalDocumentation allows referencing
@@ -1452,49 +1524,65 @@ spec:
                                       type: string
                                     enum:
                                       items:
-                                        description: |-
-                                          JSON represents any valid JSON value.
-                                          These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                        description: 'JSON represents any valid JSON
+                                          value. These types are supported: bool,
+                                          int64, float64, string, []interface{}, map[string]interface{}
+                                          and nil.'
                                         x-kubernetes-preserve-unknown-fields: true
                                       type: array
                                     example:
-                                      description: |-
-                                        JSON represents any valid JSON value.
-                                        These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                      description: 'JSON represents any valid JSON
+                                        value. These types are supported: bool, int64,
+                                        float64, string, []interface{}, map[string]interface{}
+                                        and nil.'
                                       x-kubernetes-preserve-unknown-fields: true
                                     exclusiveMaximum:
                                       type: boolean
                                     exclusiveMinimum:
                                       type: boolean
                                     format:
-                                      description: |-
-                                        format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                                        - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                                        - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                        - email: an email address as parsed by Golang net/mail.ParseAddress
-                                        - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                      description: "format is an OpenAPI v3 format
+                                        string. Unknown formats are ignored. The following
+                                        formats are validated: \n - bsonobjectid:
+                                        a bson object ID, i.e. a 24 characters hex
+                                        string - uri: an URI as parsed by Golang net/url.ParseRequestURI
+                                        - email: an email address as parsed by Golang
+                                        net/mail.ParseAddress - hostname: a valid
+                                        representation for an Internet host name,
+                                        as defined by RFC 1034, section 3.1 [RFC1034].
                                         - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
                                         - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
                                         - cidr: a CIDR as parsed by Golang net.ParseCIDR
                                         - mac: a MAC address as parsed by Golang net.ParseMAC
-                                        - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                        - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                        - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                                        - isbn10: an ISBN10 number string like "0321751043"
-                                        - isbn13: an ISBN13 number string like "978-0321751041"
-                                        - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                                        - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                                        - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                        - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                                        - byte: base64 encoded binary data
-                                        - password: any kind of string
-                                        - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                                        - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                                        - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                                        - uuid: an UUID that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                        - uuid3: an UUID3 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                        - uuid4: an UUID4 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                        - uuid5: an UUID5 that allows uppercase defined
+                                        by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                        - isbn: an ISBN10 or ISBN13 number string
+                                        like \"0321751043\" or \"978-0321751041\"
+                                        - isbn10: an ISBN10 number string like \"0321751043\"
+                                        - isbn13: an ISBN13 number string like \"978-0321751041\"
+                                        - creditcard: a credit card number defined
+                                        by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                        with any non digit characters mixed in - ssn:
+                                        a U.S. social security number following the
+                                        regex ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$
+                                        - hexcolor: an hexadecimal color code like
+                                        \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                                        - rgbcolor: an RGB color code like rgb like
+                                        \"rgb(255,255,255)\" - byte: base64 encoded
+                                        binary data - password: any kind of string
+                                        - date: a date string like \"2006-01-02\"
+                                        as defined by full-date in RFC3339 - duration:
+                                        a duration string like \"22 ns\" as parsed
+                                        by Golang time.ParseDuration or compatible
+                                        with Scala duration format - datetime: a date
+                                        time string like \"2014-12-15T19:30:20.000Z\"
+                                        as defined by date-time in RFC3339."
                                       type: string
                                     id:
                                       type: string
@@ -1575,9 +1663,9 @@ spec:
                   description:
                     type: string
                   example:
-                    description: |-
-                      JSON represents any valid JSON value.
-                      These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                    description: 'JSON represents any valid JSON value. These types
+                      are supported: bool, int64, float64, string, []interface{},
+                      map[string]interface{} and nil.'
                     x-kubernetes-preserve-unknown-fields: true
                   externalDocs:
                     description: ExternalDocumentation allows referencing an external
@@ -1603,49 +1691,56 @@ spec:
                           type: string
                         enum:
                           items:
-                            description: |-
-                              JSON represents any valid JSON value.
-                              These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                            description: 'JSON represents any valid JSON value. These
+                              types are supported: bool, int64, float64, string, []interface{},
+                              map[string]interface{} and nil.'
                             x-kubernetes-preserve-unknown-fields: true
                           type: array
                         example:
-                          description: |-
-                            JSON represents any valid JSON value.
-                            These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                          description: 'JSON represents any valid JSON value. These
+                            types are supported: bool, int64, float64, string, []interface{},
+                            map[string]interface{} and nil.'
                           x-kubernetes-preserve-unknown-fields: true
                         exclusiveMaximum:
                           type: boolean
                         exclusiveMinimum:
                           type: boolean
                         format:
-                          description: |-
-                            format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                            - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                            - uri: an URI as parsed by Golang net/url.ParseRequestURI
+                          description: "format is an OpenAPI v3 format string. Unknown
+                            formats are ignored. The following formats are validated:
+                            \n - bsonobjectid: a bson object ID, i.e. a 24 characters
+                            hex string - uri: an URI as parsed by Golang net/url.ParseRequestURI
                             - email: an email address as parsed by Golang net/mail.ParseAddress
-                            - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
-                            - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
-                            - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
-                            - cidr: a CIDR as parsed by Golang net.ParseCIDR
-                            - mac: a MAC address as parsed by Golang net.ParseMAC
-                            - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                            - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                            - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                            - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                            - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                            - isbn10: an ISBN10 number string like "0321751043"
-                            - isbn13: an ISBN13 number string like "978-0321751041"
-                            - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                            - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                            - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                            - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                            - byte: base64 encoded binary data
-                            - password: any kind of string
-                            - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                            - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                            - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                            - hostname: a valid representation for an Internet host
+                            name, as defined by RFC 1034, section 3.1 [RFC1034]. -
+                            ipv4: an IPv4 IP as parsed by Golang net.ParseIP - ipv6:
+                            an IPv6 IP as parsed by Golang net.ParseIP - cidr: a CIDR
+                            as parsed by Golang net.ParseCIDR - mac: a MAC address
+                            as parsed by Golang net.ParseMAC - uuid: an UUID that
+                            allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                            - uuid3: an UUID3 that allows uppercase defined by the
+                            regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                            - uuid4: an UUID4 that allows uppercase defined by the
+                            regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                            - uuid5: an UUID5 that allows uppercase defined by the
+                            regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                            - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
+                            or \"978-0321751041\" - isbn10: an ISBN10 number string
+                            like \"0321751043\" - isbn13: an ISBN13 number string
+                            like \"978-0321751041\" - creditcard: a credit card number
+                            defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                            with any non digit characters mixed in - ssn: a U.S. social
+                            security number following the regex ^\\\\d{3}[- ]?\\\\d{2}[-
+                            ]?\\\\d{4}$ - hexcolor: an hexadecimal color code like
+                            \"#FFFFFF\" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
+                            - rgbcolor: an RGB color code like rgb like \"rgb(255,255,255)\"
+                            - byte: base64 encoded binary data - password: any kind
+                            of string - date: a date string like \"2006-01-02\" as
+                            defined by full-date in RFC3339 - duration: a duration
+                            string like \"22 ns\" as parsed by Golang time.ParseDuration
+                            or compatible with Scala duration format - datetime: a
+                            date time string like \"2014-12-15T19:30:20.000Z\" as
+                            defined by date-time in RFC3339."
                           type: string
                         id:
                           type: string
@@ -1733,10 +1828,9 @@ spec:
                       description: True if the spec is generated from a Kamelet
                       type: boolean
                     interceptors:
-                      description: |-
-                        Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
-                        uses to pre/post process sources
-                        Deprecated: no longer in use.
+                      description: 'Interceptors are optional identifiers the org.apache.camel.k.RoutesLoader
+                        uses to pre/post process sources Deprecated: no longer in
+                        use.'
                       items:
                         type: string
                       type: array
@@ -1745,9 +1839,8 @@ spec:
                         to interpret this source code
                       type: string
                     loader:
-                      description: |-
-                        Loader is an optional id of the org.apache.camel.k.RoutesLoader that will
-                        interpret this source at runtime
+                      description: Loader is an optional id of the org.apache.camel.k.RoutesLoader
+                        that will interpret this source at runtime
                       type: string
                     name:
                       description: the name of the specification
@@ -1777,9 +1870,8 @@ spec:
                 x-kubernetes-preserve-unknown-fields: true
               types:
                 additionalProperties:
-                  description: |-
-                    EventTypeSpec represents a specification for an event type.
-                    Deprecated: In favor of using DataTypeSpec.
+                  description: 'EventTypeSpec represents a specification for an event
+                    type. Deprecated: In favor of using DataTypeSpec.'
                   properties:
                     mediaType:
                       description: media type as expected for HTTP media types (ie,
@@ -1794,9 +1886,9 @@ spec:
                         description:
                           type: string
                         example:
-                          description: |-
-                            JSON represents any valid JSON value.
-                            These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                          description: 'JSON represents any valid JSON value. These
+                            types are supported: bool, int64, float64, string, []interface{},
+                            map[string]interface{} and nil.'
                           x-kubernetes-preserve-unknown-fields: true
                         externalDocs:
                           description: ExternalDocumentation allows referencing an
@@ -1822,49 +1914,61 @@ spec:
                                 type: string
                               enum:
                                 items:
-                                  description: |-
-                                    JSON represents any valid JSON value.
-                                    These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                  description: 'JSON represents any valid JSON value.
+                                    These types are supported: bool, int64, float64,
+                                    string, []interface{}, map[string]interface{}
+                                    and nil.'
                                   x-kubernetes-preserve-unknown-fields: true
                                 type: array
                               example:
-                                description: |-
-                                  JSON represents any valid JSON value.
-                                  These types are supported: bool, int64, float64, string, []interface{}, map[string]interface{} and nil.
+                                description: 'JSON represents any valid JSON value.
+                                  These types are supported: bool, int64, float64,
+                                  string, []interface{}, map[string]interface{} and
+                                  nil.'
                                 x-kubernetes-preserve-unknown-fields: true
                               exclusiveMaximum:
                                 type: boolean
                               exclusiveMinimum:
                                 type: boolean
                               format:
-                                description: |-
-                                  format is an OpenAPI v3 format string. Unknown formats are ignored. The following formats are validated:
-
-
-                                  - bsonobjectid: a bson object ID, i.e. a 24 characters hex string
-                                  - uri: an URI as parsed by Golang net/url.ParseRequestURI
-                                  - email: an email address as parsed by Golang net/mail.ParseAddress
-                                  - hostname: a valid representation for an Internet host name, as defined by RFC 1034, section 3.1 [RFC1034].
+                                description: "format is an OpenAPI v3 format string.
+                                  Unknown formats are ignored. The following formats
+                                  are validated: \n - bsonobjectid: a bson object
+                                  ID, i.e. a 24 characters hex string - uri: an URI
+                                  as parsed by Golang net/url.ParseRequestURI - email:
+                                  an email address as parsed by Golang net/mail.ParseAddress
+                                  - hostname: a valid representation for an Internet
+                                  host name, as defined by RFC 1034, section 3.1 [RFC1034].
                                   - ipv4: an IPv4 IP as parsed by Golang net.ParseIP
                                   - ipv6: an IPv6 IP as parsed by Golang net.ParseIP
                                   - cidr: a CIDR as parsed by Golang net.ParseCIDR
                                   - mac: a MAC address as parsed by Golang net.ParseMAC
-                                  - uuid: an UUID that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                  - uuid3: an UUID3 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
-                                  - uuid4: an UUID4 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                  - uuid5: an UUID5 that allows uppercase defined by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
-                                  - isbn: an ISBN10 or ISBN13 number string like "0321751043" or "978-0321751041"
-                                  - isbn10: an ISBN10 number string like "0321751043"
-                                  - isbn13: an ISBN13 number string like "978-0321751041"
-                                  - creditcard: a credit card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\d{3})\\d{11})$ with any non digit characters mixed in
-                                  - ssn: a U.S. social security number following the regex ^\\d{3}[- ]?\\d{2}[- ]?\\d{4}$
-                                  - hexcolor: an hexadecimal color code like "#FFFFFF" following the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$
-                                  - rgbcolor: an RGB color code like rgb like "rgb(255,255,255)"
-                                  - byte: base64 encoded binary data
-                                  - password: any kind of string
-                                  - date: a date string like "2006-01-02" as defined by full-date in RFC3339
-                                  - duration: a duration string like "22 ns" as parsed by Golang time.ParseDuration or compatible with Scala duration format
-                                  - datetime: a date time string like "2014-12-15T19:30:20.000Z" as defined by date-time in RFC3339.
+                                  - uuid: an UUID that allows uppercase defined by
+                                  the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                  - uuid3: an UUID3 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?3[0-9a-f]{3}-?[0-9a-f]{4}-?[0-9a-f]{12}$
+                                  - uuid4: an UUID4 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?4[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                  - uuid5: an UUID5 that allows uppercase defined
+                                  by the regex (?i)^[0-9a-f]{8}-?[0-9a-f]{4}-?5[0-9a-f]{3}-?[89ab][0-9a-f]{3}-?[0-9a-f]{12}$
+                                  - isbn: an ISBN10 or ISBN13 number string like \"0321751043\"
+                                  or \"978-0321751041\" - isbn10: an ISBN10 number
+                                  string like \"0321751043\" - isbn13: an ISBN13 number
+                                  string like \"978-0321751041\" - creditcard: a credit
+                                  card number defined by the regex ^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\\\\d{3})\\\\d{11})$
+                                  with any non digit characters mixed in - ssn: a
+                                  U.S. social security number following the regex
+                                  ^\\\\d{3}[- ]?\\\\d{2}[- ]?\\\\d{4}$ - hexcolor:
+                                  an hexadecimal color code like \"#FFFFFF\" following
+                                  the regex ^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$ -
+                                  rgbcolor: an RGB color code like rgb like \"rgb(255,255,255)\"
+                                  - byte: base64 encoded binary data - password: any
+                                  kind of string - date: a date string like \"2006-01-02\"
+                                  as defined by full-date in RFC3339 - duration: a
+                                  duration string like \"22 ns\" as parsed by Golang
+                                  time.ParseDuration or compatible with Scala duration
+                                  format - datetime: a date time string like \"2014-12-15T19:30:20.000Z\"
+                                  as defined by date-time in RFC3339."
                                 type: string
                               id:
                                 type: string
@@ -1923,9 +2027,8 @@ spec:
                           type: string
                       type: object
                   type: object
-                description: |-
-                  data specification types for the events consumed/produced by the Kamelet
-                  Deprecated: In favor of using DataTypes
+                description: 'data specification types for the events consumed/produced
+                  by the Kamelet Deprecated: In favor of using DataTypes'
                 type: object
             type: object
           status:
@@ -1992,3 +2095,9 @@ spec:
     storage: false
     subresources:
       status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
