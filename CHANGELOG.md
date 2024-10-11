@@ -6,6 +6,7 @@
 
 **Closed issues:**
 
+- Camel-K creating new KnativeService instead of updating the existing one [\#5874](https://github.com/apache/camel-k/issues/5874)
 - Deprecate IntegrationProfile [\#5869](https://github.com/apache/camel-k/issues/5869)
 - Service Binding deprecation and removal [\#5868](https://github.com/apache/camel-k/issues/5868)
 - Flaky Knative TestGarbageCollectResources  [\#5844](https://github.com/apache/camel-k/issues/5844)
