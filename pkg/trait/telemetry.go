@@ -127,7 +127,9 @@ func (t *telemetryTrait) Apply(e *Environment) error {
 	if e.CamelCatalog.CamelCatalogSpec.Runtime.Provider == v1.RuntimeProviderQuarkus &&
 		e.CamelCatalog.CamelCatalogSpec.Runtime.Version == "3.15.0" {
 		t.setRuntimeProviderQuarkus315Properties(e)
-	} else if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
+		return nil
+	}
+	if e.CamelCatalog.Runtime.Capabilities["telemetry"].RuntimeProperties != nil {
 		t.setCatalogConfiguration(e)
 	} else {
 		t.setRuntimeProviderProperties(e)

@@ -62,8 +62,8 @@ func TestTelemetryTrait(t *testing.T) {
 		g.Expect(pod).NotTo(BeNil())
 
 		// Ensured logs in opentelemetry collector pod are present
-		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.target: Str(/customers/%s)", name)))
-		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.url: Str(http://%s/customers/%s)", serviceName, name)))
+		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("url.path: Str(/customers/%s)", name)))
+		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring("http.route: Str(/customers/:name)"))
 	})
 }
 
@@ -94,7 +94,7 @@ func TestTelemetryAddon(t *testing.T) {
 		g.Expect(pod).NotTo(BeNil())
 
 		// Ensured logs in opentelemetry collector pod are present
-		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.target: Str(/customers/%s)", name)))
-		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("http.url: Str(http://%s/customers/%s)", serviceName, name)))
+		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring(fmt.Sprintf("url.path: Str(/customers/%s)", name)))
+		g.Eventually(TailedLogs(t, ctx, pod.Namespace, pod.Name, 100), TestTimeoutLong).Should(ContainSubstring("http.route: Str(/customers/:name)"))
 	})
 }
