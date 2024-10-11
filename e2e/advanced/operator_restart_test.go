@@ -66,7 +66,12 @@ func TestOperatorRestart(t *testing.T) {
 		})
 
 		t.Run("Operator reinstalled", func(t *testing.T) {
-			InstallOperator(t, ctx, g, ns)
+			// Install Camel K without Kamelets. There may be loading error that could affect the validity of this test.
+			InstallOperatorWithConf(t, ctx, g, ns, "", false,
+				map[string]string{
+					"KAMEL_INSTALL_DEFAULT_KAMELETS": "false",
+				},
+			)
 			g.Eventually(OperatorPod(t, ctx, ns)).Should(Not(BeNil()))
 			g.Eventually(PlatformPhase(t, ctx, ns), TestTimeoutShort).Should(Equal(v1.IntegrationPlatformPhaseReady))
 			g.Consistently(OperatorLogs(t, ctx, ns), 1*time.Minute, 3*time.Second).Should(Not(ContainSubstring("error")))
