@@ -12,6 +12,7 @@
 - Flaky Knative TestGarbageCollectResources  [\#5844](https://github.com/apache/camel-k/issues/5844)
 - BuilderTrait nodeSelector configuration not working for jvm builds [\#5838](https://github.com/apache/camel-k/issues/5838)
 - Install on Kind with local registry lacks info about helm chart on a kind cluster with local repo [\#5651](https://github.com/apache/camel-k/issues/5651)
+- Rethink and onboard Camel K Tekton task version 2 [\#5379](https://github.com/apache/camel-k/issues/5379)
 - Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
 - Reproducible builds [\#4661](https://github.com/apache/camel-k/issues/4661)
 
