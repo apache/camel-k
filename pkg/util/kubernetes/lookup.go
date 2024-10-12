@@ -109,7 +109,31 @@ func LookupPersistentVolumeClaim(ctx context.Context, c client.Client, ns string
 	return &pvc, nil
 }
 
-// LookupDefaultStorageClass will look for the default k8s StorageClass in a given namespace.
+// LookupStorageClass will look for any k8s StorageClass with a given name in a given namespace.
+func LookupStorageClass(ctx context.Context, c client.Client, ns string, name string) (*storagev1.StorageClass, error) {
+	sc := storagev1.StorageClass{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "StorageClass",
+			APIVersion: storagev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns,
+			Name:      name,
+		},
+	}
+	key := ctrl.ObjectKey{
+		Namespace: ns,
+		Name:      name,
+	}
+	if err := c.Get(ctx, key, &sc); err != nil && k8serrors.IsNotFound(err) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	return &sc, nil
+}
+
+// LookupDefaultStorageClass will look for the default k8s StorageClass in the cluster.
 func LookupDefaultStorageClass(ctx context.Context, c client.Client) (*storagev1.StorageClass, error) {
 	storageClasses, err := c.StorageV1().StorageClasses().List(ctx, metav1.ListOptions{})
 	if err != nil {

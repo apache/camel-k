@@ -7630,8 +7630,10 @@ spec:
                               2.5.'
                             type: boolean
                           volumes:
-                            description: 'A list of Persistent Volume Claims to be
-                              mounted. Syntax: [pvcname:/container/path]'
+                            description: |-
+                              A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]. If the PVC is not found, the Integration fails.
+                              You can use the syntax [pvcname:/container/path:size:accessMode<:storageClass>] to create a dynamic PVC based on the Storage Class provided
+                              or the default cluster Storage Class. However, if the PVC exists, the operator would mount it.
                             items:
                               type: string
                             type: array
