@@ -25,6 +25,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -113,7 +115,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 		// Volumes declared in the Integration resources
 		e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
 		// Volumes declared in the trait config/resource options
-		err := t.configureVolumesAndMounts(volumes, &container.VolumeMounts)
+		err := t.configureVolumesAndMounts(e, volumes, &container.VolumeMounts)
 		if err != nil {
 			return err
 		}
@@ -122,7 +124,7 @@ func (t *mountTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *mountTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
+func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
 	for _, c := range t.Configs {
 		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
 			t.mountResource(vols, mnts, conf)
@@ -138,11 +140,12 @@ func (t *mountTrait) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]co
 		}
 	}
 	for _, v := range t.Volumes {
-		if vol, parseErr := utilResource.ParseVolume(v); parseErr == nil {
-			t.mountResource(vols, mnts, vol)
-		} else {
+		volume, volumeMount, parseErr := ParseAndCreateVolume(e, v)
+		if parseErr != nil {
 			return parseErr
 		}
+		*vols = append(*vols, *volume)
+		*mnts = append(*mnts, *volumeMount)
 	}
 	for _, v := range t.EmptyDirs {
 		if vol, parseErr := utilResource.ParseEmptyDirVolume(v); parseErr == nil {
@@ -185,4 +188,86 @@ func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 			t.Configs = append(t.Configs, "secret:"+secret.Name)
 		}
 	})
+}
+
+// ParseAndCreateVolume will parse a volume configuration. If the volume does not exist it tries to create one based on the storage
+// class configuration provided or default.
+// item is expected to be as: name:path/to/mount<:size:accessMode<:storageClassName>>.
+func ParseAndCreateVolume(e *Environment, item string) (*corev1.Volume, *corev1.VolumeMount, error) {
+	volumeParts := strings.Split(item, ":")
+	volumeName := volumeParts[0]
+	pvc, err := kubernetes.LookupPersistentVolumeClaim(e.Ctx, e.Client, e.Integration.Namespace, volumeName)
+	if err != nil {
+		return nil, nil, err
+	}
+	var volume *corev1.Volume
+	if pvc == nil {
+		if len(volumeParts) == 2 {
+			return nil, nil, fmt.Errorf("volume %s does not exist. "+
+				"Make sure to provide one or configure a dynamic PVC as trait volume configuration pvcName:path/to/mount:size:accessMode<:storageClassName>",
+				volumeName,
+			)
+		}
+		if err = createPVC(e, volumeParts); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	volume = &corev1.Volume{
+		Name: kubernetes.SanitizeLabel(volumeName),
+		VolumeSource: corev1.VolumeSource{
+			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+				ClaimName: volumeName,
+			},
+		},
+	}
+
+	volumeMount := getMount(volumeName, volumeParts[1], "", false)
+	return volume, volumeMount, nil
+}
+
+// createPVC is in charge to create a PersistentVolumeClaim based on the configuration provided. Or it fail within the intent.
+// volumeParts is expected to be as: name, path/to/mount, size, accessMode, <storageClassName>.
+func createPVC(e *Environment, volumeParts []string) error {
+	if len(volumeParts) < 4 || len(volumeParts) > 5 {
+		return fmt.Errorf(
+			"volume mount syntax error, must be name:path/to/mount:size:accessMode<:storageClassName> was %s",
+			strings.Join(volumeParts, ":"),
+		)
+	}
+	volumeName := volumeParts[0]
+	size := volumeParts[2]
+	accessMode := volumeParts[3]
+	sizeQty, err := resource.ParseQuantity(size)
+	if err != nil {
+		return fmt.Errorf("could not parse size %s, %s", size, err.Error())
+	}
+
+	var sc *storagev1.StorageClass
+	//nolint: nestif
+	if len(volumeParts) == 5 {
+		scName := volumeParts[4]
+		sc, err = kubernetes.LookupStorageClass(e.Ctx, e.Client, e.Integration.Namespace, scName)
+		if err != nil {
+			return fmt.Errorf("error looking up for StorageClass %s, %w", scName, err)
+		}
+		if sc == nil {
+			return fmt.Errorf("could not find any %s StorageClass", scName)
+		}
+	} else {
+		sc, err = kubernetes.LookupDefaultStorageClass(e.Ctx, e.Client)
+		if err != nil {
+			return fmt.Errorf("error looking up for default StorageClass, %w", err)
+		}
+		if sc == nil {
+			return fmt.Errorf("could not find any default StorageClass")
+		}
+	}
+
+	pvc := kubernetes.NewPersistentVolumeClaim(e.Integration.Namespace, volumeName, sc.Name, sizeQty, corev1.PersistentVolumeAccessMode(accessMode))
+	if err := e.Client.Create(e.Ctx, pvc); err != nil {
+		return err
+	}
+
+	return nil
 }

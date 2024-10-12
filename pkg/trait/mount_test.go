@@ -26,6 +26,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
@@ -63,7 +64,6 @@ func TestMountVolumesEmpty(t *testing.T) {
 
 func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
-
 	environment := getNominalEnv(t, traitCatalog)
 	environment.Platform.ResyncStatusFullConfig()
 
@@ -180,7 +180,17 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 
 func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 	t.Helper()
-	fakeClient, _ := test.NewFakeClient()
+	pvc := corev1.PersistentVolumeClaim{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PersistentVolumeClaim",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+			Name:      "my-pvc",
+		},
+	}
+	fakeClient, _ := test.NewFakeClient(&pvc)
 	catalog, _ := camel.DefaultCatalog()
 	compressedRoute, _ := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
 
@@ -239,4 +249,95 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
+}
+
+func TestMountVolumesExist(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	vol, vm, err := ParseAndCreateVolume(e, "my-pvc:/tmp/my-pvc")
+	assert.NoError(t, err)
+	assert.Equal(t, "my-pvc", vol.PersistentVolumeClaim.ClaimName)
+	assert.Equal(t, "my-pvc", vm.Name)
+	assert.Equal(t, "/tmp/my-pvc", vm.MountPath)
+}
+
+func TestMountVolumesNotExistAndFail(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	_, _, err := ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc")
+	assert.Error(t, err)
+	assert.Equal(t,
+		"volume my-pvc-2 does not exist. Make sure to provide one or configure a dynamic PVC as trait volume configuration "+
+			"pvcName:path/to/mount:size:accessMode<:storageClassName>", err.Error())
+	// Wrong configuration
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:fail")
+	assert.Error(t, err)
+	assert.Equal(t, "volume mount syntax error, must be name:path/to/mount:size:accessMode<:storageClassName> was my-pvc-2:/tmp/my-pvc:fail", err.Error())
+	// Wrong size parsing
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:10MM:ReadOnly")
+	assert.Error(t, err)
+	assert.Equal(t, "could not parse size 10MM, unable to parse quantity's suffix", err.Error())
+	// No default storage class
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:10Mi:ReadOnly")
+	assert.Error(t, err)
+	assert.Equal(t, "could not find any default StorageClass", err.Error())
+	// No given storage class
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:10Mi:ReadOnly:my-storage-class")
+	assert.Error(t, err)
+	assert.Equal(t, "could not find any my-storage-class StorageClass", err.Error())
+}
+
+func TestMountVolumesCreateDefaultStorageClass(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	sc := storagev1.StorageClass{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "StorageClass",
+			APIVersion: storagev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+			Name:      "default-sc",
+			Annotations: map[string]string{
+				"storageclass.kubernetes.io/is-default-class": "true",
+			},
+		},
+	}
+	fakeClient, _ := test.NewFakeClient(&sc)
+	e.Client = fakeClient
+	// Default storage class
+	vol, vm, err := ParseAndCreateVolume(e, "my-pvc:/tmp/my-pvc:10Mi:ReadOnly")
+	assert.NoError(t, err)
+	assert.Equal(t, "my-pvc", vol.PersistentVolumeClaim.ClaimName)
+	assert.Equal(t, "my-pvc", vm.Name)
+	assert.Equal(t, "/tmp/my-pvc", vm.MountPath)
+	pvc, err := kubernetes.LookupPersistentVolumeClaim(e.Ctx, e.Client, e.Integration.Namespace, "my-pvc")
+	assert.NoError(t, err)
+	assert.NotNil(t, pvc)
+}
+
+func TestMountVolumesCreateUserStorageClass(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	sc := storagev1.StorageClass{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "StorageClass",
+			APIVersion: storagev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+			Name:      "my-sc",
+		},
+	}
+	fakeClient, _ := test.NewFakeClient(&sc)
+	e.Client = fakeClient
+	// Default storage class
+	vol, vm, err := ParseAndCreateVolume(e, "my-pvc:/tmp/my-pvc:10Mi:ReadOnly:my-sc")
+	assert.NoError(t, err)
+	assert.Equal(t, "my-pvc", vol.PersistentVolumeClaim.ClaimName)
+	assert.Equal(t, "my-pvc", vm.Name)
+	assert.Equal(t, "/tmp/my-pvc", vm.MountPath)
+	pvc, err := kubernetes.LookupPersistentVolumeClaim(e.Ctx, e.Client, e.Integration.Namespace, "my-pvc")
+	assert.NoError(t, err)
+	assert.NotNil(t, pvc)
 }
