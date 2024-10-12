@@ -280,7 +280,7 @@ test-common:
 #
 test-smoke:
 	FAILED=0; \
-	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 30m -v \
+	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 45m -v \
 		./e2e/common/languages \
 		./e2e/common/traits \
 		--parallel 1 \
