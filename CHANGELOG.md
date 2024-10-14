@@ -6,23 +6,20 @@
 
 **Closed issues:**
 
+- RFE to allow dynamic creation of Persistent Volumes from storage classes [\#2994](https://github.com/apache/camel-k/issues/2994)
+
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-13)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
+
+**Closed issues:**
+
 - Camel-K creating new KnativeService instead of updating the existing one [\#5874](https://github.com/apache/camel-k/issues/5874)
 - Deprecate IntegrationProfile [\#5869](https://github.com/apache/camel-k/issues/5869)
 - Service Binding deprecation and removal [\#5868](https://github.com/apache/camel-k/issues/5868)
 - Jolokia is failing \(again\) [\#5855](https://github.com/apache/camel-k/issues/5855)
 - Flaky Knative TestGarbageCollectResources  [\#5844](https://github.com/apache/camel-k/issues/5844)
 - BuilderTrait nodeSelector configuration not working for jvm builds [\#5838](https://github.com/apache/camel-k/issues/5838)
-- Install on Kind with local registry lacks info about helm chart on a kind cluster with local repo [\#5651](https://github.com/apache/camel-k/issues/5651)
-- Rethink and onboard Camel K Tekton task version 2 [\#5379](https://github.com/apache/camel-k/issues/5379)
-- Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
-- Reproducible builds [\#4661](https://github.com/apache/camel-k/issues/4661)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-09-18)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
-
-**Closed issues:**
-
 - Mark Kotlin as deprecated [\#5837](https://github.com/apache/camel-k/issues/5837)
 - Integration reconciler error after operator re-install [\#5836](https://github.com/apache/camel-k/issues/5836)
 - Nightly updates is updating when no change [\#5813](https://github.com/apache/camel-k/issues/5813)
@@ -32,12 +29,16 @@
 - Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
 - Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+- Install on Kind with local registry lacks info about helm chart on a kind cluster with local repo [\#5651](https://github.com/apache/camel-k/issues/5651)
 - Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
 - Provide Openshift compatibility in the matrix [\#5562](https://github.com/apache/camel-k/issues/5562)
 - Flaky TestRunCronExample [\#5533](https://github.com/apache/camel-k/issues/5533)
 - Don't build an IntegrationKit on upgrade with same runtime version [\#5513](https://github.com/apache/camel-k/issues/5513)
 - Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
+- Rethink and onboard Camel K Tekton task version 2 [\#5379](https://github.com/apache/camel-k/issues/5379)
+- Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
+- Reproducible builds [\#4661](https://github.com/apache/camel-k/issues/4661)
 - Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
 - "Kitless" Integration [\#2365](https://github.com/apache/camel-k/issues/2365)
 - openapi/swagger - avoid rest dsl generation if specs have not changed [\#330](https://github.com/apache/camel-k/issues/330)
