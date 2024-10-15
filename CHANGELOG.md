@@ -1,14 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
-
-**Closed issues:**
-
-- RFE to allow dynamic creation of Persistent Volumes from storage classes [\#2994](https://github.com/apache/camel-k/issues/2994)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-13)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-14)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -40,6 +32,7 @@
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 - Reproducible builds [\#4661](https://github.com/apache/camel-k/issues/4661)
 - Kamelets versioning or Kamelets Catalog definition [\#4395](https://github.com/apache/camel-k/issues/4395)
+- RFE to allow dynamic creation of Persistent Volumes from storage classes [\#2994](https://github.com/apache/camel-k/issues/2994)
 - "Kitless" Integration [\#2365](https://github.com/apache/camel-k/issues/2365)
 - openapi/swagger - avoid rest dsl generation if specs have not changed [\#330](https://github.com/apache/camel-k/issues/330)
 
