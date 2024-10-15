@@ -50,8 +50,6 @@ From Camel K version 2 onward you will be able to use any Camel K Runtime. Each 
 |Camel Quarkus
 |Camel
 |Quarkus
-|Kamelets
-|LTS
 |Branch
 |===
 
