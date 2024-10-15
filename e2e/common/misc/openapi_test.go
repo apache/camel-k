@@ -24,38 +24,47 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
 func TestOpenAPI(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
-		openapiContent, err := os.ReadFile("./files/openapi/petstore-api.yaml")
+		name := RandomizedSuffixName("petstore")
+		openapiContent, err := os.ReadFile("./files/petstore-api.yaml")
 		require.NoError(t, err)
 		var cmDataProps = make(map[string]string)
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi", cmDataProps)
 
-		g.Expect(KamelRun(t, ctx, ns, "--name", "petstore", "--open-api", "configmap:my-openapi", "files/openapi/petstore.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns,
+			"--name", name, "--resource", "configmap:my-openapi", "files/petstore.yaml").
+			Execute()).To(Succeed())
 
-		g.Eventually(IntegrationPodPhase(t, ctx, ns, "petstore"), TestTimeoutLong).
-			Should(Equal(corev1.PodRunning))
-		g.Eventually(DeploymentWithIntegrationLabel(t, ctx, ns, "petstore"), TestTimeoutLong).
-			Should(Not(BeNil()))
-
-		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
-			Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
-			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
-			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		// Let's make sure the Integration is ready to receive traffic
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Listening on: http://0.0.0.0:8080"))
+		pod := IntegrationPod(t, ctx, ns, name)()
+		g.Expect(pod).NotTo(BeNil())
+		response, err := TestClient(t).CoreV1().RESTClient().Get().
+			Timeout(30 * time.Second).
+			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/v1/pets", pod.Namespace, pod.Name)).
+			DoRaw(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, "listPets", string(response))
 	})
 }

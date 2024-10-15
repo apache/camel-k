@@ -17,7 +17,7 @@ limitations under the License.
 
 package trait
 
-// WARNING: The Registry trait is **deprecated** and will removed in future release versions.
+// WARNING: The Service Binding trait is **deprecated** and will removed in future release versions.
 //
 
 // The Service Binding trait allows users to connect to Services in Kubernetes:
