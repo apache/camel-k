@@ -171,3 +171,22 @@ func TestJavaReplaceURI(t *testing.T) {
 	assert.True(t, replaced)
 	assert.Equal(t, "from(\"direct:newURI?hello=world\").to(\"log:info\")", sourceSpec.Content)
 }
+
+func TestJavaRestOpenapiFirst(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+
+	sourceSpec := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name: "test.java",
+			Content: `
+public void configure() throws Exception {
+    rest().openApi("petstore-v3.json");
+}
+			`,
+		},
+	}
+	meta := NewMetadata()
+	err := inspector.Extract(sourceSpec, &meta)
+	require.NoError(t, err)
+	assert.Contains(t, meta.Dependencies.List(), "camel:rest-openapi")
+}

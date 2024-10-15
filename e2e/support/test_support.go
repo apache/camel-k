@@ -1774,26 +1774,6 @@ func KnativeService(t *testing.T, ctx context.Context, ns string, name string) f
 		return &answer
 	}
 }
-func DeploymentWithIntegrationLabel(t *testing.T, ctx context.Context, ns string, label string) func() *appsv1.Deployment {
-	return func() *appsv1.Deployment {
-		lst := appsv1.DeploymentList{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Deployment",
-				APIVersion: appsv1.SchemeGroupVersion.String(),
-			},
-		}
-		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns), ctrl.MatchingLabels{v1.IntegrationLabel: label}); err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		} else if err != nil {
-			log.Errorf(err, "Error while retrieving deployment %s", label)
-			return nil
-		}
-		if len(lst.Items) == 0 {
-			return nil
-		}
-		return &lst.Items[0]
-	}
-}
 
 func Deployment(t *testing.T, ctx context.Context, ns string, name string) func() *appsv1.Deployment {
 	return func() *appsv1.Deployment {
