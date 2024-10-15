@@ -54,6 +54,7 @@ var (
 	restConfigurationRegexp = regexp.MustCompile(`.*restConfiguration\(\).*`)
 	restRegexp              = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
 	restClosureRegexp       = regexp.MustCompile(`.*rest\s*{\s*`)
+	openAPIRegexp           = regexp.MustCompile(`.*\.openApi\s*\([^)]*\).*`)
 	groovyLanguageRegexp    = regexp.MustCompile(`.*\.groovy\s*\(.*\).*`)
 	jsonPathLanguageRegexp  = regexp.MustCompile(`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`)
 	ognlRegexp              = regexp.MustCompile(`.*\.ognl\s*\(.*\).*`)
@@ -109,6 +110,12 @@ var (
 				}
 			}
 			return deps
+		},
+		openAPIRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dfDep := catalog.GetArtifactByScheme("rest-openapi"); dfDep != nil {
+				return []string{dfDep.GetDependencyID()}
+			}
+			return []string{}
 		},
 		groovyLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			if dependency, ok := catalog.GetLanguageDependency("groovy"); ok {

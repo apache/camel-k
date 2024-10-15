@@ -73,7 +73,11 @@ func TestRestDslTraitApplicability(t *testing.T) {
 	enabled, condition, err = trait.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, enabled)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
+	assert.Equal(t, "OpenApi trait is deprecated and may be removed in future version: "+
+		"use Camel REST contract first instead, https://camel.apache.org/manual/rest-dsl-openapi.html",
+		condition.message,
+	)
 }
 
 func TestRestDslTraitApplyError(t *testing.T) {

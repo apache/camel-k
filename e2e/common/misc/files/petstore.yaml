@@ -17,6 +17,10 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+- rest:
+    openApi:
+      specification: petstore-api.yaml
+
 - from:
     uri: "direct:listPets"
     steps:

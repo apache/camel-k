@@ -729,3 +729,31 @@ func TestYAMLRouteReplaceURI(t *testing.T) {
 	// Assert changed uri and removed parameters
 	assert.Contains(t, sourceSpec.Content, expectedYamlRouteCronReplacement)
 }
+
+func TestYAMLRESTContractFirst(t *testing.T) {
+	yamlContractFirst := `
+- rest:
+    openApi:
+      specification: petstore-v3.json
+
+- route:
+    id: route1
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - setBody:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{url}}"
+`
+
+	inspector := newTestYAMLInspector(t)
+	t.Run("TestYAMLRESTContractFirst", func(t *testing.T) {
+		assertExtractYAML(t, inspector, yamlContractFirst, func(meta *Metadata) {
+			assert.Contains(t, meta.Dependencies.List(), "camel:rest-openapi")
+		})
+	})
+}

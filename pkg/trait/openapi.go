@@ -62,12 +62,19 @@ func newOpenAPITrait() Trait {
 }
 
 func (t *openAPITrait) Configure(e *Environment) (bool, *TraitCondition, error) {
-	if !e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
-		return false, nil, nil
-	}
-
 	if t.Configmaps != nil {
-		return e.IntegrationInPhase(v1.IntegrationPhaseInitialization), nil, nil
+		if e.IntegrationInPhase(v1.IntegrationPhaseInitialization) {
+			condition := NewIntegrationCondition(
+				"OpenApi",
+				v1.IntegrationConditionTraitInfo,
+				corev1.ConditionTrue,
+				traitConfigurationReason,
+				"OpenApi trait is deprecated and may be removed in future version: "+
+					"use Camel REST contract first instead, https://camel.apache.org/manual/rest-dsl-openapi.html",
+			)
+
+			return true, condition, nil
+		}
 	}
 
 	return false, nil, nil
