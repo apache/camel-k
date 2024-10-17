@@ -41,6 +41,9 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 	}
 
 	for _, definition := range definitions {
+		if err := i.parseDefinition(definition, meta); err != nil {
+			return err
+		}
 		for k, v := range definition {
 			if err := i.parseStep(k, v, meta); err != nil {
 				return err
@@ -58,6 +61,26 @@ func (i YAMLInspector) Extract(source v1.SourceSpec, meta *Metadata) error {
 
 	meta.ExposesHTTPServices = meta.ExposesHTTPServices || i.containsHTTPURIs(meta.FromURIs)
 	meta.PassiveEndpoints = i.hasOnlyPassiveEndpoints(meta.FromURIs)
+
+	return nil
+}
+
+//nolint:nestif
+func (i YAMLInspector) parseDefinition(def map[string]interface{}, meta *Metadata) error {
+	for k, v := range def {
+		if k == "rest" {
+			meta.ExposesHTTPServices = true
+			meta.RequiredCapabilities.Add(v1.CapabilityRest)
+			// support contract first openapi
+			if oa, ok := v.(map[interface{}]interface{}); ok {
+				if _, oaOk := oa["openApi"]; oaOk {
+					if dfDep := i.catalog.GetArtifactByScheme("rest-openapi"); dfDep != nil {
+						meta.AddDependency(dfDep.GetDependencyID())
+					}
+				}
+			}
+		}
+	}
 
 	return nil
 }
