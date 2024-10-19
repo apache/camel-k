@@ -625,7 +625,7 @@ func TestTrait(t *testing.T) {
 	fileName := filepath.Base(tmpFile.Name())
 
 	runCmdOptions, runCmd, _ := initializeRunCmdOptionsWithOutput(t)
-	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "mount.configs=configmap:my-cm", "--connect", "my-service-binding")
+	output, err := test.ExecuteCommand(runCmd, cmdRun, tmpFile.Name(), "-o", "yaml", "-t", "mount.configs=configmap:my-cm")
 	assert.Equal(t, "yaml", runCmdOptions.OutputFormat)
 
 	require.NoError(t, err)
@@ -646,9 +646,6 @@ spec:
     mount:
       configs:
       - configmap:my-cm
-    service-binding:
-      services:
-      - my-service-binding
 status: {}
 `, fileName, fileName), output)
 }
