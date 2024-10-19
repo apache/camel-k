@@ -19,6 +19,7 @@ package trait
 
 import (
 	"fmt"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -27,12 +28,17 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/util/boolean"
+	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	"github.com/apache/camel-k/v2/pkg/util/log"
+	"github.com/apache/camel-k/v2/pkg/util/property"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
 )
 
@@ -112,22 +118,34 @@ func (t *mountTrait) Apply(e *Environment) error {
 	}
 
 	if visited {
-		// Volumes declared in the Integration resources
-		e.configureVolumesAndMounts(volumes, &container.VolumeMounts)
 		// Volumes declared in the trait config/resource options
+		// as this func influences the application.properties
+		// must be set as the first one to execute
 		err := t.configureVolumesAndMounts(e, volumes, &container.VolumeMounts)
 		if err != nil {
 			return err
 		}
+		// Here we configure the application.properties
+		t.addSourcesProperties(e)
+		if props, err := t.computeApplicationProperties(e); err != nil {
+			return err
+		} else if props != nil {
+			e.Resources.Add(props)
+		}
+		// Volumes declared in the Integration resources (including the application.properties Configmap)
+		t.configureCamelVolumesAndMounts(e, volumes, &container.VolumeMounts)
 	}
 
 	return nil
 }
 
+// configureVolumesAndMounts is in charge to mount volumes and mounts coming from the trait configuration.
 func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) error {
 	for _, c := range t.Configs {
 		if conf, parseErr := utilResource.ParseConfig(c); parseErr == nil {
-			t.mountResource(vols, mnts, conf)
+			// Let Camel parse these resources as properties
+			destFilePath := t.mountResource(vols, mnts, conf)
+			e.appendCloudPropertiesLocation(destFilePath)
 		} else {
 			return parseErr
 		}
@@ -158,7 +176,78 @@ func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Vo
 	return nil
 }
 
-func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) {
+// configureCamelVolumesAndMounts is in charge to mount volumes and mounts coming from Camel configuration
+// (ie, sources, properties, kamelets, etcetera).
+func (t *mountTrait) configureCamelVolumesAndMounts(e *Environment, vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
+	// Sources
+	idx := 0
+	for _, s := range e.Integration.AllSources() {
+		// We don't process routes embedded (native) or Kamelets
+		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
+			continue
+		}
+		// Routes are copied under /etc/camel/sources and discovered by the runtime accordingly
+		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, idx)
+		if s.ContentRef != "" {
+			cmName = s.ContentRef
+		}
+		cmKey := "content"
+		if s.ContentKey != "" {
+			cmKey = s.ContentKey
+		}
+		resName := strings.TrimPrefix(s.Name, "/")
+		refName := fmt.Sprintf("i-source-%03d", idx)
+		resPath := filepath.Join(camel.SourcesMountPath, resName)
+		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
+		mnt := getMount(refName, resPath, resName, true)
+
+		*vols = append(*vols, *vol)
+		*mnts = append(*mnts, *mnt)
+		idx++
+	}
+	// Resources (likely application properties or kamelets)
+	if e.Resources != nil {
+		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
+			switch configMap.Labels[kubernetes.ConfigMapTypeLabel] {
+			case CamelPropertiesType:
+				// Camel properties
+				propertiesType := configMap.Labels["camel.apache.org/properties.type"]
+				resName := propertiesType + ".properties"
+
+				var mountPath string
+				switch propertiesType {
+				case "application":
+					mountPath = filepath.Join(camel.BasePath, resName)
+				case "user":
+					mountPath = filepath.Join(camel.ConfDPath, resName)
+				}
+
+				if propertiesType != "" {
+					refName := propertiesType + "-properties"
+					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
+					mnt := getMount(refName, mountPath, resName, true)
+
+					*vols = append(*vols, *vol)
+					*mnts = append(*mnts, *mnt)
+				} else {
+					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
+				}
+			case KameletBundleType:
+				// Kamelets bundle configmap
+				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
+				refName := KameletBundleType
+				vol := getVolume(refName, "configmap", configMap.Name, "", "")
+				mnt := getMount(refName, kameletMountPoint, "", true)
+
+				*vols = append(*vols, *vol)
+				*mnts = append(*mnts, *mnt)
+			}
+		})
+	}
+}
+
+// mountResource add the resource to volumes and mounts and return the final path where the resource is mounted.
+func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount, conf *utilResource.Config) string {
 	refName := kubernetes.SanitizeLabel(conf.Name())
 	dstDir := conf.DestinationPath()
 	dstFile := ""
@@ -180,6 +269,8 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 
 	*vols = append(*vols, *vol)
 	*mnts = append(*mnts, *mnt)
+
+	return mnt.MountPath
 }
 
 func (t *mountTrait) addServiceBindingSecret(e *Environment) {
@@ -270,4 +361,78 @@ func createPVC(e *Environment, volumeParts []string) error {
 	}
 
 	return nil
+}
+
+// computeApplicationProperties is in charge to configure the configmap containing Camel application.properties.
+func (t *mountTrait) computeApplicationProperties(e *Environment) (*corev1.ConfigMap, error) {
+	// application properties
+	applicationProperties, err := property.EncodePropertyFile(e.ApplicationProperties)
+	if err != nil {
+		return nil, fmt.Errorf("could not compute application properties: %w", err)
+	}
+
+	if applicationProperties != "" {
+		return &corev1.ConfigMap{
+			TypeMeta: metav1.TypeMeta{
+				Kind:       "ConfigMap",
+				APIVersion: "v1",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      e.Integration.Name + "-application-properties",
+				Namespace: e.Integration.Namespace,
+				Labels: map[string]string{
+					v1.IntegrationLabel:                e.Integration.Name,
+					"camel.apache.org/properties.type": "application",
+					kubernetes.ConfigMapTypeLabel:      CamelPropertiesType,
+				},
+			},
+			Data: map[string]string{
+				"application.properties": applicationProperties,
+			},
+		}, nil
+	}
+
+	return nil, nil
+}
+
+// addSourcesProperties is in charge to add the sources in the application.properties required by Camel K Runtime.
+func (t *mountTrait) addSourcesProperties(e *Environment) {
+	if e.ApplicationProperties == nil {
+		e.ApplicationProperties = make(map[string]string)
+	}
+	idx := 0
+	for _, s := range e.Integration.AllSources() {
+		// We don't process routes embedded (native) or Kamelets
+		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
+			continue
+		}
+		srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
+		src := "file:" + path.Join(filepath.ToSlash(camel.SourcesMountPath), srcName)
+		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", idx)] = src
+
+		simpleName := srcName
+		if strings.Contains(srcName, ".") {
+			simpleName = srcName[0:strings.Index(srcName, ".")]
+		}
+		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", idx)] = simpleName
+
+		for pid, p := range s.PropertyNames {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", idx, pid)] = p
+		}
+
+		if s.Type != "" {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", idx)] = string(s.Type)
+		}
+		if s.InferLanguage() != "" {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", idx)] = string(s.InferLanguage())
+		}
+		if s.Loader != "" {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
+		}
+		if s.Compression {
+			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = boolean.TrueString
+		}
+
+		idx++
+	}
 }
