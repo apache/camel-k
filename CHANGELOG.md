@@ -1,6 +1,15 @@
 # Changelog
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-18)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Support Camel 4.8 cloud native properties [\#5863](https://github.com/apache/camel-k/issues/5863)
+- Auditable actions [\#5848](https://github.com/apache/camel-k/issues/5848)
+
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-19)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -20,6 +29,7 @@
 - Sourceless failure with operator applied ksvc [\#5752](https://github.com/apache/camel-k/issues/5752)
 - Camel runtime 3.13.0 nightly failure [\#5746](https://github.com/apache/camel-k/issues/5746)
 - Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
+- Deprecate openapi trait in favour of Camel openapi setting [\#5729](https://github.com/apache/camel-k/issues/5729)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
 - Install on Kind with local registry lacks info about helm chart on a kind cluster with local repo [\#5651](https://github.com/apache/camel-k/issues/5651)
 - Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
