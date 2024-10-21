@@ -7,7 +7,7 @@ image:https://img.shields.io/badge/2.5.0-white?label=Deprecated&labelColor=C40C0
 The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 
 WARNING: The Openapi trait is **deprecated** and will removed in future release versions:
-use Camel REST contract first instead, https://camel.apache.org/manual/rest-dsl-openapi.html
+use Camel REST contract first instead (see Camel core documentation).
 
 
 This trait is available in the following profiles: **Kubernetes, Knative, OpenShift**.

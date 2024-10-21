@@ -20,7 +20,7 @@ package trait
 // The OpenAPI DSL trait is internally used to allow creating integrations from a OpenAPI specs.
 //
 // WARNING: The Openapi trait is **deprecated** and will removed in future release versions:
-// use Camel REST contract first instead, https://camel.apache.org/manual/rest-dsl-openapi.html
+// use Camel REST contract first instead (see Camel core documentation).
 //
 // +camel-k:trait=openapi.
 // +camel-k:deprecated=2.5.0.
