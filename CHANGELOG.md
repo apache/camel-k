@@ -1,15 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Support Camel 4.8 cloud native properties [\#5863](https://github.com/apache/camel-k/issues/5863)
-- Auditable actions [\#5848](https://github.com/apache/camel-k/issues/5848)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-19)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-20)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -18,7 +9,9 @@
 - Camel-K creating new KnativeService instead of updating the existing one [\#5874](https://github.com/apache/camel-k/issues/5874)
 - Deprecate IntegrationProfile [\#5869](https://github.com/apache/camel-k/issues/5869)
 - Service Binding deprecation and removal [\#5868](https://github.com/apache/camel-k/issues/5868)
+- Support Camel 4.8 cloud native properties [\#5863](https://github.com/apache/camel-k/issues/5863)
 - Jolokia is failing \(again\) [\#5855](https://github.com/apache/camel-k/issues/5855)
+- Auditable actions [\#5848](https://github.com/apache/camel-k/issues/5848)
 - Flaky Knative TestGarbageCollectResources  [\#5844](https://github.com/apache/camel-k/issues/5844)
 - BuilderTrait nodeSelector configuration not working for jvm builds [\#5838](https://github.com/apache/camel-k/issues/5838)
 - Mark Kotlin as deprecated [\#5837](https://github.com/apache/camel-k/issues/5837)
