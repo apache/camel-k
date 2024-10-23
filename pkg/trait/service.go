@@ -97,7 +97,7 @@ func (t *serviceTrait) Apply(e *Environment) error {
 	svc := e.Resources.GetServiceForIntegration(e.Integration)
 	// add a new service if not already created
 	if svc == nil {
-		svc = getServiceFor(e)
+		svc = t.getServiceFor(e.Integration.Name, e.Integration.Namespace)
 
 		var serviceType corev1.ServiceType
 		if t.Type != nil {
@@ -121,23 +121,24 @@ func (t *serviceTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func getServiceFor(e *Environment) *corev1.Service {
+func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service {
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      e.Integration.Name,
-			Namespace: e.Integration.Namespace,
+			Name:      itName,
+			Namespace: itNamespace,
 			Labels: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
+				v1.IntegrationLabel: itName,
 			},
+			Annotations: t.Annotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{},
 			Selector: map[string]string{
-				v1.IntegrationLabel: e.Integration.Name,
+				v1.IntegrationLabel: itName,
 			},
 		},
 	}

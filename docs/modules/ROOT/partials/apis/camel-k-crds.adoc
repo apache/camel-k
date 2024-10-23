@@ -8790,6 +8790,13 @@ Deprecated: Use service type instead.
 
 The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
 
+|`annotations` +
+map[string]string
+|
+
+
+The annotations added to the Service object.
+
 
 |===
 
