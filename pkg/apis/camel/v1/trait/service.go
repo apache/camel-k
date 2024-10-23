@@ -35,6 +35,8 @@ type ServiceTrait struct {
 	// The type of service to be used, either 'ClusterIP', 'NodePort' or 'LoadBalancer'.
 	// +kubebuilder:validation:Enum=ClusterIP;NodePort;LoadBalancer
 	Type *ServiceType `property:"type" json:"type,omitempty"`
+	// The annotations added to the Service object.
+	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
 }
 
 type ServiceType string

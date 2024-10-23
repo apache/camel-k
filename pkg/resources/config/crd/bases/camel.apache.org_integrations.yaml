@@ -7943,6 +7943,11 @@ spec:
                   service:
                     description: The configuration of Service trait
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: The annotations added to the Service object.
+                        type: object
                       auto:
                         description: To automatically detect from the code if a Service
                           needs to be created.
@@ -9924,6 +9929,11 @@ spec:
                   service:
                     description: The configuration of Service trait
                     properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: The annotations added to the Service object.
+                        type: object
                       auto:
                         description: To automatically detect from the code if a Service
                           needs to be created.
