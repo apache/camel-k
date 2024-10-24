@@ -27,7 +27,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
@@ -40,6 +39,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/log"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	utilResource "github.com/apache/camel-k/v2/pkg/util/resource"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 const (
@@ -166,11 +166,12 @@ func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Vo
 		*mnts = append(*mnts, *volumeMount)
 	}
 	for _, v := range t.EmptyDirs {
-		if vol, parseErr := utilResource.ParseEmptyDirVolume(v); parseErr == nil {
-			t.mountResource(vols, mnts, vol)
-		} else {
+		volume, volumeMount, parseErr := ParseEmptyDirVolume(v)
+		if parseErr != nil {
 			return parseErr
 		}
+		*vols = append(*vols, *volume)
+		*mnts = append(*mnts, *volumeMount)
 	}
 
 	return nil
@@ -261,8 +262,7 @@ func (t *mountTrait) mountResource(vols *[]corev1.Volume, mnts *[]corev1.VolumeM
 	vol := getVolume(refName, string(conf.StorageType()), conf.Name(), conf.Key(), dstFile)
 	mntPath := getMountPoint(conf.Name(), dstDir, string(conf.StorageType()), string(conf.ContentType()))
 	readOnly := true
-	if conf.StorageType() == utilResource.StorageTypePVC ||
-		conf.StorageType() == utilResource.StorageTypeEmptyDir {
+	if conf.StorageType() == utilResource.StorageTypePVC {
 		readOnly = false
 	}
 	mnt := getMount(refName, mntPath, dstFile, readOnly)
@@ -279,6 +279,38 @@ func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 			t.Configs = append(t.Configs, "secret:"+secret.Name)
 		}
 	})
+}
+
+// ParseEmptyDirVolume will parse and return an empty-dir volume.
+func ParseEmptyDirVolume(item string) (*corev1.Volume, *corev1.VolumeMount, error) {
+	volumeParts := strings.Split(item, ":")
+
+	if len(volumeParts) != 2 && len(volumeParts) != 3 {
+		return nil, nil, fmt.Errorf("could not match emptyDir volume as %s", item)
+	}
+
+	refName := kubernetes.SanitizeLabel(volumeParts[0])
+	sizeLimit := "500Mi"
+	if len(volumeParts) == 3 {
+		sizeLimit = volumeParts[2]
+	}
+
+	parsed, err := resource.ParseQuantity(sizeLimit)
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not parse sizeLimit from emptyDir volume: %s", volumeParts[2])
+	}
+
+	volume := &corev1.Volume{
+		Name: refName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{
+				SizeLimit: &parsed,
+			},
+		},
+	}
+
+	volumeMount := getMount(refName, volumeParts[1], "", false)
+	return volume, volumeMount, nil
 }
 
 // ParseAndCreateVolume will parse a volume configuration. If the volume does not exist it tries to create one based on the storage

@@ -36,7 +36,8 @@ type MountTrait struct {
 	// You can use the syntax [pvcname:/container/path:size:accessMode<:storageClass>] to create a dynamic PVC based on the Storage Class provided
 	// or the default cluster Storage Class. However, if the PVC exists, the operator would mount it.
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
-	// A list of EmptyDir volumes to be mounted. Syntax: [name:/container/path]
+	// A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+	// Syntax: name:/container/path[:sizeLimit]
 	EmptyDirs []string `property:"empty-dirs" json:"emptyDirs,omitempty"`
 	// Enable "hot reload" when a secret/configmap mounted is edited (default `false`). The configmap/secret must be
 	// marked with `camel.apache.org/integration` label to be taken in account. The resource will be watched for any kind change, also for

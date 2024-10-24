@@ -136,21 +136,6 @@ func ParseResource(item string) (*Config, error) {
 	return parse(item, ContentTypeData)
 }
 
-// ParseEmptyDirVolume will parse an empty dir volume and return a Config.
-func ParseEmptyDirVolume(item string) (*Config, error) {
-	configParts := strings.Split(item, ":")
-
-	if len(configParts) != 2 {
-		return nil, fmt.Errorf("could not match emptyDir volume as %s", item)
-	}
-
-	return &Config{
-		storageType:     StorageTypeEmptyDir,
-		resourceName:    configParts[0],
-		destinationPath: configParts[1],
-	}, nil
-}
-
 // ParseVolume will parse a volume and return a Config.
 func ParseVolume(item string) (*Config, error) {
 	configParts := strings.Split(item, ":")
