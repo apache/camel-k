@@ -281,7 +281,7 @@ func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 	})
 }
 
-// ParseEmptyDirVolume will parse and return an empty-dir volume
+// ParseEmptyDirVolume will parse and return an empty-dir volume.
 func ParseEmptyDirVolume(item string) (*corev1.Volume, *corev1.VolumeMount, error) {
 	volumeParts := strings.Split(item, ":")
 
