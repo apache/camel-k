@@ -4803,8 +4803,9 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       emptyDirs:
-                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
-                          [name:/container/path]'
+                        description: |-
+                          A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                          Syntax: name:/container/path[:sizeLimit]
                         items:
                           type: string
                         type: array
@@ -6948,8 +6949,9 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       emptyDirs:
-                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
-                          [name:/container/path]'
+                        description: |-
+                          A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                          Syntax: name:/container/path[:sizeLimit]
                         items:
                           type: string
                         type: array
@@ -8996,8 +8998,9 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       emptyDirs:
-                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
-                          [name:/container/path]'
+                        description: |-
+                          A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                          Syntax: name:/container/path[:sizeLimit]
                         items:
                           type: string
                         type: array
@@ -11020,8 +11023,9 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       emptyDirs:
-                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
-                          [name:/container/path]'
+                        description: |-
+                          A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                          Syntax: name:/container/path[:sizeLimit]
                         items:
                           type: string
                         type: array
@@ -19085,8 +19089,9 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       emptyDirs:
-                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
-                          [name:/container/path]'
+                        description: |-
+                          A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                          Syntax: name:/container/path[:sizeLimit]
                         items:
                           type: string
                         type: array
@@ -21071,8 +21076,9 @@ spec:
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       emptyDirs:
-                        description: 'A list of EmptyDir volumes to be mounted. Syntax:
-                          [name:/container/path]'
+                        description: |-
+                          A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                          Syntax: name:/container/path[:sizeLimit]
                         items:
                           type: string
                         type: array
@@ -29211,8 +29217,9 @@ spec:
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           emptyDirs:
-                            description: 'A list of EmptyDir volumes to be mounted.
-                              Syntax: [name:/container/path]'
+                            description: |-
+                              A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                              Syntax: name:/container/path[:sizeLimit]
                             items:
                               type: string
                             type: array
@@ -40142,8 +40149,9 @@ spec:
                             type: object
                             x-kubernetes-preserve-unknown-fields: true
                           emptyDirs:
-                            description: 'A list of EmptyDir volumes to be mounted.
-                              Syntax: [name:/container/path]'
+                            description: |-
+                              A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+                              Syntax: name:/container/path[:sizeLimit]
                             items:
                               type: string
                             type: array

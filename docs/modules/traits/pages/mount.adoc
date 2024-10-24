@@ -51,7 +51,8 @@ or the default cluster Storage Class. However, if the PVC exists, the operator w
 
 | mount.empty-dirs
 | []string
-| A list of EmptyDir volumes to be mounted. Syntax: [name:/container/path]
+| A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
+Syntax: name:/container/path[:sizeLimit]
 
 | mount.hot-reload
 | bool
