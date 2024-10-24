@@ -95,7 +95,7 @@ func (t *masterTrait) Configure(e *trait.Environment) (bool, *trait.TraitConditi
 		return ptr.Deref(t.Enabled, false), nil, nil
 	}
 
-	enabled, err := e.ConsumeMeta(func(meta metadata.IntegrationMetadata) bool {
+	enabled, err := e.ConsumeMeta(false, func(meta metadata.IntegrationMetadata) bool {
 		found := false
 	loop:
 		for _, endpoint := range meta.FromURIs {

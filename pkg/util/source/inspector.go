@@ -54,6 +54,7 @@ var (
 	restConfigurationRegexp = regexp.MustCompile(`.*restConfiguration\(\).*`)
 	restRegexp              = regexp.MustCompile(`.*rest\s*\([^)]*\).*`)
 	restClosureRegexp       = regexp.MustCompile(`.*rest\s*{\s*`)
+	openAPIRegexp           = regexp.MustCompile(`.*\.openApi\s*\([^)]*\).*`)
 	groovyLanguageRegexp    = regexp.MustCompile(`.*\.groovy\s*\(.*\).*`)
 	jsonPathLanguageRegexp  = regexp.MustCompile(`.*\.?(jsonpath|jsonpathWriteAsString)\s*\(.*\).*`)
 	ognlRegexp              = regexp.MustCompile(`.*\.ognl\s*\(.*\).*`)
@@ -110,6 +111,12 @@ var (
 			}
 			return deps
 		},
+		openAPIRegexp: func(catalog *camel.RuntimeCatalog) []string {
+			if dfDep := catalog.GetArtifactByScheme("rest-openapi"); dfDep != nil {
+				return []string{dfDep.GetDependencyID()}
+			}
+			return []string{}
+		},
 		groovyLanguageRegexp: func(catalog *camel.RuntimeCatalog) []string {
 			if dependency, ok := catalog.GetLanguageDependency("groovy"); ok {
 				return []string{dependency}
@@ -164,7 +171,10 @@ var (
 
 // Inspector is the common interface for language specific inspector implementations.
 type Inspector interface {
+	// Extract scan the source spec for metadata.
 	Extract(spec v1.SourceSpec, metadata *Metadata) error
+	// ReplaceFromURI parses the source content and replace the `from` URI configuration with the a new URI.
+	ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error)
 }
 
 // InspectorForLanguage is the factory function to return a new inspector for the given language
@@ -223,6 +233,10 @@ type baseInspector struct {
 
 func (i baseInspector) Extract(v1.SourceSpec, *Metadata) error {
 	return nil
+}
+
+func (i baseInspector) ReplaceFromURI(source *v1.SourceSpec, newFromURI string) (bool, error) {
+	return false, nil
 }
 
 func (i *baseInspector) extract(source v1.SourceSpec, meta *Metadata,

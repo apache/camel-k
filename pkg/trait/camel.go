@@ -135,9 +135,7 @@ func (t *camelTrait) Apply(e *Environment) error {
 	}
 
 	if e.IntegrationInRunningPhases() {
-		// Get all resources
-		maps := t.computeConfigMaps(e)
-		e.Resources.AddAll(maps)
+		e.Resources.AddAll(t.computeUserProperties(e))
 	}
 	return nil
 }
@@ -181,7 +179,23 @@ func (t *camelTrait) loadOrCreateCatalog(e *Environment, runtimeVersion string) 
 	return nil
 }
 
-func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
+func determineRuntimeVersion(e *Environment) (string, error) {
+	if e.Integration != nil && e.Integration.Status.RuntimeVersion != "" {
+		return e.Integration.Status.RuntimeVersion, nil
+	}
+	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
+		return e.IntegrationKit.Status.RuntimeVersion, nil
+	}
+	if e.IntegrationProfile != nil && e.IntegrationProfile.Status.Build.RuntimeVersion != "" {
+		return e.IntegrationProfile.Status.Build.RuntimeVersion, nil
+	}
+	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
+		return e.Platform.Status.Build.RuntimeVersion, nil
+	}
+	return "", errors.New("unable to determine runtime version")
+}
+
+func (t *camelTrait) computeUserProperties(e *Environment) []ctrl.Object {
 	sources := e.Integration.AllSources()
 	maps := make([]ctrl.Object, 0, len(sources)+1)
 
@@ -260,20 +274,4 @@ func (t *camelTrait) computeConfigMaps(e *Environment) []ctrl.Object {
 	}
 
 	return maps
-}
-
-func determineRuntimeVersion(e *Environment) (string, error) {
-	if e.Integration != nil && e.Integration.Status.RuntimeVersion != "" {
-		return e.Integration.Status.RuntimeVersion, nil
-	}
-	if e.IntegrationKit != nil && e.IntegrationKit.Status.RuntimeVersion != "" {
-		return e.IntegrationKit.Status.RuntimeVersion, nil
-	}
-	if e.IntegrationProfile != nil && e.IntegrationProfile.Status.Build.RuntimeVersion != "" {
-		return e.IntegrationProfile.Status.Build.RuntimeVersion, nil
-	}
-	if e.Platform != nil && e.Platform.Status.Build.RuntimeVersion != "" {
-		return e.Platform.Status.Build.RuntimeVersion, nil
-	}
-	return "", errors.New("unable to determine runtime version")
 }

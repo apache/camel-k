@@ -146,7 +146,7 @@ func applyKamelets(ctx context.Context, c client.Client, platform *v1.Integratio
 		err = applier.Apply(ctx, kamelet)
 		if err != nil {
 			erroredKam++
-			log.Error(err, "Error occurred whilst applying a bundled kamelet named %s", kamelet.GetName())
+			log.Errorf(err, "Error occurred whilst applying a bundled kamelet named %s", kamelet.GetName())
 			return nil
 		}
 		appliedKam++

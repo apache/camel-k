@@ -28,16 +28,16 @@ asciidoc:
   attributes:
     requires: "'util=camel-website-util,ck=xref:js/ck.js'"
     prerelease: true
-    camel-k-runtime-version: 3.8.1
+    camel-k-runtime-version: 3.15.0
     camel-api-versions: camel.apache.org/v1 camel.apache.org/v1alpha1 # from Makefile BUNDLE_CAMEL_APIS
-    camel-version: 4.4.1
-    camel-docs-version: 4.4.x
-    camel-quarkus-version: 3.8.1
-    camel-quarkus-docs-version: 3.8.x
-    quarkus-version: 3.8.3
+    camel-version: 4.8.0
+    camel-docs-version: 4.8.x
+    camel-quarkus-version: 3.15.0
+    camel-quarkus-docs-version: 3.15.x
+    quarkus-version: 3.15.1
     kustomize-version: 4.5.4
     kubernetes-api-version: 0.29.7
     operator-fwk-api-version: 0.23.0
-    knative-api-version: 0.42.1
+    knative-api-version: 0.42.3
     service-binding-op-version: 1.4.0
     prometheus-op-version: 0.73.2

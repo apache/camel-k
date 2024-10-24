@@ -52,6 +52,12 @@ func (action *initializeAction) Handle(ctx context.Context, profile *v1.Integrat
 		v1.IntegrationProfileConditionCreatedReason,
 		"integration profile created")
 
+	profile.Status.SetCondition(
+		"DeprecationNotice",
+		corev1.ConditionTrue,
+		"DeprecationNoticeWarning",
+		"Usage of IntegrationProfile is deprecated. Make use of IntegrationPlatform instead.")
+
 	profile.Status.Phase = v1.IntegrationProfilePhaseReady
 
 	return profile, nil

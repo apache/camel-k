@@ -34,19 +34,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/util/test"
 )
 
-func TestMultilinePropertiesHandled(t *testing.T) {
-	e := Environment{
-		ApplicationProperties: map[string]string{
-			"prop": "multi\nline",
-		},
-		Integration: &v1.Integration{},
-	}
-	cm, err := e.computeApplicationProperties()
-	require.NoError(t, err)
-	assert.NotNil(t, cm)
-	assert.Equal(t, "prop = multi\\nline\n", cm.Data["application.properties"])
-}
-
 func TestCollectConfigurationValues(t *testing.T) {
 	e := Environment{
 		Integration: &v1.Integration{

@@ -55,7 +55,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
-	"github.com/apache/camel-k/v2/pkg/util/dsl"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	k8slog "github.com/apache/camel-k/v2/pkg/util/kubernetes/log"
 	"github.com/apache/camel-k/v2/pkg/util/property"
@@ -83,14 +82,22 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 	cmd.Flags().String("name", "", "The integration name")
 	cmd.Flags().String("image", "", "An image built externally (ie, via CICD). Enabling it will skip the Integration build phase.")
-	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name")
+	// Deprecated: service binding parameter won't be supported in future releases.
+	cmd.Flags().StringArrayP("connect", "c", nil, "A Service that the integration should bind to, specified as [[apigroup/]version:]kind:[namespace/]name."+
+		"Deprecated: service binding won't be supported in future releases.")
 	cmd.Flags().StringArrayP("dependency", "d", nil, `A dependency that should be included, e.g., "-d camel:mail" for a Camel component, "-d mvn:org.my:app:1.0" for a Maven dependency`)
 	cmd.Flags().BoolP("wait", "w", false, "Wait for the integration to be running")
 	cmd.Flags().StringP("kit", "k", "", "The kit used to run the integration")
-	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name])")
-	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file from a path, a config map or a secret (syntax: [my-key=my-value|file:/path/to/my-conf.properties|[configmap|secret]:name]])")
-	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap or a Secret (syntax: [configmap|secret]:name[/key], where name represents the configmap/secret name and key optionally represents the configmap/secret key to be filtered)")
-	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap or a Secret (syntax: [configmap|secret]:name[/key][@path], where name represents the configmap/secret name, key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
+	cmd.Flags().StringArrayP("property", "p", nil, "Add a runtime property or a local properties file from a path "+
+		"(syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
+	cmd.Flags().StringArray("build-property", nil, "Add a build time property or properties file from a path "+
+		"(syntax: [my-key=my-value|file:/path/to/my-conf.properties])")
+	cmd.Flags().StringArray("config", nil, "Add a runtime configuration from a Configmap or a Secret "+
+		"(syntax: [configmap|secret]:name[/key], where name represents the configmap/secret name and key optionally "+
+		"represents the configmap/secret key to be filtered)")
+	cmd.Flags().StringArray("resource", nil, "Add a runtime resource from a Configmap or a Secret "+
+		"(syntax: [configmap|secret]:name[/key][@path], where name represents the configmap/secret name, "+
+		"key optionally represents the configmap/secret key to be filtered and path represents the destination path)")
 	cmd.Flags().StringArray("maven-repository", nil, "Add a maven repository")
 	cmd.Flags().Bool("logs", false, "Print integration logs")
 	cmd.Flags().Bool("sync", false, "Synchronize the local source file with the cluster, republishing at each change")
@@ -122,38 +129,41 @@ func newCmdRun(rootCmdOptions *RootCmdOptions) (*cobra.Command, *runCmdOptions) 
 
 type runCmdOptions struct {
 	*RootCmdOptions    `json:"-"`
-	Compression        bool     `mapstructure:"compression" yaml:",omitempty"`
-	Wait               bool     `mapstructure:"wait" yaml:",omitempty"`
-	Logs               bool     `mapstructure:"logs" yaml:",omitempty"`
-	Sync               bool     `mapstructure:"sync" yaml:",omitempty"`
-	Dev                bool     `mapstructure:"dev" yaml:",omitempty"`
-	UseFlows           bool     `mapstructure:"use-flows" yaml:",omitempty"`
-	Save               bool     `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
-	IntegrationKit     string   `mapstructure:"kit" yaml:",omitempty"`
-	IntegrationName    string   `mapstructure:"name" yaml:",omitempty"`
-	ContainerImage     string   `mapstructure:"image" yaml:",omitempty"`
-	Profile            string   `mapstructure:"profile" yaml:",omitempty"`
-	IntegrationProfile string   `mapstructure:"integration-profile" yaml:",omitempty"`
-	OperatorID         string   `mapstructure:"operator-id" yaml:",omitempty"`
-	OutputFormat       string   `mapstructure:"output" yaml:",omitempty"`
-	PodTemplate        string   `mapstructure:"pod-template" yaml:",omitempty"`
-	ServiceAccount     string   `mapstructure:"service-account" yaml:",omitempty"`
-	Connects           []string `mapstructure:"connects" yaml:",omitempty"`
-	Resources          []string `mapstructure:"resources" yaml:",omitempty"`
-	OpenAPIs           []string `mapstructure:"open-apis" yaml:",omitempty"`
-	Dependencies       []string `mapstructure:"dependencies" yaml:",omitempty"`
-	Properties         []string `mapstructure:"properties" yaml:",omitempty"`
-	BuildProperties    []string `mapstructure:"build-properties" yaml:",omitempty"`
-	Configs            []string `mapstructure:"configs" yaml:",omitempty"`
-	Repositories       []string `mapstructure:"maven-repositories" yaml:",omitempty"`
-	Traits             []string `mapstructure:"traits" yaml:",omitempty"`
-	Volumes            []string `mapstructure:"volumes" yaml:",omitempty"`
-	EnvVars            []string `mapstructure:"envs" yaml:",omitempty"`
-	Labels             []string `mapstructure:"labels" yaml:",omitempty"`
-	Annotations        []string `mapstructure:"annotations" yaml:",omitempty"`
-	Sources            []string `mapstructure:"sources" yaml:",omitempty"`
-	RegistryOptions    url.Values
-	Force              bool `mapstructure:"force" yaml:",omitempty"`
+	Compression        bool   `mapstructure:"compression" yaml:",omitempty"`
+	Wait               bool   `mapstructure:"wait" yaml:",omitempty"`
+	Logs               bool   `mapstructure:"logs" yaml:",omitempty"`
+	Sync               bool   `mapstructure:"sync" yaml:",omitempty"`
+	Dev                bool   `mapstructure:"dev" yaml:",omitempty"`
+	UseFlows           bool   `mapstructure:"use-flows" yaml:",omitempty"`
+	Save               bool   `mapstructure:"save" yaml:",omitempty" kamel:"omitsave"`
+	IntegrationKit     string `mapstructure:"kit" yaml:",omitempty"`
+	IntegrationName    string `mapstructure:"name" yaml:",omitempty"`
+	ContainerImage     string `mapstructure:"image" yaml:",omitempty"`
+	Profile            string `mapstructure:"profile" yaml:",omitempty"`
+	IntegrationProfile string `mapstructure:"integration-profile" yaml:",omitempty"`
+	OperatorID         string `mapstructure:"operator-id" yaml:",omitempty"`
+	OutputFormat       string `mapstructure:"output" yaml:",omitempty"`
+	PodTemplate        string `mapstructure:"pod-template" yaml:",omitempty"`
+	ServiceAccount     string `mapstructure:"service-account" yaml:",omitempty"`
+	// Deprecated: service binding parameter won't be supported in future releases.
+	Connects  []string `mapstructure:"connects" yaml:",omitempty"`
+	Resources []string `mapstructure:"resources" yaml:",omitempty"`
+	// Deprecated: openapi parameter won't be supported in future releases.
+	OpenAPIs        []string `mapstructure:"open-apis" yaml:",omitempty"`
+	Dependencies    []string `mapstructure:"dependencies" yaml:",omitempty"`
+	Properties      []string `mapstructure:"properties" yaml:",omitempty"`
+	BuildProperties []string `mapstructure:"build-properties" yaml:",omitempty"`
+	Configs         []string `mapstructure:"configs" yaml:",omitempty"`
+	Repositories    []string `mapstructure:"maven-repositories" yaml:",omitempty"`
+	Traits          []string `mapstructure:"traits" yaml:",omitempty"`
+	Volumes         []string `mapstructure:"volumes" yaml:",omitempty"`
+	EnvVars         []string `mapstructure:"envs" yaml:",omitempty"`
+	Labels          []string `mapstructure:"labels" yaml:",omitempty"`
+	Annotations     []string `mapstructure:"annotations" yaml:",omitempty"`
+	Sources         []string `mapstructure:"sources" yaml:",omitempty"`
+	// Deprecated: registry parameter no longer in use.
+	RegistryOptions url.Values
+	Force           bool `mapstructure:"force" yaml:",omitempty"`
 }
 
 func (o *runCmdOptions) decode(cmd *cobra.Command, args []string) error {
@@ -273,6 +283,23 @@ func (o *runCmdOptions) validate(cmd *cobra.Command) error {
 		// We support only cluster configmaps
 		if !(strings.HasPrefix(openapi, "configmap:")) {
 			return fmt.Errorf(`invalid openapi specification "%s". It supports only configmaps`, openapi)
+		}
+	}
+
+	for i, property := range o.Properties {
+		// We support only --config
+		if strings.HasPrefix(property, "configmap:") || strings.HasPrefix(property, "secret:") {
+			o.Configs = append(o.Configs, property)
+			// clean it to avoid further processing
+			o.Properties[i] = ""
+			fmt.Fprintf(cmd.OutOrStdout(), "Property %s is deprecated: use --config %s instead\n", property, property)
+		}
+	}
+
+	for _, bp := range o.BuildProperties {
+		// Deprecated: to be removed
+		if strings.HasPrefix(bp, "configmap:") || strings.HasPrefix(bp, "secret:") {
+			fmt.Fprintf(cmd.OutOrStdout(), "Build property %s is deprecated. It will be removed from future releases.\n", bp)
 		}
 	}
 
@@ -673,7 +700,7 @@ func (o *runCmdOptions) resolveSources(cmd *cobra.Command, sources []string, it 
 
 	for _, source := range resolvedSources {
 		if o.UseFlows && !o.Compression && source.IsYaml() {
-			flows, err := dsl.FromYamlDSLString(source.Content)
+			flows, err := v1.FromYamlDSLString(source.Content)
 			if err != nil {
 				return err
 			}

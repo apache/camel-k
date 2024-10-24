@@ -34,7 +34,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
-	"github.com/apache/camel-k/v2/pkg/util/dsl"
 
 	"fmt"
 )
@@ -88,7 +87,7 @@ func ComputeForIntegration(integration *v1.Integration, configmapVersions []stri
 
 	// Integration flows
 	if len(integration.Spec.Flows) > 0 {
-		flows, err := dsl.ToYamlDSL(integration.Spec.Flows)
+		flows, err := v1.ToYamlDSL(integration.Spec.Flows)
 		if err != nil {
 			return "", err
 		}
@@ -310,12 +309,6 @@ func ComputeForSource(s v1.SourceSpec) (string, error) {
 	if _, err := hash.Write([]byte(s.Loader)); err != nil {
 		return "", err
 	}
-	for _, i := range s.Interceptors {
-		if _, err := hash.Write([]byte(i)); err != nil {
-			return "", err
-		}
-	}
-
 	if _, err := hash.Write([]byte(strconv.FormatBool(s.Compression))); err != nil {
 		return "", err
 	}

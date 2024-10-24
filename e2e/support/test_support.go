@@ -839,16 +839,6 @@ func Service(t *testing.T, ctx context.Context, ns string, name string) func() *
 	}
 }
 
-func ServiceType(t *testing.T, ctx context.Context, ns string, name string) func() corev1.ServiceType {
-	return func() corev1.ServiceType {
-		svc := Service(t, ctx, ns, name)()
-		if svc == nil {
-			return ""
-		}
-		return svc.Spec.Type
-	}
-}
-
 // ServicesByType Find the service in the given namespace with the given type
 func ServicesByType(t *testing.T, ctx context.Context, ns string, svcType corev1.ServiceType) func() []corev1.Service {
 	return func() []corev1.Service {
@@ -1784,26 +1774,6 @@ func KnativeService(t *testing.T, ctx context.Context, ns string, name string) f
 		return &answer
 	}
 }
-func DeploymentWithIntegrationLabel(t *testing.T, ctx context.Context, ns string, label string) func() *appsv1.Deployment {
-	return func() *appsv1.Deployment {
-		lst := appsv1.DeploymentList{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "Deployment",
-				APIVersion: appsv1.SchemeGroupVersion.String(),
-			},
-		}
-		if err := TestClient(t).List(ctx, &lst, ctrl.InNamespace(ns), ctrl.MatchingLabels{v1.IntegrationLabel: label}); err != nil && k8serrors.IsNotFound(err) {
-			return nil
-		} else if err != nil {
-			log.Errorf(err, "Error while retrieving deployment %s", label)
-			return nil
-		}
-		if len(lst.Items) == 0 {
-			return nil
-		}
-		return &lst.Items[0]
-	}
-}
 
 func Deployment(t *testing.T, ctx context.Context, ns string, name string) func() *appsv1.Deployment {
 	return func() *appsv1.Deployment {
@@ -1847,6 +1817,12 @@ func DeploymentCondition(t *testing.T, ctx context.Context, ns string, name stri
 		}
 
 		return condition
+	}
+}
+
+func DeploymentUID(t *testing.T, ctx context.Context, ns string, name string) func() string {
+	return func() string {
+		return string(Deployment(t, ctx, ns, name)().GetUID())
 	}
 }
 

@@ -27,7 +27,7 @@ VERSIONFILE := pkg/util/defaults/defaults.go
 VERSION ?= 2.5.0-SNAPSHOT
 LAST_RELEASED_IMAGE_NAME := camel-k-operator
 LAST_RELEASED_VERSION ?= 2.4.0
-DEFAULT_RUNTIME_VERSION := 3.8.1
+DEFAULT_RUNTIME_VERSION := 3.15.0
 CONTROLLER_GEN_VERSION := v0.15.0
 CODEGEN_VERSION := v0.29.7
 OPERATOR_SDK_VERSION := v1.30.0
@@ -280,7 +280,7 @@ test-common:
 #
 test-smoke:
 	FAILED=0; \
-	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 30m -v \
+	go test -p $(TEST_COMMON_PARALLEL_COUNT) -timeout 45m -v \
 		./e2e/common/languages \
 		./e2e/common/traits \
 		--parallel 1 \

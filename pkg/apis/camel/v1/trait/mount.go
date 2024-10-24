@@ -32,7 +32,9 @@ type MountTrait struct {
 	// The destination path can be either a default location or any path specified by the user.
 	// Syntax: [configmap|secret]:name[/key][@path], where name represents the resource name, key optionally represents the resource key to be filtered and path represents the destination path
 	Resources []string `property:"resources" json:"resources,omitempty"`
-	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]
+	// A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]. If the PVC is not found, the Integration fails.
+	// You can use the syntax [pvcname:/container/path:size:accessMode<:storageClass>] to create a dynamic PVC based on the Storage Class provided
+	// or the default cluster Storage Class. However, if the PVC exists, the operator would mount it.
 	Volumes []string `property:"volumes" json:"volumes,omitempty"`
 	// A list of EmptyDir volumes to be mounted. An optional size limit may be configured (default 500Mi).
 	// Syntax: name:/container/path[:sizeLimit]

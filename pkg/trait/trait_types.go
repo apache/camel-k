@@ -20,7 +20,6 @@ package trait
 import (
 	"context"
 	"fmt"
-	"path"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -29,7 +28,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
 
@@ -37,11 +35,9 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/metadata"
 	"github.com/apache/camel-k/v2/pkg/platform"
-	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	"github.com/apache/camel-k/v2/pkg/util/log"
-	"github.com/apache/camel-k/v2/pkg/util/property"
 )
 
 const (
@@ -232,7 +228,6 @@ type Environment struct {
 	ExecutedTraits        []Trait
 	EnvVars               []corev1.EnvVar
 	ApplicationProperties map[string]string
-	Interceptors          []string
 }
 
 // ControllerStrategy is used to determine the kind of controller that needs to be created for the integration.
@@ -421,156 +416,6 @@ func (e *Environment) DetermineCatalogNamespace() string {
 	return ""
 }
 
-func (e *Environment) computeApplicationProperties() (*corev1.ConfigMap, error) {
-	// application properties
-	applicationProperties, err := property.EncodePropertyFile(e.ApplicationProperties)
-	if err != nil {
-		return nil, fmt.Errorf("could not compute application properties: %w", err)
-	}
-
-	if applicationProperties != "" {
-		return &corev1.ConfigMap{
-			TypeMeta: metav1.TypeMeta{
-				Kind:       "ConfigMap",
-				APIVersion: "v1",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      e.Integration.Name + "-application-properties",
-				Namespace: e.Integration.Namespace,
-				Labels: map[string]string{
-					v1.IntegrationLabel:                e.Integration.Name,
-					"camel.apache.org/properties.type": "application",
-					kubernetes.ConfigMapTypeLabel:      CamelPropertiesType,
-				},
-			},
-			Data: map[string]string{
-				"application.properties": applicationProperties,
-			},
-		}, nil
-	}
-
-	return nil, nil
-}
-
-func (e *Environment) addSourcesProperties() {
-	if e.ApplicationProperties == nil {
-		e.ApplicationProperties = make(map[string]string)
-	}
-	idx := 0
-	for _, s := range e.Integration.AllSources() {
-		// We don't process routes embedded (native) or Kamelets
-		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
-			continue
-		}
-		srcName := strings.TrimPrefix(filepath.ToSlash(s.Name), "/")
-		src := "file:" + path.Join(filepath.ToSlash(camel.SourcesMountPath), srcName)
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].location", idx)] = src
-
-		simpleName := srcName
-		if strings.Contains(srcName, ".") {
-			simpleName = srcName[0:strings.Index(srcName, ".")]
-		}
-		e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].name", idx)] = simpleName
-
-		for pid, p := range s.PropertyNames {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].property-names[%d]", idx, pid)] = p
-		}
-
-		if s.Type != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].type", idx)] = string(s.Type)
-		}
-		if s.InferLanguage() != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].language", idx)] = string(s.InferLanguage())
-		}
-		if s.Loader != "" {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].loader", idx)] = s.Loader
-		}
-		if s.Compression {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].compressed", idx)] = boolean.TrueString
-		}
-
-		interceptors := make([]string, 0, len(s.Interceptors))
-		if s.Interceptors != nil {
-			interceptors = append(interceptors, s.Interceptors...)
-		}
-		if e.Interceptors != nil {
-			interceptors = append(interceptors, e.Interceptors...)
-		}
-		for intID, interceptor := range interceptors {
-			e.ApplicationProperties[fmt.Sprintf("camel.k.sources[%d].interceptors[%d]", idx, intID)] = interceptor
-		}
-		idx++
-	}
-}
-
-func (e *Environment) configureVolumesAndMounts(vols *[]corev1.Volume, mnts *[]corev1.VolumeMount) {
-	// Sources
-	idx := 0
-	for _, s := range e.Integration.AllSources() {
-		// We don't process routes embedded (native) or Kamelets
-		if e.isEmbedded(s) || s.IsGeneratedFromKamelet() {
-			continue
-		}
-		// Routes are copied under /etc/camel/sources and discovered by the runtime accordingly
-		cmName := fmt.Sprintf("%s-source-%03d", e.Integration.Name, idx)
-		if s.ContentRef != "" {
-			cmName = s.ContentRef
-		}
-		cmKey := "content"
-		if s.ContentKey != "" {
-			cmKey = s.ContentKey
-		}
-		resName := strings.TrimPrefix(s.Name, "/")
-		refName := fmt.Sprintf("i-source-%03d", idx)
-		resPath := filepath.Join(camel.SourcesMountPath, resName)
-		vol := getVolume(refName, "configmap", cmName, cmKey, resName)
-		mnt := getMount(refName, resPath, resName, true)
-
-		*vols = append(*vols, *vol)
-		*mnts = append(*mnts, *mnt)
-		idx++
-	}
-	// Resources (likely application properties or kamelets)
-	if e.Resources != nil {
-		e.Resources.VisitConfigMap(func(configMap *corev1.ConfigMap) {
-			switch configMap.Labels[kubernetes.ConfigMapTypeLabel] {
-			case CamelPropertiesType:
-				// Camel properties
-				propertiesType := configMap.Labels["camel.apache.org/properties.type"]
-				resName := propertiesType + ".properties"
-
-				var mountPath string
-				switch propertiesType {
-				case "application":
-					mountPath = filepath.Join(camel.BasePath, resName)
-				case "user":
-					mountPath = filepath.Join(camel.ConfDPath, resName)
-				}
-
-				if propertiesType != "" {
-					refName := propertiesType + "-properties"
-					vol := getVolume(refName, "configmap", configMap.Name, "application.properties", resName)
-					mnt := getMount(refName, mountPath, resName, true)
-
-					*vols = append(*vols, *vol)
-					*mnts = append(*mnts, *mnt)
-				} else {
-					log.WithValues("Function", "trait.configureVolumesAndMounts").Infof("Warning: could not determine camel properties type %s", propertiesType)
-				}
-			case KameletBundleType:
-				// Kamelets bundle configmap
-				kameletMountPoint := configMap.Annotations[kameletMountPointAnnotation]
-				refName := KameletBundleType
-				vol := getVolume(refName, "configmap", configMap.Name, "", "")
-				mnt := getMount(refName, kameletMountPoint, "", true)
-
-				*vols = append(*vols, *vol)
-				*mnts = append(*mnts, *mnt)
-			}
-		})
-	}
-}
-
 func getVolume(volName, storageType, storageName, filterKey, filterValue string) *corev1.Volume {
 	items := convertToKeyToPath(filterKey, filterValue)
 	volume := corev1.Volume{
@@ -750,18 +595,21 @@ func CapabilityPropertyKey(camelPropertyKey string, vars map[string]string) stri
 // ConsumeMeta is used to consume metadata information coming from Integration sources. If no sources available,
 // would return false. When consuming from meta you should make sure that the configuration is stored in the
 // status traits by setting each trait configuration when in "auto" mode.
-func (e *Environment) ConsumeMeta(consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
-	return e.consumeSourcesMeta(nil, consumeMeta)
+// originalSourcesOnly flag indicates if you want to use only the sources provided originally to the Integration, otherwise
+// it will consume all sources, also the one autogenerated by the operator.
+func (e *Environment) ConsumeMeta(originalSourcesOnly bool, consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
+	return e.consumeSourcesMeta(originalSourcesOnly, nil, consumeMeta)
 }
 
 // consumeSourcesMeta is used to consume both sources and metadata information coming from Integration sources.
 // If no sources available would return false.
 func (e *Environment) consumeSourcesMeta(
+	originalSourcesOnly bool,
 	consumeSources func(sources []v1.SourceSpec) bool,
 	consumeMeta func(metadata.IntegrationMetadata) bool) (bool, error) {
 	var sources []v1.SourceSpec
 	var err error
-	if sources, err = resolveIntegrationSources(e.Ctx, e.Client, e.Integration, e.Resources); err != nil {
+	if sources, err = resolveIntegrationSources(e.Ctx, e.Client, e.Integration, originalSourcesOnly, e.Resources); err != nil {
 		return false, err
 	}
 	if len(sources) < 1 {
@@ -780,4 +628,12 @@ func (e *Environment) consumeSourcesMeta(
 	}
 
 	return consumeMeta(meta), nil
+}
+
+func (e *Environment) appendCloudPropertiesLocation(cloudPropertiesLocation string) {
+	if e.ApplicationProperties["camel.main.cloud-properties-location"] == "" {
+		e.ApplicationProperties["camel.main.cloud-properties-location"] = cloudPropertiesLocation
+	} else {
+		e.ApplicationProperties["camel.main.cloud-properties-location"] += "," + cloudPropertiesLocation
+	}
 }

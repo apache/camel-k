@@ -17,11 +17,15 @@ limitations under the License.
 
 package trait
 
+// WARNING: The Service Binding trait is **deprecated** and will removed in future release versions.
+//
+
 // The Service Binding trait allows users to connect to Services in Kubernetes:
 // https://github.com/k8s-service-bindings/spec#service-binding
 // As the specification is still evolving this is subject to change.
 //
 // +camel-k:trait=service-binding.
+// +camel-k:deprecated=2.5.0.
 type ServiceBindingTrait struct {
 	Trait `property:",squash" json:",inline"`
 	// List of Services in the form [[apigroup/]version:]kind:[namespace/]name

@@ -26,10 +26,12 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
+	"github.com/apache/camel-k/v2/pkg/util/boolean"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 	"github.com/apache/camel-k/v2/pkg/util/gzip"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
@@ -63,7 +65,6 @@ func TestMountVolumesEmpty(t *testing.T) {
 
 func TestMountVolumesIntegrationPhaseDeploying(t *testing.T) {
 	traitCatalog := NewCatalog(nil)
-
 	environment := getNominalEnv(t, traitCatalog)
 	environment.Platform.ResyncStatusFullConfig()
 
@@ -233,7 +234,17 @@ func TestMountVolumesIntegrationPhaseInitialization(t *testing.T) {
 
 func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 	t.Helper()
-	fakeClient, _ := test.NewFakeClient()
+	pvc := corev1.PersistentVolumeClaim{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "PersistentVolumeClaim",
+			APIVersion: corev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+			Name:      "my-pvc",
+		},
+	}
+	fakeClient, _ := test.NewFakeClient(&pvc)
 	catalog, _ := camel.DefaultCatalog()
 	compressedRoute, _ := gzip.CompressBase64([]byte(`from("platform-http:test").log("hello")`))
 
@@ -292,4 +303,258 @@ func getNominalEnv(t *testing.T, traitCatalog *Catalog) *Environment {
 		ExecutedTraits: make([]Trait, 0),
 		Resources:      kubernetes.NewCollection(),
 	}
+}
+
+func TestMountVolumesExist(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	vol, vm, err := ParseAndCreateVolume(e, "my-pvc:/tmp/my-pvc")
+	assert.NoError(t, err)
+	assert.Equal(t, "my-pvc", vol.PersistentVolumeClaim.ClaimName)
+	assert.Equal(t, "my-pvc", vm.Name)
+	assert.Equal(t, "/tmp/my-pvc", vm.MountPath)
+}
+
+func TestMountVolumesNotExistAndFail(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	_, _, err := ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc")
+	assert.Error(t, err)
+	assert.Equal(t,
+		"volume my-pvc-2 does not exist. Make sure to provide one or configure a dynamic PVC as trait volume configuration "+
+			"pvcName:path/to/mount:size:accessMode<:storageClassName>", err.Error())
+	// Wrong configuration
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:fail")
+	assert.Error(t, err)
+	assert.Equal(t, "volume mount syntax error, must be name:path/to/mount:size:accessMode<:storageClassName> was my-pvc-2:/tmp/my-pvc:fail", err.Error())
+	// Wrong size parsing
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:10MM:ReadOnly")
+	assert.Error(t, err)
+	assert.Equal(t, "could not parse size 10MM, unable to parse quantity's suffix", err.Error())
+	// No default storage class
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:10Mi:ReadOnly")
+	assert.Error(t, err)
+	assert.Equal(t, "could not find any default StorageClass", err.Error())
+	// No given storage class
+	_, _, err = ParseAndCreateVolume(e, "my-pvc-2:/tmp/my-pvc:10Mi:ReadOnly:my-storage-class")
+	assert.Error(t, err)
+	assert.Equal(t, "could not find any my-storage-class StorageClass", err.Error())
+}
+
+func TestMountVolumesCreateDefaultStorageClass(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	sc := storagev1.StorageClass{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "StorageClass",
+			APIVersion: storagev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+			Name:      "default-sc",
+			Annotations: map[string]string{
+				"storageclass.kubernetes.io/is-default-class": "true",
+			},
+		},
+	}
+	fakeClient, _ := test.NewFakeClient(&sc)
+	e.Client = fakeClient
+	// Default storage class
+	vol, vm, err := ParseAndCreateVolume(e, "my-pvc:/tmp/my-pvc:10Mi:ReadOnly")
+	assert.NoError(t, err)
+	assert.Equal(t, "my-pvc", vol.PersistentVolumeClaim.ClaimName)
+	assert.Equal(t, "my-pvc", vm.Name)
+	assert.Equal(t, "/tmp/my-pvc", vm.MountPath)
+	pvc, err := kubernetes.LookupPersistentVolumeClaim(e.Ctx, e.Client, e.Integration.Namespace, "my-pvc")
+	assert.NoError(t, err)
+	assert.NotNil(t, pvc)
+}
+
+func TestMountVolumesCreateUserStorageClass(t *testing.T) {
+	traitCatalog := NewCatalog(nil)
+	e := getNominalEnv(t, traitCatalog)
+	sc := storagev1.StorageClass{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "StorageClass",
+			APIVersion: storagev1.SchemeGroupVersion.String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "default",
+			Name:      "my-sc",
+		},
+	}
+	fakeClient, _ := test.NewFakeClient(&sc)
+	e.Client = fakeClient
+	// Default storage class
+	vol, vm, err := ParseAndCreateVolume(e, "my-pvc:/tmp/my-pvc:10Mi:ReadOnly:my-sc")
+	assert.NoError(t, err)
+	assert.Equal(t, "my-pvc", vol.PersistentVolumeClaim.ClaimName)
+	assert.Equal(t, "my-pvc", vm.Name)
+	assert.Equal(t, "/tmp/my-pvc", vm.MountPath)
+	pvc, err := kubernetes.LookupPersistentVolumeClaim(e.Ctx, e.Client, e.Integration.Namespace, "my-pvc")
+	assert.NoError(t, err)
+	assert.NotNil(t, pvc)
+}
+
+func TestConfigureVolumesAndMountsSources(t *testing.T) {
+	trait, _ := newMountTrait().(*mountTrait)
+	env := Environment{
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      TestDeploymentName,
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source1.java",
+							ContentRef: "my-cm1",
+							ContentKey: "source1.java",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source2.java",
+							ContentRef: "my-cm2",
+						},
+						Type: "data",
+					},
+				},
+			},
+		},
+		Catalog: &Catalog{},
+	}
+
+	vols := make([]corev1.Volume, 0)
+	mnts := make([]corev1.VolumeMount, 0)
+
+	trait.configureCamelVolumesAndMounts(&env, &vols, &mnts)
+
+	assert.Len(t, vols, 2)
+	assert.Len(t, mnts, 2)
+
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "source1.java", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm2" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+}
+
+func TestConfigureVolumesAndMountsSourcesInNativeMode(t *testing.T) {
+	trait, _ := newMountTrait().(*mountTrait)
+	traitList := make([]Trait, 0, len(FactoryList))
+	quarkus, ok := newQuarkusTrait().(*quarkusTrait)
+	assert.True(t, ok, "A Quarkus trait was expected")
+	quarkus.Modes = []traitv1.QuarkusMode{traitv1.NativeQuarkusMode}
+	traitList = append(traitList, quarkus)
+	env := Environment{
+		Resources: kubernetes.NewCollection(),
+		Integration: &v1.Integration{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      TestDeploymentName,
+				Namespace: "ns",
+			},
+			Spec: v1.IntegrationSpec{
+				Sources: []v1.SourceSpec{
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source1.xml",
+							ContentRef: "my-cm1",
+							ContentKey: "source1.xml",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source2.java",
+							ContentRef: "my-cm2",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source1.java",
+							ContentRef: "my-cm3",
+							ContentKey: "source1.java",
+						},
+						Type: "data",
+					},
+					{
+						DataSpec: v1.DataSpec{
+							Name:       "source2.xml",
+							ContentRef: "my-cm4",
+						},
+						Type: "data",
+					},
+				},
+			},
+			Status: v1.IntegrationStatus{
+				Phase: v1.IntegrationPhaseRunning,
+			},
+		},
+		IntegrationKit: &v1.IntegrationKit{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: map[string]string{
+					v1.IntegrationKitLayoutLabel: v1.IntegrationKitLayoutNativeSources,
+				},
+				Namespace: "ns",
+			},
+		},
+		Catalog: &Catalog{
+			traits: traitList,
+		},
+		CamelCatalog: &camel.RuntimeCatalog{
+			CamelCatalogSpec: v1.CamelCatalogSpec{
+				Loaders: map[string]v1.CamelLoader{
+					"java": {
+						Metadata: map[string]string{
+							"native":                         boolean.TrueString,
+							"sources-required-at-build-time": boolean.TrueString,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	vols := make([]corev1.Volume, 0)
+	mnts := make([]corev1.VolumeMount, 0)
+
+	trait.configureCamelVolumesAndMounts(&env, &vols, &mnts)
+
+	assert.Len(t, vols, 2)
+	assert.Len(t, mnts, 2)
+
+	v := findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm1" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "source1.xml", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m := findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
+
+	v = findVolume(vols, func(v corev1.Volume) bool { return v.ConfigMap.Name == "my-cm4" })
+	assert.NotNil(t, v)
+	assert.NotNil(t, v.VolumeSource.ConfigMap)
+	assert.Len(t, v.VolumeSource.ConfigMap.Items, 1)
+	assert.Equal(t, "content", v.VolumeSource.ConfigMap.Items[0].Key)
+
+	m = findVVolumeMount(mnts, func(m corev1.VolumeMount) bool { return m.Name == v.Name })
+	assert.NotNil(t, m)
 }

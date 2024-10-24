@@ -643,3 +643,117 @@ func TestYAMLRouteWithUnknownScheme(t *testing.T) {
 		})
 	}
 }
+
+const yamlRouteCronReplacement = `
+- route:
+    id: route1
+    from:
+      uri: "cron:tab"
+      parameters:
+        schedule: "* * * * ?"
+      steps:
+      - setBody:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{url}}"
+`
+
+const yamlFromCronReplacement = `
+- from:
+    uri: "cron:tab"
+    parameters:
+      schedule: "* * * * ?"
+    steps:
+    - setBody:
+        constant: "Hello Yaml !!!"
+    - transform:
+        simple: "${body.toUpperCase()}"
+    - to: "{{url}}"
+`
+
+const expectedYamlFromCronReplacement = `from:
+    steps:
+    - setBody:
+        constant: Hello Yaml !!!
+    - transform:
+        simple: ${body.toUpperCase()}
+    - to: '{{url}}'
+    uri: direct:newURI?hello=world
+`
+
+const expectedYamlRouteCronReplacement = `from:
+      steps:
+      - setBody:
+          constant: Hello Yaml !!!
+      - transform:
+          simple: ${body.toUpperCase()}
+      - to: '{{url}}'
+      uri: direct:newURI?hello=world
+`
+
+func TestYAMLFromReplaceURI(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.yaml",
+			Content: yamlFromCronReplacement,
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	// Assert changed uri and removed parameters
+	assert.Contains(t, sourceSpec.Content, expectedYamlFromCronReplacement)
+}
+
+func TestYAMLRouteReplaceURI(t *testing.T) {
+	inspector := newTestYAMLInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.yaml",
+			Content: yamlRouteCronReplacement,
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	// Assert changed uri and removed parameters
+	assert.Contains(t, sourceSpec.Content, expectedYamlRouteCronReplacement)
+}
+
+func TestYAMLRESTContractFirst(t *testing.T) {
+	yamlContractFirst := `
+- rest:
+    openApi:
+      specification: petstore-v3.json
+
+- route:
+    id: route1
+    from:
+      uri: "timer:tick"
+      parameters:
+        period: "5000"
+    steps:
+      - setBody:
+          constant: "Hello Yaml !!!"
+      - transform:
+          simple: "${body.toUpperCase()}"
+      - to: "{{url}}"
+`
+
+	inspector := newTestYAMLInspector(t)
+	t.Run("TestYAMLRESTContractFirst", func(t *testing.T) {
+		assertExtractYAML(t, inspector, yamlContractFirst, func(meta *Metadata) {
+			assert.Contains(t, meta.Dependencies.List(), "camel:rest-openapi")
+		})
+	})
+}

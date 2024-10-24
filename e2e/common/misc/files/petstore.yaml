@@ -1,3 +1,5 @@
+# camel-k: language=yaml
+
 # ---------------------------------------------------------------------------
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -15,23 +17,27 @@
 # limitations under the License.
 # ---------------------------------------------------------------------------
 
+- rest:
+    openApi:
+      specification: petstore-api.yaml
+
 - from:
-    uri: "cron:tab"
-    parameters:
-      # Every minute
-      schedule: "* * * * *"
+    uri: "direct:listPets"
     steps:
-      - setHeader:
-          name: "m"
-          constant: "string!"
       - setBody:
-          simple: "Magic${header.m}"
-      # Simulate a job workload
-      - delay:
-          expression:
-            constant: 20000
-          asyncDelayed: false
-      - to:
-          uri: "log:info"
-          parameters:
-            show-all: "false"
+          simple: "listPets"
+      - to: "log:info"
+
+- from:
+    uri: "direct:createPets"
+    steps:
+      - setBody:
+          simple: "createPets"
+      - to: "log:info"
+
+- from:
+    uri: "direct:showPetById"
+    steps:
+      - setBody:
+          simple: "showPetById"
+      - to: "log:info"

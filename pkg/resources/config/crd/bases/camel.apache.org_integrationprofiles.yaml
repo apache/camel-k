@@ -51,6 +51,7 @@ spec:
         description: |-
           IntegrationProfile is the resource used to apply user defined settings to the Camel K operator behavior.
           It defines the behavior of all Custom Resources (`IntegrationKit`, `Integration`, `Kamelet`) in the given namespace.
+          Deprecated: may be removed in future releases. Make use of IntegrationPlatform instead.
         properties:
           apiVersion:
             description: |-
@@ -708,10 +709,6 @@ spec:
                       components:
                         description: |-
                           A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
-                          A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
-                          activated (it's present in the `org.apache.camel.k:camel-k-cron` library).
-
-
                           Supported components are currently: `cron`, `timer` and `quartz`.
                         type: string
                       concurrencyPolicy:
@@ -1545,8 +1542,10 @@ spec:
                           2.5.'
                         type: boolean
                       volumes:
-                        description: 'A list of Persistent Volume Claims to be mounted.
-                          Syntax: [pvcname:/container/path]'
+                        description: |-
+                          A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]. If the PVC is not found, the Integration fails.
+                          You can use the syntax [pvcname:/container/path:size:accessMode<:storageClass>] to create a dynamic PVC based on the Storage Class provided
+                          or the default cluster Storage Class. However, if the PVC exists, the operator would mount it.
                         items:
                           type: string
                         type: array
@@ -2729,10 +2728,6 @@ spec:
                       components:
                         description: |-
                           A comma separated list of the Camel components that need to be customized in order for them to work when the schedule is triggered externally by Kubernetes.
-                          A specific customizer is activated for each specified component. E.g. for the `timer` component, the `cron-timer` customizer is
-                          activated (it's present in the `org.apache.camel.k:camel-k-cron` library).
-
-
                           Supported components are currently: `cron`, `timer` and `quartz`.
                         type: string
                       concurrencyPolicy:
@@ -3566,8 +3561,10 @@ spec:
                           2.5.'
                         type: boolean
                       volumes:
-                        description: 'A list of Persistent Volume Claims to be mounted.
-                          Syntax: [pvcname:/container/path]'
+                        description: |-
+                          A list of Persistent Volume Claims to be mounted. Syntax: [pvcname:/container/path]. If the PVC is not found, the Integration fails.
+                          You can use the syntax [pvcname:/container/path:size:accessMode<:storageClass>] to create a dynamic PVC based on the Storage Class provided
+                          or the default cluster Storage Class. However, if the PVC exists, the operator would mount it.
                         items:
                           type: string
                         type: array

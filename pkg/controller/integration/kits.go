@@ -202,10 +202,10 @@ func kitMatches(c client.Client, kit *v1.IntegrationKit, target *v1.IntegrationK
 }
 
 func hasMatchingSourcesForNative(it *v1.Integration, kit *v1.IntegrationKit) bool {
-	if len(it.UserDefinedSources()) != len(kit.Spec.Sources) {
+	if len(it.OriginalSources()) != len(kit.Spec.Sources) {
 		return false
 	}
-	for _, itSource := range it.UserDefinedSources() {
+	for _, itSource := range it.OriginalSources() {
 		found := false
 		for _, ikSource := range kit.Spec.Sources {
 			if itSource.Content == ikSource.Content {

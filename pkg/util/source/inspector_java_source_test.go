@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
@@ -151,4 +152,41 @@ func TestJavaSourceDataFormat(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestJavaReplaceURI(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.java",
+			Content: "from(\"quartz:trigger?cron=0 0/1 * * * ?\").to(\"log:info\")",
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	assert.Equal(t, "from(\"direct:newURI?hello=world\").to(\"log:info\")", sourceSpec.Content)
+}
+
+func TestJavaRestOpenapiFirst(t *testing.T) {
+	inspector := newTestJavaSourceInspector(t)
+
+	sourceSpec := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name: "test.java",
+			Content: `
+public void configure() throws Exception {
+    rest().openApi("petstore-v3.json");
+}
+			`,
+		},
+	}
+	meta := NewMetadata()
+	err := inspector.Extract(sourceSpec, &meta)
+	require.NoError(t, err)
+	assert.Contains(t, meta.Dependencies.List(), "camel:rest-openapi")
 }

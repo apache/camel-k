@@ -76,7 +76,11 @@ func keyValueProps(value string) (*properties.Properties, error) {
 	return properties.Load([]byte(value), properties.UTF8)
 }
 
+// Deprecated: won't be supported in future releases.
 func loadPropertiesFromSecret(ctx context.Context, c client.Client, ns string, name string) (*properties.Properties, error) {
+	if c == nil {
+		return nil, fmt.Errorf("cannot inspect Secrets in offline mode")
+	}
 	secret := kubernetes.LookupSecret(ctx, c, ns, name)
 	if secret == nil {
 		return nil, fmt.Errorf("%s secret not found in %s namespace, make sure to provide it before the Integration can run", name, ns)
@@ -88,7 +92,11 @@ func loadPropertiesFromSecret(ctx context.Context, c client.Client, ns string, n
 		})
 }
 
+// Deprecated: won't be supported in future releases.
 func loadPropertiesFromConfigMap(ctx context.Context, c client.Client, ns string, name string) (*properties.Properties, error) {
+	if c == nil {
+		return nil, fmt.Errorf("cannot inspect Configmaps in offline mode")
+	}
 	cm := kubernetes.LookupConfigmap(ctx, c, ns, name)
 	if cm == nil {
 		return nil, fmt.Errorf("%s configmap not found in %s namespace, make sure to provide it before the Integration can run", name, ns)
@@ -98,6 +106,7 @@ func loadPropertiesFromConfigMap(ctx context.Context, c client.Client, ns string
 		func(v reflect.Value) (*properties.Properties, error) { return keyValueProps(v.String()) })
 }
 
+// Deprecated: func supporting other deprecated funcs.
 func fromMapToProperties(data interface{}, toString func(reflect.Value) string, loadProperties func(reflect.Value) (*properties.Properties, error)) (*properties.Properties, error) {
 	result := properties.NewProperties()
 	m := reflect.ValueOf(data)

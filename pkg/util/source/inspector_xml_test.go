@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	"github.com/apache/camel-k/v2/pkg/util/camel"
 
 	"github.com/stretchr/testify/assert"
@@ -185,4 +186,45 @@ func TestXMLDataFormat(t *testing.T) {
 			})
 		})
 	}
+}
+
+func TestXMLReplaceURI(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+
+	sourceSpec := &v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name:    "test.xml",
+			Content: xmlJSONEip,
+		},
+	}
+	replaced, err := inspector.ReplaceFromURI(
+		sourceSpec,
+		"direct:newURI?hello=world",
+	)
+	assert.Nil(t, err)
+	assert.True(t, replaced)
+	assert.Contains(t, sourceSpec.Content, "<from uri=\"direct:newURI?hello=world\"/>")
+}
+
+func TestXMLRestOpenapiFirst(t *testing.T) {
+	inspector := newTestXMLInspector(t)
+
+	sourceSpec := v1.SourceSpec{
+		DataSpec: v1.DataSpec{
+			Name: "test.xml",
+			Content: `
+		  <rest>
+			<openApi specification="petstore-v3.json"/>
+		  </rest>
+		  <route>
+			<from uri="direct:getUserByName"/>
+			// do something here
+		  </route>
+			`,
+		},
+	}
+	meta := NewMetadata()
+	err := inspector.Extract(sourceSpec, &meta)
+	require.NoError(t, err)
+	assert.Contains(t, meta.Dependencies.List(), "camel:rest-openapi")
 }

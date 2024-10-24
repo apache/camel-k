@@ -188,12 +188,6 @@ func (t *containerTrait) configureContainer(e *Environment) error {
 	}); err != nil {
 		return err
 	}
-	e.addSourcesProperties()
-	if props, err := e.computeApplicationProperties(); err != nil {
-		return err
-	} else if props != nil {
-		e.Resources.Add(props)
-	}
 	t.configureResources(&container)
 	if knative || ptr.Deref(t.Expose, false) {
 		t.configureService(e, &container, knative)
