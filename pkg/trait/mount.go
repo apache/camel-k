@@ -27,7 +27,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serving "knative.dev/serving/pkg/apis/serving/v1"
@@ -167,7 +166,7 @@ func (t *mountTrait) configureVolumesAndMounts(e *Environment, vols *[]corev1.Vo
 		*mnts = append(*mnts, *volumeMount)
 	}
 	for _, v := range t.EmptyDirs {
-		volume, volumeMount, parseErr := t.ParseEmptyDirVolume(v)
+		volume, volumeMount, parseErr := ParseEmptyDirVolume(v)
 		if parseErr != nil {
 			return parseErr
 		}
@@ -283,7 +282,7 @@ func (t *mountTrait) addServiceBindingSecret(e *Environment) {
 }
 
 // ParseEmptyDirVolume will parse and return an empty-dir volume
-func (t *mountTrait) ParseEmptyDirVolume(item string) (*corev1.Volume, *corev1.VolumeMount, error) {
+func ParseEmptyDirVolume(item string) (*corev1.Volume, *corev1.VolumeMount, error) {
 	volumeParts := strings.Split(item, ":")
 
 	if len(volumeParts) != 2 && len(volumeParts) != 3 {
