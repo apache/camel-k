@@ -26,6 +26,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -43,7 +44,10 @@ import (
 // the following trait options:
 // -t azure-key-vault.enabled=true -t azure-key-vault.tenant-id="tenant-id" -t azure-key-vault.client-id="client-id" -t azure-key-vault.client-secret="client-secret" -t azure-key-vault.vault-name="vault-name" -t azure-key-vault.context-reload-enabled="true" -t azure-key-vault.refresh-enabled="true" -t azure-key-vault.refresh-period="30000" -t azure-key-vault.secrets="test*" -t azure-key-vault.eventhub-connection-string="connection-string" -t azure-key-vault.blob-account-name="account-name"  -t azure-key-vault.blob-container-name="container-name"  -t azure-key-vault.blob-access-key="account-name" -t azure-key-vault.azure-identity-enabled="true"
 //
+// WARNING: The trait is **deprecated** and will removed in future release versions: configure directly the Camel properties as required by the component instead.
+//
 // +camel-k:trait=azure-key-vault.
+// +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
@@ -112,7 +116,16 @@ func (t *azureKeyVaultTrait) Configure(environment *trait.Environment) (bool, *t
 		t.AzureIdentityEnabled = ptr.To(false)
 	}
 
-	return true, nil, nil
+	condition := trait.NewIntegrationCondition(
+		"AzureKeyVault",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		trait.TraitConfigurationReason,
+		"AzureKeyVault trait is deprecated and may be removed in future version: "+
+			"configure directly the Camel properties as required by the component instead",
+	)
+
+	return true, condition, nil
 }
 
 func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
