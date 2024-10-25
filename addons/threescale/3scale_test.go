@@ -54,7 +54,7 @@ func TestThreeScaleInjection(t *testing.T) {
 	ok, condition, err := threeScale.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = threeScale.Apply(e)
 	require.NoError(t, err)
@@ -75,7 +75,7 @@ func TestThreeScaleInjectionNoAPIPath(t *testing.T) {
 	ok, condition, err := threeScale.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = threeScale.Apply(e)
 	require.NoError(t, err)
