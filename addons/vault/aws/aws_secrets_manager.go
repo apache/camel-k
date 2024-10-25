@@ -26,6 +26,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -43,7 +44,10 @@ import (
 // the following trait options:
 // -t aws-secrets-manager.enabled=true -t aws-secrets-manager.access-key="aws-access-key" -t aws-secrets-manager.secret-key="aws-secret-key" -t aws-secrets-manager.region="aws-region" -t aws-secrets-manager.context-reload-enabled="true" -t aws-secrets-manager.refresh-enabled="true" -t aws-secrets-manager.refresh-period="30000" -t aws-secrets-manager.secrets="test*"
 //
+// WARNING: The trait is **deprecated** and will removed in future release versions: configure directly the Camel properties as required by the component instead.
+//
 // +camel-k:trait=aws-secrets-manager.
+// +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
@@ -100,7 +104,16 @@ func (t *awsSecretsManagerTrait) Configure(environment *trait.Environment) (bool
 		t.RefreshEnabled = ptr.To(false)
 	}
 
-	return true, nil, nil
+	condition := trait.NewIntegrationCondition(
+		"AWSSecretManager",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		trait.TraitConfigurationReason,
+		"AWSSecretManager trait is deprecated and may be removed in future version: "+
+			"configure directly the Camel properties as required by the component instead",
+	)
+
+	return true, condition, nil
 }
 
 func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
