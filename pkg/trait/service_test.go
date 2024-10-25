@@ -741,7 +741,7 @@ func TestServiceAutoConfiguration(t *testing.T) {
 	assert.Equal(t, ptr.To(true), traits.Service.Enabled)
 }
 
-func TestServiceAnnotations(t *testing.T) {
+func TestServiceAnnotationsAndLables(t *testing.T) {
 	catalog, err := camel.DefaultCatalog()
 	require.NoError(t, err)
 
@@ -782,6 +782,10 @@ func TestServiceAnnotations(t *testing.T) {
 							"annotation-1": "value-1",
 							"annotation-2": "value-2",
 						},
+						Labels: map[string]string{
+							"label-1": "v1",
+							"label-2": "v2",
+						},
 					},
 				},
 			},
@@ -818,6 +822,12 @@ func TestServiceAnnotations(t *testing.T) {
 	})
 	assert.NotNil(t, s)
 	assert.NotNil(t, s.Annotations)
+	assert.Len(t, s.Annotations, 2)
 	assert.Equal(t, "value-1", s.Annotations["annotation-1"])
 	assert.Equal(t, "value-2", s.Annotations["annotation-2"])
+	// There are other labels added by other traits
+	assert.Len(t, s.Labels, 5)
+	assert.Equal(t, "v1", s.Labels["label-1"])
+	assert.Equal(t, "v2", s.Labels["label-2"])
+	assert.Equal(t, ServiceTestName, s.Labels[v1.IntegrationLabel])
 }

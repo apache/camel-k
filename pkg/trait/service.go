@@ -122,17 +122,21 @@ func (t *serviceTrait) Apply(e *Environment) error {
 }
 
 func (t *serviceTrait) getServiceFor(itName, itNamespace string) *corev1.Service {
+	labels := map[string]string{
+		v1.IntegrationLabel: itName,
+	}
+	for k, v := range t.Labels {
+		labels[k] = v
+	}
 	return &corev1.Service{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Service",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      itName,
-			Namespace: itNamespace,
-			Labels: map[string]string{
-				v1.IntegrationLabel: itName,
-			},
+			Name:        itName,
+			Namespace:   itNamespace,
+			Labels:      labels,
 			Annotations: t.Annotations,
 		},
 		Spec: corev1.ServiceSpec{

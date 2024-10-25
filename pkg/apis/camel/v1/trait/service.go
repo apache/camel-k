@@ -37,6 +37,8 @@ type ServiceTrait struct {
 	Type *ServiceType `property:"type" json:"type,omitempty"`
 	// The annotations added to the Service object.
 	Annotations map[string]string `property:"annotations" json:"annotations,omitempty"`
+	// The labels added to the Service object.
+	Labels map[string]string `property:"labels" json:"labels,omitempty"`
 }
 
 type ServiceType string
