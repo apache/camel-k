@@ -24,6 +24,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -41,7 +42,10 @@ import (
 // the following trait options:
 // -t gpc-secret-manager.enabled=true -t gpc-secret-manager.project-id="project-id" -t gpc-secret-manager.service-account-key="file:serviceaccount.json" -t gcp-secret-manager.subscription-name="pubsub-sub" -t gcp-secret-manager.context-reload-enabled="true" -t gcp-secret-manager.refresh-enabled="true" -t gcp-secret-manager.refresh-period="30000" -t gcp-secret-manager.secrets="test*"
 //
+// WARNING: The trait is **deprecated** and will removed in future release versions: configure directly the Camel properties as required by the component instead.
+//
 // +camel-k:trait=gcp-secret-manager.
+// +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
@@ -96,7 +100,16 @@ func (t *gcpSecretManagerTrait) Configure(environment *trait.Environment) (bool,
 		t.RefreshEnabled = ptr.To(false)
 	}
 
-	return true, nil, nil
+	condition := trait.NewIntegrationCondition(
+		"GCPSecretManager",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		trait.TraitConfigurationReason,
+		"GCPSecretManager trait is deprecated and may be removed in future version: "+
+			"configure directly the Camel properties as required by the component instead",
+	)
+
+	return true, condition, nil
 }
 
 func (t *gcpSecretManagerTrait) Apply(environment *trait.Environment) error {
