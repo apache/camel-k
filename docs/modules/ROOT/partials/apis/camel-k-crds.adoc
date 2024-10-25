@@ -8798,6 +8798,13 @@ map[string]string
 
 The annotations added to the Service object.
 
+|`labels` +
+map[string]string
+|
+
+
+The labels added to the Service object.
+
 
 |===
 
