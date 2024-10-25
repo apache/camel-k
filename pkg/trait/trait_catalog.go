@@ -182,7 +182,7 @@ func (c *Catalog) executedTraitCondition(executedTrait []Trait) (*TraitCondition
 	message := fmt.Sprintf("Applied traits: %s", strings.Join(traitIds, ","))
 	c.L.Debugf(message)
 
-	return NewIntegrationCondition("", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message), traits, nil
+	return NewIntegrationCondition("", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message), traits, nil
 }
 
 // Deprecated: remove this check when we include the addons traits into regular traits

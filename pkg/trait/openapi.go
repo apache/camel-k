@@ -68,7 +68,7 @@ func (t *openAPITrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 				"OpenApi",
 				v1.IntegrationConditionTraitInfo,
 				corev1.ConditionTrue,
-				traitConfigurationReason,
+				TraitConfigurationReason,
 				"OpenApi trait is deprecated and may be removed in future version: "+
 					"use Camel REST contract first instead, https://camel.apache.org/manual/rest-dsl-openapi.html",
 			)

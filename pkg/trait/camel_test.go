@@ -81,7 +81,7 @@ func TestApplyCamelTraitNonManagedBuild(t *testing.T) {
 		"Camel",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
-		traitConfigurationReason,
+		TraitConfigurationReason,
 		fmt.Sprintf(
 			"Operated with CamelCatalog version %s which may be different from the runtime used in the container",
 			"0.0.1",
@@ -243,7 +243,7 @@ func TestApplyCamelTraitNonManagedBuildWithProperties(t *testing.T) {
 		"Camel",
 		v1.IntegrationConditionTraitInfo,
 		corev1.ConditionTrue,
-		traitConfigurationReason,
+		TraitConfigurationReason,
 		fmt.Sprintf(
 			"Operated with CamelCatalog version %s which may be different from the runtime used in the container",
 			"0.0.1",

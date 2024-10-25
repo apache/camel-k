@@ -148,7 +148,7 @@ func (t *quarkusTrait) Configure(e *Environment) (bool, *TraitCondition, error) 
 		message := "The sources contains some language marked as deprecated. This Integration may not be supported in future release."
 		if condition == nil {
 			condition = NewIntegrationCondition(
-				"Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+				"Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
 		} else {
 			condition.message += message
 		}
@@ -182,7 +182,7 @@ func (t *quarkusTrait) adaptDeprecatedFields() *TraitCondition {
 				t.Modes = append(t.Modes, traitv1.JvmQuarkusMode)
 			}
 		}
-		return NewIntegrationCondition("Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+		return NewIntegrationCondition("Quarkus", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
 	}
 
 	return nil

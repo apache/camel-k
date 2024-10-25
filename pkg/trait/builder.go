@@ -188,7 +188,7 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 		m := "The limit-memory parameter is deprecated and may be removed in future releases. Make sure to use tasks-limit-memory parameter instead."
 		t.L.Info(m)
 		if condition == nil {
-			condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, "")
+			condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, "")
 		}
 		condition = newOrAppend(condition, m)
 		t.TasksLimitMemory = append(t.TasksLimitMemory, fmt.Sprintf("builder:%s", t.LimitMemory))
@@ -199,7 +199,7 @@ func (t *builderTrait) adaptDeprecatedFields() *TraitCondition {
 
 func newOrAppend(condition *TraitCondition, message string) *TraitCondition {
 	if condition == nil {
-		condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, traitConfigurationReason, message)
+		condition = NewIntegrationCondition("Builder", v1.IntegrationConditionTraitInfo, corev1.ConditionTrue, TraitConfigurationReason, message)
 	} else {
 		condition.message += "; " + message
 	}

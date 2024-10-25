@@ -90,7 +90,7 @@ func (t *camelTrait) Configure(e *Environment) (bool, *TraitCondition, error) {
 			"Camel",
 			v1.IntegrationConditionTraitInfo,
 			corev1.ConditionTrue,
-			traitConfigurationReason,
+			TraitConfigurationReason,
 			fmt.Sprintf(
 				"Operated with CamelCatalog version %s which may be different from the runtime used in the container",
 				t.runtimeVersion,

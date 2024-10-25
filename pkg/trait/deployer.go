@@ -58,7 +58,7 @@ func (t *deployerTrait) Configure(e *Environment) (bool, *TraitCondition, error)
 			"Deployer",
 			v1.IntegrationConditionTraitInfo,
 			corev1.ConditionTrue,
-			traitConfigurationReason,
+			TraitConfigurationReason,
 			"The use-ssa parameter is deprecated and may be removed in future releases.",
 		)
 	}
