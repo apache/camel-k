@@ -49,7 +49,7 @@ func TestAwsSecretsManagerTraitApply(t *testing.T) {
 	ok, condition, err := secrets.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = secrets.Apply(e)
 	require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestAwsSecretsManagerTraitNoDefaultCreds(t *testing.T) {
 	ok, condition, err := secrets.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = secrets.Apply(e)
 	require.NoError(t, err)
@@ -112,7 +112,7 @@ func TestAwsSecretsManagerTraitWithSecrets(t *testing.T) {
 	ok, condition, err := secrets.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = secrets.Apply(e)
 	require.NoError(t, err)
@@ -152,7 +152,7 @@ func TestAwsSecretsManagerTraitWithConfigMap(t *testing.T) {
 	ok, condition, err := secrets.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = secrets.Apply(e)
 	require.NoError(t, err)
