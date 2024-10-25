@@ -5231,6 +5231,11 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: The labels added to the Service object.
+                        type: object
                       nodePort:
                         description: |-
                           Enable Service to be exposed as NodePort (default `false`).
@@ -7376,6 +7381,11 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: The labels added to the Service object.
+                        type: object
                       nodePort:
                         description: |-
                           Enable Service to be exposed as NodePort (default `false`).
@@ -9424,6 +9434,11 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: The labels added to the Service object.
+                        type: object
                       nodePort:
                         description: |-
                           Enable Service to be exposed as NodePort (default `false`).
@@ -11448,6 +11463,11 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: The labels added to the Service object.
+                        type: object
                       nodePort:
                         description: |-
                           Enable Service to be exposed as NodePort (default `false`).
@@ -19513,6 +19533,11 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: The labels added to the Service object.
+                        type: object
                       nodePort:
                         description: |-
                           Enable Service to be exposed as NodePort (default `false`).
@@ -21499,6 +21524,11 @@ spec:
                         description: Can be used to enable or disable a trait. All
                           traits share this common property.
                         type: boolean
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: The labels added to the Service object.
+                        type: object
                       nodePort:
                         description: |-
                           Enable Service to be exposed as NodePort (default `false`).
@@ -29640,6 +29670,11 @@ spec:
                             description: Can be used to enable or disable a trait.
                               All traits share this common property.
                             type: boolean
+                          labels:
+                            additionalProperties:
+                              type: string
+                            description: The labels added to the Service object.
+                            type: object
                           nodePort:
                             description: |-
                               Enable Service to be exposed as NodePort (default `false`).
@@ -40571,6 +40606,11 @@ spec:
                             description: Can be used to enable or disable a trait.
                               All traits share this common property.
                             type: boolean
+                          labels:
+                            additionalProperties:
+                              type: string
+                            description: The labels added to the Service object.
+                            type: object
                           nodePort:
                             description: |-
                               Enable Service to be exposed as NodePort (default `false`).
