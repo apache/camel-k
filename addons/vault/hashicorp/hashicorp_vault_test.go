@@ -48,7 +48,7 @@ func TestHashicorpVaultTraitApply(t *testing.T) {
 	ok, condition, err := secrets.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = secrets.Apply(e)
 	require.NoError(t, err)
@@ -82,7 +82,7 @@ func TestHashicorpVaultTraitWithSecretApply(t *testing.T) {
 	ok, condition, err := secrets.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = secrets.Apply(e)
 	require.NoError(t, err)
@@ -116,7 +116,7 @@ func TestHashicorpVaultTraitWithConfigMapApply(t *testing.T) {
 	ok, condition, err := secrets.Configure(e)
 	require.NoError(t, err)
 	assert.True(t, ok)
-	assert.Nil(t, condition)
+	assert.NotNil(t, condition)
 
 	err = secrets.Apply(e)
 	require.NoError(t, err)

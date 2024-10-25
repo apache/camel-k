@@ -23,6 +23,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -36,7 +37,10 @@ import (
 // the following trait options:
 // -t hashicorp-vault.enabled=true -t hashicorp-vault.token="token" -t hashicorp-vault.port="port" -t hashicorp-vault.engine="engine" -t hashicorp-vault.port="port" -t hashicorp-vault.scheme="scheme"
 //
+// WARNING: The trait is **deprecated** and will removed in future release versions: configure directly the Camel properties as required by the component instead.
+//
 // +camel-k:trait=hashicorp-vault.
+// +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
@@ -75,7 +79,16 @@ func (t *hashicorpVaultTrait) Configure(environment *trait.Environment) (bool, *
 		return false, nil, nil
 	}
 
-	return true, nil, nil
+	condition := trait.NewIntegrationCondition(
+		"HashicorpVault",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		trait.TraitConfigurationReason,
+		"HashicorpVault trait is deprecated and may be removed in future version: "+
+			"configure directly the Camel properties as required by the component instead",
+	)
+
+	return true, condition, nil
 }
 
 func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
