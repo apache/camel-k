@@ -75,7 +75,7 @@ func (t *telemetryTrait) Configure(e *Environment) (bool, *TraitCondition, error
 			"Telemetry",
 			v1.IntegrationConditionTraitInfo,
 			corev1.ConditionTrue,
-			traitConfigurationReason,
+			TraitConfigurationReason,
 			"Telemetry addon configuration is deprecated and may be removed in future releases. Make sure to use Telemetry trait configuration instead.",
 		)
 	}

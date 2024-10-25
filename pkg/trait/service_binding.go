@@ -85,7 +85,7 @@ func (t *serviceBindingTrait) Configure(e *Environment) (bool, *TraitCondition, 
 			"ServiceBinding",
 			v1.IntegrationConditionTraitInfo,
 			corev1.ConditionTrue,
-			traitConfigurationReason,
+			TraitConfigurationReason,
 			"ServiceBinding trait is deprecated as the Service Binding Operator is no longer supported. It may be removed in future version.",
 		)
 	}
