@@ -1,11 +1,21 @@
 # Changelog
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-22)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Give configurable SizeLimit to emptyDir volumes in mount trait [\#5864](https://github.com/apache/camel-k/issues/5864)
+- Camel ftp issue in writing file [\#5682](https://github.com/apache/camel-k/issues/5682)
+
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-24)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
 **Closed issues:**
 
+- Support Service trait annotations [\#5901](https://github.com/apache/camel-k/issues/5901)
 - Camel-K creating new KnativeService instead of updating the existing one [\#5874](https://github.com/apache/camel-k/issues/5874)
 - Deprecate IntegrationProfile [\#5869](https://github.com/apache/camel-k/issues/5869)
 - Service Binding deprecation and removal [\#5868](https://github.com/apache/camel-k/issues/5868)
