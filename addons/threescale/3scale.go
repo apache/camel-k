@@ -20,6 +20,7 @@ package threescale
 import (
 	"strconv"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 
@@ -33,7 +34,10 @@ import (
 //
 // The 3scale trait is disabled by default.
 //
+// WARNING: The trait is **deprecated** and will removed in future release versions: configure directly the Camel properties as required by the component instead.
+//
 // +camel-k:trait=3scale.
+// +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash" json:",inline"`
 	// Enables automatic configuration of the trait.
@@ -95,6 +99,15 @@ func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, *trait.TraitCon
 		return false, nil, nil
 	}
 
+	condition := trait.NewIntegrationCondition(
+		"3Scale",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		trait.TraitConfigurationReason,
+		"3Scale trait is deprecated and may be removed in future version: "+
+			"use service trait to add 3Scale labels and annotations instead",
+	)
+
 	if ptr.Deref(t.Auto, true) {
 		if t.Scheme == "" {
 			t.Scheme = ThreeScaleSchemeDefaultValue
@@ -111,7 +124,7 @@ func (t *threeScaleTrait) Configure(e *trait.Environment) (bool, *trait.TraitCon
 		}
 	}
 
-	return true, nil, nil
+	return true, condition, nil
 }
 
 func (t *threeScaleTrait) Apply(e *trait.Environment) error {
