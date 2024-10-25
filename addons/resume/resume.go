@@ -22,6 +22,7 @@ import (
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
 	"github.com/apache/camel-k/v2/pkg/trait"
 	"github.com/apache/camel-k/v2/pkg/util"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
 )
 
@@ -33,6 +34,8 @@ import (
 //
 // The Resume trait is disabled by default.
 //
+// WARNING: The trait is **deprecated** and will removed in future release versions: configure directly the Camel properties as required by the component instead.
+//
 // The main different from the implementation on Core is that it's not necessary to bind the strategies to the
 // registry. This step will be done automatically by Camel K, after resolving the options passed to the trait.
 //
@@ -41,6 +44,7 @@ import (
 // -t resume.enabled=true -t resume.resume-path=camel-file-sets -t resume.resume-server="address-of-your-kafka:9092"
 //
 // +camel-k:trait=resume.
+// +camel-k:deprecated=2.5.0.
 type Trait struct {
 	traitv1.Trait `property:",squash"`
 	// Enables automatic configuration of the trait.
@@ -81,7 +85,16 @@ func (r *resumeTrait) Configure(environment *trait.Environment) (bool, *trait.Tr
 		return false, nil, nil
 	}
 
-	return ptr.Deref(r.Enabled, false), nil, nil
+	condition := trait.NewIntegrationCondition(
+		"Resume",
+		v1.IntegrationConditionTraitInfo,
+		corev1.ConditionTrue,
+		trait.TraitConfigurationReason,
+		"Resume trait is deprecated and may be removed in future version: "+
+			"configure directly the Camel properties as required by the component instead",
+	)
+
+	return ptr.Deref(r.Enabled, false), condition, nil
 }
 
 func (r *resumeTrait) Apply(environment *trait.Environment) error {
