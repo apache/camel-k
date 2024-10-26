@@ -1,15 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Give configurable SizeLimit to emptyDir volumes in mount trait [\#5864](https://github.com/apache/camel-k/issues/5864)
-- Camel ftp issue in writing file [\#5682](https://github.com/apache/camel-k/issues/5682)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-24)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-25)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -19,6 +10,7 @@
 - Camel-K creating new KnativeService instead of updating the existing one [\#5874](https://github.com/apache/camel-k/issues/5874)
 - Deprecate IntegrationProfile [\#5869](https://github.com/apache/camel-k/issues/5869)
 - Service Binding deprecation and removal [\#5868](https://github.com/apache/camel-k/issues/5868)
+- Give configurable SizeLimit to emptyDir volumes in mount trait [\#5864](https://github.com/apache/camel-k/issues/5864)
 - Support Camel 4.8 cloud native properties [\#5863](https://github.com/apache/camel-k/issues/5863)
 - Jolokia is failing \(again\) [\#5855](https://github.com/apache/camel-k/issues/5855)
 - Auditable actions [\#5848](https://github.com/apache/camel-k/issues/5848)
@@ -34,6 +26,7 @@
 - Provide Helm Artefacts as part of snapshots, pre-releases and final-releases [\#5740](https://github.com/apache/camel-k/issues/5740)
 - Deprecate openapi trait in favour of Camel openapi setting [\#5729](https://github.com/apache/camel-k/issues/5729)
 - Flaky TestHelmInstallation [\#5722](https://github.com/apache/camel-k/issues/5722)
+- Camel ftp issue in writing file [\#5682](https://github.com/apache/camel-k/issues/5682)
 - Install on Kind with local registry lacks info about helm chart on a kind cluster with local repo [\#5651](https://github.com/apache/camel-k/issues/5651)
 - Add a section to explain Pipes [\#5638](https://github.com/apache/camel-k/issues/5638)
 - Provide Openshift compatibility in the matrix [\#5562](https://github.com/apache/camel-k/issues/5562)
