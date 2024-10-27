@@ -20,6 +20,7 @@ package trait
 // The error-handler is a platform trait used to inject Error Handler source into the integration runtime.
 //
 // +camel-k:trait=error-handler.
+// +camel-k:internal.
 type ErrorHandlerTrait struct {
 	PlatformBaseTrait `property:",squash" json:",inline"`
 	// The error handler ref name provided or found in application properties
