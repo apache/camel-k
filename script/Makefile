@@ -217,8 +217,6 @@ generate: codegen-tools-install
 	./script/gen_doc.sh
 	cd pkg/apis/camel && $(CONTROLLER_GEN) paths="./..." object
 	cd addons/keda/duck && $(CONTROLLER_GEN) paths="./..." object
-	cd addons/strimzi/duck && $(CONTROLLER_GEN) paths="./..." object
-	./script/gen_client_strimzi.sh
 
 codegen-tools-install: controller-gen
 	@# We must force the installation to make sure we are using the correct version
@@ -259,12 +257,6 @@ ifndef NOTEST
 else
 	@echo "####### Skipping unit test..."
 endif
-
-#
-# Setup the Knative test environment
-#
-setup-knative:
-	./e2e/knative/files/setup.sh
 
 #
 # Common tests that do not require any customized operator setting. They can leverage a unique namespaced operator installation to reduce
@@ -319,6 +311,14 @@ test-install-olm:
 test-knative:
 	FAILED=0; \
 	go test -timeout 60m -v ./e2e/knative -tags=integration $(GOTESTFMT) || ((FAILED++)); \
+	exit $${FAILED}
+
+#
+# Kafka tests that require the presence of Strimzi operator configuration
+#
+test-kafka:
+	FAILED=0; \
+	go test -timeout 20m -v ./e2e/kafka -tags=integration $(GOTESTFMT) || ((FAILED++)); \
 	exit $${FAILED}
 
 #

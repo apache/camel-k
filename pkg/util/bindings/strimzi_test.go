@@ -15,18 +15,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package strimzi
+package bindings
 
 import (
 	"context"
-	"encoding/json"
 	"testing"
 
-	"github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset/fake"
-	"github.com/apache/camel-k/v2/addons/strimzi/duck/v1beta2"
 	camelv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
+	"github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
+	"github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/fake"
 
-	"github.com/apache/camel-k/v2/pkg/util/bindings"
 	"github.com/apache/camel-k/v2/pkg/util/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,7 +39,7 @@ func TestStrimziDirect(t *testing.T) {
 	client, err := test.NewFakeClient()
 	require.NoError(t, err)
 
-	bindingContext := bindings.BindingContext{
+	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Client:    client,
 		Namespace: "test",
@@ -59,7 +57,7 @@ func TestStrimziDirect(t *testing.T) {
 		}),
 	}
 
-	binding, err := BindingProvider{}.Translate(bindingContext, bindings.EndpointContext{
+	binding, err := StrimziBindingProvider{}.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	require.NoError(t, err)
@@ -101,11 +99,11 @@ func TestStrimziLookup(t *testing.T) {
 	}
 
 	client := fake.NewSimpleClientset(&cluster, &topic)
-	provider := BindingProvider{
+	provider := StrimziBindingProvider{
 		Client: client,
 	}
 
-	bindingContext := bindings.BindingContext{
+	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
@@ -119,23 +117,13 @@ func TestStrimziLookup(t *testing.T) {
 		},
 	}
 
-	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	require.NoError(t, err)
 	assert.NotNil(t, binding)
 	assert.Equal(t, "kafka:mytopicy?brokers=my-clusterx-kafka-bootstrap%3A9092", binding.URI)
 	assert.Equal(t, camelv1.Traits{}, binding.Traits)
-}
-
-func asEndpointProperties(props map[string]string) *camelv1.EndpointProperties {
-	serialized, err := json.Marshal(props)
-	if err != nil {
-		panic(err)
-	}
-	return &camelv1.EndpointProperties{
-		RawMessage: serialized,
-	}
 }
 
 func TestStrimziLookupByTopicName(t *testing.T) {
@@ -174,11 +162,11 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 	}
 
 	client := fake.NewSimpleClientset(&cluster, &topic)
-	provider := BindingProvider{
+	provider := StrimziBindingProvider{
 		Client: client,
 	}
 
-	bindingContext := bindings.BindingContext{
+	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
@@ -192,7 +180,7 @@ func TestStrimziLookupByTopicName(t *testing.T) {
 		},
 	}
 
-	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	require.NoError(t, err)
@@ -224,11 +212,11 @@ func TestStrimziKafkaCR(t *testing.T) {
 	}
 
 	client := fake.NewSimpleClientset(&cluster)
-	provider := BindingProvider{
+	provider := StrimziBindingProvider{
 		Client: client,
 	}
 
-	bindingContext := bindings.BindingContext{
+	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
@@ -245,7 +233,7 @@ func TestStrimziKafkaCR(t *testing.T) {
 		}),
 	}
 
-	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	require.NoError(t, err)
@@ -277,11 +265,11 @@ func TestStrimziPassThrough(t *testing.T) {
 	}
 
 	client := fake.NewSimpleClientset(&cluster)
-	provider := BindingProvider{
+	provider := StrimziBindingProvider{
 		Client: client,
 	}
 
-	bindingContext := bindings.BindingContext{
+	bindingContext := BindingContext{
 		Ctx:       ctx,
 		Namespace: "test",
 		Profile:   camelv1.TraitProfileKubernetes,
@@ -295,7 +283,7 @@ func TestStrimziPassThrough(t *testing.T) {
 		},
 	}
 
-	binding, err := provider.Translate(bindingContext, bindings.EndpointContext{
+	binding, err := provider.Translate(bindingContext, EndpointContext{
 		Type: camelv1.EndpointTypeSink,
 	}, endpoint)
 	require.NoError(t, err)

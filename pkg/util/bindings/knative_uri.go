@@ -58,7 +58,6 @@ func (k KnativeURIBindingProvider) Translate(ctx BindingContext, endpointCtx End
 		// HTTP/HTTPS uri are translated to Knative endpoints only when used as sinks
 		return nil, nil
 	}
-
 	originalURI, err := url.Parse(*e.URI)
 	if err != nil {
 		return nil, err
