@@ -23,47 +23,47 @@ import (
 	"context"
 	"time"
 
-	scheme "github.com/apache/camel-k/v2/addons/strimzi/duck/client/internalclientset/scheme"
-	v1beta2 "github.com/apache/camel-k/v2/addons/strimzi/duck/v1beta2"
+	v1beta2 "github.com/apache/camel-k/v2/pkg/apis/duck/strimzi/v1beta2"
+	scheme "github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset/internalclientset/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
 )
 
-// KafkaTopicsGetter has a method to return a KafkaTopicInterface.
+// KafkasGetter has a method to return a KafkaInterface.
 // A group's client should implement this interface.
-type KafkaTopicsGetter interface {
-	KafkaTopics(namespace string) KafkaTopicInterface
+type KafkasGetter interface {
+	Kafkas(namespace string) KafkaInterface
 }
 
-// KafkaTopicInterface has methods to work with KafkaTopic resources.
-type KafkaTopicInterface interface {
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta2.KafkaTopic, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1beta2.KafkaTopicList, error)
+// KafkaInterface has methods to work with Kafka resources.
+type KafkaInterface interface {
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta2.Kafka, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1beta2.KafkaList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	KafkaTopicExpansion
+	KafkaExpansion
 }
 
-// kafkaTopics implements KafkaTopicInterface
-type kafkaTopics struct {
+// kafkas implements KafkaInterface
+type kafkas struct {
 	client rest.Interface
 	ns     string
 }
 
-// newKafkaTopics returns a KafkaTopics
-func newKafkaTopics(c *KafkaV1beta2Client, namespace string) *kafkaTopics {
-	return &kafkaTopics{
+// newKafkas returns a Kafkas
+func newKafkas(c *KafkaV1beta2Client, namespace string) *kafkas {
+	return &kafkas{
 		client: c.RESTClient(),
 		ns:     namespace,
 	}
 }
 
-// Get takes name of the kafkaTopic, and returns the corresponding kafkaTopic object, and an error if there is any.
-func (c *kafkaTopics) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.KafkaTopic, err error) {
-	result = &v1beta2.KafkaTopic{}
+// Get takes name of the kafka, and returns the corresponding kafka object, and an error if there is any.
+func (c *kafkas) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta2.Kafka, err error) {
+	result = &v1beta2.Kafka{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("kafkatopics").
+		Resource("kafkas").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
 		Do(ctx).
@@ -71,16 +71,16 @@ func (c *kafkaTopics) Get(ctx context.Context, name string, options v1.GetOption
 	return
 }
 
-// List takes label and field selectors, and returns the list of KafkaTopics that match those selectors.
-func (c *kafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result *v1beta2.KafkaTopicList, err error) {
+// List takes label and field selectors, and returns the list of Kafkas that match those selectors.
+func (c *kafkas) List(ctx context.Context, opts v1.ListOptions) (result *v1beta2.KafkaList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
 	}
-	result = &v1beta2.KafkaTopicList{}
+	result = &v1beta2.KafkaList{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("kafkatopics").
+		Resource("kafkas").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Do(ctx).
@@ -88,8 +88,8 @@ func (c *kafkaTopics) List(ctx context.Context, opts v1.ListOptions) (result *v1
 	return
 }
 
-// Watch returns a watch.Interface that watches the requested kafkaTopics.
-func (c *kafkaTopics) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+// Watch returns a watch.Interface that watches the requested kafkas.
+func (c *kafkas) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -97,7 +97,7 @@ func (c *kafkaTopics) Watch(ctx context.Context, opts v1.ListOptions) (watch.Int
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
-		Resource("kafkatopics").
+		Resource("kafkas").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Watch(ctx)
