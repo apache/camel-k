@@ -1,6 +1,14 @@
 # Changelog
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-26)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Create an e2e test for Strimzi Kafka and KafkaTopic [\#5283](https://github.com/apache/camel-k/issues/5283)
+
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-27)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
