@@ -99,7 +99,6 @@ A URL will be generated for the repository, like: https://repository.apache.org/
 
 Releasing the Camel K main artifacts require some manual steps. The following tasks need to be done:
 
-- Align `KAMELET_CATALOG_REPO_TAG` in Makefile to latest released tag of the camel-kamelets repository
 - Align `DEFAULT_RUNTIME_VERSION` in Makefile to latest Camel K Runtime release
 - Set the proper `VERSION`, likely just remove `-SNAPSHOT` suffix
 - Ensure `LAST_RELEASED_VERSION` points to latest released version of Camel K
