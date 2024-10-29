@@ -55,7 +55,7 @@ jobs:
       run: |
           kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/crds.yaml
           kubectl create -f https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/olm.yaml
-          kubectl wait --for=jsonpath='{.status.phase}'=Succeeded csv packageserver -n olm --timeout=2m
+          kubectl wait --for=jsonpath='{.status.phase}'=Succeeded csv packageserver -n olm --timeout=5m
 
     # Building and pushing a bundle to a running container is required due to how
     # Operator-SDK works. Once it allows for local bundle testing, this part may be omitted
