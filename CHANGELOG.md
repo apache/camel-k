@@ -1,14 +1,6 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
-
-**Closed issues:**
-
-- Create an e2e test for Strimzi Kafka and KafkaTopic [\#5283](https://github.com/apache/camel-k/issues/5283)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-27)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-28)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
 
@@ -42,6 +34,7 @@
 - Don't build an IntegrationKit on upgrade with same runtime version [\#5513](https://github.com/apache/camel-k/issues/5513)
 - Add a trait func which should check the presence of CamelCatalog before execution [\#5417](https://github.com/apache/camel-k/issues/5417)
 - Rethink and onboard Camel K Tekton task version 2 [\#5379](https://github.com/apache/camel-k/issues/5379)
+- Create an e2e test for Strimzi Kafka and KafkaTopic [\#5283](https://github.com/apache/camel-k/issues/5283)
 - Quartz builds failing to start when using native builds [\#5088](https://github.com/apache/camel-k/issues/5088)
 - Move handling of IntegrationPlatformResource to a separate operator [\#4948](https://github.com/apache/camel-k/issues/4948)
 - Reproducible builds [\#4661](https://github.com/apache/camel-k/issues/4661)
