@@ -26,7 +26,7 @@ Camel K is available in Helm Hub:
 
 ```
 $ helm repo add camel-k https://apache.github.io/camel-k/charts/
-$ helm install camel-k camel-k/camel-k
+$ helm install camel-k camel-k/camel-k -n camel-k
 ```
 
 More instructions on the https://hub.helm.sh/charts/camel-k/camel-k[Camel K Helm] page.
@@ -64,21 +64,22 @@ The majority of configuration required to tune the operator are stored in an `In
 
 Camel K requires a container registry which is used to store the images built for your applications. Certain clusters may use their internal container registry (ie, Openshift, Minikube or https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry[KEP-1755 compatible] clusters).
 
-You need to create an `IntegrationPlatform` with the following configuration in the namespace where the operator is running:
+**IMPORTANT:** You need to create an `IntegrationPlatform` with the following configuration in the namespace where the operator is running:
 
 ```yaml
 apiVersion: camel.apache.org/v1
 kind: IntegrationPlatform
 metadata:
-labels:
+  labels:
     app: camel-k
-name: camel-k
-namespace: camel-k
+  name: camel-k
+  namespace: camel-k
 spec:
-build:
+  build:
     registry:
-    address: registry.io
-    insecure: true
+      address: registry.io
+      organization: camel-k
+      insecure: true
 ```
 
 The minimum configuration required is the container registry. Just change the example value with the configuration available for your installation and write as a file as `itp.yaml`.
