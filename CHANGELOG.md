@@ -1,16 +1,16 @@
 # Changelog
 
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-30)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0...v2.5.0-nightly)
+
 ## [v2.5.0](https://github.com/apache/camel-k/tree/v2.5.0) (2024-10-29)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/camel-k-crds-2.5.0...v2.5.0)
 
 ## [camel-k-crds-2.5.0](https://github.com/apache/camel-k/tree/camel-k-crds-2.5.0) (2024-10-29)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...camel-k-crds-2.5.0)
-
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-29)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...v2.5.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/2.5.0-nightly...camel-k-crds-2.5.0)
 
 **Closed issues:**
 
