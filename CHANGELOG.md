@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- IntergationPlatform Registry not Accepting Minikube's DNS URI [\#5914](https://github.com/apache/camel-k/issues/5914)
+
 ## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-10-30)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0...v2.5.0-nightly)
