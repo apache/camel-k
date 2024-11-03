@@ -1,6 +1,6 @@
 # Changelog
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-11-01)
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-11-02)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0...v2.5.0-nightly)
 
