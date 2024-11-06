@@ -1,6 +1,15 @@
 # Changelog
 
-## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-11-04)
+## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...HEAD)
+
+**Closed issues:**
+
+- Creating camel-k with helm cannot publish integrations [\#5888](https://github.com/apache/camel-k/issues/5888)
+- Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
+
+## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-11-05)
 
 [Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0...v2.5.0-nightly)
 
