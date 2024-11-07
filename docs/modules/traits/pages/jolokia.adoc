@@ -63,7 +63,7 @@ the servers binds to every network interface (default `"*"`).
 | The password used for authentication, applicable when the `user` option is set.
 
 | jolokia.port
-| int
+| int32
 | The Jolokia endpoint port (default `8778`).
 
 | jolokia.protocol

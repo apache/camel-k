@@ -330,14 +330,14 @@ func writeFile(file *os.File, content []string) error {
 	if err := file.Truncate(0); err != nil {
 		return err
 	}
-	max := 0
+	mx := 0
 	for i, line := range content {
 		if line != "" {
-			max = i
+			mx = i
 		}
 	}
 	for i, line := range content {
-		if i <= max {
+		if i <= mx {
 			if _, err := file.WriteString(line + "\n"); err != nil {
 				return err
 			}

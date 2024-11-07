@@ -33,7 +33,7 @@ CODEGEN_VERSION := v0.29.7
 OPERATOR_SDK_VERSION := v1.30.0
 KUSTOMIZE_VERSION := v4.5.4
 OPM_VERSION := v1.24.0
-LINTER_VERSION ?= v1.59.1
+LINTER_VERSION ?= v1.61.0
 GOVULNCHECK_VERSION ?= latest
 
 LINTER ?= $(LOCALBIN)/golangci-lint
@@ -699,21 +699,15 @@ $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
 .PHONY: golangci-lint
-golangci-lint: $(LINTER)
-$(LINTER): $(LOCALBIN)
-	@test -s $(LOCALBIN)/golangci-lint || \
+golangci-lint:
 	GOBIN=$(LOCALBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(LINTER_VERSION)
 
 .PHONY: govulncheck
-govulncheck: $(GOVULNCHECK)
-$(GOVULNCHECK): $(LOCALBIN)
-	@test -s $(GOVULNCHECK) || \
+govulncheck:
 	GOBIN=$(LOCALBIN) go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
 
 .PHONY: goimport
-goimport: $(GOIMPORT)
-$(GOIMPORT): $(LOCALBIN)
-	@test -s $(LOCALBIN)/goimport || \
+goimport:
 	GOBIN=$(LOCALBIN) go install golang.org/x/tools/cmd/goimports@latest
 
 #####

@@ -60,6 +60,7 @@ import (
 	"github.com/apache/camel-k/v2/pkg/controller/synthetic"
 	"github.com/apache/camel-k/v2/pkg/install"
 	"github.com/apache/camel-k/v2/pkg/platform"
+	"github.com/apache/camel-k/v2/pkg/util"
 	"github.com/apache/camel-k/v2/pkg/util/defaults"
 	"github.com/apache/camel-k/v2/pkg/util/kubernetes"
 	logutil "github.com/apache/camel-k/v2/pkg/util/log"
@@ -103,8 +104,10 @@ func Run(healthPort, monitoringPort int32, leaderElection bool, leaderElectionID
 		default:
 			customLevel, err := strconv.Atoi(strings.ToLower(logLevelVal))
 			exitOnError(err, "Invalid log-level")
+			int8Lev, err := util.IToInt8(customLevel)
+			exitOnError(err, "Invalid log-level")
 			// Need to multiply by -1 to turn logr expected level into zap level
-			logLevel = zapcore.Level(int8(customLevel) * -1)
+			logLevel = zapcore.Level(*int8Lev * -1)
 		}
 	} else {
 		logLevel = zapcore.InfoLevel

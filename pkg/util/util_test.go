@@ -19,6 +19,7 @@ package util
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -60,4 +61,34 @@ func TestCopyDir(t *testing.T) {
 	fmt.Println(destDir)
 	err = CopyDir(srcDir, destDir)
 	require.NoError(t, err)
+}
+
+func TestIToInt32(t *testing.T) {
+	x := 6000
+	converted, err := IToInt32(x)
+	require.NoError(t, err)
+	assert.Equal(t, int32(6000), *converted)
+	x = math.MaxInt32 + 1
+	converted, err = IToInt32(x)
+	require.Error(t, err)
+	assert.Equal(t, "integer overflow casting to int32 type", err.Error())
+	x = math.MinInt32 - 1
+	converted, err = IToInt32(x)
+	require.Error(t, err)
+	assert.Equal(t, "integer overflow casting to int32 type", err.Error())
+}
+
+func TestIToInt8(t *testing.T) {
+	x := 2
+	converted, err := IToInt8(x)
+	require.NoError(t, err)
+	assert.Equal(t, int8(2), *converted)
+	x = math.MaxInt8 + 1
+	converted, err = IToInt8(x)
+	require.Error(t, err)
+	assert.Equal(t, "integer overflow casting to int8 type", err.Error())
+	x = math.MinInt8 - 1
+	converted, err = IToInt8(x)
+	require.Error(t, err)
+	assert.Equal(t, "integer overflow casting to int8 type", err.Error())
 }

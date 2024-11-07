@@ -345,7 +345,7 @@ func postProcessDependencies(project *maven.Project, catalog *RuntimeCatalog) {
 
 // SanitizeIntegrationDependencies --.
 func SanitizeIntegrationDependencies(dependencies []maven.Dependency) error {
-	for i := range len(dependencies) {
+	for i := range dependencies {
 		dep := dependencies[i]
 
 		// It may be externalized into runtime provider specific steps

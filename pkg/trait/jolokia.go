@@ -35,6 +35,7 @@ const (
 	jolokiaTraitOrder = 1800
 
 	defaultJolokiaPort = 8778
+	trueString         = "true"
 )
 
 type jolokiaTrait struct {
@@ -79,35 +80,9 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 		return err
 	}
 
-	t.setDefaultJolokiaOption(options, &t.Host, "host", "*")
-	t.setDefaultJolokiaOption(options, &t.DiscoveryEnabled, "discoveryEnabled", false)
-
-	// Configure HTTPS by default for OpenShift
-	if e.DetermineProfile() == v1.TraitProfileOpenShift {
-		t.setDefaultJolokiaOption(options, &t.Protocol, "protocol", "https")
-		t.setDefaultJolokiaOption(options, &t.CaCert, "caCert", "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt")
-		t.setDefaultJolokiaOption(options, &t.ExtendedClientCheck, "extendedClientCheck", true)
-		t.setDefaultJolokiaOption(options, &t.UseSslClientAuthentication, "useSslClientAuthentication", true)
-		t.setDefaultJolokiaOption(options, &t.ClientPrincipal, "clientPrincipal", []string{
-			// Master API proxy for OpenShift 3
-			"cn=system:master-proxy",
-			// Default Hawtio and Fuse consoles for OpenShift 4
-			"cn=hawtio-online.hawtio.svc",
-			"cn=fuse-console.fuse.svc",
-		})
-	}
-
+	t.setDefaultJolokiaOption(options, e.DetermineProfile())
 	// Then add explicitly set trait configuration properties
-	t.addToJolokiaOptions(options, "caCert", t.CaCert)
-	t.addToJolokiaOptions(options, "clientPrincipal", t.ClientPrincipal)
-	t.addToJolokiaOptions(options, "discoveryEnabled", t.DiscoveryEnabled)
-	t.addToJolokiaOptions(options, "extendedClientCheck", t.ExtendedClientCheck)
-	t.addToJolokiaOptions(options, "host", t.Host)
-	t.addToJolokiaOptions(options, "password", t.Password)
-	t.addToJolokiaOptions(options, "port", t.getPort())
-	t.addToJolokiaOptions(options, "protocol", t.Protocol)
-	t.addToJolokiaOptions(options, "user", t.User)
-	t.addToJolokiaOptions(options, "useSslClientAuthentication", t.UseSslClientAuthentication)
+	t.addToJolokiaOptions(options)
 
 	// Options must be sorted so that the environment variable value is consistent over iterations,
 	// otherwise the value changes which results in triggering a new deployment.
@@ -128,7 +103,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 
 	containerPort := corev1.ContainerPort{
 		Name:          "jolokia",
-		ContainerPort: int32(t.getPort()),
+		ContainerPort: t.getPort(),
 		Protocol:      corev1.ProtocolTCP,
 	}
 
@@ -144,7 +119,7 @@ func (t *jolokiaTrait) Apply(e *Environment) error {
 	return nil
 }
 
-func (t *jolokiaTrait) getPort() int {
+func (t *jolokiaTrait) getPort() int32 {
 	if t.Port == 0 {
 		return defaultJolokiaPort
 	}
@@ -152,61 +127,66 @@ func (t *jolokiaTrait) getPort() int {
 	return t.Port
 }
 
-func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, option interface{}, key string, value interface{}) {
+func (t *jolokiaTrait) setDefaultJolokiaOption(options map[string]string, profile v1.TraitProfile) {
 	// Do not override existing option
-	if _, ok := options[key]; ok {
-		return
+	if options["host"] == "" {
+		options["host"] = "*"
 	}
-	switch o := option.(type) {
-	case **bool:
-		if *o == nil {
-			v, _ := value.(bool)
-			*o = &v
+	if options["discoveryEnabled"] == "" {
+		options["discoveryEnabled"] = "false"
+	}
+	//nolint:nestif
+	if profile == v1.TraitProfileOpenShift {
+		if options["protocol"] == "" {
+			options["protocol"] = "https"
 		}
-	case **int:
-		if *o == nil {
-			v, _ := value.(int)
-			*o = &v
+		if options["caCert"] == "" {
+			options["caCert"] = "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
 		}
-	case **string:
-		if *o == nil {
-			v, _ := value.(string)
-			*o = &v
+		if options["extendedClientCheck"] == "" {
+			options["extendedClientCheck"] = trueString
 		}
-	case *[]string:
-		if len(*o) == 0 {
-			*o, _ = value.([]string)
+		if options["useSslClientAuthentication"] == "" {
+			options["useSslClientAuthentication"] = trueString
+		}
+		if options["clientPrincipal.1"] == "" {
+			options["clientPrincipal.1"] = "cn=system:master-proxy"
+		}
+		if options["clientPrincipal.2"] == "" {
+			options["clientPrincipal.2"] = "cn=hawtio-online.hawtio.svc"
+		}
+		if options["clientPrincipal.3"] == "" {
+			options["clientPrincipal.3"] = "cn=fuse-console.fuse.svc"
 		}
 	}
 }
 
-func (t *jolokiaTrait) addToJolokiaOptions(options map[string]string, key string, value interface{}) {
-	switch v := value.(type) {
-	case *bool:
-		if v != nil {
-			options[key] = strconv.FormatBool(*v)
+func (t *jolokiaTrait) addToJolokiaOptions(options map[string]string) {
+	if t.CaCert != nil {
+		options["caCert"] = *t.CaCert
+	}
+	if t.ClientPrincipal != nil {
+		for i, v := range t.ClientPrincipal {
+			options[fmt.Sprintf("clientPrincipal.%v", i)] = v
 		}
-	case *int:
-		if v != nil {
-			options[key] = strconv.Itoa(*v)
-		}
-	case int:
-		options[key] = strconv.Itoa(v)
-	case *string:
-		if v != nil {
-			options[key] = *v
-		}
-	case string:
-		if v != "" {
-			options[key] = v
-		}
-	case []string:
-		if len(v) == 1 {
-			options[key] = v[0]
-		} else {
-			for i, vi := range v {
-				options[key+"."+strconv.Itoa(i+1)] = vi
-			}
-		}
+	}
+	if t.ExtendedClientCheck != nil {
+		options["extendedClientCheck"] = strconv.FormatBool(*t.ExtendedClientCheck)
+	}
+	if t.Host != nil {
+		options["host"] = *t.Host
+	}
+	if t.Password != nil {
+		options["password"] = *t.Password
+	}
+	options["port"] = fmt.Sprintf("%v", t.getPort())
+	if t.Protocol != nil {
+		options["protocol"] = *t.Protocol
+	}
+	if t.User != nil {
+		options["user"] = *t.User
+	}
+	if t.UseSslClientAuthentication != nil {
+		options["useSslClientAuthentication"] = strconv.FormatBool(*t.UseSslClientAuthentication)
 	}
 }

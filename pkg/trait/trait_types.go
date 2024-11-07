@@ -558,7 +558,7 @@ func (e *Environment) getIntegrationContainerPort() *corev1.ContainerPort {
 // createContainerPort creates a new container port with values taken from Container trait or default.
 func (e *Environment) createContainerPort() *corev1.ContainerPort {
 	var name string
-	var port int
+	var port int32
 
 	if t := e.Catalog.GetTrait(containerTraitID); t != nil {
 		if ct, ok := t.(*containerTrait); ok {
@@ -573,7 +573,7 @@ func (e *Environment) createContainerPort() *corev1.ContainerPort {
 
 	return &corev1.ContainerPort{
 		Name:          name,
-		ContainerPort: int32(port),
+		ContainerPort: port,
 		Protocol:      corev1.ProtocolTCP,
 	}
 }

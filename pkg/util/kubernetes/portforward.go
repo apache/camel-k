@@ -38,13 +38,12 @@ import (
 func PortForward(ctx context.Context, c client.Client, ns, labelSelector string, localPort, remotePort uint, stdOut, stdErr io.Writer) error {
 	log.InitForCmd()
 	var forwardPod *corev1.Pod
-	var forwardCtx context.Context
-	var forwardCtxCancel context.CancelFunc
+	forwardCtx, forwardCtxCancel := context.WithCancel(ctx)
+	defer forwardCtxCancel()
 
 	setupPortForward := func(pod *corev1.Pod) error {
 		if forwardPod == nil && podReady(pod) {
 			forwardPod = pod
-			forwardCtx, forwardCtxCancel = context.WithCancel(ctx)
 			log.Debugf("Setting up Port Forward for pod with name: %q\n", forwardPod.Name)
 			if _, err := portFowardPod(forwardCtx, c.GetConfig(), ns, forwardPod.Name, localPort, remotePort, stdOut, stdErr); err != nil {
 				return err
@@ -107,10 +106,7 @@ func PortForward(ctx context.Context, c client.Client, ns, labelSelector string,
 					}
 					log.Debugf("Handling watch.Deleted event for pod with name: %v while Port Forward was active for pod with name: %v\n", deletedPod.Name, forwardPod.Name)
 					if deletedPod.Name == forwardPod.Name {
-						forwardCtxCancel()
 						forwardPod = nil
-						forwardCtx = nil
-						forwardCtxCancel = nil
 
 						log.Debugf("Handling watch.Deleted event, since the pod with Port Forward enabled has been deleted we try to bootstrap Port Forward with LabelSelector: %v\n", labelSelector)
 						_, err := bootstrapPortForward(ctx, c, ns, labelSelector, setupPortForward)

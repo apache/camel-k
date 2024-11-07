@@ -460,5 +460,5 @@ func TestInstallDebugLogging4(t *testing.T) {
 }
 
 func decodeMavenSettings(mavenSettings string) (v1.ValueSource, error) {
-	return v1.DecodeValueSource(mavenSettings, "settings.xml", "illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
+	return v1.DecodeValueSource(mavenSettings, "settings.xml")
 }

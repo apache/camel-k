@@ -146,6 +146,6 @@ func readSpectrumLogs(newStdOut io.Reader) {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		log.Infof(line)
+		log.Info(line)
 	}
 }

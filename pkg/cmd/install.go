@@ -571,8 +571,7 @@ func (o *installCmdOptions) setupIntegrationPlatform(c client.Client, namespace 
 	}
 
 	if o.MavenSettings != "" {
-		mavenSettings, err := v1.DecodeValueSource(o.MavenSettings, "settings.xml",
-			"illegal maven setting definition, syntax: configmap|secret:resource-name[/settings path]")
+		mavenSettings, err := v1.DecodeValueSource(o.MavenSettings, "settings.xml")
 		if err != nil {
 			return nil, err
 		}

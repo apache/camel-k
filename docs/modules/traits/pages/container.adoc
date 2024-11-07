@@ -56,7 +56,7 @@ The following configuration options are available:
 | Can be used to enable/disable exposure via kubernetes Service.
 
 | container.port
-| int
+| int32
 | To configure a different port exposed by the container (default `8080`).
 
 | container.port-name
@@ -64,7 +64,7 @@ The following configuration options are available:
 | To configure a different port name for the port exposed by the container. It defaults to `http` only when the `expose` parameter is true.
 
 | container.service-port
-| int
+| int32
 | To configure under which service port the container port is to be exposed (default `80`).
 
 | container.service-port-name

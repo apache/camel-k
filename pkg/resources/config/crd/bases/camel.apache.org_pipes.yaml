@@ -6726,6 +6726,7 @@ spec:
                           port:
                             description: To configure a different port exposed by
                               the container (default `8080`).
+                            format: int32
                             type: integer
                           portName:
                             description: To configure a different port name for the
@@ -6760,6 +6761,7 @@ spec:
                           servicePort:
                             description: To configure under which service port the
                               container port is to be exposed (default `80`).
+                            format: int32
                             type: integer
                           servicePortName:
                             description: To configure under which service port name
@@ -7254,6 +7256,7 @@ spec:
                             type: string
                           port:
                             description: The Jolokia endpoint port (default `8778`).
+                            format: int32
                             type: integer
                           protocol:
                             description: The protocol to use, either `http` or `https`

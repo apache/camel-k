@@ -98,11 +98,11 @@ func (t *pdbTrait) podDisruptionBudgetFor(integration *v1.Integration) *policyv1
 	}
 
 	if t.MaxUnavailable != "" {
-		max := intstr.Parse(t.MaxUnavailable)
-		pdb.Spec.MaxUnavailable = &max
+		mx := intstr.Parse(t.MaxUnavailable)
+		pdb.Spec.MaxUnavailable = &mx
 	} else {
-		min := intstr.Parse(t.MinAvailable)
-		pdb.Spec.MinAvailable = &min
+		mn := intstr.Parse(t.MinAvailable)
+		pdb.Spec.MinAvailable = &mn
 	}
 
 	return pdb

@@ -224,7 +224,7 @@ func (bc *BuildConfiguration) IsEmpty() bool {
 }
 
 // DecodeValueSource returns a ValueSource object from an input that respects the format configmap|secret:resource-name[/path].
-func DecodeValueSource(input string, defaultKey string, errorMessage string) (ValueSource, error) {
+func DecodeValueSource(input string, defaultKey string) (ValueSource, error) {
 	sub := make([]string, 0)
 	hits := PlainConfigSecretRegexp.FindAllStringSubmatch(input, -1)
 
@@ -262,7 +262,7 @@ func DecodeValueSource(input string, defaultKey string, errorMessage string) (Va
 		}
 	}
 
-	return ValueSource{}, fmt.Errorf(errorMessage)
+	return ValueSource{}, fmt.Errorf("could not decode %s", input)
 }
 
 // IsGeneratedFromKamelet determines is a source spec is derived from a Kamelet.

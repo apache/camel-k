@@ -218,7 +218,7 @@ func TestTraitDecode(t *testing.T) {
 	trait := traitToMap(t, traitv1.ContainerTrait{
 		PlatformBaseTrait: traitv1.PlatformBaseTrait{},
 		Name:              "test-container",
-		Port:              7071,
+		Port:              int32(7071),
 		Auto:              ptr.To(false),
 	})
 
@@ -228,6 +228,6 @@ func TestTraitDecode(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "test-container", target.Name)
-	assert.Equal(t, 7071, target.Port)
+	assert.Equal(t, int32(7071), target.Port)
 	assert.False(t, ptr.Deref(target.Auto, true))
 }
