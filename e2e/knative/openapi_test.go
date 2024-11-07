@@ -24,36 +24,78 @@ package knative
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"testing"
+	"time"
 
 	"io/ioutil"
 
 	. "github.com/apache/camel-k/v2/e2e/support"
+	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 )
 
-/*
-	go test -v -tags=integration ./e2e/knative --run TestOpenAPIService
-*/
-
-func TestOpenAPIService(t *testing.T) {
+func TestOpenAPIKnativeTrait(t *testing.T) {
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		name := RandomizedSuffixName("petstore")
 		openapiContent, err := ioutil.ReadFile("./files/petstore-api.yaml")
 		require.NoError(t, err)
 		var cmDataProps = make(map[string]string)
 		cmDataProps["petstore-api.yaml"] = string(openapiContent)
 		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi-knative", cmDataProps)
 
-		g.Expect(KamelRun(t, ctx, ns, "--name", "petstore", "--open-api", "configmap:my-openapi-knative", "files/petstore.yaml").Execute()).To(Succeed())
+		g.Expect(KamelRun(t, ctx, ns, "--name", name, "--open-api", "configmap:my-openapi-knative", "files/petstore.yaml").Execute()).To(Succeed())
 
-		g.Eventually(KnativeService(t, ctx, ns, "petstore"), TestTimeoutLong).
+		g.Eventually(KnativeService(t, ctx, ns, name), TestTimeoutLong).
 			Should(Not(BeNil()))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
-			Should(ContainSubstring("Started listPets (rest://get:/v1:/pets)"))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
-			Should(ContainSubstring("Started createPets (rest://post:/v1:/pets)"))
-		g.Eventually(IntegrationLogs(t, ctx, ns, "petstore"), TestTimeoutMedium).
-			Should(ContainSubstring("Started showPetById (rest://get:/v1:/pets/%7BpetId%7D)"))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		// Let's make sure the Integration is ready to receive traffic
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Listening on: http://0.0.0.0:8080"))
+		pod := IntegrationPod(t, ctx, ns, name)()
+		g.Expect(pod).NotTo(BeNil())
+		response, err := TestClient(t).CoreV1().RESTClient().Get().
+			Timeout(30 * time.Second).
+			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/v1/pets", pod.Namespace, pod.Name)).
+			DoRaw(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, "listPets", string(response))
+	})
+}
+
+func TestOpenAPIKnativeContractFirst(t *testing.T) {
+	t.Parallel()
+	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
+		name := RandomizedSuffixName("petstore")
+		openapiContent, err := os.ReadFile("./files/petstore-api.yaml")
+		require.NoError(t, err)
+		var cmDataProps = make(map[string]string)
+		cmDataProps["petstore-api.yaml"] = string(openapiContent)
+		CreatePlainTextConfigmap(t, ctx, ns, "my-openapi", cmDataProps)
+
+		g.Expect(KamelRun(t, ctx, ns,
+			"--name", name, "--resource", "configmap:my-openapi", "files/petstore-cf.yaml").
+			Execute()).To(Succeed())
+
+		g.Eventually(KnativeService(t, ctx, ns, name), TestTimeoutLong).
+			Should(Not(BeNil()))
+		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
+			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
+		// Let's make sure the Integration is ready to receive traffic
+		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Listening on: http://0.0.0.0:8080"))
+		pod := IntegrationPod(t, ctx, ns, name)()
+		g.Expect(pod).NotTo(BeNil())
+		response, err := TestClient(t).CoreV1().RESTClient().Get().
+			Timeout(30 * time.Second).
+			AbsPath(fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/proxy/v1/pets", pod.Namespace, pod.Name)).
+			DoRaw(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, "listPets", string(response))
 	})
 }
