@@ -39,7 +39,7 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 )
 
-func TestOpenAPI(t *testing.T) {
+func TestOpenAPIContractFirst(t *testing.T) {
 	t.Parallel()
 	WithNewTestNamespace(t, func(ctx context.Context, g *WithT, ns string) {
 		name := RandomizedSuffixName("petstore")
@@ -55,6 +55,7 @@ func TestOpenAPI(t *testing.T) {
 
 		g.Eventually(IntegrationConditionStatus(t, ctx, ns, name, v1.IntegrationConditionReady), TestTimeoutMedium).
 			Should(Equal(corev1.ConditionTrue))
+		g.Eventually(Service(t, ctx, ns, name), TestTimeoutShort).ShouldNot(BeNil())
 		g.Eventually(IntegrationPodPhase(t, ctx, ns, name)).Should(Equal(corev1.PodRunning))
 		// Let's make sure the Integration is ready to receive traffic
 		g.Eventually(IntegrationLogs(t, ctx, ns, name)).Should(ContainSubstring("Listening on: http://0.0.0.0:8080"))
