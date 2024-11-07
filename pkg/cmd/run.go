@@ -337,7 +337,7 @@ func (o *runCmdOptions) run(cmd *cobra.Command, args []string) error {
 	}
 
 	// We need to make this check at this point, in order to have sources filled during decoding
-	if len(args) < 1 && o.ContainerImage == "" {
+	if (len(args) < 1 && len(o.Sources) < 0) && o.ContainerImage == "" {
 		return errors.New("run command expects either an Integration source or the container image (via --image argument)")
 	}
 
