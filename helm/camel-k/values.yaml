@@ -45,3 +45,6 @@ operator:
 
   # Default operator name
   operatorId: camel-k
+
+  serviceAccount:
+    annotations:
