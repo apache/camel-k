@@ -79,7 +79,7 @@ func Translate(ctx BindingContext, endpointCtx EndpointContext, endpoint v1.Endp
 	} else if ptr.Deref(endpoint.URI, "") != "" {
 		errorMessage = fmt.Sprintf("could not find any suitable binding provider for %s", *endpoint.URI)
 	}
-	return nil, fmt.Errorf(errorMessage)
+	return nil, errors.New(errorMessage)
 }
 
 func validateEndpoint(ctx BindingContext, e v1.Endpoint) error {

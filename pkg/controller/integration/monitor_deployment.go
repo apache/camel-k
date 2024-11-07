@@ -59,14 +59,14 @@ func (c *deploymentController) getPodSpec() corev1.PodSpec {
 	return c.obj.Spec.Template.Spec
 }
 
-func (c *deploymentController) updateReadyCondition(readyPods int) bool {
+func (c *deploymentController) updateReadyCondition(readyPods int32) bool {
 	replicas := int32(1)
 	if r := c.integration.Spec.Replicas; r != nil {
 		replicas = *r
 	}
 	// The Deployment status reports updated and ready replicas separately,
 	// so that the number of ready replicas also accounts for older versions.
-	readyReplicas := int32(readyPods)
+	readyReplicas := readyPods
 	switch {
 	case readyReplicas >= replicas:
 		// The Integration is considered ready when the number of replicas

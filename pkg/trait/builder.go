@@ -435,8 +435,7 @@ func (t *builderTrait) builderTask(e *Environment, taskConf *v1.BuildConfigurati
 		mavenProfiles := make([]v1.ValueSource, 0)
 		for _, v := range t.MavenProfiles {
 			if v != "" {
-				mavenProfile, err := v1.DecodeValueSource(v, "profile.xml",
-					"illegal profile definition, syntax: configmap|secret:resource-name[/profile path]")
+				mavenProfile, err := v1.DecodeValueSource(v, "profile.xml")
 				if err != nil {
 					return nil, fmt.Errorf("invalid maven profile: %s: %w. ", v, err)
 				}

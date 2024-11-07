@@ -262,11 +262,11 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 	isUpdateRequired := false
 	minScale, ok := svc.Spec.Template.Annotations[knativeServingMinScaleAnnotation]
 	if ok {
-		min, err := strconv.Atoi(minScale)
+		mnScale, err := strconv.Atoi(minScale)
 		if err != nil {
 			return nil, err
 		}
-		if replicas == nil || min != int(*replicas) {
+		if replicas == nil || mnScale != int(*replicas) {
 			isUpdateRequired = true
 		}
 	} else if replicas != nil {
@@ -275,11 +275,11 @@ func (t *knativeServiceTrait) getServiceFor(e *Environment) (*serving.Service, e
 
 	maxScale, ok := svc.Spec.Template.Annotations[knativeServingMaxScaleAnnotation]
 	if ok {
-		max, err := strconv.Atoi(maxScale)
+		mxScale, err := strconv.Atoi(maxScale)
 		if err != nil {
 			return nil, err
 		}
-		if replicas == nil || max != int(*replicas) {
+		if replicas == nil || mxScale != int(*replicas) {
 			isUpdateRequired = true
 		}
 	} else if replicas != nil {

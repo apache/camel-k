@@ -102,7 +102,7 @@ func (t *hashicorpVaultTrait) Apply(environment *trait.Environment) error {
 
 	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.Token, -1)
 	if len(hits) >= 1 {
-		var res, _ = v1.DecodeValueSource(t.Token, "hashicorp-vault-token", "The Hashicorp Vault Token provided is not valid")
+		var res, _ = v1.DecodeValueSource(t.Token, "hashicorp-vault-token")
 
 		secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res)
 		if err != nil {

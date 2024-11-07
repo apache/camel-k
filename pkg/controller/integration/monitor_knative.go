@@ -52,7 +52,7 @@ func (c *knativeServiceController) getPodSpec() corev1.PodSpec {
 	return c.obj.Spec.Template.Spec.PodSpec
 }
 
-func (c *knativeServiceController) updateReadyCondition(readyPods int) bool {
+func (c *knativeServiceController) updateReadyCondition(readyPods int32) bool {
 	ready := kubernetes.GetKnativeServiceCondition(*c.obj, servingv1.ServiceConditionReady)
 	if ready.IsTrue() {
 		c.integration.SetReadyCondition(corev1.ConditionTrue,

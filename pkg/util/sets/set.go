@@ -84,7 +84,7 @@ func (s *Set) Has(item string) bool {
 
 // IsEmpty returns true if the set has no items.
 func (s *Set) IsEmpty() bool {
-	return s.keys == nil || len(s.keys) == 0
+	return s.Size() == 0
 }
 
 // Size returns the number if items in the Set.

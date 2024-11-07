@@ -141,7 +141,7 @@ func integrationMatches(ctx context.Context, c client.Client, integration *v1.In
 	}
 	// If IntegrationKit has any source, we must verify that it corresponds with the one in the Integration.
 	// This is important in case of Native builds as we need to rebuild when language requires a source during build.
-	if (kit.Spec.Sources != nil && len(kit.Spec.Sources) > 0) && !hasMatchingSourcesForNative(integration, kit) {
+	if len(kit.Spec.Sources) > 0 && !hasMatchingSourcesForNative(integration, kit) {
 		ilog.Debug("Integration and integration-kit sources do not match", "integration", integration.Name, "integration-kit", kit.Name, "namespace", integration.Namespace)
 		return false, nil
 	}

@@ -102,7 +102,7 @@ func (t *environmentTrait) Apply(e *Environment) error {
 			k, v := property.SplitPropertyFileEntry(env)
 			confs := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(v, -1)
 			if len(confs) > 0 {
-				var res, err = v1.DecodeValueSource(v, "", "Invalid configuration "+v)
+				var res, err = v1.DecodeValueSource(v, "")
 				if err != nil {
 					return err
 				}

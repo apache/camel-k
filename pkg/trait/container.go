@@ -211,7 +211,7 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 	}
 	containerPort := corev1.ContainerPort{
 		Name:          name,
-		ContainerPort: int32(t.getPort()),
+		ContainerPort: t.getPort(),
 		Protocol:      corev1.ProtocolTCP,
 	}
 	if !isKnative {
@@ -220,7 +220,7 @@ func (t *containerTrait) configureService(e *Environment, container *corev1.Cont
 		if service != nil {
 			servicePort := corev1.ServicePort{
 				Name:       t.getServicePortName(),
-				Port:       int32(t.getServicePort()),
+				Port:       t.getServicePort(),
 				Protocol:   corev1.ProtocolTCP,
 				TargetPort: intstr.FromString(name),
 			}
@@ -324,7 +324,7 @@ func (t *containerTrait) getUser(e *Environment) (*int64, error) {
 	return runAsUser, nil
 }
 
-func (t *containerTrait) getPort() int {
+func (t *containerTrait) getPort() int32 {
 	if t.Port == 0 {
 		return defaultContainerPort
 	}
@@ -332,7 +332,7 @@ func (t *containerTrait) getPort() int {
 	return t.Port
 }
 
-func (t *containerTrait) getServicePort() int {
+func (t *containerTrait) getServicePort() int32 {
 	if t.ServicePort == 0 {
 		return defaultServicePort
 	}

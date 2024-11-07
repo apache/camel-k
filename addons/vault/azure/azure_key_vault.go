@@ -140,7 +140,7 @@ func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
 
 	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.ClientSecret, -1)
 	if len(hits) >= 1 {
-		var res, _ = v1.DecodeValueSource(t.ClientSecret, "azure-key-vault-client-secret", "The Azure Key Vault Client Secret provided is not valid")
+		var res, _ = v1.DecodeValueSource(t.ClientSecret, "azure-key-vault-client-secret")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
 			return err
 		} else if secretValue != "" {
@@ -151,7 +151,7 @@ func (t *azureKeyVaultTrait) Apply(environment *trait.Environment) error {
 	}
 	hits = v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.BlobAccessKey, -1)
 	if len(hits) >= 1 {
-		var res, _ = v1.DecodeValueSource(t.BlobAccessKey, "azure-storage-blob-access-key", "The Azure Storage Blob Access Key provided is not valid")
+		var res, _ = v1.DecodeValueSource(t.BlobAccessKey, "azure-storage-blob-access-key")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
 			return err
 		} else if secretValue != "" {

@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -117,7 +118,7 @@ func StringSliceJoin(slices ...[]string) []string {
 }
 
 func StringSliceContains(slice []string, items []string) bool {
-	for i := range len(items) {
+	for i := range items {
 		if !StringSliceExists(slice, items[i]) {
 			return false
 		}
@@ -127,7 +128,7 @@ func StringSliceContains(slice []string, items []string) bool {
 }
 
 func StringSliceExists(slice []string, item string) bool {
-	for i := range len(slice) {
+	for i := range slice {
 		if slice[i] == item {
 			return true
 		}
@@ -137,7 +138,7 @@ func StringSliceExists(slice []string, item string) bool {
 }
 
 func StringContainsPrefix(slice []string, prefix string) bool {
-	for i := range len(slice) {
+	for i := range slice {
 		if strings.HasPrefix(slice[i], prefix) {
 			return true
 		}
@@ -147,8 +148,8 @@ func StringContainsPrefix(slice []string, prefix string) bool {
 }
 
 func StringSliceContainsAnyOf(slice []string, items ...string) bool {
-	for i := range len(slice) {
-		for j := range len(items) {
+	for i := range slice {
+		for j := range items {
 			if strings.Contains(slice[i], items[j]) {
 				return true
 			}
@@ -744,4 +745,24 @@ func NavigateConfigTree(current interface{}, nodes []string) (interface{}, error
 	default:
 		return nil, errors.New("invalid node type in configuration")
 	}
+}
+
+// IToInt32 attempts to convert safely an int to an int32.
+func IToInt32(x int) (*int32, error) {
+	if x < math.MinInt32 || x > math.MaxInt32 {
+		return nil, fmt.Errorf("integer overflow casting to int32 type")
+	}
+	casted := int32(x)
+
+	return &casted, nil
+}
+
+// IToInt8 attempts to convert safely an int to an int8.
+func IToInt8(x int) (*int8, error) {
+	if x < math.MinInt8 || x > math.MaxInt8 {
+		return nil, fmt.Errorf("integer overflow casting to int8 type")
+	}
+	casted := int8(x)
+
+	return &casted, nil
 }

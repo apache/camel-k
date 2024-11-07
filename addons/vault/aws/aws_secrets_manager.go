@@ -127,7 +127,7 @@ func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 
 	hits := v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.AccessKey, -1)
 	if len(hits) >= 1 {
-		var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key", "The access Key provided is not valid")
+		var res, _ = v1.DecodeValueSource(t.AccessKey, "aws-access-key")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
 			return err
 		} else if secretValue != "" {
@@ -138,7 +138,7 @@ func (t *awsSecretsManagerTrait) Apply(environment *trait.Environment) error {
 	}
 	hits = v1.PlainConfigSecretRegexp.FindAllStringSubmatch(t.SecretKey, -1)
 	if len(hits) >= 1 {
-		var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key", "The secret Key provided is not valid")
+		var res, _ = v1.DecodeValueSource(t.SecretKey, "aws-secret-key")
 		if secretValue, err := kubernetes.ResolveValueSource(environment.Ctx, environment.Client, environment.Platform.Namespace, &res); err != nil {
 			return err
 		} else if secretValue != "" {

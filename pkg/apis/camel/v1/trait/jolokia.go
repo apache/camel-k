@@ -46,7 +46,7 @@ type JolokiaTrait struct {
 	// The password used for authentication, applicable when the `user` option is set.
 	Password *string `property:"password" json:"password,omitempty"`
 	// The Jolokia endpoint port (default `8778`).
-	Port int `property:"port" json:"port,omitempty"`
+	Port int32 `property:"port" json:"port,omitempty"`
 	// The protocol to use, either `http` or `https` (default `https` for OpenShift)
 	Protocol *string `property:"protocol" json:"protocol,omitempty"`
 	// The user to be used for authentication
