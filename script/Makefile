@@ -597,10 +597,8 @@ endif
 .PHONY: $(BUNDLE_CAMEL_APIS) pre-bundle bundle bundle-build
 
 # - Have to copy pkg/apis since it is a module in its own right
-# - The dependency of v1alpha1 api on v1 results in duplication
-#   of the v1 schema in those CRDs so need to split them up
 # - No way to add a licence header to the CRD other then post-script
-BUNDLE_CAMEL_APIS = v1 v1alpha1
+BUNDLE_CAMEL_APIS = v1
 
 $(BUNDLE_CAMEL_APIS): operator-sdk
 	@# Clean up api directory, copy over fresh version

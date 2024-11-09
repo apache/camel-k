@@ -200,18 +200,6 @@ func installCRDs(ctx context.Context, c client.Client, collection *kubernetes.Co
 		return err
 	}
 
-	// Install CRD for Kamelet (if needed)
-	if err := installCRD(ctx, c, "Kamelet", "v1alpha1", "camel.apache.org_kamelets.yaml",
-		v1beta1Customizer, collection, force); err != nil {
-		return err
-	}
-
-	// Install CRD for KameletBinding (if needed)
-	if err := installCRD(ctx, c, "KameletBinding", "v1alpha1", "camel.apache.org_kameletbindings.yaml",
-		v1beta1Customizer, collection, force); err != nil {
-		return err
-	}
-
 	// Install CRD for Pipe (if needed)
 	if err := installCRD(ctx, c, "Pipe", "v1", "camel.apache.org_pipes.yaml",
 		v1beta1Customizer, collection, force); err != nil {
@@ -332,11 +320,6 @@ func areAllCrdInstalled(c client.Client) (int, error) {
 	} else if !ok {
 		return 6, nil
 	}
-	if ok, err := isCrdInstalled(c, "KameletBinding", "v1alpha1"); err != nil {
-		return 7, fmt.Errorf("error installing KameletBindings CRDs: %w", err)
-	} else if !ok {
-		return 7, nil
-	}
 	if ok, err := isCrdInstalled(c, "Pipe", "v1"); err != nil {
 		return 8, fmt.Errorf("error installing Pipe CRDs: %w", err)
 	} else if !ok {
@@ -360,6 +343,7 @@ func isCrdInstalled(c client.Client, kind string, version string) (bool, error) 
 	return false, nil
 }
 
+//nolint:unparam
 func installCRD(
 	ctx context.Context, c client.Client, kind string, version string, resourceName string,
 	customizer ResourceCustomizer, collection *kubernetes.Collection, force bool,

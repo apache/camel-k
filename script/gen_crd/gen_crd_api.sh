@@ -38,13 +38,4 @@ go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
     -api-dir "github.com/apache/camel-k/v2/pkg/apis/camel/v1" \
     -out-file $crd_file_camel
 
-# the v1alpha1 kamelet api is deprecated and will stay here until
-# the new Pipe api is mature
-#go run /Users/david/projects/camel/gen-crd-api-reference-docs/main.go \
-go run github.com/tadayosi/gen-crd-api-reference-docs@v0.4.0-camel-k-2 \
-    -config $location/gen-kamelets-crd-api-config.json \
-    -template-dir $location/template \
-    -api-dir "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1" \
-    -out-file $crd_file_kamelets
-
 echo "Generating CRD API documentation... Done."

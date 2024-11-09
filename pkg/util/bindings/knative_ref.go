@@ -18,14 +18,12 @@ limitations under the License.
 package bindings
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	knativeapis "github.com/apache/camel-k/v2/pkg/apis/camel/v1/knative"
 	"github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/util/property"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -180,86 +178,6 @@ func (k V1alpha1KnativeRefBindingProvider) ID() string {
 	return "knative-ref"
 }
 
-// Translate --.
-// Deprecated.
-func (k V1alpha1KnativeRefBindingProvider) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
-	if e.Ref == nil {
-		// works only on refs
-		return nil, nil
-	}
-
-	if ok, err := isKnownKnativeResource(e.Ref); !ok {
-		// only operates on known Knative endpoint resources (e.g. channels, brokers)
-		return nil, err
-	}
-
-	if refInstalled, _ := knative.IsRefKindInstalled(ctx.Client, *e.Ref); !refInstalled {
-		// works only when Knative specific API Kind is installed
-		return nil, fmt.Errorf("integration referencing Knative endpoint '%s' that cannot run, "+
-			"because Knative is not installed on the cluster", e.Ref.Name)
-	}
-
-	serviceType, err := knative.GetServiceType(*e.Ref)
-	if err != nil {
-		return nil, err
-	}
-
-	if serviceType == nil {
-		endpointType := knativeapis.CamelServiceTypeEndpoint
-		serviceType = &endpointType
-	}
-
-	props, err := e.Properties.GetPropertyMap()
-	if err != nil {
-		return nil, err
-	}
-	if props == nil {
-		props = make(map[string]string)
-	}
-	if props["apiVersion"] == "" {
-		props["apiVersion"] = e.Ref.APIVersion
-	}
-	if props["kind"] == "" {
-		props["kind"] = e.Ref.Kind
-	}
-
-	var serviceURI string
-
-	//nolint:nestif
-	if *serviceType == knativeapis.CamelServiceTypeEvent {
-		if props["name"] == "" {
-			props["name"] = e.Ref.Name
-		}
-		if eventType, ok := props["type"]; ok {
-			// consume prop
-			delete(props, "type")
-			serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, eventType)
-		} else {
-			if endpointCtx.Type == v1alpha1.EndpointTypeSink || endpointCtx.Type == v1alpha1.EndpointTypeAction {
-				// Allowing no event type, but it can fail. See https://github.com/apache/camel-k/v2-runtime/issues/536
-				serviceURI = fmt.Sprintf("knative:%s", *serviceType)
-			} else {
-				return nil, errors.New(`property "type" must be provided when reading from the Broker`)
-			}
-		}
-	} else {
-		serviceURI = fmt.Sprintf("knative:%s/%s", *serviceType, url.PathEscape(e.Ref.Name))
-	}
-
-	serviceURI = uri.AppendParameters(serviceURI, props)
-	return &Binding{
-		URI: serviceURI,
-	}, nil
-}
-
-// Order --.
-// Deprecated.
-func (k V1alpha1KnativeRefBindingProvider) Order() int {
-	// Executes as last, as it can be used as fallback for all unknown object references
-	return OrderLast
-}
-
 func init() {
 	RegisterBindingProvider(KnativeRefBindingProvider{})
-	V1alpha1RegisterBindingProvider(V1alpha1KnativeRefBindingProvider{})
 }

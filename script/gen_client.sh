@@ -25,13 +25,13 @@ cd $location/../pkg/client/camel
 echo "Generating Go client code..."
 
 $(go env GOPATH)/bin/applyconfiguration-gen \
-	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1,github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1 \
+	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1 \
 	--go-header-file=../../../script/headers/default.txt \
 	--output-base=. \
 	--output-package=github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration
 
 $(go env GOPATH)/bin/client-gen \
-	--input=camel/v1,camel/v1alpha1 \
+	--input=camel/v1 \
 	--go-header-file=../../../script/headers/default.txt \
 	--clientset-name "versioned"  \
 	--input-base=github.com/apache/camel-k/v2/pkg/apis \
@@ -47,7 +47,7 @@ $(go env GOPATH)/bin/client-gen \
   --output-package=github.com/apache/camel-k/v2/pkg/client/duck/strimzi/clientset
 
 $(go env GOPATH)/bin/lister-gen \
-	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1,github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1 \
+	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1 \
 	--go-header-file=../../../script/headers/default.txt \
 	--output-base=. \
 	--output-package=github.com/apache/camel-k/v2/pkg/client/camel/listers
@@ -55,7 +55,7 @@ $(go env GOPATH)/bin/lister-gen \
 $(go env GOPATH)/bin/informer-gen \
     --versioned-clientset-package=github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned \
 	--listers-package=github.com/apache/camel-k/v2/pkg/client/camel/listers \
-	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1,github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1 \
+	--input-dirs=github.com/apache/camel-k/v2/pkg/apis/camel/v1 \
 	--go-header-file=../../../script/headers/default.txt \
 	--output-base=. \
 	--output-package=github.com/apache/camel-k/v2/pkg/client/camel/informers

@@ -27,7 +27,6 @@ import (
 	"github.com/apache/camel-k/v2/pkg/client"
 	fakecamelclientset "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/fake"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/util"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -166,10 +165,6 @@ func (c *FakeClient) AddReactor(verb, resource string, reaction testing.Reaction
 
 func (c *FakeClient) CamelV1() camelv1.CamelV1Interface {
 	return c.camel.CamelV1()
-}
-
-func (c *FakeClient) CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface {
-	return c.camel.CamelV1alpha1()
 }
 
 // GetScheme ---.

@@ -31,7 +31,6 @@ rules:
   - integrationprofiles/finalizers
   - integrations/finalizers
   - pipes/finalizers
-  - kameletbindings/finalizers
   verbs:
   - update
 - apiGroups:
