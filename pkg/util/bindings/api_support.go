@@ -40,13 +40,3 @@ func (c EndpointContext) GenerateID() string {
 	}
 	return id
 }
-
-// GenerateID generates an identifier based on the context type and its optional position.
-// Deprecated.
-func (c V1alpha1EndpointContext) GenerateID() string {
-	id := string(c.Type)
-	if c.Position != nil {
-		id = fmt.Sprintf("%s-%d", id, *c.Position)
-	}
-	return id
-}

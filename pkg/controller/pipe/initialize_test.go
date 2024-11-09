@@ -114,7 +114,7 @@ func TestNewPipeCamelURIBinding(t *testing.T) {
 	assert.Equal(t, "", pipe.Annotations[v1.AnnotationIcon])
 }
 
-func TestNewPipeKameletBinding(t *testing.T) {
+func TestNewPipe(t *testing.T) {
 	source := v1.NewKamelet("ns", "my-source")
 	source.Annotations = map[string]string{
 		v1.AnnotationIcon: "my-source-icon-base64",

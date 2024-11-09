@@ -46,7 +46,6 @@ import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	camel "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/clientset/versioned/typed/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/util"
 )
 
@@ -62,7 +61,6 @@ type Client interface {
 	ctrl.Client
 	kubernetes.Interface
 	CamelV1() camelv1.CamelV1Interface
-	CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface
 	GetScheme() *runtime.Scheme
 	GetConfig() *rest.Config
 	GetCurrentNamespace(kubeConfig string) (string, error)
@@ -93,10 +91,6 @@ var _ Client = &defaultClient{}
 
 func (c *defaultClient) CamelV1() camelv1.CamelV1Interface {
 	return c.camel.CamelV1()
-}
-
-func (c *defaultClient) CamelV1alpha1() camelv1alpha1.CamelV1alpha1Interface {
-	return c.camel.CamelV1alpha1()
 }
 
 func (c *defaultClient) GetScheme() *runtime.Scheme {

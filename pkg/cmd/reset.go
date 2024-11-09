@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	"github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 
 	"github.com/spf13/cobra"
@@ -69,12 +68,6 @@ func (o *resetCmdOptions) reset(cmd *cobra.Command, _ []string) {
 			return
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), n, "pipes deleted from namespace", o.Namespace)
-
-		if n, err = o.deleteAllKameletBindings(c); err != nil {
-			fmt.Fprint(cmd.ErrOrStderr(), err)
-			return
-		}
-		fmt.Fprintln(cmd.OutOrStdout(), n, "kameletbindings deleted from namespace", o.Namespace)
 	}
 
 	if !o.SkipIntegrations {
@@ -135,21 +128,6 @@ func (o *resetCmdOptions) deleteAllPipes(c client.Client) (int, error) {
 		klb := i
 		if err := c.Delete(o.Context, &klb); err != nil {
 			return 0, fmt.Errorf("could not delete Pipe %s from namespace %s: %w", klb.Name, klb.Namespace, err)
-		}
-	}
-	return len(list.Items), nil
-}
-
-// Deprecated.
-func (o *resetCmdOptions) deleteAllKameletBindings(c client.Client) (int, error) {
-	list := v1alpha1.NewKameletBindingList()
-	if err := c.List(o.Context, &list, k8sclient.InNamespace(o.Namespace)); err != nil {
-		return 0, fmt.Errorf("could not retrieve KameletBindings from namespace %s: %w", o.Namespace, err)
-	}
-	for _, i := range list.Items {
-		klb := i
-		if err := c.Delete(o.Context, &klb); err != nil {
-			return 0, fmt.Errorf("could not delete KameletBinding %s from namespace %s: %w", klb.Name, klb.Namespace, err)
 		}
 	}
 	return len(list.Items), nil

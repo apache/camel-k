@@ -75,7 +75,6 @@ import (
 	"github.com/apache/camel-k/v2/e2e/support/util"
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
 	traitv1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1/trait"
-	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/client"
 	"github.com/apache/camel-k/v2/pkg/cmd"
 	"github.com/apache/camel-k/v2/pkg/install"
@@ -101,8 +100,7 @@ const ciPID = "/tmp/ci-k8s-pid"
 // v1.Build,          v1.Integration
 // v1.IntegrationKit, v1.IntegrationPlatform, v1.IntegrationProfile
 // v1.Kamelet,  v1.Pipe,
-// v1alpha1.Kamelet, v1alpha1.KameletBinding
-const ExpectedCRDs = 9
+const ExpectedCRDs = 7
 
 // camel-k-operator,
 // camel-k-operator-events,
@@ -2235,7 +2233,6 @@ func CRDs(t *testing.T) func() []metav1.APIResource {
 			reflect.TypeOf(v1.IntegrationProfile{}).Name(),
 			reflect.TypeOf(v1.Kamelet{}).Name(),
 			reflect.TypeOf(v1.Pipe{}).Name(),
-			reflect.TypeOf(v1alpha1.KameletBinding{}).Name(),
 		}
 
 		versions := []string{"v1", "v1alpha1"}

@@ -34,8 +34,6 @@ rules:
   - integrationprofiles
   - integrations
   - pipes
-  # Deprecated: kameletbindings CR
-  - kameletbindings
   - kamelets
   verbs:
   - create
@@ -70,9 +68,6 @@ rules:
   - integrations/status
   - pipes/status
   - pipes/scale
-  # Deprecated: kameletbindings CR
-  - kameletbindings/status
-  - kameletbindings/scale
   - kamelets/status
   verbs:
   - get
@@ -285,7 +280,6 @@ rules:
   - integrationprofiles/finalizers
   - integrations/finalizers
   - pipes/finalizers
-  - kameletbindings/finalizers
   verbs:
   - update
 - apiGroups:

@@ -19,7 +19,6 @@ package bindings
 
 import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	"github.com/apache/camel-k/v2/pkg/util/uri"
 )
 
@@ -57,44 +56,6 @@ func (k CamelURIBindingProvider) Order() int {
 	return OrderLast
 }
 
-// V1alpha1CamelURIBindingProvider --.
-// Deprecated .
-type V1alpha1CamelURIBindingProvider struct{}
-
-// ID --.
-// Deprecated .
-func (k V1alpha1CamelURIBindingProvider) ID() string {
-	return "camel-uri"
-}
-
-// Translate --.
-// Deprecated .
-func (k V1alpha1CamelURIBindingProvider) Translate(ctx V1alpha1BindingContext, endpointCtx V1alpha1EndpointContext, e v1alpha1.Endpoint) (*Binding, error) {
-	if e.URI == nil {
-		// works only on uris
-		return nil, nil
-	}
-
-	endpointURI := *e.URI
-	props, err := e.Properties.GetPropertyMap()
-	if err != nil {
-		return nil, err
-	}
-	endpointURI = uri.AppendParameters(endpointURI, props)
-
-	return &Binding{
-		URI: endpointURI,
-	}, nil
-}
-
-// Order --
-// Deprecated .
-func (k V1alpha1CamelURIBindingProvider) Order() int {
-	// Using it as fallback
-	return OrderLast
-}
-
 func init() {
 	RegisterBindingProvider(CamelURIBindingProvider{})
-	V1alpha1RegisterBindingProvider(V1alpha1CamelURIBindingProvider{})
 }

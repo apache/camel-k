@@ -21,9 +21,7 @@ package applyconfiguration
 
 import (
 	v1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1"
-	v1alpha1 "github.com/apache/camel-k/v2/pkg/apis/camel/v1alpha1"
 	camelv1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1"
-	camelv1alpha1 "github.com/apache/camel-k/v2/pkg/client/camel/applyconfiguration/camel/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -228,52 +226,6 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &camelv1.UserTaskApplyConfiguration{}
 	case v1.SchemeGroupVersion.WithKind("ValueSource"):
 		return &camelv1.ValueSourceApplyConfiguration{}
-
-		// Group=camel.apache.org, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeReference"):
-		return &camelv1alpha1.DataTypeReferenceApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("DataTypeSpec"):
-		return &camelv1alpha1.DataTypeSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("DataTypesSpec"):
-		return &camelv1alpha1.DataTypesSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("Endpoint"):
-		return &camelv1alpha1.EndpointApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("EndpointProperties"):
-		return &camelv1alpha1.EndpointPropertiesApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("ErrorHandlerSpec"):
-		return &camelv1alpha1.ErrorHandlerSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("EventTypeSpec"):
-		return &camelv1alpha1.EventTypeSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("ExternalDocumentation"):
-		return &camelv1alpha1.ExternalDocumentationApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("HeaderSpec"):
-		return &camelv1alpha1.HeaderSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("JSON"):
-		return &camelv1alpha1.JSONApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("JSONSchemaProp"):
-		return &camelv1alpha1.JSONSchemaPropApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("JSONSchemaProps"):
-		return &camelv1alpha1.JSONSchemaPropsApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("Kamelet"):
-		return &camelv1alpha1.KameletApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBinding"):
-		return &camelv1alpha1.KameletBindingApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingCondition"):
-		return &camelv1alpha1.KameletBindingConditionApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingSpec"):
-		return &camelv1alpha1.KameletBindingSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletBindingStatus"):
-		return &camelv1alpha1.KameletBindingStatusApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletCondition"):
-		return &camelv1alpha1.KameletConditionApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletProperty"):
-		return &camelv1alpha1.KameletPropertyApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletSpec"):
-		return &camelv1alpha1.KameletSpecApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("KameletStatus"):
-		return &camelv1alpha1.KameletStatusApplyConfiguration{}
-	case v1alpha1.SchemeGroupVersion.WithKind("Template"):
-		return &camelv1alpha1.TemplateApplyConfiguration{}
 
 	}
 	return nil
