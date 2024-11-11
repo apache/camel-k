@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/apache/camel-k/tree/HEAD)
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-10)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...HEAD)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
@@ -18,10 +18,6 @@
 - Documentation: 3scale title trait invalid when generating documentation [\#3972](https://github.com/apache/camel-k/issues/3972)
 - Missing option to enable prometheus monitoring when installing Camel-K using Helm [\#3429](https://github.com/apache/camel-k/issues/3429)
 - Directly reference secrets in KameletBinding [\#2875](https://github.com/apache/camel-k/issues/2875)
-
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-09)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
 
 ## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-09)
 
