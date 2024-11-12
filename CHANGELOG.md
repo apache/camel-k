@@ -1,12 +1,18 @@
 # Changelog
 
-## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-10)
+## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-11)
 
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.1-nightly...v2.6.0-nightly)
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.6.0-nightly...v2.5.1-nightly)
+
+## [v2.6.0-nightly](https://github.com/apache/camel-k/tree/v2.6.0-nightly) (2024-11-11)
+
+[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.6.0-nightly)
 
 **Closed issues:**
 
 - Integration build pushes image successfully using credentials but fails on pulling built image [\#5898](https://github.com/apache/camel-k/issues/5898)
+- Creating camel-k with helm cannot publish integrations [\#5888](https://github.com/apache/camel-k/issues/5888)
+- Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
 - Bump Golang version to 1.23 [\#5877](https://github.com/apache/camel-k/issues/5877)
 - \[features request\] add the hability to set Jib registryMirrors [\#5691](https://github.com/apache/camel-k/issues/5691)
 - Pipe is waiting forever on Revision to become available [\#5623](https://github.com/apache/camel-k/issues/5623)
@@ -18,15 +24,6 @@
 - Documentation: 3scale title trait invalid when generating documentation [\#3972](https://github.com/apache/camel-k/issues/3972)
 - Missing option to enable prometheus monitoring when installing Camel-K using Helm [\#3429](https://github.com/apache/camel-k/issues/3429)
 - Directly reference secrets in KameletBinding [\#2875](https://github.com/apache/camel-k/issues/2875)
-
-## [v2.5.1-nightly](https://github.com/apache/camel-k/tree/v2.5.1-nightly) (2024-11-09)
-
-[Full Changelog](https://github.com/apache/camel-k/compare/v2.5.0-nightly...v2.5.1-nightly)
-
-**Closed issues:**
-
-- Creating camel-k with helm cannot publish integrations [\#5888](https://github.com/apache/camel-k/issues/5888)
-- Release 2.5.0 [\#5887](https://github.com/apache/camel-k/issues/5887)
 
 ## [v2.5.0-nightly](https://github.com/apache/camel-k/tree/v2.5.0-nightly) (2024-11-05)
 
